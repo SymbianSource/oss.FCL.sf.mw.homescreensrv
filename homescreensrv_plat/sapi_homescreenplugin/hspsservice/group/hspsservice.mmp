@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for HSPS Service
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "../../inc/hsps_log_cfg.hrh"
+
+TARGET             hspsservice.dll
+TARGETTYPE         DLL
+UID                0x1000008D 0x2001242B
+
+CAPABILITY         All -TCB
+VENDORID           VID_DEFAULT
+
+LANG SC
+
+USERINCLUDE        ../inc
+USERINCLUDE        ../../inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH         ../src
+SOURCE             hspsconfigurationservice.cpp
+SOURCE             hspspersonalisationservice.cpp
+SOURCE             hspsserviceutilities.cpp
+
+LIBRARY            euser.lib
+LIBRARY            efsrv.lib
+LIBRARY            estor.lib
+LIBRARY            eikcore.lib
+LIBRARY            cone.lib
+LIBRARY            bafl.lib
+LIBRARY            hspsrequestclient.lib
+LIBRARY            hspsclient.lib
+LIBRARY            hspsodt.lib
+LIBRARY            hspsdomdocument.lib
+LIBRARY            hspsresource.lib
+LIBRARY            hspsresult.lib
+LIBRARY            flogger.lib
+
+// End of File
+

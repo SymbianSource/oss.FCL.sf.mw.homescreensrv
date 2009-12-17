@@ -1,0 +1,49 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: This is the project specification file for HSPApi.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET          hswidgetpublisher.dll
+TARGETTYPE      dll
+EPOCALLOWDLLDATA
+UID             0x1000008d 0x069DD3DD
+
+CAPABILITY      CAP_GENERAL_DLL
+
+USERINCLUDE	    ../inc
+
+MW_LAYER_SYSTEMINCLUDE
+OS_LAYER_LIBC_SYSTEMINCLUDE
+OS_LAYER_STDCPP_SYSTEMINCLUDE
+
+SOURCEPATH	../src
+
+SOURCE      hsexception.cpp
+SOURCE      hswidgetitem.cpp
+SOURCE      hswidget.cpp 
+SOURCE      hswidgetpublisherimpl.cpp
+SOURCE      hswidgetpublisher.cpp 
+
+
+LIBRARY	    euser.lib
+LIBRARY     liwservicehandler.lib
+LIBRARY     charconv.lib              // for CnvUtfConverter
+LIBRARY     libstdcpp.lib
+LIBRARY     libc.lib
+
+

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<package version="0.3">
+  
+  <!-- application|view|widget|template -->
+  <type>widget</type>
+  
+  <!-- Interface Uid -->
+	<interfaceuid>0998</interfaceuid>
+	
+	<!-- Vendor UID -->
+	<provideruid>101FB657</provideruid>
+	
+	<!-- UID -->
+	<configurationuid>2000B132</configurationuid>	
+	
+	<!-- statusmakeactive|statuslicenceedefault|statuslicenceerestorable|statusoperatordefault|statususerdefault -->
+	
+	<!-- Description -->
+	<fullname>&amp;qtn_2000B132_configuration_name;</fullname>
+	<shortname>FinnishWidget</shortname>
+	<version>1.0</version>
+	
+	<!-- Configuration -->
+	<filexml>widgetconfiguration.xml</filexml>	
+	
+	<!-- Name of the localization files -->
+	<filedtd>locale.dtd</filedtd>
+	
+	<!-- Locale independent/common resources -->		
+	<fileresource mediatype="mime_type">common.jpg</fileresource>
+		
+	<!-- Locale specific resources -->
+	<localization>     
+	  <fileresource>localizedbg.jpg</fileresource>
+	</localization>
+  
+</package>

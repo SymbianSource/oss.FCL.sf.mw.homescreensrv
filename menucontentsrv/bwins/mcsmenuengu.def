@@ -1,0 +1,34 @@
+EXPORTS
+	??1CMenuEng@@UAE@XZ @ 1 NONAME ; CMenuEng::~CMenuEng(void)
+	??1CMenuEngObject@@UAE@XZ @ 2 NONAME ; CMenuEngObject::~CMenuEngObject(void)
+	?AddL@CMenuEng@@QAEXAAVCMenuEngObject@@HH@Z @ 3 NONAME ; void CMenuEng::AddL(class CMenuEngObject &, int, int)
+	?AppendNotifyL@CMenuEng@@QAEXHH@Z @ 4 NONAME ; void CMenuEng::AppendNotifyL(int, int)
+	?DequeueOperation@CMenuEng@@QAEXAAVMMenuEngOperation@@@Z @ 5 NONAME ; void CMenuEng::DequeueOperation(class MMenuEngOperation &)
+	?Exist@CMenuEng@@QBEHH@Z @ 6 NONAME ; int CMenuEng::Exist(int) const
+	?FindAttribute@CMenuEngObject@@QBEHABVTDesC16@@AAVTPtrC16@@AAH@Z @ 7 NONAME ; int CMenuEngObject::FindAttribute(class TDesC16 const &, class TPtrC16 &, int &) const
+	?Flags@CMenuEngObject@@QBEKH@Z @ 8 NONAME ; unsigned long CMenuEngObject::Flags(int) const
+	?GetAttribute@CMenuEngObject@@QBEHHAAVTPtrC16@@0AAH@Z @ 9 NONAME ; int CMenuEngObject::GetAttribute(int, class TPtrC16 &, class TPtrC16 &, int &) const
+	?GetItemL@CMenuEng@@QBEXHAAVTMenuItem@@@Z @ 10 NONAME ; void CMenuEng::GetItemL(int, class TMenuItem &) const
+	?GetItemsL@CMenuEng@@QBEXAAV?$RArray@VTMenuItem@@@@HPBVMMenuEngFilter@@H@Z @ 11 NONAME ; void CMenuEng::GetItemsL(class RArray<class TMenuItem> &, int, class MMenuEngFilter const *, int) const
+	?GetOnceLegacyFormat@CMenuEng@@QAEHXZ @ 12 NONAME ; int CMenuEng::GetOnceLegacyFormat(void)
+	?Id@CMenuEngObject@@QBEHXZ @ 13 NONAME ; int CMenuEngObject::Id(void) const
+	?MoveToFolderL@CMenuEng@@QAEXAAV?$RArray@H@@HH@Z @ 14 NONAME ; void CMenuEng::MoveToFolderL(class RArray<int> &, int, int)
+	?NewL@CMenuEng@@SAPAV1@ABVTDesC16@@AAVMMenuEngObserver@@@Z @ 15 NONAME ; class CMenuEng * CMenuEng::NewL(class TDesC16 const &, class MMenuEngObserver &)
+	?NewObjectL@CMenuEng@@QAEPAVCMenuEngObject@@ABVTDesC16@@@Z @ 16 NONAME ; class CMenuEngObject * CMenuEng::NewObjectL(class TDesC16 const &)
+	?NumAttributes@CMenuEngObject@@QBEHXZ @ 17 NONAME ; int CMenuEngObject::NumAttributes(void) const
+	?ObjectL@CMenuEng@@QBEABVCMenuEngObject@@H@Z @ 18 NONAME ; class CMenuEngObject const & CMenuEng::ObjectL(int) const
+	?ParentFolderL@CMenuEng@@QBEXHAAH@Z @ 19 NONAME ; void CMenuEng::ParentFolderL(int, int &) const
+	?QueueOperationL@CMenuEng@@QAEXAAVMMenuEngOperation@@@Z @ 20 NONAME ; void CMenuEng::QueueOperationL(class MMenuEngOperation &)
+	?RemoveAttribute@CMenuEngObject@@QAEXABVTDesC16@@@Z @ 21 NONAME ; void CMenuEngObject::RemoveAttribute(class TDesC16 const &)
+	?RemoveL@CMenuEng@@QAEXH@Z @ 22 NONAME ; void CMenuEng::RemoveL(int)
+	?ReorderL@CMenuEng@@QAEXHH@Z @ 23 NONAME ; void CMenuEng::ReorderL(int, int)
+	?Reset@CMenuEngObject@@QAEXXZ @ 24 NONAME ; void CMenuEngObject::Reset(void)
+	?RootFolderL@CMenuEng@@QBEXAAH@Z @ 25 NONAME ; void CMenuEng::RootFolderL(int &) const
+	?SetAttributeL@CMenuEngObject@@QAEXABVTDesC16@@0H@Z @ 26 NONAME ; void CMenuEngObject::SetAttributeL(class TDesC16 const &, class TDesC16 const &, int)
+	?SetFlags@CMenuEngObject@@QAEXKH@Z @ 27 NONAME ; void CMenuEngObject::SetFlags(unsigned long, int)
+	?TraverseFolderL@CMenuEng@@QBEXHAAVMMenuEngVisitor@@@Z @ 28 NONAME ; void CMenuEng::TraverseFolderL(int, class MMenuEngVisitor &) const
+	?Type@CMenuEngObject@@QBE?AVTPtrC16@@XZ @ 29 NONAME ; class TPtrC16 CMenuEngObject::Type(void) const
+	?GetNative@CMenuEngObject@@QBEHXZ @ 30 NONAME ; int CMenuEngObject::GetNative(void) const
+	?SetNative@CMenuEngObject@@QAEXH@Z @ 31 NONAME ; void CMenuEngObject::SetNative(int)
+	?ModifiableObjectL@CMenuEng@@QAEAAVCMenuEngObject@@HH@Z @ 32 NONAME ; class CMenuEngObject & CMenuEng::ModifiableObjectL(int, int)
+

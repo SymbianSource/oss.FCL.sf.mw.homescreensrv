@@ -1,0 +1,80 @@
+/*
+* Copyright (c) 2006-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  App for Action handler
+*
+*/
+
+
+#include <ecom/registryinfo.rh>
+#include "ahpluginuids.hrh"
+
+// ---------------------------------------------------------------------------
+// theInfo
+// Declares info for implementations
+// ---------------------------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO theInfo
+	{
+	// UID for the DLL
+	dll_uid = 0x10282E64;
+	// Declare array of interface info
+	interfaces = 
+		{
+		INTERFACE_INFO
+			{
+			// UID of interface that is implemented
+			interface_uid = KAHPluginInterfaceUid;
+			implementations = 
+				{
+				// Info for App Handler
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = 0x10282E5F;
+					version_no = 1;
+					display_name = "Implementation 1";
+					default_data = "1";
+					opaque_data = "";
+					},
+				// Info for Tel Handler
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = 0x10282E61;
+					version_no = 1;
+					display_name = "Implementation 2";
+					default_data = "2";
+					opaque_data = "";
+					},
+				// Info for Message Handler
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = 0x10282E62;
+					version_no = 1;
+					display_name = "Implementation 3";
+					default_data = "3";
+					opaque_data = "";
+					},
+				// Info for HelpLauncher
+				IMPLEMENTATION_INFO
+					{
+					implementation_uid = 0x2001B285;
+					version_no = 1;
+					display_name = "Implementation 4";
+					default_data = "4";
+					opaque_data = "";
+					}
+				};
+			}
+		};
+	}
+

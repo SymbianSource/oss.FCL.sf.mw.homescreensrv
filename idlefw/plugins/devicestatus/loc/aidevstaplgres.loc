@@ -1,0 +1,55 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project Active Idle
+*
+*/
+
+
+
+// d: The format string defines how date are shown on the navi pane of idle state. 
+// d: %0U stands for the week day, and %1U stands for date. 
+// l: navi_text_pane_t1
+// w: 
+// r: 3.2
+//
+#define qtn_idle_time_format "%0U %1U"
+
+
+// d: Text in title pane in idle state
+// d: Remote SIM Access Profile is active. SIM or network  is not accessible
+// d: from the terminal. This doesn't relate to normal user profiles like General
+// d: or Meeting.
+// l: title_pane_t2/opt9
+// w:
+// r: 3.2
+//
+#define qtn_mode_sap "Remote SIM"
+
+
+// d: The unit format of the cug soft indicator
+// l: soft_indicator_pane_t1
+// w:
+// r: 3.2
+
+#define qtn_cug_indic_group "Group %N"
+
+// d: The format string defines how operator and service provider names
+// d: are concatenated to one string, which is shown on the title pane 
+// d: of idle state.
+// d: %0U stands for operator name, %1U stands for service provider name. 
+// l: title_pane_t2/opt9
+// w:
+// r: 3.2
+//
+#define qtn_ai_opn_spn_separator "%0U - %1U"

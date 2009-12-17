@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="178473c941d92ff1095ae98ebd827b68" dataversion="1.0">
+  <name>AI Shortcut Command API</name>
+  <description>Gives possibility to execute shortcuts defined by localapp URL</description>
+  <type>c++</type>
+  <subsystem>activeidle</subsystem>
+  <libs>
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

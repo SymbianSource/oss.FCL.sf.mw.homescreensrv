@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Uids for shortcut plug-in
+*
+*/
+
+
+#ifndef AISCUTUIDS_HRH
+#define AISCUTUIDS_HRH
+
+#include <platform/mw/aicontentpublisheruid.hrh>
+
+/**
+ * Ecom dll uid for AI Shortcut plug-in.
+ */
+#define AI_UID_ECOM_DLL_CONTENTPUBLISHER_SCUTPLUGIN 0x102750F9
+
+/**
+ * Ecom implementation uid for AI Shortcut plug-in.
+ */
+#define AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_SCUTPLUGIN 0x102750FA
+
+/**
+ * Ecom dll uid for AI Shortcut Settings plug-in.
+ */
+#define AI_UID_ECOM_DLL_SETTINGS_SCUTPLUGIN 0x102750FB
+
+/**
+ * Ecom implementation uid for AI Shortcut Settings plug-in.
+ */
+#define AI_UID_ECOM_IMPLEMENTATION_SETTINGS_SCUTPLUGIN 0x102750FC
+
+#endif // AISCUTUIDS_HRH
+
+// End of File.

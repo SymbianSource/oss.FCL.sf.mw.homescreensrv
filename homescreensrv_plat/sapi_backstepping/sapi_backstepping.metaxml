@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="3e83bc1d89ee9f1eade84a778a9baeae" dataversion="2.0">
+<name>sapi_backstepping</name>
+<description>Back Stepping Service API</description>
+<type>c++</type>
+<collection>backsteppingsrv</collection>
+<libs></libs>
+<release category="platform" sinceversion="0"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

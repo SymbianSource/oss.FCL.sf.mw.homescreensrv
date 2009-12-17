@@ -1,0 +1,92 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  App uids for shortcut plug-in
+*
+*/
+
+
+#ifndef AISCUTAPPUIDS_HRH
+#define AISCUTAPPUIDS_HRH
+
+#define KScutExchangeMailUidValue           0x10282480 //
+#define KScutFlashPlayerUidValue            0x101fd693 //
+#define KScutOperatorMenuUidValue           0x10008D5E // !!
+#define KScutVideoServicesUidValue          0x10281893 // !!
+#define KScutVoiceDialUidValue              0x101F8543 // aivoicedialui
+
+#define KScutAmsEditorUidValue              0x1020745A //
+#define KScutEmailEditorUidValue            0x101F4CD6 //
+#define KScutMmsEditorUidValue              0x100058DE //
+#define KScutPostcardEditorUidValue         0x10207247 //
+#define KScutUnifiedEditorUidValue          0x102072D8 //
+#define KScutSyncMlEmailUidValue            0x101F7C5C //
+
+#define KScutAboutUidValue                  0x10005A22 //
+#define KScutApplicationManagerUidValue     0x101F8512 //
+#define KScutApplicationShellUidValue       0x101F4CD2 //
+#define KScutBluetoothUidValue              0x10005951 //
+#define KScutBrowserUidValue                0x10008D39 //
+#define KScutCalculatorUidValue             0x10005902 //
+#define KScutCalendarUidValue               0x10005901 //
+#define KScutCamcorderUidValue              0x101F857A //
+#define KScutChineseDictionaryUidValue      0x101F9CFE //
+#define KScutClockUidValue                  0x10005903 //
+#define KScutConnectionManagerUidValue      0x101F84D0 //
+#define KScutConverterUidValue              0x101F4668 //
+#define KScutDiallerUidValue                0x100058B3 //
+#define KScutDRMRightsManagerUidValue       0x101F85C7 //
+#define KScutDeviceManagerUidValue          0x101F6DE5 //
+#define KScutFMRadioUidValue                0x10207A89 //
+#define KScutFMTXRadioUidValue              0x10282BEF //
+#define KScutFaxModemUidValue               0x1000594E //
+#define KScutFileManagerUidValue            0x101F84EB //
+#define KScutGeneralSettingsUidValue        0x100058EC //
+#define KScutControlPanelUidValue           0          // not yet!
+#define KScutHelpUidValue                   0x10005234 //
+#define KScutIRUidValue                     0x1000594D //
+#define KScutInstantMessagingUidValue       0x101F4673 //
+#define KScutLandmarksUidValue              0x101F85A2 //
+#define KScutLogsUidValue                   0x101F4CD5 //
+#define KScutMediaGallery2UidValue          0x101F8599 //
+#define KScutMediaPlayerUidValue            0x200159B2 //
+#define KScutMemoryCardUidValue             0x101F4666 //
+#define KScutMessagingCenterUidValue        0x100058C5 //
+#define KScutMusicPlayerUidValue            0x102072C3 //
+#define KScutNavigatorUidValue              0x101F85A0 //
+#define KScutNotepadUidValue                0x10005907 //
+#define KScutPersonalisationUidValue        0x10005A32 //
+#define KScutPhoneUidValue                  0x100058B3 //
+#define KScutPhonebookUidValue              0x101F4CCE //
+#define KScutPocUidValue                    0x101FD63D //
+#define KScutProfilesUidValue               0x100058F8 //
+#define KScutSatUiUidValue                  0x101F4CE0 //
+#define KScutSearchUidValue                 0x10282411 //
+#define KScutSmlSyncUidValue                0x101F6DE4 //
+#define KScutSpeedDialUidValue              0x1000590A //
+#define KScutUSBUidValue                    0x102068E2 //
+#define KScutUserDictionaryUidValue         0x101F8645 //
+#define KScutVoIPUidValue                   0x10202871 //
+#define KScutVoiceCommandsUidValue          0x101F8555 //
+#define KScutVoiceMailboxUidValue           0x100058F5 //
+#define KScutVoiceRecorderUidValue          0x100058CA //
+
+#define KScutInstallationViewIdValue        0x10283321
+#define KScutChangeThemeViewIdValue         0x102750A7
+#define KScutDiallerViewIdValue             0x10282D81
+#define KScutRemoteMailboxViewIdValue       0x2
+#define KScutConnectivityStatusViewIdValue  0x10207250
+
+#endif // AISCUTAPPUIDS_HRH
+
+// End of File.

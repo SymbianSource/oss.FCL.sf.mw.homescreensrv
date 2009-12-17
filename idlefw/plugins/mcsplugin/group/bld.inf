@@ -1,0 +1,58 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  The build information file of Profile Plugin
+*
+*/
+
+
+#ifdef RD_CUSTOMIZABLE_AI
+#include <platform_paths.hrh>
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../loc/mcspluginsettings.loc             MW_LAYER_LOC_EXPORT_PATH(mcspluginsettings.loc)
+../loc/mcsplugin.loc             MW_LAYER_LOC_EXPORT_PATH(mcsplugin.loc)
+
+
+../rom/mcsplugin_resources.iby      LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(mcsplugin_resources.iby)
+../rom/mcsplugin.iby                CORE_MW_LAYER_IBY_EXPORT_PATH(mcsplugin.iby)
+
+../handler/inc/mcspluginparamval.h     MW_LAYER_PLATFORM_EXPORT_PATH(mcspluginparamval.h)
+
+qgn_mcsplugin_log_out.svg             /epoc32/s60/icons/qgn_mcsplugin_log_out.svg
+
+
+PRJ_EXTENSIONS
+
+START EXTENSION s60/mifconv
+OPTION TARGETFILE aimcsplugin.mif
+OPTION HEADERFILE aimcsplugin.mbg
+OPTION SOURCES -c8,8 qgn_prop_ai_shortcut -c8,8 qgn_menu_url \
+               -c8,8 qgn_menu_mce_sel_mes -c8,8 qgn_menu_mce_syncmail \
+               -c8,8 qgn_menu_am -c8,8 qgn_prop_cp_conn_shortcut \
+               -c8,8 qgn_prop_psln_ai_sub -c8,8 qgn_mcsplugin_log_out
+END
+
+
+PRJ_MMPFILES
+mcsplugin.mmp
+mcspluginsettings.mmp
+mcspluginhandler.mmp
+
+#endif // RD_CUSTOMIZABLE_AI
+
+// End of File.

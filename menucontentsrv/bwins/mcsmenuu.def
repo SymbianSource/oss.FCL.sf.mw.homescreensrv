@@ -1,0 +1,59 @@
+EXPORTS
+	??0CMenuHandler@@IAE@AAVRMenu@@@Z @ 1 NONAME ; CMenuHandler::CMenuHandler(class RMenu &)
+	??1CMenuCompletedOperation@@UAE@XZ @ 2 NONAME ; CMenuCompletedOperation::~CMenuCompletedOperation(void)
+	??1CMenuFilter@@UAE@XZ @ 3 NONAME ; CMenuFilter::~CMenuFilter(void)
+	??1CMenuHandler@@UAE@XZ @ 4 NONAME ; CMenuHandler::~CMenuHandler(void)
+	??1CMenuItem@@UAE@XZ @ 5 NONAME ; CMenuItem::~CMenuItem(void)
+	?BaseConstructL@CMenuHandler@@IAEXXZ @ 6 NONAME ; void CMenuHandler::BaseConstructL(void)
+	?Cancel@RMenuNotifier@@QAEXXZ @ 7 NONAME ; void RMenuNotifier::Cancel(void)
+	?Close@RMenu@@QAEXXZ @ 8 NONAME ; void RMenu::Close(void)
+	?Close@RMenuNotifier@@QAEXXZ @ 9 NONAME ; void RMenuNotifier::Close(void)
+	?CreateL@CMenuItem@@SAPAV1@AAVRMenu@@ABVTDesC16@@HH@Z @ 10 NONAME ; class CMenuItem * CMenuItem::CreateL(class RMenu &, class TDesC16 const &, int, int)
+	?DoNotHaveAttributeL@CMenuFilter@@QAEXABVTDesC16@@@Z @ 11 NONAME ; void CMenuFilter::DoNotHaveAttributeL(class TDesC16 const &)
+	?Flags@CMenuItem@@QBEKXZ @ 12 NONAME ; unsigned long CMenuItem::Flags(void) const
+	?FlagsOff@CMenuFilter@@QBEKXZ @ 13 NONAME ; unsigned long CMenuFilter::FlagsOff(void) const
+	?FlagsOn@CMenuFilter@@QBEKXZ @ 14 NONAME ; unsigned long CMenuFilter::FlagsOn(void) const
+	?GetAttribute@CMenuFilter@@QBEHHAAVTPtrC16@@0@Z @ 15 NONAME ; int CMenuFilter::GetAttribute(int, class TPtrC16 &, class TPtrC16 &) const
+	?GetAttributeL@CMenuItem@@QAE?AVTPtrC16@@ABVTDesC16@@AAH@Z @ 16 NONAME ; class TPtrC16 CMenuItem::GetAttributeL(class TDesC16 const &, int &)
+	?GetAttributeListL@CMenuItem@@QAEXAAV?$RArray@V?$TBuf@$0EA@@@@@@Z @ 17 NONAME ; void CMenuItem::GetAttributeListL(class RArray<class TBuf<64> > &)
+	?GetItemsL@RMenu@@QAEXAAV?$RArray@VTMenuItem@@@@HPBVCMenuFilter@@H@Z @ 18 NONAME ; void RMenu::GetItemsL(class RArray<class TMenuItem> &, int, class CMenuFilter const *, int)
+	?GetRunningAppsL@RMenu@@QAEXAAV?$RArray@VTUid@@@@@Z @ 19 NONAME ; void RMenu::GetRunningAppsL(class RArray<class TUid> &)
+	?HandleCommandL@CMenuHandler@@UAEPAVCMenuOperation@@AAVCMenuItem@@ABVTDesC8@@1AAVTRequestStatus@@@Z @ 20 NONAME ; class CMenuOperation * CMenuHandler::HandleCommandL(class CMenuItem &, class TDesC8 const &, class TDesC8 const &, class TRequestStatus &)
+	?HandleCommandL@CMenuItem@@QAEPAVCMenuOperation@@ABVTDesC8@@0AAVTRequestStatus@@@Z @ 21 NONAME ; class CMenuOperation * CMenuItem::HandleCommandL(class TDesC8 const &, class TDesC8 const &, class TRequestStatus &)
+	?HaveAttributeL@CMenuFilter@@QAEXABVTDesC16@@0@Z @ 22 NONAME ; void CMenuFilter::HaveAttributeL(class TDesC16 const &, class TDesC16 const &)
+	?Id@CMenuItem@@QBEHXZ @ 23 NONAME ; int CMenuItem::Id(void) const
+	?MoveToFolderL@RMenu@@QAEPAVCMenuOperation@@ABV?$RArray@H@@HHAAVTRequestStatus@@@Z @ 24 NONAME ; class CMenuOperation * RMenu::MoveToFolderL(class RArray<int> const &, int, int, class TRequestStatus &)
+	?NewL@CMcsCacheHandler@@SAPAV1@AAVCMenuEng@@AAVCMenuSrvEngUtils@@@Z @ 25 NONAME ; class CMcsCacheHandler * CMcsCacheHandler::NewL(class CMenuEng &, class CMenuSrvEngUtils &)
+	?NewL@CMcsSatMonitor@@SAPAV1@AAVCMenuEng@@@Z @ 26 NONAME ; class CMcsSatMonitor * CMcsSatMonitor::NewL(class CMenuEng &)
+	?NewL@CMenuCompletedOperation@@SAPAV1@AAVRMenu@@HAAVTRequestStatus@@H@Z @ 27 NONAME ; class CMenuCompletedOperation * CMenuCompletedOperation::NewL(class RMenu &, int, class TRequestStatus &, int)
+	?NewL@CMenuFilter@@SAPAV1@XZ @ 28 NONAME ; class CMenuFilter * CMenuFilter::NewL(void)
+	?NewLC@CMenuFilter@@SAPAV1@XZ @ 29 NONAME ; class CMenuFilter * CMenuFilter::NewLC(void)
+	?Notify@RMenuNotifier@@QAEXHHAAVTRequestStatus@@@Z @ 30 NONAME ; void RMenuNotifier::Notify(int, int, class TRequestStatus &)
+	?NumAttributes@CMenuFilter@@QBEHXZ @ 31 NONAME ; int CMenuFilter::NumAttributes(void) const
+	?Open@RMenuNotifier@@QAEHAAVRMenu@@@Z @ 32 NONAME ; int RMenuNotifier::Open(class RMenu &)
+	?OpenL@CMenuItem@@SAPAV1@AAVRMenu@@ABVTMenuItem@@@Z @ 33 NONAME ; class CMenuItem * CMenuItem::OpenL(class RMenu &, class TMenuItem const &)
+	?OpenL@CMenuItem@@SAPAV1@AAVRMenu@@H@Z @ 34 NONAME ; class CMenuItem * CMenuItem::OpenL(class RMenu &, int)
+	?OpenL@RMenu@@QAEXABVTDesC16@@@Z @ 35 NONAME ; void RMenu::OpenL(class TDesC16 const &)
+	?Parent@CMenuItem@@QBEHXZ @ 36 NONAME ; int CMenuItem::Parent(void) const
+	?RemoveAttribute@CMenuFilter@@QAEXABVTDesC16@@@Z @ 37 NONAME ; void CMenuFilter::RemoveAttribute(class TDesC16 const &)
+	?RemoveAttributeL@CMenuItem@@QAEXABVTDesC16@@@Z @ 38 NONAME ; void CMenuItem::RemoveAttributeL(class TDesC16 const &)
+	?RemoveL@RMenu@@QAEPAVCMenuOperation@@HAAVTRequestStatus@@@Z @ 39 NONAME ; class CMenuOperation * RMenu::RemoveL(int, class TRequestStatus &)
+	?ReorderL@RMenu@@QAEPAVCMenuOperation@@HHAAVTRequestStatus@@@Z @ 40 NONAME ; class CMenuOperation * RMenu::ReorderL(int, int, class TRequestStatus &)
+	?Reset@CMenuFilter@@QAEXXZ @ 41 NONAME ; void CMenuFilter::Reset(void)
+	?ResourceCheck@RMenu@@QAEXXZ @ 42 NONAME ; void RMenu::ResourceCheck(void)
+	?ResourceCount@RMenu@@QAEHXZ @ 43 NONAME ; int RMenu::ResourceCount(void)
+	?ResourceMark@RMenu@@QAEXXZ @ 44 NONAME ; void RMenu::ResourceMark(void)
+	?RootFolderL@RMenu@@QAEHXZ @ 45 NONAME ; int RMenu::RootFolderL(void)
+	?RunMenuServer@@YAHXZ @ 46 NONAME ; int RunMenuServer(void)
+	?RunningStatusL@CMenuItem@@QAEHXZ @ 47 NONAME ; int CMenuItem::RunningStatusL(void)
+	?SaveL@CMenuItem@@QAEPAVCMenuOperation@@AAVTRequestStatus@@@Z @ 48 NONAME ; class CMenuOperation * CMenuItem::SaveL(class TRequestStatus &)
+	?SetAttributeL@CMenuItem@@QAEXABVTDesC16@@0@Z @ 49 NONAME ; void CMenuItem::SetAttributeL(class TDesC16 const &, class TDesC16 const &)
+	?SetFlags@CMenuFilter@@QAEXKK@Z @ 50 NONAME ; void CMenuFilter::SetFlags(unsigned long, unsigned long)
+	?SetFlags@CMenuItem@@QAEXKH@Z @ 51 NONAME ; void CMenuItem::SetFlags(unsigned long, int)
+	?SetType@CMenuFilter@@QAEXABVTDesC16@@@Z @ 52 NONAME ; void CMenuFilter::SetType(class TDesC16 const &)
+	?SupportsType@CMenuHandler@@UAEHABVTDesC16@@@Z @ 53 NONAME ; int CMenuHandler::SupportsType(class TDesC16 const &)
+	?Type@CMenuFilter@@QBE?AVTPtrC16@@XZ @ 54 NONAME ; class TPtrC16 CMenuFilter::Type(void) const
+	?Type@CMenuItem@@QBE?AVTPtrC16@@XZ @ 55 NONAME ; class TPtrC16 CMenuItem::Type(void) const
+	?__DbgSetAllocFail@RMenu@@QAEXW4TAllocFail@RAllocator@@H@Z @ 56 NONAME ; void RMenu::__DbgSetAllocFail(enum RAllocator::TAllocFail, int)
+	?GetListL@RMenuSapi@@QAEXAAVTDes8@@AAVRBuf8@@@Z @ 57 NONAME ; void RMenuSapi::GetListL(class TDes8 &, class RBuf8 &)
+

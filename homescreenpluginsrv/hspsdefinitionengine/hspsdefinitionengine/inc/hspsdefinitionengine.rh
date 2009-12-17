@@ -1,0 +1,31 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  DefinitionEngine
+*
+*/
+
+
+#ifndef hspsDEFINITIONENGINE_RH_H
+#define hspsDEFINITIONENGINE_RH_H
+
+// CONSTANTS
+// implementation interface uid
+#define	KhspsDefinitionEngineIId				0x200159C7 //0x10281F08 
+
+//implementation uid
+#define KhspsDefinitionEngineImplUid		0x200159C8 //0x10281F09
+
+#endif     
+            
+// End of File

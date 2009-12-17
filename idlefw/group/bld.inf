@@ -1,0 +1,55 @@
+/*
+* Copyright (c) 2002-2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+#ifdef RD_CUSTOMIZABLE_AI
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+
+PRJ_EXPORTS
+../plugins/devicestatus/loc/aidevstaplgres.loc          MW_LAYER_LOC_EXPORT_PATH(aidevstaplgres.loc)
+../loc/aifw.loc                                       MW_LAYER_LOC_EXPORT_PATH(aifw.loc)
+
+// Generic configuration interface for component cenrep settings
+../conf/activeidle2.confml                  APP_LAYER_CONFML(activeidle2.confml)
+../conf/activeidle2_10275102.crml           APP_LAYER_CRML(activeidle2_10275102.crml)
+
+../rom/idlefw.iby                                  CORE_MW_LAYER_IBY_EXPORT_PATH(idlefw.iby)
+../rom/idlefw_resources.iby                        LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(idlefw_resources.iby)
+
+PRJ_MMPFILES
+aiutils.mmp
+aiidleint.mmp
+aifw.mmp
+ailaunch.mmp
+
+PRJ_TESTMMPFILES
+
+PRJ_TESTEXPORTS
+
+//
+// Include subprojects
+//
+
+// Plug-ins
+#include "../plugins/group/bld.inf"
+
+#endif // RD_CUSTOMIZABLE_AI

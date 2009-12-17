@@ -1,0 +1,8 @@
+EXPORTS
+	_Z16CreateTestSuiteLv @ 1 NONAME
+	_ZN27MT_CHspsInstallationService4NewLEv @ 2 NONAME
+	_ZTI16MT_CHSPSResource @ 3 NONAME ; #<TI>#
+	_ZTI27MT_CHspsInstallationService @ 4 NONAME ; #<TI>#
+	_ZTV16MT_CHSPSResource @ 5 NONAME ; #<VT>#
+	_ZTV27MT_CHspsInstallationService @ 6 NONAME ; #<VT>#
+

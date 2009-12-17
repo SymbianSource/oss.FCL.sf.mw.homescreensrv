@@ -1,0 +1,68 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+TARGET         	mcsservice.dll
+TARGETTYPE     	DLL
+UID            	0x1000008D 0x2001242B
+
+CAPABILITY     	All -Tcb
+VENDORID       	VID_DEFAULT
+
+LANG SC
+
+USERINCLUDE    	../inc
+USERINCLUDE    	../../inc
+USERINCLUDE     ../../../../inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH		../src
+SOURCE 			mcsservice.cpp
+SOURCE 			mcsgetlistimpl.cpp
+SOURCE 			mcsexecuteaction.cpp 
+SOURCE 			mcsmenuopwatcher.cpp 
+SOURCE  		mcsrunningapps.cpp 
+SOURCE 			mcsrequestnotification.cpp
+SOURCE 			mcsupdateitem.cpp 
+SOURCE          mcsdeleteitem.cpp
+SOURCE          mcsbitmapbuffer.cpp
+SOURCE 			mcsorganizeimpl.cpp
+SOURCE			mcsoperationmanager.cpp
+SOURCE			mcsiconutility.cpp
+//SOURCE          fbscli.lib
+
+
+LIBRARY        	euser.lib
+LIBRARY        	efsrv.lib
+LIBRARY        	estor.lib
+LIBRARY        	bafl.lib
+LIBRARY			mcsmenu.lib // MCS
+LIBRARY			liwservicehandler.lib
+LIBRARY         aknicon.lib
+LIBRARY			mcsextendedmenu.lib 
+
+LIBRARY			apgrfx.lib 
+LIBRARY			mcsmenuutils.lib
+LIBRARY			fbscli.lib 
+LIBRARY         aknskins.lib
+LIBRARY         mcssathandler.lib
+
+// End of File
+

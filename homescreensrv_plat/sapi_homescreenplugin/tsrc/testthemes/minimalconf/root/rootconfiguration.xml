@@ -1,0 +1,15 @@
+<configuration>
+
+  <control>
+
+		<plugins>
+	    <plugin uid="0x2000B101"/>			  
+		</plugins>
+
+		<settings>			
+		</settings>
+
+  </control>
+
+</configuration>
+

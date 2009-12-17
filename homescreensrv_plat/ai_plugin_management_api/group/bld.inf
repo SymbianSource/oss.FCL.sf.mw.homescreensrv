@@ -1,0 +1,35 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  File that exports the files belonging to 
+:                AI Plug-in Management API
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/aicontentpublisheruid.hrh     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentpublisheruid.hrh)
+../inc/aiprofilepluginuids.hrh       MW_LAYER_PLATFORM_EXPORT_PATH(aiprofilepluginuids.hrh)
+../inc/aiscutuids.hrh                MW_LAYER_PLATFORM_EXPORT_PATH(aiscutuids.hrh)
+../inc/aicontentpublisher.h          MW_LAYER_PLATFORM_EXPORT_PATH(aicontentpublisher.h)
+../inc/aidevicestatuscontentmodel.h  MW_LAYER_PLATFORM_EXPORT_PATH(aidevicestatuscontentmodel.h)
+../inc/aiscutcontentmodel.h          MW_LAYER_PLATFORM_EXPORT_PATH(aiscutcontentmodel.h)
+../inc/aiscutdefs.h                  MW_LAYER_PLATFORM_EXPORT_PATH(aiscutdefs.h)
+../inc/aiprofileplugincontentmodel.h MW_LAYER_PLATFORM_EXPORT_PATH(aiprofileplugincontentmodel.h)
+../inc/aiscutappuids.hrh             MW_LAYER_PLATFORM_EXPORT_PATH(aiscutappuids.hrh)

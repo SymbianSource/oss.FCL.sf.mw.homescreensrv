@@ -1,0 +1,139 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project ShortcutPlugin
+*
+*/
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <platform/mw/aiscutuids.hrh>
+
+//MACRO MY_DEBUG
+
+//#include "../../../inc/common/debug.h"
+//#define AI_ENABLE_RD_LOGGING
+#define AI_RD_LOG_TO_DEBUG_OUTPUT
+
+// Master flag for enabling xSP extensions
+#define AI_SCUTPLUGIN_XSP_EXTENSIONS
+
+TARGET                  aiscutplugin.dll
+TARGETTYPE              PLUGIN
+UID                     0x10009D8D AI_UID_ECOM_DLL_CONTENTPUBLISHER_SCUTPLUGIN
+
+CAPABILITY              CAP_ECOM_PLUGIN
+VENDORID                VID_DEFAULT
+
+SOURCEPATH              ../src
+
+// xSP extension
+#ifdef AI_SCUTPLUGIN_XSP_EXTENSIONS
+SOURCE                  caiscutengineext.cpp
+SOURCE                  caiscutextserver.cpp
+SOURCE                  caiscutextsession.cpp
+SOURCE                  caiscutshortcutext.cpp
+SOURCE                  PopupFSM.cpp
+SOURCE                  cpopupeventhandler.cpp
+SOURCE                  caiscutextdata.cpp
+SOURCE                  caiscutextdatamodel.cpp
+SOURCE                  aiscutfactoryext.cpp
+USERINCLUDE             .
+LIBRARY                 estor.lib
+#else
+SOURCE                  aiscutfactory.cpp
+#endif
+
+SOURCE                  caiscutplugin.cpp
+SOURCE                  caiscutengine.cpp
+SOURCE                  caiscutshortcut.cpp
+SOURCE                  caiscutshortcutinfo.cpp
+SOURCE                  caiscuttarget.cpp
+SOURCE                  caiscuttargetapp.cpp
+SOURCE                  caiscuttargetbkm.cpp
+SOURCE                  caiscuttargethttp.cpp
+SOURCE                  caiscuttargetkeylock.cpp
+SOURCE                  caiscuttargetmessagingview.cpp
+SOURCE                  caiscuttargetnewmsg.cpp
+SOURCE                  caiscuttargetempty.cpp
+SOURCE                  aiscuttargetshutter.cpp
+
+SOURCE                  taiscutparser.cpp
+SOURCE                  aidefaultshortcut.cpp
+SOURCE                  aiscutappuidparser.cpp
+SOURCE                  aiscutrepositorywatcher.cpp
+
+START RESOURCE          aiscutplugin.rss
+TARGET                  aiscutplugin.rsc
+END
+
+START RESOURCE          aiscutpluginres.rss
+HEADER
+TARGET                  aiscutpluginres.rsc
+TARGETPATH              RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+START RESOURCE          aiscuttexts.rss
+HEADER
+TARGET                  aiscuttexts.rsc
+TARGETPATH              RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+USERINCLUDE   ../../../inc/common
+USERINCLUDE             ../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY                 euser.lib
+LIBRARY                 cone.lib
+LIBRARY                 ecom.lib
+LIBRARY                 apparc.lib              // TApaTask
+LIBRARY                 apgrfx.lib              // CApaAppListNotifier
+LIBRARY                 viewcli.lib             // CVwsSessionWrapper
+LIBRARY                 ws32.lib                // RWsSession
+LIBRARY                 inetprotutil.lib        // TUriParser
+LIBRARY                 centralrepository.lib   // CRepository
+LIBRARY                 cenrepnotifhandler.lib  // CCenRepNotifyHandler
+LIBRARY                 msgs.lib                // Message Server
+LIBRARY                 muiu.lib                // MsvUiServiceUtilities
+LIBRARY                 sendui.lib              // Send UI
+LIBRARY                 egul.lib                // CGulIcon
+LIBRARY                 aknskins.lib            // AknsUtils
+LIBRARY                 charconv.lib            // CnvUtfConverter
+LIBRARY                 avkon.lib
+LIBRARY                 aknnotify.lib
+LIBRARY                 featmgr.lib
+LIBRARY                 aiutils.lib
+LIBRARY                 fbscli.lib
+LIBRARY                 aknicon.lib
+LIBRARY                 favouritesengine.lib
+LIBRARY                 commonengine.lib        // For RConeResourceLoader
+LIBRARY                 platformenv.lib         // For PathInfo
+LIBRARY                 efsrv.lib
+LIBRARY                 bafl.lib
+LIBRARY                 imcm.lib 
+LIBRARY 				akncapserverclient.lib 	// Fastswap  
+#ifdef __WEB_WIDGETS
+LIBRARY                 widgetregistryclient.lib
+#endif
+LIBRARY                 keylockpolicyapi.lib
+LIBRARY			gfxtrans.lib
+LIBRARY			akntransitionutils.lib
+LIBRARY			gslauncher.lib
+
+// Debugging dependencies
+LIBRARY    flogger.lib
+
+// End of File.

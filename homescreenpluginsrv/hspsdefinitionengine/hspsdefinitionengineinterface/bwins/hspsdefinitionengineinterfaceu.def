@@ -1,0 +1,4 @@
+EXPORTS
+	??1ChspsDefinitionEngineInterface@@UAE@XZ @ 1 NONAME ; ChspsDefinitionEngineInterface::~ChspsDefinitionEngineInterface(void)
+	?NewL@ChspsDefinitionEngineInterface@@SAPAV1@ABVTDesC8@@@Z @ 2 NONAME ; class ChspsDefinitionEngineInterface * ChspsDefinitionEngineInterface::NewL(class TDesC8 const &)
+

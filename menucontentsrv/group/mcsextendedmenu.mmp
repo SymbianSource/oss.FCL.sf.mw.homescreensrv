@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*  Version     : %version: sa1spcx1#10.1.4 % << Don't touch! Updated by Synergy at check-out.
+*
+*/
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+TARGET          mcsextendedmenu.dll
+TARGETTYPE      dll
+UID             0x1000008D 0x200113E2
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../extsrc
+SOURCE          mcsmenuiconutility.cpp
+
+
+
+USERINCLUDE     ../extinc
+
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         aknskins.lib
+LIBRARY         aknicon.lib
+LIBRARY         mcsmenu.lib
+LIBRARY         mcsmenuutils.lib
+//LIBRARY         ws32.lib
+LIBRARY         fbscli.lib 
+LIBRARY         mcssathandler.lib avkon.lib
+LIBRARY         efsrv.lib
+LIBRARY         apgrfx.lib liwServiceHandler.lib 
+
+
+//LIBRARY         apgrfx.lib
+//LIBRARY         egul.lib
+//LIBRARY         apparc.lib
+//LIBRARY         javaregistry.lib
+//LIBRARY         caf.lib
+//LIBRARY         cafutils.lib
+//LIBRARY         SatClient.lib
+//LIBRARY         bitgdi.lib  

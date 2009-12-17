@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="9420c9b8b2a35c6f7d24472c12665238" dataversion="1.0">
+  <name>AI Utilities API</name>
+  <description>Provides utility services common for all AI plug-ins such as string parsing, content model itterator, customizable setting management, publish and subscribe keys observer.</description>
+  <type>c++</type>
+  <subsystem>activeidle</subsystem>
+  <libs>
+    <lib name="aiutils.lib" />
+  </libs>
+  <release category="domain"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>yes</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

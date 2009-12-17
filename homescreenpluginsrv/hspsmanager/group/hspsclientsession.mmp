@@ -1,0 +1,43 @@
+/*
+* Copyright (c) 2003 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build configuration of low-level client side library for hspsThemeServer.exe
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET        hspsclientsession.dll
+TARGETTYPE    dll
+
+UID             0x1000008d 0x200159BE //old uid 10207256
+
+CAPABILITY      CAP_CLIENT_DLL
+VENDORID        VID_DEFAULT
+
+SOURCEPATH    ../client
+SOURCE        hspsclientsession.cpp
+
+USERINCLUDE     . 
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+
+MW_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE /epoc32/include/connect
+
+LANG      SC
+
+LIBRARY       euser.lib
+LIBRARY       bafl.lib
+LIBRARY       hspsodt.lib

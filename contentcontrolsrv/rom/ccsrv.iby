@@ -1,0 +1,36 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  IBY file for ROM image creation
+*
+*/
+
+
+#ifndef CCSRV_IBY
+#define CCSRV_IBY	
+
+#include <bldvariant.hrh>
+
+file=ABI_DIR\BUILD_DIR\ccclientsession.dll SHARED_LIB_DIR\ccclientsession.dll
+file=ABI_DIR\BUILD_DIR\ccsrvapi.dll SHARED_LIB_DIR\ccsrvapi.dll
+file=ABI_DIR\BUILD_DIR\hsccapiclient.dll SHARED_LIB_DIR\hsccapiclient.dll
+file=ABI_DIR\BUILD_DIR\hsccproviderclient.dll SHARED_LIB_DIR\hsccproviderclient.dll
+file=ABI_DIR\BUILD_DIR\hscontentinfo.dll SHARED_LIB_DIR\hscontentinfo.dll
+
+file=ABI_DIR\BUILD_DIR\ccserver.exe PROGRAMS_DIR\ccserver.exe
+
+
+
+#endif // CCSRV_IBY
+
+//  End of File  

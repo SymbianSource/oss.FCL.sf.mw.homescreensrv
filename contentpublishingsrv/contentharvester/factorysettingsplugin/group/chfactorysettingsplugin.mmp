@@ -1,0 +1,67 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Active Space Facory Settings
+*
+*/
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+TARGET          chfactorysettingsplugin.dll
+TARGETTYPE		PLUGIN
+UID				0x10009D8D 0x10282E6C
+CAPABILITY		CAP_ECOM_PLUGIN
+
+LANG			SC
+
+VENDORID        VID_DEFAULT
+SOURCEPATH		../data
+START RESOURCE	chfactorysettingsplugin.rss 
+HEADER
+TARGET			chfactorysettingsplugin.rsc
+TARGETPATH		resource/plugins 
+END
+
+SOURCEPATH      ../src
+SOURCE          chfactorysettingsplugin.cpp
+SOURCE			chfactorysettingsinstallnotifier.cpp
+SOURCE          chfactorysettingsparser.cpp
+SOURCE          chfactsetutils.cpp
+SOURCE          chdbstatehandler.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../contentpublishingutils/contentpublishingdebug/inc
+USERINCLUDE     ../../../contentpublishingserver/cpserver/inc
+
+// APP layer system include is needed here because xcfw_api has
+// dependency to app layer
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         estor.lib 
+LIBRARY         efsrv.lib
+LIBRARY         xcfw.lib
+LIBRARY			bafl.lib
+LIBRARY			ecom.lib
+//AIW Plugin
+LIBRARY			liwservicehandler.lib	//AIW Framework
+#ifdef CONTENT_PUBLISHER_DEBUG
+LIBRARY			cpdebug.lib
+#endif
+LIBRARY         centralrepository.lib
+
+DEBUGLIBRARY	flogger.lib
+
+// End of file
+

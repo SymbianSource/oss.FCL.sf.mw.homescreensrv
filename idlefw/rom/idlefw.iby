@@ -1,0 +1,40 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Image description file for project ActiveIdle3
+*
+*/
+
+
+#ifndef ACTIVEIDLE3_IBY
+#define ACTIVEIDLE3_IBY
+
+#ifndef ACTIVEIDLE2_IBY
+#define ACTIVEIDLE2_IBY
+// Active Idle application and registration file
+S60_APP_EXE( ailaunch )
+S60_APP_AIF_RSC( ailaunch )
+S60_APP_AIF_ICONS( ailaunch )
+//S60_APP_RESOURCE( ailaunch )
+
+file=ABI_DIR\BUILD_DIR\aiutils.dll    SHARED_LIB_DIR\aiutils.dll
+file=ABI_DIR\BUILD_DIR\aiidleint.dll  SHARED_LIB_DIR\aiidleint.dll
+file=ABI_DIR\BUILD_DIR\aifw.dll       SHARED_LIB_DIR\aifw.dll
+
+// Content publishing plug-ins
+ECOM_PLUGIN( aidevstaplg.dll, aidevstaplg.rsc )
+#endif // ACTIVEIDLE2_IBY
+
+//data=\epoc32\release\winscw\udeb\z\private\10202be9\2001952b.txt          private\10202be9\2001952b.txt
+
+#endif // ACTIVEIDLE3_IBY

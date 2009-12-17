@@ -1,0 +1,52 @@
+EXPORTS
+	?AddResourceL@ChspsODT@@QAEXPAVChspsResource@@@Z @ 1 NONAME ; void ChspsODT::AddResourceL(class ChspsResource *)
+	?CloneL@ChspsODT@@QAEPAV1@XZ @ 2 NONAME ; class ChspsODT * ChspsODT::CloneL(void)
+	?ConfigurationType@ChspsODT@@QBEIXZ @ 3 NONAME ; unsigned int ChspsODT::ConfigurationType(void) const
+	?CopyDomDocumentL@ChspsODT@@QAEXAAVChspsDomDocument@@@Z @ 4 NONAME ; void ChspsODT::CopyDomDocumentL(class ChspsDomDocument &)
+	?DeleteResourceL@ChspsODT@@QAEXH@Z @ 5 NONAME ; void ChspsODT::DeleteResourceL(int)
+	?DomDocument@ChspsODT@@QBEAAVChspsDomDocument@@XZ @ 6 NONAME ; class ChspsDomDocument & ChspsODT::DomDocument(void) const
+	?ExternalizeHeaderL@ChspsODT@@QBEXAAVRWriteStream@@@Z @ 7 NONAME ; void ChspsODT::ExternalizeHeaderL(class RWriteStream &) const
+	?ExternalizeL@ChspsODT@@QBEXAAVRWriteStream@@@Z @ 8 NONAME ; void ChspsODT::ExternalizeL(class RWriteStream &) const
+	?ExternalizeResourceListL@ChspsODT@@QBEXAAVRWriteStream@@@Z @ 9 NONAME ; void ChspsODT::ExternalizeResourceListL(class RWriteStream &) const
+	?Flags@ChspsODT@@QBEIXZ @ 10 NONAME ; unsigned int ChspsODT::Flags(void) const
+	?InternalizeHeaderL@ChspsODT@@QAEXAAVRReadStream@@@Z @ 11 NONAME ; void ChspsODT::InternalizeHeaderL(class RReadStream &)
+	?InternalizeL@ChspsODT@@QAEXAAVRReadStream@@@Z @ 12 NONAME ; void ChspsODT::InternalizeL(class RReadStream &)
+	?InternalizeResourceListL@ChspsODT@@QAEXAAVRReadStream@@@Z @ 13 NONAME ; void ChspsODT::InternalizeResourceListL(class RReadStream &)
+	?MarshalHeaderL@ChspsODT@@QBEPAVHBufC8@@XZ @ 14 NONAME ; class HBufC8 * ChspsODT::MarshalHeaderL(void) const
+	?NewL@ChspsODT@@SAPAV1@XZ @ 15 NONAME ; class ChspsODT * ChspsODT::NewL(void)
+	?NewLC@ChspsODT@@SAPAV1@ABVTDesC8@@@Z @ 16 NONAME ; class ChspsODT * ChspsODT::NewLC(class TDesC8 const &)
+	?OdtLanguage@ChspsODT@@QBEHXZ @ 17 NONAME ; int ChspsODT::OdtLanguage(void) const
+	?PackageVersion@ChspsODT@@QBEABVTDesC16@@XZ @ 18 NONAME ; class TDesC16 const & ChspsODT::PackageVersion(void) const
+	?ProviderName@ChspsODT@@QBEABVTDesC16@@XZ @ 19 NONAME ; class TDesC16 const & ChspsODT::ProviderName(void) const
+	?ProviderUid@ChspsODT@@QBEHXZ @ 20 NONAME ; int ChspsODT::ProviderUid(void) const
+	?ResourceCount@ChspsODT@@QBEHXZ @ 21 NONAME ; int ChspsODT::ResourceCount(void) const
+	?ResourceL@ChspsODT@@QBEAAVChspsResource@@H@Z @ 22 NONAME ; class ChspsResource & ChspsODT::ResourceL(int) const
+	?RootUid@ChspsODT@@QBEHXZ @ 23 NONAME ; int ChspsODT::RootUid(void) const
+	?SetConfigurationType@ChspsODT@@QAEXI@Z @ 24 NONAME ; void ChspsODT::SetConfigurationType(unsigned int)
+	?SetFlags@ChspsODT@@QAEXI@Z @ 25 NONAME ; void ChspsODT::SetFlags(unsigned int)
+	?SetOdtLanguage@ChspsODT@@QAEXH@Z @ 26 NONAME ; void ChspsODT::SetOdtLanguage(int)
+	?SetPackageVersionL@ChspsODT@@QAEXABVTDesC16@@@Z @ 27 NONAME ; void ChspsODT::SetPackageVersionL(class TDesC16 const &)
+	?SetProviderNameL@ChspsODT@@QAEXABVTDesC16@@@Z @ 28 NONAME ; void ChspsODT::SetProviderNameL(class TDesC16 const &)
+	?SetProviderUid@ChspsODT@@QAEXH@Z @ 29 NONAME ; void ChspsODT::SetProviderUid(int)
+	?SetRootUid@ChspsODT@@QAEXH@Z @ 30 NONAME ; void ChspsODT::SetRootUid(int)
+	?SetThemeFullNameL@ChspsODT@@QAEXABVTDesC16@@@Z @ 31 NONAME ; void ChspsODT::SetThemeFullNameL(class TDesC16 const &)
+	?SetThemeShortNameL@ChspsODT@@QAEXABVTDesC16@@@Z @ 32 NONAME ; void ChspsODT::SetThemeShortNameL(class TDesC16 const &)
+	?SetThemeUid@ChspsODT@@QAEXH@Z @ 33 NONAME ; void ChspsODT::SetThemeUid(int)
+	?SetThemeVersionL@ChspsODT@@QAEXABVTDesC16@@@Z @ 34 NONAME ; void ChspsODT::SetThemeVersionL(class TDesC16 const &)
+	?ThemeFullName@ChspsODT@@QBEABVTDesC16@@XZ @ 35 NONAME ; class TDesC16 const & ChspsODT::ThemeFullName(void) const
+	?ThemeShortName@ChspsODT@@QBEABVTDesC16@@XZ @ 36 NONAME ; class TDesC16 const & ChspsODT::ThemeShortName(void) const
+	?ThemeUid@ChspsODT@@QBEHXZ @ 37 NONAME ; int ChspsODT::ThemeUid(void) const
+	?ThemeVersion@ChspsODT@@QBEABVTDesC16@@XZ @ 38 NONAME ; class TDesC16 const & ChspsODT::ThemeVersion(void) const
+	?UnMarshalHeaderL@ChspsODT@@QAEXABVTDesC8@@@Z @ 39 NONAME ; void ChspsODT::UnMarshalHeaderL(class TDesC8 const &)
+	?UnMarshalHeaderLC@ChspsODT@@SAPAV1@ABVTDesC8@@@Z @ 40 NONAME ; class ChspsODT * ChspsODT::UnMarshalHeaderLC(class TDesC8 const &)
+	?Family@ChspsODT@@QBEKXZ @ 41 NONAME ; unsigned long ChspsODT::Family(void) const
+	?SetFamily@ChspsODT@@QAEXK@Z @ 42 NONAME ; void ChspsODT::SetFamily(unsigned long)
+	?SetMultiInstance@ChspsODT@@QAEXH@Z @ 43 NONAME ; void ChspsODT::SetMultiInstance(int)
+	?MultiInstance@ChspsODT@@QBEHXZ @ 44 NONAME ; int ChspsODT::MultiInstance(void) const
+	?Description@ChspsODT@@QBEABVTDesC16@@XZ @ 45 NONAME ; class TDesC16 const & ChspsODT::Description(void) const
+	?PreviewFile@ChspsODT@@QBEABVTDesC16@@XZ @ 46 NONAME ; class TDesC16 const & ChspsODT::PreviewFile(void) const
+	?SetLogoFileL@ChspsODT@@QAEXABVTDesC16@@@Z @ 47 NONAME ; void ChspsODT::SetLogoFileL(class TDesC16 const &)
+	?SetDescriptionL@ChspsODT@@QAEXABVTDesC16@@@Z @ 48 NONAME ; void ChspsODT::SetDescriptionL(class TDesC16 const &)
+	?SetPreviewFileL@ChspsODT@@QAEXABVTDesC16@@@Z @ 49 NONAME ; void ChspsODT::SetPreviewFileL(class TDesC16 const &)
+	?LogoFile@ChspsODT@@QBEABVTDesC16@@XZ @ 50 NONAME ; class TDesC16 const & ChspsODT::LogoFile(void) const
+

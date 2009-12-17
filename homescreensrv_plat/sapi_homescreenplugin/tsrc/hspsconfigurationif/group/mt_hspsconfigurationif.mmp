@@ -1,0 +1,66 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for HSPS SAPI configuration interface
+*                module testing
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include "../../../inc/hsps_log_cfg.hrh"
+
+TARGET                  mt_hspsconfigurationif.dll
+TARGETTYPE              dll
+UID                     0x1000af5a 0x01700000
+
+CAPABILITY              ALL -TCB -DRM
+VENDORID                0x00000000
+
+SOURCEPATH              ../src
+SOURCE                  mt_hspsconfigurationif.cpp
+SOURCE                  mt_hspsconfigurationif_dllmain.cpp
+SOURCE                  mt_hspsliwlistprinter.cpp
+SOURCEPATH              ../../common/src
+SOURCE                  mt_hsps.cpp
+SOURCE                  mt_hspsteststep.cpp
+SOURCE                  mt_hspsinstallationservice.cpp
+
+SOURCEPATH              ../../../hspsservice/src
+SOURCE                  hspsserviceutilities.cpp
+
+USERINCLUDE    	        ../inc
+USERINCLUDE    	        ../../common/inc
+USERINCLUDE             ../../../inc
+USERINCLUDE             ../../../hspsservice/inc
+
+// System include folders required by the tested code
+MW_LAYER_SYSTEMINCLUDE
+
+SYSTEMINCLUDE           /epoc32/include/platform/digia/eunit
+
+LIBRARY                 bafl.lib
+LIBRARY                 efsrv.lib
+LIBRARY                 EUnit.lib
+LIBRARY                 EUnitUtil.lib
+LIBRARY                 euser.lib
+LIBRARY                 estor.lib
+LIBRARY                 liwServiceHandler.lib
+LIBRARY                 flogger.lib
+LIBRARY                 centralrepository.lib
+LIBRARY                 hspsservice.lib
+LIBRARY                 hspsclient.lib
+LIBRARY                 hspsodt.lib
+LIBRARY                 hspsresult.lib
+
+// End of file

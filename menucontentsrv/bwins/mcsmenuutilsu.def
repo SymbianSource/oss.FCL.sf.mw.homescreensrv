@@ -1,0 +1,4 @@
+EXPORTS
+	?GetTUint@MenuUtils@@SAHABVTDesC16@@AAI@Z @ 1 NONAME ; int MenuUtils::GetTUint(class TDesC16 const &, unsigned int &)
+	?SetTUint@MenuUtils@@SAXAAVTDes16@@I@Z @ 2 NONAME ; void MenuUtils::SetTUint(class TDes16 &, unsigned int)
+

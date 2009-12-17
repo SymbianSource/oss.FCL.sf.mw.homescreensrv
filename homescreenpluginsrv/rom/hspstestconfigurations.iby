@@ -1,0 +1,152 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Test configurations for the internal HSPS Eunit tests
+*
+*/
+
+
+#ifndef HSPSTESTCONFIGURATIONS_IBY
+#define HSPSTESTCONFIGURATIONS_IBY
+
+
+// Configuration files
+
+// NOTE!!! This file should be in sync with the homescreenpluginservice\internal\testthemes\group\bld.inf file
+
+// ==============================================================================
+// MinimalConfiguration
+// ==============================================================================
+
+// MinimalConfiguration - Widget
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b102\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b102\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b102\1.0\widgetconfiguration.xml private\200159c0\install\0998\101fb657\2000b102\1.0\widgetconfiguration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b102\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b102\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b102_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b102_1.0.dat
+
+// minimalconfiguration - view
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b101\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\viewconfiguration.xml private\200159c0\install\0998\101fb657\2000b101\1.0\viewconfiguration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\main.xml private\200159c0\install\0998\101fb657\2000b101\1.0\main.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\picture.jpeg private\200159c0\install\0998\101fb657\2000b101\1.0\picture.jpeg
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\resource.file private\200159c0\install\0998\101fb657\2000b101\1.0\resource.file
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\viewnavigationrules.xml private\200159c0\install\0998\101fb657\2000b101\1.0\viewnavigationrules.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b101\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b101\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b101_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b101_1.0.dat
+
+// minimalconfiguration - root
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b100\1.0\manifest.dat private\200159c0\install\102750f0\101fb657\2000b100\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b100\1.0\rootconfiguration.xml private\200159c0\install\102750f0\101fb657\2000b100\1.0\rootconfiguration.xml
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b100\1.0\0\locale.dtd private\200159c0\install\102750f0\101fb657\2000b100\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\app_102750f0_101fb657_2000b100_1.0.dat private\200159c0\install\app_102750f0_101fb657_2000b100_1.0.dat
+
+
+// ==============================================================================
+// typicalconfiguration
+// ==============================================================================
+
+// typicalconfiguration - widget
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b120\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\widgetconfiguration.xml private\200159c0\install\0998\101fb657\2000b120\1.0\widgetconfiguration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\hs_logo.jpg private\200159c0\install\0998\101fb657\2000b120\1.0\hs_logo.jpg
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\widget.bmp private\200159c0\install\0998\101fb657\2000b120\1.0\widget.bmp
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b120\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\1\locale.dtd private\200159c0\install\0998\101fb657\2000b120\1.0\1\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b120\1.0\9\locale.dtd private\200159c0\install\0998\101fb657\2000b120\1.0\9\locale.dtd
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b120_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b120_1.0.dat
+
+// typicalconfiguration - view1
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b111\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\viewconfiguration.xml private\200159c0\install\0998\101fb657\2000b111\1.0\viewconfiguration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\view1.bmp private\200159c0\install\0998\101fb657\2000b111\1.0\view1.bmp
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b111\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\1\locale.dtd private\200159c0\install\0998\101fb657\2000b111\1.0\1\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\9\locale.dtd private\200159c0\install\0998\101fb657\2000b111\1.0\9\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\0\hs_logoz.jpg private\200159c0\install\0998\101fb657\2000b111\1.0\0\hs_logoz.jpg
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\1\hs_logoz.jpg private\200159c0\install\0998\101fb657\2000b111\1.0\1\hs_logoz.jpg
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b111\1.0\9\hs_logoz.jpg private\200159c0\install\0998\101fb657\2000b111\1.0\9\hs_logoz.jpg
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b111_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b111_1.0.dat
+
+// typicalconfiguration - view2
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b112\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b112\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b112\1.0\viewconfiguration.xml private\200159c0\install\0998\101fb657\2000b112\1.0\viewconfiguration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b112\1.0\view2.bmp private\200159c0\install\0998\101fb657\2000b112\1.0\view2.bmp
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b112\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b112\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b112\1.0\1\locale.dtd private\200159c0\install\0998\101fb657\2000b112\1.0\1\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b112\1.0\9\locale.dtd private\200159c0\install\0998\101fb657\2000b112\1.0\9\locale.dtd
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b112_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b112_1.0.dat
+
+// typicalconfiguration - root
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b110\1.0\manifest.dat private\200159c0\install\102750f0\101fb657\2000b110\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b110\1.0\rootconfiguration.xml private\200159c0\install\102750f0\101fb657\2000b110\1.0\rootconfiguration.xml
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b110\1.0\root.bmp private\200159c0\install\102750f0\101fb657\2000b110\1.0\root.bmp
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b110\1.0\0\locale.dtd private\200159c0\install\102750f0\101fb657\2000b110\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b110\1.0\1\locale.dtd private\200159c0\install\102750f0\101fb657\2000b110\1.0\1\locale.dtd
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b110\1.0\9\locale.dtd private\200159c0\install\102750f0\101fb657\2000b110\1.0\9\locale.dtd
+data=DATAZ_\private\200159c0\install\app_102750f0_101fb657_2000b110_1.0.dat private\200159c0\install\app_102750f0_101fb657_2000b110_1.0.dat
+
+
+// ==============================================================================
+// operatorconfiguration
+// ==============================================================================
+
+// operatorconfiguration - view
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b131\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b131\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b131\1.0\configuration.xml private\200159c0\install\0998\101fb657\2000b131\1.0\configuration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b131\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b131\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b131_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b131_1.0.dat
+
+// operatorconfiguration - root
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b130\1.0\manifest.dat private\200159c0\install\102750f0\101fb657\2000b130\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b130\1.0\configuration.xml private\200159c0\install\102750f0\101fb657\2000b130\1.0\configuration.xml
+data=DATAZ_\private\200159c0\install\102750f0\101fb657\2000b130\1.0\0\locale.dtd private\200159c0\install\102750f0\101fb657\2000b130\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\app_102750f0_101fb657_2000b130_1.0.dat private\200159c0\install\app_102750f0_101fb657_2000b130_1.0.dat
+
+
+// ==============================================================================
+// finnishwidget
+// ==============================================================================
+
+// finnishwidget - widget
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\manifest.dat private\200159c0\install\0998\101fb657\2000b132\1.0\manifest.dat
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\widgetconfiguration.xml private\200159c0\install\0998\101fb657\2000b132\1.0\widgetconfiguration.xml
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\common.jpg private\200159c0\install\0998\101fb657\2000b132\1.0\common.jpg
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\0\locale.dtd private\200159c0\install\0998\101fb657\2000b132\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\9\locale.dtd private\200159c0\install\0998\101fb657\2000b132\1.0\9\locale.dtd
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\0\localizedbg.jpg private\200159c0\install\0998\101fb657\2000b132\1.0\0\localizedbg.jpg
+data=DATAZ_\private\200159c0\install\0998\101fb657\2000b132\1.0\9\localizedbg.jpg private\200159c0\install\0998\101fb657\2000b132\1.0\9\localizedbg.jpg
+data=DATAZ_\private\200159c0\install\plugin_0998_101fb657_2000b132_1.0.dat private\200159c0\install\plugin_0998_101fb657_2000b132_1.0.dat
+
+
+
+// ==============================================================================
+// installedwidget
+// ==============================================================================
+
+// installedwidget
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\manifest.dat private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\manifest.dat
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\widgetconfiguration.xml private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\widgetconfiguration.xml
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\0\locale.dtd private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\0\locale.dtd
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\0\hs_logo.jpg private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\0\hs_logo.jpg
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\0\widget.bmp private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\0\widget.bmp
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\1\locale.dtd private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\1\locale.dtd
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\1\hs_logo.jpg private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\1\hs_logo.jpg
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\1\widget.bmp private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\1\widget.bmp
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\9\locale.dtd private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\9\locale.dtd
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\9\hs_logo.jpg private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\9\hs_logo.jpg
+data=DATAZ_\private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\9\widget.bmp private\200159c0\sisxtest\0998\101fb657\2000b133\1.0\9\widget.bmp
+data=DATAZ_\private\200159c0\sisxtest\plugin_0998_101fb657_2000b133_1.0.dat private\200159c0\sisxtest\plugin_0998_101fb657_2000b133_1.0.dat
+
+#endif // HSPSTESTCONFIGURATIONS_IBY
+
+//  End of File  

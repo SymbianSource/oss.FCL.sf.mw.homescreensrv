@@ -1,0 +1,33 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  File that exports the files belonging to 
+:                AI Content Model API
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/aicontentobserver.inl     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentobserver.inl)
+../inc/aicontentobserver.h     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentobserver.h)
+../inc/aipropertyextension.h     MW_LAYER_PLATFORM_EXPORT_PATH(aipropertyextension.h)
+../inc/aieventhandlerextension.h     MW_LAYER_PLATFORM_EXPORT_PATH(aieventhandlerextension.h)
+../inc/aipropertyextension.inl     MW_LAYER_PLATFORM_EXPORT_PATH(aipropertyextension.inl)
+../inc/aicontentmodel.h     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentmodel.h)
+../inc/aicontentrequest.h   MW_LAYER_PLATFORM_EXPORT_PATH(aicontentrequest.h)

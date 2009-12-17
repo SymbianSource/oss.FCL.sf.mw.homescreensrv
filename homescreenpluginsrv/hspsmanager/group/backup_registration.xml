@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="yes"?>
+<backup_registration version="1.0">
+  <passive_backup>
+<!-- backup all private data -->
+    <include_directory name = "\backup" />
+  </passive_backup>
+  <active_backup process_name="hspsthemeserver.exe" requires_delay_to_preparate_data="no" supports_selective="no" supports_incremental="no" active_type="activeonly"/>
+  <proxy_data_manager sid = "0x10202BE9" />
+  <restore requires_reboot = "no"/>
+</backup_registration>

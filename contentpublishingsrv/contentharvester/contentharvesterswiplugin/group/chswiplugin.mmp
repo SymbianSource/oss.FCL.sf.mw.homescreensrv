@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+ *
+*/
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+TARGET			chswiplugin.dll
+TARGETTYPE		PLUGIN
+UID			    0x10009D8D 0x20022E84
+CAPABILITY		CAP_ECOM_PLUGIN
+
+LANG 			SC
+
+VENDORID        VID_DEFAULT
+
+SOURCEPATH		../src
+SOURCE			chswiplugin.cpp
+
+SOURCEPATH		../data
+START RESOURCE	chswiplugin.rss 
+HEADER
+TARGET			chswiplugin.rsc
+TARGETPATH		resource/plugins 
+END
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../../contentpublishingserver/cpserver/inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+
+LIBRARY			ecom.lib
+LIBRARY			euser.lib
+
+LIBRARY         apgrfx.lib
+LIBRARY         apparc.lib
+
+LIBRARY			liwservicehandler.lib	//AIW Framework
+
+//end of file

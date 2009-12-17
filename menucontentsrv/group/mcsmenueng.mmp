@@ -1,0 +1,58 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+#include <data_caging_paths.hrh>
+#include "../inc/menuuid.hrh"
+
+TARGET          mcsmenueng.dll
+TARGETTYPE      dll
+UID             0x1000008D MENU_ENG_UID3
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../engsrc
+SOURCE          menueng.cpp
+SOURCE          menuengidmanager.cpp
+SOURCE          menuenglegacyobjectfactory.cpp
+SOURCE          menuengobjectattr.cpp
+SOURCE          menuengobject.cpp
+SOURCE          menuengobjectfactory.cpp
+SOURCE          menuengobjectfactoryproxy.cpp
+SOURCE          menuengflags.cpp
+SOURCE          menuengitemlister.cpp
+SOURCE          menuengdeletionchecker.cpp
+SOURCE          menuengidmanagerinit.cpp
+SOURCE          menuengidsetter.cpp
+SOURCE          menuengidcollector.cpp
+
+USERINCLUDE     ../enginc
+USERINCLUDE     ../inc
+
+// APP layer system include is needed here because xcfw_api has
+// dependency to app layer
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         efsrv.lib
+LIBRARY         xcfw.lib
+LIBRARY         platformenv.lib
+LIBRARY         flogger.lib
+LIBRARY         sysutil.lib
+LIBRARY         centralrepository.lib

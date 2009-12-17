@@ -1,0 +1,22 @@
+EXPORTS
+	?CloneL@ChspsResource@@QAEPAV1@XZ @ 1 NONAME ; class ChspsResource * ChspsResource::CloneL(void)
+	?ExternalizeL@ChspsResource@@QBEXAAVRWriteStream@@@Z @ 2 NONAME ; void ChspsResource::ExternalizeL(class RWriteStream &) const
+	?FileName@ChspsResource@@QBEABVTDesC16@@XZ @ 3 NONAME ; class TDesC16 const & ChspsResource::FileName(void) const
+	?InternalizeL@ChspsResource@@QAEXAAVRReadStream@@@Z @ 4 NONAME ; void ChspsResource::InternalizeL(class RReadStream &)
+	?Language@ChspsResource@@QBEABW4TLanguage@@XZ @ 5 NONAME ; enum TLanguage const & ChspsResource::Language(void) const
+	?LockingPolicy@ChspsResource@@QBE?AW4ThspsLockingPolicy@@XZ @ 6 NONAME ; enum ThspsLockingPolicy ChspsResource::LockingPolicy(void) const
+	?MimeType@ChspsResource@@QBE?AVTDataType@@XZ @ 7 NONAME ; class TDataType ChspsResource::MimeType(void) const
+	?NewL@ChspsResource@@SAPAV1@XZ @ 8 NONAME ; class ChspsResource * ChspsResource::NewL(void)
+	?ResourceId@ChspsResource@@QBEABVTDesC16@@XZ @ 9 NONAME ; class TDesC16 const & ChspsResource::ResourceId(void) const
+	?ResourceType@ChspsResource@@QBE?AW4ThspsResourceType@@XZ @ 10 NONAME ; enum ThspsResourceType ChspsResource::ResourceType(void) const
+	?SetFileNameL@ChspsResource@@QAEXABVTDesC16@@@Z @ 11 NONAME ; void ChspsResource::SetFileNameL(class TDesC16 const &)
+	?SetLanguage@ChspsResource@@QAEXABW4TLanguage@@@Z @ 12 NONAME ; void ChspsResource::SetLanguage(enum TLanguage const &)
+	?SetLockingPolicy@ChspsResource@@QAEXW4ThspsLockingPolicy@@@Z @ 13 NONAME ; void ChspsResource::SetLockingPolicy(enum ThspsLockingPolicy)
+	?SetMimeTypeL@ChspsResource@@QAEXVTDataType@@@Z @ 14 NONAME ; void ChspsResource::SetMimeTypeL(class TDataType)
+	?SetResourceIdL@ChspsResource@@QAEXABVTDesC16@@@Z @ 15 NONAME ; void ChspsResource::SetResourceIdL(class TDesC16 const &)
+	?SetResourceType@ChspsResource@@QAEXW4ThspsResourceType@@@Z @ 16 NONAME ; void ChspsResource::SetResourceType(enum ThspsResourceType)
+	?SetConfigurationUid@ChspsResource@@QAEXH@Z @ 17 NONAME ; void ChspsResource::SetConfigurationUid(int)
+	?ConfigurationUid@ChspsResource@@QBEHXZ @ 18 NONAME ; int ChspsResource::ConfigurationUid(void) const
+	?SetTagsL@ChspsResource@@QAEXABVTDesC16@@@Z @ 19 NONAME ; void ChspsResource::SetTagsL(class TDesC16 const &)
+	?Tags@ChspsResource@@QBEABVTDesC16@@XZ @ 20 NONAME ; class TDesC16 const & ChspsResource::Tags(void) const
+

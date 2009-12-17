@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="33a9bf72af820d16ea8f861ad23dab15" dataversion="2.0">
+<name>sapi_actionhandler</name>
+<description>Action Handler Service API</description>
+<type>c++</type>
+<collection>contentpublishingsrv</collection>
+<libs></libs>
+<release category="platform" sinceversion="0"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

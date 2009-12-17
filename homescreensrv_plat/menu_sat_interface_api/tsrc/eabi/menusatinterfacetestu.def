@@ -1,0 +1,5 @@
+EXPORTS
+	_Z9LibEntryLR13CTestModuleIf @ 1 NONAME
+	_ZTI11CWaitActive @ 2 NONAME
+	_ZTV11CWaitActive @ 3 NONAME
+

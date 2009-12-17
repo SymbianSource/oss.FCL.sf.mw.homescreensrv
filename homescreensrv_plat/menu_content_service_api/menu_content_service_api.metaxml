@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<api id="dc3c7e231288c47e3df48348bc935a0a" dataversion="2.0">
+<name>menu content service api</name>
+<description>API for menu content service</description>
+<type>c++</type>
+<collection>menucontentsrv</collection>
+<libs>
+  <lib name="mcsmenu.lib" />
+  <lib name="mcsmenuutils.lib" />
+  <lib name="mcsextendedmenu.lib" />
+</libs>
+<release category="platform" sinceversion=""/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

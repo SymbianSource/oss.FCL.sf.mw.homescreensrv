@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package version="0.3">
+  
+  <type>view</type>
+  
+  <!-- Interface UID -->
+	<interfaceuid>0998</interfaceuid>
+	
+	<!-- Vendor UID -->
+	<provideruid>101FB657</provideruid>
+	
+	<!-- Configuration UID -->
+	<configurationuid>2000B101</configurationuid>	
+	
+	<!-- statuslicenceedefault|statuslicenceerestorable|statusoperatordefault|statususerdefault -->
+	
+	<!-- Description -->
+	<fullname>&amp;qtn_2000B101_configuration_name;</fullname>
+	<shortname>ViewConf1</shortname>
+	<version>1.0</version>
+	
+	<!-- Configuration -->
+	<filexml>viewconfiguration.xml</filexml>	
+	
+	<!-- Name of the localization files -->
+	<filedtd>locale.dtd</filedtd>
+	
+	<!-- Locale independent/common resources -->		
+	<fileresource mediatype="text/application+xml">main.xml</fileresource>
+	<fileresource mediatype="text/application+xml">viewnavigationrules.xml</fileresource>
+	<fileresource mediatype="mime_type">resource.file</fileresource>
+	<fileresource mediatype="mime_type">picture.jpeg</fileresource>
+	  
+</package>  	

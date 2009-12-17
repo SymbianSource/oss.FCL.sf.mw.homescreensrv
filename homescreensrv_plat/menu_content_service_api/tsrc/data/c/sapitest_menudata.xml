@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xcfwml SYSTEM "appshelldata.dtd">
+<menu:data id="0">
+  <menu:folder id="1" short_name="&qtn_fldr_root_level;">
+    <menu:application id="2" uid="0x10005901" short_name="short__" long_name="long__" title_name="titile__"/>
+    <menu:application id="3" uid="0x101F4CCE"/>
+    <menu:application id="4" uid="0x101F4CD5" view="0x1"/>
+    <menu:application id="5" icon_file="wrong.mif" icon_id="0x4002" mask_id="0x4003" uid="0x10008D39"/>
+    <menu:application id="6" uid="0x100058C5"/>
+    <menu:application id="7" uid="0x101f8599"/>
+    <menu:application id="8" uid="0x200159B2"/>
+    <menu:application id="9" uid="0x102072c3"/>
+    <menu:application id="10" uid="0x10207a89"/>
+    <menu:application id="11" uid="0x100058EC"/>
+    <menu:application id="12" uid="0x10005234"/>
+    <menu:folder id="13" applicationgroup_name="applications" default="1" short_name="&qtn_apps_appsfolder_grid;" long_name="&qtn_apps_appsfolder_list;" title_name="&qtn_apps_appsfolder_title;" m3g_icon_file="folder8.m3g" icon_file="Menu.mif" icon_id="16394" mask_id="16395" icon_skin_minor_id="0x13FD" icon_skin_major_id="0x101F86E3">
+      <menu:application id="14" uid="0x101F84EB"/>
+      <menu:application id="15" uid="0x10005902"/>
+      <menu:application id="16" uid="0x101F4668"/>
+      <menu:application id="17" uid="0x101F4673"/>
+      <menu:application id="18" uid="0x10005903"/>
+      <menu:application id="19" uid="0x100058CA"/>
+      <menu:application id="21" uid="0x100058F5"/>
+      <menu:application id="22" uid="0x101F857A"/>
+      <menu:application id="23" uid="0x101F4CE0"/>
+      <menu:application flags="hidden" id="24" uid="0x101F85a0"/>
+      <menu:application flags="hidden" id="25" uid="0x101f85a2"/>
+      <menu:application id="26" uid="0x101F8645"/>
+      <menu:folder id="29" applicationgroup_name="RnD Tools">
+        <menu:application id="30" uid="0x100059EF"/>
+        <menu:application id="31" uid="0x100059EC"/>
+        <menu:application id="32" uid="0x100059EE"/>
+        <menu:application id="39" uid="0x1028311D"/>
+        <menu:application id="41" uid="0x101FB751"/>
+        <menu:application id="47" uid="0x20011385"/>
+        <menu:application id="56" uid="0x20011384"/>
+        <menu:application id="61" uid="0x101FB74F"/>
+        <menu:application id="63" uid="0x102828D6"/>
+        <menu:application id="69" uid="0x20011383"/>
+        <menu:application id="70" uid="0x101FB754"/>
+        <menu:application id="71" uid="0x101F6D2B"/>
+        <menu:application id="80" uid="0x1028338C"/>
+        <menu:application id="81" uid="0x1020DEB5"/>
+        <menu:application id="82" uid="0x1028337C"/>
+        <menu:application id="83" uid="0x20201F5D"/>
+        <menu:application id="84" uid="0x20012432"/>
+        <menu:application id="86" uid="0x105ADAF"/>
+      </menu:folder>
+      <menu:application id="33" uid="0x10281caa"/>
+      <menu:application id="34" uid="0x101f8543"/>
+      <menu:application id="35" uid="0x10281893"/>
+      <menu:application id="36" uid="0x101f8555"/>
+      <menu:application id="37" uid="0x102068e2"/>
+      <menu:application id="40" uid="0x1000590a"/>
+      <menu:application id="42" uid="0xa000018a"/>
+      <menu:application id="44" uid="0x100053f5"/>
+      <menu:application id="45" uid="0x10005a32"/>
+      <menu:application id="46" uid="0x100058f8"/>
+      <menu:application id="48" uid="0x10008d5e"/>
+      <menu:application id="49" uid="0x101f6de4"/>
+      <menu:application id="50" uid="0x101f6de5"/>
+      <menu:application id="51" uid="0x10005907"/>
+      <menu:application id="55" uid="0x101f4cd2"/>
+      <menu:application id="57" uid="0xa0000188"/>
+      <menu:application id="58" uid="0xa0000187"/>
+      <menu:application id="59" uid="0x10283139"/>
+      <menu:application id="60" uid="0xa0000189"/>
+      <menu:application id="62" uid="0x1000594d"/>
+      <menu:application id="64" uid="0x101f7ae7"/>
+      <menu:application id="65" uid="0x1020381c"/>
+      <menu:application id="67" uid="0x101f9cfe"/>
+      <menu:application id="68" uid="0x10202065"/>
+      <menu:application id="72" uid="0x101f84d0"/>
+      <menu:application id="76" uid="0x10005951"/>
+      <menu:application id="77" uid="0x10005a22"/>
+      <menu:application id="87" uid="0x90C399D"/>
+      <menu:application id="88" uid="0x3132013"/>
+      <menu:application id="89" uid="0x1105901"/>
+    </menu:folder>
+    <menu:url id="85" url="http://google.com" short_name="other_url"/>
+    <menu:folder id="90">
+      <menu:url id="91" url="www.nokia.com" short_name="some_url"/>
+      <menu:url id="92" url="www.nokia.com" short_name="some_url"/>
+      <menu:url id="93" url="www.nokia.com" short_name="some_url"/>
+      <menu:folder id="94">
+        <menu:url id="95" url="www.nokia.com" short_name="some_url"/>
+        <menu:url id="96" url="www.nokia.com" short_name="some_url"/>
+        <menu:url id="97" url="www.nokia.com" short_name="some_url"/>
+      </menu:folder>
+    </menu:folder>
+	<menu:url id="98" url="change_tester__" short_name="change_tester__"/>
+	<menu:url id="99" flags="lock_name lock_delete lock_item" url="change_tester__" short_name="change_tester__"/>
+	<menu:folder id="101">
+		<menu:url id="103" url="www.youtube.com"/>
+		<menu:url id="104" url="www.youtube.com"/>
+	</menu:folder>
+	<menu:folder id="102">
+		<menu:url id="105" url="www.FillerURL.com"/>
+	</menu:folder>
+	<menu:folder flags="lock_item lock_moveinto" id="106" />
+    <menu:folder id="109" />
+	<menu:folder id="107">
+		<menu:folder id="108" />
+	</menu:folder>
+	<menu:folder id="110">
+		<menu:url id="111" flags="lock_delete" url="lock_tester__" short_name="lock_tester__"/>
+	</menu:folder>
+	<menu:folder id="112" flags="lock_delete">
+		<menu:url id="113" url="lock_tester__" short_name="lock_tester__"/>
+		<menu:url id="114" flags="lock_item" url="lock_tester__" short_name="lock_tester__"/>
+	</menu:folder>
+	
+  </menu:folder>
+  <menu:id_seed id="0" seed="114"/>
+</menu:data>

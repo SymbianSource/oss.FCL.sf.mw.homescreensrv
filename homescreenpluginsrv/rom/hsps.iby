@@ -1,0 +1,56 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  IBY file for ROM image creation
+*
+*/
+
+
+#ifndef HSPS_IBY
+#define HSPS_IBY	
+
+#include <bldvariant.hrh>
+
+file=ABI_DIR\BUILD_DIR\hspsdomdocument.dll SHARED_LIB_DIR\hspsdomdocument.dll
+
+// Uncomment if ____HSPS_CFG_LOG_ON____ defined.
+// file=ABI_DIR\BUILD_DIR\hspstools.dll SHARED_LIB_DIR\hspstools.dll
+
+file=ABI_DIR\BUILD_DIR\hspsresource.dll SHARED_LIB_DIR\hspsresource.dll
+file=ABI_DIR\BUILD_DIR\hspsresult.dll SHARED_LIB_DIR\hspsresult.dll
+file=ABI_DIR\BUILD_DIR\hspsodt.dll SHARED_LIB_DIR\hspsodt.dll
+file=ABI_DIR\BUILD_DIR\hspsdefrep.dll SHARED_LIB_DIR\hspsdefrep.dll
+file=ABI_DIR\BUILD_DIR\hspsdefinitionengineinterface.dll SHARED_LIB_DIR\hspsdefinitionengineinterface.dll
+
+// Stock plugins
+ECOM_PLUGIN( hspsdefinitionengine.dll , hspsdefinitionengine.rsc )
+
+// Homescreen plug-in service
+// HSPS Client-side modules:
+file=ABI_DIR\BUILD_DIR\hspsclient.dll SHARED_LIB_DIR\hspsclient.dll
+file=ABI_DIR\BUILD_DIR\hspsclientsession.dll SHARED_LIB_DIR\hspsclientsession.dll
+file=ABI_DIR\BUILD_DIR\hspsrequestclient.dll SHARED_LIB_DIR\hspsrequestclient.dll
+
+// Homescreen plug-in service Server-side modules: 
+file=ABI_DIR\BUILD_DIR\hspsthemeserver.exe PROGRAMS_DIR\hspsthemeserver.exe
+
+//Backup registration
+data=DATAZ_\private\200159c0\backup_registration.xml        private\200159c0\backup_registration.xml     
+
+// Exporting of HSPS Test configurations:
+// Uncomment if _HSPS_AUTOINSTALL_TEST_THEMES_ defined
+// #include <hspsTestConfigurations.iby>
+
+#endif // HSPS_IBY
+
+//  End of File  

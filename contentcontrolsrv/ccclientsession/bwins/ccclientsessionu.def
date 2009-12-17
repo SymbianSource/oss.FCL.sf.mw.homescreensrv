@@ -1,0 +1,11 @@
+EXPORTS
+	?WaitForApiReq@RCcClientSession@@IAEXAAV?$TPckgBuf@K@@00AAVTPtr8@@AAVTRequestStatus@@@Z @ 1 NONAME ; void RCcClientSession::WaitForApiReq(class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &, class TPtr8 &, class TRequestStatus &)
+	?RegisterObserver@RCcClientSession@@IAEHAAV?$TPckgBuf@K@@0@Z @ 2 NONAME ; int RCcClientSession::RegisterObserver(class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &)
+	?CancelReq@RCcClientSession@@IAEHAAV?$TPckgBuf@H@@@Z @ 3 NONAME ; int RCcClientSession::CancelReq(class TPckgBuf<int> &)
+	?Close@RCcClientSession@@IAEXXZ @ 4 NONAME ; void RCcClientSession::Close(void)
+	?WaitForApiNtf@RCcClientSession@@IAEXAAV?$TPckgBuf@K@@00AAVTPtr8@@AAVTRequestStatus@@@Z @ 5 NONAME ; void RCcClientSession::WaitForApiNtf(class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &, class TPtr8 &, class TRequestStatus &)
+	?Connect@RCcClientSession@@IAEHXZ @ 6 NONAME ; int RCcClientSession::Connect(void)
+	?GetMsgData@RCcClientSession@@IAEHAAV?$TPckgBuf@K@@AAVTPtr8@@@Z @ 7 NONAME ; int RCcClientSession::GetMsgData(class TPckgBuf<unsigned long> &, class TPtr8 &)
+	?RegisterProvider@RCcClientSession@@IAEHAAV?$TPckgBuf@K@@0@Z @ 8 NONAME ; int RCcClientSession::RegisterProvider(class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &)
+	?Send@RCcClientSession@@IAEHHAAV?$TPckgBuf@K@@00AAVTPtr8@@@Z @ 9 NONAME ; int RCcClientSession::Send(int, class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &, class TPckgBuf<unsigned long> &, class TPtr8 &)
+

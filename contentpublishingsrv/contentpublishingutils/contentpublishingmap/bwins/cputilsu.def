@@ -1,0 +1,16 @@
+EXPORTS
+	?GetProperty@CCPLiwMap@@QBEHABVTDesC8@@AAJ@Z @ 1 NONAME ; int CCPLiwMap::GetProperty(class TDesC8 const &, long &) const
+	?GetPropertyL@CCPLiwMap@@QBEHABVTDesC8@@AAVRBuf16@@@Z @ 2 NONAME ; int CCPLiwMap::GetPropertyL(class TDesC8 const &, class RBuf16 &) const
+	?GetPropertyL@CCPLiwMap@@QBEHABVTDesC8@@AAVRBuf8@@@Z @ 3 NONAME ; int CCPLiwMap::GetPropertyL(class TDesC8 const &, class RBuf8 &) const
+	?IsValidForActionL@CCPLiwMap@@QBEXXZ @ 4 NONAME ; void CCPLiwMap::IsValidForActionL(void) const
+	?IsValidForNotificationL@CCPLiwMap@@QBEXXZ @ 5 NONAME ; void CCPLiwMap::IsValidForNotificationL(void) const
+	?NewL@CCPLiwMap@@SAPAV1@AAVRDesReadStream@@@Z @ 6 NONAME ; class CCPLiwMap * CCPLiwMap::NewL(class RDesReadStream &)
+	?NewL@CCPLiwMap@@SAPAV1@ABVCLiwGenericParamList@@@Z @ 7 NONAME ; class CCPLiwMap * CCPLiwMap::NewL(class CLiwGenericParamList const &)
+	?NewL@CContentMap@@SAPAV1@XZ @ 8 NONAME ; class CContentMap * CContentMap::NewL(void)
+	?NewL@CPublisherRegistryMap@@SAPAV1@XZ @ 9 NONAME ; class CPublisherRegistryMap * CPublisherRegistryMap::NewL(void)
+	?NewLC@CContentMap@@SAPAV1@XZ @ 10 NONAME ; class CContentMap * CContentMap::NewLC(void)
+	?NewLC@CPublisherRegistryMap@@SAPAV1@XZ @ 11 NONAME ; class CPublisherRegistryMap * CPublisherRegistryMap::NewLC(void)
+	?PackForServerLC@CCPLiwMap@@QBEPAVHBufC8@@XZ @ 12 NONAME ; class HBufC8 * CCPLiwMap::PackForServerLC(void) const
+	?Reset@CCPLiwMap@@QBEXXZ @ 13 NONAME ; void CCPLiwMap::Reset(void) const
+	?SetSecurityL@CCPLiwMap@@QAEXABVRMessage2@@@Z @ 14 NONAME ; void CCPLiwMap::SetSecurityL(class RMessage2 const &)
+
