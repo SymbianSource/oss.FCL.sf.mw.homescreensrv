@@ -28,8 +28,8 @@
 #include <mcsmenufilter.h>
 #include <mcsmenuoperation.h>
 #include <mcsmenuiconutility.h>
-#include <ActiveFavouritesDbNotifier.h>
-#include <FavouritesItemList.h>
+#include <activefavouritesdbnotifier.h>
+#include <favouritesitemlist.h>
 
 #include <bautils.h>
 #include <StringLoader.h>
@@ -55,11 +55,9 @@ _LIT( KResourceFile, "mcspluginres.rsc" );
 _LIT( KResPath, "\\resource\\" );
 _LIT( KMenuAttrRefcount, "ref_count" );
 _LIT( KMMApplication, "mm://" );
-_LIT( KHideExit, "?exit=hide" );
 _LIT( KHideExit2, "&exit=hide" );
 _LIT( KSetFocusString, "!setfocus?applicationgroup_name=" );
 _LIT( KApplicationGroupName, "applicationgroup_name" );
-_LIT( KSuiteName, "suite_name" );
 _LIT( KIcon, "icon" );
 _LIT( KMenuAttrUndefUid, "0x99999991" );
 
@@ -334,52 +332,31 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
     CleanupStack::PushL( item );
     TPtrC type = item->Type();
 
-    // run suite/folder
-    if ( type == KMenuTypeSuite || type == KMenuTypeFolder )
+    // run folder
+    if ( type == KMenuTypeFolder )
         {
 
         // message for MM application
         HBufC8* message; 
 
-        if ( type == KMenuTypeSuite )
+        // prepare message for launching folder
+        TBool hasApplicationGroupName = EFalse;
+        TPtrC applicationGroupName = item->GetAttributeL( KApplicationGroupName, 
+                                                          hasApplicationGroupName );
+        if ( !hasApplicationGroupName )
             {
-            // prepare message for launching suite
-            TBool hasSuiteName = EFalse;
-            TPtrC suiteName = item->GetAttributeL( KSuiteName, hasSuiteName );
-            if ( !hasSuiteName )
-                { 
-                CleanupStack::PopAndDestroy( item );
-                return;
-                }
-            message = HBufC8::NewLC( KMMApplication().Length() + 
-                                     suiteName.Length() + 
-                                     KHideExit().Length() );
-
-            message->Des().Copy( KMMApplication );
-            message->Des().Append( suiteName );
-            message->Des().Append( KHideExit );
+            CleanupStack::PopAndDestroy( item );
+            return;
             }
-        else 
-            {
-            // prepare message for launching folder
-            TBool hasApplicationGroupName = EFalse;
-            TPtrC applicationGroupName = item->GetAttributeL( KApplicationGroupName, 
-                                                              hasApplicationGroupName );
-            if ( !hasApplicationGroupName )
-                {
-                CleanupStack::PopAndDestroy( item );
-                return;
-                }
-            message = HBufC8::NewLC( KMMApplication().Length() + 
-                                     KSetFocusString().Length() +
-                                     applicationGroupName.Length() + 
-                                     KHideExit2().Length() );
+        message = HBufC8::NewLC( KMMApplication().Length() + 
+                                 KSetFocusString().Length() +
+                                 applicationGroupName.Length() + 
+                                 KHideExit2().Length() );
 
-            message->Des().Copy( KMMApplication );
-            message->Des().Append( KSetFocusString );
-            message->Des().Append( applicationGroupName );
-            message->Des().Append( KHideExit2 );
-            }
+        message->Des().Copy( KMMApplication );
+        message->Des().Append( KSetFocusString );
+        message->Des().Append( applicationGroupName );
+        message->Des().Append( KHideExit2 );
 
         // find MM application
         TApaTaskList taskList( CCoeEnv::Static()->WsSession() );

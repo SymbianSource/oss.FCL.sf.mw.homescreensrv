@@ -17,8 +17,8 @@
 
 
 
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
 #include <bamdesca.h>
 
 #include <hspluginsettings.h>

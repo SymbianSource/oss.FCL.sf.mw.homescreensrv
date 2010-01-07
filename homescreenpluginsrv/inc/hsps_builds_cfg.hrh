@@ -38,10 +38,6 @@
 // By default, should be undefined in official production builds.
 #undef _HSPS_TESTAPP_
 
-// Controls whether internal test themes should be installed into the ROM drive.
-// By default, should be undefined in official production builds.
-#undef _HSPS_AUTOINSTALL_TEST_THEMES_
-
 // Controls whether old RDebug-prints should be processed. 
 // By default, should be undefined in official production builds. 
 #undef _hsps_DEBUG_
@@ -65,8 +61,7 @@
 // ***********************************************
 #ifdef _hsps_INTERNAL_
     #define ____HSPS_CFG_LOG_ON____
-    #define _HSPS_TESTAPP_
-    #define _HSPS_AUTOINSTALL_TEST_THEMES_    
+    #define _HSPS_TESTAPP_    
     #define _hsps_DEBUG_
     #define _hsps_SERVER_SHUTDOWN_ENABLED_
 

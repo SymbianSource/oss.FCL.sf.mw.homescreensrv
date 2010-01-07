@@ -19,9 +19,9 @@
 #ifndef __HSPSCALLBACK_H
 #define __HSPSCALLBACK_H
 
-#include <LiwCommon.h>
-#include <LiwServiceIfBase.h>
-#include <LiwBufferExtension.h>
+#include <liwcommon.h>
+#include <liwserviceifbase.h>
+#include <liwbufferextension.h>
 
 #include "hspsconfigurationservice.h"
 

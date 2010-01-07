@@ -32,11 +32,8 @@ _LIT8( KProperNameParam, "param" );
 _LIT8( KProperNameUid, "uid" );
 _LIT8( KProperNameView, "view" );
 _LIT8( KProperValueFolder, "folder" );
-_LIT8( KProperValueSuite, "suite" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
-_LIT( KMCSPlugin, "MCSPlugin" );
-_LIT( KSuiteName, "suite_name" );
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -185,9 +182,8 @@ TMenuItem CMCSPluginData::CreateMenuItemL( RPointerArray<HSPluginSettingsIf::CPr
     filter->DoNotHaveAttributeL( KMenuAttrView );
     filter->DoNotHaveAttributeL( KMenuAttrParam );
     TBool isFolder = EFalse;
-    TBool isSuite = EFalse;
     
-    // first, we need to check if the item is folder or suite
+    // first, we need to check if the item is folder
     for ( TInt i = 0; i < aProperties.Count(); i++ )
         {
         if ( aProperties[i]->Name() == KProperNameType )
@@ -196,12 +192,6 @@ TMenuItem CMCSPluginData::CreateMenuItemL( RPointerArray<HSPluginSettingsIf::CPr
                 {
                 isFolder = ETrue;
                 }
-
-            if ( aProperties[i]->Value() == KProperValueSuite )
-                {
-                isSuite = ETrue;
-                }
-
             break;
             }
         }
@@ -225,38 +215,17 @@ TMenuItem CMCSPluginData::CreateMenuItemL( RPointerArray<HSPluginSettingsIf::CPr
 
         if ( value->Length() != 0 )
             {
-            // in case of folder/suite, we just have to extract 
+            // in case of folder, we just have to extract 
             // id from param attribute and return item with this id
-            if ( aProperties[i]->Name() ==  KProperNameParam && ( isFolder || isSuite ) )
+            if ( aProperties[i]->Name() ==  KProperNameParam && isFolder )
                 {
-                
                 TMenuItem item;
-
-                // set the type
-                if ( isFolder )
-                    {
-                    // convert id to integer
-                    TInt id;
-                    TLex16 lextmp( value->Ptr() );
-                    lextmp.Val( id );
-                    item.SetType( KMenuTypeFolder );
-                    item.SetId( id );
-                    }
-                    
-                if ( isSuite )
-                    {
-                    CMenuFilter* suitefilter = CMenuFilter::NewLC();
-                    // Exclude 'view' and 'param' attributes from search criteria by default
-                    // Criterias will be added to filter if setting defines them
-                    suitefilter->DoNotHaveAttributeL( KMenuAttrView );
-                    suitefilter->DoNotHaveAttributeL( KMenuAttrParam );
-                    suitefilter->HaveAttributeL( KSuiteName, *value );
-                    // locked property excluded from search pattern 
-                    suitefilter->DoNotHaveAttributeL( KMenuAttrLocked );
-                    item = iEngine.FindMenuItemL( *suitefilter );
-                    CleanupStack::PopAndDestroy( suitefilter );
-
-                    }
+                // convert id to integer
+                TInt id;
+                TLex16 lextmp( value->Ptr() );
+                lextmp.Val( id );
+                item.SetType( KMenuTypeFolder );
+                item.SetId( id );
 
                 CleanupStack::PopAndDestroy( value );
                 CleanupStack::PopAndDestroy( name );

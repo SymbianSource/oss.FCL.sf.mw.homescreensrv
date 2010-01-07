@@ -17,7 +17,7 @@
 
 
 #include <StringLoader.h>
-#include <ActiveFavouritesDbNotifier.h> // For CActiveFavouritesDbNotifier
+#include <activefavouritesdbnotifier.h> // For CActiveFavouritesDbNotifier
 
 #include <aiscutsettingsres.rsg>
 #include <aiscuttexts.rsg>

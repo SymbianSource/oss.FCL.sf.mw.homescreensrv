@@ -34,9 +34,6 @@
 #include "../hspsresource/group/bld.inf"
 #include "../hspsresult/group/bld.inf"
 #include "../homescreen_settings_api/group/bld.inf"
-#ifdef _HSPS_AUTOINSTALL_TEST_THEMES_
-#include "../internal/testthemes/group/bld.inf"
-#endif
 
 
 PRJ_PLATFORMS
@@ -49,10 +46,6 @@ PRJ_EXPORTS
 //200159c9.txt z:/private/10202be9/200159c9.txt
 
 ../rom/hsps.iby                     CORE_MW_LAYER_IBY_EXPORT_PATH(hsps.iby)
-
-#ifdef _HSPS_AUTOINSTALL_TEST_THEMES_
-../rom/hspstestconfigurations.iby   CORE_MW_LAYER_IBY_EXPORT_PATH(hspstestconfigurations.iby)
-#endif
 
 
 // Generic configuration interface for component cenrep settings  

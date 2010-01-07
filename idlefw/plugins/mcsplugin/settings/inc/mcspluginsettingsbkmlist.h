@@ -21,9 +21,9 @@
 
 #include <e32base.h>
 #include <bamdesca.h>               // For MDesCArray
-#include <FavouritesDbObserver.h>   // For MFavouritesDbObserver
-#include <FavouritesDb.h>           // For RFavouritesDb
-#include <FavouritesItemList.h>     // For CFavouritesItemList
+#include <favouritesdbobserver.h>   // For MFavouritesDbObserver
+#include <favouritesdb.h>           // For RFavouritesDb
+#include <favouritesitemlist.h>     // For CFavouritesItemList
 #include <mcsmenu.h>                // For MenuContentService
 
 class CActiveFavouritesDbNotifier;

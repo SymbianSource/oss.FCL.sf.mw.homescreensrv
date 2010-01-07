@@ -19,8 +19,8 @@
 #ifndef C_CHSPSPROVIDER_H
 #define C_CHSPSPROVIDER_H
 
-#include <LiwCommon.h>
-#include <LiwServiceIfBase.h>
+#include <liwcommon.h>
+#include <liwserviceifbase.h>
 
 /**
 * @ingroup group_hsps_sapi

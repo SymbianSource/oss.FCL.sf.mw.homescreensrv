@@ -16,7 +16,7 @@
 */
 
 #include <ecom/ecom.h>
-#include <LiwServiceHandler.h>
+#include <liwservicehandler.h>
 #include <aipluginsettings.h>
 #include <utf.h>
 

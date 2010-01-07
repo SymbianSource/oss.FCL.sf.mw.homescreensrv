@@ -47,9 +47,8 @@ file=ABI_DIR\BUILD_DIR\hspsthemeserver.exe PROGRAMS_DIR\hspsthemeserver.exe
 //Backup registration
 data=DATAZ_\private\200159c0\backup_registration.xml        private\200159c0\backup_registration.xml     
 
-// Exporting of HSPS Test configurations:
-// Uncomment if _HSPS_AUTOINSTALL_TEST_THEMES_ defined
-// #include <hspsTestConfigurations.iby>
+//Cenrep ini
+data=DATAZ_\private\10202be9\200159c9.txt			private\10202be9\200159c9.txt
 
 #endif // HSPS_IBY
 

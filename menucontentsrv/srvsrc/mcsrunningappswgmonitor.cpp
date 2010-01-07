@@ -17,7 +17,7 @@
 
 #include <apgwgnam.h>
 #include <apgtask.h>
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 
 #include "mcsrunningappswgmonitor.h"

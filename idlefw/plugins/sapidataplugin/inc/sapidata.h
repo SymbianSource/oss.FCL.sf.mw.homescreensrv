@@ -20,7 +20,7 @@
 #define SAPIDATA_H
 
 // INCLUDE FILES
-#include <LiwCommon.h> 
+#include <liwcommon.h> 
 #include <AknsItemID.h>
 #include <aieventhandlerextension.h>
 #include "sapidatapluginconst.h"

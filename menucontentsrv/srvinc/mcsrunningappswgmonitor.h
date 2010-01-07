@@ -21,7 +21,7 @@
 #define __MCSRUNNINGAPPSWGMONITOR_H__
 
 #include <w32std.h>
-#include <WidgetRegistryConstants.h>
+#include <widgetregistryconstants.h>
 
 #include "menuengoperation.h"
 

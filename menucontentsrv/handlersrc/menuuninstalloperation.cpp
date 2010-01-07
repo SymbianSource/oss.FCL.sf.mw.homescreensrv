@@ -17,7 +17,7 @@
 #include <apgcli.h>
 #include <swi/sisregistrysession.h>
 #include <swi/sisregistryentry.h>
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 #include <javaregistry.h>
 #include <javaregistrypackageentry.h>
 #include <javaregistryapplicationentry.h>
@@ -379,7 +379,7 @@ void CMenuUninstallOperation::DoCancel()
     iUninstaller.CancelAsyncRequest( SwiUI::ERequestUninstall );
     // Complete the caller:
     TRequestStatus* status = &iObserverStatus;
-    User::RequestComplete( status, iStatus.Int() );
+    User::RequestComplete( status, KErrCancel );
     }
 
 // ---------------------------------------------------------

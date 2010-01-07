@@ -24,7 +24,7 @@
 #include <SATDomainPSKeys.h>
 #include <AknTaskList.h> 
 #include <mmf/common/mmfcontrollerpluginresolver.h>
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 
 #include "menusrvengutils.h"
 

@@ -41,12 +41,8 @@ _LIT( KMenuMaskId, "16389" );
 _LIT( KMailboxUid, "0x100058c5" );
 _LIT( KInitialRefCount, "1" );
 _LIT( KMCSFolder, "mcsplugin_folder" );
-_LIT( KSuiteName, "suite_name" );
 _LIT8( KItemLocked, "locked");
 _LIT8( KProperValueFolder, "folder" );
-_LIT8( KProperValueSuite, "suite" );
-
-
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -169,9 +165,8 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
     TBool attrExists( EFalse );
     TSettingItem settingItem = { KErrNotFound, EApplication, EFalse };
     TBool isFolder = EFalse;
-    TBool isSuite = EFalse;
 
-    // check if the item is folder or suite
+    // check if the item is folder
     for ( TInt j = 0; j < aProperties.Count(); j++ )
         {
         if( aProperties[j]->Name() == KType )
@@ -181,11 +176,6 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
                 {
                 isFolder = ETrue;
                 }
-
-            if ( aProperties[j]->Value() == KProperValueSuite )
-                {
-                isSuite = ETrue;
-                }          
             break;
             }
         }   
@@ -225,22 +215,6 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
                     lextmp.Val( id );
 
                     if ( item->Id() != id )
-                        {
-                        match = EFalse;
-                        }
-                    CleanupStack::PopAndDestroy( attrValue );
-                    CleanupStack::PopAndDestroy( attrName );
-                    break;
-                    }
-
-                // in case of suite, we just have to compare suite_name
-                // which is stored in param attribute
-                if ( isSuite && *attrName == KMenuAttrParameter )
-                    {
-                    TBool exists;
-                    TPtrC suitename = item->GetAttributeL( KSuiteName, exists );
-
-                    if ( !exists || suitename != *attrValue )
                         {
                         match = EFalse;
                         }
@@ -391,9 +365,9 @@ void CMCSPluginSettingsAppList::AddStaticItemsL()
         {
         TPtrC type = itemArray[ i ].Type();
         
-        // we add applications, shortcuts, folders and suites to the list
+        // we add applications, shortcuts and folders to the list
         if ( type == KMenuTypeApp || type == KMenuTypeShortcut || 
-             type == KMenuTypeFolder || type == KMenuTypeSuite )
+             type == KMenuTypeFolder )
             {
             CMenuItem* menuItem = CMenuItem::OpenL( iMenu, itemArray[ i ] );
             CleanupStack::PushL( menuItem );

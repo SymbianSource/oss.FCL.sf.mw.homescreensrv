@@ -21,11 +21,11 @@
 
 #include <apgnotif.h>                   // For MApaAppListServObserver
 #include <msvapi.h>                     // For MMsvSessionObserver
-#include <FavouritesDb.h>               // For RFavouritesDb
-#include <FavouritesDbObserver.h>       // For MFavouritesDbObserver
+#include <favouritesdb.h>               // For RFavouritesDb
+#include <favouritesdbobserver.h>       // For MFavouritesDbObserver
 #include <ConeResLoader.h>
 #ifdef __WEB_WIDGETS
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 #endif
 
 #include <aiutility.h>

@@ -16,9 +16,9 @@
 */
 
 
-#include <LiwServiceHandler.h>
-#include <LiwVariant.h>
-#include <LiwGenericParam.h>
+#include <liwservicehandler.h>
+#include <liwvariant.h>
+#include <liwgenericparam.h>
 #include "sapidata.h"
 #include "sapidataobserver.h"
 #include "sapidatapluginconst.h"

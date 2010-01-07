@@ -51,7 +51,7 @@ _LIT8( KProperValueFolder, "folder" );
 _LIT8( KProperValueSuite, "suite" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
-_LIT( KSuiteName, "suite_name" );
+
 
 
 using namespace HSPluginSettingsIf;
@@ -345,7 +345,6 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                 {
                 TPtrC param = aMenuItem.GetAttributeL( KMenuAttrParam, exists );
                 TBool isFolder = EFalse;
-                TBool isSuite = EFalse;
                 TPtrC type = aMenuItem.Type();
 
                 // is the item folder or suite?
@@ -355,12 +354,7 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                     isFolder = ETrue;
                     }
 
-                if ( type == KMenuTypeSuite )
-                    {
-                    isSuite = ETrue;
-                    }
-
-                if ( exists || isFolder || isSuite )
+                if ( exists || isFolder )
                     {
                     // the folder id is stored 
                     // in param attribute in HSPS
@@ -369,18 +363,6 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                         TBuf<8> number;
                         number.Num( aMenuItem.Id() );
                         param.Set( number );
-                        }
-
-                    // the suite_name is stored 
-                    // in param attribute in HSPS
-                    if ( isSuite )
-                        {
-                        TBool suiteNameExists = EFalse;
-                        TPtrC suiteName = aMenuItem.GetAttributeL( KSuiteName, suiteNameExists );
-                        if ( suiteNameExists )
-                            {
-                            param.Set( suiteName );
-                            }
                         }
 
                     HBufC8* param8( NULL );

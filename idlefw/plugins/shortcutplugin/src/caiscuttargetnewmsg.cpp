@@ -17,7 +17,7 @@
 
 
 #include <sendui.h>         // For CSendUi
-#include <sendnorm.rsg>     // For settings not ok - error dialog
+#include <Sendnorm.rsg>     // For settings not ok - error dialog
 #include <gulicon.h>        // For CGulIcon
 #include <SenduiMtmUids.h>
 #include <cemailaccounts.h> // For finding out available email account counts

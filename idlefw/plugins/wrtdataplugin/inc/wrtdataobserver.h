@@ -20,7 +20,7 @@
 #define WRTDATAOBSERVER_H
 
 // INCLUDE FILES
-#include <LiwCommon.h>
+#include <liwcommon.h>
 
 class CWrtData;
 

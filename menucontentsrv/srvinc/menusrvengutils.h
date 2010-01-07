@@ -23,7 +23,7 @@
 #include <e32base.h>
 #include <w32std.h> 
 #include <apgcli.h>
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 #include "menuengobject.h"
 #include "menueng.h"
 #include "menuengfilter.h"

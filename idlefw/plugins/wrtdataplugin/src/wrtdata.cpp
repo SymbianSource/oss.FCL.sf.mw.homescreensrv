@@ -17,7 +17,7 @@
 */
 
 #include <ecom/ecom.h>
-#include <LiwServiceHandler.h>
+#include <liwservicehandler.h>
 #include <aipluginsettings.h>
 
 
@@ -198,8 +198,6 @@ void CWrtData::GetMenuItemsL()
 	{
 	if(iInterface)
 		{
-		TInt confindex( 0 );
-		
 		CLiwDefaultMap *outDataMap = CLiwDefaultMap::NewLC();
 		CLiwDefaultMap* filter = CreateFilterLC( );
 		//append filter to input param
@@ -293,7 +291,6 @@ void CWrtData::PublishL( MAiContentObserver* aObserver )
    CLiwDefaultMap* filter = CreateFilterLC();
    ExecuteCommandL( filter, outDataMap, KCpData  );
    CleanupStack::PopAndDestroy( filter );
-   TInt id = KErrNotFound;
    TLiwVariant variant;
 	if ( outDataMap->FindL( KImage1, variant ) )
 		{
@@ -400,8 +397,7 @@ void CWrtData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
    CLiwDefaultMap* filter = NULL;
-   TInt confindex (0);
-   
+
    triggerName->Des().Copy(aTrigger);
    if ( aObjectId == KPubData )
 	   {

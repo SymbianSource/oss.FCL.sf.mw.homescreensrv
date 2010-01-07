@@ -36,7 +36,3 @@ hspsclient.mmp
 hspsrequestclient.mmp
 hspsthemeserver.mmp
 
-#include "../tools/bld.inf"
-
-//PRJ_TESTMMPFILES
-//

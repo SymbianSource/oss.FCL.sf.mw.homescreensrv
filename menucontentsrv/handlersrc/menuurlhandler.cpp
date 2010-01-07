@@ -24,7 +24,7 @@
 #include <apgtask.h>
 #include <apgcli.h>
 #include <AknTaskList.h>
-#include <SchemeHandler.h>
+#include <schemehandler.h>
 
 // ================= MEMBER FUNCTIONS =======================
 

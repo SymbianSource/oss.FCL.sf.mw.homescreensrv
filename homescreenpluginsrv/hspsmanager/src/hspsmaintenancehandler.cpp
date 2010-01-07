@@ -2542,9 +2542,7 @@ TInt ChspsMaintenanceHandler::hspsSavePluginSettingsL(
         ChspsODT& aOdt,
         ChspsDomDocument&  aDom )
     {
-    TInt error;      
     ChspsDomNode* node =  aOdt.DomDocument().RootNode();
-            
     ChspsDomNode* controlNode = &(FindNodeByTagL(KControlElement, *node )); 
         
     if( !controlNode )    
@@ -2559,7 +2557,7 @@ TInt ChspsMaintenanceHandler::hspsSavePluginSettingsL(
         {
         return KErrNotFound;
         }
-    
+
     TInt index = controlNode->ItemIndex( *settingsNode );
     controlNode->DeleteChild(settingsNode);
    
@@ -2568,7 +2566,9 @@ TInt ChspsMaintenanceHandler::hspsSavePluginSettingsL(
     ChspsDomNode* iterNode = iter->First();
     ChspsDomNode* prevNode = NULL;
     TBool jobDone = EFalse;
-    
+
+    TInt error( KErrNotFound );
+
     while( iterNode && !jobDone && iterNode != prevNode)
         {
         const TDesC8& name = iterNode->Name();
@@ -2590,8 +2590,8 @@ TInt ChspsMaintenanceHandler::hspsSavePluginSettingsL(
     CleanupStack::PopAndDestroy( iter ); 
 
     return error;
+    }
 
-    }  
 // Service for updating plugin positions
 // -----------------------------------------------------------------------------
 //

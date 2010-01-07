@@ -236,5 +236,5 @@ void CMenuClientOperation::DoCancel()
     iOperation.Cancel();
     // Propagate completion to observer.
     TRequestStatus* status = &iObserverStatus;
-    User::RequestComplete( status, iStatus.Int() );
+    User::RequestComplete( status, KErrCancel );
     }

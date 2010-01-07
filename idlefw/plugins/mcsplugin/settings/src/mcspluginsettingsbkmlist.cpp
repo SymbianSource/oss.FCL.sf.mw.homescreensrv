@@ -17,7 +17,7 @@
 
 
 #include <StringLoader.h>
-#include <ActiveFavouritesDbNotifier.h> // For CActiveFavouritesDbNotifier
+#include <activefavouritesdbnotifier.h> // For CActiveFavouritesDbNotifier
 #include <aistrcnv.h>
 #include <mcsmenufilter.h>
 #include <mcsmenuitem.h>

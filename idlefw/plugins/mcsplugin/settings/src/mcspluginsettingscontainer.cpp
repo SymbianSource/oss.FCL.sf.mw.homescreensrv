@@ -29,7 +29,7 @@
 #include <hlplch.h>
 
 // For CActiveFavouritesDbNotifier
-#include <ActiveFavouritesDbNotifier.h> 
+#include <activefavouritesdbnotifier.h> 
 #include <mcspluginsettingsres.rsg>
 
 #include "mcspluginsettingscontainer.h"

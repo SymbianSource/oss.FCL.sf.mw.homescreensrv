@@ -22,8 +22,8 @@
 #include <e32base.h>
 #include <bamdesca.h>               // For MDesCArray
 #include <apgcli.h>                 // For RApaLsSession
-#include <FavouritesDb.h>           // For RFavouritesDb
-#include <FavouritesItemList.h>     // For CFavouritesItemList
+#include <favouritesdb.h>           // For RFavouritesDb
+#include <favouritesitemlist.h>     // For CFavouritesItemList
 
 #include "caiscutsettingsapplist.h"
 #include "caiscutsettingsbkmlist.h"

@@ -20,7 +20,7 @@
 #define _HSPSLIWUTILITIES_H_
 
 #include <e32base.h>
-#include <LiwCommon.h>
+#include <liwcommon.h>
 #include <hspsdomdocument.h>
 #include <hspsdomlist.h>
 #include <hspsodt.h>

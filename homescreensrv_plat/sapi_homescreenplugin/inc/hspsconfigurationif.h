@@ -19,9 +19,9 @@
 #ifndef C_CHSPSCONFIGURATIONIF_H
 #define C_CHSPSCONFIGURATIONIF_H
 
-#include <LiwCommon.h>
-#include <LiwServiceIfBase.h>
-#include <LiwBufferExtension.h>
+#include <liwcommon.h>
+#include <liwserviceifbase.h>
+#include <liwbufferextension.h>
 #include "hspsconfigurationservice.h"
 #include "hspspersonalisationservice.h"
 

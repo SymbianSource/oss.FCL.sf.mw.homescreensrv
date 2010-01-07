@@ -23,8 +23,8 @@
 #include <gsbasecontainer.h>
 #include <mcsmenu.h>
 #include <mcsmenunotifier.h>
-#include <FavouritesDbObserver.h>   // For MFavouritesDbObserver
-#include <FavouritesDb.h>           // For RFavouritesDb
+#include <favouritesdbobserver.h>   // For MFavouritesDbObserver
+#include <favouritesdb.h>           // For RFavouritesDb
 #include <msvapi.h>                 // For MMsvSessionObserver
 
 // Internal includes

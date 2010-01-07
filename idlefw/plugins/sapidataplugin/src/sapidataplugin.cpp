@@ -87,6 +87,7 @@ void CSapiDataPlugin::ConstructL()
     iInfo.iUid.iUid = SAPIDP_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DATAPLUGIN; 
     iPluginState = ENone;
     iHSForeGround = EFalse;
+    iKeyLockOn = EFalse;
     iNetworkStatus = EUnknown;
     iData = CSapiData::NewL(this);
 
@@ -211,7 +212,6 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
 //
 void CSapiDataPlugin::PublishL()
     {
-    TInt err( KErrNone );
     User::LeaveIfError( iRfs.Connect() );
 
     TInt observers( iObservers.Count() );        
@@ -443,7 +443,6 @@ const TDesC& CSapiDataPlugin::GetTypeL(TDesC& aObjectId )
 //
 void CSapiDataPlugin::RefreshL(TDesC& aContentType, TDesC& aOperation)
     {
-     TInt err( KErrNone );
      User::LeaveIfError( iRfs.Connect() );
 	 TInt observers( iObservers.Count() );        
 	 TInt transactionId = reinterpret_cast<TInt>( this );
@@ -522,6 +521,7 @@ void CSapiDataPlugin::Suspend( TAiTransitionReason aReason )
         case EAiKeylockEnabled:
         	{
         	// handled in resume 
+        	TRAP_IGNORE( DoResumeL( aReason ) ); 
         	break;
         	}
         default :
@@ -686,7 +686,7 @@ void CSapiDataPlugin::DoResumeL( TAiTransitionReason aReason )
     		}
     	case EAiBacklightOn:    		
     		{
-    		if ( iPluginState == ESuspend )
+    		if ( iPluginState == ESuspend  && !iKeyLockOn )
 				{
 				iPluginState = EResume;
 				iData->ResumeL();
@@ -695,6 +695,7 @@ void CSapiDataPlugin::DoResumeL( TAiTransitionReason aReason )
 			}
     	case EAiKeylockDisabled:
         	{
+        	iKeyLockOn = EFalse;
         	// Key lock events considered only if HS is in foreground  
         	if ( iHSForeGround && iPluginState == ESuspend )
         		{
@@ -705,6 +706,7 @@ void CSapiDataPlugin::DoResumeL( TAiTransitionReason aReason )
         	}
     	case EAiKeylockEnabled:
         	{
+        	iKeyLockOn = ETrue;
         	// Key lock events considered only if HS is in foreground
         	if ( iHSForeGround && iPluginState == EResume )
         		{

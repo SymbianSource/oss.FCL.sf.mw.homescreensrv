@@ -16,7 +16,7 @@
 */
 #include <mcsmenuutils.h>
 #include <e32property.h>
-#include <WidgetRegistryClient.h>
+#include <widgetregistryclient.h>
 #include "menusrvappscanner.h"
 #include "menusrvmmchistory.h"
 #include "menueng.h"

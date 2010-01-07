@@ -21,7 +21,7 @@
 
 #include <e32base.h>
 #include <bamdesca.h>               // For MDesCArray
-#include <FavouritesDbObserver.h>   // For MFavouritesDbObserver
+#include <favouritesdbobserver.h>   // For MFavouritesDbObserver
 
 class CCoeEnv;
 class CActiveFavouritesDbNotifier;

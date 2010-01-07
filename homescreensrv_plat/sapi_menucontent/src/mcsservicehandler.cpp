@@ -18,7 +18,7 @@
 
 
 #include <ecom/implementationproxy.h>
-#include <LiwGenericParam.hrh>
+#include <liwgenericparam.hrh>
 
 #include "mcsconstants.h"
 #include "mcsdsinterface.h"

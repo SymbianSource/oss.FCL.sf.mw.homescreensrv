@@ -87,6 +87,7 @@ void CWrtDataPlugin::ConstructL()
     iInfo.iUid.iUid = WRTDP_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DATAPLUGIN; 
     iPluginState = ENone;
     iHSForeGround = EFalse;
+    iKeyLockOn = EFalse;
     iNetworkStatus = EUnknown;
     iData = CWrtData::NewL(this);
 
@@ -129,7 +130,6 @@ CWrtDataPlugin::~CWrtDataPlugin()
 //
 void CWrtDataPlugin::PublishL()
     {
-    TInt err( KErrNone );
     User::LeaveIfError( iRfs.Connect() );
 
     TInt observers( iObservers.Count() );        
@@ -365,7 +365,6 @@ void CWrtDataPlugin::GetTypeL(TDesC16& aObjectId, TDes16& aType )
 //
 void CWrtDataPlugin::RefreshL(TDesC16& aOperation)
     {
-    TInt err( KErrNone );
     User::LeaveIfError( iRfs.Connect() );
     TInt observers( iObservers.Count() );        
     TInt transactionId = reinterpret_cast<TInt>( this );
@@ -703,7 +702,7 @@ void CWrtDataPlugin::DoResumeL( TAiTransitionReason aReason )
     		}
     	case EAiBacklightOn:    		
     		{
-    		if ( iPluginState == ESuspend )
+    		if ( iPluginState == ESuspend  && !iKeyLockOn )
 				{
 				iPluginState = EResume;
 				iData->ResumeL();
@@ -712,6 +711,7 @@ void CWrtDataPlugin::DoResumeL( TAiTransitionReason aReason )
 			}
     	case EAiKeylockDisabled:
         	{
+        	iKeyLockOn = EFalse;
         	// Key lock events considered only if HS is in foreground  
         	if ( iHSForeGround && iPluginState == ESuspend )
         		{
@@ -722,6 +722,7 @@ void CWrtDataPlugin::DoResumeL( TAiTransitionReason aReason )
         	}
     	case EAiKeylockEnabled:
         	{
+        	iKeyLockOn = ETrue;
         	// Key lock events considered only if HS is in foreground
         	if ( iHSForeGround && iPluginState == EResume )
         		{

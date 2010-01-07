@@ -33,11 +33,11 @@
 #include "mcspluginsettings.hrh"
 
 
-NAME MCSE
+NAME MCPS
 
 RESOURCE RSS_SIGNATURE { }
 
-RESOURCE TBUF { buf="MCSE"; }
+RESOURCE TBUF { buf="MCPS"; }
 
 //----------------------------------------------------
 // EIK_APP_INFO

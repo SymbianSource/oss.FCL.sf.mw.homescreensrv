@@ -566,6 +566,24 @@ TInt hspsServerUtil::CopyResourceFileL(
         const TPath& aTargetPath,
         const TFileName& aSourceFile )
     {
+    // Construct target file with full path.
+    TFileName targetFile;
+    
+    TParse targetParser;
+    targetParser.Set( aTargetPath, NULL, NULL );    
+    
+    if( targetParser.NamePresent() )
+        {
+        targetFile = aTargetPath;
+        }
+    else
+        {
+        TParse sourceParser;
+        sourceParser.Set( aSourceFile, NULL, NULL );
+        targetFile = targetParser.DriveAndPath();
+        targetFile.Append( sourceParser.NameAndExt() );    
+        }
+        
     // Make target folder
     TInt error = aFs.MkDirAll( aTargetPath );            
     if( error == KErrAlreadyExists )
@@ -581,7 +599,7 @@ TInt hspsServerUtil::CopyResourceFileL(
         // Check whether the resource needs to be copied
         if ( hspsServerUtil::ResourceCopyIsRelevantL( 
                 aSourceFile,
-                aTargetPath,
+                targetFile,
                 aFs ) 
             )
             {        

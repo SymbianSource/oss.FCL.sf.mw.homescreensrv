@@ -26,7 +26,7 @@
 #include <utf.h>                    // For CnvUtfConverter
 #include <bautils.h>
 #include <featmgr.h>
-#include <ActiveFavouritesDbNotifier.h> // For CActiveFavouritesDbNotifier
+#include <activefavouritesdbnotifier.h> // For CActiveFavouritesDbNotifier
 #include <pathinfo.h>
 #include <data_caging_path_literals.hrh>
 #include <AknSgcc.h>                    // for fast swap

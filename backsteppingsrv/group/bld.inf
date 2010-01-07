@@ -27,9 +27,7 @@ bsengine.mmp
 PRJ_EXPORTS
 ../rom/backsteppingservice.iby CORE_MW_LAYER_IBY_EXPORT_PATH(backsteppingservice.iby)
 
-../data/bs_config.xml /epoc32/data/Z/private/2000F83E/bs_config.xml
-../data/bs_config.xml /epoc32/release/winscw/udeb/Z/private/2000F83E/bs_config.xml
-../data/bs_config.xml /epoc32/release/winscw/urel/Z/private/2000F83E/bs_config.xml
+../data/bs_config.xml Z:/private/2000F83E/bs_config.xml
 
 ../inc/bsclient.h			        |../../inc/bsclient.h
 ../inc/bsengineglobals.h         	|../../inc/bsengineglobals.h

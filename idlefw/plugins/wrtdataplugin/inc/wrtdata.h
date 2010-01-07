@@ -20,7 +20,7 @@
 #define WRTDATA_H
 
 // INCLUDE FILES
-#include <LiwCommon.h> 
+#include <liwcommon.h> 
 #include <AknsItemID.h>
 #include "wrtdatapluginconst.h"
 #include "aicontentpublisher.h"

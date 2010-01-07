@@ -392,6 +392,9 @@ private: // data
     
     // Is Homescreen foreground.
     TBool iHSForeGround;
+    
+    // Is KeyLockON.
+    TBool iKeyLockOn;
 
 	// Plugin state    
     TPluginStates iPluginState;
