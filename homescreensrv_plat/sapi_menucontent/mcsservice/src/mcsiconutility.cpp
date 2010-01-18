@@ -155,7 +155,9 @@ LOCAL_C TBool CreateMbmIconLC2(CFbsBitmap*& aBitmap, CFbsBitmap*& aMask, const T
 
         aBitmap = appIcon->Bitmap();
         aMask = appIcon->Mask();
-        AknInternalIconUtils::SetAppIcon(aBitmap);
+        // The line below was commented out to improve the appearance of scaled
+        // icons of java applications.
+        // AknInternalIconUtils::SetAppIcon(aBitmap);
         
         // Detach and delete
         appIcon->SetBitmap( NULL );

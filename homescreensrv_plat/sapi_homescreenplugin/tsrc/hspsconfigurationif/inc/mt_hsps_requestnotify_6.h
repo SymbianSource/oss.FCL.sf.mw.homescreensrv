@@ -1,20 +1,20 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of the License "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+* ==============================================================================
+*  Name        : mt_hsps_requestnotify_6.h
+*  Part of     : HSPS / SAPI module testing
+*  Description : Test case RequestNotify(6) test data
+*  Version     : %version: e003sa35#2 %
 *
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  Test case RequestNotify(6) test data
-*
+*  Copyright © 2008 Nokia. All rights reserved.
+*  This material, including documentation and any related computer
+*  programs, is protected by copyright controlled by Nokia.  All
+*  rights are reserved.  Copying, including reproducing, storing,
+*  adapting or translating, any or all of this material requires the
+*  prior written consent of Nokia.  This material also contains
+*  confidential information which may not be disclosed to others
+*  without the prior written consent of Nokia.
+* ==============================================================================
 */
-
 
 #ifndef C_MT_HSPS_REQUESTNOTIFY_6_H
 #define C_MT_HSPS_REQUESTNOTIFY_6_H

@@ -23,7 +23,8 @@
 #include <aipropertyextension.h>
 #include <aicontentmodel.h>
 #include <aieventhandlerextension.h>
-
+#include <centralrepository.h>
+#include "mcspluginwatcher.h"
 
 class MAiContentObserver;
 class MAiContentItemIterator;
@@ -42,7 +43,8 @@ class TMCSData;
  */
 class CMCSPlugin : public CAiContentPublisher,
                    public MAiPropertyExtension,
-                   public MAiEventHandlerExtension
+                   public MAiEventHandlerExtension,
+                   public MMCSPluginWatcherObserver
 
 
     {
@@ -88,6 +90,12 @@ public:
     * @return void
     */
     void PublishL();
+
+    /**
+    * From base class MMCSPluginWatcherObserver
+    * .a method for Skin UID cenrep key change handeling
+    */
+    void HandleNotifyL();
 
 // from base class CAiContentPublisher
   
@@ -276,8 +284,11 @@ private: // data
     // Information about the content publisher (this plug-in)
     TAiPublisherInfo iInfo;
 
-    // Boolean, which expresses whether the content has been updated
-    //TBool iIsUpdated;
+    // For accessing central repository keys
+    CRepository* iRepository;
+
+    // For observing central repository Skin UID key change 
+    CMCSPluginWatcher* iRepositoryWatcher;
 
     };
 

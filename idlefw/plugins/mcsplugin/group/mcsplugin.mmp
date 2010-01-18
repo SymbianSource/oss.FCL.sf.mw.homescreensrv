@@ -79,7 +79,8 @@ LIBRARY         eikdlg.lib
 LIBRARY         commonengine.lib 
 LIBRARY         favouritesengine.lib
 
-LIBRARY         gfxtrans.lib
+LIBRARY         gfxtrans.lib 
+LIBRARY         centralrepository.lib
 
 
 // End of File

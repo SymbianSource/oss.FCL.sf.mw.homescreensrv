@@ -1646,9 +1646,9 @@ ChspsDomNode* hspsServerUtil::GetParentNode(
         {
         if ( parent->Name().CompareF( aNodeName ) == 0 )
             {
-            ChspsDomList& attrList = parent->AttributeList();                 
+            ChspsDomList& attrList = parent->AttributeList();
             ChspsDomAttribute* attr = static_cast<ChspsDomAttribute*>( attrList.FindByName( aAttrName ) );
-            if ( attr->Value().CompareF( aAttrValue ) == 0 )
+            if ( attr && attr->Value().CompareF( aAttrValue ) == 0 )
                 {
                 found = ETrue;
                 }

@@ -113,6 +113,16 @@ public:
      */
     virtual TInt ActivateAppL( CHsContentInfo& aInfo ) = 0;
 
+    /**
+     *
+     */
+    virtual TInt ActiveViewL( CHsContentInfo& aInfo ) = 0;
+
+    /**
+     *
+     */
+    virtual TInt ActiveAppL( CHsContentInfo& aInfo ) = 0;
+
     };
 
 

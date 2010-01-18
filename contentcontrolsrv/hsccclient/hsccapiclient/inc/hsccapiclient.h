@@ -124,6 +124,16 @@ public: // From MHsContentController
      */
     TInt ActivateAppL( CHsContentInfo& aInfo );
 
+   /**
+    * 
+    */
+   TInt ActiveViewL( CHsContentInfo& aInfo );
+   
+   /**
+    * 
+    */
+   TInt ActiveAppL( CHsContentInfo& aInfo );
+
 private: // Functions
     /**
      * 

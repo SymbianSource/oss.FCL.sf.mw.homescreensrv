@@ -229,6 +229,31 @@ enum THsCcSrvMessages
 // - Message data:   None
     EHsCcActivateViewResp,
 // ----------------------------------------------------------------------------
+// ActiveViewReq
+// ----------------------------------------------------------------------------
+// Purpose:
+// This request is used to get active view configuration
+//
+// Message parameters:
+// - Message id:     EHsCcActiveViewReq
+// - Transaction id: Unique transaction id
+// - Message data:   None
+    EHsCcActiveViewReq,
+// ----------------------------------------------------------------------------
+// ActiveViewResp
+// ----------------------------------------------------------------------------
+// Purpose:
+// This response contains the active view configuration
+//
+// Message parameters:
+// - Message id:     EHsCcActiveViewResp
+// - Transaction id: Transaction id from corresponding ActiveViewReq
+// - Status:         Operation status (Symbian error code)
+// - Message data:   Successful operation: CHsContentInfo instance defining the 
+//                   active view configuration
+//                   Failed operation: None
+    EHsCcActiveViewResp,
+// ----------------------------------------------------------------------------
 // AppListReq
 // ----------------------------------------------------------------------------
 // Purpose:
@@ -278,6 +303,31 @@ enum THsCcSrvMessages
 // - Status:         Operation status (Symbian error code)
 // - Message data:   None
     EHsCcActivateAppResp,
+// ----------------------------------------------------------------------------
+// ActiveAppReq
+// ----------------------------------------------------------------------------
+// Purpose:
+// This request is used to get active application configuration
+//
+// Message parameters:
+// - Message id:     EHsCcActivateAppReq
+// - Transaction id: Unique transaction id
+// - Message data:   None
+    EHsCcActiveAppReq,
+// ----------------------------------------------------------------------------
+// ActiveAppResp
+// ----------------------------------------------------------------------------
+// Purpose:
+// This response contains the active application configuration
+//
+// Message parameters:
+// - Message id:     EHsCcActiveAppResp
+// - Transaction id: Transaction id from corresponding ActiveAppReq
+// - Status:         Operation status (Symbian error code)
+// - Message data:   Successful operation: CHsContentInfo instance defining the 
+//                   active application configuration
+//                   Failed operation: None
+    EHsCcActiveAppResp,
 // ----------------------------------------------------------------------------
 // NotSupportedResp
 // ----------------------------------------------------------------------------

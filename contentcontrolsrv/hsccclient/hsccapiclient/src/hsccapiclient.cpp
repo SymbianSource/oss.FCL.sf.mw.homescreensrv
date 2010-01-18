@@ -713,6 +713,148 @@ TInt CHsCcApiClient::ActivateAppL( CHsContentInfo& aInfo )
     }
 
 // -----------------------------------------------------------------------------
+// CHsCcApiClient::ActiveViewL
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::ActiveViewL( CHsContentInfo& aInfo )
+    {
+    TInt err( KErrNone );
+
+    // Create ActiveViewReq API request
+    CCcSrvMsg* reqMsg = CCcSrvMsg::NewL();
+    CleanupStack::PushL( reqMsg );
+    reqMsg->SetMsgId( EHsCcActiveViewReq );
+    reqMsg->SetTrId( 0 );
+    reqMsg->SetData( KNullDesC8() );
+    
+    // Marshal API request
+    HBufC8* msgBuf = reqMsg->MarshalL();
+    CleanupStack::PushL( msgBuf );
+    TPtr8 msgPtr( NULL, 0 );
+    msgPtr.Set( msgBuf->Des() );
+ 
+    // Send API request
+    // Sender and receiver address not defined -> message is routed
+    // according to the provider id
+    TPckgBuf<TUint32> provider( ECcHomescreen );
+    TPckgBuf<TUint32> sender;
+    TPckgBuf<TUint32> receiver;
+    err = iSession.Send( ECcApiReq, provider, sender, receiver, msgPtr );
+    
+    if ( !err )
+        {
+        // Internalize AppListResp API response
+        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
+        CleanupStack::PushL( respMsg );
+        RDesReadStream respStream( msgPtr );
+        CleanupClosePushL( respStream );
+        respMsg->InternalizeHeaderL( respStream );
+        CleanupStack::PopAndDestroy( &respStream );
+        err = respMsg->Status();
+        if ( !err )
+            {
+            if ( respMsg->DataSize() )
+                {
+                // Get API response data
+                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
+                CleanupStack::PushL( dataBuf );
+                TPtr8 dataPtr( NULL, 0 );
+                dataPtr.Set( dataBuf->Des() );
+                TPckgBuf<TUint32> trId( respMsg->TrId() );
+                err = iSession.GetMsgData( trId, dataPtr );
+                if ( !err )
+                    {
+                    // Internalize API response data
+                    RDesReadStream dataStream( dataPtr );
+                    CleanupClosePushL( dataStream );
+                    aInfo.InternalizeL( dataStream );                    
+                    CleanupStack::PopAndDestroy( &dataStream );
+                    }
+                CleanupStack::PopAndDestroy( dataBuf );
+                }
+            }
+        CleanupStack::PopAndDestroy( respMsg );
+        }
+
+    // Cleanup
+    CleanupStack::PopAndDestroy( msgBuf );
+    CleanupStack::PopAndDestroy( reqMsg );
+    
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CHsCcApiClient::ActiveAppL
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::ActiveAppL( CHsContentInfo& aInfo )
+    {
+    TInt err( KErrNone );
+
+    // Create ActiveViewReq API request
+    CCcSrvMsg* reqMsg = CCcSrvMsg::NewL();
+    CleanupStack::PushL( reqMsg );
+    reqMsg->SetMsgId( EHsCcActiveAppReq );
+    reqMsg->SetTrId( 0 );
+    reqMsg->SetData( KNullDesC8() );
+    
+    // Marshal API request
+    HBufC8* msgBuf = reqMsg->MarshalL();
+    CleanupStack::PushL( msgBuf );
+    TPtr8 msgPtr( NULL, 0 );
+    msgPtr.Set( msgBuf->Des() );
+ 
+    // Send API request
+    // Sender and receiver address not defined -> message is routed
+    // according to the provider id
+    TPckgBuf<TUint32> provider( ECcHomescreen );
+    TPckgBuf<TUint32> sender;
+    TPckgBuf<TUint32> receiver;
+    err = iSession.Send( ECcApiReq, provider, sender, receiver, msgPtr );
+    
+    if ( !err )
+        {
+        // Internalize AppListResp API response
+        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
+        CleanupStack::PushL( respMsg );
+        RDesReadStream respStream( msgPtr );
+        CleanupClosePushL( respStream );
+        respMsg->InternalizeHeaderL( respStream );
+        CleanupStack::PopAndDestroy( &respStream );
+        err = respMsg->Status();
+        if ( !err )
+            {
+            if ( respMsg->DataSize() )
+                {
+                // Get API response data
+                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
+                CleanupStack::PushL( dataBuf );
+                TPtr8 dataPtr( NULL, 0 );
+                dataPtr.Set( dataBuf->Des() );
+                TPckgBuf<TUint32> trId( respMsg->TrId() );
+                err = iSession.GetMsgData( trId, dataPtr );
+                if ( !err )
+                    {
+                    // Internalize API response data
+                    RDesReadStream dataStream( dataPtr );
+                    CleanupClosePushL( dataStream );
+                    aInfo.InternalizeL( dataStream );                    
+                    CleanupStack::PopAndDestroy( &dataStream );
+                    }
+                CleanupStack::PopAndDestroy( dataBuf );
+                }
+            }
+        CleanupStack::PopAndDestroy( respMsg );
+        }
+
+    // Cleanup
+    CleanupStack::PopAndDestroy( msgBuf );
+    CleanupStack::PopAndDestroy( reqMsg );
+    
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
 // CHsCcApiClient::WaitForApiNtfL()
 // -----------------------------------------------------------------------------
 //

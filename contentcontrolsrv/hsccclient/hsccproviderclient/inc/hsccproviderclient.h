@@ -159,6 +159,12 @@ private: // Functions
     /**
      * 
      */
+    void HandleActiveViewReqL(
+        CCcSrvMsg& aMessage );
+
+    /**
+     * 
+     */
     void HandleAppListReqL(
         CCcSrvMsg& aMessage );
 
@@ -166,6 +172,12 @@ private: // Functions
      * 
      */
     void HandleActivateAppReqL(
+        CCcSrvMsg& aMessage );
+
+    /**
+     * 
+     */
+    void HandleActiveAppReqL(
         CCcSrvMsg& aMessage );
 
     /**

@@ -159,6 +159,12 @@ void CHsCcProviderClient::RunL()
             case EHsCcActivateAppReq:
                 HandleActivateAppReqL( *message );
                 break;
+            case EHsCcActiveAppReq:
+                HandleActiveAppReqL( *message );
+                break;
+            case EHsCcActiveViewReq:
+                HandleActiveViewReqL( *message );
+                break;
             default:
                 HandleNotSupportedReqL( *message );
                 break;
@@ -553,6 +559,43 @@ void CHsCcProviderClient::HandleActivateViewReqL(
     }
 
 // -----------------------------------------------------------------------------
+// CHsCcProviderClient::HandleActiveViewReqL()
+// -----------------------------------------------------------------------------
+//
+void CHsCcProviderClient::HandleActiveViewReqL(
+    CCcSrvMsg& aMessage )
+    {
+    // Get active view
+    CHsContentInfo* view = CHsContentInfo::NewL();
+    CleanupStack::PushL( view );
+    TInt err = iController.ActiveViewL( *view );
+
+    // Create and send ActiveViewResp
+    CCcSrvMsg* message = CCcSrvMsg::NewL();
+    CleanupStack::PushL( message );
+    message->SetMsgId( EHsCcActiveViewResp );
+    message->SetTrId( aMessage.TrId() );
+    message->SetStatus( err );
+    
+    if ( !err )
+        {
+        // Externalize view list
+        HBufC8* dataBuf = view->MarshalL();
+        CleanupStack::PushL( dataBuf );
+        TPtr8 dataPtr( NULL, 0 );
+        dataPtr.Set( dataBuf->Des() );
+        message->SetData( dataPtr );
+        CleanupStack::PopAndDestroy( dataBuf );
+        }
+    
+    SendRespL( *message );
+    
+    CleanupStack::PopAndDestroy( message );    
+    CleanupStack::PopAndDestroy( view );
+
+    }
+
+// -----------------------------------------------------------------------------
 // CHsCcProviderClient::HandleAppListReqL()
 // -----------------------------------------------------------------------------
 //
@@ -627,6 +670,42 @@ void CHsCcProviderClient::HandleActivateAppReqL(
     SendRespL( *message );
     
     CleanupStack::PopAndDestroy( message );    
+    }
+
+// -----------------------------------------------------------------------------
+// CHsCcProviderClient::HandleActiveAppReqL()
+// -----------------------------------------------------------------------------
+//
+void CHsCcProviderClient::HandleActiveAppReqL(
+    CCcSrvMsg& aMessage )
+    {
+    // Get active application info
+    CHsContentInfo* app = CHsContentInfo::NewL();
+    CleanupStack::PushL( app );
+    TInt err = iController.ActiveAppL( *app );
+
+    // Create and send ActiveViewResp
+    CCcSrvMsg* message = CCcSrvMsg::NewL();
+    CleanupStack::PushL( message );
+    message->SetMsgId( EHsCcActiveAppResp );
+    message->SetTrId( aMessage.TrId() );
+    message->SetStatus( err );
+    
+    if ( !err )
+        {
+        // Externalize application info
+        HBufC8* dataBuf = app->MarshalL();
+        CleanupStack::PushL( dataBuf );
+        TPtr8 dataPtr( NULL, 0 );
+        dataPtr.Set( dataBuf->Des() );
+        message->SetData( dataPtr );
+        CleanupStack::PopAndDestroy( dataBuf );
+        }
+    
+    SendRespL( *message );
+    
+    CleanupStack::PopAndDestroy( message );    
+    CleanupStack::PopAndDestroy( app );
     }
 
 // -----------------------------------------------------------------------------

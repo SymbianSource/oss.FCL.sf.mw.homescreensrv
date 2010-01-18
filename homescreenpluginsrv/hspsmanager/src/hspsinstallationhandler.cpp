@@ -2233,7 +2233,7 @@ void ChspsInstallationHandler::AddLocalizedResourcesDTDV2L(
 #ifdef HSPS_LOG_ACTIVE  
         if( iLogBus )
             {
-            iLogBus->LogText( _L( "ChspsInstallationHandler::AddLocalizedResourcesL(): - DTD file was not found '%S'" ),
+            iLogBus->LogText( _L( "ChspsInstallationHandler::AddLocalizedResourcesDTDV2L(): - DTD file was not found '%S'" ),
                     &dtdPath );
             }
 #endif            
@@ -2507,10 +2507,14 @@ void ChspsInstallationHandler::AddLocalizedResourcesL(
         resourcePath->Des().Append( resource->FileName() );
         
         TDataType dataType( resource->MimeType() );
+        
         TPtrC8 tagsPtr;
-        if ( iResourceTag )
+        HBufC8* tagBuf8 = NULL;
+        if ( resource->Tags().Length() )
             {
-            tagsPtr.Set( iResourceTag->Des() );
+            tagBuf8 = HBufC8::NewLC( resource->Tags().Length() );
+            tagBuf8->Des().Copy( resource->Tags() );
+            tagsPtr.Set( tagBuf8->Des() );            
             }
         
         // Add localized files into the resource array
@@ -2522,6 +2526,11 @@ void ChspsInstallationHandler::AddLocalizedResourcesL(
             dataType.Des8(),
             tagsPtr
             );
+        
+        if ( tagBuf8 )
+            {
+            CleanupStack::PopAndDestroy( tagBuf8 );
+            }
         
         CleanupStack::PopAndDestroy( resourcePath );
         }        

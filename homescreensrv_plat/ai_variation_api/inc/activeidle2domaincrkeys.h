@@ -113,5 +113,14 @@ const TUint32 KAIBackupShortcutDefinitionStart = 0x00003000;
  */
 const TUint32 KAIWebStatus = 0x0000300F;
 
+/**
+ * Key id to store wallpaper change type
+ */
+const TUint32 KAIWallpaperChangeType = 0x00000850;
+
+/**
+ * Key id to store wallpaper path that is common for all Homescreen pages.
+ */
+const TUint32 KAIWallpaperPath = 0x00000851;
 
 #endif // __AI2INTERNALCRKEYS_H__

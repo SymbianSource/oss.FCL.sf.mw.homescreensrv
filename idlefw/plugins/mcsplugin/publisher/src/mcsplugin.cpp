@@ -24,6 +24,9 @@
 #include <aistrcnv.h>
 #include <mcsmenuitem.h>
 
+#include <aknskinsinternalcrkeys.h> // For working with settings API
+#include <centralrepository.h> // Headers Used for CRepository
+
 #include "mcspluginuids.hrh"
 #include "mcsplugin.h"
 #include "mcsplugindata.h"
@@ -78,6 +81,39 @@ CMCSPlugin::CMCSPlugin()
 void CMCSPlugin::ConstructL()
     { 
     iInfo.iUid.iUid = AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_MCSPLUGIN; 
+    // We need to Query Central Repository
+    iRepository  = CRepository::NewL( KCRUidPersonalisation );
+
+    // Setting up watcher which calls HandleNotifyL method 
+    // everytime the SkinUID changes in central repository
+    iRepositoryWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::ENotify );
+    iRepository->NotifyRequest( KPslnActiveSkinUid, iRepositoryWatcher->iStatus );
+    iRepositoryWatcher->WatchNotify( this );
+    }
+
+// ---------------------------------------------------------------------------
+// Handle Skin UID change
+// ---------------------------------------------------------------------------
+//
+void CMCSPlugin::HandleNotifyL()
+    {
+
+    // Skin ID has changed. Set all MenuItems on Widget dirty
+    // and re-publish to update icons
+    if ( iEngine )
+        {
+        TInt dataCount = iEngine->MenuItemCount();
+        for ( TInt i = 0; i < dataCount; i++ )
+            {
+            iEngine->MenuDataL( i ).SetDirty( ETrue );
+            }
+        PublishL();
+        }
+
+    // Skin ID Notification must be activated again
+    iRepositoryWatcher->Cancel();
+    iRepository->NotifyRequest( KPslnActiveSkinUid, iRepositoryWatcher->iStatus );
+    iRepositoryWatcher->WatchNotify( this );
     }
     
 // ---------------------------------------------------------------------------
@@ -98,6 +134,19 @@ CMCSPlugin::~CMCSPlugin()
     iObservers.Close();
     
     DeleteContentModel();
+
+    if ( iRepository )
+        {
+        delete iRepository;
+        iRepository = NULL;
+        }
+
+    if ( iRepositoryWatcher )
+        {
+        iRepositoryWatcher->Cancel();
+        delete iRepositoryWatcher;
+        iRepositoryWatcher = NULL;
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -154,6 +203,7 @@ void CMCSPlugin::PublishL()
 //
 void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver, TMCSData& aData, TInt aIndex )
     {
+
     if( !aData.IsDirty() )
         {
         return;
@@ -274,13 +324,13 @@ TInt CMCSPlugin::CompareItems( const MAiPluginSettings& aFirst,
 void CMCSPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     {
     
-    TLinearOrder<MAiPluginSettings> sortMethod(CMCSPlugin::CompareItems);
+    TLinearOrder<MAiPluginSettings> sortMethod( CMCSPlugin::CompareItems );
     RAiSettingsItemArray contentItemsArr;
 
     TInt count = aSettings.Count();
-    for(TInt i = 0; i < count; i++ )
+    for ( TInt i = 0; i < count; i++ )
        {
-       MAiPluginSettings* pluginSetting = aSettings[i];
+       MAiPluginSettings* pluginSetting = aSettings[ i ];
        if( pluginSetting->AiPluginItemType() == EAiPluginContentItem )
            {
            MAiPluginContentItem& contItem = pluginSetting->AiPluginContentItem();
@@ -291,15 +341,15 @@ void CMCSPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
 
        }
     iDataCount = contentItemsArr.Count();
-    if(iDataCount > 0 )
+    if ( iDataCount > 0 )
         {
         // Create the dynamic content Model
         DeleteContentModel();
-        iContentModel = new ( ELeave ) TAiContentItem[iDataCount];
-        for(TInt i = 0; i < iDataCount; i++)
+        iContentModel = new ( ELeave ) TAiContentItem[ iDataCount ];
+        for ( TInt i = 0; i < iDataCount; i++ )
             {
             iContentModel[i].id = i;
-            MAiPluginContentItem& contentItem = (contentItemsArr[i])->AiPluginContentItem();
+            MAiPluginContentItem& contentItem = ( contentItemsArr[ i ] )->AiPluginContentItem();
 
             if( contentItem.Type() == KContentItemTypeText )
                 {
@@ -313,11 +363,11 @@ void CMCSPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
                 }
             TInt pos = contentItem.Name().Locate( KPluginNameSeprator );
             
-            HBufC* contentId = HBufC::NewL(  contentItem.Name().Length());
+            HBufC* contentId = HBufC::NewL( contentItem.Name().Length() );
             CleanupStack::PushL( contentId );
             TPtr ptr = contentId->Des();
             ptr = contentItem.Name().Mid( pos + 1 );
-            TInt sizeOfContentId = ptr.Size() +sizeof(wchar_t);
+            TInt sizeOfContentId = ptr.Size() +sizeof( wchar_t );
             iContentModel[i].cid = static_cast<const wchar_t*>( User::AllocL( sizeOfContentId ) );
             Mem::Copy((TAny*)iContentModel[i].cid, ptr.PtrZ(), sizeOfContentId);
             CleanupStack::PopAndDestroy( contentId );
