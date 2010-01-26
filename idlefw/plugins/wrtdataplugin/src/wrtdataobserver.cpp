@@ -16,12 +16,40 @@
 *
 */
 
+
+// INCLUDE FILES
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <liwgenericparam.h>
+#include <s32mem.h>
 #include "wrtdata.h"
 #include "wrtdataobserver.h"
 #include "wrtdatapluginconst.h"
+
+// ---------------------------------------------------------------------------
+// Factory method construction
+// ---------------------------------------------------------------------------
+//
+CWrtDataObserver * CWrtDataObserver::NewL( MLiwInterface* aInterface, CWrtData* aData )
+    {
+    CWrtDataObserver * self = new (ELeave) CWrtDataObserver();
+    CleanupStack::PushL( self );
+    self->ConstructL( aInterface, aData );
+    CleanupStack::Pop( self );
+    return self;    
+    }
+
+
+// ---------------------------------------------------------------------------
+// 2n phase constructor
+// ---------------------------------------------------------------------------
+//
+void CWrtDataObserver::ConstructL( MLiwInterface* aInterface, CWrtData* aData )
+    {
+    iData = aData;
+    iInterface = aInterface;
+    }
+
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
@@ -43,82 +71,7 @@ CWrtDataObserver ::~CWrtDataObserver ()
     }
 
 // ---------------------------------------------------------------------------
-// Register for notifications
-// ---------------------------------------------------------------------------
-//
-void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
-    {
-    CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
-    CleanupStack::PushL( inParamList );
-    CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
-    CleanupStack::PushL( outParamList );
-        
-    // Fill in input list for RequestNotification command
-    inParamList->AppendL(TLiwGenericParam(KType,TLiwVariant(KCpData_PubData)));
-    inParamList->AppendL(TLiwGenericParam(KFilter ,TLiwVariant(aFilter)));
-        
-    iError = KErrNone;
-    TRAP( iError, iInterface->ExecuteCmdL( 
-                KRequestNotification,
-                *inParamList,
-                *outParamList,
-                0,
-                this ) );
-    
-    CleanupStack::PopAndDestroy( outParamList );
-    CleanupStack::PopAndDestroy( inParamList ); 
-    }
-
-// ---------------------------------------------------------------------------
-// Sing off to notification
-// ---------------------------------------------------------------------------
-//
-void CWrtDataObserver ::ReleaseL()
-    {
-    if( iInterface )
-        {
-        CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( inParamList );
-        CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( outParamList );
-        
-        TInt err(KErrNone);
-        TRAP(err, iInterface->ExecuteCmdL( 
-                KRequestNotification,
-                *inParamList,
-                *outParamList,
-                KLiwOptCancel,
-                this ));
-        
-        CleanupStack::PopAndDestroy( outParamList );
-        CleanupStack::PopAndDestroy( inParamList );
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// Factory method construction
-// ---------------------------------------------------------------------------
-//
-CWrtDataObserver * CWrtDataObserver::NewL( MLiwInterface* aInterface, CWrtData* aData )
-    {
-    CWrtDataObserver * self = new (ELeave) CWrtDataObserver();
-    CleanupStack::PushL( self );
-    self->ConstructL( aInterface, aData );
-    CleanupStack::Pop( self );
-    return self;    
-    }
-        
-// ---------------------------------------------------------------------------
-// 2n phase constructor
-// ---------------------------------------------------------------------------
-//
-void CWrtDataObserver::ConstructL( MLiwInterface* aInterface, CWrtData* aData )
-    {
-    iData = aData;
-    iInterface = aInterface;
-    }
-
-// ---------------------------------------------------------------------------
+// CWrtDataObserver::HandleNotifyL
 // Handles Published content notification
 // ---------------------------------------------------------------------------
 //
@@ -150,71 +103,54 @@ TInt CWrtDataObserver::HandleNotifyL(
 
 		CLiwDefaultMap *map = CLiwDefaultMap::NewLC();
 		variant.Get( *map );
-		TBool found;
-		found = map->FindL( KOperation, variant );
-		if (found)
+		if (map->FindL( KOperation, variant ))
 		   {
 		   operation = variant.AsDes().AllocLC();
-		   }
-		variant.Reset();
-		if( operation->Des() != KOperationExecute )
-		   {
-		   // Nothing to update for execute action
-		   HBufC16* publisher = NULL; 
-		   HBufC16* contentType = NULL;
-		   HBufC16* contentId = NULL;
-		   found = map->FindL( KFLAG, variant );
-		   if ( found)
-			   {
-			   // notification from publisher registry
-			  if ( operation->Des() !=  KOperationDelete )
-				  {
-				  iData->UpdatePublisherStatusL();
-				  }
-			   }
-		   // ignore update if plugin is in suspend mode
-		   else if ( iData->IsPluginActive() ) 
-			   { 
-			   // notification from content registry
-			   found = map->FindL( KPublisherId, variant );
-			   if (found)
-				   {
-				   publisher = variant.AsDes().AllocLC();
-				   }
-			   variant.Reset();
-			   found = map->FindL( KContentType, variant );
-			   if (found)
-				  {
-				  contentType = variant.AsDes().AllocLC();
-				  }
-			   variant.Reset();
-			   found = map->FindL( KContentId, variant );
-			   if (found)
-				  {
-				  contentId = variant.AsDes().AllocLC();
-				  }
-			   variant.Reset();
-			   iData->RefreshL( *publisher, *contentType, *contentId, *operation );
-			   
-			   if ( contentId )
-				   {
-				   CleanupStack::PopAndDestroy( contentId );
-				   }
-			  if ( contentType )
-				   {
-				   CleanupStack::PopAndDestroy( contentType );
-				   }
-			  if ( publisher )
-				   {
-				   CleanupStack::PopAndDestroy( publisher );
-				   }
-			}
-			 variant.Reset();
-		   }
-		if ( operation )
-			{
-			CleanupStack::PopAndDestroy( operation );
-			}
+	       variant.Reset();
+            if( operation->Des() != KOperationExecute )
+               {
+               // Nothing to update for execute action
+               if ( map->FindL( KFLAG, variant ))
+                   {
+                   // notification from publisher registry
+                  if ( operation->Des() !=  KOperationDelete )
+                      {
+                      iData->UpdatePublisherStatusL();
+                      }
+                   }
+               // ignore update if plugin is in suspend mode
+               else if ( iData->IsPluginActive() ) 
+                   {
+                   HBufC16* contentId = NULL; 
+                   CLiwDefaultMap* dataMap = NULL;
+                    // Get the data Map if available
+                    if ( map->FindL( KDataMap, variant))
+                        {
+                        TPtrC8 data = variant.AsData();
+                        RDesReadStream datastrm ( data );
+                        dataMap = CLiwDefaultMap::NewLC(datastrm);
+                        }
+                    // Get the content Id
+                   if ( map->FindL( KContentId, variant ))
+                       {
+                       contentId = variant.AsDes().AllocLC();
+                       // Refresh only if contentId is retrieved
+                       iData->RefreshL( *contentId, *operation, dataMap );
+                       CleanupStack::PopAndDestroy( contentId );
+                       }
+
+                   if ( dataMap )
+                        {
+                        CleanupStack::PopAndDestroy( dataMap );
+                        }
+                   }
+                 variant.Reset();
+               }
+            if ( operation )
+                {
+                CleanupStack::PopAndDestroy( operation );
+                }
+		     }
 		CleanupStack::PopAndDestroy( map );
 		}
 	CleanupStack::PopAndDestroy( listOfMaps );
@@ -222,3 +158,57 @@ TInt CWrtDataObserver::HandleNotifyL(
     return aErrorCode;
     }
 
+// ---------------------------------------------------------------------------
+// CWrtDataObserver::RegisterL
+// Register for notifications
+// ---------------------------------------------------------------------------
+//
+void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
+    {
+    CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( inParamList );
+    CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( outParamList );
+        
+    // Fill in input list for RequestNotification command
+    inParamList->AppendL(TLiwGenericParam(KType,TLiwVariant(KCpData_PubData)));
+    inParamList->AppendL(TLiwGenericParam(KFilter ,TLiwVariant(aFilter)));
+        
+    iError = KErrNone;
+    TRAP( iError, iInterface->ExecuteCmdL( 
+                KRequestNotification,
+                *inParamList,
+                *outParamList,
+                0,
+                this ) );
+    
+    CleanupStack::PopAndDestroy( outParamList );
+    CleanupStack::PopAndDestroy( inParamList ); 
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtDataObserver ::ReleaseL
+// Sing off to notification
+// ---------------------------------------------------------------------------
+//
+void CWrtDataObserver ::ReleaseL()
+    {
+    if( iInterface )
+        {
+        CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
+        CleanupStack::PushL( inParamList );
+        CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
+        CleanupStack::PushL( outParamList );
+        
+        TInt err(KErrNone);
+        TRAP(err, iInterface->ExecuteCmdL( 
+                KRequestNotification,
+                *inParamList,
+                *outParamList,
+                KLiwOptCancel,
+                this ));
+        
+        CleanupStack::PopAndDestroy( outParamList );
+        CleanupStack::PopAndDestroy( inParamList );
+        }
+    }

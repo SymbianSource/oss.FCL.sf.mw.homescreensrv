@@ -26,6 +26,8 @@
 #include <akntextsettingpage.h>
 #include <centralrepository.h>
 #include <StringLoader.h>
+
+#include <csxhelp/ai.hlp.hrh>
 #include <hlplch.h>
 
 // For CActiveFavouritesDbNotifier
@@ -36,10 +38,8 @@
 #include "mcspluginsettingsmodel.h"
 #include "mcspluginsettingsbkmlist.h"
 #include "mcspluginsettings.hrh"
+#include "mcspluginuids.hrh"
 
-const TUid KUidAI = { 0x102750FB }; // Active Standby Shortcuts help uid
-
-_LIT(KSET_HLP_HOME_SCREEN_SHORTCUTS, "SET_HLP_HOME_SCREEN_SHORTCUTS"); 
 _LIT( KMyMenuData, "matrixmenudata" );
 
 // ======== MEMBER FUNCTIONS ========
@@ -410,12 +410,13 @@ TBool CMCSPluginSettingsContainer::HandleBookmarkChangeCommandL( const TInt& aIn
 //
 TCoeHelpContext CMCSPluginSettingsContainer::GetHelpContext() const
 {
+    TUid uid = TUid::Uid( AI_UID_ECOM_DLL_SETTINGS_MCSPLUGIN );
     TCoeContextName helpString;
 
     helpString.Copy( KSET_HLP_HOME_SCREEN_SHORTCUTS );
 
     // set UID and topic of Help to display
-    return TCoeHelpContext( KUidAI, helpString );
+    return TCoeHelpContext( uid, helpString );
 }
 
 // ---------------------------------------------------------------------------

@@ -583,42 +583,41 @@ TInt hspsServerUtil::CopyResourceFileL(
         targetFile = targetParser.DriveAndPath();
         targetFile.Append( sourceParser.NameAndExt() );    
         }
-        
-    // Make target folder
-    TInt error = aFs.MkDirAll( aTargetPath );            
-    if( error == KErrAlreadyExists )
+
+    TInt error = KErrNone;
+    
+    if ( hspsServerUtil::ResourceCopyIsRelevantL( 
+            aSourceFile,
+            targetFile,
+            aFs ) 
+        )
         {
-        // lets ignore error if directory already exists                
-        error = KErrNone;
-        }       
-    if( !error )
-        {
-        // Default to 'copying was not neccessary'
-        error = KErrAlreadyExists;
+        // Make target folder
+        error = aFs.MkDirAll( aTargetPath );
+        if( error == KErrAlreadyExists )
+            {
+            // lets ignore error if directory already exists                
+            error = KErrNone;
+            }
         
-        // Check whether the resource needs to be copied
-        if ( hspsServerUtil::ResourceCopyIsRelevantL( 
-                aSourceFile,
-                targetFile,
-                aFs ) 
-            )
+        if( !error )
             {        
             // Slowish operation
             error = aFilemanager.Copy( 
                     aSourceFile, 
                     aTargetPath );
-            if( !error )
-                {
-                // Clear readonly file attribs that might be inherited from the source file                
-                aFilemanager.Attribs( 
-                    aTargetPath,
-                    0,
-                    KEntryAttReadOnly,
-                    TTime( 0 ) ); // TTime(0) = preserve original time stamp.                                                                      
-                }
+            }
             
-            } // copy op        
-        }
+        if( !error )
+            {
+            // Clear readonly file attribs that might be inherited from the source file                
+            aFilemanager.Attribs( 
+                aTargetPath,
+                0,
+                KEntryAttReadOnly,
+                TTime( 0 ) ); // TTime(0) = preserve original time stamp.                                                                      
+            }        
+        }                
     
     return error;
     }
@@ -639,18 +638,11 @@ TBool hspsServerUtil::ResourceCopyIsRelevantL(
         }
 
     // Collect data from files.
-    
-    TEntry sourceEntry;
-    TInt entryError = aFs.Entry( aSource, sourceEntry ); 
-    if( entryError != KErrNone )
-        {
-        // Problem. Do not copy.
-        return EFalse;
-        }            
 
     TEntry targetEntry;
-    entryError = aFs.Entry( aTarget, targetEntry ); 
-    if( entryError == KErrNotFound )
+    TInt entryError = aFs.Entry( aTarget, targetEntry ); 
+    if( entryError == KErrNotFound ||
+        entryError == KErrPathNotFound )
         {
         // Target does not exist. Copy needed.
         return ETrue;
@@ -660,6 +652,14 @@ TBool hspsServerUtil::ResourceCopyIsRelevantL(
         // All other errors handled here. Better not to copy.
         return EFalse;
         }
+    
+    TEntry sourceEntry;
+    entryError = aFs.Entry( aSource, sourceEntry ); 
+    if( entryError != KErrNone )
+        {
+        // Problem. Do not copy.
+        return EFalse;
+        }            
     
     TParse sourceParser;
     sourceParser.Set( aSource, NULL, NULL );
@@ -686,25 +686,21 @@ TBool hspsServerUtil::ResourceCopyIsRelevantL(
             targetDriveNumber = tmpDriveNumber;
             }        
         }   
-
-    const TInt KTargetExists = BaflUtils::FileExists( aFs, aTarget ); 
-           
-    // Target exists + size and time stamp identical?
-    if( KTargetExists &&
-        sourceEntry.iSize == targetEntry.iSize &&
+            
+    // Size and time stamp identical?
+    if( sourceEntry.iSize == targetEntry.iSize &&
         sourceEntry.iModified == targetEntry.iModified )
         {
         return EFalse;
         }    
     
     // Check required disk space.
-    TInt requiredDiskSpace = 0;
-    
-    if( KTargetExists && sourceEntry.iSize > targetEntry.iSize )
+    TInt requiredDiskSpace = 0;    
+    if( sourceEntry.iSize > targetEntry.iSize )
         {
         requiredDiskSpace = sourceEntry.iSize - targetEntry.iSize; 
         }
-    else if( !KTargetExists )
+    else
         {
         requiredDiskSpace = sourceEntry.iSize;
         }
@@ -1720,8 +1716,8 @@ void hspsServerUtil::GetValidResourcesL(
         {
         ChspsResource& resource = aODT.ResourceL( resourceIndex );        
         if ( resource.ConfigurationUid() == aConfUid &&
-             resource.FileName().FindF( KSourcesFolder ) > 0 &&
-             resource.Language() == aActiveLanguage )                
+             resource.Language() == aActiveLanguage &&
+             resource.FileName().FindF( KSourcesFolder ) > 0 )                
             {                                
             aWidgetResources.Append( &resource );
             }

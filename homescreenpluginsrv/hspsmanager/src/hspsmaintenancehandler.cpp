@@ -3557,7 +3557,8 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsPluginUpdateL( const C
         odt->SetProviderNameL( aOdt.ProviderName() );
         odt->SetThemeFullNameL( aOdt.ThemeFullName() );
         odt->SetThemeShortNameL( aOdt.ThemeShortName() );
-        odt->SetThemeVersionL( aOdt.ThemeVersion() );            
+        odt->SetThemeVersionL( aOdt.ThemeVersion() );
+		odt->SetDescriptionL( aOdt.Description() );          
         odt->SetFlags( aOdt.Flags() ); 
         odt->SetMultiInstance( aOdt.MultiInstance() );
         User::LeaveIfError( iDefinitionRepository.GetOdtL( *odt ) );
@@ -3623,6 +3624,7 @@ void ChspsMaintenanceHandler::UpdatePluginFromAppConfsL( ChspsODT& aOdt,
                 odt->SetThemeFullNameL( header->ThemeFullName() );
                 odt->SetThemeShortNameL( header->ThemeShortName() );
                 odt->SetThemeVersionL( header->ThemeVersion() );            
+                odt->SetDescriptionL( header->Description() );
                 odt->SetFlags( header->Flags() ); 
                 odt->SetMultiInstance( header->MultiInstance() );
                 User::LeaveIfError( iDefinitionRepository.GetOdtL( *odt ) );
@@ -3704,16 +3706,18 @@ TInt ChspsMaintenanceHandler::UpdatePluginConfigurationL(
         return err;
         }
     
-    ChspsDomNode* pluginNode  = NULL;
-    ChspsDomNode* configNode  = NULL;
-    for(TInt i = 0; i < aPluginIds.Count() && err == KErrNone; i++ )
+    for( TInt i = 0; i < aPluginIds.Count() && err == KErrNone; i++ )
         {
-        pluginNode =
-        hspsServerUtil::FindPluginNodeL( aOdt, aPluginIds[i] );
+        ChspsDomNode* configNode  = NULL;        
+        ChspsDomNode* pluginNode =
+                hspsServerUtil::FindPluginNodeL( aOdt, aPluginIds[i] );
         TInt index = 0;
         
-        configNode = 
-        hspsServerUtil::FindChildNodeByTagL( KConfigurationElement, *pluginNode, index );
+        if ( pluginNode )
+            {
+            configNode = 
+            hspsServerUtil::FindChildNodeByTagL( KConfigurationElement, *pluginNode, index );
+            }
        
         if( configNode )
             {

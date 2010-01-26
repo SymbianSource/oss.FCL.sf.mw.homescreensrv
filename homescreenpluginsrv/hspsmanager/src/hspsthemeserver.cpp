@@ -895,7 +895,8 @@ void ChspsThemeServer::CheckConfigurationL(
                 odt->SetProviderNameL( header->ProviderName() );
                 odt->SetThemeFullNameL( header->ThemeFullName() );
                 odt->SetThemeShortNameL( header->ThemeShortName() );
-                odt->SetThemeVersionL( header->ThemeVersion() );            
+                odt->SetThemeVersionL( header->ThemeVersion() );
+                odt->SetDescriptionL( header->Description() );
                 odt->SetFlags( header->Flags() );                                                                       
                 odt->SetMultiInstance( header->MultiInstance() );
 
@@ -1514,6 +1515,7 @@ TInt ChspsThemeServer::CheckInstalledPluginUsageL( const TInt aPluginUid )
                 odt->SetThemeFullNameL( header->ThemeFullName() );
                 odt->SetThemeShortNameL( header->ThemeShortName() );
                 odt->SetThemeVersionL( header->ThemeVersion() );            
+                odt->SetDescriptionL( header->Description() );
                 odt->SetFlags( header->Flags() );                                                                       
                 odt->SetMultiInstance( header->MultiInstance() );
                 User::LeaveIfError( iDefinitionRepository->GetOdtL( *odt ) );
@@ -2218,7 +2220,8 @@ void ChspsThemeServer::LocalizeConfigurationsL()
 			if ( localized )
 				{
 				// Set header's name from the ODT
-				header->SetThemeFullNameL( odt->ThemeFullName() );				
+				header->SetThemeFullNameL( odt->ThemeFullName() );
+				header->SetDescriptionL( odt->Description() );
 				}
 			
 			CleanupStack::PopAndDestroy( odt );			

@@ -628,7 +628,7 @@ void ChspsClientRequestHandler::AppendPluginConfigurationsL(
                     CleanupStack::PushL( pluginIter );                                
                     ChspsDomNode* pluginNode =  pluginIter->First();                              
                     TBool steppingtoConfNode(EFalse);                     
-                    while(pluginNode && !steppingtoConfNode)
+                    while( pluginNode && !steppingtoConfNode )
                         {
                         const TDesC8& pluginNodeName = pluginNode->Name();
                          
@@ -643,10 +643,16 @@ void ChspsClientRequestHandler::AppendPluginConfigurationsL(
                         }
                     CleanupStack::PopAndDestroy( pluginIter );
                     
-                    // Copy the plugin configuration to the main document.
-                    ChspsDomNode* rootCopy = pluginNode->CloneL( node->StringPool());
-                    rootCopy->SetParent( node );
-                    node->AddChildL( rootCopy );                                       
+                    if ( pluginNode )
+                        {
+                        // Copy the plugin configuration to the main document.
+                        ChspsDomNode* rootCopy = pluginNode->CloneL( node->StringPool());
+                        if ( rootCopy )
+                            {
+                            rootCopy->SetParent( node );
+                            node->AddChildL( rootCopy );
+                            }
+                        }
                     } // !pluginOdt else
                 
                 CleanupStack::PopAndDestroy( pluginOdt );

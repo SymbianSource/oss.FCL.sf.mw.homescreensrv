@@ -40,9 +40,9 @@ END
 
 
 LIBRARY         euser.lib
-LIBRARY    	    bafl.lib
+LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
-LIBRARY    	    liwservicehandler.lib 
+LIBRARY         liwservicehandler.lib 
 LIBRARY         ecom.lib
 LIBRARY         aiutils.lib
 LIBRARY         cone.lib
@@ -50,6 +50,8 @@ LIBRARY         avkon.lib
 LIBRARY         fbscli.lib
 LIBRARY         egul.lib
 LIBRARY         aknskins.lib  
+LIBRARY         estor.lib
+LIBRARY         apgrfx.lib 
 
 // End of File
 SOURCEPATH ../src

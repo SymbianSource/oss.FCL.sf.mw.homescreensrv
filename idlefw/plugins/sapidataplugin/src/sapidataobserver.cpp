@@ -156,7 +156,7 @@ TInt CSapiDataObserver::HandleNotifyL(
 		   operation = variant.AsDes().AllocLC();
 		   }
 		variant.Reset();
-		if( operation->Des() != KOperationExecute )
+		if( operation && ( operation->Des() != KOperationExecute ) )
 		   {
 		   // Nothing to update for execute action
 		   HBufC* publisher = NULL; 

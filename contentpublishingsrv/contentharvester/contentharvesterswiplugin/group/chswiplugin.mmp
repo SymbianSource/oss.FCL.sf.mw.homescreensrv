@@ -29,6 +29,8 @@ VENDORID        VID_DEFAULT
 
 SOURCEPATH		../src
 SOURCE			chswiplugin.cpp
+SOURCE			chswiusbhandler.cpp
+SOURCE			chswiusbobserver.cpp
 
 SOURCEPATH		../data
 START RESOURCE	chswiplugin.rss 
@@ -49,6 +51,10 @@ LIBRARY			euser.lib
 LIBRARY         apgrfx.lib
 LIBRARY         apparc.lib
 
+LIBRARY			PlatformEnv.lib
+LIBRARY			efsrv.lib
+
 LIBRARY			liwservicehandler.lib	//AIW Framework
+LIBRARY			bafl.lib // CDesC16ArrayFlat
 
 //end of file

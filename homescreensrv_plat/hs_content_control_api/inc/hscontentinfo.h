@@ -253,6 +253,14 @@ public:
     IMPORT_C void SetDescriptionL( const TDesC& aDescription );
 
     /**
+     * Sets this widget's description
+     *
+     * @since S60 5.0
+     * @param aDescription Description
+     */                
+    IMPORT_C void SetDescriptionL( const TDesC8& aDescription );
+    
+    /**
      * Gets this widget's description
      *
      * @since S60 5.0
@@ -394,11 +402,11 @@ private: // Data
      * WRT Widget publisher uid, Owned
      */
     HBufC8* iPublisherUid;
-	
-	/**
-	 * Flag to indicate whether this is a WRT widget
-	 */
-	TBool iIsWrt;
+    
+    /**
+     * Flag to indicate whether this is a WRT widget
+     */
+    TBool iIsWrt;
     };
 
 #endif // HSCONTENTINFO_H

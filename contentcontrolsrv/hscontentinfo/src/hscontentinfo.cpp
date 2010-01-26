@@ -376,6 +376,17 @@ EXPORT_C TTime CHsContentInfo::InstallationTime() const
     return iInstallationTime;
     }
 
+// ---------------------------------------------------------------------------
+// CHsContentInfo::SetDescriptionL
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CHsContentInfo::SetDescriptionL( const TDesC8& aDescription )
+    {
+    delete iDescription;
+    iDescription = NULL;
+    iDescription = CnvUtfConverter::ConvertToUnicodeFromUtf8L( aDescription );
+    }
+
 // -----------------------------------------------------------------------
 // CHsContentInfo::SetDescriptionL()
 // -----------------------------------------------------------------------
@@ -384,7 +395,6 @@ EXPORT_C void CHsContentInfo::SetDescriptionL( const TDesC& aDescription )
     {
     delete iDescription;
     iDescription = NULL;
-    
     iDescription = aDescription.AllocL();
     }
 

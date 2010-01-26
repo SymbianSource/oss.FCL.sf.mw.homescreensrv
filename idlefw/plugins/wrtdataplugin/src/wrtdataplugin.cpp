@@ -16,6 +16,9 @@
 *
 */
 
+
+
+// INCLUDE FILES
 #include <ecom/ecom.h>
 #include <ecom/implementationproxy.h>
 #include <aicontentobserver.h>
@@ -125,291 +128,6 @@ CWrtDataPlugin::~CWrtDataPlugin()
     }
 
 // ---------------------------------------------------------------------------
-// Publishes widget's texts and images
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::PublishL()
-    {
-    User::LeaveIfError( iRfs.Connect() );
-
-    TInt observers( iObservers.Count() );        
-    TInt transactionId = reinterpret_cast<TInt>( this );
-
-    for ( int i = 0; i < observers; i++ )
-        {
-        MAiContentObserver* observer = iObservers[i];
-                
-        if ( observer->StartTransaction( transactionId ) == KErrNone )        	 
-        	{// Publish all the data
-            iData->PublishAllL(observer);
-            observer->Commit( transactionId );
-            }
-
-        // Release memory of the published text
-        iDataArray.ResetAndDestroy();
-        // Release memory of the published icons
-        iIconArray.Reset();
-        }
-    iRfs.Close();
-    }
-
-// ---------------------------------------------------------------------------
-// Publish a specific text of the widget  
-// ---------------------------------------------------------------------------
-//
-/*
-void CWrtDataPlugin::PublishTextL(MAiContentObserver* aObserver, 
-        TInt& aContentId, TDesC16& aContentValue)
-    {
-    if ( aObserver->CanPublish( *this,  aContentId  ,  aContentId  ) )
-        {
-        if( aContentValue.Length() > 0 )
-            {
-            HBufC* contentText = HBufC::NewLC(aContentValue.Size());
-            TPtr16 cDes = contentText->Des();
-            cDes.Copy(aContentValue);
-            aObserver->Publish( *this, aContentId, cDes, aContentId );  
-            iDataArray.AppendL( contentText );
-            CleanupStack::Pop( contentText );
-            }
-        else
-            {
-            aObserver->Clean( *this, aContentId, aContentId );
-            }
-        }
-    }*/
-
-// ---------------------------------------------------------------------------
-// Publish a specific image of the widget  
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver,
-		TContentItem aContentId, TDesC16& aPath )
-    {
-    TInt err = KErrNone;
-    TAknsItemID iconId;
-    iconId.iMajor=0;
-    iconId.iMinor=0;
-    TInt bitmapId(0);
-    TInt maskId(0);
-    TFileName fileName;
-    CGulIcon* icon = NULL;
-    CFbsBitmap* bitmap = NULL;
-    CFbsBitmap* mask = NULL;
-    
-    if ( aObserver->CanPublish( *this, aContentId , aContentId ) )
-      {
-      TBool inSkin = iData->ResolveSkinIdAndMifId( aPath, iconId, bitmapId, maskId, fileName  );
-      if ( inSkin )
-          {
-          // Load from skin 
-          MAknsSkinInstance* skin = AknsUtils::SkinInstance();
-          if ( iconId.iMajor != 0 && iconId.iMajor!=0 )
-              {
-              // Create icon with fall back 
-              TRAP_IGNORE(AknsUtils::CreateIconL(
-                      skin,
-                      iconId,
-                      bitmap,
-                      mask,
-                      fileName,  /* backup filename */
-                      bitmapId,  /* backup bit map id */
-                      maskId));   /* backup mask id */
-              }
-          else if( bitmapId !=0 )
-              {
-              if ( maskId!=0 )
-                  {
-                  // Create icon from Mif filename , bitmap id and mask id
-                  TRAP_IGNORE(icon = AknsUtils::CreateGulIconL(
-                          skin,
-                          iconId,
-                          fileName,
-                          bitmapId,
-                          maskId) );
-                  }
-              else
-                  {
-                  TRAP_IGNORE(AknsUtils::CreateIconL(
-                          skin,
-                          iconId,
-                          bitmap,
-                          fileName,  /* backup filename */
-                          bitmapId)); /* backup bit map id */
-                  }
-              }
-          
-          if ( icon == NULL && bitmap !=  NULL )
-              {
-              icon = CGulIcon::NewL( bitmap, mask );
-              }
-
-          if ( icon != NULL ) // Syntax correct but icon not found
-              {
-              aObserver->PublishPtr( *this, aContentId, icon , aContentId );
-              iIconArray.Append(icon);
-              } 
-          else
-              {
-              err = KErrNotFound;   
-              aObserver->Clean( *this, aContentId, aContentId );
-              }
-          }
-      else  // Interpret as File path
-          {
-          RFile* iconFile = new (ELeave) RFile();
-          err = iconFile->Open( iRfs, aPath, EFileShareReadersOnly |  EFileRead );
-          if( err == KErrNone )
-            {
-             aObserver->Publish( *this, aContentId, *iconFile, aContentId );
-            }
-          else
-              {
-              aObserver->Clean( *this, aContentId, aContentId );
-              }
-          iconFile->Close();
-          delete iconFile;
-          iconFile = NULL;
-          }
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// Publish a image of the widget  
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver, 
-		TContentItem aContentId, TInt aHandle, TInt aMaskHandle )
-    {
-    if ( aObserver->CanPublish( *this, aContentId , aContentId ) )
-        {
-        if( aHandle != KErrBadHandle  )
-            {
-            CFbsBitmap* bitmap = new (ELeave) CFbsBitmap();
-            if( KErrNone == bitmap->Duplicate( aHandle) )
-                {
-                // Take the ownership
-                CGulIcon* icon = CGulIcon::NewL(bitmap);
-                if( aMaskHandle != KErrBadHandle )
-                    {
-                    CFbsBitmap* mask = new (ELeave) CFbsBitmap();
-                    if (KErrNone == mask->Duplicate( aMaskHandle) )
-                        {
-                        icon->SetMask( mask );            
-                        }
-                    }
-                aObserver->PublishPtr( *this, aContentId, icon , aContentId );
-                iIconArray.Append(icon);
-                }
-            else
-                {
-                delete bitmap;
-                bitmap = NULL;
-                aObserver->Clean( *this, aContentId, aContentId );
-                }
-            }
-          }
-    }
-
-// ---------------------------------------------------------------------------
-// Gets the id of a content  
-// ---------------------------------------------------------------------------
-//
-TInt CWrtDataPlugin::GetIdL( TDesC16& aObjectId)
-	{
-    TInt id = KErrNotFound;
-    HBufC16* objectId = HBufC16::NewLC( KAiContentIdMaxLength );
-	for( TInt i = 0;i<  iDataCount; i++ )
-		{
-		 objectId->Des().Copy((TUint16*)iContentModel[i].cid);
-		 if( aObjectId == objectId->Des() )
-			 {
-			 id = iContentModel[i].id;
-			 break;
-			 }
-		}
-	CleanupStack::PopAndDestroy( objectId );
-	return id;
-	}
- 
-
-// ---------------------------------------------------------------------------
-// Gets type of a content
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::GetTypeL(TDesC16& aObjectId, TDes16& aType )
-	{
-	HBufC16* objectId = HBufC16::NewLC( KAiContentIdMaxLength );
-	for( TInt i = 0;i<  iDataCount; i++ )
-		{
-		objectId->Des().Copy((TUint16*)iContentModel[i].cid);
-		 if( aObjectId == objectId->Des() )
-			 {
-			 if( iContentModel[i].type ==  KAiContentTypeText)
-				 {
-				 aType.Copy( KText );
-				 }
-			 else if( iContentModel[i].type == KAiContentTypeBitmap)
-				 {
-				 aType.Copy( KImage );
-				 }
-			 break;
-			 }
-		}
-	CleanupStack::PopAndDestroy( objectId );
-	}
-
-// ---------------------------------------------------------------------------
-//Refresh a specific image of text in the widget
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::RefreshL(TDesC16& aOperation)
-    {
-    User::LeaveIfError( iRfs.Connect() );
-    TInt observers( iObservers.Count() );        
-    TInt transactionId = reinterpret_cast<TInt>( this );
-   
-    for ( TInt obsIndex = 0; obsIndex < observers; obsIndex++ )
-        {
-        MAiContentObserver* observer = iObservers[obsIndex];
-    
-        if ( observer->StartTransaction( transactionId ) == KErrNone )    	 
-            {
-            if( aOperation != KOperationDelete)
-                {
-                iData->PublishL( observer );
-                }
-            else
-                {
-                Clean( observer , EImage1 ) ;
-                }
-            
-            observer->Commit( transactionId );
-            }
-     
-        // Relese memory of the published text
-        iDataArray.ResetAndDestroy();
-        // Release memory of the published icons
-        iIconArray.Reset();
-        }
-    
-    iRfs.Close();
-    }
-
-// ---------------------------------------------------------------------------
-// Cleans a data from the widget
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::Clean(MAiContentObserver* aObserver, 
-        TInt aContentId )
-	{
-	 if ( aObserver->CanPublish( *this, aContentId, aContentId ) )
-		{
-		aObserver->Clean( *this, aContentId, aContentId );		
-		}
-
-	}
-// ---------------------------------------------------------------------------
 // From class CAiContentPublisher
 // Plug-in is requested to unload its engines due backup operation
 // ---------------------------------------------------------------------------
@@ -440,19 +158,19 @@ void CWrtDataPlugin::Resume( TAiTransitionReason aReason )
 void CWrtDataPlugin::Suspend( TAiTransitionReason aReason )
     {
     switch( aReason )
-		{
-		case EAiKeylockDisabled:
+        {
+        case EAiKeylockDisabled:
         case EAiKeylockEnabled:
-        	{
-        	// handled in resume 
-        	break;
-        	}
+            {
+            // handled in resume 
+            break;
+            }
         default :
-        	{
-        	iPluginState = ESuspend;
-        	TRAP_IGNORE ( iData->SuspendL() );
-        	}
-		}
+            {
+            iPluginState = ESuspend;
+            TRAP_IGNORE ( iData->SuspendL() );
+            }
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -514,12 +232,13 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
             {
             MAiPluginContentItem& contentItem = (contentItemsArr[i])->AiPluginContentItem();
             iContentModel[i].id = i;
-            /*if( contentItem.Type() == KText() || contentItem.Type() == KNewsTicker() )
+            if( contentItem.Type() == KText() )
                 {
                 // text
                 iContentModel[i].type = KAiContentTypeText;
-                }*/
-            if( contentItem.Type() == KImage() )
+                }
+            if( contentItem.Type() == KImage() || 
+                    contentItem.Type() == KAnimation() )
                 {
                 // image
                 iContentModel[i].type = KAiContentTypeBitmap;
@@ -566,17 +285,17 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
 TAny* CWrtDataPlugin::Extension( TUid aUid )
     {    
     if ( aUid == KExtensionUidProperty )
-   		{
+        {
         return static_cast<MAiPropertyExtension*>( this );
-    	}
+        }
     else if (aUid == KExtensionUidEventHandler)
-    	{
+        {
         return static_cast<MAiEventHandlerExtension*>( this );
-    	}
+        }
     else
-    	{	
+        {   
         return NULL;
-    	}
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -617,18 +336,18 @@ void CWrtDataPlugin::SetPropertyL( TInt aProperty, TAny* aValue )
     {  
     switch ( aProperty )
         {
-		case EAiPublisherInfo:
-			{
-			if( aValue )
-			    {
-    		    const TAiPublisherInfo* info = static_cast<const TAiPublisherInfo*>( aValue );
-	    	    iInfo.iName.Copy( info->iName );
-	    	    iInfo.iNamespace.Copy( info->iNamespace );
-			    }
-		    break;
-		    }
-		default:
-		    break;         
+        case EAiPublisherInfo:
+            {
+            if( aValue )
+                {
+                const TAiPublisherInfo* info = static_cast<const TAiPublisherInfo*>( aValue );
+                iInfo.iName.Copy( info->iName );
+                iInfo.iNamespace.Copy( info->iNamespace );
+                }
+            break;
+            }
+        default:
+            break;         
         }
     }
  
@@ -638,9 +357,9 @@ void CWrtDataPlugin::SetPropertyL( TInt aProperty, TAny* aValue )
 // ---------------------------------------------------------------------------
 //
 void CWrtDataPlugin::HandleEvent( TInt /*aEvent*/, const TDesC& /*aParam*/ )
-	{
+    {
     // This is not as there is no event id to retrieve in this dynamic plugin. 
-	} 
+    } 
     
 // ---------------------------------------------------------------------------
 // From class MAiEventHandlerExtension.
@@ -659,102 +378,92 @@ void CWrtDataPlugin::HandleEvent( const TDesC& aEventName, const TDesC& aParam )
 // ---------------------------------------------------------------------------
 //
 TBool CWrtDataPlugin::HasMenuItem( const TDesC16& aMenuItem )
-	{ 
-	return iData->HasMenuItem ( aMenuItem );  
-	}
+    { 
+    return iData->HasMenuItem ( aMenuItem );  
+    }
 
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// framework instructs plug-in that it is allowed to consume CPU resources
+// Gets the id of a content  
 // ---------------------------------------------------------------------------
 //
-void CWrtDataPlugin::DoResumeL( TAiTransitionReason aReason )
+TInt CWrtDataPlugin::GetIdL( TDesC16& aObjectId)
     {
-	//update in startup phase and idle is on foreground.
-    switch ( aReason )
-    	{
-        case EAiIdleOnLine:
-        	{
-        	iNetworkStatus = EOnline;
-			iData->OnLineL();
-			break;
-        	}
-        case EAiIdleOffLine:
-        	{
-			iNetworkStatus = EOffline;
-			iData->OffLineL();
-			break;
-			}
-        case EAiIdlePageSwitch:
-        	{
-        	if ( iPluginState == EResume )
-				{
-				iData->SuspendL();
-				}
-        	iPluginState = EInActive;
-        	iData->InActiveL();
-        	}
-        	break;
-        case EAiSystemStartup:
-    	case EAiIdleForeground:
-    		{
-			iHSForeGround = ETrue;
-    		}
-    	case EAiBacklightOn:    		
-    		{
-    		if ( iPluginState == ESuspend  && !iKeyLockOn )
-				{
-				iPluginState = EResume;
-				iData->ResumeL();
-				}
-    		break;
-			}
-    	case EAiKeylockDisabled:
-        	{
-        	iKeyLockOn = EFalse;
-        	// Key lock events considered only if HS is in foreground  
-        	if ( iHSForeGround && iPluginState == ESuspend )
-        		{
-        		iPluginState = EResume;
-				iData->ResumeL();
-        		}
-        	break;
-        	}
-    	case EAiKeylockEnabled:
-        	{
-        	iKeyLockOn = ETrue;
-        	// Key lock events considered only if HS is in foreground
-        	if ( iHSForeGround && iPluginState == EResume )
-        		{
-				iPluginState = ESuspend ;
-				iData->SuspendL();
-        		}
-        	break;
-        	}
-    	case EAiScreenLayoutChanged:
-        	{
-        	// ignore events
-        	break;
-        	}
-      case EAiGeneralThemeChanged:
-          {
-          // ignore event
-          break;
-          }
-    	case EAiIdleBackground: 
-        	{
-			iHSForeGround = EFalse;
-        	}
-        default :
-        	{
-			if ( iPluginState == EResume )
-				{
-				iPluginState = ESuspend;
-				iData->SuspendL();
-				}
-        	break;
-        	}
-    	}
+    TInt id = KErrNotFound;
+    HBufC16* objectId = HBufC16::NewLC( KAiContentIdMaxLength );
+    for( TInt i = 0;i<  iDataCount; i++ )
+        {
+         objectId->Des().Copy((TUint16*)iContentModel[i].cid);
+         if( aObjectId == objectId->Des() )
+             {
+             id = iContentModel[i].id;
+             break;
+             }
+        }
+    CleanupStack::PopAndDestroy( objectId );
+    return id;
+    }
+ 
+
+// ---------------------------------------------------------------------------
+// Gets type of a content
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::GetTypeL(TDesC16& aObjectId, TDes16& aType )
+    {
+    HBufC16* objectId = HBufC16::NewLC( KAiContentIdMaxLength );
+    for( TInt i = 0;i<  iDataCount; i++ )
+        {
+        objectId->Des().Copy((TUint16*)iContentModel[i].cid);
+         if( aObjectId == objectId->Des() )
+             {
+             if( iContentModel[i].type ==  KAiContentTypeText)
+                 {
+                 aType.Copy( KText );
+                 }
+             else if( iContentModel[i].type == KAiContentTypeBitmap)
+                 {
+                 aType.Copy( KImage );
+                 }
+             break;
+             }
+        }
+    CleanupStack::PopAndDestroy( objectId );
+    }
+
+// ---------------------------------------------------------------------------
+//Refresh a specific image of text in the widget
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::RefreshL( TDesC16& aOperation, CLiwDefaultMap* aDataMap )
+    {
+    TInt observers( iObservers.Count() );        
+    TInt transactionId = reinterpret_cast<TInt>( this );
+    
+    for ( TInt obsIndex = 0; obsIndex < observers; obsIndex++ )
+        {
+        MAiContentObserver* observer = iObservers[obsIndex];
+ 
+        if ( observer->StartTransaction( transactionId ) == KErrNone )       
+            {
+            if( ( aOperation == KOperationUpdate 
+                  || aOperation == KOperationAdd )
+                  && aDataMap )
+                {
+                iData->PublishL( observer, aDataMap );
+                }
+            else if ( aOperation == KOperationDelete )
+                {
+                Clean( observer , EImage1 ) ;
+                }
+            
+            observer->Commit( transactionId );
+            }
+     
+        // Relese memory of the published text
+        iDataArray.ResetAndDestroy();
+        // Release memory of the published icons
+        iIconArray.Reset();
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -765,3 +474,395 @@ TBool CWrtDataPlugin::IsActive()
     {
     return (iPluginState == EResume );
     }
+
+// ---------------------------------------------------------------------------
+// Publish a specific text of the widget  
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::PublishTextL(MAiContentObserver* aObserver, 
+        TInt aContentId, const TDesC16& aContentValue)
+    {
+    if ( aObserver->CanPublish( *this,  aContentId  ,  aContentId  ) )
+        {
+        if( aContentValue.Length() > 0 )
+            {
+            HBufC* contentText = HBufC::NewLC(aContentValue.Size());
+            TPtr16 cDes = contentText->Des();
+            cDes.Copy(aContentValue);
+            aObserver->Publish( *this, aContentId, cDes, aContentId );  
+            iDataArray.AppendL( contentText );
+            CleanupStack::Pop( contentText );
+            }
+        else
+            {
+            aObserver->Clean( *this, aContentId, aContentId );
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Publish a specific image of the widget  
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver,
+		TContentItem aContentId, const TDesC16& aPath )
+    {
+    TInt err = KErrNone;
+    TAknsItemID iconId;
+    iconId.iMajor=0;
+    iconId.iMinor=0;
+    TInt bitmapId(0);
+    TInt maskId(0);
+    TFileName fileName;
+    CGulIcon* icon = NULL;
+    CFbsBitmap* bitmap = NULL;
+    CFbsBitmap* mask = NULL;
+    
+    if ( aObserver->CanPublish( *this, aContentId , aContentId ) )
+      {
+      TBool inSkin = ResolveSkinIdAndMifId( aPath, iconId, bitmapId, maskId, fileName  );
+      if ( inSkin )
+          {
+          // Load from skin 
+          MAknsSkinInstance* skin = AknsUtils::SkinInstance();
+          if ( iconId.iMajor != 0 && iconId.iMajor!=0 )
+              {
+              // Create icon with fall back 
+              TRAP_IGNORE(AknsUtils::CreateIconL(
+                      skin,
+                      iconId,
+                      bitmap,
+                      mask,
+                      fileName,  /* backup filename */
+                      bitmapId,  /* backup bit map id */
+                      maskId));   /* backup mask id */
+              }
+          else if( bitmapId !=0 )
+              {
+              if ( maskId!=0 )
+                  {
+                  // Create icon from Mif filename , bitmap id and mask id
+                  TRAP_IGNORE(icon = AknsUtils::CreateGulIconL(
+                          skin,
+                          iconId,
+                          fileName,
+                          bitmapId,
+                          maskId) );
+                  }
+              else
+                  {
+                  TRAP_IGNORE(AknsUtils::CreateIconL(
+                          skin,
+                          iconId,
+                          bitmap,
+                          fileName,  /* backup filename */
+                          bitmapId)); /* backup bit map id */
+                  }
+              }
+          
+          if ( icon == NULL && bitmap !=  NULL )
+              {
+              icon = CGulIcon::NewL( bitmap, mask );
+              }
+
+          if ( icon != NULL ) // Syntax correct but icon not found
+              {
+              aObserver->PublishPtr( *this, aContentId, icon , aContentId );
+              iIconArray.Append(icon);
+              } 
+          else
+              {
+              err = KErrNotFound;   
+              aObserver->Clean( *this, aContentId, aContentId );
+              }
+          }
+      else  // Interpret as File path
+          {
+          RFs rfs;
+          User::LeaveIfError( rfs.Connect() );
+          RFile* iconFile = new (ELeave) RFile();
+          err = iconFile->Open( rfs, aPath, EFileShareReadersOnly |  EFileRead );
+          if( err == KErrNone )
+            {
+             aObserver->Publish( *this, aContentId, *iconFile, aContentId );
+            }
+          else
+              {
+              aObserver->Clean( *this, aContentId, aContentId );
+              }
+          iconFile->Close();
+          delete iconFile;
+          iconFile = NULL;
+          rfs.Close();
+          }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Publish a image of the widget  
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver, 
+		TContentItem aContentId, TInt aHandle, TInt aMaskHandle )
+    {
+    if ( aObserver->CanPublish( *this, aContentId , aContentId ) )
+        {
+        if( aHandle != KErrBadHandle  )
+            {
+            CFbsBitmap* bitmap = new (ELeave) CFbsBitmap();
+            if( KErrNone == bitmap->Duplicate( aHandle) )
+                {
+                // Take the ownership
+                CGulIcon* icon = CGulIcon::NewL(bitmap);
+                if( aMaskHandle != KErrBadHandle )
+                    {
+                    CFbsBitmap* mask = new (ELeave) CFbsBitmap();
+                    if (KErrNone == mask->Duplicate( aMaskHandle) )
+                        {
+                        icon->SetMask( mask );            
+                        }
+                    }
+                aObserver->PublishPtr( *this, aContentId, icon , aContentId );
+                iIconArray.Append(icon);
+                }
+            else
+                {
+                delete bitmap;
+                bitmap = NULL;
+                aObserver->Clean( *this, aContentId, aContentId );
+                }
+            }
+          }
+    }
+
+// ---------------------------------------------------------------------------
+// Cleans a data from the widget
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::Clean(MAiContentObserver* aObserver, 
+        TInt aContentId )
+    {
+     if ( aObserver->CanPublish( *this, aContentId, aContentId ) )
+        {
+        aObserver->Clean( *this, aContentId, aContentId );      
+        }
+
+    }
+
+// ---------------------------------------------------------------------------
+// Show the loading icong animation 
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::ShowLoadingIcon(MAiContentObserver* aObserver)
+    {
+    aObserver->SetProperty( *this, KElement , KDisplay , KShow );
+    }
+
+// ---------------------------------------------------------------------------
+// Hides the loading icon animation 
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::HideLoadingIcon(MAiContentObserver* aObserver)
+    {
+    aObserver->SetProperty( *this, KElement , KDisplay , KHide );
+    }
+
+// ---------------------------------------------------------------------------
+// Publishes widget's texts and images
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::PublishL()
+    {
+    TInt observers( iObservers.Count() );        
+    TInt transactionId = reinterpret_cast<TInt>( this );
+
+    for ( int i = 0; i < observers; i++ )
+        {
+        MAiContentObserver* observer = iObservers[i];
+                
+        if ( observer->StartTransaction( transactionId ) == KErrNone )           
+            {// Publish default data
+            iData->PublishDefaultImageL(observer);
+            observer->Commit( transactionId );
+            }
+
+        // Release memory of the published text
+        iDataArray.ResetAndDestroy();
+        // Release memory of the published icons
+        iIconArray.Reset();
+        }
+
+    }
+
+// ---------------------------------------------------------------------------
+// From class CAiContentPublisher
+// framework instructs plug-in that it is allowed to consume CPU resources
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::DoResumeL( TAiTransitionReason aReason )
+    {
+    //update in startup phase and idle is on foreground.
+    switch ( aReason )
+        {
+        case EAiIdleOnLine:
+            {
+            iNetworkStatus = EOnline;
+            iData->OnLineL();
+            break;
+            }
+        case EAiIdleOffLine:
+            {
+            iNetworkStatus = EOffline;
+            iData->OffLineL();
+            break;
+            }
+        case EAiIdlePageSwitch:
+            {
+            if ( iPluginState == EResume )
+                {
+                iData->SuspendL();
+                }
+            iPluginState = EInActive;
+            iData->InActiveL();
+            }
+            break;
+        case EAiSystemStartup:
+        case EAiIdleForeground:
+            {
+            iHSForeGround = ETrue;
+            }
+        case EAiBacklightOn:            
+            {
+            if ( iPluginState == ESuspend  && !iKeyLockOn )
+                {
+                iPluginState = EResume;
+                iData->ResumeL();
+                }
+            break;
+            }
+        case EAiKeylockDisabled:
+            {
+            iKeyLockOn = EFalse;
+            // Key lock events considered only if HS is in foreground  
+            if ( iHSForeGround && iPluginState == ESuspend )
+                {
+                iPluginState = EResume;
+                iData->ResumeL();
+                }
+            break;
+            }
+        case EAiKeylockEnabled:
+            {
+            iKeyLockOn = ETrue;
+            // Key lock events considered only if HS is in foreground
+            if ( iHSForeGround && iPluginState == EResume )
+                {
+                iPluginState = ESuspend ;
+                iData->SuspendL();
+                }
+            break;
+            }
+        case EAiScreenLayoutChanged:
+            {
+            // ignore events
+            break;
+            }
+      case EAiGeneralThemeChanged:
+          {
+          // ignore event
+          break;
+          }
+        case EAiIdleBackground: 
+            {
+            iHSForeGround = EFalse;
+            }
+        default :
+            {
+            if ( iPluginState == EResume )
+                {
+                iPluginState = ESuspend;
+                iData->SuspendL();
+                }
+            break;
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// ResolveSkinItemId
+// ---------------------------------------------------------------------------
+//
+TBool CWrtDataPlugin::ResolveSkinIdAndMifId( const TDesC& aPath, TAknsItemID& aItemId,
+        TInt& abitmapId, TInt& aMaskId, TDes& aFilename )
+   {
+   // Syntax: skin( <major> <minor> ):mif(filename bimapId maskId) 
+   TInt error = KErrNotFound;
+   TInt pos = aPath.FindF( KSkin );
+   if( pos != KErrNotFound )
+       {
+       // Skip skin token
+       pos += KSkin().Length();
+       
+       // Initialize lexer
+      TLex lex( aPath.Mid( pos ) );
+      lex.SkipSpace();
+       
+       // Check left parenthesis
+      if (lex.Get() == KLeftParenthesis )
+           {
+           //lex.SkipSpace();
+           
+           TInt majorId( 0 );        
+           TInt minorId( 0 );
+
+           // Resolve major id        
+           error = lex.Val( majorId );
+           
+           // Resolve minor id
+           lex.SkipSpace();
+           error |= lex.Val( minorId );
+           
+           // initilize skin item id object
+           aItemId.Set( majorId, minorId );
+           }
+       }
+
+   if( (error == KErrNone && aPath.FindF( KColon ) != KErrNotFound ) 
+         || ( error == KErrNotFound ) )
+       {
+       error = KErrNotFound;
+       pos = aPath.FindF( KMif );
+       if ( pos != KErrNotFound )
+           {
+           pos += KMif().Length();
+           // Initialize lexer
+           TLex lex( aPath.Mid( pos ) );
+           lex.SkipSpace();
+           
+           // Check left parenthesis
+           if (lex.Get() == KLeftParenthesis )
+               {
+               lex.SkipSpaceAndMark();
+               lex.SkipCharacters();
+               // Resolve MifFile name
+               aFilename.Copy(lex.MarkedToken());
+               if( aFilename.Length()!= 0)
+                   {
+                   // Resolve bitmap id  
+                   lex.SkipSpace();
+                   error = lex.Val( abitmapId );
+                   
+                   // Resolve mask id
+                   // dont return error if it is not found, that is ok
+                   lex.SkipSpace();
+                   lex.Val( aMaskId );
+                   }
+               else
+                   {
+                   error = KErrNotFound;
+                   }
+               }
+           }
+       }
+   return (error == KErrNone );
+   }

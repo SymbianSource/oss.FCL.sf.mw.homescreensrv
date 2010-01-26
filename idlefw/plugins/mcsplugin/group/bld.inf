@@ -22,6 +22,8 @@
 
 PRJ_PLATFORMS
 DEFAULT
+//  Help exports
+#include "../help/group/bld.inf"
 
 PRJ_EXPORTS
 ../loc/mcspluginsettings.loc             MW_LAYER_LOC_EXPORT_PATH(mcspluginsettings.loc)

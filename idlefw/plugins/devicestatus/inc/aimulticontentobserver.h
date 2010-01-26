@@ -64,6 +64,17 @@ public:
     TAny* Extension( TUid aUid );
     TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const;
 
+    TInt SetProperty( MAiPropertyExtension& aPlugin,
+               const TDesC8& aElementId,
+               const TDesC8& aPropertyName,
+               const TDesC8& aPropertyValue );
+       
+    TInt SetProperty( MAiPropertyExtension& aPlugin,
+               const TDesC8& aElementId,
+               const TDesC8& aPropertyName,
+               const TDesC8& aPropertyValue,  
+               MAiContentObserver::TValueType aValueType);
+
 private:
     CAiMultiContentObserver();
     void ConstructL();

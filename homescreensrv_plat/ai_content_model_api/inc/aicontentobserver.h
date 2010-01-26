@@ -35,6 +35,28 @@ struct TAiPublisherInfo;
  */
 class MAiContentObserver
     {
+public: // New Enumeration
+    /**
+    * CSS Primitive value type
+    */
+    enum TValueType
+        {
+        EValueUnknown = 0,
+        EValueNumber,
+        EValuePercentage,
+        EValuePx,
+        EValueDimension,
+        EValueString,
+        EValueIdent,
+        EValueAttr,
+        EValueCounter,
+        EValueRect,
+        EValueRgbColor,
+        EValueRgbaColor,
+        EValueFunction,
+        EValueUnitValue
+        };
+    
 public:  // New functions
 
     /**
@@ -250,8 +272,52 @@ public:  // New functions
 	 * @param aPublsiherInfo Publisher which requires subscription
 	 * @return ETrue if subsription is needed, EFalse otherwise
 	 */	
-    virtual TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const = 0;	    
-
+    virtual TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const = 0;
+    
+    /**
+     * Invoked by the plug-in to change the property value of a specific content.
+     * value type must be string.
+     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aElementId - id of content selector, MUST correspond
+     *         single content supported by plug-in. The framework
+     *         utilizes the id to find in the plugin xml defintion.
+     * @param  aPropertyName - property name.
+     * @param  aPropertyValue - property value.
+     * @return - Possible return values:
+     *         - KErrNone - if content reference found.
+     *         - KErrNotFound - if content reference is not found in current
+     *         plugin definition.
+     *         - KErrNotSupported - if content selector is not supported by
+     *         current plugin definition.         
+     */
+    virtual TInt SetProperty( MAiPropertyExtension& aPlugin,
+            const TDesC8& aElementId,
+            const TDesC8& aPropertyName,
+            const TDesC8& aPropertyValue ) = 0;
+    
+    /**
+     * Invoked by the plug-in to change the property value of a specific content.
+     *
+     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aElementId - id of content selector, MUST correspond
+     *         single content supported by plug-in. The framework
+     *         utilizes the id to find in the plugin xml defintion.
+     * @param  aPropertyName - property name.
+     * @param  aPropertyValue - property value.
+     * @param  aValueType  - value type.
+     * @return - Possible return values:
+     *         - KErrNone - if content reference found.
+     *         - KErrNotFound - if content reference is not found in current
+     *         plugin definition.
+     *         - KErrNotSupported - if content selector is not supported by
+     *         current plugin definition.         
+     */
+    virtual TInt SetProperty( MAiPropertyExtension& aPlugin,
+            const TDesC8& aElementId,
+            const TDesC8& aPropertyName,
+            const TDesC8& aPropertyValue,  
+            MAiContentObserver::TValueType aValueType) = 0;
+            
 protected:
     /**
      * Protected destructor prevents deletion through this interface.

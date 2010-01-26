@@ -34,6 +34,7 @@ const TUid KUidDataPlugin = { KImplUidDataPlugin };
  */
 _LIT(KText ,"text");
 _LIT(KImage, "image");
+_LIT(KAnimation, "animation");
 _LIT(KPlugin, "plugin");
 
 _LIT(KNewsTicker ,"newsticker");
@@ -79,6 +80,7 @@ _LIT( KResume, "resume");
 _LIT( KOnLine, "online");
 _LIT( KOffLine, "offline");
 _LIT( KInActive, "inactive");
+
 // reserved extension for retrieving mask handle 
 _LIT8( KImageMask, "image1_mask");
 
@@ -90,6 +92,29 @@ _LIT( KColon,		 ":");
 _LIT( KTemplateWidget,"ai3templatedwidget");
 _LIT( KWRTPublisher, "wrt_publisher");
 _LIT8(KImage1, "image1");
+_LIT8( KWidgetInfo,   "widget_info");
+_LIT8( KWidgetName, "widget_name");
+_LIT8( KWidgetIcon, "widget_icon");
+
+_LIT( KHexPrefix,     "0x" );
+_LIT( KUid,           "uid" );
+_LIT8(KElement, "loading");
+_LIT8(KDisplay, "display");
+_LIT8(KShow, "block");
+_LIT8(KHide, "none");
+
+#ifdef __WINS__
+_LIT( KDrive, "C:" );
+#else
+_LIT( KDrive, "Z:" );
+#endif
+
+#ifdef WRT_PREDEFINED_IMAGE  
+_LIT(KImgFolder, "200286dd\\");
+_LIT(KJPEG, ".jpg");
+_LIT(KPNG, ".png");
+#endif
+
 const TUint KLeftParenthesis = '(';
 
 
@@ -116,5 +141,11 @@ const TInt KWRTContentValueMaxLength = 255;
  */
 const TInt KAiPluginNameMaxLength = 255;
 
+/**
+ * Maximum length for the application uid string
+ * uid(0x123456578)
+ * 
+ */
+const TInt KWRTAppUidLenth = 16; 
 
 #endif /* WRTDATAPLUGINCONST_H */

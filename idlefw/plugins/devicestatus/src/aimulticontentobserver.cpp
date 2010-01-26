@@ -224,6 +224,23 @@ TBool CAiMultiContentObserver::RequiresSubscription(
     return ETrue;
     }
 
+TInt CAiMultiContentObserver::SetProperty( MAiPropertyExtension& /*aPlugin*/,
+           const TDesC8& /*aElementId*/,
+           const TDesC8& /*aPropertyName*/,
+           const TDesC8& /*aPropertyValue*/ )
+    {
+        return KErrNotSupported;
+    }
+   
+TInt CAiMultiContentObserver::SetProperty( MAiPropertyExtension& /*aPlugin*/,
+           const TDesC8& /*aElementId*/,
+           const TDesC8& /*aPropertyName*/,
+           const TDesC8& /*aPropertyValue*/,  
+           MAiContentObserver::TValueType /*aValueType*/)
+    {
+    return KErrNotSupported;
+    }
+
 CAiMultiContentObserver::CAiMultiContentObserver()
     {
     }

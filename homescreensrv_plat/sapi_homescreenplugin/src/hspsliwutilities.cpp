@@ -683,12 +683,15 @@ ChspsDomNode& CHspsLiwUtilities::FindRootNodeByIdentifierL(
 	    	
 	    	ChspsDomAttribute* attr = static_cast<ChspsDomAttribute*>( 
 	    							      attrList.FindByName( KAttrId ));
-	    	const TDesC8& value = attr->Value();
-	        if( value.Compare( aNodeIdentifier ) == 0 )
-	        	{
-	        	found = ETrue;
-	        	targetNode = node;
-	        	}
+	    	if ( attr )
+	    	    {
+                const TDesC8& value = attr->Value();
+                if( value.Compare( aNodeIdentifier ) == 0 )
+                    {
+                    found = ETrue;
+                    targetNode = node;
+                    }
+	    	    }
 	    	}
 	    node = iter->NextL();
 		}	

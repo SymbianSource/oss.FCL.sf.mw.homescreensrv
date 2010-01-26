@@ -1383,8 +1383,12 @@ void CXCFWEngine::PrepareDTDPathL()
                 }                
             }
         }
-    //Store DTD name to tree, so it is available at save.
-    iTree->SetDTDNameL( iDTD->Des() );
+    
+    if ( iDTD )
+        {
+        //Store DTD name to tree, so it is available at save.
+        iTree->SetDTDNameL( iDTD->Des() );
+        }
     }
 
 //  End of File  

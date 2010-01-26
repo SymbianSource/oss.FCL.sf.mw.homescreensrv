@@ -450,12 +450,15 @@ EXPORT_C void ChspsODT::InternalizeResourceListL( RReadStream& aStream )
 	TInt count = aStream.ReadInt32L();
 	for (TInt i=0;i<count;i++)
 		{
-		ChspsResource* resource = ChspsResource::NewL();
-       	CleanupStack::PushL(resource);
-       	resource->InternalizeL(aStream);
-       	iResourceList->AppendL( resource );
-       	CleanupStack::Pop( resource ); // now owned by array
-       	resource = NULL;
+        ChspsResource* resource = ChspsResource::NewL();
+        CleanupStack::PushL(resource);
+        resource->InternalizeL(aStream);
+       	if ( iResourceList )
+       	    {
+       	    iResourceList->AppendL( resource );
+       	    }
+        CleanupStack::Pop( resource ); // now owned by array
+        resource = NULL;
 		}
     }
 
@@ -721,6 +724,10 @@ EXPORT_C ChspsODT* ChspsODT::CloneL()
     if( iPackageVersion )
         {
         clone->SetPackageVersionL( *iPackageVersion );
+        }
+    if( iDescription )
+        {
+        clone->SetDescriptionL( *iDescription );
         }
     clone->SetOdtLanguage( iLanguage );
     clone->SetFlags( iFlags );

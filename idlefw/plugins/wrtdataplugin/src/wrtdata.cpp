@@ -16,15 +16,20 @@
 *
 */
 
+
+// INCLUDE FILES
 #include <ecom/ecom.h>
 #include <liwservicehandler.h>
 #include <aipluginsettings.h>
-
+#include <apgcli.h>
+#include <apgicnfl.h> 
+#include <bautils.H> 
 
 #include "wrtdata.h"
 #include "wrtdatapluginconst.h"
 #include "wrtdataobserver.h"
 #include "wrtdataplugin.h"
+
 // ======== MEMBER FUNCTIONS ========
 	
 // ---------------------------------------------------------------------------
@@ -99,7 +104,7 @@ CWrtData::~CWrtData()
     }
 
 // ---------------------------------------------------------------------------
-// ConfigureL
+// CWrtData::ConfigureL
 // ---------------------------------------------------------------------------
 //
 void CWrtData::ConfigureL(RAiSettingsItemArray& aConfigurations )
@@ -191,7 +196,439 @@ void CWrtData::ConfigureL(RAiSettingsItemArray& aConfigurations )
     }
 
 // ---------------------------------------------------------------------------
-// GetMenuItemsL
+// CWrtData::HasMenuItem
+// ---------------------------------------------------------------------------
+//
+TBool CWrtData::HasMenuItem(const TDesC16& aMenuItem )
+    {
+    TBool found = EFalse;
+    for (TInt i = 0; i < iMenuItems.Count(); i++ )
+        {
+        if( aMenuItem == iMenuItems[i] )
+            {
+            found =  ETrue;
+            break;
+            }
+        }
+    return found;
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::RegisterL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::RegisterL()
+    {
+    CLiwDefaultMap* filter = CreateFilterLC();
+    filter->InsertL( KOperation, TLiwVariant( KAddUpdateDelete ) );
+    iObserver->RegisterL(filter);
+    CleanupStack::PopAndDestroy( filter );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::UpdatePublisherStatusL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::UpdatePublisherStatusL()
+    {
+     // Resent the plugin status to publisher
+     ActivateL();
+     if ( iPlugin->IsActive() )
+         {
+         ResumeL();
+         }
+     else
+         {
+         SuspendL();
+         }
+      // forward the network status if it uses.
+    if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOnline )
+        {
+        OnLineL();
+        }
+    else if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOffline )
+        {
+        OffLineL();
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::PublishDefaultImageL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::PublishDefaultImageL( MAiContentObserver* aObserver )
+    {
+    TBuf<KWRTAppUidLenth> appUidStr;
+    TBuf<KWRTContentValueMaxLength> appName;
+    GetWidgetNameAndUidL( appName, appUidStr );
+    
+    TUid appUid;
+    if ( ResolveUid (appUidStr, appUid ) )
+        {
+#ifdef WRT_PREDEFINED_IMAGE         
+        RFs rfs;
+        User::LeaveIfError( rfs.Connect() );
+
+        TFileName privatePath;
+        rfs.PrivatePath(privatePath);
+        privatePath.Insert(0,KDrive);
+        privatePath.Append( KImgFolder );
+      
+        appUidStr.Copy( appUid.Name());
+        appUidStr.Delete(0,1);
+        appUidStr.Delete( appUidStr.Length() -1, 1);
+        privatePath.Append (appUidStr );
+        privatePath.Append ( KJPEG );
+        if ( BaflUtils::FileExists(rfs,privatePath) )
+            {
+            // Publish predefined jpeg image
+            iPlugin->PublishImageL( aObserver, CWrtDataPlugin::EImage1,privatePath);
+            }
+        else
+            {
+            privatePath.Delete( privatePath.Length() - 4 , 4);
+            privatePath.Append( KPNG );
+            if ( BaflUtils::FileExists(rfs,privatePath) )
+               {
+               // Publish predefined image
+               iPlugin->PublishImageL( aObserver, CWrtDataPlugin::EImage1,privatePath);
+               }
+            else
+                {
+#endif                 
+                TInt handle = KErrNotFound;
+                TInt mask = KErrNotFound;
+                CreateIconFromUidL( handle, mask, appUid );
+                // Publish widget apparc image
+                iPlugin->PublishImageL( aObserver, CWrtDataPlugin::EDefaultImage,handle,mask);
+                if ( appName.Length() > 0)
+                   {
+                   // Publish Widget Name
+                   iPlugin->PublishTextL( aObserver, CWrtDataPlugin::EDefaultText, appName);
+                   }
+#ifdef WRT_PREDEFINED_IMAGE                
+                }
+            }
+        rfs.Close();
+#endif        
+        }
+    
+    // Show loading animation
+    iPlugin->ShowLoadingIcon(aObserver);
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::PublishL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::PublishL( MAiContentObserver* aObserver, CLiwDefaultMap* aDataMap ) 
+    {
+    TLiwVariant variant;
+    iPlugin->HideLoadingIcon(aObserver);
+    if ( aDataMap->FindL( KImage1, variant ) )
+        {
+        TInt handle = KErrBadHandle;
+        TUint uintHandle = 0;
+        TPtrC16 valPtr;
+        if ( variant.Get( uintHandle ) )
+            {
+            handle = uintHandle;
+            }
+        else if ( !variant.Get( handle ) )
+            {
+            handle = KErrBadHandle;
+            }
+        // read as a image handle
+        if( handle == KErrBadHandle )
+            {
+            // no handle, so read as image path
+            variant.Get( valPtr );
+            iPlugin->PublishImageL(aObserver, CWrtDataPlugin::EImage1, valPtr );
+            }
+        else
+            {
+            TInt maskHandle = KErrBadHandle;
+            //Look for image mask
+            if ( aDataMap->FindL( KImageMask, variant ) )
+               {
+               variant.Get( maskHandle );                           
+               }
+            iPlugin->PublishImageL(aObserver, CWrtDataPlugin::EImage1, handle, maskHandle );
+            }
+        }
+    variant.Reset();
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::RefreshL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::RefreshL( TDesC& aContentId, TDesC& aOperation, 
+        CLiwDefaultMap* aDataMap )
+    {
+     if ( aContentId == iContentId )
+         {
+         iPlugin->RefreshL( aOperation, aDataMap);
+         }
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::ExecuteActionL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
+   {
+   HBufC8* triggerName = HBufC8::NewLC( KWRTContentNameMaxLength );
+  
+   CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+   CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
+   CLiwDefaultMap* filter = NULL;
+
+   triggerName->Des().Copy(aTrigger);
+   if ( aObjectId == KPubData )
+       {
+       // this trigger belongs to publisher registery.
+       // in such case it is assumed that all the items in the widgets
+       // belongs to same publisher, type and id.
+       TLiwGenericParam cptype( KType, TLiwVariant( KPubData ) );
+       inParamList->AppendL( cptype );
+       cptype.Reset();
+       // use the first item configuration to create the filter
+       filter = CreateFilterLC();
+       }
+   else
+       {
+       if ( aObjectId == KMenuItem16 )
+           {
+           TInt pos = KErrNotFound;
+           for (TInt i = 0; i < iMenuItems.Count(); i++)
+               {
+               if ( aTrigger == iMenuItems[i] )
+                   {
+                   pos = i;
+                   break;
+                   }
+               }
+           if( pos == KErrNotFound )
+               {
+               // No such menu items
+               CleanupStack::PopAndDestroy( triggerName );
+               return; 
+               }
+              triggerName->Des().Copy( iMenuTriggers[pos]->Des() );
+              filter = CreateFilterLC();
+           }
+       else
+           {
+           //Create filter criteria for requested entries in form of LIW map:
+           filter = CreateFilterLC();
+           }
+       //append type to inparam list
+       TLiwGenericParam cptype( KType, TLiwVariant( KCpData ) );
+       inParamList->AppendL( cptype );
+       cptype.Reset();
+       }
+
+    filter->InsertL( KActionTrigger, TLiwVariant( triggerName->Des() ) );
+   //append filter to input param
+    TLiwGenericParam item( KFilter, TLiwVariant( filter ) );
+    inParamList->AppendL( item );
+    iInterface->ExecuteCmdL( KExecuteAction,  *inParamList, *outParamList );
+    
+    CleanupStack::PopAndDestroy( filter );
+    CleanupStack::PopAndDestroy( triggerName );
+    item.Reset();
+
+    inParamList->Reset();
+    outParamList->Reset();  
+    
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::IsPluginActive
+// ---------------------------------------------------------------------------
+//
+TBool CWrtData::IsPluginActive()
+    {
+    return iPlugin->IsActive();
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::ActivateL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::ActivateL()
+    {
+    ChangePublisherStatusL( KActive );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::ResumeL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::ResumeL()
+    {
+    ChangePublisherStatusL( KResume );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::SuspendL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::SuspendL()
+    {
+    ChangePublisherStatusL( KSuspend );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::DeActivateL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::DeActivateL()
+    {
+    ChangePublisherStatusL( KDeActive );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::InActiveL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::InActiveL()
+    {
+    ChangePublisherStatusL( KInActive );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::OnLineL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::OnLineL()
+    {
+    ChangePublisherStatusL( KOnLine );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::offLineL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::OffLineL()
+    {
+    ChangePublisherStatusL( KOffLine );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::CreateFilterL
+// ---------------------------------------------------------------------------
+//
+CLiwDefaultMap* CWrtData::CreateFilterLC()
+    {
+    CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
+    filter->InsertL( KPublisherId, TLiwVariant( KWRTPublisher ));
+    filter->InsertL( KContentType, TLiwVariant( KTemplateWidget ));
+    filter->InsertL( KContentId, TLiwVariant( iContentId ));
+    return filter;
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::ExecuteCommandL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::ExecuteCommandL(CLiwDefaultMap* aInFilter, CLiwDefaultMap* aOutDataMap, const TDesC16& aRegistry  )
+    {
+    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
+    
+    TLiwGenericParam type( KType, TLiwVariant( aRegistry ) );
+    inParamList->AppendL( type );
+    
+    //append filter to input param
+     TLiwGenericParam item( KFilter, TLiwVariant( aInFilter ));
+     inParamList->AppendL( item );
+     
+    // execute service.It is assumed that iInterface is already initiatedd
+    if(iInterface)
+        {
+        iInterface->ExecuteCmdL( *iCommandName, *inParamList, *outParamList);
+        }
+    else
+        {
+        User::Leave( KErrNotSupported );
+        }
+    type.Reset();
+    item.Reset();
+    inParamList->Reset();
+    
+    //extracts data map
+    TInt pos = 0;
+    outParamList->FindFirst( pos, KResults );
+    if( pos != KErrNotFound )
+        // results present
+        {
+        //extract iterator on results list
+        TLiwVariant variant = (*outParamList)[pos].Value();
+        CLiwIterable* iterable = variant.AsIterable();
+        iterable->Reset();
+        
+        //get next result
+        if( iterable->NextL( variant ) )
+            {
+            //extract content map
+            CLiwDefaultMap *map = CLiwDefaultMap::NewLC();
+            variant.Get( *map );
+            if( map->FindL( KDataMap, variant) )
+                {
+                 variant.Get( *aOutDataMap );
+                }
+            CleanupStack::PopAndDestroy( map );
+            }
+        iterable->Reset();
+        variant.Reset();
+        }
+    outParamList->Reset();
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::PublisherStatusL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::ChangePublisherStatusL(const TDesC& aStatus)
+    {
+    if( iContentId == NULL )
+       {
+       return;
+       }
+   HBufC8* triggerName = HBufC8::NewLC(KWRTContentNameMaxLength);
+   triggerName->Des().Copy(aStatus);
+   
+   CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+   CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
+       
+   TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
+   inParamList->AppendL( type );
+              
+   CLiwDefaultMap* filter = CreateFilterLC();
+   filter->InsertL(KActionTrigger, TLiwVariant(triggerName->Des()) );
+   
+   TLiwGenericParam item( KFilter, TLiwVariant( filter ));
+   inParamList->AppendL( item );
+   
+   if(iInterface)
+       {
+       iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
+       }
+   else
+       {
+       User::Leave( KErrNotSupported );
+       }
+   CleanupStack::PopAndDestroy( filter );
+   
+   inParamList->Reset();
+   outParamList->Reset();
+   CleanupStack::PopAndDestroy( triggerName );
+   }
+
+// ---------------------------------------------------------------------------
+// CWrtData::GetMenuItemsL
 // ---------------------------------------------------------------------------
 //
 void CWrtData::GetMenuItemsL()
@@ -241,463 +678,120 @@ void CWrtData::GetMenuItemsL()
 	}
 
 // ---------------------------------------------------------------------------
-// CreateFilterL
+// CWrtData::GetWidgetNameAndUidL
 // ---------------------------------------------------------------------------
 //
-CLiwDefaultMap* CWrtData::CreateFilterLC()
+void CWrtData::GetWidgetNameAndUidL(TDes& aName, TDes& aAppUID )
     {
-    CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
-	filter->InsertL( KPublisherId, TLiwVariant( KWRTPublisher ));
-	filter->InsertL( KContentType, TLiwVariant( KTemplateWidget ));
-	filter->InsertL( KContentId, TLiwVariant( iContentId ));
-	return filter;
-    }
-
-// ---------------------------------------------------------------------------
-// HasMenuItem
-// ---------------------------------------------------------------------------
-//
-TBool CWrtData::HasMenuItem(const TDesC16& aMenuItem )
-	{
-	TBool found = EFalse;
-	for (TInt i = 0; i < iMenuItems.Count(); i++ )
-		{
-		if( aMenuItem == iMenuItems[i] )
-			{
-			found =  ETrue;
-			break;
-			}
-		}
-	return found;
-	}
-
-// ---------------------------------------------------------------------------
-// PublishAllL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::PublishAllL( MAiContentObserver* aObserver )
-	{
-    PublishL( aObserver );
-	}
-
-// ---------------------------------------------------------------------------
-// PublishL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::PublishL( MAiContentObserver* aObserver ) 
-   {
-   CLiwDefaultMap *outDataMap = CLiwDefaultMap::NewLC();
-   //Create filter criteria for requested entries in form of LIW map:
-   CLiwDefaultMap* filter = CreateFilterLC();
-   ExecuteCommandL( filter, outDataMap, KCpData  );
-   CleanupStack::PopAndDestroy( filter );
-   TLiwVariant variant;
-	if ( outDataMap->FindL( KImage1, variant ) )
-		{
-		TInt handle = KErrBadHandle;
-		TUint uintHandle = 0;
-		TPtrC16 valPtr;
-		if ( variant.Get( uintHandle ) )
-			{
-			handle = uintHandle;
-			}
-		else if ( !variant.Get( handle ) )
-			{
-			handle = KErrBadHandle;
-			}
-		// read as a image handle
-		if( handle == KErrBadHandle )
-			{
-			// no handle, so read as image path
-			variant.Get( valPtr );
-			iPlugin->PublishImageL(aObserver, EImage1, valPtr );
-			}
-		else
-			{
-			TInt maskHandle = KErrBadHandle;
-			//Look for image mask
-			if ( outDataMap->FindL( KImageMask, variant ) )
-			   {
-			   variant.Get( maskHandle );                           
-			   }
-			iPlugin->PublishImageL(aObserver, EImage1, handle, maskHandle );
-			}
-		}
-	
-	variant.Reset();
-    CleanupStack::PopAndDestroy( outDataMap );
-	}
-
-// ---------------------------------------------------------------------------
-// ExecuteCommandL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ExecuteCommandL(CLiwDefaultMap* aInFilter, CLiwDefaultMap* aOutDataMap, const TDesC16& aRegistry  )
-	{
-	CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-	CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-	
-	TLiwGenericParam type( KType, TLiwVariant( aRegistry ) );
-	inParamList->AppendL( type );
-	
-	//append filter to input param
-	 TLiwGenericParam item( KFilter, TLiwVariant( aInFilter ));
-	 inParamList->AppendL( item );
-	 
-	// execute service.It is assumed that iInterface is already initiatedd
-	if(iInterface)
-		{
-		iInterface->ExecuteCmdL( *iCommandName, *inParamList, *outParamList);
-		}
-	else
-		{
-		User::Leave( KErrNotSupported );
-		}
-	type.Reset();
-	item.Reset();
-	inParamList->Reset();
-	
-	//extracts data map
-	TInt pos = 0;
-	outParamList->FindFirst( pos, KResults );
-	if( pos != KErrNotFound )
-		// results present
-		{
-		//extract iterator on results list
-		TLiwVariant variant = (*outParamList)[pos].Value();
-		CLiwIterable* iterable = variant.AsIterable();
-		iterable->Reset();
-		
-		//get next result
-		if( iterable->NextL( variant ) )
-			{
-			//extract content map
-			CLiwDefaultMap *map = CLiwDefaultMap::NewLC();
-			variant.Get( *map );
-			if( map->FindL( KDataMap, variant) )
-				{
-				 variant.Get( *aOutDataMap );
-				}
-			CleanupStack::PopAndDestroy( map );
-			}
-		iterable->Reset();
-		variant.Reset();
-		}
-	outParamList->Reset();
-	}
-
-// ---------------------------------------------------------------------------
-// ExecuteActionL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
-   {
-   HBufC8* triggerName = HBufC8::NewLC( KWRTContentNameMaxLength );
-  
-   CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-   CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-   CLiwDefaultMap* filter = NULL;
-
-   triggerName->Des().Copy(aTrigger);
-   if ( aObjectId == KPubData )
-	   {
-	   // this trigger belongs to publisher registery.
-	   // in such case it is assumed that all the items in the widgets
-	   // belongs to same publisher, type and id.
-	   TLiwGenericParam cptype( KType, TLiwVariant( KPubData ) );
-	   inParamList->AppendL( cptype );
-	   cptype.Reset();
-	   // use the first item configuration to create the filter
-	   filter = CreateFilterLC();
-	   }
-   else
-	   {
-	   if ( aObjectId == KMenuItem16 )
-		   {
-		   TInt pos = KErrNotFound;
-		   for (TInt i = 0; i < iMenuItems.Count(); i++)
-			   {
-			   if ( aTrigger == iMenuItems[i] )
-				   {
-				   pos = i;
-				   break;
-				   }
-			   }
-		   if( pos == KErrNotFound )
-			   {
-			   // No such menu items
-			   CleanupStack::PopAndDestroy( triggerName );
-			   return; 
-			   }
-			  triggerName->Des().Copy( iMenuTriggers[pos]->Des() );
-			  filter = CreateFilterLC();
-		   }
-	   else
-		   {
-		   //Create filter criteria for requested entries in form of LIW map:
-		   filter = CreateFilterLC();
-		   }
-	   //append type to inparam list
-	   TLiwGenericParam cptype( KType, TLiwVariant( KCpData ) );
-	   inParamList->AppendL( cptype );
-	   cptype.Reset();
-	   }
-
-    filter->InsertL( KActionTrigger, TLiwVariant( triggerName->Des() ) );
-   //append filter to input param
-    TLiwGenericParam item( KFilter, TLiwVariant( filter ) );
-    inParamList->AppendL( item );
-    iInterface->ExecuteCmdL( KExecuteAction,  *inParamList, *outParamList );
-    
+    CLiwDefaultMap *outDataMap = CLiwDefaultMap::NewLC();
+    //Create filter criteria for requested entries in form of LIW map:
+    CLiwDefaultMap* filter = CreateFilterLC();
+    ExecuteCommandL( filter, outDataMap, KPubData  );
     CleanupStack::PopAndDestroy( filter );
-    CleanupStack::PopAndDestroy( triggerName );
-    item.Reset();
+  
+    TLiwVariant variant;
+    if ( outDataMap->FindL(KWidgetInfo, variant) )
+        {
+        CLiwDefaultMap* widgetInfoMap = CLiwDefaultMap::NewLC();
+        variant.Get( *widgetInfoMap );
+        variant.Reset();
+        if ( widgetInfoMap->FindL( KWidgetName, variant ) )
+            {
+            aName.Copy(variant.AsDes());
+            variant.Reset();
+            if ( widgetInfoMap->FindL( KWidgetIcon, variant ) )
+               {
+               aAppUID.Copy(variant.AsDes());
+               }
+            }
+        CleanupStack::PopAndDestroy( widgetInfoMap );
+        }
+    variant.Reset();
+    CleanupStack::PopAndDestroy( outDataMap );
+    }
 
-    inParamList->Reset();
-    outParamList->Reset();  
+// ---------------------------------------------------------------------------
+// CWrtData::ResolveUid
+// ---------------------------------------------------------------------------
+//
+TBool CWrtData::ResolveUid(const TDesC& aUidDes, TUid& aUid )
+    {
+    // Syntax: uid(0x12345678)
+    TInt error = KErrNotFound;
+    TInt pos = aUidDes.FindF( KUid );
+    if( pos == 0 )
+        {
+        // Skip skin token
+        pos += KUid().Length();
+
+        // Initialize lexer
+        TLex lex( aUidDes.Mid( pos ) );
+
+        // Check left parenthesis
+        if ( lex.Get() == KLeftParenthesis )
+            {
+            lex.SkipSpaceAndMark();
+            lex.SkipCharacters();
+            
+            TPtrC mtoken = lex.MarkedToken();
+            pos = mtoken.FindF( KHexPrefix );
+            if ( pos == 0 )
+                {
+                TLex lex( mtoken.Mid( KHexPrefix().Length() ) );
+                TUint id = 0;
+                error = lex.Val( id, EHex );
+                aUid = TUid::Uid( (TInt)id );
+                }
+            else
+                {
+                TInt id( 0 );
+                error = lex.Val( id );
+                aUid.iUid = id;
+                }
+            }
+        }
+    return (error == KErrNone );
+    }
+
+// ---------------------------------------------------------------------------
+// CWrtData::CreateIconFromUidL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::CreateIconFromUidL(TInt& aHandle, TInt& aMaskHandle, const TUid& aAppUid ) 
+    {
+    RApaLsSession lsSession;
+    User::LeaveIfError( lsSession.Connect() );
+    CleanupClosePushL( lsSession ); // lsSession (1)
     
+    CArrayFixFlat<TSize>* sizeArray = new(ELeave) CArrayFixFlat<TSize>( 5 );
+    CleanupStack::PushL( sizeArray );
+    if ( KErrNone == lsSession.GetAppIconSizes(aAppUid, *sizeArray) )
+        {
+        if ( sizeArray->Count() ) 
+            {
+            // There are other icon sizes
+            TInt idx = 0;
+            TInt size( sizeArray->At(idx).iWidth * sizeArray->At(idx).iHeight );
+            for ( TInt i = 1; i < sizeArray->Count(); i++ ) 
+                {
+                if ( ( sizeArray->At(i).iWidth * sizeArray->At(i).iHeight ) > size )
+                    {
+                    idx = i;
+                    size =  sizeArray->At(idx).iWidth * sizeArray->At(idx).iHeight;
+                    }
+                }
+
+            CApaMaskedBitmap* appBitMap = CApaMaskedBitmap::NewLC();
+            if ( KErrNone == lsSession.GetAppIcon( aAppUid, sizeArray->At(idx),
+                    *appBitMap ) )
+                {
+                aHandle = appBitMap->Handle();
+                aMaskHandle = appBitMap->Mask()->Handle();
+                }
+            CleanupStack::PopAndDestroy( appBitMap );
+            }
+        }
+    CleanupStack::PopAndDestroy( sizeArray );
+    CleanupStack::PopAndDestroy( &lsSession );
     }
 
-// ---------------------------------------------------------------------------
-// RegisterL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::RegisterL()
-    {
-	CLiwDefaultMap* filter = CreateFilterLC();
-	filter->InsertL( KOperation, TLiwVariant( KAddUpdateDelete ) );
-	iObserver->RegisterL(filter);
-	CleanupStack::PopAndDestroy( filter );
-    }
-
-// ---------------------------------------------------------------------------
-// RefreshL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::RefreshL( TDesC& aPublisher, TDesC& aContentType, 
-                TDesC& aContentId, TDesC& aOperation )
-    {
-     if ( aPublisher == KWRTPublisher() && aContentType == KTemplateWidget()
-    	  && aContentId == iContentId )
-    	 {
-    	 iPlugin->RefreshL( aOperation);
-    	 }
-    }
-
-// ---------------------------------------------------------------------------
-// IsPluginActive
-// ---------------------------------------------------------------------------
-//
-TBool CWrtData::IsPluginActive()
-    {
-    return iPlugin->IsActive();
-    }
-
-// ---------------------------------------------------------------------------
-// PublisherStatusL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ChangePublisherStatusL(const TDesC& aStatus)
-    {
-    if( iContentId == NULL )
-       {
-       return;
-       }
-   HBufC8* triggerName = HBufC8::NewLC(KWRTContentNameMaxLength);
-   triggerName->Des().Copy(aStatus);
-   
-   CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-   CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-       
-   TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
-   inParamList->AppendL( type );
-			  
-   CLiwDefaultMap* filter = CreateFilterLC();
-   filter->InsertL(KActionTrigger, TLiwVariant(triggerName->Des()) );
-   
-   TLiwGenericParam item( KFilter, TLiwVariant( filter ));
-   inParamList->AppendL( item );
-   
-   if(iInterface)
-	   {
-	   iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
-	   }
-   else
-	   {
-	   User::Leave( KErrNotSupported );
-	   }
-   CleanupStack::PopAndDestroy( filter );
-   
-   inParamList->Reset();
-   outParamList->Reset();
-   CleanupStack::PopAndDestroy( triggerName );
-   }
-
-// ---------------------------------------------------------------------------
-// ResumeL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ResumeL()
-    {
-    ChangePublisherStatusL( KResume );
-    }
-
-// ---------------------------------------------------------------------------
-// SuspendL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::SuspendL()
-    {
-    ChangePublisherStatusL( KSuspend );
-    }
-
-// ---------------------------------------------------------------------------
-// ActivateL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ActivateL()
-    {
-    ChangePublisherStatusL( KActive );
-    }
-
-// ---------------------------------------------------------------------------
-// DeActivateL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::DeActivateL()
-    {
-    ChangePublisherStatusL( KDeActive );
-    }
-
-// ---------------------------------------------------------------------------
-// OnLineL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::OnLineL()
-    {
-    ChangePublisherStatusL( KOnLine );
-    }
-
-// ---------------------------------------------------------------------------
-// offLineL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::OffLineL()
-    {
-    ChangePublisherStatusL( KOffLine );
-    }
-
-// ---------------------------------------------------------------------------
-// InActiveL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::InActiveL()
-    {
-    ChangePublisherStatusL( KInActive );
-    }
-
-// ---------------------------------------------------------------------------
-// UpdatePublisherStatusL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::UpdatePublisherStatusL()
-	{
-	 // Resent the plugin status to publisher
-	 ActivateL();
-	 if ( iPlugin->IsActive() )
-		 {
-		 ResumeL();
-		 }
-	 else
-		 {
-		 SuspendL();
-		 }
-	  // forward the network status if it uses.
-	if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOnline )
-		{
-		OnLineL();
-		}
-	else if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOffline )
-		{
-		OffLineL();
-		}
-	}
-
-// ---------------------------------------------------------------------------
-// ResolveSkinItemId
-// ---------------------------------------------------------------------------
-//
-TBool CWrtData::ResolveSkinIdAndMifId( const TDesC& aPath, TAknsItemID& aItemId,
-		TInt& abitmapId, TInt& aMaskId, TDes& aFilename )
-   {
-   // Syntax: skin( <major> <minor> ):mif(filename bimapId maskId) 
-   TInt error = KErrNotFound;
-   TInt pos = aPath.FindF( KSkin );
-   if( pos != KErrNotFound )
-	   {
-	   // Skip skin token
-	   pos += KSkin().Length();
-	   
-	   // Initialize lexer
-	  TLex lex( aPath.Mid( pos ) );
-	  lex.SkipSpace();
-	   
-	   // Check left parenthesis
-	  if (lex.Get() == KLeftParenthesis )
-		   {
-		   //lex.SkipSpace();
-		   
-		   TInt majorId( 0 );        
-		   TInt minorId( 0 );
-
-		   // Resolve major id        
-		   error = lex.Val( majorId );
-		   
-		   // Resolve minor id
-		   lex.SkipSpace();
-		   error |= lex.Val( minorId );
-		   
-		   // initilize skin item id object
-		   aItemId.Set( majorId, minorId );
-		   }
-	   }
-
-   if( (error == KErrNone && aPath.FindF( KColon ) != KErrNotFound ) 
-		 || ( error == KErrNotFound ) )
-	   {
-	   error = KErrNotFound;
-	   pos = aPath.FindF( KMif );
-	   if ( pos != KErrNotFound )
-		   {
-		   pos += KMif().Length();
-		   // Initialize lexer
-		   TLex lex( aPath.Mid( pos ) );
-		   lex.SkipSpace();
-		   
-		   // Check left parenthesis
-		   if (lex.Get() == KLeftParenthesis )
-			   {
-			   lex.SkipSpaceAndMark();
-			   lex.SkipCharacters();
-			   // Resolve MifFile name
-			   aFilename.Copy(lex.MarkedToken());
-			   if( aFilename.Length()!= 0)
-				   {
-				   // Resolve bitmap id  
-				   lex.SkipSpace();
-				   error = lex.Val( abitmapId );
-				   
-				   // Resolve mask id
-				   // dont return error if it is not found, that is ok
-				   lex.SkipSpace();
-				   lex.Val( aMaskId );
-				   }
-			   else
-				   {
-				   error = KErrNotFound;
-				   }
-			   }
-		   }
-	   }
-   return (error == KErrNone );
-   }

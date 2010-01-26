@@ -21,8 +21,13 @@
 #include <contentharvesterplugin.h>
 #include <apgnotif.h>
 
+#include "chswimassmodeobserver.h"
+
 class MLiwInterface;
 class CLiwGenericParamList;
+
+class CCHSwiUsbHandler;
+class CCHSwiUsbObserver;
 
 /**
  *  Active Data plugin for SIS installation events.
@@ -30,7 +35,7 @@ class CLiwGenericParamList;
  *  @since S60 S60 v3.1
  */
 class CCHSwiPlugin: public CContentHarvesterPlugin,
-        MApaAppListServObserver
+        MApaAppListServObserver, MCHSwiMassModeObserver
 	{
 	
 public:
@@ -53,6 +58,13 @@ public:
 	void UpdateL();
 	
 private:
+	
+	// from MCHSwiMassModeObserver
+	void SetMassStorageMode( TBool aMode );
+	TBool IsMassStorageMode();
+	void HandleMassStorageModeEndEvent();
+	void HandleSuccessfulAsynchDriveScan();
+	
     // from MApaAppListServObserver
 
     void HandleAppListEvent( TInt aEvent );    
@@ -67,16 +79,23 @@ private:
 	 */
 	CCHSwiPlugin( MLiwInterface* aInterface );
 	
-	
-   /**
-     * This function removes publishers from database when
-     * an applicaion is uninstalled or when the MMC is removed.
+    /**
+     * Removes publishers from database when an applicaion 
+     * is uninstalled or when the MMC is removed.
      */
 	void UpdateWidgetsL();
 	
-	
+	/**
+	 * Removes widgets.
+	 * @param aWidgets Widgets list.
+	 */
 	void RemoveWidgetsL( CLiwGenericParamList* aWidgets );
 	
+	/** 
+	 * Removes single widget.
+	 * @param aType Widget type.
+	 * @param aContentId Widget UID.
+	 */
 	void RemoveWidgetL( const TDesC& aType, 
         const TDesC& aContentId );
 	
@@ -87,17 +106,42 @@ private:
      * An interface to Content Publisher Service
      */
     MLiwInterface* iCPSInterface;
-
-    
+   
     /**
      * AppArc session.
      * Own.
      */     
     RApaLsSession iApaLsSession;
     
-    CApaAppListNotifier* iNotifier; ///< Change notifier. Own.
+    /**
+     * File session.
+     */
+    RFs iFs;
+    
+    /**
+     * Change notifier.
+     * Own.
+     */
+    CApaAppListNotifier* iNotifier; 
+    
+    /**
+     * Mass storage mode handler. 
+     * Own.
+     */
+    CCHSwiUsbHandler* iUsbHandler;
+    
+    /**
+     * Disk observer for monitoring status of mass drive. 
+     * Own.
+     */
+    CCHSwiUsbObserver* iUsbObserver;
+    
+    /**
+     * Mass storage mode flag.
+     */
+    TBool iMassStorageMode;
+	};
 
-    };
+
 
 #endif // C_CCHSWIPLUGIN_H
-
