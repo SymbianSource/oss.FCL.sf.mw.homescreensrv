@@ -309,6 +309,7 @@ TBool ChspsSecurityEnforcer::CheckAccessRightsL( const RMessage2& aMessage )
         case EhspsSetConfState:
         case EhspsRestoreActiveAppConf:
         case EhspsUpdatePluginConf:    
+        case EhspsRestoreConfigurations:
             {
             if( CheckAccessControlListL( secure_id ) )
                 {

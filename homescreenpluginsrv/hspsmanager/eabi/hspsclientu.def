@@ -52,4 +52,5 @@ EXPORTS
 	_ZThn32_N11ChspsClient21hspsSetPluginSettingsERK8ChspsODTiR16ChspsDomDocumenti @ 51 NONAME
 	_ZThn32_N11ChspsClient24hspsCancelGetListHeadersEv @ 52 NONAME
 	_ZThn32_N11ChspsClient24hspsRestoreActiveAppConfEii @ 53 NONAME
+	_ZN11ChspsClient25hspsRestoreConfigurationsEii @ 54 NONAME
 

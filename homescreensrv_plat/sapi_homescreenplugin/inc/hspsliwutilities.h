@@ -243,6 +243,13 @@ class CHspsLiwUtilities : public CBase
          */
         static void SetActivePluginOutputL( 
             CLiwGenericParamList& aOutParamList );
+        
+        /**
+         * Creates RestoreConfigurations method output parameter list
+         * @param aOutParamList Output parameters
+         */
+        static void RestoreConfigurationsOutputL( 
+            CLiwGenericParamList& aOutParamList );
 
     private:
         

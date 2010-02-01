@@ -25,4 +25,5 @@ EXPORTS
 	_ZTI27CHspsPersonalisationService @ 24 NONAME
 	_ZTV25CHspsConfigurationService @ 25 NONAME
 	_ZTV27CHspsPersonalisationService @ 26 NONAME
+	_ZN27CHspsPersonalisationService22RestoreConfigurationsLEii @ 27 NONAME
 

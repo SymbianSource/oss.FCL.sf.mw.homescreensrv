@@ -56,6 +56,7 @@ _LIT8( KSetActiveAppConf, "SetActiveAppConf" );
 _LIT8( KRequestNotification, "RequestNotification" );
 _LIT8( KSetConfState, "SetConfState" );
 _LIT8( KSetActivePlugin, "SetActivePlugin" );
+_LIT8( KRestoreConfigurations, "RestoreConfigurations" );
 
 //Input words.
 _LIT8( KPluginId, "pluginId" );
@@ -70,6 +71,10 @@ _LIT8( KHspsLiwFilter, "filter" );
 _LIT8( KHspsLiwStoringParams, "storingParams" ); //optional
 _LIT8( KHspsLiwStorePluginRefence, "storePluginConf" );
 _LIT8( KHspsLiwStoreAppConf, "storeAppConf" ); 
+_LIT8( KHspsLiwRestore, "restore" );
+_LIT8( KHspsLiwRestoreActive, "active");
+_LIT8( KHspsLiwRestoreAll, "all");
+
 //Output words.
 _LIT8( KHspsLiwPluginId, "pluginId" );
 _LIT8( KHspsLiwPluginIds, "pluginIds" );

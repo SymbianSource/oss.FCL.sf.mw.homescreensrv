@@ -1851,7 +1851,27 @@ void ChspsMaintenanceHandler::SetLogBus( ChspsLogBus* aLogBus )
 #endif
 
 // -----------------------------------------------------------------------------
-// Removes an plugin instance from the provided application configuration
+// ChspsMaintenanceHandler::IsViewConfiguration()
+// -----------------------------------------------------------------------------
+//
+TBool ChspsMaintenanceHandler::IsViewConfiguration(
+        ChspsDomNode& aPluginNode )
+    {
+    TBool isView = EFalse;
+    
+    ChspsDomNode* confNode = 
+            (ChspsDomNode*)aPluginNode.ChildNodes().FindByName( KConfigurationElement );
+    if( confNode )
+        {
+        ChspsDomAttribute* typeAttr = 
+                (ChspsDomAttribute*)confNode->AttributeList().FindByName( KConfigurationAttrType );
+        isView = ( typeAttr->Value().CompareF( KConfTypeView ) == 0 );            
+        }
+    return isView;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::RemoveConfigurationL()
 // -----------------------------------------------------------------------------
 //
 TInt ChspsMaintenanceHandler::RemoveConfigurationL(
@@ -1861,96 +1881,153 @@ TInt ChspsMaintenanceHandler::RemoveConfigurationL(
     TInt err = KErrNotFound;
     
     // Find a plugin node with the provided id
-    ChspsDomNode *node = hspsServerUtil::FindPluginNodeL( aAppODT, aPluginId );
-    if ( node )
-        {        
-        // Get parent node
-        ChspsDomNode *parentNode = node->Parent();
-        if ( parentNode )
-            {            
-            // Get uid attribute from the node
-            TInt pluginUid = 0;
-            ChspsDomList& attrList = node->AttributeList();                                                                                                      
-            ChspsDomAttribute* pluginUidAttr = 
-                static_cast<ChspsDomAttribute*> ( attrList.FindByName(KPluginAttrUid) );                                                
-            if( !pluginUidAttr )
-                {
-#ifdef HSPS_LOG_ACTIVE  
-                if( iLogBus )
-                    {
-                    iLogBus->LogText( _L( "ChspsMaintenanceHandler::RemoveConfigurationL(): - Invalid XML" ) );
-                    }
-#endif
-                
-                err = KErrGeneral;
-                }         
-            else            
-                {
-                // Convert uids from string to numeric format                                        
-                const TDesC8& pluginUidValue = pluginUidAttr->Value();                    
-                const TUid uid = hspsServerUtil::ConvertDescIntoUid(pluginUidValue);                
-                if ( uid.iUid > 0 )
-                    {                    
-                    pluginUid = uid.iUid;
-                    // Override default status
-                    err = KErrNone;
-                    }
-                }
+    ChspsDomNode *pluginNode = hspsServerUtil::FindPluginNodeL( aAppODT, aPluginId );
+    if ( pluginNode )
+        {
+        // Remove the node
+        err = RemoveConfigurationL( aAppODT, *pluginNode );
+        }
+    
+    return err;    
+    }
 
-            // Store activity state for use after deletion.
-            TBool pluginWasActive = EFalse;
-            ChspsDomAttribute* pluginActivityAttr = 
-                static_cast<ChspsDomAttribute*>( attrList.FindByName( KPluginAttrActive ) );                                                
-            if( pluginActivityAttr )
+// -----------------------------------------------------------------------------
+// Removes an plugin instance from the provided application configuration
+// -----------------------------------------------------------------------------
+//
+TInt ChspsMaintenanceHandler::RemoveConfigurationL(
+        ChspsODT& aAppODT,
+        ChspsDomNode& aPluginNode )
+    {
+    TInt err = KErrNotFound;
+                   
+    // Get parent node
+    ChspsDomNode *parentNode = aPluginNode.Parent();
+    if ( parentNode )
+        {                                            
+        ChspsDomList& attrList = aPluginNode.AttributeList();
+                   
+        // Get uid attribute from the node
+        TInt pluginUid = 0;            
+        ChspsDomAttribute* pluginUidAttr = 
+            static_cast<ChspsDomAttribute*> ( attrList.FindByName(KPluginAttrUid) );                                                
+        if( !pluginUidAttr )
+            {
+#ifdef HSPS_LOG_ACTIVE  
+            if( iLogBus )
                 {
-                if( pluginActivityAttr->Value().CompareF( KPluginActiveStateActive ) == 0 )
-                    {
-                    pluginWasActive = ETrue;
-                    }
+                iLogBus->LogText( _L( "ChspsMaintenanceHandler::RemoveConfigurationL(): - Invalid XML" ) );
                 }
-                            
-            if ( !err )
+#endif
+            
+            err = KErrGeneral;
+            }         
+        else            
+            {
+            // Convert uids from string to numeric format                                        
+            const TDesC8& pluginUidValue = pluginUidAttr->Value();                    
+            const TUid uid = hspsServerUtil::ConvertDescIntoUid(pluginUidValue);                
+            if ( uid.iUid > 0 )
+                {                    
+                pluginUid = uid.iUid;
+                // Override default status
+                err = KErrNone;
+                }
+            }
+
+        // Store activity state for use after deletion.
+        TBool pluginWasActive = EFalse;
+        ChspsDomAttribute* pluginActivityAttr = 
+            static_cast<ChspsDomAttribute*>( attrList.FindByName( KPluginAttrActive ) );                                                
+        if( pluginActivityAttr )
+            {
+            if( pluginActivityAttr->Value().CompareF( KPluginActiveStateActive ) == 0 )
                 {
-                // Get number of plugin instances with the plugin uid
-                TInt instanceCount = 0;
-                GetPluginInstanceCountL( 
-                    aAppODT, 
-                    pluginUid, 
-                    instanceCount );                                                        
-                    
-                // Remove plugin resources form the application configuration:
-                // By default remove all plugin's resources from all instances
-                // - otherwise, after upgrades, there might be various versions of the same resources
-                err = RemovePluginResourcesL( aAppODT, pluginUid );
-                if ( !err )
+                pluginWasActive = ETrue;
+                }
+            }
+                        
+        if ( !err )
+            {            
+            // If user is removing a view plugin
+            if( IsViewConfiguration( aPluginNode ) )
+                {
+                // first all subplugins need to be removed, so that the application's resource array 
+                // (visible in ODT dump) contains only valid resources
+                ChspsDomNode* confNode = 
+                    (ChspsDomNode*)aPluginNode.ChildNodes().FindByName( KConfigurationElement );
+                if( confNode )
                     {
-                    // If the application configuration holds other instances of the same plugin                     
-                    if ( instanceCount > 1 )
+                    ChspsDomNode* controlNode = 
+                            (ChspsDomNode*)confNode->ChildNodes().FindByName( KControlElement );
+                    if( controlNode )
                         {
-                        // Put back the resources
-                        AddPluginResourcesL( 
-                                aAppODT,
-                                pluginUid );
+                        ChspsDomNode *pluginsNode = 
+                                (ChspsDomNode*)controlNode->ChildNodes().FindByName( KPluginsElement );
+                        if( pluginsNode )
+                            {
+                            RPointerArray<ChspsDomNode> nodeArray;
+                            CleanupClosePushL( nodeArray );
+                            
+                            // Get plugin nodes
+                            TInt pluginCount = pluginsNode->ChildNodes().Length();
+                            for( TInt pluginIndex=0; pluginIndex < pluginCount; pluginIndex++ )                                    
+                                {
+                                nodeArray.Append( (ChspsDomNode*)pluginsNode->ChildNodes().Item( pluginIndex ) );
+                                }                                
+                            
+                            // Remove the nodes and related resources
+                            for( TInt pluginIndex=0; pluginIndex < pluginCount; pluginIndex++ )
+                                {
+                                RemoveConfigurationL( aAppODT, *nodeArray[pluginIndex ] );
+                                }
+                            
+                            nodeArray.Reset();
+                            CleanupStack::PopAndDestroy( 1, &nodeArray );
+                            }                                                            
                         }
-                    
-                    // Remove the plugin node from parent node    
-                    parentNode->DeleteChild( node );
                     }                
                 }
-
-            // If plugin was succesfully deleted and was active ->
-            // need set another plugin active.
-            // ( Choose to activate topmost item. )
-            // ( Use depth of 1 to affect only one level. )
-            if ( !err && pluginWasActive )
+        
+            // Get number of plugin instances with the plugin uid
+            TInt instanceCount = 0;
+            GetPluginInstanceCountL( 
+                aAppODT, 
+                pluginUid, 
+                instanceCount );                                                        
+                
+            // Remove plugin resources from the application configuration:
+            // By default remove all plugin's resources from all instances
+            // - otherwise, after upgrades, there might be various versions of the same resources
+            err = RemovePluginResourcesL( aAppODT, pluginUid );
+            if ( !err )
                 {
-                const TInt KDepth = 1;
-                hspsServerUtil::EditPluginNodeActivityL( parentNode,
-                                                         hspsServerUtil::EActivateFirst,
-                                                         KDepth );       
-                }
-            }        
-        }
+                // If the application configuration holds other instances of the same plugin                     
+                if ( instanceCount > 1 )
+                    {
+                    // Put back the resources
+                    AddPluginResourcesL( 
+                            aAppODT,
+                            pluginUid );
+                    }
+                
+                // Remove the plugin node from the plugins node    
+                parentNode->DeleteChild( &aPluginNode );
+                }                
+            }
+
+        // If plugin was succesfully deleted and was active ->
+        // need set another plugin active.
+        // ( Choose to activate topmost item. )
+        // ( Use depth of 1 to affect only one level. )
+        if ( !err && pluginWasActive )
+            {
+            const TInt KDepth = 1;
+            hspsServerUtil::EditPluginNodeActivityL( parentNode,
+                                                     hspsServerUtil::EActivateFirst,
+                                                     KDepth );       
+            }
+        }        
 
     return err;
     }
@@ -4601,6 +4678,337 @@ void ChspsMaintenanceHandler::AddErrorConfigurationL(
     CleanupStack::Pop( resourcesNode );        
     resourcesNode->SetParent( confNode );           
     
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::ServiceRestoreConfigurationsL
+// -----------------------------------------------------------------------------
+//    
+void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aMessage )
+    {    
+    ThspsServiceCompletedMessage ret = EhspsRestoreConfigurationsFailed;    
+    
+    // using message pointer as a local variable because of synch call
+    RMessagePtr2 messagePtr = aMessage;
+    
+    // IPC slots: 
+    // #0) output: externalized ChspsResult for error handling
+    // #1) input: ThspsParamRestoreConfigurations struct                         
+    ThspsParamRestoreConfigurations params;        
+    TPckg<ThspsParamRestoreConfigurations> packagedStruct(params);    
+    aMessage.ReadL(1, packagedStruct);                                
+    if ( params.appUid < 1 )
+        {
+        User::Leave( KErrArgument );
+        }
+    // Enable modification of owned configurations only
+    if( messagePtr.SecureId().iId != params.appUid )
+        {
+        User::Leave( KErrAccessDenied );
+        }
+    
+    TInt err = KErrNone;
+    if( iDefinitionRepository.Locked() )
+        {
+        // Repository locked
+        err = KErrAccessDenied;
+        }
+            
+    if( !err )
+        {
+        // Lock the Plugin Repository (a.k.a. Def.rep)
+        iDefinitionRepository.Lock();                                
+        CleanupStack::PushL( TCleanupItem( UnlockRepository, &iDefinitionRepository ) );
+        
+        // Get active root configuration for the client application
+        ChspsODT* appODT = ChspsODT::NewL();
+        CleanupStack::PushL( appODT );
+        iThemeServer.GetActivateAppConfigurationL( 
+                params.appUid,
+                *appODT );     
+
+#ifdef HSPS_LOG_ACTIVE                
+        if( iLogBus )
+            {
+            iLogBus->LogText( 
+                _L( "ChspsMaintenanceHandler::ServiceRestoreConfigurationsL(): - Dump before the changes:" ) 
+                );                
+            ChspsOdtDump::Dump( *appODT, *iLogBus );
+            }
+#endif
+        
+        TInt err = KErrNone;
+        if ( !params.restoreAll )
+            {
+            // Remove all widgets from the active view
+            err = RestoreActiveViewL( *appODT );
+            }        
+        
+        // As a backup, if restoration of the active view fails,  
+        // or if all views but the locked view should be removed
+        if ( err || params.restoreAll )
+            {                        
+            // Remove all views but the locked one and reset active view            
+            RemoveUnlockedViewsL( *appODT );
+            
+            // Remove all widgets from the active view
+            err = RestoreActiveViewL( *appODT );
+            }       
+
+#ifdef HSPS_LOG_ACTIVE                
+        if( iLogBus )
+            {
+            iLogBus->LogText( 
+                _L( "ChspsMaintenanceHandler::ServiceRestoreConfigurationsL(): - Dump after the changes:" ) 
+                );        
+            ChspsOdtDump::Dump( *appODT, *iLogBus );
+            }
+#endif
+        if( !err )
+            {
+            // Stores the new application configuration into the repository
+            err = iDefinitionRepository.SetOdtL( *appODT );
+            ret = EhspsRestoreConfigurationsSuccess;
+            }
+        
+        CleanupStack::PopAndDestroy( appODT );        
+
+        // Unlock after the changes have been done
+        iDefinitionRepository.Unlock();
+        CleanupStack::Pop(&iDefinitionRepository);                               
+        }
+                          
+    // Error handling
+    iResult->iXuikonError = err;    
+    
+    // complete the message
+    CompleteRequest( ret, messagePtr );
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::RestoreActiveViewL
+// -----------------------------------------------------------------------------
+//
+TInt ChspsMaintenanceHandler::RestoreActiveViewL(
+        ChspsODT& aAppODT )
+    {          
+    TInt err = KErrCorrupt;
+    
+    // Find active view node
+    ChspsDomNode* pluginNode = FindActiveView( aAppODT );
+    if ( pluginNode )
+        {    
+        // Remove all plugins from the view configuration
+        err = RemovePluginConfigurationsL( 
+                aAppODT,
+                *pluginNode ); 
+        }   
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::FindActiveView
+// -----------------------------------------------------------------------------
+//
+ChspsDomNode* ChspsMaintenanceHandler::FindActiveView(
+        ChspsODT& aAppODT )
+    {       
+    ChspsDomNode* pluginNode = NULL;
+        
+    // Get 1st configuration element
+    ChspsDomNode* confNode = aAppODT.DomDocument().RootNode();
+    if( confNode && confNode->Name().CompareF( KConfigurationElement ) == 0 )
+        {                    
+        // Get control element
+        ChspsDomNode* controlNode = 
+                (ChspsDomNode*)confNode->ChildNodes().FindByName( KControlElement );
+        if( controlNode )
+            {    
+            // Get plugins element
+            ChspsDomNode* pluginsNode = 
+                    (ChspsDomNode*)controlNode->ChildNodes().FindByName( KPluginsElement );  
+            if( pluginsNode )
+                {                        
+                // Find active plugin node under the plugins node 
+                pluginNode = hspsServerUtil::GetActivePluginNode( pluginsNode );
+                }
+            }
+        }
+    return pluginNode;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::RemovePluginConfigurationsL
+// -----------------------------------------------------------------------------
+//
+TInt ChspsMaintenanceHandler::RemovePluginConfigurationsL(
+        ChspsODT& aAppODT, 
+        ChspsDomNode& aActivePluginNode )
+    {
+    TInt err = KErrCorrupt;
+    
+    // Find a configuration node    
+    ChspsDomNode* confNode = 
+            (ChspsDomNode*)aActivePluginNode.ChildNodes().FindByName( KConfigurationElement );
+    if( confNode )
+        {
+        // Get control node
+        ChspsDomNode* controlNode = 
+                (ChspsDomNode*)confNode->ChildNodes().FindByName( KControlElement );
+        if( controlNode )
+            {            
+            // Find a plugins node        
+            ChspsDomNode* pluginsNode = 
+                    (ChspsDomNode*)controlNode->ChildNodes().FindByName( KPluginsElement );
+            if( pluginsNode )
+                {
+                // Loop plugin nodes            
+                err = KErrNone;
+                ChspsDomList& childNodes = pluginsNode->ChildNodes();
+                for( TInt pluginIndex=childNodes.Length()-1; pluginIndex >= 0; pluginIndex-- )
+                    {
+                    ChspsDomNode* pluginNode = (ChspsDomNode*)childNodes.Item( pluginIndex );
+                    if( pluginNode )
+                        {
+                        // Remove the plugin configuration instance                       
+                        err = RemoveConfigurationL( 
+                            aAppODT,
+                            *pluginNode );
+                        if( err )
+                            {
+                            break;
+                            }
+                        }                    
+                    }
+                }
+            }
+        }
+    
+    return err;    
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::IsConfigurationLocked
+// -----------------------------------------------------------------------------
+//
+TBool ChspsMaintenanceHandler::IsConfigurationLocked(
+        ChspsDomNode& aConfNode )
+    {   
+    TBool isLocked = EFalse;
+    
+    ChspsDomList& attrList = aConfNode.AttributeList();
+    ChspsDomAttribute* attr = 
+        static_cast<ChspsDomAttribute*>( attrList.FindByName( KConfigurationAttrLocking ) );                
+    if( attr )
+        {        
+        isLocked = ( attr->Value().CompareF( KConfLockingLocked ) == 0 );
+       }
+    
+    return isLocked;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::RemoveUnlockedViewsL
+// -----------------------------------------------------------------------------
+//
+void ChspsMaintenanceHandler::RemoveUnlockedViewsL(
+        ChspsODT& aAppODT )
+    {
+    // Get 1st configuration element
+    ChspsDomNode* confNode = aAppODT.DomDocument().RootNode();
+    if( !confNode || confNode->Name().CompareF( KConfigurationElement) != 0 )
+        {            
+        User::Leave( KErrCorrupt );            
+        }           
+    
+    ChspsDomNode* controlNode = 
+            (ChspsDomNode*)confNode->ChildNodes().FindByName( KControlElement );
+    if( !controlNode )
+        {
+        User::Leave( KErrCorrupt );
+        }
+    
+    // Get plugins element
+    ChspsDomNode* pluginsNode = 
+            (ChspsDomNode*)controlNode->ChildNodes().FindByName( KPluginsElement );  
+    if( !pluginsNode )
+        {            
+        User::Leave( KErrCorrupt );
+        }
+        
+    // Find plugin nodes which should be removed        
+    const TInt pluginCount = pluginsNode->ChildNodes().Length();
+    if( pluginCount > 1 )
+        {        
+        // Array for nodes which should removed from the configuration
+        // (don't touch the appended objects) 
+        RPointerArray<ChspsDomNode> nodeArray;
+        CleanupClosePushL( nodeArray );
+        
+        // Remove all but one view
+        TBool foundLocked = EFalse;                
+        for( TInt nodeIndex=0; nodeIndex < pluginCount; nodeIndex++ ) 
+            {
+            ChspsDomNode* pluginNode = 
+                    (ChspsDomNode*)pluginsNode->ChildNodes().Item( nodeIndex );
+            if( pluginNode )
+                {
+            
+                ChspsDomNode* confNode = 
+                        (ChspsDomNode*)pluginNode->ChildNodes().FindByName( KConfigurationElement );
+                if( confNode )
+                    {                                
+                    TBool isLocked = IsConfigurationLocked( *confNode );
+                    
+                    // If the plugin configuration hasn't been locked or 
+                    // if there are several locked plugin nodes then remove all the rest
+                    if( !isLocked || foundLocked )
+                        {
+                        // Mark for removal
+                        nodeArray.Append( pluginNode );
+                        }
+                    else
+                        {
+                        // If this is the 1st locked node
+                        if( !foundLocked )
+                            {
+                            foundLocked = ETrue;
+                            }
+                        }
+                    }
+                }                
+            }
+                
+        // If all the nodes were marked for removal
+        if( nodeArray.Count() > 0 && nodeArray.Count() == pluginCount )
+            {
+            // Unmark the 1st node - remove from the array only
+            nodeArray.Remove( 0 );
+            }
+        
+        // Remove rest
+        TInt err = KErrNone;
+        for( TInt nodeIndex=0; nodeIndex < nodeArray.Count(); nodeIndex++ ) 
+            {
+            // Remove the plugin node, related resources and maintain activity information
+            err = RemoveConfigurationL( 
+                    aAppODT, 
+                    *nodeArray[nodeIndex] );            
+            if( err )
+                {
+#ifdef HSPS_LOG_ACTIVE                                            
+                if( iLogBus )
+                    {
+                    iLogBus->LogText( _L( "ChspsMaintenanceHandler::RemoveUnlockedViewsL(): - Restoring failed with %d code" ), err );                    
+                    }
+#endif
+                }
+
+            }
+        
+        nodeArray.Reset();
+        CleanupStack::PopAndDestroy( 1, &nodeArray );        
+        }           
     }
 
 // end of file

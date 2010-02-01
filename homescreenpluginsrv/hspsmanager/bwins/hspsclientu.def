@@ -28,4 +28,5 @@ EXPORTS
 	?hspsMovePluginsL@ChspsClient@@UAE?AW4ThspsServiceCompletedMessage@@HHABV?$CArrayFixFlat@H@@@Z @ 27 NONAME ; enum ThspsServiceCompletedMessage ChspsClient::hspsMovePluginsL(int, int, class CArrayFixFlat<int> const &)
 	?hspsGetListHeaders@ChspsClient@@UAE?AW4ThspsServiceCompletedMessage@@ABVChspsODT@@AAV?$CArrayPtrFlat@VChspsODT@@@@@Z @ 28 NONAME ; enum ThspsServiceCompletedMessage ChspsClient::hspsGetListHeaders(class ChspsODT const &, class CArrayPtrFlat<class ChspsODT> &)
 	?hspsRemoveThemeL@ChspsClient@@UAE?AW4ThspsServiceCompletedMessage@@ABVChspsODT@@@Z @ 29 NONAME ; enum ThspsServiceCompletedMessage ChspsClient::hspsRemoveThemeL(class ChspsODT const &)
+	?hspsRestoreConfigurations@ChspsClient@@QAE?AW4ThspsServiceCompletedMessage@@HH@Z @ 30 NONAME ; enum ThspsServiceCompletedMessage ChspsClient::hspsRestoreConfigurations(int, int)
 

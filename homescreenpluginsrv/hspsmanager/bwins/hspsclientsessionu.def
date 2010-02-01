@@ -24,4 +24,5 @@ EXPORTS
 	?AccessResourceFile@RhspsClientSession@@IAEHAAVTDes8@@ABUThspsConfiguration@@ABVTDesC16@@AAH@Z @ 23 NONAME ; int RhspsClientSession::AccessResourceFile(class TDes8 &, struct ThspsConfiguration const &, class TDesC16 const &, int &)
 	?GetODTUpdate@RhspsClientSession@@IAEXAAVTDes8@@00AAVTRequestStatus@@@Z @ 24 NONAME ; void RhspsClientSession::GetODTUpdate(class TDes8 &, class TDes8 &, class TDes8 &, class TRequestStatus &)
 	?ReinstallConf@RhspsClientSession@@IAEHAAVTDes8@@ABUThspsParamReinstallConf@@@Z @ 25 NONAME ; int RhspsClientSession::ReinstallConf(class TDes8 &, struct ThspsParamReinstallConf const &)
+	?RestoreConfigurations@RhspsClientSession@@IAEHAAVTDes8@@ABUThspsParamRestoreConfigurations@@@Z @ 26 NONAME ; int RhspsClientSession::RestoreConfigurations(class TDes8 &, struct ThspsParamRestoreConfigurations const &)
 

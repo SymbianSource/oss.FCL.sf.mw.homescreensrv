@@ -24,4 +24,5 @@ EXPORTS
 	_ZN18RhspsClientSession6GetODTER5TDes8RK18ThspsConfigurationRK6TDesC8R6TDes16 @ 23 NONAME
 	_ZN18RhspsClientSession7ConnectEv @ 24 NONAME
 	_ZN18RhspsClientSession9AddPluginER5TDes8RK18ThpsParamAddPluginRi @ 25 NONAME
+	_ZN18RhspsClientSession21RestoreConfigurationsER5TDes8RK31ThspsParamRestoreConfigurations @ 26 NONAME
 

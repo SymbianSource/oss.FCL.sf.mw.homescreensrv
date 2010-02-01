@@ -880,6 +880,29 @@ EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsRestoreActiveAppConf(
     
     return ret;
     }
+
+
+// -----------------------------------------------------------------------------
+// ChspsClient::hspsRestoreConfigurations
+// -----------------------------------------------------------------------------
+//
+EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsRestoreConfigurations(
+    const TInt aAppUid,
+    const TBool aReinstall )
+    {
+    ThspsServiceCompletedMessage ret = EhspsRestoreConfigurationsFailed;
+    
+    ThspsParamRestoreConfigurations params;
+    params.appUid = aAppUid;
+    params.restoreAll = aReinstall;
+
+    ret = ( ThspsServiceCompletedMessage )iSession.RestoreConfigurations( iResultData, params );
+    
+    UpdatehspsResult( iResultData );
+    
+    return ret;
+    }
+
 // -----------------------------------------------------------------------------
 // ChspsClient::hspsPluginUpdateL
 // -----------------------------------------------------------------------------

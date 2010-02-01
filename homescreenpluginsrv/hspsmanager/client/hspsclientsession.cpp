@@ -469,5 +469,18 @@ EXPORT_C TInt RhspsClientSession::RestoreActiveAppConf(
     return SendReceive( EhspsRestoreActiveAppConf, TIpcArgs( &aResultData, &packagedStruct ) );             
     }
 
+// -----------------------------------------------------------------------------
+// RhspsClientSession::RestoreConfigurations
+// -----------------------------------------------------------------------------
+//
+EXPORT_C TInt RhspsClientSession::RestoreConfigurations(
+    TDes8& aResultData, 
+    const ThspsParamRestoreConfigurations& aParams )
+    {
+    aResultData.Zero();                                         
+    TPckgC<ThspsParamRestoreConfigurations> packagedStruct( aParams );
+    return SendReceive( EhspsRestoreConfigurations, TIpcArgs( &aResultData, &packagedStruct ) );
+    }
+
 // end of file
 

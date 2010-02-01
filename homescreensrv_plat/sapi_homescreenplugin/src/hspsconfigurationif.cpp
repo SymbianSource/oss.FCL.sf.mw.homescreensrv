@@ -243,6 +243,10 @@ void CHSPSConfigurationIf::SyncMethodCallL(
         {
         TRAP( err, SetActivePluginL( aInParamList, aOutParamList ) );
         }
+    else if ( aCmdName.CompareF( KRestoreConfigurations ) == 0 )
+        {
+        TRAP( err, RestoreConfigurationsL( aInParamList, aOutParamList ) );
+        }
     //UNKNOWN COMMAND
     else
         {
@@ -1157,6 +1161,54 @@ void CHSPSConfigurationIf::SetActivePluginL(
     // Create output parameters
     CHspsLiwUtilities::SetActivePluginOutputL( aOutParamList );
 
+    }
+
+
+// -----------------------------------------------------------------------------
+// Restores plugin configurations when the client has panicked
+// -----------------------------------------------------------------------------
+//
+void CHSPSConfigurationIf::RestoreConfigurationsL( 
+    const CLiwGenericParamList& aInParamList, 
+    CLiwGenericParamList& aOutParamList )
+    {                
+    // Get restore parameter
+    const TLiwGenericParam* inParam;
+    TInt pos = 0;
+    
+    inParam = aInParamList.FindFirst( 
+        pos, 
+        KHspsLiwRestore );    
+    if ( !inParam )
+        {
+        // Manadatory parameter missing
+        User::Leave( KErrArgument );
+        }
+    
+    TLiwVariant inParamVariant = inParam->Value();
+    TPtrC8 restore( inParamVariant.AsData() );
+    
+    TBool restoreAll = EFalse;            
+    if( restore.CompareF( KHspsLiwRestoreAll ) == 0 )
+        {
+        restoreAll = ETrue;
+        }
+    else if( restore.CompareF( KHspsLiwRestoreActive ) != 0 )
+        {
+        User::Leave( KErrArgument );
+        }           
+    
+    // Get client application's uid
+    TInt appUid;
+    iHspsConfigurationService->GetAppUidL( appUid );
+        
+    iHspsPersonalisationService->RestoreConfigurationsL( appUid, restoreAll );
+
+    // Invalidate ODT.
+    iHspsConfigurationService->InvalidateODT();
+    
+    // Create output parameters
+    CHspsLiwUtilities::RestoreConfigurationsOutputL( aOutParamList );
     }
 
 // ======== GLOBAL FUNCTIONS ===================================================

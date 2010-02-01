@@ -214,6 +214,12 @@ private:
     * @since S60 5.0
     */
     void RestoreActiveAppConfL(const RMessage2& aMessage);
+    
+    /**
+    * RestoreConfigurationsL
+    * @since S60 5.2
+    */
+    void RestoreConfigurationsL( const RMessage2& aMessage );
 
     /****************************************
      * hspsClientRequestService requests

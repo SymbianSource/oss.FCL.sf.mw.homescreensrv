@@ -21,4 +21,5 @@ EXPORTS
 	?GetPluginOdtL@CHspsPersonalisationService@@QAEXHAAVTDesC8@@PAVChspsODT@@@Z @ 20 NONAME ; void CHspsPersonalisationService::GetPluginOdtL(int, class TDesC8 &, class ChspsODT *)
 	?SetActivePluginL@CHspsPersonalisationService@@QAEXHAAVTDesC8@@@Z @ 21 NONAME ; void CHspsPersonalisationService::SetActivePluginL(int, class TDesC8 &)
 	?UnRegisterObserverL@CHspsConfigurationService@@QAEXXZ @ 22 NONAME ; void CHspsConfigurationService::UnRegisterObserverL(void)
+	?RestoreConfigurationsL@CHspsPersonalisationService@@QAEXHH@Z @ 23 NONAME ; void CHspsPersonalisationService::RestoreConfigurationsL(int, int)
 

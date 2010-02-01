@@ -392,6 +392,12 @@ enum ThspsServiceRequestMessage
     
   EhspsUpdatePluginConf,
   
+  /**
+   * Restores plugin configurations by either removing all plugins
+   * from the active view or by reinstalling all the ROM based plugins.
+   */
+  EhspsRestoreConfigurations,
+  
 
   /**************************************
    * Client Request related requests: 
@@ -615,6 +621,17 @@ enum ThspsServiceCompletedMessage
      * EhspsGetPluginOdtFailed. Failed to get plugin odt.
      */
     EhspsGetPluginOdtFailed,
+    
+    /**
+     * EhspsRestoreConfigurationsSuccess. Restoration was successfull.
+     */
+    EhspsRestoreConfigurationsSuccess,
+    
+    /**
+     * EhspsRestoreConfigurationsFailed. Restoration failed.
+     */
+    EhspsRestoreConfigurationsFailed,
+    
     
 /* Client Requests: */
     
@@ -1009,6 +1026,18 @@ struct ThspsParamSetPluginSettings
     {
     TInt pluginId;                  // id of the existing plugin to be replaced
     TBool storingStatus;            // storing status telling if modified plugin settings are needed to stored its reference.
+    };
+
+/**
+ * Input parameter for the RestoreActiveAppConf service 
+ */
+struct ThspsParamRestoreConfigurations
+    {
+    TInt appUid;                    // uid of the application
+    TBool restoreAll;               // false: if all widget plugins should be removed from the active view,
+                                    // true: if all widget plugins should be removed from the first locked view
+                                    //       (or if locked views were not found then from first unlocked view) 
+                                    //       and if all other views should be removed
     };
 
 

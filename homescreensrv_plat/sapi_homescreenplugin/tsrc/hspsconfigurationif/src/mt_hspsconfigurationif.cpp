@@ -114,6 +114,8 @@
 #include "mt_hsps_setactiveplugin_4.h"
 #include "mt_hsps_setactiveplugin_5.h"
 #include "mt_hsps_setactiveplugin_6.h"
+// restore configurations
+#include "mt_hsps_restoreconfigurations_1.h"
 
 // ======== LOCAL CONSTANTS ====================================================
 
@@ -2882,6 +2884,68 @@ void MT_CHSPSConfigurationIf::SetActivePlugin_6_L()
 //------------------------------------------------------------------------------
 // Test case table
 //------------------------------------------------------------------------------
+void MT_CHSPSConfigurationIf::RestoreConfigurations_1_L()
+    {
+    // Pre conditions
+    // Set active configuration to Typical configuration
+    EUNIT_PRINT( _L8( "Pre conditions: Set Active configuration Typical" ) );
+    SetActiveConfigurationL( KHSPSTestAppUid, KHSPSActiveConfTypical );    
+    // Attach to HSPS 
+    EUNIT_PRINT( _L8( "Pre conditions: Attach to HSPS service IConfiguration interface" ) );
+    AttachServiceL( KHSPS, KHSPSConfigurationIf, KHSPSTestAppUid );
+    
+    // Test step 1
+    EUNIT_PRINT( _L8( "Test step 1" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_1_method,
+        ( TUint8* )restoreconfigurations_1_ts_1_input,
+        ( TUint8* )restoreconfigurations_1_ts_1_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    
+    // Test step 2
+    EUNIT_PRINT( _L8( "Test step 2" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_2_method,
+        ( TUint8* )restoreconfigurations_1_ts_2_input,
+        ( TUint8* )restoreconfigurations_1_ts_2_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    
+    // Test step 3
+    EUNIT_PRINT( _L8( "Test step 3" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_3_method,
+        ( TUint8* )restoreconfigurations_1_ts_3_input,
+        ( TUint8* )restoreconfigurations_1_ts_3_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    
+    // Test step 4
+    EUNIT_PRINT( _L8( "Test step 4" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_4_method,
+        ( TUint8* )restoreconfigurations_1_ts_4_input,
+        ( TUint8* )restoreconfigurations_1_ts_4_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    
+    // Test step 5
+    EUNIT_PRINT( _L8( "Test step 5" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_5_method,
+        ( TUint8* )restoreconfigurations_1_ts_5_input,
+        ( TUint8* )restoreconfigurations_1_ts_5_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    
+    // Test step 6
+    EUNIT_PRINT( _L8( "Test step 6" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_6_method,
+        ( TUint8* )restoreconfigurations_1_ts_6_input,
+        ( TUint8* )restoreconfigurations_1_ts_6_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    }
+
+//------------------------------------------------------------------------------
+// Test case table
+//------------------------------------------------------------------------------
 EUNIT_BEGIN_TEST_TABLE(
     MT_CHSPSConfigurationIf,
     "This is a test suite for HSPS configuration interface.",
@@ -3400,6 +3464,14 @@ EUNIT_BEGIN_TEST_TABLE(
        "FUNCTIONALITY",
        SetupL, SetActivePlugin_6_L, Teardown )
 
+    EUNIT_TEST(   
+       "RestoreConfigurations(1)",
+       "IConfiguration",
+       "SetActivePlugin",
+       "FUNCTIONALITY",
+       SetupL, RestoreConfigurations_1_L, Teardown )
+       
+       
     EUNIT_END_TEST_TABLE
 
 //  END OF FILE

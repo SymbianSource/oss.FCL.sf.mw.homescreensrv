@@ -153,7 +153,10 @@ EXPORT_C TInt ChspsDomStringPool::AddStringL( const TDesC8& aString )
 //
 const TDesC8& ChspsDomStringPool::String( const TInt aStringRef )
     {
-    return (*iStringPool[ aStringRef ]);
+    if ( aStringRef < iStringPool.Count() )
+        return (*iStringPool[ aStringRef ]);
+    else
+        return KNullDesC8;
     }
         
 // -----------------------------------------------------------------------------

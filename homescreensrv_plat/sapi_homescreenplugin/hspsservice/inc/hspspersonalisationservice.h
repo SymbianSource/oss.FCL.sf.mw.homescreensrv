@@ -230,6 +230,7 @@ class CHspsPersonalisationService : public CBase, public MhspsThemeManagementSer
         
         /**
          * Replaces a plugin in active application configuration
+         * @since S60 5.1
          * @param aAppUid - application uid
          * @param aPluginId - id of the plugin to be replaced
          * @param aConfUid - uid of the new plugin configuration 
@@ -238,6 +239,21 @@ class CHspsPersonalisationService : public CBase, public MhspsThemeManagementSer
             const TInt aAppUid,
             const TDesC8& aPluginId,
             const TDesC8& aConfUid );
+        
+        /**
+         * Restores plugin configurations by either removing all plugins
+         * from the active view or by removing all extra views.
+         * In latter case, the first locked view is emptied. If there are 
+         * no locked views then the first view will remain while others
+         * are removed.
+         * @since S60 5.2
+         * @param aAppUid Application uid
+         * @param aResetAllViews False if only the active view should be fixed,
+         *                       True if also all extra views should removed                
+         */
+        IMPORT_C void RestoreConfigurationsL(
+            const TInt aAppUid, 
+            const TBool aResetAllViews );
 
     private: // Methods
     

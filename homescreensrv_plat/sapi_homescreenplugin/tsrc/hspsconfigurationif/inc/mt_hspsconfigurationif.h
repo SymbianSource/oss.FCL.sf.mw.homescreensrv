@@ -443,6 +443,11 @@ NONSHARABLE_CLASS( MT_CHSPSConfigurationIf ) : public MT_CHSPS
          * See HSPS module test specification
          */
         void SetActivePlugin_6_L();
+        /**
+         * Test case function for test case RestoreConfigurations(1)
+         * See HSPS module test specification
+         */
+        void RestoreConfigurations_1_L();
         
     private:    // Data
 

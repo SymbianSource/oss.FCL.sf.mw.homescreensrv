@@ -349,6 +349,21 @@ class RhspsClientSession : public RSessionBase
                 TDes8& aResultData, 
                 const ThspsParamReplacePlugin& aParams );
         
+        /**        
+        * Restores plugin configurations by either removing all plugins
+        * from the active view or by removing all extra views.
+        * In latter case, the first locked view is emptied. If there are 
+        * no locked views then the first view will remain while others
+        * are removed.
+        * @since S60 5.2
+        * @param aResultData    Result data.
+        * @param aParams        Params.
+        * @return Symbian error code.
+        */        
+        IMPORT_C TInt RestoreConfigurations(
+            TDes8& aResultData, 
+            const ThspsParamRestoreConfigurations& aParams );
+        
     public:
     
         friend class ChspsClient;

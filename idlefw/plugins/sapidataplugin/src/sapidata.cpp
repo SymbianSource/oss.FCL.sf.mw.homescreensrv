@@ -497,8 +497,17 @@ void CSapiData::PublishDataL(MAiContentObserver* aObserver, CLiwDefaultMap* aDat
 			else if( iItemList[pIndex]->iType->Des() == KImage )
 				{
 				TInt handle = KErrBadHandle;
+                TUint uintHandle = 0;
+                if ( variant.Get( uintHandle ) )
+                    {
+                    handle = uintHandle;
+                    }
+                else if ( !variant.Get( handle ) )
+                    {
+                    handle = KErrBadHandle;
+                    }				
 				// read as a image handle
-				if( ! variant.Get( handle ) )
+				if( handle == KErrBadHandle )
 					{
 					// no handle, so read as image path
 					variant.Get( valPtr );
@@ -507,6 +516,7 @@ void CSapiData::PublishDataL(MAiContentObserver* aObserver, CLiwDefaultMap* aDat
 				else
 					{
 					TInt maskHandle = KErrBadHandle;
+					TUint uintmaskHandle = 0;
 					//Look for image mask
 					HBufC8* maskKey = HBufC8::NewLC( itemName->Length() + KMask().Length() );
 					TPtr8 maskKeyPtr = maskKey->Des();
@@ -514,7 +524,14 @@ void CSapiData::PublishDataL(MAiContentObserver* aObserver, CLiwDefaultMap* aDat
 					maskKeyPtr.Append( KMask );
 					if ( aDataMap->FindL( maskKeyPtr, variant ) )
 						{
-						variant.Get( maskHandle );                           
+                        if ( variant.Get( uintmaskHandle ) )
+                            {
+                            maskHandle = uintmaskHandle;
+                            }
+                        else if ( !variant.Get( maskHandle ) )
+                            {
+                            maskHandle = KErrBadHandle;
+                            }                           
 						}
 					CleanupStack::PopAndDestroy( maskKey );
 					iPlugin->PublishImageL(aObserver, iItemList[pIndex]->iId, handle, maskHandle );

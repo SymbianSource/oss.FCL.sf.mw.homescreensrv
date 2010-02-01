@@ -21,7 +21,7 @@
 #include <platform/mw/aisystemuids.hrh>
 #include <appinfo.rh>
 #include <data_caging_paths_strings.hrh>
-#include <ailaunch.rsg>
+#include <homescreen.rsg>
 
 // ========== CONSTANTS =======================================================
 
@@ -37,9 +37,9 @@ UID3 AI_UID3_AIFW_EXE // Define your application UID here
 //
 RESOURCE APP_REGISTRATION_INFO
     {
-    app_file = "ailaunch";
-    localisable_resource_file = APP_RESOURCE_DIR"\\ailaunch";
-    localisable_resource_id = R_AILAUNCH_LOCALISABLE_APP_INFO;
+    app_file = "homescreen";
+    localisable_resource_file = APP_RESOURCE_DIR"\\homescreen";
+    localisable_resource_id = R_HOMESCREEN_LOCALISABLE_APP_INFO;
     
 #ifdef RD_BOOT_CUSTOMIZABLE_AI
     // When Active Idle starts in boot, hide the app icon from Application Shell

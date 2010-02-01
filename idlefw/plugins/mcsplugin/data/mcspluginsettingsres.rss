@@ -74,6 +74,7 @@ RESOURCE MENU_PANE r_ai_mcs_settings_menupane
         {
             command = EAiScutSettingsCmdChange;
             txt     = qtn_options_change;
+            flags   = EEikMenuItemAction;
         }
 
 #ifdef __SERIES60_HELP

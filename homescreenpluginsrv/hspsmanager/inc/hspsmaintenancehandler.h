@@ -266,6 +266,13 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
          * @param @param aServerSession Pointer to owning server session
          */
         void SetServerSession( ChspsThemeServerSession* aServerSession );
+
+        /**  
+         * ServiceRestoreConfigurationsL
+         * @since S60 5.2
+         * @param aMessage contains the data received from the client
+         */
+        void ServiceRestoreConfigurationsL( const RMessage2& aMessage );                        
         
   public: // Functions from base classes
 
@@ -575,6 +582,17 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
                 );
 
         /**
+         * Checks if the provided plugin configuration is a collection of plugin
+         * configurations, e.g. view configuration.
+         * Alternatively, we could check the type from header cache
+         * @since S60 5.2
+         * @param aPluginNode Plugin node
+         * @return True if it is a view configuration
+         */
+        TBool IsViewConfiguration(
+                ChspsDomNode& aPluginNode );
+                
+        /**
          * Removes an plugin instance from the provided application configuration
          * @since S60 5.0
          * @param aAppODT is an instance of the the application configuration         
@@ -583,7 +601,18 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
          */
         TInt RemoveConfigurationL(
                 ChspsODT& aAppODT,
-                const TInt aPluginId );
+                const TInt aPluginId );                
+        
+        /**
+         * Removes an plugin instance from the provided application configuration
+         * @since S60 5.0
+         * @param aAppODT is an instance of the the application configuration         
+         * @param aPluginNode is a node of the plugin instance to be removed
+         * @return KErrNone if succeeded
+         */
+        TInt RemoveConfigurationL(
+                ChspsODT& aAppODT,
+                ChspsDomNode& aPluginNode );
         
         /**
          * Finds a plugin node with the provided id which is also a children of 
@@ -796,6 +825,55 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
                 ChspsDomNode& aMissingPluginNode,
                 const TInt aPluginUid );
 
+        /**
+         * Removes all plugins from the plugins node and related 
+         * resources from the resource array.
+         * @since S60 5.2
+         * @param aAppODT Application configuration
+         * @return error code
+         */
+        TInt RestoreActiveViewL(
+                ChspsODT& aAppODT );
+        
+        /**
+         * Finds a plugin node which is the active view configuration.
+         * @since S60 5.2
+         * @param aAppODT Application configuration
+         * @return Active plugin node or NULL
+         */
+        ChspsDomNode* FindActiveView(
+                ChspsODT& aAppODT );
+        
+        /**
+         * Removes all plugin configurations from the provided
+         * plugin node (view configuration).
+         * @since S60 5.2         
+         * @param aAppODT Application configuration
+         * @param aActivePluginNode Plugin node to be modified
+         * @return error code 
+         */
+        TInt RemovePluginConfigurationsL(
+                ChspsODT& aAppODT, 
+                ChspsDomNode& aActivePluginNode );
+        
+        /**
+         * Removes all unlocked views and reset the active view.
+         * Can leave if DOM is corrupted (objects are not found) or in OOM cases.
+         * @since S60 5.2   
+         * @param aAppODT Application configuration
+         */
+        void RemoveUnlockedViewsL(
+                ChspsODT& aAppODT );
+        
+        /**
+         * Checks whether the plugin configuration was locked.
+		 * @since S60 5.2   
+         * @param aConfNode Configuration node
+		 * @return True if it was locked
+         */
+        TBool IsConfigurationLocked(
+                ChspsDomNode& aConfNode );
+        
     private:   // Data
         RMessagePtr2 iMessagePtr;
         ChspsResult* iResult;

@@ -359,6 +359,14 @@ void ChspsThemeServerSession::DoServiceL( const RMessage2& aMessage )
 	        RestoreActiveAppConfL( aMessage );
 	        break;
 	        }
+	    case EhspsRestoreConfigurations:
+	        {
+#ifdef HSPS_LOG_ACTIVE              
+            iLogBus->LogText( _L( "DoServiceL: EhspsRestoreConfigurations" ) );
+#endif
+            RestoreConfigurationsL( aMessage );
+            break;	        
+	        }
         default:
             {
 #ifdef HSPS_LOG_ACTIVE        
@@ -696,6 +704,15 @@ void ChspsThemeServerSession::GetOdtUpdateL(const RMessage2& aMessage)
         iClientRequestHandler->ServiceGetOdtUpdateL(aMessage);  
         }
     } 
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServerSession::RestoreConfigurationsL
+// -----------------------------------------------------------------------------
+void ChspsThemeServerSession::RestoreConfigurationsL( const RMessage2& aMessage )
+    {
+    CreateMaintenanceHandlerL( aMessage.SecureId().iId );
+    iMaintenanceHandler->ServiceRestoreConfigurationsL( aMessage );        
+    }
 
 // -----------------------------------------------------------------------------
 // ChspsThemeServerSession::CancelGetOdtUpdate

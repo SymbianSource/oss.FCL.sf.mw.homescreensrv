@@ -1546,3 +1546,13 @@ void CHspsLiwUtilities::SetActivePluginOutputL(
     AppendStatusL( KErrNone, aOutParamList );
 
     }
+
+// -----------------------------------------------------------------------------
+// Creates output parmater list for RestoreConfigurations method
+// ----------------------------------------------------------------------------- 
+void CHspsLiwUtilities::RestoreConfigurationsOutputL( 
+    CLiwGenericParamList& aOutParamList )
+    {    
+    AppendStatusL( KErrNone, aOutParamList );
+    }
+    

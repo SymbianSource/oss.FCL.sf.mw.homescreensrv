@@ -254,6 +254,17 @@ NONSHARABLE_CLASS( CHSPSConfigurationIf ) : public CBase, public MLiwInterface
             CLiwGenericParamList& aOutParamList );
 
         /**
+         * Restores plugin configurations.
+         * Either removes all plugins from the active view or 
+         * reinstalls all ROM based configurations.
+         * @param aInParamList Input param list
+         * @param aOutParamList Output param list
+         */   
+        void RestoreConfigurationsL(
+            const CLiwGenericParamList& aInParamList, 
+            CLiwGenericParamList& aOutParamList );        
+        
+        /**
          * Sets an error value to output parameter.
          * @param aOutParamList Output param list
          * @param aErr an error

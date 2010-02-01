@@ -19,7 +19,7 @@
 #include        <platform/mw/aisystemuids.hrh>
 #include        <data_caging_paths.hrh>
 
-TARGET          ailaunch.exe
+TARGET          homescreen.exe
 TARGETTYPE      exe
 UID             0x100039CE AI_UID3_AIFW_EXE
 SECUREID        AI_SID_AIFW_EXE
@@ -33,14 +33,13 @@ EPOCHEAPSIZE    0x300000 0xC00000
 SOURCEPATH      ../src/framework
 SOURCE          main.cpp
 
-START RESOURCE  ailaunch.rss
+START RESOURCE  homescreen.rss
 HEADER
 TARGETPATH      APP_RESOURCE_DIR
 LANGUAGE_IDS
 END
 
-START RESOURCE  ailaunch_reg.rss
-DEPENDS ailaunch.rsg
+START RESOURCE  homescreen_reg.rss
 TARGETPATH      /private/10003a3f/apps
 END
 

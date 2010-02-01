@@ -37,6 +37,7 @@ _LIT8( KConfigurationAttrMultiInstance, "multiinstance" );      // Multiinstance
 _LIT8( KConfigurationAttrDesc,          "desc" );               // Localized description
 _LIT8( KConfigurationAttrDescEntity,    "_desc" );              // Logical string id of the Description attr (DTD entity)
 _LIT8( KConfigurationAttrMaxChild,      "max_child" );          // Maximum child count
+_LIT8( KConfigurationAttrLocking,       "locking_status" );     // Locking status
 
 
 // Configuration element type attribute values
@@ -50,6 +51,11 @@ _LIT8( KConfStateNotConfirmed,          "NotConfirmed" );       // Not confirmed
 _LIT8( KConfStateWaitForConfirmation,   "WaitForConfirmation" );// Wait for confirmation state
 _LIT8( KConfStateConfirmed,             "Confirmed" );          // Confirmed state
 _LIT8( KConfStateError,                 "Error" );              // Error state
+
+// Options for the KConfigurationAttrLocking 
+_LIT8( KConfLockingLocked,              "locked" );             // Locked state
+_LIT8( KConfLockingRemovable,           "removable" );          // Removable state
+_LIT8( KConfLockingNone,                "none" );               // Default
 
 // Control element
 _LIT8( KControlElement, 				"control" );

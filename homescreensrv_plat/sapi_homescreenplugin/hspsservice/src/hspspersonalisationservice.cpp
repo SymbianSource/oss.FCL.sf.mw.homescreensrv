@@ -424,6 +424,35 @@ EXPORT_C void CHspsPersonalisationService::ReplacePluginL(
         }
     }
 
+// -----------------------------------------------------------------------------
+// Repaces a plugin in active application configuration
+// -----------------------------------------------------------------------------
+EXPORT_C void CHspsPersonalisationService::RestoreConfigurationsL(
+    const TInt aAppUid, 
+    const TBool aResetAllViews )
+    {        
+    ThspsServiceCompletedMessage ret = 
+        iHspsClient->hspsRestoreConfigurations( aAppUid, aResetAllViews );            
+    if( ret != EhspsRestoreConfigurationsSuccess )
+        {
+        // Get error code from the server process
+        ChspsResult* errorDetails = ChspsResult::NewL();
+        CleanupStack::PushL( errorDetails );
+        iHspsClient->GethspsResult( *errorDetails );
+        
+        // Check if disk full error case.
+        if( errorDetails->iXuikonError == KErrDiskFull )
+            {
+            User::Leave( KErrDiskFull );
+            }                
+        
+        CleanupStack::PopAndDestroy( errorDetails );
+        
+        // Other error cases.
+        User::Leave( KErrGeneral );
+        }
+    }
+
 
 // ---------------------------------------------------------------------------
 // Hsps client service observer

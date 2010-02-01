@@ -39,7 +39,8 @@ PRJ_MMPFILES
 aiutils.mmp
 aiidleint.mmp
 aifw.mmp
-ailaunch.mmp
+homescreen.mmp
+
 
 PRJ_TESTMMPFILES
 
@@ -48,6 +49,9 @@ PRJ_TESTEXPORTS
 //
 // Include subprojects
 //
+
+// hslaunch
+#include "../hslaunch/group/bld.inf"
 
 // Plug-ins
 #include "../plugins/group/bld.inf"

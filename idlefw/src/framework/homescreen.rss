@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Resource definitions for project ailaunch
+* Description:  Resource definitions for project homescreen
 *
 */
 
@@ -35,11 +35,11 @@ RESOURCE RSS_SIGNATURE { }
 RESOURCE TBUF { buf=""; }
 
 // ---------------------------------------------------------------------------
-// r_ailaunch_localisable_app_info
-// It defines localisable app info of Active Idle 2
+// r_homescreen_localisable_app_info
+// It defines localisable app info of Active Idle 3
 // ---------------------------------------------------------------------------
 //
-RESOURCE LOCALISABLE_APP_INFO r_ailaunch_localisable_app_info
+RESOURCE LOCALISABLE_APP_INFO r_homescreen_localisable_app_info
     {
     short_caption = qtn_apps_idle_grid;
     caption_and_icon = 
@@ -50,12 +50,12 @@ RESOURCE LOCALISABLE_APP_INFO r_ailaunch_localisable_app_info
 #ifdef __SCALABLE_ICONS
 
         number_of_icons = 1;
-        icon_file = APP_RESOURCE_DIR"\\ailaunch_aif.mif";
+        icon_file = APP_RESOURCE_DIR"\\homescreen_aif.mif";
 
 #else
 
         number_of_icons = 1;
-        icon_file = APP_RESOURCE_DIR"\\ailaunch_aif.mbm";
+        icon_file = APP_RESOURCE_DIR"\\homescreen_aif.mbm";
 
 #endif // __SCALABLE_ICONS
         };

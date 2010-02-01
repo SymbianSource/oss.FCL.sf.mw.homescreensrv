@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Image description file for ActiveIdle2 localisable resources.
+* Description:  Image description file for ActiveIdle3 localisable resources.
 *
 */
 
@@ -21,17 +21,12 @@
 
 #ifdef RD_CUSTOMIZABLE_AI
 
-#ifndef ACTIVEIDLE2_RESOURCES_IBY
-#define ACTIVEIDLE2_RESOURCES_IBY
-
 #include <data_caging_paths_for_iby.hrh>
 
-data=DATAZ_\APP_RESOURCE_DIR\ailaunch.rsc         APP_RESOURCE_DIR\ailaunch.rsc
+data=DATAZ_\APP_RESOURCE_DIR\homescreen.rsc		APP_RESOURCE_DIR\homescreen.rsc
 
 // Content publishing plug-in resources
 data=DATAZ_\APP_RESOURCE_DIR\aidevstaplgres.rsc  APP_RESOURCE_DIR\aidevstaplgres.rsc
-
-#endif // ACTIVEIDLE2_RESOURCES_IBY
 
 #endif // RD_CUSTOMIZABLE_AI
 
