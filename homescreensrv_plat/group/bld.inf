@@ -16,7 +16,8 @@
 *
 */
 
-
+PRJ_EXPORTS
+../../inc/aisystemuids.hrh              MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
 
 #include "../ai_content_model_api/group/bld.inf"
 #include "../ai_utilities_api/group/bld.inf"
