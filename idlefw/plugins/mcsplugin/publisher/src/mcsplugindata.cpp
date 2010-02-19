@@ -123,22 +123,32 @@ void CMCSPluginData::UpdateDataL()
     CleanupStack::PushL( settingsCleanupItem );
     iPluginSettings->GetSettingsL( iInstanceUid, settings );
     TInt count = settings.Count();
-    for( TInt i = 0; i < count; i++ )
+    TBool wasEmpty = !iData.Count();
+    
+    for ( TInt i = 0; i < count; i++ )
        {
-        CItemMap* itemMap = settings[i];
+        CItemMap* itemMap = settings[ i ];
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
             = itemMap->Properties();
         TMenuItem item = CreateMenuItemL( properties );
         TMCSData data;
-        TInt id = -1;
-        
-        if ( count == iData.Count() )
+
+        if ( wasEmpty )
             {
-            id = iData[i].MenuItem().Id();
+            // list of shortcut slot was empty
+            // we append the shortcut data slots one-by-one to the list
+            data.SetMenuItem( item );
+            data.SetDirty( ETrue );
+            iData.AppendL( data );
             }
-                   
-        if ( id > 0 )
+        else 
             {
+            // check for updates in existing shortcut data slot
+            // if menuitem id has changed, replace the item and 
+            // set as dirty
+            TInt id = -1;
+            id = iData[ i ].MenuItem().Id();
+            
             if ( item.Id() != id )
                 {
                 data.SetMenuItem( item );
@@ -146,17 +156,12 @@ void CMCSPluginData::UpdateDataL()
                 iData.Remove( i );
                 iData.InsertL( data, i );
                 }
-        	}
-        else
-            {
-            data.SetMenuItem( item );
-            data.SetDirty( ETrue );
-            iData.AppendL( data );
-        	}
+            }
         }
     
-        CleanupStack::PopAndDestroy(); // settingsCleanupItem
+        CleanupStack::PopAndDestroy(); // settingsCleanupItem 
     }
+
 
 // ---------------------------------------------------------------------------
 // 

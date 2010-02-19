@@ -36,6 +36,7 @@ _LIT(KImage, "image");
 _LIT(KPlugin, "plugin");
 
 _LIT(KNewsTicker ,"newsticker");
+_LIT(KTextEditor, "texteditor");
 
 
 // CPS Constants
@@ -79,8 +80,14 @@ _LIT( KUpdate, "update" );
 _LIT(KWidget, "hswidget");
 _LIT( KDeActive, "deactive");
 _LIT( KActive, "active");
+_LIT( KSystemStartup, "systemstartup");
+_LIT( KPageStartup, "pagestartup");
+_LIT( KPluginStartup, "pluginstartup");
 _LIT( KSuspend , "suspend");
 _LIT( KResume, "resume");
+_LIT( KSystemShutdown, "systemshutdown");
+_LIT( KPageShutdown, "pageshutdown");
+_LIT( KPluginShutdown, "pluginshutdown");
 _LIT( KOnLine, "online");
 _LIT( KOffLine, "offline");
 _LIT( KInActive, "inactive");

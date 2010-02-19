@@ -11,134 +11,152 @@
 *
 * Contributors:
 *
-* Description:  Content plugin manager class for Active idle framework.
+* Description:  Plugin factory class for Active idle framework.
 *
 */
 
 
 
-#ifndef C_AIPLUGINASYNCFACTORY_H
-#define C_AIPLUGINASYNCFACTORY_H
+#ifndef _AIPLUGINCFACTORY_H
+#define _AIPLUGINCFACTORY_H
 
-#include "aicontentpublisher.h"
-#include "aipropertyextension.h"
-#include "aifwdefs.h"
+// System includes
 #include <e32base.h>
+#include <ecom/implementationinformation.h>
 
-class MAiContentObserver;
-class MAiEventHandlerExtension;
-class MAiContentItemIterator;
-class CAiContentPublisher;
-class CAiUiController;
-class CAiPluginActivityRegistry;
-class CImplementationInformation;
-class CAiContentPluginManager;
-class MAiPluginTool;
-class MAiPluginLifecycleObserver;
+// User includes
 
+// Forward declarations
+class CAiUiControllerManager;
+class CAiStateManager;
+class CHsContentPublisher;
+class THsPublisherInfo;
+
+// Class declaration
 /**
  * @ingroup group_aifw
  * 
- *  Content plugin factory class for Active idle framework.
+ *  Plugin factory class for Active idle framework.
  *
  *  @lib aifw
- *  @since S60 3.2
+ *  @since S60 5.2
  */
 NONSHARABLE_CLASS( CAiPluginFactory ) : public CBase
 	{
-	public:
+public:
+    // Constructors and destructor
+    
+    /**
+     * Two-phased constructor.
+     */	
+    static CAiPluginFactory* NewL( CAiUiControllerManager& aManager );
 	
-// Constructor and destructor
-		
-		static CAiPluginFactory* NewL( RPointerArray<CAiContentPublisher>& aPlugins,
-		                                    CAiContentPluginManager& aManager );
-		
-		virtual ~CAiPluginFactory();
+    /**
+     * Destructor
+     */    
+    ~CAiPluginFactory();
 
-// New functions
+public:
+    // new functions
 		
-        /**
-         * Create plugin
-         *
-         * @since S60 5.0
-         * @param aPublisherInfo plugin to load.
-         * @param aControllerArray array of active UI controllers.
-         */
-		void CreatePluginL( const TAiPublisherInfo& aPublisherInfo,						
-						     RPointerArray<CAiUiController>& aControllerArray );						
+    /**
+     * Create plugin
+     *
+     * @since S60 5.2
+     * @param aPublisherInfo plugin to create. Factory keeps plugin's ownership. 
+     * @return KErrNone if plugin is created succesfully, otherwise system wide error code.      
+     */
+    TInt CreatePlugin( 
+        const THsPublisherInfo& aPublisherInfo );						
+                         						
+    /**
+     * Destroy plugin
+     *
+     * @since S60 5.2
+     * @param aPublisherInfo plugin to destroy.      
+     */
+    void DestroyPlugin( 
+        const THsPublisherInfo& aPublisherInfo );		    
+                         
+    /**
+     * Finds plugin by publisher info.
+     *
+     * @since S60 5.2
+     * @param aInfo publisher info.
+     * @return Pointer to plugin, NULL if not found. Factory keeps plugin's ownership.
+     */        
+    CHsContentPublisher* PluginByInfo( 
+        const THsPublisherInfo& aPublisherInfo ) const;
 
-        /**
-         * Destroy plugin
-         *
-         * @since S60 5.0
-         * @param aPublisherInfo plugin to destroy.
-         * @param aControllerArray array of active UI controllers.
-         */
-		void DestroyPluginL( const TAiPublisherInfo& aPublisherInfo,		    
-                             RPointerArray<CAiUiController>& aControllerArray );
+    /**
+     * Finds plugin by uid.
+     *
+     * @since S60 5.2
+     * @param aInfo publisher uid.
+     * @return Pointer to plugin, NULL if not found. Factory keeps plugin's ownership.
+     */            
+    CHsContentPublisher* PluginByUid( const TUid& aUid ) const;
+    
+    /**
+     * Finds plugin by name.
+     *
+     * @since S60 5.2
+     * @param aInfo publisher info.
+     * @return Pointer to plugin, NULL if not found. Factory keeps plugin's ownership.
+     */                
+    CHsContentPublisher* PluginByName( const TDesC& aName ) const;
+            
+private:	
+    // private constructors
 
-        /**
-         * Destroys all plugins
-         * 
-         * @since S60 5.0         
-         */
-		void DestroyPlugins();
+    /**
+     * Leaving constructor
+     */
+    void ConstructL();
+    
+    /**
+     * C++ default constructor
+     */	
+    CAiPluginFactory( CAiUiControllerManager& aManager );
 		
-		
-        void AddLifecycleObserverL( MAiPluginLifecycleObserver& aObserver );
+private:    								
+    // new functions
+	       
+    void CreatePluginL( 
+        const THsPublisherInfo& aPublisherInfo );
+                            
+    void SubscribeContentObserversL( 
+        CHsContentPublisher& aContentPublisher,		    
+        const THsPublisherInfo& aPublisherInfo );
+                                         
+    void ConfigurePluginL(         
+        CHsContentPublisher& aContentPublisher,
+        const THsPublisherInfo& aPublisherInfo );		                           
+    
+    RPointerArray< CHsContentPublisher >& Publishers() const;
+    
+    void ResolvePluginsToUpgradeL( 
+        RArray< THsPublisherInfo >& aArray );
+    
+private:     
+    // data	
 
-        /**
-         * Finds plugin by publisher info.
-         *
-         * @since S60 5.0
-         * @param aInfo publisher info.
-         * @return Pointer to plugin, NULL if not found.
-         */        
-        CAiContentPublisher* PluginByInfoL( const TAiPublisherInfo& aInfo ) const;
-
-        /**
-         * Finds plugin by name.
-         *
-         * @since S60 5.0
-         * @param aInfo publisher info.
-         * @return Pointer to plugin, NULL if not found.
-         */                
-        CAiContentPublisher* PluginByNameL( const TDesC& aName ) const;
-						
-	private:	
-
-// Constructors
-		
-		CAiPluginFactory( RPointerArray<CAiContentPublisher>& aPlugins,
-		                       CAiContentPluginManager& aManager );
-		
-		void ConstructL();
-										
-// New functions
-		
-		CAiContentPublisher* CreatePluginLC( const TAiPublisherInfo& aPluginInfo );
-								
-		void SubscribeContentObserversL( CAiContentPublisher& aContentPublisher,		    
-            const TAiPublisherInfo& aPublisherInfo,
-		    RPointerArray<CAiUiController>& aControllerArray );
-		                              
-        void ConfigurePluginL( RPointerArray<CAiUiController>& aControllerArray,
-                               CAiContentPublisher& aContentPublisher,
-                               const TAiPublisherInfo& aPubInfo );		                           
-        
-	private:     // Data	
-	    // Array of loaded data plugins, Not owned
-	    RPointerArray<CAiContentPublisher>& iPlugins;
-	    // Content plugin manager, Not owned	    		
-        CAiContentPluginManager& iManager;
-        // Ecom implementation info, Owned
-		RImplInfoPtrArray iEComPlugins;		
-		// Plugin tool from utility lib, Owned
-		MAiPluginTool* iPluginTool;      
-        // Life cycle observers, Owned
-		RPointerArray<MAiPluginLifecycleObserver> iLifecycleObservers;		
+    /** UI Controller Manager, Not owned */
+    CAiUiControllerManager& iUiControllerManager;
+    /** Array of loaded data plugins, Owned */
+    mutable RPointerArray< CHsContentPublisher > iPublishers;
+    /** Ecom implementation info, Owned */
+    RImplInfoPtrArray iEComPlugins;		          
+    
+private: 
+    // friend classes
+    friend class CAiStateManager;
+    
+#ifdef _AIFW_UNIT_TEST
+    friend class UT_AiPluginFactory;
+#endif
     };
 
-#endif // C_AIPLUGINASYNCFACTORY_H
+#endif // _AIPLUGINCFACTORY_H
 
 // End of File.

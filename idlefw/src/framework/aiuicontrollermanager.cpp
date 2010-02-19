@@ -15,18 +15,19 @@
 *
 */
 
-
-#include "aiuicontrollermanager.h"
-#include "aiuicontroller.h"
-#include "aicontentpublisher.h"
-#include "aicontentobserver.h"
-#include "activeidle2domaincrkeys.h"
-#include "aifwpanic.h"
-#include <ecom/ecom.h>
-#include <ecom/implementationinformation.h>
+// System includes
 #include <centralrepository.h>
 
+// User includes
 #include <aisystemuids.hrh>
+#include "aiuicontroller.h"
+#include "aicontentobserver.h"
+#include "activeidle2domaincrkeys.h"
+#include "aifw.h"
+
+#include "aiuicontrollermanager.h"
+
+#include "aifwpanic.h"
 
 #include "debug.h"
 
@@ -34,6 +35,7 @@
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::CAiUiControllerManager()
+//
 // ----------------------------------------------------------------------------
 //
 CAiUiControllerManager::CAiUiControllerManager()
@@ -42,15 +44,15 @@ CAiUiControllerManager::CAiUiControllerManager()
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::LoadMainControllerL()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiUiControllerManager::LoadMainControllerL(
-    CRepository& aCenRepConfig )
+void CAiUiControllerManager::LoadMainControllerL( CRepository& aRepository )    
     {
     TInt value( 0 );
     
     // Main UI Controller must be configured correctly
-    User::LeaveIfError( aCenRepConfig.Get( KAiMainUIController, value ) );
+    User::LeaveIfError( aRepository.Get( KAiMainUIController, value ) );
     
     CAiUiController* controller = CAiUiController::NewL( TUid::Uid( value ) );
     
@@ -67,24 +69,22 @@ void CAiUiControllerManager::LoadMainControllerL(
         }
     
     iUiControllerArray.AppendL( controller );
-    CleanupStack::Pop( controller );
-    
-    // Register this as a UI framework observer of the main UI controller
-    iMainUiController->SetUiFrameworkObserver( *this );
+    CleanupStack::Pop( controller );    
     }
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::LoadSecondaryControllersL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiUiControllerManager::LoadSecondaryControllersL(
-    CRepository& aCenRepConfig )
+    CRepository& aRepository )
     {
     TInt value( 0 );
     
     // Instantiate rest of the UI controllers.
     for( TInt key = KAiFirstUIController; 
-         key <= KAiLastUIController && aCenRepConfig.Get( key, value ) == KErrNone;
+         key <= KAiLastUIController && aRepository.Get( key, value ) == KErrNone;
         ++key )
         {
         // skip empty entries
@@ -106,77 +106,48 @@ void CAiUiControllerManager::LoadSecondaryControllersL(
         CleanupStack::PushL( controller );
         
         iUiControllerArray.AppendL( controller );
-        CleanupStack::Pop( controller );
-        
-        // Get the secondary interface
-        MAiSecondaryUiController* secController( 
-                    controller->SecondaryInterface() ); 
-                        
-        if( secController )
-            {
-            MAiUiFrameworkObserver* uiFwObserver(
-                    secController->UiFrameworkObserver() );
-        
-            if( uiFwObserver )
-                {
-                // Add secondary controller as UI framework event observer. 
-                User::LeaveIfError( 
-                        iUiFrameworkObservers.InsertInAddressOrder( uiFwObserver ) );
-                }
-            }
+        CleanupStack::Pop( controller );        
         }
     }
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::ConstructL()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiUiControllerManager::ConstructL()
+void CAiUiControllerManager::ConstructL( CAiFw* aAiFw )
     {
     __HEAP("FW: Init - Create UI Ctrls");
     __TIME_MARK(t);
-
-    CRepository* cenRep( NULL );
-
-#if 0
-    // For AI3_test    
-    RProcess proc;
-    // 0x102750F0 in AI3, 0x2001CB4F in AI3_Test
-    TSecureId secId( proc.SecureId() ); 
-                                           
-    if( secId == 0x2001CB4F )
-        {
-        cenRep = CRepository::NewL( TUid::Uid( 0x2001952B ) );
-        }   
-    else
-        {
-        cenRep = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
-        }
-#else
-    cenRep = CRepository::NewLC( TUid::Uid( KCRUidActiveIdleLV ) );
-#endif
-
-    LoadMainControllerL( *cenRep );
+   
+    CRepository& repository( aAiFw->Repository() );
+    
+    LoadMainControllerL( repository );
     
     // Failing on secondary is not fatal. Ignore leaves.
-    TRAP_IGNORE( LoadSecondaryControllersL( *cenRep ) );
-                       
-    CleanupStack::PopAndDestroy( cenRep );
-    
+    TRAP_IGNORE( LoadSecondaryControllersL( repository ) );
+                           
+    for ( TInt i = 0; i < iUiControllerArray.Count(); i++ )
+        {
+        iUiControllerArray[i]->SetEventHandler( *aAiFw );
+        }
+        
     __TIME_ENDMARK("FW: Create UI Ctrls", t);
     __HEAP("FW: Done - Create UI Ctrls");
     }
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::NewL()
+//
 // ----------------------------------------------------------------------------
 //
-CAiUiControllerManager* CAiUiControllerManager::NewL()
+CAiUiControllerManager* CAiUiControllerManager::NewL( CAiFw* aAiFw )
     {
-    CAiUiControllerManager* self = new (ELeave) CAiUiControllerManager;
+    CAiUiControllerManager* self = 
+        new ( ELeave ) CAiUiControllerManager;
     
     CleanupStack::PushL( self );
-    self->ConstructL();
+    self->ConstructL( aAiFw );
     CleanupStack::Pop( self ); // self
     
     return self;
@@ -184,19 +155,19 @@ CAiUiControllerManager* CAiUiControllerManager::NewL()
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::~CAiUiControllerManager()
+//
 // ----------------------------------------------------------------------------
 //
 CAiUiControllerManager::~CAiUiControllerManager()
     {
     iUiControllerArray.ResetAndDestroy();
-    
-    iUiFrameworkObservers.Reset();
-    
+           
     iCreatedUICList.Reset();
     }
 
 // ----------------------------------------------------------------------------
-// CAiUiControllerManager::UiControllers() 
+// CAiUiControllerManager::UiControllers()
+//
 // ----------------------------------------------------------------------------
 //
 RPointerArray< CAiUiController >& CAiUiControllerManager::UiControllers() const
@@ -206,6 +177,7 @@ RPointerArray< CAiUiController >& CAiUiControllerManager::UiControllers() const
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::IsMainUiController()
+//
 // ----------------------------------------------------------------------------
 //
 TBool CAiUiControllerManager::IsMainUiController(
@@ -215,20 +187,8 @@ TBool CAiUiControllerManager::IsMainUiController(
     }
 
 // ----------------------------------------------------------------------------
-// CAiUiControllerManager::SetEventHandler()
-// ----------------------------------------------------------------------------
-//
-void CAiUiControllerManager::SetEventHandler(
-    MAiFwEventHandler& aEventHandler )
-    {
-    for ( TInt i = 0; i < iUiControllerArray.Count(); i++ )
-        {
-        iUiControllerArray[i]->SetEventHandler( aEventHandler );
-        }
-    }
-
-// ----------------------------------------------------------------------------
 // CAiUiControllerManager::RunApplicationL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiUiControllerManager::RunApplicationL()
@@ -238,6 +198,7 @@ void CAiUiControllerManager::RunApplicationL()
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::ActivateUI()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiUiControllerManager::ActivateUI()
@@ -250,6 +211,7 @@ void CAiUiControllerManager::ActivateUI()
     
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::LoadUIDefinition()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiUiControllerManager::LoadUIDefinition()
@@ -290,6 +252,7 @@ void CAiUiControllerManager::LoadUIDefinition()
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::CoeEnv()
+//
 // ----------------------------------------------------------------------------
 //
 CCoeEnv& CAiUiControllerManager::CoeEnv() const
@@ -299,6 +262,7 @@ CCoeEnv& CAiUiControllerManager::CoeEnv() const
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::MainUiController()
+//
 // ----------------------------------------------------------------------------
 //
 MAiMainUiController& CAiUiControllerManager::MainUiController() const
@@ -308,6 +272,7 @@ MAiMainUiController& CAiUiControllerManager::MainUiController() const
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::DestroySecondaryUiControllers()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiUiControllerManager::DestroySecondaryUiControllers()
@@ -328,82 +293,25 @@ void CAiUiControllerManager::DestroySecondaryUiControllers()
 
 // ----------------------------------------------------------------------------
 // CAiUiControllerManager::ExitMainController()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiUiControllerManager::ExitMainController()
     {
     iMainUiController->Exit();
     }
-
-// ----------------------------------------------------------------------------
-// CAiUiControllerManager::AddObserverL()
-// ----------------------------------------------------------------------------
-//
-void CAiUiControllerManager::AddObserverL( 
-    MAiUiFrameworkObserver& aUiFwObserver )
-    {
-    User::LeaveIfError( 
-            iUiFrameworkObservers.InsertInAddressOrder( &aUiFwObserver ) );
-    }
-
-// ----------------------------------------------------------------------------
-// CAiUiControllerManager::RemoveObserver()
-// ----------------------------------------------------------------------------
-//
-void CAiUiControllerManager::RemoveObserver( 
-    MAiUiFrameworkObserver& aUiFwObserver )
-    {
-    TInt index( iUiFrameworkObservers.FindInAddressOrder( &aUiFwObserver ) );
     
-    if( index != KErrNotFound )
-        {
-        iUiFrameworkObservers.Remove( index );
-        }
-    }
-
 // ----------------------------------------------------------------------------
-// CAiUiControllerManager::RemovePluginFromUI()
+// CAiUiControllerManager::SetStateHandler()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiUiControllerManager::RemovePluginFromUI( CAiContentPublisher& aPlugin )
+void CAiUiControllerManager::SetStateHandler( MAiFwStateHandler& aHandler )
     {
-    // Get MAiPropertyExtension from plugin
-    MAiPropertyExtension* plugin =
-        static_cast< MAiPropertyExtension* >( 
-                aPlugin.Extension( KExtensionUidProperty ) );
-    
-    // Inform all UI controller that this plugin need to be removed from UI.
-    if( plugin )
+    for ( TInt i = 0; i < iUiControllerArray.Count(); i++ )
         {
-        for ( TInt i = 0; i < iUiControllerArray.Count(); i++ )
-            {
-            iUiControllerArray[i]->RemovePluginFromUI( *plugin );
-            }
-        }
+        iUiControllerArray[i]->SetStateHandler( aHandler );
+        }    
     }
 
-// ----------------------------------------------------------------------------
-// CAiUiControllerManager::HandleResourceChange()
-// ----------------------------------------------------------------------------
-//
-void CAiUiControllerManager::HandleResourceChange( TInt aType )
-    {
-    for( TInt i = 0; i < iUiFrameworkObservers.Count(); i++ )
-        {
-        iUiFrameworkObservers[i]->HandleResourceChange( aType );
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CAiUiControllerManager::HandleForegroundEvent()
-// ----------------------------------------------------------------------------
-//
-void CAiUiControllerManager::HandleForegroundEvent( TBool aForeground )
-    {
-    for( TInt i = 0; i < iUiFrameworkObservers.Count(); i++ )
-        {
-        iUiFrameworkObservers[i]->HandleForegroundEvent( aForeground );
-        }
-    }
-    
 // End of file

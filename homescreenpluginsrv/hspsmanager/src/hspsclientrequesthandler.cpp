@@ -703,61 +703,70 @@ TInt ChspsClientRequestHandler::AppendInitialSettingsL(
             {
             // Check parent element
             parentNode = node->Parent();
-            const TDesC8& parentName = parentNode->Name();
-            
+            const TDesC8& parentName = parentNode->Name();            
             if( parentName == KPluginElement )
                 { 
-                ChspsDomList& initial_settings_childList = node->ChildNodes(); 
-                                             
-                ChspsDomNode* initialSettingsNode = static_cast<ChspsDomNode*>(initial_settings_childList.FindByName( KSettingsElement ));
-                
-                ChspsDomList& initial_items = initialSettingsNode->ChildNodes();
-                                
-                ChspsDomNode* controlNode = hspsServerUtil::FindNodeByTagL(KControlElement, *parentNode ); 
-                      
-                if( controlNode )
+                ChspsDomList& initial_settings_childList = node->ChildNodes();                                              
+                ChspsDomNode* initialSettingsNode = 
+                        static_cast<ChspsDomNode*>(initial_settings_childList.FindByName( KSettingsElement ));
+                if( initialSettingsNode )
                     {
-                    ChspsDomList& controlNode_childList = controlNode->ChildNodes();
-                
-                    ChspsDomNode* settingsNode = static_cast<ChspsDomNode*>(controlNode_childList.FindByName( KSettingsElement ));
-                
-                    if( settingsNode )
+                        
+                    ChspsDomList& initial_items = initialSettingsNode->ChildNodes();                                    
+                    ChspsDomNode* controlNode = hspsServerUtil::FindNodeByTagL(KControlElement, *parentNode ); 
+                          
+                    if( controlNode )
                         {
-                        ChspsDomList& items = settingsNode->ChildNodes();
-                                
-                        if( items.Length() == initial_items.Length() )                    
+                        ChspsDomList& controlNode_childList = controlNode->ChildNodes();
+                    
+                        ChspsDomNode* settingsNode = static_cast<ChspsDomNode*>(controlNode_childList.FindByName( KSettingsElement ));
+                    
+                        if( settingsNode )
                             {
-                            TInt index = controlNode->ItemIndex( *settingsNode );
-                            controlNode->DeleteChild(settingsNode);    
-                            ChspsDomNode* clone = initialSettingsNode->CloneL( aAppODT.DomDocument().StringPool() );
-                            CleanupStack::PushL( clone  );
-                            controlNode->AddChildL( clone, index );
-                            clone->SetParent( controlNode );             
-                            CleanupStack::Pop( clone );
-                            }
-                        else if( items.Length() > initial_items.Length() )
-                            {
-                            error = ParseInitialSettingsItemsL(*initialSettingsNode,*settingsNode);        
+                            ChspsDomList& items = settingsNode->ChildNodes();
+                                    
+                            if( items.Length() == initial_items.Length() )                    
+                                {
+                                TInt index = controlNode->ItemIndex( *settingsNode );
+                                controlNode->DeleteChild(settingsNode);    
+                                ChspsDomNode* clone = initialSettingsNode->CloneL( aAppODT.DomDocument().StringPool() );
+                                CleanupStack::PushL( clone  );
+                                controlNode->AddChildL( clone, index );
+                                clone->SetParent( controlNode );             
+                                CleanupStack::Pop( clone );
+                                }
+                            else if( items.Length() > initial_items.Length() )
+                                {
+                                error = ParseInitialSettingsItemsL(*initialSettingsNode,*settingsNode);        
+                                }
+                            else
+                                {
+                                error = KErrCorrupt;
+                                }
                             }
                         else
                             {
-                            error = KErrCorrupt;
+                            error = KErrNotFound;
                             }
                         }
                     else
                         {
-                        error = KErrNotFound;
+                        error = KErrCorrupt;
                         }
-                    }
+                        
+                    // clean settings under initialsettings
+                    node->ChildNodes().RemoveItem( initialSettingsNode );
+                    delete initialSettingsNode;
+                    initialSettingsNode = NULL;                    
+                        
+                    } 
                 else
                     {
+                    // initialSettingsNode (KSettingsElement) not found
                     error = KErrCorrupt;
                     }
-                // clean settings under initialsettings
-                node->ChildNodes().RemoveItem( initialSettingsNode );
-                delete initialSettingsNode;
-                initialSettingsNode = NULL; 
-                }
+                   
+                }                   
             }
         
         prevNode = node;    
@@ -955,11 +964,14 @@ ChspsDomNode& ChspsClientRequestHandler::FindRootNodeByIdentifierL(
             
             ChspsDomAttribute* attr = static_cast<ChspsDomAttribute*>( 
                                           attrList.FindByName( KItemAttrId ));
-            const TDesC8& value = attr->Value();
-            if( value.Compare( aNodeIdentifier ) == 0 )
-                {
-                found = ETrue;
-                targetNode = node;
+            if( attr )
+                {                                          
+                const TDesC8& value = attr->Value();
+                if( value.CompareF( aNodeIdentifier ) == 0 )
+                    {
+                    found = ETrue;
+                    targetNode = node;
+                    }
                 }
             }
         node = iter->NextL();

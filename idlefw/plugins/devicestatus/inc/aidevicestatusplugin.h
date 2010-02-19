@@ -19,11 +19,13 @@
 #ifndef C_AIDEVICESTATUSPLUGIN_H
 #define C_AIDEVICESTATUSPLUGIN_H
 
+// System includes
 
-#include <aicontentpublisher.h>
-#include <aipropertyextension.h>
+// User includes
+#include <hscontentpublisher.h>
 #include <aicontentrequest.h>
 
+// Forward declarations
 class MAiDeviceStatusPublisher;
 class CAiContentItemArrayIterator;
 class CAiDeviceStatusPluginEngine;
@@ -40,100 +42,110 @@ class CAiNetworkInfoListener;
  *
  *  @since S60 3.2
  */
-class CAiDeviceStatusPlugin : public CAiContentPublisher, 
-                                public MAiPropertyExtension, 
-                                public MAiContentRequest
+NONSHARABLE_CLASS( CAiDeviceStatusPlugin ) : public CHsContentPublisher, 
+    public MAiContentRequest                                 
     {
 public:
-
+    // constructors and destructor
     static CAiDeviceStatusPlugin* NewL();
     static CAiDeviceStatusPlugin* NewLC();
 
     virtual ~CAiDeviceStatusPlugin();
 
 protected:
-
-// from base class CAiContentPublisher
-    void Resume( TAiTransitionReason aReason );
-    void Suspend( TAiTransitionReason aReason );
-    void Stop( TAiTransitionReason aReason );
-    void SubscribeL(MAiContentObserver& aObserver);
-    TAny* Extension(TUid aUid);
-    void ConfigureL(RAiSettingsItemArray& aSettings);
-
-protected:
-
-// from base class MAiPropertyExtension
-    TAny* GetPropertyL(TInt aProperty);
-    void SetPropertyL(TInt aProperty, TAny* aValue);
-
-// from base class MAiContentRequest
-    TBool RefreshContent( TInt aContentId );
-
-
-private:
-
-    CAiDeviceStatusPlugin();
-    void ConstructL();
-
-    void AllocateResourcesL();
-    void FreeResources();
-    void DoResumeL( TAiTransitionReason aReason );
-    TBool IgnoreReason( TAiTransitionReason aReason );
-
-     /**
-     * Add device status publisher.
-     */
-    void AddPublisherL( MAiDeviceStatusPublisher* aPublisher );
-
-private: // data
-
-	/**
-	 * Device Status Plug-in Engine.
-	 * Own.
-	 */
-	 CAiDeviceStatusPluginEngine* iEngine;
-
-    /**
-     * Content observers.
-     * Own.
-     */
-    CAiMultiContentObserver* iContentObservers;
-
-	/**
-	 * Device Status Plug-in content prioritizer.
-	 * Own.
-	 */
-	 CAiPublishPrioritizer* iPrioritizer;
-
-    /**
-     * Content item array iterator.
-     * Own.
-     */
-    MAiContentItemIterator* iContent;
-
-    /**
-     * Content item array iterator for resources.
-     * Own.
-     */
-    MAiContentItemIterator* iResources;
-
-    /**
-     * Publisher info.
-     */
-    TAiPublisherInfo iInfo;
-
-    /**
-     * Offset of the loaded resource file.
-     */
-    TInt iResourceOffset;
+    // from CHsContentPublisher
     
     /**
-     * Network info listener.
-     * Own.
+     * @see CHsContentPublisher
      */
+    void Start( CHsContentPublisher::TStartReason aReason );
+
+    /**
+     * @see CHsContentPublisher
+     */    
+    void Stop( CHsContentPublisher::TStopReason aReason );
+    
+    /**
+     * @see CHsContentPublisher
+     */    
+    void Resume( CHsContentPublisher::TResumeReason aReason );
+    
+    /**
+     * @see CHsContentPublisher
+     */    
+    void Suspend( CHsContentPublisher::TSuspendReason aReason );
+
+    /**
+     * @see CHsContentPublisher
+     */    
+    void SubscribeL( MAiContentObserver& aObserver );
+    
+    /**
+     * @see CHsContentPublisher
+     */    
+    void ConfigureL( RAiSettingsItemArray& aSettings );
+    
+    /**
+     * @see CHsContentPublisher
+     */    
+    TAny* GetProperty( CHsContentPublisher::TProperty aProperty );
+    
+protected:
+    // from MAiContentRequest
+    
+    /**
+     * @see MAiContentRequest
+     */
+    TBool RefreshContent( TInt aContentId );
+
+    /**
+     * @see MAiContentRequest
+     */    
+    TBool SuspendContent( TInt aContentId );
+    
+private:
+    // constructors
+    
+    /**
+     * C++ default constructor
+     */
+    CAiDeviceStatusPlugin();
+    
+    /**
+     * 2nd phase constructor
+     */
+    void ConstructL();
+
+private:
+    // new functions
+    
+    void AllocateResourcesL();
+    void FreeResources();
+    void DoResumeL();
+    
+    void AddPublisherL( MAiDeviceStatusPublisher* aPublisher );
+
+private: 
+    // data
+
+	/** Device Status Plug-in Engine, owned */
+	 CAiDeviceStatusPluginEngine* iEngine;
+    /** Content observers, owned */
+    CAiMultiContentObserver* iContentObservers;
+	/** Device Status Plug-in content prioritizer, owned */
+	 CAiPublishPrioritizer* iPrioritizer;
+    /** Content item array iterator, owned */
+    MAiContentItemIterator* iContent;
+    /** Content item array iterator for resources, owned */
+    MAiContentItemIterator* iResources;
+    /** Offset of the loaded resource file */
+    TInt iResourceOffset;    
+    /** Network info listener, owned */
     CAiNetworkInfoListener* iListener;    
+    /** Flag to indicate republish need */
+    TBool iRequirePublish;
     };
 
-
 #endif // C_AIDEVICESTATUSPLUGIN_H
+
+// End of file

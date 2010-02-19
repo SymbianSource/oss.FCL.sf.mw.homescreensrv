@@ -34,15 +34,6 @@ class AiPublisherFactory
 public:
 
     /**
-     * Create profile publisher.
-     *
-     * @since S60 3.2
-     * @return pointer to publisher or NULL if publisher is not supported
-     *         by platform.
-     */
-    static MAiDeviceStatusPublisher* CreateProfilePublisherL();
-
-    /**
      * Create date profile publisher.
      *
      * @since S60 3.2

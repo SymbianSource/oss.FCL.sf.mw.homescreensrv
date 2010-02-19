@@ -30,15 +30,16 @@
 */
 class MAiProfilePluginNotifier 
     {
-    public: 
+public: 
 
-        /**
-        * Virtual method, which the plugin class has to implement.
-		* Method is used to send notification of P&S data's change event
-		* from engine to plugin.
-        *
-        */
-	inline virtual void NotifyContentUpdate() = 0;  
+    /**
+    * Virtual method, which the plugin class has to implement.
+    * Method is used to send notification of P&S data's change event
+    * from engine to plugin.
+    */
+	virtual void NotifyContentUpdate() = 0;  
     };
 
-#endif //MAIPROFILEPLUGINNOTIFIER_H  
+#endif // MAIPROFILEPLUGINNOTIFIER_H
+
+// End of file

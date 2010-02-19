@@ -21,7 +21,7 @@
 #include "chswiusbhandler.h"
 #include "chswiplugin.h"
 #include "chswimassmodeobserver.h"
-#include <DriveInfo.h>
+#include <driveinfo.h>
 
 // CONSTANTS
 const TInt KCallBackDelay = 5000000;

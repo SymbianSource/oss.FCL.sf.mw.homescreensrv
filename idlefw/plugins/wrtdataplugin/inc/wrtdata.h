@@ -19,46 +19,35 @@
 #ifndef WRTDATA_H
 #define WRTDATA_H
 
-// INCLUDE FILES
+// System includes
 #include <liwcommon.h> 
 #include <AknsItemID.h>
-#include "wrtdatapluginconst.h"
-#include "aicontentpublisher.h"
 
-// FORWARD DECLARATIONS
+// User includes
+#include <hscontentpublisher.h>
+#include "wrtdatapluginconst.h"
+
+// Forward declarations
 class MLiwInterface;
 class CLiwServiceHandler;
 class CWrtDataObserver;
 class CWrtDataPlugin;
 
-// CLASS DECLARATION
 /**
  *  @ingroup group_wrtdataplugin
  *
  *  Wrt data
  *
- *  @since S60 v3.2
+ *  @since S60 5.2
  */
-class CWrtData : public CBase
-   {
+NONSHARABLE_CLASS( CWrtData ) : public CBase
+    {    
+public:
+    // constructor and destructor
+    
+    static CWrtData* NewL( CWrtDataPlugin* aPlugin );
 
-   public:
-        
-        /**
-        * Part of the two phased construction
-        *
-        * @param aPlugin refrence of the plugin
-        * @return none
-        */
-        static CWrtData* NewL(CWrtDataPlugin* aPlugin);
-        
-        /**
-        * Destructor
-        *
-        * @param none
-        * @return none
-        */
-        ~CWrtData();
+    ~CWrtData();
     
    public : 
     
@@ -169,15 +158,7 @@ class CWrtData : public CBase
         * @param None
         * @return void
         */
-        void DeActivateL();
-        
-        /**
-        * InActiveL 
-        * 
-        * @param None
-        * @return void
-        */
-        void InActiveL();        
+        void DeActivateL();      
         
         /**
         * OnLineL 
@@ -275,38 +256,24 @@ class CWrtData : public CBase
         void CreateIconFromUidL(TInt& aHandle, TInt& aMaskHandle, const TUid& aAppUid );
 
     private :   
-        
-        // Subscriber interface
-        // own
-        MLiwInterface* iInterface;
-          
-        // Data Observer to CPS
-        // Own
-        CWrtDataObserver* iObserver;
-       
-        // Service handler 
-        // Own
-        CLiwServiceHandler* iServiceHandler;
+    // data
     
-        // Command name in configuration Array
-        HBufC8* iCommandName;
-          
-        // Reference of the wrt data plugin
-        // Not owned
-        CWrtDataPlugin* iPlugin;
-        
-        // Menu item names
-        // Own
-        RPointerArray<HBufC16> iMenuItems; 
-        
-        // Trigger names for the menu items
-        // Own
-        RPointerArray<HBufC8> iMenuTriggers;
-        
-        // Widgets content id.
-        // Own
-        HBufC* iContentId;
- 
+    /** Subscriber interface, owned */    
+    MLiwInterface* iInterface;     
+    /** Data Observer to CPS, owned */
+    CWrtDataObserver* iObserver;   
+    /** Service handler, owned */    
+    CLiwServiceHandler* iServiceHandler;
+    /** Command name in configuration Array, owned */
+    HBufC8* iCommandName;      
+    /** Reference of the wrt data plugin, not owned */    
+    CWrtDataPlugin* iPlugin;    
+    /** Menu item names, owned */    
+    RPointerArray<HBufC16> iMenuItems;     
+    /** Trigger names for the menu items, owned */    
+    RPointerArray<HBufC8> iMenuTriggers;    
+    /** Content id, owned */
+    HBufC* iContentId;
     };
 
 #endif /*WRTDATA_H*/

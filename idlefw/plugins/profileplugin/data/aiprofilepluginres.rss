@@ -93,4 +93,15 @@ RESOURCE DIALOG r_ai_leave_offline_mode_query
          };
      }
  
+// -----------------------------------------------------------------------------
+//
+// "Insert SIM card and restart"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_su_note_insert_sim_and_restart
+    {
+    buf = qtn_su_note_insert_sim_and_restart;
+    }
+
 // End of File.

@@ -18,7 +18,7 @@
 #define C_CHomeScreenSettingsIf_H
 
 #include <e32base.h>
-#include <LiwCommon.h>      // for MLiwNotifyCallback
+#include <liwcommon.h>      // for MLiwNotifyCallback
 #include <mhomescreensettingsif.h>
 #include <mhomescreensettingsobserver.h>
 

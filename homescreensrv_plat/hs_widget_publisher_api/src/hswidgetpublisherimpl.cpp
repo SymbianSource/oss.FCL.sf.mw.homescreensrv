@@ -809,6 +809,9 @@ void HsWidgetPublisherImpl::InsertWidgetInfoL( HsWidget& aWidget,
 	aDataMap->InsertL( KWidgetName, TLiwVariant( *widgetName ) );
     aDataMap->InsertL( KWidgetMaxInstance, TLiwVariant( 1 ) );
     
+    // this is needed by chswiplugin:
+    aDataMap->InsertL( KWidgetUid, TLiwVariant( iWidgetUid ));
+    
     const std::string& widgetDescriptionStd = aWidget.getDescription();
     if ( widgetDescriptionStd.length() )
         {

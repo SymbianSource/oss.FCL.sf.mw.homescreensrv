@@ -19,13 +19,16 @@
 #ifndef C_AINETWORKINFOLISTENER_H
 #define C_AINETWORKINFOLISTENER_H
 
-
+// System includes
 #include <e32base.h>
 #include <NWHandlingEngine.h>
 
+// User includes
 
+// Forward declarations
 class MAiNetworkInfoObserver;
 class CNWSession;
+
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -37,7 +40,8 @@ class CNWSession;
  *
  *  @since S60 3.2
  */
-class CAiNetworkInfoListener : public CBase, public MNWMessageObserver
+NONSHARABLE_CLASS( CAiNetworkInfoListener ) : public CBase, 
+    public MNWMessageObserver
     {
 public:
 

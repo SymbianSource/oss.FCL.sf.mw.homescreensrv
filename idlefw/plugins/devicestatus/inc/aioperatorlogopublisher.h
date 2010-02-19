@@ -19,19 +19,23 @@
 #ifndef C_AIOPERATORLOGOPUBLISHER_H
 #define C_AIOPERATORLOGOPUBLISHER_H
 
-
+// System includes
 #include <e32base.h>
 #include <e32property.h>
 #include <cenrepnotifyhandler.h>
+
+// User includes
 #include <aiutility.h>
 #include "aidevicestatuspublisher.h"
 #include "ainetworkinfoobserver.h"
 
+// Forward declarations
 class CAiNetworkInfoListener;
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
 class CGulIcon;
 class CCenRepNotifyHandler;
+
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -43,9 +47,10 @@ class CCenRepNotifyHandler;
  *
  *  @since S60 3.2
  */
-class CAiOperatorLogoPublisher : public CBase, public MAiDeviceStatusPublisher,
-                               public MAiNetworkInfoObserver, /*public MAiCenRepNotifierCallBack*/
-                               public MCenRepNotifyHandlerCallback
+NONSHARABLE_CLASS( CAiOperatorLogoPublisher ) : public CBase, 
+    public MAiDeviceStatusPublisher,
+    public MAiNetworkInfoObserver, 
+    public MCenRepNotifyHandlerCallback
     {
 public:
 
@@ -59,11 +64,12 @@ protected:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
     TBool RefreshL( TInt aContentId, TBool aClean );
+    TBool SuspendL( TInt aContentId, TBool aClean );
     TBool RefreshContentWithPriorityL( TInt aContentId, TInt aPriority );
 
 
@@ -149,77 +155,39 @@ private:
 
 private: // data
 
-    /**
-     * Network info listener.
-     * Own.
-     */
+    /** Network info listener, owned */     
     CAiNetworkInfoListener* iListener;
-
-    /**
-     * Operator logo bitmap and mask.
-     * Own.
-     */
+    /** Operator logo bitmap and mask, owned */     
     CGulIcon* iIcon;
-
-    /**
-     * Content observer.
-     * Not own.
-     */
+    /** Content observer, not owned */
     MAiContentObserver* iContentObserver;
-
-    /**
-     * Property extension.
-     * Not own.
-     */
-    MAiPropertyExtension* iExtension;
-
-	/**
-	 * Content prioritizer.
-	 * Not own.
-	 */
-	MAiPublishPrioritizer* iPrioritizer;
-    
-	/**
-	 * Publish broadcaster.
-	 * Not own.
-	 */
-	MAiPublisherBroadcaster* iBroadcaster;
-    
-    /**
-     * Publish-subscribe client.
-     */
+    /** Property extension, not owned */
+    CHsContentPublisher* iExtension;
+	/** Content prioritizer, not owned */
+	MAiPublishPrioritizer* iPrioritizer;    
+	/** Publish broadcaster, not owned */
+	MAiPublisherBroadcaster* iBroadcaster;    
+    /** Publish-subscribe client, owned */
     MAiPSPropertyObserver* iOperatorLogoObserver;
-
-    /**
-     * Central repository client.
-     * Own.
-     */
+    /** Central repository client, owned */
     CRepository* iCenRep;
-
-    /**
-     * Central repository notifier.
-     * Own.
-     */
+    /** Central repository notifier, owned */
     CCenRepNotifyHandler* iCenRepNotify;
-
-    /**
-     * Operator logo priority, can have one of the following values:
+    /** Operator logo priority, can have one of the following values:
+     * 
      * 1) EAiOTAOperatorLogo
      * 2) EAiProgOperatorLogo
      * 3) EAiInvalidPriority
      */
     TInt iPriority;
-
-    /**
-     * True if publish was successful.
-     */
-    TBool iSuccess;
-    
-    /**
-     * Show operator indicator.
-     */
+    /** True if publish was successful. */
+    TBool iSuccess;    
+    /** Flag to indicate if the content is suspended */
+     TBool iSuspended;    
+    /** Show operator indicator */
     TBool iShowOpInd;
     };
 
-
 #endif // C_AIOPERATORLOGOPUBLISHER_H
+
+// End of file

@@ -19,13 +19,15 @@
 #ifndef M_AICONTENTOBSERVER_H
 #define M_AICONTENTOBSERVER_H
 
+// System includes
 #include <e32std.h>
 
-class MAiPropertyExtension;
+// User includes
+
+// Forward declarations
+class CHsContentPublisher;
+class THsPublisherInfo;
 class RFile;
-class TDesC8;
-class TDesC16;
-struct TAiPublisherInfo;
 
 /**
  *  Used by AI Plug-in to give notification about modifications in
@@ -35,9 +37,13 @@ struct TAiPublisherInfo;
  */
 class MAiContentObserver
     {
-public: // New Enumeration
+public: 
+    // data types
+    
     /**
-    * CSS Primitive value type
+    * Value type for SetProperty
+    *
+    * @since S60 5.2
     */
     enum TValueType
         {
@@ -57,7 +63,8 @@ public: // New Enumeration
         EValueUnitValue
         };
     
-public:  // New functions
+public:  
+    // new functions
 
     /**
      * Invoked by the plug-in to inform that it initiates content publishing
@@ -107,21 +114,21 @@ public:  // New functions
     /**
      * Invoked by plug-in to test if the specified content can be published.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
      * @param  aIndex - index of the content item.
      * @return ETrue - if content could be published; EFalse otherwise.
      */
-    virtual TBool CanPublish( MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex ) = 0;
+    virtual TBool CanPublish( CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex ) = 0;
 
     /**
      * Invoked by the plug-in to inform that content identified by reference
      * aResource must be published to UI control\element identified by selector
      * aContent.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
@@ -137,14 +144,14 @@ public:  // New functions
      *         - KErrNotFound - if content reference is not found in current
      *         UI definition.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent, TInt aResource, TInt aIndex ) = 0;
+    virtual TInt Publish( CHsContentPublisher& aPlugin, TInt aContent, TInt aResource, TInt aIndex ) = 0;
 
     /**
      * Invoked by the plug-in to inform that textual content provided within 
      * parameter aText must be published to UI control\element identified by 
      * selector aContent.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
@@ -159,14 +166,14 @@ public:  // New functions
      *         - KErrArgument - if content cannot be published to UI element,
      *         e.g. MIME type mismatch.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent, const TDesC16& aText, TInt aIndex ) = 0;
+    virtual TInt Publish( CHsContentPublisher& aPlugin, TInt aContent, const TDesC16& aText, TInt aIndex ) = 0;
 
     /**
      * Invoked by the plug-in to inform that content provided within buffer
      * aBuf must be published to UI control\element identified by selector
      * aContent.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
@@ -181,7 +188,7 @@ public:  // New functions
      *         - KErrArgument - if content cannot be published to UI element,
      *         e.g. MIME type mismatch.
      */ 
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent, const TDesC8& aBuf, TInt aIndex ) = 0;
+    virtual TInt Publish( CHsContentPublisher& aPlugin, TInt aContent, const TDesC8& aBuf, TInt aIndex ) = 0;
     
     /**
      * Invoked by the plug-in to inform that an object provided by pointer aPtr
@@ -189,7 +196,7 @@ public:  // New functions
      * The implementation packages the pointer to a buffer and delegates to 
      * buffer publishing method Publish(MAiPropertyExtension&, TInt, const TDesC8&, TInt).
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
@@ -207,7 +214,7 @@ public:  // New functions
      *         e.g. MIME type mismatch.
      * @see KAiContentTypeBitmap
      */ 
-    inline TInt PublishPtr( MAiPropertyExtension& aPlugin, TInt aContent, TAny* aPtr, TInt aIndex );
+    inline TInt PublishPtr( CHsContentPublisher& aPlugin, TInt aContent, TAny* aPtr, TInt aIndex );
 
     /**
      * Helper function for unpacking a pointer that has been published with
@@ -221,7 +228,7 @@ public:  // New functions
      * Invoked by the plug-in to inform that content from file handle aFile
      * must be published to UI control\element identified by selector aContent.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
@@ -237,13 +244,13 @@ public:  // New functions
      *         - KErrArgument - if content cannot be published to UI element,
      *         e.g. MIME type mismatch.
      */
-    virtual TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent, RFile& aFile, TInt aIndex ) = 0;
+    virtual TInt Publish( CHsContentPublisher& aPlugin, TInt aContent, RFile& aFile, TInt aIndex ) = 0;
 
     /**
      * Invoked by the plug-in to inform that content must be cleaned in UI
      * control\element identified by selector aContent.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aContent - identification of content selector, MUST correspond
      *         single content selector supported by plug-in. The framework
      *         utilizes the selector id to match for cid and MIME type.
@@ -255,7 +262,7 @@ public:  // New functions
      *         - KErrNotFound - if content reference is not found in current
      *         UI definition.
      */
-    virtual TInt Clean( MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex ) = 0;
+    virtual TInt Clean( CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex ) = 0;
 
     /**
      * Returns interface extension. Not used in S60 3.2 release.
@@ -267,17 +274,17 @@ public:  // New functions
     virtual TAny* Extension( TUid aUid ) = 0;
 
     /**
-	 * Invoked by the plugin factory
-	 *
-	 * @param aPublsiherInfo Publisher which requires subscription
-	 * @return ETrue if subsription is needed, EFalse otherwise
-	 */	
-    virtual TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const = 0;
+     * Invoked by the plugin factory
+     *
+     * @param aPublsiherInfo Publisher which requires subscription
+     * @return ETrue if subsription is needed, EFalse otherwise
+     */ 
+    virtual TBool RequiresSubscription( const THsPublisherInfo& aPublisherInfo ) const = 0;     
     
     /**
      * Invoked by the plug-in to change the property value of a specific content.
      * value type must be string.
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aElementId - id of content selector, MUST correspond
      *         single content supported by plug-in. The framework
      *         utilizes the id to find in the plugin xml defintion.
@@ -290,7 +297,7 @@ public:  // New functions
      *         - KErrNotSupported - if content selector is not supported by
      *         current plugin definition.         
      */
-    virtual TInt SetProperty( MAiPropertyExtension& aPlugin,
+    virtual TInt SetProperty( CHsContentPublisher& aPlugin,
             const TDesC8& aElementId,
             const TDesC8& aPropertyName,
             const TDesC8& aPropertyValue ) = 0;
@@ -298,7 +305,7 @@ public:  // New functions
     /**
      * Invoked by the plug-in to change the property value of a specific content.
      *
-     * @param  aPlugin - Plug-in property extension interface implementation.
+     * @param  aPlugin - Plug-in interface implementation.
      * @param  aElementId - id of content selector, MUST correspond
      *         single content supported by plug-in. The framework
      *         utilizes the id to find in the plugin xml defintion.
@@ -312,7 +319,7 @@ public:  // New functions
      *         - KErrNotSupported - if content selector is not supported by
      *         current plugin definition.         
      */
-    virtual TInt SetProperty( MAiPropertyExtension& aPlugin,
+    virtual TInt SetProperty( CHsContentPublisher& aPlugin,
             const TDesC8& aElementId,
             const TDesC8& aPropertyName,
             const TDesC8& aPropertyValue,  

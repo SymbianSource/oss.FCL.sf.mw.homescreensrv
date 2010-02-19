@@ -42,13 +42,26 @@ RESOURCE EIK_APP_INFO
 
 //----------------------------------------------------
 // R_MCS_DISABLE_OPEN_ITEM
-// Contains application information.
+// Dialog text: Item cannot be run because of backup
+// state
 //----------------------------------------------------
 //
 RESOURCE TBUF r_mcs_disable_open_item
 {
     buf = qtn_mcs_disable_open_item;
 }
+
+//----------------------------------------------------
+// R_MCS_DISABLE_OPEN_ITEM_MISSING
+// Dialog text: Item cannot be opened because of it is
+// missing
+//----------------------------------------------------
+//
+RESOURCE TBUF r_mcs_disable_open_item_missing
+{
+    buf = qtn_mcs_disable_open_item_missing;
+}
+
 
 //----------------------------------------------------
 // R_MCS_DISABLE_OPEN_ITEM_DLG

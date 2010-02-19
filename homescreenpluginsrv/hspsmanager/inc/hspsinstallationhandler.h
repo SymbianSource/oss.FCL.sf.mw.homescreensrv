@@ -641,6 +641,23 @@ class ChspsInstallationHandler : public CBase,
                 const TDesC8& aTag,
                 HBufC*& aResultString );
         
+        /**
+         * Enabler for customization where the input is
+         * searched from all unremovable drives (eclipsing).
+         * Drives are searched in descending alphabetical order, 
+         * from Y: to A:, and ending with the Z: drive. 
+         * All drives which end-user can freely modify/crack 
+         * are skipped from the search.         
+         * @since S60 5.2
+         * @param aPath Path to the resource file (input)
+         * @param aFilename Name and extension of the file (input)
+         * @param aDrivePathName Full path with a drive letter to the 
+         *                       resource file (output)
+         */
+        void FindFile(                
+                const TDesC& aPath,
+                const TDesC& aFilename,
+                TFileName& aDrivePathName );
     public: 
         
         ChspsResult* iResult;

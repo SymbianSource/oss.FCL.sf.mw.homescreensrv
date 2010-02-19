@@ -19,7 +19,6 @@
 #include "aipublisherfactory.h"
 
 // Publishers
-#include "aiprofilepublisher.h"
 #include "aidatepublisher.h"
 #include "aioperatorlogopublisher.h"
 #include "aioperatornamepublisher.h"
@@ -53,14 +52,6 @@ class TPublisherFactory
         return publisher;
         }
     };
-
-
-MAiDeviceStatusPublisher* AiPublisherFactory::CreateProfilePublisherL()
-    {
-    TPublisherFactory<CAiProfilePublisher> factory;
-    return factory.CreatePublisherL();
-    }
-
 
 MAiDeviceStatusPublisher* AiPublisherFactory::CreateDatePublisherL()
     {

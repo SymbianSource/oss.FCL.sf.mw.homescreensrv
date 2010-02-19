@@ -22,7 +22,7 @@
 
 //  INCLUDES
 #include <s32std.h>
-#include <GMXMLParser.h>
+#include <gmxmlparser.h>
 #include <gmxmlcomposer.h>
 #include "gecodefaultobjectfactory.h"
 

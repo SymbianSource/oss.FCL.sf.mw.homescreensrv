@@ -37,6 +37,15 @@ public:
      *         content observer, EFalse otherwise.
      */
     virtual TBool RefreshContent( TInt aContentId ) = 0;
+   
+    /**
+     * Requests AI content publisher to suspend specific content item.
+     *
+     * @param aContentId content identifier in target plug-ins content model.
+     * @return ETrue if the plugin will suspend the content by calling its 
+     *         content observer, EFalse otherwise.
+     */    
+    virtual TBool SuspendContent( TInt aContentId ) = 0;
     
 protected:
     /**

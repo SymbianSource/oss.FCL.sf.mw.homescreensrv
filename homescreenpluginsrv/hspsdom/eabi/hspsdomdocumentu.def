@@ -21,81 +21,80 @@ EXPORTS
 	_ZN12ChspsDomNode14CreateRefNodeLEv @ 20 NONAME
 	_ZN12ChspsDomNode14SetContentTypeERK12TContentType @ 21 NONAME
 	_ZN12ChspsDomNode17CloneWithoutKidsLER18ChspsDomStringPool @ 22 NONAME
-	_ZN12ChspsDomNode19DeleteAttributeListEv @ 23 NONAME
-	_ZN12ChspsDomNode4NameEv @ 24 NONAME
-	_ZN12ChspsDomNode6CloneLER18ChspsDomStringPool @ 25 NONAME
-	_ZN12ChspsDomNode6PCDataEv @ 26 NONAME
-	_ZN12ChspsDomNode9AddChildLEPS_ @ 27 NONAME
-	_ZN12ChspsDomNode9AddChildLEPS_i @ 28 NONAME
-	_ZN12ChspsDomNode9NamespaceEv @ 29 NONAME
-	_ZN12ChspsDomNode9SetNodeIdEi @ 30 NONAME
-	_ZN12ChspsDomNode9SetParentEPS_ @ 31 NONAME
-	_ZN16ChspsDomDocument11SetRootNodeEP12ChspsDomNode @ 32 NONAME
-	_ZN16ChspsDomDocument12InternalizeLER11RReadStream @ 33 NONAME
-	_ZN16ChspsDomDocument16CreateElementNSLERK6TDesC8S2_ @ 34 NONAME
-	_ZN16ChspsDomDocument4NewLEPK6HBufC8 @ 35 NONAME
-	_ZN16ChspsDomDocument4NewLER11RReadStream @ 36 NONAME
-	_ZN16ChspsDomDocument4NewLEv @ 37 NONAME
-	_ZN16ChspsDomDocument6CloneLEv @ 38 NONAME
-	_ZN16ChspsDomDocument9MarshallLEv @ 39 NONAME
-	_ZN16ChspsDomDocumentD0Ev @ 40 NONAME
-	_ZN16ChspsDomDocumentD1Ev @ 41 NONAME
-	_ZN16ChspsDomDocumentD2Ev @ 42 NONAME
-	_ZN17ChspsDomAttribute4NameEv @ 43 NONAME
-	_ZN17ChspsDomAttribute4NewLERK6TDesC8R18ChspsDomStringPool @ 44 NONAME
-	_ZN17ChspsDomAttribute5ValueEv @ 45 NONAME
-	_ZN17ChspsDomAttribute6CloneLEv @ 46 NONAME
-	_ZN17ChspsDomAttribute9SetValueLERK6TDesC8 @ 47 NONAME
-	_ZN17ChspsDomAttributeD0Ev @ 48 NONAME
-	_ZN17ChspsDomAttributeD1Ev @ 49 NONAME
-	_ZN17ChspsDomAttributeD2Ev @ 50 NONAME
-	_ZN18ChspsDomStringPool10AddStringLERK6TDesC8 @ 51 NONAME
-	_ZN21ChspsDomDepthIterator11NextSiblingER12ChspsDomNode @ 52 NONAME
-	_ZN21ChspsDomDepthIterator4NewLER12ChspsDomNode @ 53 NONAME
-	_ZN21ChspsDomDepthIterator5FirstEv @ 54 NONAME
-	_ZN21ChspsDomDepthIterator5NextLEv @ 55 NONAME
-	_ZN21ChspsDomDepthIteratorD0Ev @ 56 NONAME
-	_ZN21ChspsDomDepthIteratorD1Ev @ 57 NONAME
-	_ZN21ChspsDomDepthIteratorD2Ev @ 58 NONAME
-	_ZNK12ChspsDomList10StringPoolEv @ 59 NONAME
-	_ZNK12ChspsDomList4ItemEi @ 60 NONAME
-	_ZNK12ChspsDomList6LengthEv @ 61 NONAME
-	_ZNK12ChspsDomList9ItemIndexERK16MhspsDomListItem @ 62 NONAME
-	_ZNK12ChspsDomNode10StringPoolEv @ 63 NONAME
-	_ZNK12ChspsDomNode13AttributeListEv @ 64 NONAME
-	_ZNK12ChspsDomNode14AttributeValueERK6TDesC8 @ 65 NONAME
-	_ZNK12ChspsDomNode15DescendantCountEv @ 66 NONAME
-	_ZNK12ChspsDomNode6NodeIdEv @ 67 NONAME
-	_ZNK12ChspsDomNode6ParentEv @ 68 NONAME
-	_ZNK12ChspsDomNode9IsRefNodeEv @ 69 NONAME
-	_ZNK12ChspsDomNode9ItemIndexERK16MhspsDomListItem @ 70 NONAME
-	_ZNK16ChspsDomDocument10StringPoolEv @ 71 NONAME
-	_ZNK16ChspsDomDocument12DomNodeCountEv @ 72 NONAME
-	_ZNK16ChspsDomDocument12ExternalizeLER12RWriteStream @ 73 NONAME
-	_ZNK16ChspsDomDocument4SizeEv @ 74 NONAME
-	_ZNK16ChspsDomDocument8LastNodeEv @ 75 NONAME
-	_ZNK16ChspsDomDocument8RootNodeEv @ 76 NONAME
-	_ZNK17ChspsDomAttribute19NameStringPoolIndexEv @ 77 NONAME
-	_ZNK17ChspsDomAttribute20ValueStringPoolIndexEv @ 78 NONAME
-	_ZTI12ChspsDomList @ 79 NONAME ; #<TI>#
-	_ZTI12ChspsDomNode @ 80 NONAME ; #<TI>#
-	_ZTI16ChspsDomDocument @ 81 NONAME ; #<TI>#
-	_ZTI17ChspsDomAttribute @ 82 NONAME ; #<TI>#
-	_ZTI18ChspsDomStringPool @ 83 NONAME ; #<TI>#
-	_ZTI21ChspsDomDepthIterator @ 84 NONAME ; #<TI>#
-	_ZTV12ChspsDomList @ 85 NONAME ; #<VT>#
-	_ZTV12ChspsDomNode @ 86 NONAME ; #<VT>#
-	_ZTV16ChspsDomDocument @ 87 NONAME ; #<VT>#
-	_ZTV17ChspsDomAttribute @ 88 NONAME ; #<VT>#
-	_ZTV18ChspsDomStringPool @ 89 NONAME ; #<VT>#
-	_ZTV21ChspsDomDepthIterator @ 90 NONAME ; #<VT>#
-	_ZThn4_N12ChspsDomNode4NameEv @ 91 NONAME ; #<thunk>#
-	_ZThn4_N17ChspsDomAttribute4NameEv @ 92 NONAME ; #<thunk>#
-	_ZThn4_N17ChspsDomAttributeD0Ev @ 93 NONAME ; #<thunk>#
-	_ZThn4_N17ChspsDomAttributeD1Ev @ 94 NONAME ; #<thunk>#
-	_ZThn4_N21ChspsDomDepthIterator11NextSiblingER12ChspsDomNode @ 95 NONAME ; #<thunk>#
-	_ZThn4_N21ChspsDomDepthIterator5FirstEv @ 96 NONAME ; #<thunk>#
-	_ZThn4_N21ChspsDomDepthIterator5NextLEv @ 97 NONAME ; #<thunk>#
-	_ZThn4_N21ChspsDomDepthIteratorD0Ev @ 98 NONAME ; #<thunk>#
-	_ZThn4_N21ChspsDomDepthIteratorD1Ev @ 99 NONAME ; #<thunk>#
+	_ZN12ChspsDomNode4NameEv @ 23 NONAME
+	_ZN12ChspsDomNode6CloneLER18ChspsDomStringPool @ 24 NONAME
+	_ZN12ChspsDomNode6PCDataEv @ 25 NONAME
+	_ZN12ChspsDomNode9AddChildLEPS_ @ 26 NONAME
+	_ZN12ChspsDomNode9AddChildLEPS_i @ 27 NONAME
+	_ZN12ChspsDomNode9NamespaceEv @ 28 NONAME
+	_ZN12ChspsDomNode9SetNodeIdEi @ 29 NONAME
+	_ZN12ChspsDomNode9SetParentEPS_ @ 30 NONAME
+	_ZN16ChspsDomDocument11SetRootNodeEP12ChspsDomNode @ 31 NONAME
+	_ZN16ChspsDomDocument12InternalizeLER11RReadStream @ 32 NONAME
+	_ZN16ChspsDomDocument16CreateElementNSLERK6TDesC8S2_ @ 33 NONAME
+	_ZN16ChspsDomDocument4NewLEPK6HBufC8 @ 34 NONAME
+	_ZN16ChspsDomDocument4NewLER11RReadStream @ 35 NONAME
+	_ZN16ChspsDomDocument4NewLEv @ 36 NONAME
+	_ZN16ChspsDomDocument6CloneLEv @ 37 NONAME
+	_ZN16ChspsDomDocument9MarshallLEv @ 38 NONAME
+	_ZN16ChspsDomDocumentD0Ev @ 39 NONAME
+	_ZN16ChspsDomDocumentD1Ev @ 40 NONAME
+	_ZN16ChspsDomDocumentD2Ev @ 41 NONAME
+	_ZN17ChspsDomAttribute4NameEv @ 42 NONAME
+	_ZN17ChspsDomAttribute4NewLERK6TDesC8R18ChspsDomStringPool @ 43 NONAME
+	_ZN17ChspsDomAttribute5ValueEv @ 44 NONAME
+	_ZN17ChspsDomAttribute6CloneLEv @ 45 NONAME
+	_ZN17ChspsDomAttribute9SetValueLERK6TDesC8 @ 46 NONAME
+	_ZN17ChspsDomAttributeD0Ev @ 47 NONAME
+	_ZN17ChspsDomAttributeD1Ev @ 48 NONAME
+	_ZN17ChspsDomAttributeD2Ev @ 49 NONAME
+	_ZN18ChspsDomStringPool10AddStringLERK6TDesC8 @ 50 NONAME
+	_ZN21ChspsDomDepthIterator11NextSiblingER12ChspsDomNode @ 51 NONAME
+	_ZN21ChspsDomDepthIterator4NewLER12ChspsDomNode @ 52 NONAME
+	_ZN21ChspsDomDepthIterator5FirstEv @ 53 NONAME
+	_ZN21ChspsDomDepthIterator5NextLEv @ 54 NONAME
+	_ZN21ChspsDomDepthIteratorD0Ev @ 55 NONAME
+	_ZN21ChspsDomDepthIteratorD1Ev @ 56 NONAME
+	_ZN21ChspsDomDepthIteratorD2Ev @ 57 NONAME
+	_ZNK12ChspsDomList10StringPoolEv @ 58 NONAME
+	_ZNK12ChspsDomList4ItemEi @ 59 NONAME
+	_ZNK12ChspsDomList6LengthEv @ 60 NONAME
+	_ZNK12ChspsDomList9ItemIndexERK16MhspsDomListItem @ 61 NONAME
+	_ZNK12ChspsDomNode10StringPoolEv @ 62 NONAME
+	_ZNK12ChspsDomNode13AttributeListEv @ 63 NONAME
+	_ZNK12ChspsDomNode14AttributeValueERK6TDesC8 @ 64 NONAME
+	_ZNK12ChspsDomNode15DescendantCountEv @ 65 NONAME
+	_ZNK12ChspsDomNode6NodeIdEv @ 66 NONAME
+	_ZNK12ChspsDomNode6ParentEv @ 67 NONAME
+	_ZNK12ChspsDomNode9IsRefNodeEv @ 68 NONAME
+	_ZNK12ChspsDomNode9ItemIndexERK16MhspsDomListItem @ 69 NONAME
+	_ZNK16ChspsDomDocument10StringPoolEv @ 70 NONAME
+	_ZNK16ChspsDomDocument12DomNodeCountEv @ 71 NONAME
+	_ZNK16ChspsDomDocument12ExternalizeLER12RWriteStream @ 72 NONAME
+	_ZNK16ChspsDomDocument4SizeEv @ 73 NONAME
+	_ZNK16ChspsDomDocument8LastNodeEv @ 74 NONAME
+	_ZNK16ChspsDomDocument8RootNodeEv @ 75 NONAME
+	_ZNK17ChspsDomAttribute19NameStringPoolIndexEv @ 76 NONAME
+	_ZNK17ChspsDomAttribute20ValueStringPoolIndexEv @ 77 NONAME
+	_ZTI12ChspsDomList @ 78 NONAME
+	_ZTI12ChspsDomNode @ 79 NONAME
+	_ZTI16ChspsDomDocument @ 80 NONAME
+	_ZTI17ChspsDomAttribute @ 81 NONAME
+	_ZTI18ChspsDomStringPool @ 82 NONAME
+	_ZTI21ChspsDomDepthIterator @ 83 NONAME
+	_ZTV12ChspsDomList @ 84 NONAME
+	_ZTV12ChspsDomNode @ 85 NONAME
+	_ZTV16ChspsDomDocument @ 86 NONAME
+	_ZTV17ChspsDomAttribute @ 87 NONAME
+	_ZTV18ChspsDomStringPool @ 88 NONAME
+	_ZTV21ChspsDomDepthIterator @ 89 NONAME
+	_ZThn4_N12ChspsDomNode4NameEv @ 90 NONAME
+	_ZThn4_N17ChspsDomAttribute4NameEv @ 91 NONAME
+	_ZThn4_N17ChspsDomAttributeD0Ev @ 92 NONAME
+	_ZThn4_N17ChspsDomAttributeD1Ev @ 93 NONAME
+	_ZThn4_N21ChspsDomDepthIterator11NextSiblingER12ChspsDomNode @ 94 NONAME
+	_ZThn4_N21ChspsDomDepthIterator5FirstEv @ 95 NONAME
+	_ZThn4_N21ChspsDomDepthIterator5NextLEv @ 96 NONAME
+	_ZThn4_N21ChspsDomDepthIteratorD0Ev @ 97 NONAME
+	_ZThn4_N21ChspsDomDepthIteratorD1Ev @ 98 NONAME
 

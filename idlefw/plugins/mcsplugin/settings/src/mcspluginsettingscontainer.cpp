@@ -88,7 +88,9 @@ void CMCSPluginSettingsContainer::StartObservingL()
         {
         iNotifyWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::ENotify );
         iNotifier.Notify( 0,
-            RMenuNotifier::EItemsAddedRemoved | RMenuNotifier::EItemsReordered,
+            RMenuNotifier::EItemsAddedRemoved | 
+            RMenuNotifier::EItemsReordered |
+            RMenuNotifier::EItemAttributeChanged,
         iNotifyWatcher->iStatus );
         iNotifyWatcher->WatchNotify( this );
         }
@@ -496,7 +498,9 @@ void CMCSPluginSettingsContainer::HandleNotifyL()
     // Notification must be activated again
     iNotifyWatcher->Cancel();
     iNotifier.Notify( 0,
-        RMenuNotifier::EItemsAddedRemoved | RMenuNotifier::EItemsReordered,
+        RMenuNotifier::EItemsAddedRemoved | 
+        RMenuNotifier::EItemsReordered |
+        RMenuNotifier::EItemAttributeChanged,
         iNotifyWatcher->iStatus );
     iNotifyWatcher->WatchNotify( this );
     }

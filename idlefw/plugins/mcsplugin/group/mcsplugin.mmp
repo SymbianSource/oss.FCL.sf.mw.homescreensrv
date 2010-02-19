@@ -41,15 +41,15 @@ USERINCLUDE     ../commoninc
 
 APP_LAYER_SYSTEMINCLUDE
 
-SOURCEPATH            ../data
-START RESOURCE          mcsplugin.rss
-TARGET                  mcsplugin.rsc
+SOURCEPATH      ../data
+START RESOURCE  mcsplugin.rss
+TARGET          mcsplugin.rsc
 END
 
-START RESOURCE          mcspluginres.rss
+START RESOURCE  mcspluginres.rss
 HEADER
-TARGET                  mcspluginres.rsc
-TARGETPATH              RESOURCE_FILES_DIR
+TARGET          mcspluginres.rsc
+TARGETPATH      RESOURCE_FILES_DIR
 LANGUAGE_IDS
 END
 LIBRARY         euser.lib
@@ -77,10 +77,7 @@ LIBRARY         fbscli.lib
 LIBRARY         gslauncher.lib
 LIBRARY         eikdlg.lib
 LIBRARY         commonengine.lib 
-LIBRARY         favouritesengine.lib
 
 LIBRARY         gfxtrans.lib 
-LIBRARY         centralrepository.lib
-
 
 // End of File

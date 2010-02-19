@@ -25,9 +25,6 @@
 
 data=DATAZ_\APP_RESOURCE_DIR\homescreen.rsc		APP_RESOURCE_DIR\homescreen.rsc
 
-// Content publishing plug-in resources
-data=DATAZ_\APP_RESOURCE_DIR\aidevstaplgres.rsc  APP_RESOURCE_DIR\aidevstaplgres.rsc
-
 #endif // RD_CUSTOMIZABLE_AI
 
 #endif // ACTIVEIDLE3_RESOURCES_IBY

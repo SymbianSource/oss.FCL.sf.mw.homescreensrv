@@ -23,7 +23,7 @@
 #include <aipluginsettings.h>
 #include <apgcli.h>
 #include <apgicnfl.h> 
-#include <bautils.H> 
+#include <bautils.h> 
 
 #include "wrtdata.h"
 #include "wrtdatapluginconst.h"
@@ -487,15 +487,6 @@ void CWrtData::SuspendL()
 void CWrtData::DeActivateL()
     {
     ChangePublisherStatusL( KDeActive );
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::InActiveL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::InActiveL()
-    {
-    ChangePublisherStatusL( KInActive );
     }
 
 // ---------------------------------------------------------------------------

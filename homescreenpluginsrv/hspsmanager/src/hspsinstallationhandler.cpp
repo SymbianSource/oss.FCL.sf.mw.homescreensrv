@@ -1739,7 +1739,54 @@ void ChspsInstallationHandler::ActivateThemeL()
         iMultiInstance = KMultiInstanceDefaultValue;
         }
     }
-
+ 
+ // -----------------------------------------------------------------------------
+ // ChspsInstallationHandler::FindFile
+ // Eclipsing support for customization 
+ // -----------------------------------------------------------------------------
+ //
+ void ChspsInstallationHandler::FindFile(
+         const TDesC& aPath,
+         const TDesC& aFilename,         
+         TFileName& aDrivePathName )
+     {                   
+     TParsePtrC parser( aPath );
+     const TPath path = parser.Path();              
+               
+     // Find the input file, search from the user area (UDA) first, 
+     // exclude external/remote drives from the search - otherwise end-users  
+     // could introduce fixed configurations (e.g. operator locks wouldn't work)
+     TFindFile fileFinder( iFsSession );
+     fileFinder.SetFindMask( 
+         KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+     iFsSession.SetSessionToPrivate( EDriveZ );
+     TInt err = fileFinder.FindByDir( aFilename, path );
+     iFsSession.SetSessionToPrivate( EDriveC );
+     if( !err )          
+         {         
+         // Return the path with a drive reference 
+         aDrivePathName = fileFinder.File();        
+         TParsePtrC drvParser( aDrivePathName );
+         if( !drvParser.DrivePresent() )
+             {             
+             err = KErrNotFound;
+             }
+         }
+     
+     if( err )
+         {
+         // Not found from C nor Z drives
+#ifdef HSPS_LOG_ACTIVE  
+         if( iLogBus )
+             {
+             iLogBus->LogText( 
+                     _L( "ChspsInstallationHandler::FindFile(): - couldnt' find file '%S'" ),
+                     &aDrivePathName );
+             }
+    #endif
+         }
+     }
+ 
 // -----------------------------------------------------------------------------
 // Parsing of the manifest elements.
 // -----------------------------------------------------------------------------
@@ -1934,28 +1981,27 @@ void ChspsInstallationHandler::OnEndElementL( const RTagInfo& aElement, TInt /*a
         }
     else if ( localName == KFileXML )
         {
-        delete iXmlFile;
-        iXmlFile = NULL;
-        iXmlFile = HBufC::NewL( KMaxFileName );
-        TPtr fileDes( iXmlFile->Des() );
-    
-        fileDes.Copy( iThemeFilePath );
-        HBufC* data = CnvUtfConverter::ConvertToUnicodeFromUtf8L( *iContent );
-        fileDes.Append( *data );
-        delete data;
-        
-        if( !BaflUtils::FileExists( iFsSession, fileDes ) )
+        if( iContent )
             {
-#ifdef HSPS_LOG_ACTIVE  
-            if( iLogBus )
+            // Convert from 8 to 16bit string
+            HBufC* nameBuf = CnvUtfConverter::ConvertToUnicodeFromUtf8L( *iContent );                        
+            // Find full path to the file 
+            TFileName fullName;
+            FindFile( 
+                iThemeFilePath, 
+                nameBuf->Des(),
+                fullName );
+            delete nameBuf;
+            nameBuf = NULL;
+            if( !fullName.Length() )
                 {
-                iLogBus->LogText( _L( "ChspsInstallationHandler::OnEndElementL(): - XML file does not exist '%S'" ),
-                        &fileDes );
+                iFileNotFound = ETrue;
+                iResult->iXuikonError = KErrXmlFileNotFound;
+                User::Leave( KErrNotFound );
                 }
-#endif    
-            
-            iFileNotFound = ETrue;
-            iResult->iXuikonError = KErrXmlFileNotFound;
+            delete iXmlFile;
+            iXmlFile = NULL;
+            iXmlFile = fullName.AllocL();
             }
         }
     else if ( localName == KFileDTD )

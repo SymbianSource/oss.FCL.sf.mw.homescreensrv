@@ -15,25 +15,28 @@
 *
 */
 
-
+// System includes
 #include <ecom/ecom.h>
 #include <ecom/implementationproxy.h>
-#include <aicontentobserver.h>
-#include <aiutility.h>
 #include <PUAcodes.hrh>
 #include <AknUtils.h>
 
-#include "aiprofileplugincontentmodel.h"
+// User includes
 #include <aiprofilepluginuids.hrh>
+#include <aicontentobserver.h>
+#include <aiutility.h>
+
+#include "aiprofileplugincontentmodel.h"
 #include "caiprofileplugin.h"
 #include "caiprofileengine.h"
 #include "aipluginsettings.h"
+
+// Constants
 
 // PUA code for the timed profile, missing from PUAcodes.hrh
 #define KAiTimedProfilePUA 0xF815
 #define KAiRTL 0x200F
 
-// CONST CLASS VARIABLES
 const TImplementationProxy KImplementationTable[] =
     {
     IMPLEMENTATION_PROXY_ENTRY( KImplUidProfilePlugin, CAiProfilePlugin::NewL ) 
@@ -42,14 +45,14 @@ const TImplementationProxy KImplementationTable[] =
 // ======== LOCAL FUNCTIONS ========
 
 // ======== MEMBER FUNCTIONS ========
-
 // ---------------------------------------------------------------------------
-// Symbian 2nd phase constructor can leave
+// CAiProfilePlugin::NewL
+//
 // ---------------------------------------------------------------------------
 //
 CAiProfilePlugin* CAiProfilePlugin::NewL()
     {
-    CAiProfilePlugin* self = new (ELeave) CAiProfilePlugin;
+    CAiProfilePlugin* self = new ( ELeave ) CAiProfilePlugin;
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -58,7 +61,8 @@ CAiProfilePlugin* CAiProfilePlugin::NewL()
     }
     
 // ---------------------------------------------------------------------------
-// Default constructor
+// CAiProfilePlugin::CAiProfilePlugin()
+// 
 // ---------------------------------------------------------------------------
 //
 CAiProfilePlugin::CAiProfilePlugin()
@@ -66,39 +70,39 @@ CAiProfilePlugin::CAiProfilePlugin()
     }
     
 // ---------------------------------------------------------------------------
-// Symbian 2nd phase constructor can leave
+// CAiProfilePlugin::ConstructL
+// 
 // ---------------------------------------------------------------------------
 //
 void CAiProfilePlugin::ConstructL()
     { 
-    iInfo.iUid.iUid = AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_PROFILEPLUGIN; 
-   
     iContent = AiUtility::CreateContentItemArrayIteratorL( KAiProfileContent );
     iEvents = AiUtility::CreateContentItemArrayIteratorL( KAiProfileEvents );
-    iResources = AiUtility::CreateContentItemArrayIteratorL( KAiProfileResources );
-    
-    iIsUpdated = ETrue;
-    iAlive = EFalse;        
+    iResources = AiUtility::CreateContentItemArrayIteratorL( KAiProfileResources );        
     }
     
 // ---------------------------------------------------------------------------
-// Destructor
+// CAiProfilePlugin::~CAiProfilePlugin
 // Deletes all data created to heap
 // ---------------------------------------------------------------------------
 //
 CAiProfilePlugin::~CAiProfilePlugin()
     {
     CleanPublishedProfileNames();
+	
     Release( iContent );
     Release( iEvents );
-    Release( iResources );   
+    Release( iResources );
+    
     delete iActiveProfileAndChar;
     delete iPreviousProfileNameAndChar;
     delete iEngine;
+    
     iObservers.Close();
     }
 
 // ---------------------------------------------------------------------------
+// CAiProfilePlugin::PublishL
 // Publishes the profiles
 // ---------------------------------------------------------------------------
 //
@@ -106,12 +110,14 @@ void CAiProfilePlugin::PublishL()
     {
     TInt err( KErrNone );
     TInt observers( iObservers.Count() );        
-    TInt transactionId = reinterpret_cast<TInt>( this );
+    TInt transactionId ( reinterpret_cast<TInt>( this ) );
 
     iCurrentCount = iEngine->NumberOfProfiles();
-    for ( int i = 0; i < observers; i++ )
+    
+    for ( TInt i = 0; i < observers; i++ )
         {
-        MAiContentObserver* observer = iObservers[i];
+        MAiContentObserver* observer( iObservers[i] );
+        
         err = observer->StartTransaction( transactionId );
 		
 		if ( err == KErrNotSupported )
@@ -130,11 +136,12 @@ void CAiProfilePlugin::PublishL()
             {
             delete iActiveProfileAndChar;
             iActiveProfileAndChar = NULL;
+            
             // silent/non-silent icon + timed icon + space + possible RTL*2 = 5
-            TInt maxChars = iEngine->ActiveProfileName().Length() + 5;
+            TInt maxChars( iEngine->ActiveProfileName().Length() + 5 );
             
             iActiveProfileAndChar = HBufC::NewL( maxChars );
-            TPtr profileNamePtr = iActiveProfileAndChar->Des();
+            TPtr profileNamePtr( iActiveProfileAndChar->Des() );
            
             if( AknLayoutUtils::LayoutMirrored() )
                 {
@@ -145,7 +152,8 @@ void CAiProfilePlugin::PublishL()
                 {
                 profileNamePtr.Append( KAiTimedProfilePUA );                
                 }
-            if( iEngine->IsActiveProfileSilentL() )
+            
+            if ( iEngine->IsActiveProfileSilentL() )
                 {                
                 profileNamePtr.Append( KPuaCodeSilentSymbol );
                 }
@@ -153,10 +161,12 @@ void CAiProfilePlugin::PublishL()
                 {
                 profileNamePtr.Append( KPuaCodeAprofSound );
                 }
-            _LIT( KSpace, " " );   
+            
+            _LIT( KSpace, " " ); 
+            
             profileNamePtr.Append( KSpace );
             
-            if( AknLayoutUtils::LayoutMirrored() )
+            if ( AknLayoutUtils::LayoutMirrored() )
                 {
                 profileNamePtr.Append( KAiRTL );
                 }
@@ -184,13 +194,14 @@ void CAiProfilePlugin::PublishL()
        	// clean profiles that are already deleted.
        	// Cleans the array blindly from the end, because in the next
        	// step all the profiles are republished
-        if( iPreviousCount > iCurrentCount )
+        if ( iPreviousCount > iCurrentCount )
             {
             for( TInt k = iCurrentCount; k < iPreviousCount; k++ )
                 {
                 observer->Clean( *this, EAiProfileContentProfileName, k + 1 );
                 }
             }
+        
 		for ( TInt j = 0; j < iCurrentCount; j++ )
 			{
 			if ( observer->CanPublish( *this, EAiProfileContentProfileName, j + 1 ) )
@@ -206,6 +217,7 @@ void CAiProfilePlugin::PublishL()
         		{
         		TBuf<1> silent; // one character
         		silent.Append( KPuaCodeSilentSymbol );
+        		
         		observer->Publish( *this, EAiProfileActiveProfileSilentChar, silent, EAiProfileActiveProfileSilentChar );
         		}
         	else
@@ -220,7 +232,8 @@ void CAiProfilePlugin::PublishL()
     		observer->Clean( *this, EAiProfileActiveProfileIcon, EAiProfileActiveProfileSilentIconResource );
     		observer->Clean( *this, EAiProfileActiveProfileIcon, EAiProfileActiveProfileGeneralIconResource );
     		observer->Clean( *this, EAiProfileActiveProfileIcon, EAiProfileActiveProfileTimedIconResource );
-        	if ( iEngine->IsActiveProfileTimedL() )
+        	
+    		if ( iEngine->IsActiveProfileTimedL() )
         		{
         		observer->Publish( *this, 
         							EAiProfileActiveProfileIcon, 
@@ -250,9 +263,11 @@ void CAiProfilePlugin::PublishL()
     		observer->Clean( *this, EAiProfileActiveProfileSilentChar, EAiProfileActiveProfileSilentChar );
     		observer->Clean( *this, EAiProfileActiveProfileIcon, 1 );
     		observer->Clean( *this, EAiProfileActiveProfileIcon, 2 );
-            // uncomment also this and respective policy lines in profiles.xml if whole widget needs to be hidden in AI3 
+            
+    		// uncomment also this and respective policy lines in profiles.xml if whole widget needs to be hidden in AI3 
     		//observer->Clean( *this, EAiProfileContentActiveProfileName, EAiProfileContentActiveProfileName );        		    		
     		}
+        
         if ( err == KErrNone )
             {
             err = observer->Commit( transactionId );
@@ -261,234 +276,145 @@ void CAiProfilePlugin::PublishL()
                 {
                 return;
                 }
-            }
-        
-        iIsUpdated = EFalse;
+            }                
         }
+    
     iPreviousCount = iCurrentCount;
     }
     
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-in is requested to unload its engines due backup operation
+// CAiProfilePlugin::Start
+// 
 // ---------------------------------------------------------------------------
 //
-void CAiProfilePlugin::Stop( TAiTransitionReason /*aReason*/ )
-    {
-    FreeEngine();
+void CAiProfilePlugin::Start( TStartReason /*aReason*/ )
+    {   
     }
 
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-in is instructed that it is allowed to consume CPU resources
+// CAiProfilePlugin::Stop
+// 
 // ---------------------------------------------------------------------------
 //
-void CAiProfilePlugin::Resume( TAiTransitionReason aReason )
-    {
-    TRAP_IGNORE( DoResumeL( aReason ) ); 
+void CAiProfilePlugin::Stop( TStopReason /*aReason*/ )
+    {    
     }
-    
+
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-in is instructed that it is not allowed to consume CPU resources
+// CAiProfilePlugin::Resume
+// 
 // ---------------------------------------------------------------------------
 //
-void CAiProfilePlugin::Suspend( TAiTransitionReason /*aReason*/ )
+void CAiProfilePlugin::Resume( TResumeReason aReason )
     {
-    if ( iEngine && iAlive )
+    if ( aReason == EForeground )
         {
-        iEngine->Suspend();
+        TRAP_IGNORE( DoResumeL() );
         }
-        
-    iAlive = EFalse;
     }
 
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// The plug-in MUST maintain a registry of subscribers and send 
-// notification to all of them whenever the state changes or new content
-// is available
+// CAiProfilePlugin::Suspend
+// 
+// ---------------------------------------------------------------------------
+//
+void CAiProfilePlugin::Suspend( TSuspendReason /*aReason*/ )
+    {    
+    }
+
+// ---------------------------------------------------------------------------
+// CAiProfilePlugin::SubscribeL
+// 
 // ---------------------------------------------------------------------------
 //
 void CAiProfilePlugin::SubscribeL( MAiContentObserver& aObserver )
-    { 
+    {
     iObservers.AppendL( &aObserver );
     }
-    
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-ins take ownership of the settings array, so it must either
-// store it in a member or free it.
-// ---------------------------------------------------------------------------
-//
-void CAiProfilePlugin::ConfigureL( RAiSettingsItemArray& aSettings )
-    {
-    aSettings.ResetAndDestroy();
-    }
 
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Returns the extension interface. Actual type depends on the passed 
-// aUid argument.
+// CAiProfilePlugin::ConfigureL
+// 
 // ---------------------------------------------------------------------------
 //
-TAny* CAiProfilePlugin::Extension( TUid aUid )
+void CAiProfilePlugin::ConfigureL( RAiSettingsItemArray& /*aSettings*/ )
     {    
-    if (aUid == KExtensionUidProperty)
-   		{
-        return static_cast<MAiPropertyExtension*>(this);
-    	}
-    else if (aUid == KExtensionUidEventHandler)
-    	{
-        return static_cast<MAiEventHandlerExtension*>(this);
-    	}
-    else
-    	{	
-        return NULL;
-    	}
     }
 
 // ---------------------------------------------------------------------------
-// From class MAiPropertyExtension
-// Read property of publisher plug-in.
+// CAiProfilePlugin::GetProperty
+// 
 // ---------------------------------------------------------------------------
 //
-TAny* CAiProfilePlugin::GetPropertyL( TInt aProperty )
+TAny* CAiProfilePlugin::GetProperty( TProperty aProperty )
     {
-    TAny* property = NULL;
-    
-    switch ( aProperty )
+    if ( aProperty == EPublisherContent )
         {
-    case EAiPublisherInfo:
-        {
-         property = static_cast<TAiPublisherInfo*>( &iInfo );
-        break;  
-        }       
-
-    case EAiPublisherContent:
-        {
-        property = static_cast<MAiContentItemIterator*>( iContent );
-        break;    
-        }        
-
-    case EAiPublisherEvents:
-        {
-        property = static_cast<MAiContentItemIterator*>( iEvents );
-        break;
+        return static_cast< MAiContentItemIterator* >( iContent );        
         }
-    
-    case EAiPublisherResources:
-        property = static_cast<MAiContentItemIterator*>( iResources );
-        break;
-       
-    default:
-        break;
+    else if ( aProperty == EPublisherEvents )
+        {
+        return static_cast< MAiContentItemIterator* >( iEvents );
+        }
+    else if ( aProperty == EPublisherResources )
+        {
+        return static_cast< MAiContentItemIterator* >( iResources );        
         }
 
-    return property;
+    return NULL;
     }
 
 // ---------------------------------------------------------------------------
-// From class MAiPropertyExtension
-// Write property value to optimize the content model.
+// CAiProfilePlugin::HandleEvent
+// 
 // ---------------------------------------------------------------------------
 //
-void CAiProfilePlugin::SetPropertyL( TInt aProperty, TAny* aValue )
-    {  
-    if( aProperty == EAiPublisherInfo )
+void CAiProfilePlugin::HandleEvent( TInt aEvent, const TDesC& aParam )
+    {    
+    TRAP_IGNORE( iEngine->HandleAiEventL( aEvent, aParam ) );    
+    }
+
+// ---------------------------------------------------------------------------
+// CAiProfilePlugin::DoResumeL
+//
+// ---------------------------------------------------------------------------
+//
+void CAiProfilePlugin::DoResumeL()
+    {
+    if( !iEngine )
         {
-        ASSERT( aValue );
+        iEngine = CAiProfileEngine::NewL( this );
         
-        const TAiPublisherInfo* info( 
-                static_cast<const TAiPublisherInfo*>( aValue ) );
+        iEngine->UpdateProfileNamesL();
         
-        iInfo = *info;
+        PublishL();        
         }
     }
  
 // ---------------------------------------------------------------------------
-// From class MAiEventHandlerExtension.
-// Handles an event sent by the AI framework.
+// CAiProfilePlugin::NotifyContentUpdate()
+// This method is called from the engine, when the profile data has changed
 // ---------------------------------------------------------------------------
 //
-void CAiProfilePlugin::HandleEvent(TInt aEvent, const TDesC& aParam)
-	{
-    if ( iEngine )
-    	{
-        // We have no way of reporting errors to framework so just ignore them.
-        TRAP_IGNORE( iEngine->HandleAiEventL( aEvent, aParam ) );
-    	}
-	} 
-    
-// ---------------------------------------------------------
-// This method is called from the engine, when the profile
-// data content has been changed. Method call is made through
-// the MAiProfilePluginNotifier interface.
-// ---------------------------------------------------------
-//
 void CAiProfilePlugin::NotifyContentUpdate()
-    {
-    iIsUpdated = ETrue;
-    
+    {        
     TRAP_IGNORE( PublishL() );
     }
 
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// framework instructs plug-in that it is allowed to consume CPU resources
-// ---------------------------------------------------------------------------
-//
-void CAiProfilePlugin::DoResumeL( TAiTransitionReason aReason )
-    {
-    if ( !iEngine )
-        {
-        iEngine = CAiProfileEngine::NewL( this );
-        }
-    
-	//update in startup phase and idle is on foreground.
-    if( aReason != EAiBacklightOff && aReason != EAiIdleBackground )
-    	{
-    	// force republish in case layout has changed
-      if ( aReason == EAiScreenLayoutChanged )
-          {
-          delete iPreviousProfileNameAndChar;
-          iPreviousProfileNameAndChar = NULL;
-          }
-
-    	if ( !iAlive )
-    	    {
-            iEngine->ResumeL();
-    	    }
-    	
-	    iEngine->UpdateProfileNamesL();
-	    
-        PublishL();
-	    iAlive = ETrue;     
-    	}   
-    }
-    
-// ---------------------------------------------------------------------------
-// Frees engine resources
-// ---------------------------------------------------------------------------
-//    
-void CAiProfilePlugin::FreeEngine()
-    {
-    delete iEngine;
-    iEngine = NULL;
-    iAlive = EFalse;   
-    }
-
-// ---------------------------------------------------------------------------
+// CAiProfilePlugin::CleanPublishedProfileNames
 // Clean profile names from content
 // ---------------------------------------------------------------------------
 //    
 void CAiProfilePlugin::CleanPublishedProfileNames()
     {
     TInt obsCount( iObservers.Count() );
+    
     for ( TInt i( 0 ); i < obsCount; i++ )
         {
-        MAiContentObserver* observer = iObservers[i];
-        for( TInt j( 0 ); j < iCurrentCount && observer; j++ )
+        MAiContentObserver* observer( iObservers[i] );
+        
+        for ( TInt j( 0 ); j < iCurrentCount && observer; j++ )
             {
             observer->Clean( *this, EAiProfileContentProfileName, j + 1 );
             }
@@ -505,5 +431,6 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
     {
     aTableCount = sizeof( KImplementationTable ) / 
         sizeof( TImplementationProxy );
+    
     return KImplementationTable;
     }

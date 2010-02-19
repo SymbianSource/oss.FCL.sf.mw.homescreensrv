@@ -15,9 +15,8 @@
 *
 */
 
-
+#include <aicontentobserver.h>
 #include "aimcnpublisher.h"
-#include "aicontentobserver.h"
 #include "ainetworkinfolistener.h"
 
 
@@ -61,7 +60,7 @@ void CAiMCNPublisher::ResumeL()
 
 
 void CAiMCNPublisher::Subscribe( MAiContentObserver& aObserver, 
-							        MAiPropertyExtension& aExtension,
+							        CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {

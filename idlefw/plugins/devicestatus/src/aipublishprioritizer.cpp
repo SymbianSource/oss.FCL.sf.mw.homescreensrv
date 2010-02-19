@@ -20,14 +20,14 @@
 #include "ainwidpriorities.h"
 #include "aidevicestatuscontentmodel.h"
 #include <aicontentrequest.h>
-#include "aipropertyextension.h"
+
 #include "aipublisherbroadcaster.h"
 #include "debug.h"
 
 
 CAiPublishPrioritizer::CAiPublishPrioritizer( 
                                         MAiContentObserver& aContentObserver,
-                                        MAiPropertyExtension& aPropertyExtension )
+                                        CHsContentPublisher& aPropertyExtension )
     : iContentObserver( aContentObserver ),
         iPropertyExtension( aPropertyExtension ),
         iPriority( EAiInvalidPriority )
@@ -37,7 +37,7 @@ CAiPublishPrioritizer::CAiPublishPrioritizer(
 
 CAiPublishPrioritizer* CAiPublishPrioritizer::NewL( 
                                         MAiContentObserver& aContentObserver,
-                                        MAiPropertyExtension& aPropertyExtension )
+                                        CHsContentPublisher& aPropertyExtension )
     {
     return new( ELeave ) CAiPublishPrioritizer( aContentObserver, 
                                                 aPropertyExtension );

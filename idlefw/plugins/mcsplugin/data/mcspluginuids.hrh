@@ -19,8 +19,6 @@
 #ifndef MCSPLUGINUIDS_HRH
 #define MCSPLUGINUIDS_HRH
 
-#include <platform/mw/aicontentpublisheruid.hrh>
-
 /**
  * Ecom dll uid for MCS plug-in.
  */

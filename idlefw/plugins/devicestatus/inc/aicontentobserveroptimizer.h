@@ -19,9 +19,14 @@
 #ifndef C_AIMULTICONTENTOBSERVEROPTIMIZER_H
 #define C_AIMULTICONTENTOBSERVEROPTIMIZER_H
 
-
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "aicontentobserver.h"
+
+// Forward declarations
+class CHsContentPublisher;
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -34,9 +39,8 @@
  * @see MAiContentObserver
  * @since S60 3.2
  */
-class CAiContentObserverOptimizer : public CBase      
+NONSHARABLE_CLASS( CAiContentObserverOptimizer ) : public CBase      
     {
-
 private:
     struct TAiPublishBlackList
         {
@@ -80,34 +84,34 @@ public:
     /*
      * @see MAiContentObserver
      */
-    TBool CanPublish( MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex );
+    TBool CanPublish( CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex );
     
     /**
      * @see MAiContentObserver
      */
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   TInt aResource, TInt aIndex );
 
     /**
      * @see MAiContentObserver
      */
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   const TDesC16& aText, TInt aIndex );
     /**
      * @see MAiContentObserver
      */
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   const TDesC8& aBuf, TInt aIndex );
 
     /**
      * @see MAiContentObserver
      */
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   RFile& aFile, TInt aIndex );
     /**
      * @see MAiContentObserver
      */
-    TInt Clean( MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex );
+    TInt Clean( CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex );
 
     /**
      * Returns the actual content observer.

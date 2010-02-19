@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Plug-in main class
+* Description:  SAPI data plug-in main class
 *
 */
 
@@ -19,16 +19,16 @@
 #ifndef SAPIDATAPLUGIN_H
 #define SAPIDATAPLUGIN_H
 
-#include <aicontentpublisher.h>
-#include <aipropertyextension.h>
-#include <aicontentmodel.h>
-#include <aieventhandlerextension.h>
+// System includes
 
+// User includes
+#include <hscontentpublisher.h>
+#include <aicontentmodel.h>
+
+// Forward declarations
 class MAiContentObserver;
 class MAiContentItemIterator;
-class MAiPSPropertyObserver;
 class CSapiData;
-class CDesC16Array;
 class CGulIcon;
 
 /**
@@ -38,13 +38,11 @@ class CGulIcon;
  *
  *  @since S60 v3.2
  */
-class CSapiDataPlugin : public CAiContentPublisher,
-                     	public MAiPropertyExtension,
-                     	public MAiEventHandlerExtension
-                    
-    {
+NONSHARABLE_CLASS( CSapiDataPlugin ) : public CHsContentPublisher                    
+    {   
+public:
+    // data types
     
-public :
 	 /**
 	 * Plugin's network state.
 	 */
@@ -62,11 +60,12 @@ public :
 		{
 		ENone,
 		EResume,
-		ESuspend,
-		EInActive,
+		ESuspend
 		};
+	
 public:
-
+    // constructor and destructor
+    
     /**
     * Part of the two phased constuction
     *
@@ -84,6 +83,7 @@ public:
     ~CSapiDataPlugin();
 
 private:
+    // constructors
     
     /**
     * Constructor
@@ -100,148 +100,67 @@ private:
     * @return void
     */
     void ConstructL();
-
-    /**
-    * Resume the plug-in.
-    *
-    * @param aReason reason for state change, see TAiTransitionChange.
-    * @return void
-    */    
-    void DoResumeL(TAiTransitionReason aReason);
     
-public: // from base class CAiContentPublisher
+public: 
+    // from CHsContentPublisher
     
     /**
-    * From CAiContentPublisher
-    * The method is called by the framework to request the plug-in free all
-    * memory and CPU resources and close all its open files, e.g. the plug-in 
-    * should unload its engines due backup operation. The method transits the 
-    * plug-in to "Idle" state.
-    *
-    * @param aReason reason for state change, see TAiTransitionChange.
-    * @return void
-    */
-    void Stop( TAiTransitionReason aReason );
+     * @see CHsContentPublisher
+     */
+    void Start( TStartReason aReason );
 
     /**
-    * From CAiContentPublisher
-    * The method is called by the framework to instruct plug-in that it is
-    * allowed to consume CPU resources, e.g plug-in is able to run timers,
-    * perform asynchronous operations, etc. The method transits the plug-in
-    * to "Alive" state.
-    *
-    * @param aReason reason for state change, see TAiTransitionChange.
-    * @return void
-    */
-    void Resume( TAiTransitionReason aReason );
+     * @see CHsContentPublisher
+     */    
+    void Stop( TStopReason aReason );
+    
+    /**
+     * @see CHsContentPublisher
+     */    
+    void Resume( TResumeReason aReason );
+    
+    /**
+     * @see CHsContentPublisher
+     */
+    void Suspend( TSuspendReason aReason );
 
     /**
-    * From CAiContentPublisher
-    * The method is called by the framework to instruct plug-in that it is
-    * not allowed to consume CPU resources, e.g plug-in MUST stop each
-    * timers, cancel outstanding asynchronous operations, etc. The method
-    * transits the plug-in to "Suspendend" state.
-    *
-    * @param aReason reason for state change, see TAiTransitionChange.
-    * @return void
-    */
-    void Suspend( TAiTransitionReason aReason );
+     * @see CHsContentPublisher
+     */
+    void SetOnline();
 
     /**
-    * From CAiContentPublisher
-    * Adds the content observer / subscriber to plug-in. The plug-in MUST
-    * maintain a registry of subscribers and send notification to all them
-    * whenever the plug-in changes state or new content available.
-    *
-    * @param aObserver content observer to register.
-    * @return void
-    */
+     * @see CHsContentPublisher
+     */
+    void SetOffline();
+    
+    /**
+     * @see CHsContentPublisher
+     */
     void SubscribeL( MAiContentObserver& aObserver );
-    
-    /**
-    * From CAiContentPublisher
-    * Configures the plug-in.
-    * Plug-ins take ownership of the settings array, so it must either
-    * store it in a member or free it. Framework has put the array in cleanup
-    * stack so the plugin shouldn't do that.
-    * If this leaves, the plug-in will be destroyed by AI FW.
-    * Plug-in must support LaunchByValue-event even if normal shortcuts don't
-    * work. The only allowed serious enough leave is KErrNotFound from CenRep.
-    *
-    * @param aSettings setting items defined in the UI definition.
-    * @return void
-    */
-    void ConfigureL( RAiSettingsItemArray& aSettings );
-    
-    /**
-    * From CAiContentPublisher
-    * Returns interface extension. In Series 60 3.1 only event & property
-    * extensions are supported. See MAiEventExtension & MAiPropertyExtension
-    * interfaces.
-    *
-    * @param  aUid - UID of the extension interface to access.
-    * @return the extension interface. Actual type depends on the passed aUid 
-    *         argument.
-    */
-    TAny* Extension( TUid aUid );  
-
-// from base class MAiPropertyExtension
 
     /**
-    * From MAiPropertyExtension.
-    * Read property of publisher plug-in.
-    *
-    * @param aProperty - identification of property.
-    * @return pointer to property value.
-    */
-    TAny* GetPropertyL( TInt aProperty );
-
-    /**
-    * From MAiPropertyExtension.
-    * Write property value.
-    *
-    * @param aProperty - identification of property.
-    * @param aValue - contains pointer to property value.
-    */
-    void SetPropertyL( TInt aProperty, TAny* aValue );
-  
- // from base class MAiEventHandlerExtension
-   
-     /**
-     * From MAiEventHandlerExtension
-     * Invoked by the framework when plug-in must handle an event.
-     * @param aEvent - unique identifier of event from plug-in content model.
-     * @param aParam - parameters associated with event. Each UI Definition
-     *        declares events in the format: <event name>(<event params>),
-     *        where <event name> is mapped by the framework to unique
-     *        identifier supplied in aEvent, <event params> are provided to
-     *        plug-in as-is in the descriptor.
-     * @since S60 3.2
+     * @see CHsContentPublisher
      */
-     void HandleEvent(TInt aEvent, const TDesC& aParam);
-    
-     /**
-     * From MAiEventHandlerExtension
-     * Invoked by the framework when plug-in must handle an event.
-     *
-     * @param aEventName - name of the event from plug-in content model.
-     * @param aParam - parameters associated with event. Each UI Definition
-     *        declares events in the format: <event name>(<event params>),
-     *        where  <event name> mapping to unique identifier supplied by event 
-     *        is failed by the frame work then the  <event name> and  
-     *        <event params>  are provided to plug-in as-is in the descriptor.
-     */
-     void HandleEvent(const TDesC& aEventName, const TDesC& aParam);
+    void ConfigureL( RAiSettingsItemArray& aSettings );  
 
     /**
- 	* Invoked by the framework for querying if plugin has menu item
- 	*
- 	* @param aMenuItem  menu item name.
- 	* @return ETrue if plugin has specific menu item, EFalse otherwise 
-	*/
-    TBool HasMenuItem(const TDesC16& aMenuItem);
+     * @see CHsContentPublisher
+     */
+    TAny* GetProperty( TProperty aProperty );     
+
+    /**
+     * @see CHsContentPublisher
+     */
+    void HandleEvent( const TDesC& aEventName, const TDesC& aParam );
+
+    /**
+     * @see CHsContentPublisher
+     */
+    TBool HasMenuItem( const TDesC16& aMenuItem );
      
-public : // new functions
+public: 
+    // new functions
 	
     /**
     * Publishes widget's texts and images
@@ -282,7 +201,7 @@ public : // new functions
     * @param void 
     * @return boolean (ETrue/EFalse)
     */
-    TBool IsActive();
+    TBool IsActive() const;
     
     /**
 	* Publish a specific text of the widget  
@@ -332,69 +251,38 @@ public : // new functions
      * CSapiData getter
      * @return Pointer to CSapiData
      */
-    inline CSapiData* Data() const
-        {
-        return iData;
-        }
+    CSapiData* Data() const;
 
 	/*
 	 * Plugin's network status getter
-	 * @return Pointer to Harvester status observer
 	 */
-	inline TPluginNetworkStatus NetworkStatus() const
-		{
-		return iNetworkStatus;
-		}
+	TPluginNetworkStatus NetworkStatus() const;
 	
-private: // data
+private: 
+    // data
 
-    // Iterator for plugin content
-    // Own
+    /** Iterator for plugin content, owned */    
     MAiContentItemIterator* iContent;
-
-    // Array of content observers
-    // Own
-    RPointerArray<MAiContentObserver> iObservers;
-    
-    // Information about the content publisher (this plug-in)
-    TAiPublisherInfo iInfo;
-	
-	// Number of data in the content model.
-	TInt iDataCount;
-	 
-	// Dynamic content model
-	// Own
-	TAiContentItem* iContentModel;
-	
-	// Reference array for Published text
-	// Own
-	RPointerArray<HBufC> iDataArray;
-	
-	// Service API Data Subscriber.
-	// Own
-	CSapiData* iData;
-    
-    // References array for published images 
-    // Own
-    RArray<CGulIcon*> iIconArray;
-    
-    // File Server
-    // Reference
-    RFs iRfs;
-    
-    // Plugin's network status
-    TPluginNetworkStatus iNetworkStatus;
-    
-    // Is Homescreen foreground.
-    TBool iHSForeGround;
-    
-    // Is KeyLockON.
-    TBool iKeyLockOn;
-
-	// Plugin state    
+    /** Array of content observers, owned */
+    RPointerArray<MAiContentObserver> iObservers;       
+	/** Number of data in the content model */
+	TInt iDataCount;	
+	/** Dynamic content model, owned */	
+	TAiContentItem* iContentModel;	
+	/** Reference array for Published text, owned */
+	RPointerArray< HBufC > iDataArray;	
+	/** Service API Data Subscriber, owned */	
+	CSapiData* iData;    
+    /** References array for published images, owned */     
+    RArray< CGulIcon* > iIconArray;    
+    /** Handle to file server session, owned */    
+    RFs iRfs;    
+    /** Plugin's network status */
+    TPluginNetworkStatus iNetworkStatus;       
+	/** Plugin state */    
     TPluginStates iPluginState;
     };
 
 #endif // SAPIDATAPLUGIN_H
 
-
+// End of file

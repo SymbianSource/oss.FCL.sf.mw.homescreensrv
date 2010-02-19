@@ -981,6 +981,12 @@ private:
     void RestoreConfigurationL(
         ChspsODT& aOdt );
     
+    /**
+     * Install all widgets from uda
+     * @since S60 5.2
+     */
+    void InstallUDAWidgetsL();
+    
 #if defined(WINSCW) || defined(__WINS__)    
 
     /**

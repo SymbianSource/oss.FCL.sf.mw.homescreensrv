@@ -20,6 +20,7 @@
 #include <centralrepository.h>
 #include <avkondomainpskeys.h>
 #include <e32property.h>
+
 #include <aidevstaplgres.rsg>
 #include "aioperatornamepublisher.h"
 #include "ainetworkinfolistener.h"
@@ -113,23 +114,27 @@ void CAiOperatorNamePublisher::HandleNetworkInfoChange(
                 const TNWInfo& /*aInfo*/,
                 const TBool aShowOpInd )
     {
-        if( aShowOpInd )
-        	{
-        	TRAP_IGNORE  ( RefreshL( ETrue ));
-        	}
-        else
-        	{
-        	TRAP_IGNORE (
-        		iPrioritizer->TryToCleanL( *iBroadcaster,
-            							EAiDeviceStatusContentNetworkIdentity,
-            							iPriority ));
-        	}
-        
+    if ( iSuspended )
+        {
+        return;
+        }
+    
+    if( aShowOpInd )
+        {
+        TRAP_IGNORE  ( RefreshL( ETrue ));
+        }
+    else
+        {
+        TRAP_IGNORE (
+            iPrioritizer->TryToCleanL( *iBroadcaster,
+                                    EAiDeviceStatusContentNetworkIdentity,
+                                    iPriority ));
+        }    
     }
 
 
 void CAiOperatorNamePublisher::Subscribe( MAiContentObserver& /*aObserver*/,
-									                MAiPropertyExtension& aExtension,
+									                CHsContentPublisher& aExtension,
                                                     MAiPublishPrioritizer& aPrioritizer,
                                                     MAiPublisherBroadcaster& aBroadcaster )
     {
@@ -143,6 +148,11 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
     {
     iSuccess = EFalse;
 
+    if ( iSuspended )
+        {
+        return;
+        }
+    
     if( aClean )
         {
         iPrioritizer->TryToCleanL( *iBroadcaster,
@@ -610,10 +620,13 @@ void CAiOperatorNamePublisher::DoCleanOperationL()
 
 TBool CAiOperatorNamePublisher::RefreshL( TInt aContentId, TBool aClean )
 	{
-    if( aContentId == EAiDeviceStatusContentNetworkIdentity )
+    if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
         {
+        iSuspended = EFalse;
+        
    	    RefreshL( aClean );
-   	    if( iSuccess )
+   	    
+   	    if ( iSuccess )
    	        {
    	        return ETrue;
    	        }
@@ -622,6 +635,17 @@ TBool CAiOperatorNamePublisher::RefreshL( TInt aContentId, TBool aClean )
     return EFalse;
 	}
 
+TBool CAiOperatorNamePublisher::SuspendL( TInt aContentId, TBool /*aClean*/ )
+    {
+    if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
+        {
+        iSuspended = ETrue;
+        
+        return ETrue;
+        }
+
+    return EFalse;    
+    }
 
 TBool CAiOperatorNamePublisher::RefreshContentWithPriorityL(
                                             TInt aContentId,

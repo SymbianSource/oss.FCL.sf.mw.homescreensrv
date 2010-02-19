@@ -16,141 +16,160 @@
 */
 
 
-#ifndef C_AIUICONTROLLERMANAGER_H
-#define C_AIUICONTROLLERMANAGER_H
+#ifndef _AIUICONTROLLERMANAGER_H
+#define _AIUICONTROLLERMANAGER_H
 
-
+// System includes
 #include <e32base.h>
-#include "aiuiframeworkobserver.h"
-#include "aicontentmodel.h"
-#include "aifwdefs.h"
 
+// User includes
+
+// Forward declarations
 class CAiUiController;
 class CAiContentPublisher;
 class MAiMainUiController;
-class MAiFwEventHandler;
 class CRepository;
 class CCoeEnv;
+class CAiFw;
+class MAiFwStateHandler;
 
+// Class declaration
 /**
  * @ingroup group_aifw
  * 
  *  Active Idle UI Controller manager.
  *
- *  @since S60 3.2
+ *  @since S60 5.2
  */
-NONSHARABLE_CLASS( CAiUiControllerManager ) : public CBase,
-                                              public MAiUiFrameworkObserver
+NONSHARABLE_CLASS( CAiUiControllerManager ) : public CBase                             
 	{
-	public: // Constructors and destructor		
-
-		static CAiUiControllerManager* NewL();
-		~CAiUiControllerManager();
-		
-	public: // New functions
-		
-        /**
-         * Returns all UI controllers in an array.
-         */
-		RPointerArray< CAiUiController >& UiControllers() const;
-		
-		/**
-		 * Calls ActivateUI() for all UI controllers.
-		 */
-		void ActivateUI();
-		
-        /**
-         * Returns the main ui controller object.
-         */
-		MAiMainUiController& MainUiController() const;
-		
-        /**
-         * Returns true if aUiController is the main UI controller.
-         */
-		TBool IsMainUiController(CAiUiController& aUiController) const;
-		    
-        /**
-         * Sets framework event handler for all UI controllers.
-         */
-		void SetEventHandler(MAiFwEventHandler& aEventHandler);
-		
-        /**
-         * Calls RunApplicationL for the main UI controller.
-         */
-		void RunApplicationL();
-		
-        /**
-         * Calls LoadUIDefinitionL for all UI controllers.
-         */
-		void LoadUIDefinition();
-		
-		/**
-		 * Returns the main UI Controller's CONE environment object.
-		 */
-		CCoeEnv& CoeEnv() const;
-		
-        /**
-         * Destroys all UI controllers except the main controller.
-         */
-		void DestroySecondaryUiControllers();
-		
-		/**
-		 * Adds an UI Framework observer. No duplicates are allowed.
-		 */
-		void AddObserverL( MAiUiFrameworkObserver& aUiFwObserver );
-
-		/**
-		 * Removes an UI Framework observer.
-		 */
-		void RemoveObserver( MAiUiFrameworkObserver& aUiFwObserver );
-		
-		/**
-		 * Removes plugin from UI.
-		 */
-		void RemovePluginFromUI( CAiContentPublisher& aPlugin );
-
-        /**
-         * Exits main UI controller
-         */		
-        void ExitMainController();
-        
-    private:  // From MAiUiFrameworkObserver
+public: 		
+    // Constructors and destructor
     
-        void HandleResourceChange( TInt aType );
-        void HandleForegroundEvent( TBool aForeground );
-                 	
-    private: // Constructors
+    /**
+     * Two-phased constructor.
+     */ 
+    static CAiUiControllerManager* NewL( CAiFw* aAiFw );
+    
+    /**
+     * Destructor
+     */        
+    ~CAiUiControllerManager();
+    
+public: 
+    // new functions
+    
+    /**
+     * Gets UI controllers
+     * 
+     * @since S60 5.2
+     * @return Array of UI controllers
+     */
+    RPointerArray< CAiUiController >& UiControllers() const;
+    
+    /**
+     * Actives UI by calling ActivateUI() for each UI controller 
+     * 
+     * @since S60 5.2
+     */
+    void ActivateUI();
+    
+    /**
+     * Gets the main UI controller
+     * 
+     * @since S60 5.2
+     * @return Main UI controller
+     */
+    MAiMainUiController& MainUiController() const;
+    
+    /**
+     * Queries whether aUiController is the main UI controller
+     * 
+     * @since S60 5.2
+     * @return ETrue if main UI controller, EFalse otherwise
+     */
+    TBool IsMainUiController( CAiUiController& aUiController ) const;
+            
+    /**
+     * Calls RunApplicationL for the main UI controller.
+     * 
+     * @since S60 5.2
+     */
+    void RunApplicationL();
+    
+    /**
+     * Calls LoadUIDefinitionL for each UI controller.
+     * 
+     * @since S60 5.2
+     */
+    void LoadUIDefinition();
+    
+    /**
+     * Returns the main UI Controller's CONE environment object.
+     * 
+     * @since S60 5.2
+     * @return Control Environment
+     */
+    CCoeEnv& CoeEnv() const;
+    
+    /**
+     * Destroys all UI controllers except the main controller.
+     * 
+     * @since S60 5.2
+     */
+    void DestroySecondaryUiControllers();
+        
+    /**
+     * Exits main UI controller
+     * 
+     * @since S60 5.2
+     */		
+    void ExitMainController();
+    
+    /** 
+     * Sets Fw state handler for each UI conttroller
+     * 
+     * @since S60 5.2
+     * @param aHandler State handler to set
+     */
+    void SetStateHandler( MAiFwStateHandler& aHandler );    
+                    
+private: 
+    // private constructors
 
-		CAiUiControllerManager();
-		void ConstructL();
-        
-    private: // new functions
-        
-		void LoadMainControllerL(CRepository& aCenRepConfig);
-        void LoadSecondaryControllersL(CRepository& aCenRepConfig);
-		
-	private: // data
-    	/**
-		 * UI controller array.
-		 * Own.
-		 */
-		mutable RPointerArray<CAiUiController> iUiControllerArray;
-		
-    	/**
-		 * Main UI controller for app session. Owned in above array.
-		 */
-		MAiMainUiController*  iMainUiController;
-		
-		/**
-		 * List of UI framework observers to delegate events
-		 */
-		RPointerArray<MAiUiFrameworkObserver> iUiFrameworkObservers;
-		
-		/**
-		 * List to check for duplicated creations.
-		 */
-		RArray<TInt> iCreatedUICList;
+    /**
+     * Leaving constructor
+     */    
+    void ConstructL( CAiFw* aAiFw );
+    
+    /**
+     * C++ default constructor
+     */     
+    CAiUiControllerManager();
+    
+private: 
+    // new functions
+    
+    void LoadMainControllerL( CRepository& aRepository );
+    void LoadSecondaryControllersL( CRepository& aRepository );
+    
+private: 
+    // data
+    
+    /** UI controllers, Owned */
+    mutable RPointerArray< CAiUiController > iUiControllerArray;    
+    /** Main UI controller, Owned by the above array */
+    MAiMainUiController* iMainUiController;        
+    /** List of created UI controllers */
+    RArray< TInt > iCreatedUICList;
+    
+private:
+    // friend class
+    
+#ifdef _AIFW_UNIT_TEST
+    friend class UT_AiUiControllerManager;
+#endif
 	};
 
-#endif // C_AIUICONTROLLERMANAGER_H
+#endif // _AIUICONTROLLERMANAGER_H
 

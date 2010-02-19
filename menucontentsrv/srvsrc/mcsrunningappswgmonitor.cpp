@@ -24,6 +24,9 @@
 #include "mcsrunningappshandler.h"
 #include "menueng.h"
 
+const TInt KWindowGroupPosition = -1;
+const TInt KWindowGroupPriority = -1;
+
 // ---------------------------------------------------------
 // CMcsRunningAppsWgMonitor::NewL
 // ---------------------------------------------------------
@@ -91,9 +94,8 @@ void CMcsRunningAppsWgMonitor::ConstructL()
     iWg.DisableModifierChangedEvents();
     iWg.DisableOnEvents();
     iWg.DisableScreenChangeEvents();
-
+    iWg.SetOrdinalPosition( KWindowGroupPosition, KWindowGroupPriority );
     User::LeaveIfError( iWg.EnableGroupListChangeEvents() );    
-    
     //it makes the soft keys working
     iWg.EnableReceiptOfFocus( EFalse );
     

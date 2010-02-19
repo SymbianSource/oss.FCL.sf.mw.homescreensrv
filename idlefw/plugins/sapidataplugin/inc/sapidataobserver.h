@@ -19,15 +19,27 @@
 #ifndef SAPIDATAOBSERVER_H
 #define SAPIDATAOBSERVER_H
 
-// INCLUDE FILES
+// System includes
 #include <liwcommon.h>
 
+// User includes
+
+// Forward declarations
 class CSapiData;
 
-class CSapiDataObserver : public CBase, public MLiwNotifyCallback
+/**
+ * @ingroup group_sapidataplugin
+ *
+ * Sapi data observer
+ *
+ * @since S60 5.0
+ */
+NONSHARABLE_CLASS( CSapiDataObserver ) : public CBase, 
+    public MLiwNotifyCallback
     {
 public:
-
+    // constructor and destructor
+    
     /**
     * Part of the two phased constuction
     *
@@ -45,7 +57,8 @@ public:
     */   
     ~CSapiDataObserver();
 
-private :
+private:
+    // construtors
     
     /**
     * Constructor
@@ -64,7 +77,8 @@ private :
     */
     void ConstructL( MLiwInterface* aInterface, CSapiData* aData );
        
-public:  //from MLiwNotifyCallbackc
+public:  
+    //from MLiwNotifyCallbackc
     
     /**
     * Handles notifications caused by an asynchronous Execute*CmdL call
@@ -85,6 +99,7 @@ public:  //from MLiwNotifyCallbackc
         const CLiwGenericParamList& /*aInParamList*/);
 
 public:
+    // new functions
     
     /**
     * Registers to CPS for add, delete , update and execute notifications
@@ -100,18 +115,17 @@ public:
     void ReleaseL();
         
 private:
-        
-    // Reference of 
-    // Not owned
-    MLiwInterface* iInterface;
+    // data
     
-    // Reference of the sapi data
-    // Not owned
-    CSapiData* iData;
-    
-    // Call back error code
-    TInt iError;
-        
+    /** Interface Reference, not owned */    
+    MLiwInterface* iInterface;   
+    /** Reference of the sapi data, not owned */
+    CSapiData* iData;    
+    /** Call back error code */
+    TInt iError;        
     };
 
-#endif /*SAPIDATAOBSERVER_H*/
+#endif // SAPIDATAOBSERVER_H
+
+// End of file
+

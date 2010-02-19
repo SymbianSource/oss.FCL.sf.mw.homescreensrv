@@ -19,19 +19,23 @@
 #ifndef C_AICUGMCNPUBLISHER_H
 #define C_AICUGMCNPUBLISHER_H
 
-
+// System includes
 #include <e32base.h>
 #include <RSSSettings.h>
 #include <MSSSettingsObserver.h>
+
+// User includes
 #include "aidevicestatuspublisher.h"
 #include "aidevicestatuscontentmodel.h"
 #include "ainetworkinfoobserver.h"
 
+// Forward declarations
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
 class CAiNetworkInfoListener;
 
-const TInt KAnimDelay = 2000000;
+// Constants
+const TInt KAnimDelay( 2000000 );
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -40,8 +44,10 @@ const TInt KAnimDelay = 2000000;
  *
  *  @since S60 3.2
  */
-class CAiCUGMCNPublisher : public CBase, public MAiDeviceStatusPublisher,
-                        public MSSSettingsObserver, public MAiNetworkInfoObserver
+NONSHARABLE_CLASS( CAiCUGMCNPublisher ) : public CBase, 
+    public MAiDeviceStatusPublisher,
+    public MSSSettingsObserver, 
+    public MAiNetworkInfoObserver
     {
 public:
 
@@ -55,7 +61,7 @@ protected:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
@@ -115,7 +121,7 @@ private: // data
      * Property extension.
      * Not own.
      */
-    MAiPropertyExtension* iExtension;
+    CHsContentPublisher* iExtension;
 
     /**
      * SS Settings client. Used to observer CUGMCN changes.

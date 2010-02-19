@@ -241,13 +241,10 @@ void CCpStorageEngine::DeleteCorruptedDbL()
 void CCpStorageEngine::CreateNewDbL()
     {
     TSecureId id( KServerUid ); // Uid of CP Server - only this process has access rights
-    TSecurityPolicy defaultPolicy;
-    TSecurityPolicy securityPolicy(id);
+    TSecurityPolicy defaultPolicy( id );
     RSqlSecurityPolicy sqlSecurityPolicy;
     CleanupClosePushL( sqlSecurityPolicy );
     User::LeaveIfError( sqlSecurityPolicy.Create( defaultPolicy ) );
-    User::LeaveIfError( sqlSecurityPolicy.SetDbPolicy(
-        RSqlSecurityPolicy::ESchemaPolicy, securityPolicy ) );
 #ifdef CONTENT_PUBLISHER_STORAGE_MT
     iSqlDb.CreateL( KCPpathdatabase, &KMdsSqlDbaConfig );
 #else
