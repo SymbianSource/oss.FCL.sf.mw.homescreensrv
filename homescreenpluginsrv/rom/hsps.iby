@@ -10,6 +10,7 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
+* NTT DOCOMO, INC - Fixing Bug 399 - hsps.iby includes 200159C9.txt which is already included by s60cenrep_variant.iby
 *
 * Description:  IBY file for ROM image creation
 *
