@@ -52,39 +52,59 @@ class MHomescreenSettingsObserver;
  *  @lib HomeScreenSettingsIf.lib
  *  @since S60 v5.0
  */
-class CHomescreenSettings:
+NONSHARABLE_CLASS( CHomescreenSettings ) :
     public CBase,
     public MLiwNotifyCallback,
     public MHomescreenSettingsIf
     {
+public: // static methods
+    /**
+     * Get instance to settings API.
+     * 
+     * InitializeL must be called before calling this method.
+     * Otherwise NULL is returned. InitializeL and Instance
+     * must be called within same thread since TLS is used
+     * to storage instance data.
+     * 
+     * @return CHomescreenSettings* Pointer to settings api.
+     *                              Can return NULL in case of
+     *                              error. 
+     */
+    IMPORT_C static CHomescreenSettings* Instance();
+
+    /**
+     * Initialize settings api.
+     *
+     * There must be one UnInitialize call for each Initialize call
+     * in order to prevent memory leaking.
+     * (Implementation contains reference counting)
+     */
+    IMPORT_C static void InitializeL( const TDesC8& aAppUid );
+
+    /**
+     * Uninitialize settings api.
+     *
+     * There must be one UnInitialize call for each Initialize call
+     * in order to prevent memory leaking.
+     * (Implementation contains reference counting)
+     */
+    IMPORT_C static void UnInitialize();    
+
 public:
     /**
-     * Two-phased constructor.
+     * Add observer
      * 
-     * @param aAppUid Application uid in integer format
-     * @param aObserver Observer
+     * @param aObserver     Observer to be added.
      */
-    IMPORT_C static CHomescreenSettings* NewL(
-        const TDesC8& aAppUid,
-        const TDesC8& aPluginId,
-        MHomeScreenSettingsObserver* aObserver );
+    IMPORT_C void AddObserverL( MHomeScreenSettingsObserver* aObserver );        
     
     /**
-     * Two-phased constructor.
+     * Remove observer
      * 
-     * @param aAppUid Application uid in integer format
-     * @param aObserver Observer
-     */
-    IMPORT_C static CHomescreenSettings* NewLC(
-        const TDesC8& aAppUid,
-        const TDesC8& aPluginId,
-        MHomeScreenSettingsObserver* aObserver );
+     * @param aObserver     Observer to be removed.
+     */    
+    IMPORT_C void RemoveObserver( MHomeScreenSettingsObserver* aObserver );        
     
-    /**
-    * Destructor.
-    */
-    IMPORT_C virtual ~CHomescreenSettings();
-
 public: 
     /**
      * From MHomescreenSettingsIf
@@ -114,19 +134,33 @@ public:
     IMPORT_C TInt SetSettingsL(
         const TDesC8& aPluginId,
         const RPointerArray<CItemMap>& aSettings,
-        const TBool aStoringParam );
-        
-
+        const TBool aStoringParam );   
+    
 protected:
     /**
-     * Constructor.
+     * Two-phased constructor.
      * 
      * @param aAppUid Application uid in integer format
-     * @param aObserver Observer
      */
-    CHomescreenSettings(
-        MHomeScreenSettingsObserver* aObserver,
-        const TDesC8& aPluginId );
+    static CHomescreenSettings* NewL( const TDesC8& aAppUid );
+    
+    /**
+     * Two-phased constructor.
+     * 
+     * @param aAppUid Application uid in integer format
+     */
+    static CHomescreenSettings* NewLC(
+        const TDesC8& aAppUid );
+    
+    /**
+    * Destructor.
+    */
+    virtual ~CHomescreenSettings(); 
+    
+    /**
+     * Constructor.
+     */
+    CHomescreenSettings();
     
     /**
      * Second phase constructor
@@ -182,7 +216,6 @@ protected:
         const RPointerArray<CItemMap>& aSettings,
         const TDesC8& aStoringParam );
     
-    
 protected:  
     /**
      * From MLiwNotifyCallback
@@ -210,18 +243,16 @@ private: // data
      * Owned. Provides hsps services.
      */
     MLiwInterface* iHspsInterface;
-    /**
-     * Not owned. Wrapper observer
-     */    
-    MHomeScreenSettingsObserver* iObserver;
+
     /*
      * Asynchronous service request tarnsaction id
      */ 
     TInt iTransactionId;
-    /**
-     * Plugin id
-     */
-    const TDesC8& iPluginId;
+    
+    /*
+     * List of observers. Items not owned!
+     */ 
+    RPointerArray<MHomeScreenSettingsObserver> iObservers;
     };
 
 } //namespace HSPluginSettingsIf

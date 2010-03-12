@@ -46,6 +46,7 @@ enum TAiDeviceStatusContentIds
     EAiDeviceStatusContentGeneralIndicator,
     EAiDeviceStatusContentVHZText,
     EAiDeviceStatusContentCUGMCNIndicator
+    ,EAiDeviceStatusContentNetRegStatus
     };
 
 
@@ -64,7 +65,7 @@ const wchar_t KAiDeviceStatusContentCUGIndicator_Cid[]	  		= L"CUGIndicator";
 const wchar_t KAiDeviceStatusContentGeneralIndicator_Cid[]	  	= L"GeneralIndicator";
 const wchar_t KAiDeviceStatusContentVHZText_Cid[]       	  	= L"VHZText";
 const wchar_t KAiDeviceStatusContentCUGMCNIndicator_Cid[]	  	= L"CUGMCNIndicator";
-
+const wchar_t KAiDeviceStatusContentNetRegStatus_Cid[]          = L"NetRegStatus";
 
 const char KAiDeviceStatusMimeTypeTextPlain[]			= "text/plain";
 
@@ -130,6 +131,11 @@ const TAiContentItem KAiDeviceStatusContent[] =
     //Published data is localized text, for example "Group 1" or MCN message
     { EAiDeviceStatusContentCUGMCNIndicator, KAiDeviceStatusContentCUGMCNIndicator_Cid,
         KAiDeviceStatusMimeTypeTextPlain }
+          
+    //Published data is network registration status
+    , { EAiDeviceStatusContentNetRegStatus, KAiDeviceStatusContentNetRegStatus_Cid, 
+        KAiDeviceStatusMimeTypeTextPlain }
+
     };
 
 const TInt KAiDeviceStatusContentCount = sizeof( KAiDeviceStatusContent ) /
@@ -142,11 +148,13 @@ enum TAiDeviceStatusResourceIds
     {
     EAiDeviceStatusResourceSIMRegFail,
     EAiDeviceStatusResourceNWOk,
-    EAiDeviceStatusResourceNWLost
+    EAiDeviceStatusResourceNWLost     
+    ,EAiDeviceStatusResourceNetRegFail
     };
 
 const wchar_t KAiDeviceStatusResourceSIMRegFail_Cid[] = L"SIMRegFail";
-const wchar_t KAiDeviceStatusResourceShowNWLost_Cid[] = L"NWLost";
+const wchar_t KAiDeviceStatusResourceShowNWLost_Cid[] = L"NWLost";  
+const wchar_t KAiDeviceStatusResourceNetRegFail_Cid[] = L"NetRegFail";    
 
 
 const TAiContentItem KAiDeviceStatusResources[] =
@@ -155,7 +163,10 @@ const TAiContentItem KAiDeviceStatusResources[] =
     { EAiDeviceStatusResourceSIMRegFail, KAiDeviceStatusResourceSIMRegFail_Cid,
     	KAiDeviceStatusMimeTypeTextPlain },
     { EAiDeviceStatusResourceNWLost, KAiDeviceStatusResourceShowNWLost_Cid,
-    	KAiDeviceStatusMimeTypeTextPlain },
+    	KAiDeviceStatusMimeTypeTextPlain },              
+    { EAiDeviceStatusResourceNetRegFail, KAiDeviceStatusResourceNetRegFail_Cid, 
+    KAiDeviceStatusMimeTypeTextPlain },  
+    	
 };
 
 const TInt KAiDeviceStatusResourceCount = sizeof( KAiDeviceStatusResources ) /

@@ -240,7 +240,17 @@ TInt CAiMultiContentObserver::SetProperty( CHsContentPublisher& /*aPlugin*/,
     return KErrNotSupported;
     }
 
+void CAiMultiContentObserver::ClearBlackList()
+    {
+    const TInt count = iObserverOptimizers.Count();
+    for ( TInt i = 0; i < count; ++i )
+        {
+        iObserverOptimizers[i]->ClearBlackList(); 
+        }
+    }
+
 CAiMultiContentObserver::CAiMultiContentObserver()
     {
     }
 
+// End of file

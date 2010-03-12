@@ -491,7 +491,10 @@ class ChspsDefinitionRepository : public CBase
 #ifdef HSPS_LOG_ACTIVE        
         // Log bus. Not owned.
         ChspsLogBus* iLogBus;
-#endif        
+#endif
+       
+        // Cached copy of last retrieved ODT.
+        ChspsODT* iCacheLastODT;        
     };
 
 #endif      // C_hspsDEFINITIONREPOSITORY_H   

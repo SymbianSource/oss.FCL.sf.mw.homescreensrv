@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005,2006 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,25 +15,24 @@
 *
 */
 
-
-
-#ifndef hsps_DOM_STRING_POOL_H
-#define hsps_DOM_STRING_POOL_H
+#ifndef HSPS_DOM_STRING_POOL_H
+#define HSPS_DOM_STRING_POOL_H
 
 //  INCLUDES
 #include <e32base.h>
 #include <s32strm.h>
+#include "hspsdomstringpooloptimizer.h"
 
 // CLASS DECLARATION
 
 /**
- * Class utilize flyweight pattern. Dom strings are stored once 
- * and referred with index. Class can be serialized.
- *
- * @lib hspsdomdocument.lib
- * @since S60 5.0
- * @ingroup group_hspsdom
- */
+*  @ingroup group_hspsdom
+*  Class utilize flyweight pattern. Dom strings are stored once 
+*  and referred with index. Class can be serialized.
+*
+*  @lib xndomdocument.lib
+*  @since Series 60 3.1
+*/
 class ChspsDomStringPool : public CBase
     {
     public:  // Constructors and destructor
@@ -41,23 +40,26 @@ class ChspsDomStringPool : public CBase
         /**
         * Two-phased constructor.
         * 
-        * @since S60 5.0
+        * @param    aAllowDuplicates        ETrue if duplicates are to be allowed.
+        *                                   Supported for legacy reasons. 
         */
-        static ChspsDomStringPool* NewL();
-        
+        static ChspsDomStringPool* NewL( const TBool aAllowDuplicates = EFalse );
+
         /**
         * Two-phased stream constructor.
         * 
-        * @since S60 5.0
-        * @param aStream Source stream.
-        */        
-        static ChspsDomStringPool* NewL( RReadStream& aStream );
+        * @param    aStream                 Stream where string pool is internalized.
+        * @param    aAllowDuplicates        ETrue if duplicates are to be allowed.
+        *                                   Supported for legacy reasons. 
+        */
+        static ChspsDomStringPool* NewL( RReadStream& aStream,
+                const TBool aAllowDuplicates = EFalse );
         
         /**
         * Destructor.
         */
         virtual ~ChspsDomStringPool();
-
+        
    public: 
         /**
         * Make a copy from original StringPool.
@@ -65,39 +67,63 @@ class ChspsDomStringPool : public CBase
         * @return Pointer to a string pool. Ownership is transferred to a caller.
         */
         ChspsDomStringPool* CloneL(); 
+        
    public: //Adding
         
         /**
         * Set dom string into string pool.
         * 
-        * @since S60 5.0
         * @param aString String to add to string pool
         * @return Index (reference) to string pool
         */
         IMPORT_C TInt AddStringL( const TDesC8& aString ); 
-   
+
+        /**
+        * Set dom string into string pool.
+        * 
+        * @param aString String to add to string pool. OWNERSHIP TRANSFERRED!
+        * @return Index (reference) to string pool
+        */
+        TInt AddStringL( HBufC8* aString );         
+
+        /**
+        * Add all string from another string pool.
+        * 
+        * @param aStringPool    Source string pool.
+        */
+        void AddAllL( ChspsDomStringPool& aStringPool );        
+        
    public: //Accessing     
         /**
-        * Get pointer to the node element name.
-        * @param aStringRef StringRef.
+        * Get reference to string.
+        * 
+        * @param aMap Map object which has index to name string
         * @return Pointer to the name
         */
         const TDesC8& String( const TInt aStringRef ); 
         
         /**
         * Get object's data size in bytes.
+        * 
         * @return Data size in bytes
         */
         TInt Size() const;
+
+        /**
+        * Get amount of strings.
+        */
+        TInt Count() const;        
         
         /**
-        * Externalize object
+        * Externalize object.
+        * 
         * @param aStream Output stream
         */
         void ExternalizeL( RWriteStream& aStream ) const;
        
         /**
-        * Internalize object
+        * Internalize object.
+        * 
         * @param aStream Input stream
         */
         void InternalizeL( RReadStream& aStream );          
@@ -106,21 +132,41 @@ class ChspsDomStringPool : public CBase
 
         /**
         * C++ default constructor.
+        * 
+        * @param    aAllowDuplicates        ETrue if duplicates are to be allowed.
+        *                                   Supported for legacy reasons.
         */
-        ChspsDomStringPool();
+        ChspsDomStringPool( const TBool aAllowDuplicates );
 
         /**
-        * By default Symbian 2nd phase constructor is private.
+        * By default Symbian 2nd phase constructor is private. 
         */
-        void ConstructL();
-     
-    private:    
+        void ConstructL();    
+        
+        /**
+        * Add string to string pool and to optimizer also.
+        * 
+        * @param aNewString     String to be added. OWNERSHIP TRANSFERRED.
+        * @param TInt           Index to added string.
+        */
+        TInt DoAddStringL( HBufC8* aNewString ) ;
+        
+    private:            
         //String pool
         RPointerArray<HBufC8>       iStringPool;
-       
         
+        /**
+         * String pool optimizer.
+         */
+        ThspsDomStringPoolOptimizer iStringPoolOptimizer;
+        
+        /**
+         * ETrue if string pool can contain duplicate entries. Must
+         * be supported for legacy reasons while loading xuikon odts.
+         */
+        TBool iAllowDuplicates;
     };
 
-#endif      // hsps_DOM_STRING_POOL_H  
+#endif      // HSPS_DOM_STRING_POOL_H  
             
 // End of File

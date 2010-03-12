@@ -151,6 +151,13 @@ class ChspsODT : public CBase
         * @param aIndex Index of the resource to be deleted.
         */ 
         IMPORT_C void DeleteResourceL( TInt aIndex );
+
+        /**
+        * Deletes all resources from the ODT.
+        * 
+        * @since S60 5.0
+        */ 
+        IMPORT_C void DeleteAllResources();        
         
         /**
         * Gets a resource.
@@ -344,8 +351,15 @@ class ChspsODT : public CBase
         * @since S60 5.0
         * @return ChspsODT* pointer to the cloned ODT.
         */ 
-        IMPORT_C ChspsODT* CloneL();
-        
+        IMPORT_C ChspsODT* CloneL() const;
+
+        /**
+        * Clones given ODT to this ODT.
+        * 
+        * @since S60 5.0
+        * @param	aODT	Source ODT.
+        */         
+        IMPORT_C void CloneL( ChspsODT& aODT );        
         
         /**
         * Clones the aDom and sets it as this ChspsODT's DomDocument.
@@ -475,6 +489,15 @@ class ChspsODT : public CBase
         */
         void ConstructL();
 
+    private:
+        /**
+        * Helper to ODT cloning. Prevents duplicate code in two clone methods.
+        * 
+        * @param aSource    Source ODT
+        * @param aTarget    Target ODT
+        */
+        static void CopyODTDataL( const ChspsODT& aSource, ChspsODT& aTarget );
+        
     private:    // Data
 
         // Family mask (bits for e.g. vga, qhd_tch etc resolutions)

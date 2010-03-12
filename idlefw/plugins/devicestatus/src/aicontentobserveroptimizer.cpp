@@ -228,6 +228,11 @@ TBool CAiContentObserverOptimizer::IsInBlackList( TInt aContentId, TInt aIndex )
     return EFalse;
     }
 
+void CAiContentObserverOptimizer::ClearBlackList()
+    {
+    iBlackList.Reset();
+    }
+
 CAiContentObserverOptimizer::CAiContentObserverOptimizer(MAiContentObserver& aObserver): 
     iObserver( aObserver )
     {

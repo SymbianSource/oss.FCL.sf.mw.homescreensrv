@@ -115,8 +115,10 @@ public:
      * @since S6CCPActiveNotifierNotifier v 5.CCPActiveNotifierNotifier
      * @param aInParamList input parameter list (filter)
      * @param aOutParamList output action_map
+     * @param aCmdOptions options for the command
      */
-    void ExecuteActionL( const CLiwGenericParamList& aInParamList );
+    void ExecuteActionL( const CLiwGenericParamList& aInParamList,
+            TUint aCmdOptions );
 
     /**
      * Check second param from IDataSource interface

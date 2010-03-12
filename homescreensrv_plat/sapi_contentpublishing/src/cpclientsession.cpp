@@ -146,12 +146,13 @@ void RCPServerClient::GetListL( const CCPLiwMap& aMap,
 //
 // -----------------------------------------------------------------------------
 //
-void RCPServerClient::ExecuteActionL( const CCPLiwMap& aMap )
+void RCPServerClient::ExecuteActionL( const CCPLiwMap& aMap, TUint aOptions )
     {
     CP_DEBUG( _L8("RCPServerClient::ExecuteActionL()") );
     HBufC8 *inbuf = aMap.PackForServerLC( );
     TIpcArgs args;
     args.Set( KDescriptorPosition, &*inbuf );
+    args.Set( KOptionsPosition, static_cast<TInt>( aOptions ) );
     User::LeaveIfError( SendReceive( ECpServerExecuteAction, args ) );
     CleanupStack::PopAndDestroy( inbuf );
     }

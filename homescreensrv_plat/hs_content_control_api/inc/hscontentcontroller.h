@@ -62,25 +62,39 @@ class MHsContentController
     {
 public:
     /**
-     * Fills an array of CHsContentInfo. Both widget and template types are appended.
-     * @param aArray Array of CHsContentInfo
+     * Returns the list of available Home screen widgets
+     * @param aArray List of widgets
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt WidgetListL( CHsContentInfoArray& aArray ) = 0;
 
     /**
-     * Fills an array of CHsContentInfo. View types are appended.
-     * @param aArray Array of CHsContentInfo
+     * Returns the list of Home screen widgets included in an application 
+     * configuration or a view
+     * @param aInfo Content info defining the application configuration 
+     *              or the view which widget list is requested
+     * @param aArray List of widgets
+     * @return KErrNone on success, any of system wide error codes
+     */
+    virtual TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray ) = 0;
+
+    /**
+     * Returns the list of available Home screen views
+     * @param aArray List of views
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt ViewListL( CHsContentInfoArray& aArray ) = 0;
 
     /**
-     *
+     * Returns the list of available Home screen application configurations
+     * @param aArray List of application configurations
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt AppListL( CHsContentInfoArray& aArray ) = 0;
 
     /**
-     * Adds a widget to the active view.
-     * @param aInfo Content info object
+     * Adds a widget to the active Home screen view.
+     * @param aInfo Widget request to be added
      * @return KErrNone on success, any of system wide error codes,
      *         KHsErrorViewFull, KHsErrorMaxInstanceCountExceeded or
      *         KHsErrorDoesNotFit
@@ -89,37 +103,50 @@ public:
 
     /**
      * Removes a widget from the configuration.
-     * @param aInfo Content info object
+     * @param aInfo Widget request to be removed
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt RemoveWidgetL( CHsContentInfo& aInfo ) = 0;
 
     /**
-     *
+     * Adds a view to the active Home screen application configuration.
+     * @param aInfo View request to be added
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt AddViewL( CHsContentInfo& aInfo ) = 0;
 
     /**
-     *
+     * Removes a view from the configuration.
+     * @param aInfo View request to be removed
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt RemoveViewL( CHsContentInfo& aInfo ) = 0;
 
     /**
-     *
+     * Activates the Home screen view
+     * @param aInfo View request to be activated
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt ActivateViewL( CHsContentInfo& aInfo ) = 0;
 
     /**
-     *
+     * Activates the Home screen application configuration
+     * @param aInfo Application configuration request to be activated
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt ActivateAppL( CHsContentInfo& aInfo ) = 0;
 
     /**
-     *
+     * Returns the active Home screen view
+     * @param aInfo Active view
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt ActiveViewL( CHsContentInfo& aInfo ) = 0;
 
     /**
-     *
+     * Returns the active Home screen application configuration
+     * @param aInfo Active application configuration
+     * @return KErrNone on success, any of system wide error codes
      */
     virtual TInt ActiveAppL( CHsContentInfo& aInfo ) = 0;
 

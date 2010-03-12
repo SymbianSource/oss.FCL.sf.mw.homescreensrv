@@ -129,7 +129,9 @@ private:
     void HandleEditActiveProfileL();
     
     TBool ShowOfflineMessageL();
-           
+    
+    void DetermineTimedAndSilentStatesL();
+    
     void NotifyContentUpdate();
   
 private:
@@ -184,6 +186,10 @@ private:
     RPointerArray< HBufC > iProfileNamePointerArray;    
     /** Resource loader, owned */
     RConeResourceLoader iResourceLoader;
+    /** Flag to indicate whether active profile is timed */
+    TBool iTimed;
+    /** Flag to indicate whether active profile is silent */
+    TBool iSilent;
     };
 
 #endif // CAIPROFILEENGINE_H

@@ -118,6 +118,11 @@ public:
      */
     MAiContentObserver& Observer() const;
     
+    /**
+     * Clears blacklist
+     */
+    void ClearBlackList();
+    
 private:
     CAiContentObserverOptimizer(MAiContentObserver& aObserver);
 

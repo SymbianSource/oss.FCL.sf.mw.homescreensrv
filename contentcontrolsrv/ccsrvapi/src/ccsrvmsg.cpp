@@ -79,6 +79,55 @@ EXPORT_C RMessage2 CCcSrvMsg::Message()
 EXPORT_C void CCcSrvMsg::SetMessage( RMessage2& aMessage )
     {
     iMessage = aMessage;
+    SetFunction( aMessage.Function() );
+    }
+
+// -----------------------------------------------------------------------------
+// CCcSrvMsg::Sender()
+// -----------------------------------------------------------------------------
+EXPORT_C TInt CCcSrvMsg::Function()
+    {
+    return( iFunction ) ;
+    }
+
+// -----------------------------------------------------------------------------
+// CCcSrvMsg::SetSender()
+// -----------------------------------------------------------------------------
+EXPORT_C void CCcSrvMsg::SetFunction( TInt aFunction )
+    {
+    iFunction = aFunction;
+    }
+
+// -----------------------------------------------------------------------------
+// CCcSrvMsg::Sender()
+// -----------------------------------------------------------------------------
+EXPORT_C TUint32 CCcSrvMsg::Sender()
+    {
+    return( iSender ) ;
+    }
+
+// -----------------------------------------------------------------------------
+// CCcSrvMsg::SetSender()
+// -----------------------------------------------------------------------------
+EXPORT_C void CCcSrvMsg::SetSender( TUint32 aSender )
+    {
+    iSender = aSender;
+    }
+
+// -----------------------------------------------------------------------------
+// CCcSrvMsg::Receiver()
+// -----------------------------------------------------------------------------
+EXPORT_C TUint32 CCcSrvMsg::Receiver()
+    {
+    return( iReceiver ) ;
+    }
+
+// -----------------------------------------------------------------------------
+// CCcSrvMsg::SetReceiver()
+// -----------------------------------------------------------------------------
+EXPORT_C void CCcSrvMsg::SetReceiver( TUint32 aReceiver )
+    {
+    iReceiver = aReceiver;
     }
 
 // -----------------------------------------------------------------------------

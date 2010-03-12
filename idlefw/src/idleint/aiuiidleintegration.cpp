@@ -11,35 +11,30 @@
 *
 * Contributors:
 *
-* Description:  Window server plug-in manager.
+* Description:  Idle integration
 *
 */
 
 
-#include "aiuiidleintegrationimpl.h"
-#include "aifweventhandler.h"
-
-#include <coemain.h>
+// System includes
 #include <coeaui.h>
 #include <eikenv.h>
-#include <apgtask.h>
 #include <AknIncallBubbleNotify.h>
 #include <aknsoundsystem.h>
-#include <apgwgnam.h> 
 #include <AknDef.h>
-#include <AknCapServerDefs.h> 
-#include <startupdomainpskeys.h>
-#include <aiutility.h>
-#include <aipspropertyobserver.h>
-#include <aisystemuids.hrh>
-
-#include "aistate.h"
-#include "aifwpanic.h"
-#include "activeidle2domainpskeys.h"
-
 #include <ctsydomainpskeys.h>
 
-#include <AknSgcc.h>
+// User includes
+#include <aisystemuids.hrh>
+#include <aiutility.h>
+#include <aipspropertyobserver.h>
+#include "activeidle2domainpskeys.h"
+#include "aiuiidleintegrationimpl.h"
+#include "aifweventhandler.h"
+#include "aistate.h"
+#include "aifwpanic.h"
+#include "debug.h"
+
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -70,10 +65,6 @@ CAiUiIdleIntegrationImpl::~CAiUiIdleIntegrationImpl()
     
     delete iIncallBubble;
     
-    Release( iSystemStateObserver );
-    
-    Release( iUiStartupStateObserver );
-    
     Release( iCallStatusObserver );
     }
 
@@ -95,6 +86,9 @@ CAiUiIdleIntegrationImpl::CAiUiIdleIntegrationImpl( CEikonEnv& aEikEnv,
 void CAiUiIdleIntegrationImpl::ConstructL(
     const TAiIdleKeySoundConfig& aKeySoundConfig )       
     {   
+    __PRINTS( "*** CAiUiIdleIntegrationImpl::ConstructL" );
+    __TIME_MARK( time );
+    
 	iIncallBubble = CAknIncallBubble::NewL();
 	
     iActiveIdleState = CActiveIdleState::NewL();
@@ -102,39 +96,32 @@ void CAiUiIdleIntegrationImpl::ConstructL(
     // Set up keysounds
     if( aKeySoundConfig.iKeySounds )
         {
-        aKeySoundConfig.iKeySounds
-            ->PushContextL( aKeySoundConfig.iContextResId );            
+        aKeySoundConfig.iKeySounds->PushContextL( 
+            aKeySoundConfig.iContextResId );                       
         }
     
     iEikEnv.SetSystem( ETrue );
-                 
-    // Eikon server window group
-    iThisApplicationWgId = iEikEnv.RootWin().Identifier();
+             
+    TInt wgId( iEikEnv.RootWin().Identifier() );
+    TInt focusWgId( iEikEnv.WsSession().GetFocusWindowGroup() );
     
-    CApaWindowGroupName::FindByAppUid( KAknCapServerUid, 
-                                       iEikEnv.WsSession(), 
-                                       iEikonServerWgId );
-	           
-    iActiveIdleState->SetIsIdleForeground( iThisApplicationForeground );
+    if ( focusWgId == wgId )
+        {
+        __PRINTS( "*** CAiUiIdleIntegrationImpl::ConstructL - iForeground: 1" );
+    
+        iForeground = ETrue;
+        }
+    
+    iActiveIdleState->SetIsIdleForeground( iForeground );
       
-    iSystemStateObserver = AiUtility::CreatePSPropertyObserverL(                      
-                            TCallBack( HandleSystemStateChange, this ),            
-                                       KPSUidStartup, 
-                                       KPSGlobalSystemState );
-              
-    iUiStartupStateObserver = AiUtility::CreatePSPropertyObserverL(                           
-                                TCallBack( HandleUiStartupStateChange, this ),            
-                                           KPSUidStartup, 
-                                           KPSStartupUiPhase );        
-                 
     iCallStatusObserver = AiUtility::CreatePSPropertyObserverL(          
                             TCallBack( HandleCallEvent, this ),  
                                        KPSUidCtsyCallInformation, 
                                        KCTsyCallState );  
     
-    // Update state flags.    
-    CAiUiIdleIntegrationImpl::HandleSystemStateChange( this );
-    CAiUiIdleIntegrationImpl::HandleUiStartupStateChange( this );
+    ActivateUI();
+           
+    __TIME_ENDMARK( "CAiUiIdleIntegrationImpl::ConstructL, done", time );
     }
 
 // ----------------------------------------------------------------------------
@@ -142,24 +129,12 @@ void CAiUiIdleIntegrationImpl::ConstructL(
 // ----------------------------------------------------------------------------
 //
 void CAiUiIdleIntegrationImpl::ActivateUI()
-    {       
-    if( iUiStartupPhaseOk && iSystemStateOk )
-        {      
-        RWsSession& wsSession( iEikEnv.WsSession() );
-        
-        TInt focusWgId( wsSession.GetFocusWindowGroup() );
-        
-        if( iThisApplicationWgId != focusWgId )
-            {                       
-            TApaTaskList taskList( wsSession );
-            
-            TApaTask task( taskList.FindApp( TUid::Uid( AI_UID3_AIFW_EXE ) ) );
-            
-            task.SendSystemEvent( EApaSystemEventBroughtToForeground );            
-            }
-
-        iAiFwEventHandler->HandleActivateUI();
-        }    
+    {   
+    __TICK( "CAiUiIdleIntegrationImpl::ActivateUI - HandleActivateUI" );
+    
+    iAiFwEventHandler->HandleActivateUI();
+    
+    __PRINTS( "CAiUiIdleIntegrationImpl::ActivateUI - HandleActivateUI done" );    
     }
 
 // ----------------------------------------------------------------------------
@@ -169,64 +144,48 @@ void CAiUiIdleIntegrationImpl::ActivateUI()
 void CAiUiIdleIntegrationImpl::HandleWsEventL( const TWsEvent& aEvent, 
     CCoeControl* /*aDestination*/ )
     {
-    if( !iSystemStateOk || !iUiStartupPhaseOk )
-        {                
-        return;
+    TInt type( aEvent.Type() );
+    
+    if ( type == KAknFullOrPartialForegroundGained )
+        {
+        if ( !iForeground )
+            {
+            iForeground = ETrue;
+            iActiveIdleState->SetIsIdleForeground( ETrue );
+            SetCallBubbleIfNeededL();
+            }    
         }
-      
-    switch ( aEvent.Type() )
-    	{
-    	case KAknFullOrPartialForegroundGained:	
-        	{
-            if ( !iThisApplicationForeground )
-            	{
-                iThisApplicationForeground = ETrue;
-                iActiveIdleState->SetIsIdleForeground( ETrue );
-               	SetCallBubbleIfNeededL();
+    else if ( type == KAknFullOrPartialForegroundLost )
+        {
+        if ( iForeground )
+            {
+            iForeground = EFalse;
+            iActiveIdleState->SetIsIdleForeground( EFalse );
+            ClearCallBubbleL();
+            }    
+        }
+    else if ( type == EEventKeyDown )
+        {
+        if( aEvent.Key()->iScanCode == EStdKeyDevice0 )
+            {
+            TBool isDialog( iEikEnv.AppUi()->IsDisplayingMenuOrDialog() );
+            
+            if( isDialog || iAiFwEventHandler->QueryIsMenuOpen() )
+                {
+                RProperty::Set(
+                    KPSUidAiInformation, 
+                    KActiveIdlePopupState, 
+                    EPSAiDisplayingMenuOrDialog );
                 }
-          	break;
-        	}
-                
-        case KAknFullOrPartialForegroundLost:
-        	{
-        	if ( iThisApplicationForeground )
-            	{
-            	iThisApplicationForeground = EFalse;
-                iActiveIdleState->SetIsIdleForeground( EFalse );
-                ClearCallBubbleL();
-                }
-        	break;
-        	}
-        
-    	case EEventKeyDown:
-    	    {
-            if( aEvent.Key()->iScanCode == EStdKeyDevice0 )
-            	{
-            	TBool isDialog( iEikEnv.AppUi()->IsDisplayingMenuOrDialog() );
-            	
-            	if( isDialog || iAiFwEventHandler->QueryIsMenuOpen() )
-            	    {
-                    RProperty::Set(
-                        KPSUidAiInformation, 
-                        KActiveIdlePopupState, 
-                        EPSAiDisplayingMenuOrDialog );
-            	    }
-            	else
-            	    {
-                    RProperty::Set(
-                        KPSUidAiInformation, 
-                        KActiveIdlePopupState, 
-                        EPSAiNotDisplayingMenuOrDialog );
-            	    }
-            	} 
-    	    break;
-    	    }
-                
-    	default:
-    	    {
-    		break;
-    	    }
-    	}
+            else
+                {
+                RProperty::Set(
+                    KPSUidAiInformation, 
+                    KActiveIdlePopupState, 
+                    EPSAiNotDisplayingMenuOrDialog );
+                }    
+            }
+        }        
     }
 
 // ----------------------------------------------------------------------------
@@ -278,66 +237,6 @@ EXPORT_C CAiUiIdleIntegration* CAiUiIdleIntegration::NewL( CEikonEnv& aEikEnv,
     }
 
 // ----------------------------------------------------------------------------
-// CAiUiIdleIntegrationImpl::HandleSystemStateChange()
-// ----------------------------------------------------------------------------
-//
-TInt CAiUiIdleIntegrationImpl::HandleSystemStateChange( TAny* aPtr )
-    {
-    __ASSERT_DEBUG( aPtr, 
-            AiFwPanic::Panic( AiFwPanic::EAiFwPanic_NullPointerReference ) );
-    
-    CAiUiIdleIntegrationImpl* self = 
-        static_cast<CAiUiIdleIntegrationImpl*>( aPtr );
-           
-    if( !self->iSystemStateOk )
-        {
-        TInt state( 0 );
-        
-        self->iSystemStateObserver->Get( state );               
-
-        if ( state == ESwStateCriticalPhaseOK ||
-             state == ESwStateNormalRfOn || 
-             state == ESwStateNormalRfOff ||
-             state == ESwStateNormalBTSap )        
-            {
-            self->iSystemStateOk = ETrue;            
-            self->ActivateUI();
-            }        
-        }
-              
-    return KErrNone;
-    }
-
-// ----------------------------------------------------------------------------
-// CAiUiIdleIntegrationImpl::HandleUiStartupStateChange()
-// ----------------------------------------------------------------------------
-//
-TInt CAiUiIdleIntegrationImpl::HandleUiStartupStateChange( TAny *aPtr )
-    {
-    __ASSERT_DEBUG( aPtr, 
-            AiFwPanic::Panic( AiFwPanic::EAiFwPanic_NullPointerReference ) );
-    
-    CAiUiIdleIntegrationImpl* self = 
-        static_cast<CAiUiIdleIntegrationImpl*>( aPtr );
-
-    if( !self->iUiStartupPhaseOk )
-        {
-        TInt state( 0 );
-        
-        self->iUiStartupStateObserver->Get( state );
-        
-        if( state == EStartupUiPhaseAllDone )
-            {
-            self->iUiStartupPhaseOk = ETrue;
-            
-            self->ActivateUI();
-            }
-        }
-    
-    return KErrNone;
-    }
-
-// ----------------------------------------------------------------------------
 // CAiUiIdleIntegrationImpl::HandleCallEvent()
 // ----------------------------------------------------------------------------
 //
@@ -359,7 +258,7 @@ TInt CAiUiIdleIntegrationImpl::HandleCallEvent( TAny* aPtr )
 		TBool allowed = EFalse;
 		
 		if( !self->iIncallBubbleAllowed &&
-		     self->iThisApplicationForeground &&
+		     self->iForeground &&
 		    ( callStatus > EPSCTsyCallStateNone ) )
 			{
 			allowed = ETrue;

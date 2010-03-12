@@ -153,6 +153,15 @@ public:
     void ChangePublisherStatusL(const TDesC& aStatus);
     
     /**
+    * Triggers active event with KNoNotification option.
+    * Notification is not send to observer, action handler
+    * plug-ins are executed 
+    *
+    * @return void
+    */
+    void TriggerActiveL();
+    
+    /**
     * Configures the subscriber and data to subscribe.
     *  
     * @param aConfigurations  Information about the subscriber 

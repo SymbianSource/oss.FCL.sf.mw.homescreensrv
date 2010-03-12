@@ -25,6 +25,7 @@
 #include <mhomescreensettingsobserver.h>
 #include <hspluginsettings.h>
 #include <propertymap.h>
+#include <mcsmenu.h>
 
 class TMenuItem;
 class CMCSPluginEngine;
@@ -166,11 +167,16 @@ public:
      * @param aPluginName
      * @param aPluginUid
      * @param aPluginId
-     * @return TInt
      */
-    TInt SettingsChangedL( const TDesC8& aEvent,  const TDesC8& aPluginName,
+    void SettingsChangedL( const TDesC8& aEvent,  const TDesC8& aPluginName,
                            const TDesC8& aPluginUid, const TDesC8& aPluginId );
 
+    /**
+     * CreateBkmMenuItemsL
+     * @param void
+     * @return void
+     */
+    void CreateBkmMenuItemsL();
 private:
 
     /**
@@ -189,13 +195,19 @@ private:
     TMenuItem CreateMenuItemL(
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
 
+    /**
+     * GetMCSPluginFolderIdL
+     * 
+     * @return TInt
+     */
+    TInt GetMCSPluginFolderIdL();
 private: // data
 
     // Menu items, which are defined in settings
     // Own
     RArray<TMCSData> iData;
 
-    // Plugin settings
+    // Plugin settings. NOT OWNED!
     HSPluginSettingsIf::CHomescreenSettings* iPluginSettings;
 
     // Reference to MCS plug-in engine
@@ -203,6 +215,12 @@ private: // data
 
     // Reference to instance uid of HSPS widget
     const TDesC8& iInstanceUid;
+
+    // MCS asynchronous operation watcher, owned 
+    CMCSPluginWatcher* iSaveWatcher;
+
+    // MCS resource handle, owned 
+    RMenu iMenu;
     };
 
 #endif // CMCSPLUGINDATA_H

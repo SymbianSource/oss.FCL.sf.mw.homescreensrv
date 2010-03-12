@@ -32,6 +32,7 @@ SOURCE          menuapphandler.cpp
 SOURCE          menuurlhandler.cpp
 SOURCE          menuuninstalloperation.cpp
 SOURCE          menulinkhandler.cpp
+SOURCE          menutasklist.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../handlerinc

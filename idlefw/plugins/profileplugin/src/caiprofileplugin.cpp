@@ -76,9 +76,18 @@ CAiProfilePlugin::CAiProfilePlugin()
 //
 void CAiProfilePlugin::ConstructL()
     { 
-    iContent = AiUtility::CreateContentItemArrayIteratorL( KAiProfileContent );
-    iEvents = AiUtility::CreateContentItemArrayIteratorL( KAiProfileEvents );
-    iResources = AiUtility::CreateContentItemArrayIteratorL( KAiProfileResources );        
+    iContent = 
+        AiUtility::CreateContentItemArrayIteratorL( KAiProfileContent );
+    
+    iEvents = 
+        AiUtility::CreateContentItemArrayIteratorL( KAiProfileEvents );
+    
+    iResources = 
+        AiUtility::CreateContentItemArrayIteratorL( KAiProfileResources );
+    
+    iEngine = CAiProfileEngine::NewL( this );
+    
+    iEngine->UpdateProfileNamesL();        
     }
     
 // ---------------------------------------------------------------------------
@@ -87,9 +96,7 @@ void CAiProfilePlugin::ConstructL()
 // ---------------------------------------------------------------------------
 //
 CAiProfilePlugin::~CAiProfilePlugin()
-    {
-    CleanPublishedProfileNames();
-	
+    {    	
     Release( iContent );
     Release( iEvents );
     Release( iResources );
@@ -289,6 +296,7 @@ void CAiProfilePlugin::PublishL()
 //
 void CAiProfilePlugin::Start( TStartReason /*aReason*/ )
     {   
+    iPublishRequired = ETrue;
     }
 
 // ---------------------------------------------------------------------------
@@ -298,6 +306,7 @@ void CAiProfilePlugin::Start( TStartReason /*aReason*/ )
 //
 void CAiProfilePlugin::Stop( TStopReason /*aReason*/ )
     {    
+    CleanPublishedProfileNames();
     }
 
 // ---------------------------------------------------------------------------
@@ -381,13 +390,11 @@ void CAiProfilePlugin::HandleEvent( TInt aEvent, const TDesC& aParam )
 //
 void CAiProfilePlugin::DoResumeL()
     {
-    if( !iEngine )
+    if ( iPublishRequired )
         {
-        iEngine = CAiProfileEngine::NewL( this );
+        iPublishRequired = EFalse;
         
-        iEngine->UpdateProfileNamesL();
-        
-        PublishL();        
+        PublishL();
         }
     }
  
@@ -398,7 +405,9 @@ void CAiProfilePlugin::DoResumeL()
 //
 void CAiProfilePlugin::NotifyContentUpdate()
     {        
-    TRAP_IGNORE( PublishL() );
+    iPublishRequired = ETrue;
+    
+    TRAP_IGNORE( DoResumeL() );
     }
 
 // ---------------------------------------------------------------------------
@@ -419,6 +428,11 @@ void CAiProfilePlugin::CleanPublishedProfileNames()
             observer->Clean( *this, EAiProfileContentProfileName, j + 1 );
             }
         }
+    
+    delete iPreviousProfileNameAndChar;
+    iPreviousProfileNameAndChar = NULL;
+    
+    iPreviousCount = 0;
     }
 
 // ======== GLOBAL FUNCTIONS ========

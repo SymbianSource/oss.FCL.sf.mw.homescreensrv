@@ -333,13 +333,18 @@ void CMCSPluginSettingsContainer::HandleSessionEventL(
 //
 void CMCSPluginSettingsContainer::ConstructListBoxL(TInt /*aResLbxId*/)
 {
-    iListBox->ConstructL(this, EAknListBoxSelectionList);
-
+	iListBox->ConstructL(this, EAknListBoxSelectionList);
     // Set empty listbox's text.
-    HBufC* text = iCoeEnv->AllocReadResourceLC(R_AI_MCS_SETTINGS_TXT_ALL_FIXED);
-    iListBox->View()->SetListEmptyTextL(*text);
-    CleanupStack::PopAndDestroy(text);
-
+	if (iModel->MdcaCount() == 0)
+		{
+		HBufC* text = iCoeEnv->AllocReadResourceLC(R_AI_MCS_SETTINGS_TXT_ALL_FIXED);
+		iListBox->View()->SetListEmptyTextL(*text);
+		CleanupStack::PopAndDestroy(text);
+		}
+	else
+		{
+		 iListBox->View()->SetListEmptyTextL(KNullDesC);  
+		}
     iListBox->Model()->SetItemTextArray(iModel);
     iListBox->Model()->SetOwnershipType(ELbmDoesNotOwnItemArray);
 }

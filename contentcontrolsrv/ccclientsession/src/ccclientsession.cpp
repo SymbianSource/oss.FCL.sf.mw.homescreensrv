@@ -30,6 +30,7 @@ _LIT( KCcSrvName,"ccserver" );
 const TUint KCcSrvMajorVersionNumber = 1;
 const TUint KCcSrvMinorVersionNumber = 0;
 const TUint KCcSrvBuildVersionNumber = 0;
+const TInt KDefaultMessageSlots = 3;
 
 
 // -----------------------------------------------------------------------------
@@ -78,7 +79,7 @@ EXPORT_C TInt RCcClientSession::Connect()
     TInt retry=2;
     for (;;)
         {
-        TInt r = CreateSession( KCcSrvName, ver );
+        TInt r = CreateSession( KCcSrvName, ver, KDefaultMessageSlots );
   
         if (r != KErrNotFound && r != KErrServerTerminated)
             {

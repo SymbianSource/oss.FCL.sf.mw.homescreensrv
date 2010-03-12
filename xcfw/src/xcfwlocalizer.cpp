@@ -159,9 +159,8 @@ void CXCFWLocalizer::LoadDTDL(
             do {
                 lcstring.Num( (TInt64)langs[current] );
                 codelen = lcstring.Length()>1?lcstring.Length():KMinLangCodeLen;
-                locfile->Des().Copy( PathInfo::RomRootPath().Left( KPathStartLoc ) );
-                locfile->Des().Append( filepath );
-                locfile->Des().Format( locfile->Des(), codelen, langs[current] );          
+                locfile->Des().Format( filepath, codelen, langs[current] );
+                locfile->Des().Insert( 0, PathInfo::RomRootPath().Left( KPathStartLoc ) );
                 current--;
                 } while ( current >= 0 && 
                     !BaflUtils::FileExists( aFileSystem, locfile->Des() ) );

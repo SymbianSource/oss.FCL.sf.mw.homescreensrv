@@ -79,7 +79,7 @@ CMCSPlugin::CMCSPlugin()
 // ----------------------------------------------------------------------------
 //
 void CMCSPlugin::ConstructL()
-    {         
+    {
     }
     
 // ----------------------------------------------------------------------------
@@ -200,8 +200,12 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
 // 
 // ----------------------------------------------------------------------------
 //
-void CMCSPlugin::Start( TStartReason /*aReason*/ )
-    {    
+void CMCSPlugin::Start( TStartReason aReason )
+    {
+    if( aReason == EPluginStartup )
+        {
+        TRAP_IGNORE( iEngine->CreateBkmMenuItemsL() );
+        }
     }
 
 // ----------------------------------------------------------------------------

@@ -34,19 +34,30 @@
 const TUid KDeviceStatusPluginUid = 
     { AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DEVSTAPLUGIN };
 
+const TUid KProfilePluginUid =
+    { AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_PROFILEPLUGIN };
+
 _LIT( KDeviceStatusPluginName, "DeviceStatus" );
+_LIT( KProfilePluginName, "Profile" );
 
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
-// IsDeviceStatus()
+// IsRecyclable()
 //
 // ----------------------------------------------------------------------------
 //
-TBool IsDeviceStatus( const THsPublisherInfo& aInfo )
+TBool IsRecyclable( const THsPublisherInfo& aInfo )
     {
-    return ( aInfo.Name() == KDeviceStatusPluginName && 
-        aInfo.Uid() == KDeviceStatusPluginUid );
+    if ( ( aInfo.Name() == KProfilePluginName && 
+        aInfo.Uid() == KProfilePluginUid ) ||
+        ( aInfo.Name() == KDeviceStatusPluginName &&
+        aInfo.Uid() == KDeviceStatusPluginUid ) )
+        {
+        return ETrue;
+        }
+    
+    return EFalse;
     }
 
 // ----------------------------------------------------------------------------
@@ -136,19 +147,19 @@ TInt CAiPluginFactory::CreatePlugin(
     {                                            
     __PRINTS( "*** CAiPluginFactory::CreatePlugin: Start ***" );
                                     
-    if ( IsDeviceStatus( aPublisherInfo ) )
+    if ( IsRecyclable( aPublisherInfo ) )
         {
         CHsContentPublisher* plugin( PluginByUid( aPublisherInfo.Uid() ) );
         
         if ( plugin )
             {
-            // Devicestatus plugin already exists, update its namespace
+            // Plugin already exists, update its namespace
             THsPublisherInfo& info( 
                 const_cast< THsPublisherInfo& >( plugin->PublisherInfo() ) );
             
             info.iNamespace.Copy( aPublisherInfo.Namespace() );
             
-            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - DeviceStatus plugin updated ***" );
+            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Plugin recycled ***" );
             
             return KErrNone;
             }
@@ -202,10 +213,10 @@ void CAiPluginFactory::DestroyPlugin( const THsPublisherInfo& aPublisherInfo )
     {
     __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Start ***" );
     
-    if ( IsDeviceStatus( aPublisherInfo ) )
+    if ( IsRecyclable( aPublisherInfo ) )
         {
-        // Don't destroy device status plugin
-        __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done - Keepind DeviceStatus Plug-in ***" );
+        // Don't destroy recyclable plugin
+        __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done - Keeping recyclable Plug-in ***" );
         
         return;
         }
@@ -234,12 +245,13 @@ void CAiPluginFactory::CreatePluginL(
     __PRINT( __DBG_FORMAT( "\t[I]\t Loading plug-in uid=%x name=%S"), 
     aPublisherInfo.Uid(), &(aPublisherInfo.Name() ) );
 
-    __TIME( "FW: Create plug-in:",
-            
-    iPublishers.ReserveL( iPublishers.Count() + 1 );    
-            
-    CHsContentPublisher* plugin = 
-        CHsContentPublisher::NewL( aPublisherInfo ) );            
+    iPublishers.ReserveL( iPublishers.Count() + 1 );
+    
+    CHsContentPublisher* plugin( NULL );
+    
+    __TIME( "CAiPluginFactory::CreatePluginL Create plug-in:",                                  
+    plugin = CHsContentPublisher::NewL( aPublisherInfo ) );            
+    
     CleanupStack::PushL( plugin );
     
     __TIME( "FW: Subscribe content observers",    

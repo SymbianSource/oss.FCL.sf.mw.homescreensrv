@@ -209,6 +209,7 @@ class CRepository;
 class ChspsSecurityEnforcer;
 class ChspsRomInstaller;
 class ChspsAutoInstaller;
+class ChspsThemeServerSession;
 
 #ifdef HSPS_LOG_ACTIVE
 class ChspsLogBus;
@@ -396,15 +397,21 @@ public:
     
     /**
     * AddSession
+    * 
+    * @param aSession   Session that is added. Ownership not transferred!.
+    * 
     * @since S60 3.1
     */
-    void AddSession();
+    void AddSession( ChspsThemeServerSession* aSession );
     
     /**
     * DropSession
+    * 
+    * @param aSession   Session that is dropped. Ownership not transferred!.
+    * 
     * @since S60 3.1
     */
-    void DropSession();
+    void DropSession( ChspsThemeServerSession* aSession );
     
 public: // public functions
 	
@@ -997,11 +1004,7 @@ private:
     void ActivateRootConfigurationsL();
            
 #endif // defined(WINSCW)
-    
-    
-private:
-    TInt iSessionCount;
-    
+        
 #ifdef _hsps_SERVER_SHUTDOWN_ENABLED_    
     CShutdown* iShutdown;
 #endif // _hsps_SERVER_SHUTDOWN_ENABLED_
@@ -1084,6 +1087,8 @@ private:
      */        
     ChspsLogBus* iLogBus;
 #endif    
+    
+    RPointerArray<ChspsThemeServerSession> iSessions; // Sessions not owned!
     };
 
 #endif //__hspsTHEMESERVER_H__

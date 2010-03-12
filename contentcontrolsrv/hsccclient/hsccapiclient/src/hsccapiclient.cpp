@@ -102,12 +102,27 @@ CHsCcApiClient::~CHsCcApiClient()
 //
 void CHsCcApiClient::RunL()
     {
-    if ( !iStatus.Int() )
+    TInt err( iStatus.Int() );
+    HBufC8* header( NULL );
+    TPtr8 headerPtr( NULL, 0 );
+
+    if ( !err )
+        {
+        // Read API request header
+        header = iApiHeader->AllocL();
+        CleanupStack::PushL( header );
+        headerPtr.Set( header->Des() );
+        }
+
+    // Receive next API notification
+    WaitForApiNtfL();
+    
+    if ( !err )
         {
         // Get received message header
         CCcSrvMsg* message = CCcSrvMsg::NewL();
         CleanupStack::PushL( message );
-        RDesReadStream stream( iApiHeaderPtr );
+        RDesReadStream stream( headerPtr );
         CleanupClosePushL( stream );
         message->InternalizeHeaderL( stream );
         CleanupStack::PopAndDestroy( &stream );
@@ -138,10 +153,10 @@ void CHsCcApiClient::RunL()
             }
         CleanupStack::PopAndDestroy( message );
         }
-    
-    // Receive next API notification
-    WaitForApiNtfL();
-
+    if ( header )
+        {
+        CleanupStack::PopAndDestroy( header );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -188,37 +203,73 @@ TInt CHsCcApiClient::WidgetListL( CHsContentInfoArray& aArray )
     
     if ( !err )
         {
-        // Internalize WidgetListResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        if ( !err )
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
             {
-            if ( respMsg->DataSize() )
-                {
-                // Get API response data
-                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
-                CleanupStack::PushL( dataBuf );
-                TPtr8 dataPtr( NULL, 0 );
-                dataPtr.Set( dataBuf->Des() );
-                TPckgBuf<TUint32> trId( respMsg->TrId() );
-                err = iSession.GetMsgData( trId, dataPtr );
-                if ( !err )
-                    {
-                    // Internalize API response data
-                    RDesReadStream dataStream( dataPtr );
-                    CleanupClosePushL( dataStream );
-                    aArray.InternalizeL( dataStream );                    
-                    CleanupStack::PopAndDestroy( &dataStream );
-                    }
-                CleanupStack::PopAndDestroy( dataBuf );
-                }
+            // Internalize API response data
+            err = InternalizeContentInfoArrayL( aArray, trId, dataSize );
             }
-        CleanupStack::PopAndDestroy( respMsg );
+        }
+
+    // Cleanup
+    CleanupStack::PopAndDestroy( msgBuf );
+    CleanupStack::PopAndDestroy( reqMsg );
+
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CHsCcApiClient::WidgetListL
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::WidgetListL( 
+    CHsContentInfo& aInfo, CHsContentInfoArray& aArray )
+    {
+    TInt err( KErrNone );
+    
+    // Create WidgetListReq API request
+    CCcSrvMsg* reqMsg = CCcSrvMsg::NewL();
+    CleanupStack::PushL( reqMsg );
+    reqMsg->SetMsgId( EHsCcWidgetListReq );
+    reqMsg->SetTrId( 0 );
+
+    // Marshal WidgetListReq data to a descriptor
+    HBufC8* dataBuf = aInfo.MarshalL();
+    TPtr8 dataPtr( NULL, 0 );
+    dataPtr.Set( dataBuf->Des() );
+    reqMsg->SetData( dataPtr );
+    
+    delete dataBuf;
+    dataBuf = NULL;
+    
+    // Marshal API request
+    HBufC8* msgBuf = reqMsg->MarshalL();
+    CleanupStack::PushL( msgBuf );
+    TPtr8 msgPtr( NULL, 0 );
+    msgPtr.Set( msgBuf->Des() );
+ 
+    // Send API request
+    // Sender and receiver address not defined -> message is routed
+    // according to the provider id
+    TPckgBuf<TUint32> provider( ECcHomescreen );
+    TPckgBuf<TUint32> sender;
+    TPckgBuf<TUint32> receiver;
+    err = iSession.Send( ECcApiReq, provider, sender, receiver, msgPtr );
+    
+    if ( !err )
+        {
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
+            {
+            // Internalize API response data
+            err = InternalizeContentInfoArrayL( aArray, trId, dataSize );
+            }
         }
 
     // Cleanup
@@ -259,37 +310,15 @@ TInt CHsCcApiClient::ViewListL( CHsContentInfoArray& aArray )
     
     if ( !err )
         {
-        // Internalize ViewListResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        if ( !err )
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
             {
-            if ( respMsg->DataSize() )
-                {
-                // Get API response data
-                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
-                CleanupStack::PushL( dataBuf );
-                TPtr8 dataPtr( NULL, 0 );
-                dataPtr.Set( dataBuf->Des() );
-                TPckgBuf<TUint32> trId( respMsg->TrId() );
-                err = iSession.GetMsgData( trId, dataPtr );
-                if ( !err )
-                    {
-                    // Internalize API response data
-                    RDesReadStream dataStream( dataPtr );
-                    CleanupClosePushL( dataStream );
-                    aArray.InternalizeL( dataStream );                    
-                    CleanupStack::PopAndDestroy( &dataStream );
-                    }
-                CleanupStack::PopAndDestroy( dataBuf );
-                }
+            // Internalize API response data
+            err = InternalizeContentInfoArrayL( aArray, trId, dataSize );
             }
-        CleanupStack::PopAndDestroy( respMsg );
         }
 
     // Cleanup
@@ -330,37 +359,15 @@ TInt CHsCcApiClient::AppListL( CHsContentInfoArray& aArray )
     
     if ( !err )
         {
-        // Internalize AppListResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        if ( !err )
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
             {
-            if ( respMsg->DataSize() )
-                {
-                // Get API response data
-                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
-                CleanupStack::PushL( dataBuf );
-                TPtr8 dataPtr( NULL, 0 );
-                dataPtr.Set( dataBuf->Des() );
-                TPckgBuf<TUint32> trId( respMsg->TrId() );
-                err = iSession.GetMsgData( trId, dataPtr );
-                if ( !err )
-                    {
-                    // Internalize API response data
-                    RDesReadStream dataStream( dataPtr );
-                    CleanupClosePushL( dataStream );
-                    aArray.InternalizeL( dataStream );                    
-                    CleanupStack::PopAndDestroy( &dataStream );
-                    }
-                CleanupStack::PopAndDestroy( dataBuf );
-                }
+            // Internalize API response data
+            err = InternalizeContentInfoArrayL( aArray, trId, dataSize );
             }
-        CleanupStack::PopAndDestroy( respMsg );
         }
 
     // Cleanup
@@ -409,15 +416,10 @@ TInt CHsCcApiClient::AddWidgetL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize AddWidgetResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        CleanupStack::PopAndDestroy( respMsg );
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
         }
 
     // Cleanup
@@ -466,15 +468,10 @@ TInt CHsCcApiClient::RemoveWidgetL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize RemoveWidgetResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        CleanupStack::PopAndDestroy( respMsg );
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
         }
 
     // Cleanup
@@ -523,15 +520,10 @@ TInt CHsCcApiClient::AddViewL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize AddViewResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        CleanupStack::PopAndDestroy( respMsg );
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
         }
 
     // Cleanup
@@ -580,15 +572,10 @@ TInt CHsCcApiClient::RemoveViewL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize RemoveViewResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        CleanupStack::PopAndDestroy( respMsg );
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
         }
 
     // Cleanup
@@ -637,15 +624,10 @@ TInt CHsCcApiClient::ActivateViewL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize ActivateViewResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        CleanupStack::PopAndDestroy( respMsg );
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
         }
 
     // Cleanup
@@ -694,15 +676,10 @@ TInt CHsCcApiClient::ActivateAppL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize ActivateAppResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        CleanupStack::PopAndDestroy( respMsg );
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
         }
 
     // Cleanup
@@ -743,37 +720,15 @@ TInt CHsCcApiClient::ActiveViewL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize AppListResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        if ( !err )
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
             {
-            if ( respMsg->DataSize() )
-                {
-                // Get API response data
-                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
-                CleanupStack::PushL( dataBuf );
-                TPtr8 dataPtr( NULL, 0 );
-                dataPtr.Set( dataBuf->Des() );
-                TPckgBuf<TUint32> trId( respMsg->TrId() );
-                err = iSession.GetMsgData( trId, dataPtr );
-                if ( !err )
-                    {
-                    // Internalize API response data
-                    RDesReadStream dataStream( dataPtr );
-                    CleanupClosePushL( dataStream );
-                    aInfo.InternalizeL( dataStream );                    
-                    CleanupStack::PopAndDestroy( &dataStream );
-                    }
-                CleanupStack::PopAndDestroy( dataBuf );
-                }
+            // Internalize API response data
+            err = InternalizeContentInfoL( aInfo, trId, dataSize );
             }
-        CleanupStack::PopAndDestroy( respMsg );
         }
 
     // Cleanup
@@ -814,37 +769,15 @@ TInt CHsCcApiClient::ActiveAppL( CHsContentInfo& aInfo )
     
     if ( !err )
         {
-        // Internalize AppListResp API response
-        CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
-        CleanupStack::PushL( respMsg );
-        RDesReadStream respStream( msgPtr );
-        CleanupClosePushL( respStream );
-        respMsg->InternalizeHeaderL( respStream );
-        CleanupStack::PopAndDestroy( &respStream );
-        err = respMsg->Status();
-        if ( !err )
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
             {
-            if ( respMsg->DataSize() )
-                {
-                // Get API response data
-                HBufC8* dataBuf = HBufC8::NewL( respMsg->DataSize() );
-                CleanupStack::PushL( dataBuf );
-                TPtr8 dataPtr( NULL, 0 );
-                dataPtr.Set( dataBuf->Des() );
-                TPckgBuf<TUint32> trId( respMsg->TrId() );
-                err = iSession.GetMsgData( trId, dataPtr );
-                if ( !err )
-                    {
-                    // Internalize API response data
-                    RDesReadStream dataStream( dataPtr );
-                    CleanupClosePushL( dataStream );
-                    aInfo.InternalizeL( dataStream );                    
-                    CleanupStack::PopAndDestroy( &dataStream );
-                    }
-                CleanupStack::PopAndDestroy( dataBuf );
-                }
+            // Internalize API response data
+            err = InternalizeContentInfoL( aInfo, trId, dataSize );
             }
-        CleanupStack::PopAndDestroy( respMsg );
         }
 
     // Cleanup
@@ -876,6 +809,85 @@ void CHsCcApiClient::WaitForApiNtfL()
     iSession.WaitForApiNtf( provider, iPckgSender, iPckgReceiver, iApiHeaderPtr, iStatus );
     SetActive();
     
+    }
+
+// -----------------------------------------------------------------------------
+// CHsCcApiClient::InternalizeRespL()
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::InternalizeRespL( 
+    TPtr8& aResp, TUint32& aTrId, TUint32& aDataSize )
+    {
+    TInt err( KErrNone );
+    
+    CCcSrvMsg* respMsg = CCcSrvMsg::NewL();
+    CleanupStack::PushL( respMsg );
+    RDesReadStream respStream( aResp );
+    CleanupClosePushL( respStream );
+    respMsg->InternalizeHeaderL( respStream );
+    CleanupStack::PopAndDestroy( &respStream );
+    err = respMsg->Status();
+    aTrId = respMsg->TrId();
+    aDataSize = respMsg->DataSize();
+    CleanupStack::PopAndDestroy( respMsg );
+    
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CHsCcApiClient::InternalizeContentInfoL()
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::InternalizeContentInfoL( 
+    CHsContentInfo& aInfo, TUint32 aTrId, TUint32 aDataSize )
+    {
+    TInt err( KErrNone );
+    
+    HBufC8* dataBuf = HBufC8::NewL( aDataSize );
+    CleanupStack::PushL( dataBuf );
+    TPtr8 dataPtr( NULL, 0 );
+    dataPtr.Set( dataBuf->Des() );
+    TPckgBuf<TUint32> trId( aTrId );
+    err = iSession.GetMsgData( trId, dataPtr );
+    if ( !err )
+        {
+        // Internalize API response data
+        RDesReadStream dataStream( dataPtr );
+        CleanupClosePushL( dataStream );
+        aInfo.InternalizeL( dataStream );                    
+        CleanupStack::PopAndDestroy( &dataStream );
+        }
+    CleanupStack::PopAndDestroy( dataBuf );
+
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
+// CHsCcApiClient::InternalizeContentInfoArrayL()
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::InternalizeContentInfoArrayL( 
+    CHsContentInfoArray& aInfo, TUint32 aTrId, TUint32 aDataSize )
+    {
+    TInt err( KErrNone );
+    
+    HBufC8* dataBuf = HBufC8::NewL( aDataSize );
+    CleanupStack::PushL( dataBuf );
+    TPtr8 dataPtr( NULL, 0 );
+    dataPtr.Set( dataBuf->Des() );
+    TPckgBuf<TUint32> trId( aTrId );
+    err = iSession.GetMsgData( trId, dataPtr );
+    if ( !err )
+        {
+        // Internalize API response data
+        RDesReadStream dataStream( dataPtr );
+        CleanupClosePushL( dataStream );
+        aInfo.InternalizeL( dataStream );                    
+        CleanupStack::PopAndDestroy( &dataStream );
+        }
+    CleanupStack::PopAndDestroy( dataBuf );
+
+    return err;
     }
 
 // End of file

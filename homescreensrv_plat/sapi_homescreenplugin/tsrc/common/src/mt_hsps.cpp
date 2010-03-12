@@ -36,7 +36,7 @@
 _LIT8( KHspsAppUid, "appUid" );
 
 // Heap size for test step thread
-const TUint KDefaultHeapSize = 0x10000;       
+const TUint KDefaultHeapSize = 0x100000;       
 
 // Test step data
 typedef struct
@@ -595,11 +595,12 @@ void MT_CHSPS::RunTestStepAsyncL(
         User::WaitForRequest( status );
         err = status.Int();
         
-        testThread.Close();
-
         // Give test thread some time to close
         User::After( 2000000 );
-
+        
+        // Terminate thread.
+        testThread.Kill( KErrNone );
+        testThread.Close();
         }
     
     User::LeaveIfError( err );

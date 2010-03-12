@@ -40,11 +40,10 @@
 // Two-phased constructor.
 // ----------------------------------------------------------------------------
 //
-CAiStateProvider* CAiStateProvider::NewL( 
-    MAiStateObserver& aObserver, CCoeEnv& aCoeEnv )
+CAiStateProvider* CAiStateProvider::NewL( MAiStateObserver& aObserver )     
     {
     CAiStateProvider* self = 
-        CAiStateProvider::NewLC( aObserver, aCoeEnv );
+        CAiStateProvider::NewLC( aObserver );
     
     CleanupStack::Pop( self );
     
@@ -56,11 +55,10 @@ CAiStateProvider* CAiStateProvider::NewL(
 // Two-phased constructor.
 // ----------------------------------------------------------------------------
 //
-CAiStateProvider* CAiStateProvider::NewLC( 
-    MAiStateObserver& aObserver, CCoeEnv& aCoeEnv )
+CAiStateProvider* CAiStateProvider::NewLC( MAiStateObserver& aObserver )     
     {
     CAiStateProvider* self = 
-        new ( ELeave ) CAiStateProvider( aObserver, aCoeEnv );
+        new ( ELeave ) CAiStateProvider( aObserver );
     
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -74,18 +72,8 @@ CAiStateProvider* CAiStateProvider::NewLC(
 // ----------------------------------------------------------------------------
 //
 CAiStateProvider::~CAiStateProvider()
-    {        
-    iObserver.NotifyStateChange( EAiFwUiShutdown );
-    
-    iCoeEnv.RemoveMessageMonitorObserver( *this );
-    
-    delete iEcomObserver;
-    
-    iSkinSrv.Close();
-           
-    Release( iBackupRestoreObserver );
-    
-    delete iLightObserver;       
+    {  
+    Stop();
     }
 
 // ----------------------------------------------------------------------------
@@ -93,11 +81,9 @@ CAiStateProvider::~CAiStateProvider()
 // C++ default constructor.
 // ----------------------------------------------------------------------------
 //
-CAiStateProvider::CAiStateProvider( MAiStateObserver& aObserver, 
-    CCoeEnv& aCoeEnv )     
-    : iObserver( aObserver ), iCoeEnv( aCoeEnv )
-    {  
-    iObserver.NotifyStateChange( EAiFwUiStartup );
+CAiStateProvider::CAiStateProvider( MAiStateObserver& aObserver )        
+    : iObserver( aObserver )
+    {      
     }
 
 // ----------------------------------------------------------------------------
@@ -107,18 +93,69 @@ CAiStateProvider::CAiStateProvider( MAiStateObserver& aObserver,
 //
 void CAiStateProvider::ConstructL()
     {
-    iLightObserver = CHWRMLight::NewL( this );
-    
-    iBackupRestoreObserver = AiUtility::CreatePSPropertyObserverL(
-        TCallBack( BackupRestoreEvent, this ),
-        KUidSystemCategory, conn::KUidBackupRestoreKey );
-    
-    User::LeaveIfError( iSkinSrv.Connect( this ) );
-       
-    iEcomObserver = CAiEcomObserver::NewL();
-    iEcomObserver->AddObserverL( this );
-    
-    iCoeEnv.AddMessageMonitorObserverL( *this );
+    }
+
+// ----------------------------------------------------------------------------
+// CAiStateProvider::StartL()
+// 
+// ----------------------------------------------------------------------------
+//
+void CAiStateProvider::StartL( CCoeEnv& aCoeEnv )
+    {
+    if ( !iStarted )
+        {        
+        iStarted = ETrue;
+                        
+        iObserver.NotifyStateChange( EAiFwUiStartup );
+        
+        iLightObserver = CHWRMLight::NewL( this );
+        
+        iBackupRestoreObserver = AiUtility::CreatePSPropertyObserverL(
+            TCallBack( BackupRestoreEvent, this ),
+            KUidSystemCategory, conn::KUidBackupRestoreKey );
+        
+        User::LeaveIfError( iSkinSrv.Connect( this ) );
+           
+        iEcomObserver = CAiEcomObserver::NewL();
+        iEcomObserver->AddObserverL( this );
+        
+        iCoeEnv = &aCoeEnv;
+        
+        iCoeEnv->AddMessageMonitorObserverL( *this );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CAiStateProvider::Stop()
+// 
+// ----------------------------------------------------------------------------
+//
+void CAiStateProvider::Stop()
+    {
+    if ( iStarted )
+        {
+        iStarted = EFalse;
+        
+        iObserver.NotifyStateChange( EAiFwUiShutdown );
+        
+        if ( iCoeEnv )
+            {
+            iCoeEnv->RemoveMessageMonitorObserver( *this );        
+            }
+                
+        iCoeEnv = NULL;
+        
+        delete iEcomObserver;
+        iEcomObserver = NULL;
+        
+        iSkinSrv.Close();
+               
+        Release( iBackupRestoreObserver );
+        iBackupRestoreObserver = NULL;
+        
+        delete iLightObserver;      
+        iLightObserver = NULL;
+        }           
     }
 
 // ----------------------------------------------------------------------------

@@ -15,7 +15,7 @@
 *
 */
 
-
+#include <mw/memorymanager.h>
 #include <liwcommon.h>
 #include <ecom/ecom.h>
 #include <fbs.h>
@@ -387,7 +387,12 @@ void CCPServer::ResetAndUpdateFlagL( CCPLiwMap* aMap )
 //
 TInt E32Main()
     {
-    return CCPServer::ThreadStart( );
+    RAllocator* iAllocator = MemoryManager::SwitchToFastAllocator();
+    
+    //Get the return value (needs to call CloseFastAllocator() before return)
+    TInt iReturnValue = CCPServer::ThreadStart( );
+    MemoryManager::CloseFastAllocator(iAllocator);
+    return iReturnValue;  
     }
 
 // End of File

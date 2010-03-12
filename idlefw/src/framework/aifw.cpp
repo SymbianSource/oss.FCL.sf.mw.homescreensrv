@@ -64,6 +64,8 @@ CAiFw::CAiFw()
 //
 void CAiFw::ConstructL()
     {
+    __PRINTS( "*** CAiFw::ConstructL" );
+    __TIME_MARK( time );
 #if 0
     // For AI3_test    
     RProcess proc;
@@ -102,8 +104,14 @@ void CAiFw::ConstructL()
     iFactory = CAiPluginFactory::NewL( *iUiControllerManager );
     
     iStateManager = CAiStateManager::NewL( *iFactory );
-                 
-    iEventHandler = CAiEventHandler::NewL( *iFactory );                                                                   
+               
+    iStateProvider = CAiStateProvider::NewL( *iStateManager );
+    
+    iEventHandler = CAiEventHandler::NewL( *iFactory );
+    
+    iUiControllerManager->SetStateHandler( *iStateProvider );
+    
+    __TIME_ENDMARK( "CAiFw::ConstructL, done", time );
     }
 
 // ----------------------------------------------------------------------------
@@ -113,13 +121,14 @@ void CAiFw::ConstructL()
 //
 EXPORT_C CAiFw* CAiFw::NewLC()
     {
+    __TICK( "CAiFw::NewLC" );
+    
     CAiFw* self = new ( ELeave ) CAiFw;
     CleanupStack::PushL( self );
     
     self->ConstructL();
 
-    __TICK( "FW: Core FW constructed" );
-    __HEAP( "FW: Core FW constructed" );
+    __PRINTS( "*** CAiFw::NewLC - done" );
     
     return self;
     }
@@ -183,14 +192,22 @@ CAiFw::~CAiFw()
 //
 EXPORT_C void CAiFw::RunL()
     {
-    CAiIdleAppRegister* idleReg = CAiIdleAppRegister::NewLC();
-    idleReg->RegisterL();
-    CleanupStack::PopAndDestroy( idleReg );
+    __TICK( "CAiFw::RunL" );
+        
+    __PRINTS( "*** CAiFw::RunL - CAiIdleAppRegister::NewLC" );
+    __TIME_MARK( time );
+            
+    CAiIdleAppRegister* registry = CAiIdleAppRegister::NewLC();
+    registry->RegisterL();
+    CleanupStack::PopAndDestroy( registry );
 
+    __TIME_ENDMARK( "CAiFw::RunL - CAiIdleAppRegister::NewLC, done", time );
+        
     // Tell UI controller manager to start application framework and event loop.
-    // This function returns only when the application is shut down.
-    // See in CAiFw::HandleUiReadyEventL how the framework initialization continues.
+    // This function returns only when the application is shut down.    
     iUiControllerManager->RunApplicationL();
+    
+    __PRINTS( "*** CAiFw::RunL - done" );
     }
 
 // ----------------------------------------------------------------------------
@@ -200,6 +217,9 @@ EXPORT_C void CAiFw::RunL()
 //
 void CAiFw::AppEnvReadyL()
     {
+    __TICK( "CAiFw::AppEnvReadyL" );
+    __TIME_MARK( time );
+    
     // Initialize members which need to be connected to the app environment's
     // active scheduler or depend on the app environment being initialized.
 
@@ -208,10 +228,9 @@ void CAiFw::AppEnvReadyL()
     // Create WS pluign manager
     iWsPluginManager = CAiWsPluginManager::NewL( env );
     
-    iStateProvider = CAiStateProvider::NewL( *iStateManager, env );
-    
-    iUiControllerManager->SetStateHandler( *iStateProvider );
-        
+    // Start state provider
+    iStateProvider->StartL( env );
+               
     // CenRep notifier to listen key changes in cenrep. 
     // Application is restarted if key value is changed.
     iNotifyHandler = CCenRepNotifyHandler::NewL( *this, *iRepository,  
@@ -227,7 +246,9 @@ void CAiFw::AppEnvReadyL()
 
     iIdleRestartObserver = AiUtility::CreatePSPropertyObserverL(
         TCallBack( HandleRestartEvent, this ), 
-        KPSUidAiInformation, KActiveIdleRestartAI2 );                                                      
+        KPSUidAiInformation, KActiveIdleRestartAI2 );
+    
+    __PRINTS( "*** CAiFw::AppEnvReadyL - done" );
     }
 
 // ----------------------------------------------------------------------------
@@ -237,23 +258,26 @@ void CAiFw::AppEnvReadyL()
 //
 void CAiFw::HandleUiReadyEventL( CAiUiController& aUiController )
     {         
+    __TICK( "CAiFw::HandleUiReadyEventL" );
+    
     if ( iUiControllerManager->IsMainUiController( aUiController ) )
-        {                      
+        {    
         TInt value( EIdlePhase1Ok );
         
-        RProperty::Get( KPSUidStartup, 
-                        KPSIdlePhase1Ok, 
-                        value );
-                                                      
+        RProperty::Get( KPSUidStartup, KPSIdlePhase1Ok, value ); 
+                                                                                              
         if ( value == EIdlePhase1NOK )
             {
-            RProperty::Set( KPSUidStartup, 
-                            KPSIdlePhase1Ok, 
-                            EIdlePhase1Ok );                                                          
-            }    
-        
+            __TICK( "CAiFw::HandleUiReadyEventL - Setting EIdlePhase1Ok" );
+            
+            RProperty::Set( KPSUidStartup, KPSIdlePhase1Ok, EIdlePhase1Ok );                                                                                                          
+            }                      
+    
         if ( !iLibrariesLoaded )
             {
+            __PRINTS( "*** CAiFw::HandleUiReadyEventL - load libraries" );
+            __TIME_MARK( time );
+            
             _LIT( KAIVoiceUIDialer, "VoiceUiNameDialer.dll" );
             _LIT( KAIVoiceUIRecog, "VoiceUiRecognition.dll" );
             _LIT( KAIVCommandHandler, "vcommandhandler.dll" );
@@ -263,10 +287,12 @@ void CAiFw::HandleUiReadyEventL( CAiUiController& aUiController )
             iLibrary3.Load( KAIVCommandHandler );        
             
             iLibrariesLoaded = ETrue;
-            }
-        
-        iUiControllerManager->LoadUIDefinition();
+            
+            __TIME_ENDMARK( "CAiFw::HandleUiReadyEventL - load libraries, done", time );            
+            }             
         }
+    
+    __PRINTS( "*** CAiFw::HandleUiReadyEventL - done" );
     }
 
 // ---------------------------------------------------------------------------
@@ -276,7 +302,14 @@ void CAiFw::HandleUiReadyEventL( CAiUiController& aUiController )
 //
 void CAiFw::HandleActivateUI()
     {
-    iUiControllerManager->ActivateUI();         
+    __PRINTS( "*** CAiFw::HandleActivateUI" );
+    __TIME_MARK( time );
+    
+    iUiControllerManager->LoadUIDefinition();
+    
+    iUiControllerManager->ActivateUI();     
+    
+    __TIME_ENDMARK( "CAiFw::HandleActivateUI, done", time );
     }
 
 // ---------------------------------------------------------------------------
@@ -312,8 +345,7 @@ void CAiFw::HandleUiShutdown( CAiUiController& aUiController )
         Release( iIdleRestartObserver );
         iIdleRestartObserver = NULL;
         
-        delete iStateProvider;
-        iStateProvider = NULL;
+        iStateProvider->Stop();
         }
     }
 

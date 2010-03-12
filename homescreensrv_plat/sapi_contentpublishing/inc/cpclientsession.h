@@ -113,8 +113,9 @@ public:
      *
      * @since S60 v 5.0
      * @param aInParamList const reference to the input list
+     * @param aOptions Command options.
      */
-    void ExecuteActionL( const CCPLiwMap& aMap );
+    void ExecuteActionL( const CCPLiwMap& aMap, TUint aOptions = 0 );
 
     /**
      * Pass GetChangeInfoData request to server

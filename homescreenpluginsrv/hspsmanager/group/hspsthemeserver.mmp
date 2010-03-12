@@ -81,6 +81,8 @@ LIBRARY     hspsresult.lib
 LIBRARY     hspsdomdocument.lib
 LIBRARY     hspsdefinitionengineinterface.lib
 LIBRARY     ecom.lib // definition engine
+LIBRARY     MemMan.lib
+
 #ifdef _hsps_DEBUG_
 LIBRARY     flogger.lib
 #endif // _hsps_DEBUG_

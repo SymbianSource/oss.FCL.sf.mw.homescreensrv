@@ -18,13 +18,14 @@
 #include <mcsmenufilter.h>
 #include <itemmap.h>
 #include <aistrcnv.h>
+#include <favouritesdbobserver.h>
+#include <favouritesdb.h>        
 
 #include "mcsplugindata.h"
 #include "mcspluginengine.h"
 
 using namespace HSPluginSettingsIf;
 
-_LIT8( KAppUid, "271012080" );
 _LIT( KMenuAttrParam, "param" );
 _LIT( KMenuAttrLocked, "locked" );
 _LIT8( KProperNameType, "type" );
@@ -34,6 +35,15 @@ _LIT8( KProperNameView, "view" );
 _LIT8( KProperValueFolder, "folder" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
+
+_LIT( KUrl, "url" );
+_LIT( KMenuIconFile, "aimcsplugin.mif" );
+_LIT( KMenuIconId, "16386" );
+_LIT( KMenuMaskId, "16387" );
+_LIT( KInitialRefCount, "1" );
+_LIT( KMenuAttrRefcount, "ref_count" );
+_LIT( KMyMenuData, "matrixmenudata" );
+
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -95,10 +105,17 @@ CMCSPluginData::CMCSPluginData( CMCSPluginEngine& aEngine, const TDesC8& aInstan
 //
 void CMCSPluginData::ConstructL()
     {
-     // AILaunch uid in decimal format
-    iPluginSettings = CHomescreenSettings::NewL( KAppUid,
-                                                 iInstanceUid,
-                                                 this );
+    iPluginSettings = CHomescreenSettings::Instance();
+    if( iPluginSettings == NULL )
+        {
+        User::Leave( KErrUnknown );
+        }
+    iPluginSettings->AddObserverL( this );
+
+    iSaveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
+
+    iMenu.OpenL( KMyMenuData );
+
     UpdateDataL();
     }
 
@@ -107,9 +124,16 @@ void CMCSPluginData::ConstructL()
 // ---------------------------------------------------------------------------
 //
 CMCSPluginData::~CMCSPluginData()
-    {   
+    {
+    if( iPluginSettings )
+        {
+        iPluginSettings->RemoveObserver( this );
+        }
+
     iData.Close();
-    delete iPluginSettings;
+    iMenu.Close();
+
+    delete iSaveWatcher;
     }
 
 // ---------------------------------------------------------------------------
@@ -167,11 +191,13 @@ void CMCSPluginData::UpdateDataL()
 // 
 // ---------------------------------------------------------------------------
 //
-TInt CMCSPluginData::SettingsChangedL( const TDesC8& /*aEvent*/,  const TDesC8& /*aPluginName*/,
-                           const TDesC8& /*aPluginUid*/, const TDesC8& /*aPluginId*/ )
+void CMCSPluginData::SettingsChangedL( const TDesC8& /*aEvent*/,  const TDesC8& /*aPluginName*/,
+                           const TDesC8& /*aPluginUid*/, const TDesC8& aPluginId )
     {
-    UpdateDataL();
-    return KErrNone;
+    if( aPluginId.CompareF( iInstanceUid ) == 0 )
+        {
+        UpdateDataL();
+        }   
     }
 
 // ---------------------------------------------------------------------------
@@ -363,8 +389,152 @@ void CMCSPluginData::SaveSettingsL( const TInt& aIndex, CMenuItem& aMenuItem )
                 }
             }
         }
-		// ETrue tells that changes are stored also to plugin reference 
+    // ETrue tells that changes are stored also to plugin reference 
     iPluginSettings->SetSettingsL( iInstanceUid, settingItems, ETrue );
     CleanupStack::PopAndDestroy( &settingItems );
     }
 
+// ---------------------------------------------------------------------------
+// Gets MCS Plugin folder ID. This hidden folder in matrixmenudata.xml is used 
+// for storing run-time generated menuitems
+// ---------------------------------------------------------------------------
+//
+TInt CMCSPluginData::GetMCSPluginFolderIdL()
+    {
+    TInt folderId;
+    
+    _LIT( KMCSFolder, "mcsplugin_folder" );
+
+    CMenuItem* item( NULL );
+    CMenuFilter* filter = CMenuFilter::NewL();
+    CleanupStack::PushL( filter );
+    filter->SetType( KMenuTypeFolder );
+    filter->HaveAttributeL( KMenuAttrLongName, KMCSFolder );
+
+    const TInt rootId = iMenu.RootFolderL();
+    RArray<TMenuItem> itemArray;
+    CleanupClosePushL( itemArray );
+    iMenu.GetItemsL( itemArray, rootId, filter, ETrue );
+    if ( itemArray.Count() > 0 )
+        {
+        item = CMenuItem::OpenL( iMenu, itemArray[0] );
+        folderId = item->Id();
+        }
+    else 
+        {
+        folderId = iMenu.RootFolderL();
+        }
+    CleanupStack::PopAndDestroy( &itemArray );
+    CleanupStack::PopAndDestroy( filter ); 
+
+    delete item; 
+
+    return folderId;
+    }
+
+// ---------------------------------------------------------------------------
+// Creates bookmark menu item if it does not exist
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginData::CreateBkmMenuItemsL()
+    {
+    RPointerArray<CItemMap> settings;
+    TCleanupItem settingsCleanupItem( ItemMapArrayCleanupFunc, &settings );
+    CleanupStack::PushL( settingsCleanupItem );
+    iPluginSettings->GetSettingsL( iInstanceUid, settings );
+
+    RFavouritesSession bookmarkSess;
+    RFavouritesDb bookmarkDb;
+
+    User::LeaveIfError( bookmarkSess.Connect() );
+    User::LeaveIfError( bookmarkDb.Open( bookmarkSess, KBrowserBookmarks ));
+
+    TInt count = settings.Count();
+    for( TInt i = 0; i < count; i++ )
+       {
+        CItemMap* itemMap = settings[i];
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
+            = itemMap->Properties();
+
+        TPtrC8 uid8, type;
+
+        for( TInt j = 0; j < properties.Count(); j++ )
+            {
+
+            if( properties[j]->Name() == KProperNameType )
+                {
+                type.Set( properties[j]->Value() );
+                }
+            else if ( properties[j]->Name() == KProperNameUid )
+                {
+                uid8.Set( properties[j]->Value() );
+                }
+            }
+
+        if( type == KProperValueBookmark )
+            {
+            TMenuItem menuItem = CreateMenuItemL( properties );
+
+            CActiveSchedulerWait* wait = 
+                            new ( ELeave ) CActiveSchedulerWait;
+            CleanupStack::PushL( wait );
+            
+            if( menuItem.Id() == 0 )
+                {
+                TLex8 uidLex( uid8.Mid( 1, uid8.Length() - 2 ) );
+                TUint32 id;
+                uidLex.Val(id, EHex);
+
+                CFavouritesItem* bkmItem = CFavouritesItem::NewLC();
+                TInt bcount = bookmarkDb.Get( TInt32( id ), *bkmItem );
+
+                HBufC *uid( NULL );
+                uid = AiUtility::CopyToBufferL( uid, uid8 );
+                CleanupStack::PushL( uid );
+
+                CMenuItem* newItem = CMenuItem::CreateL( iMenu, 
+                                                         KMenuTypeUrl, 
+                                                         GetMCSPluginFolderIdL(),
+                                                         0 );
+                CleanupStack::PushL( newItem );
+
+                newItem->SetAttributeL( KMenuAttrUid, *uid );
+                newItem->SetAttributeL( KMenuAttrLongName, bkmItem->Name() );
+                newItem->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
+                newItem->SetAttributeL( KMenuAttrIconId, KMenuIconId );
+                newItem->SetAttributeL( KMenuAttrMaskId, KMenuMaskId );
+                newItem->SetAttributeL( KMenuAttrRefcount, KInitialRefCount );
+                newItem->SetAttributeL( KUrl , bkmItem->Url() );
+
+                CMenuOperation* op = newItem->SaveL( iSaveWatcher->iStatus );
+                TInt newId = newItem->Id();
+                iData[i].MenuItem().SetId( newId );
+
+                iSaveWatcher->StopAndWatch( op, wait );
+
+                // Start the nested scheduler loop.
+                wait->Start();
+
+                CleanupStack::Pop( newItem );
+                CleanupStack::PopAndDestroy( uid );
+                CleanupStack::PopAndDestroy( bkmItem );
+                }
+            else
+                {
+                CMenuItem* item = CMenuItem::OpenL( iMenu, menuItem );
+
+                if( iEngine.UpdateMenuItemsRefCountL( item, 1 ) > 0 )
+                    {
+                    CMenuOperation* op = item->SaveL( iSaveWatcher->iStatus );
+                    iSaveWatcher->StopAndWatch( op, wait );
+                    // Start the nested scheduler loop.
+                    wait->Start();
+                    }
+                }
+
+            CleanupStack::PopAndDestroy( wait );
+            wait = NULL;
+            }
+        }
+    CleanupStack::PopAndDestroy(); // settingsCleanupItem
+    }

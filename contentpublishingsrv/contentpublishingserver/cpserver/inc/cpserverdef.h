@@ -71,7 +71,7 @@ enum TCPServerPanic
 
 const TUint KDescriptorPosition( 0);
 const TUint KReturnPosition( 1);
-const TUint KInfoPosition( 2);
+const TUint KOptionsPosition( 2);
 const TUint KTransactionPosition( 3);
 const TBool KActive( ETrue );
 const TBool KInActive( EFalse );

@@ -195,14 +195,15 @@ void CCPClient::UnregisterObserversL( const CLiwGenericParamList& aInParamList )
 // 
 // -----------------------------------------------------------------------------
 //    
-void CCPClient::ExecuteActionL( const CLiwGenericParamList& aInParamList )
+void CCPClient::ExecuteActionL( const CLiwGenericParamList& aInParamList,
+        TUint aCmdOptions)
     {
     CP_DEBUG( _L8("CCPClient::RegisterObserverL()") );
     CheckMapL( aInParamList, KFilter );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList );
     inMapForServer->PushL( );
     inMapForServer->IsValidForActionL( );
-    iServerClient.ExecuteActionL( *inMapForServer );
+    iServerClient.ExecuteActionL( *inMapForServer, aCmdOptions );
     CleanupStack::PopAndDestroy( inMapForServer );
     }
 

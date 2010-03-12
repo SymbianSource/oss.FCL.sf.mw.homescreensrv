@@ -602,10 +602,11 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         
         // Activate the publisher
         iData->ChangePublisherStatusL( KActive );
+        iData->TriggerActiveL();
                 
         // Register for notifications
         iData->RegisterPublisherObserverL();
-      
+        
         PublishL();
         
         iPluginState = ESuspend;

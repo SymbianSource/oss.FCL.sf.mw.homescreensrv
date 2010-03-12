@@ -139,7 +139,7 @@ void CMCSPluginEngine::ConstructL()
     filter = NULL;
     iUndefinedItem = CMenuItem::OpenL( iMenu, iUndefinedItemHeader );    
     }
-    
+
 // ----------------------------------------------------------------------------
 // CMCSPluginEngine::~CMCSPluginEngine
 //
@@ -148,21 +148,21 @@ void CMCSPluginEngine::ConstructL()
 CMCSPluginEngine::~CMCSPluginEngine()
     {
     StopObserving();
-    
+
     delete iPluginData;
-    iNotifier.Close();
+    
     iMenu.Close();
     //iWatcher->Cancel();
     delete iWatcher;
-    delete iNotifyWatcher;
+    
 
     CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );
-        
+
     if ( iUndefinedItem )
         {
         delete iUndefinedItem;
         iUndefinedItem = NULL;
-        }    
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -732,6 +732,10 @@ TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath,
 //
 void CMCSPluginEngine::CleanMCSItemsL()
     {
+    iNotifier.Close();
+    delete iNotifyWatcher;
+    iNotifyWatcher = NULL;
+
     const TInt count( iPluginData->DataCount() );
     
     for( TInt i = 0; i < count; i++ )
@@ -827,6 +831,15 @@ TInt CMCSPluginEngine::UpdateMenuItemsRefCountL( CMenuItem* aItem,
         }
     
     return -1;
+    }
+
+// ---------------------------------------------------------------------------
+// Creates bookmark menu item if it does not exist
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginEngine::CreateBkmMenuItemsL()
+    {
+    iPluginData->CreateBkmMenuItemsL();
     }
 
 // End of file

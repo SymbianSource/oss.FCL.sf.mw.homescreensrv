@@ -30,7 +30,7 @@
 // ======== LOCAL CONSTANTS ====================================================
 
 // Test step timeout
-const TInt KTestStepTimeout = 5000000;
+const TInt KTestStepTimeout = 15000000;
 
 // Max input
 const TInt KTestStepInputSizeMax = 1000;
@@ -327,6 +327,21 @@ void MT_CHSPSTeststep::DebugL(
             exitNow = ETrue;
             }                
         }            
+
+    if( exitNow )
+        {
+        logBus->LogText( _L("------------------------------------------") );
+        logBus->LogText( _L("Differences found. Dumping output in full:") );
+        for ( TInt i = 0; 
+              i < iOutParams->Length(); 
+              i++ )
+            {
+            logBus->LogText( _L("[%5d], %3d, '%c'"),
+                             i, // index
+                             ( TUint16 )aOutPtr[i],
+                             ( TUint16 )aOutPtr[i] );         
+            }
+        }
     
     CleanupStack::PopAndDestroy( logBus );     
     }

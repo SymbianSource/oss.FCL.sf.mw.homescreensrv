@@ -32,9 +32,9 @@
 //
 EXPORT_C CHsContentInfoArray* CHsContentInfoArray::NewL()
     {
-		CHsContentInfoArray* self = new ( ELeave ) CHsContentInfoArray();
-		CleanupStack::PushL( self );
-		self->ConstructL();
+    CHsContentInfoArray* self = new ( ELeave ) CHsContentInfoArray();
+    CleanupStack::PushL( self );
+    self->ConstructL();
     CleanupStack::Pop( self );
     return self;
     }
@@ -44,13 +44,13 @@ EXPORT_C CHsContentInfoArray* CHsContentInfoArray::NewL()
 // -----------------------------------------------------------------------
 //    
 EXPORT_C CHsContentInfoArray* CHsContentInfoArray::NewL( RReadStream& aStream )
-		{
-			CHsContentInfoArray* self = new ( ELeave ) CHsContentInfoArray();
-			CleanupStack::PushL( self );
-			self->InternalizeL( aStream );
-			CleanupStack::Pop( self );
-			return self;
-		}   
+    {
+    CHsContentInfoArray* self = new ( ELeave ) CHsContentInfoArray();
+    CleanupStack::PushL( self );
+    self->InternalizeL( aStream );
+    CleanupStack::Pop( self );
+    return self;
+    }   
 
 // -----------------------------------------------------------------------
 // CHsContentInfoArray::ConstructL()
@@ -74,7 +74,7 @@ CHsContentInfoArray::CHsContentInfoArray()
 //
 CHsContentInfoArray::~CHsContentInfoArray()
     {
-    iArray.ResetAndDestroy();    	
+    iArray.ResetAndDestroy();        
     }
 
 // -----------------------------------------------------------------------
@@ -91,15 +91,15 @@ EXPORT_C RPointerArray< CHsContentInfo >& CHsContentInfoArray::Array()
 // -----------------------------------------------------------------------
 //     
 EXPORT_C void CHsContentInfoArray::ExternalizeL( RWriteStream& aStream )
-	{
-		aStream.WriteInt16L( iArray.Count() );
-		
-		for( int i = 0; i < iArray.Count(); i++ )
-		{
-			CHsContentInfo* info = iArray[i];
-			info->ExternalizeL( aStream );
-		}
-	}
+    {
+    aStream.WriteInt16L( iArray.Count() );
+        
+    for( int i = 0; i < iArray.Count(); i++ )
+        {
+        CHsContentInfo* info = iArray[i];
+        info->ExternalizeL( aStream );
+        }
+    }
 
    
 // -----------------------------------------------------------------------
@@ -107,15 +107,15 @@ EXPORT_C void CHsContentInfoArray::ExternalizeL( RWriteStream& aStream )
 // -----------------------------------------------------------------------
 //   
 EXPORT_C void CHsContentInfoArray::InternalizeL( RReadStream& aStream )
-		{
-		TInt count = aStream.ReadInt16L();
-		
-		for( int i = 0; i < count; i++ )
-			{
-			CHsContentInfo* info = CHsContentInfo::NewL( aStream );
-			iArray.AppendL( info );
-			}				
-		}
+    {
+    TInt count = aStream.ReadInt16L();
+        
+    for( int i = 0; i < count; i++ )
+        {
+        CHsContentInfo* info = CHsContentInfo::NewL( aStream );
+        iArray.AppendL( info );
+        }                
+    }
 
 // -----------------------------------------------------------------------
 // CHsContentInfoArray::Size()
@@ -123,7 +123,7 @@ EXPORT_C void CHsContentInfoArray::InternalizeL( RReadStream& aStream )
 //   
 EXPORT_C TInt CHsContentInfoArray::Size( )
     {
-    TInt size( 0 );   
+    TInt size( sizeof( TInt16 ) );   
     for ( TInt i = 0; i < iArray.Count(); i++ )
         {
         size = size + iArray[ i ]->Size();

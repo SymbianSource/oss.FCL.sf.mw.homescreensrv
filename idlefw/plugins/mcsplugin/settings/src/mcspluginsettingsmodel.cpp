@@ -52,8 +52,6 @@ _LIT8( KProperValueSuite, "suite" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
 
-
-
 using namespace HSPluginSettingsIf;
 
 // -----------------------------------------------------------------------------
@@ -136,10 +134,12 @@ CMCSPluginSettingsModel::~CMCSPluginSettingsModel()
 {
     delete iAppList;
     delete iBkmList;
-    iSettings.Reset();
-    delete iPluginSettings;
+    iSettings.Reset();    
     delete iPluginId;
     delete iListBoxLine;
+    
+    CHomescreenSettings::UnInitialize();
+    iPluginSettings = NULL;
 }
 
 // ---------------------------------------------------------------------------
@@ -148,6 +148,14 @@ CMCSPluginSettingsModel::~CMCSPluginSettingsModel()
 //
 void CMCSPluginSettingsModel::ConstructL()
 {
+    CHomescreenSettings::InitializeL( KAppUid );
+    
+    iPluginSettings = CHomescreenSettings::Instance();
+    if( iPluginSettings == NULL )
+        {
+        User::Leave( KErrUnknown );
+        }
+    
     iAppList = CMCSPluginSettingsAppList::NewL();
     iAppList->StartL();
     iBkmList = CMCSPluginSettingsBkmList::NewL();
@@ -164,13 +172,46 @@ void CMCSPluginSettingsModel::UpdateSettingsL( const TDesC8& aPluginId )
         {
         return;
         }
-    if( !iPluginSettings )
+    
+    if( iPluginId )
         {
-        // AILaunch uid in decimal format
-        iPluginSettings = CHomescreenSettings::NewL( KAppUid, aPluginId, this );
-        iPluginId = aPluginId.AllocL();
+        delete iPluginId;
+        iPluginId = NULL;
         }
+    iPluginId = aPluginId.AllocL();    
+    
+    iSettings.Reset();
+    RPointerArray<CItemMap> settingItems;
+    CleanupClosePushL( settingItems );
 
+    iPluginSettings->GetSettingsL( *iPluginId, settingItems );
+
+    TInt count = settingItems.Count();
+    for ( TInt i = 0; i < count; i++ )
+        {
+        CItemMap* itemMap = settingItems[i];
+        RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
+        properties = itemMap->Properties();
+        TSettingItem item = ItemL( properties );
+        iSettings.AppendL( item );
+        }
+    CleanupStack::Pop( &settingItems );
+    settingItems.ResetAndDestroy();
+    }
+
+// ---------------------------------------------------------------------------
+// Gets the latest settings from HSPS and updates
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginSettingsModel::UpdateSettingModelL( const TDesC8& aPluginId )
+    {
+    if( iPluginId )
+        {
+        delete iPluginId;
+        iPluginId = NULL;
+        }
+    iPluginId = aPluginId.AllocL();
+    
     iSettings.Reset();
     RPointerArray<CItemMap> settingItems;
     CleanupClosePushL( settingItems );
@@ -274,12 +315,12 @@ TBool CMCSPluginSettingsModel::SettingLockedL(
 //
 void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex, 
                                              CMenuItem& aMenuItem )
-    {
-
-    if ( !iPluginSettings )
+    {    
+    if( !iPluginId )
         {
         return;
         }
+    
     RPointerArray<CItemMap> settingItems;
     CleanupClosePushL( settingItems );
     iPluginSettings->GetSettingsL( *iPluginId, settingItems );
@@ -424,18 +465,6 @@ void CMCSPluginSettingsModel::UpdateSettingsContainerL( const TDesC8& aPluginId 
         iContainer->ResetCurrentListL(0);
     }
 }
-
-// ---------------------------------------------------------------------------
-// From MHomeScreenSettingsObserver - handler for HSPS setting change
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginSettingsModel::SettingsChangedL( const TDesC8& /*aEvent*/,  
-                                                const TDesC8& /*aPluginName*/,
-                                                const TDesC8& /*aPluginUid*/, 
-                                                const TDesC8& /*aPluginId*/ )
-    {
-    return KErrNone;
-    }
 
 // ---------------------------------------------------------------------------
 // From MDesCArray

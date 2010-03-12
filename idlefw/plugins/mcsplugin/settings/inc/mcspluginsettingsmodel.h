@@ -23,7 +23,6 @@
 #include <e32base.h>
 #include <bamdesca.h>               // For MDesCArray
 #include <badesca.h>
-#include <mhomescreensettingsobserver.h>
 #include <hspluginsettings.h>
 #include <propertymap.h>
 
@@ -66,7 +65,6 @@ struct TSettingItem
  */
 class CMCSPluginSettingsModel : public CBase
     , public MDesCArray
-    , public HSPluginSettingsIf::MHomeScreenSettingsObserver
 {
 
 public:
@@ -169,18 +167,12 @@ public:
      */
     void UpdateSettingsContainerL( const TDesC8& aPluginId );
 
-    // From MHomeScreenSettingsObserver
     /**
-     * Settings changed
-     * 
-     * @param aEvent
-     * @param aPluginName
-     * @param aPluginUid
-     * @param aPluginId
-     * @return TInt
-     */
-    TInt SettingsChangedL( const TDesC8& aEvent,  const TDesC8& aPluginName,
-        const TDesC8& aPluginUid, const TDesC8& aPluginId );
+       * Update settings model
+       * 
+       * @param aPluginId
+       */
+    void UpdateSettingModelL( const TDesC8& aPluginId );
 
 private:
 
@@ -256,7 +248,7 @@ private: // data
      */
     RArray<TSettingItem> iSettings;
 
-    // Homescreen settings API
+    // Homescreen settings API. NOT OWNED!
     HSPluginSettingsIf::CHomescreenSettings* iPluginSettings;
 
     HBufC8* iPluginId;

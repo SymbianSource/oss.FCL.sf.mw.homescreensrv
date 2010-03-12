@@ -23,7 +23,7 @@
 #include <e32base.h>
 #include <coemain.h>
 #include <hwrmlight.h>
-#include <AknSSrvClient.h>
+#include <AknsSrvClient.h>
 
 // User includes
 #include <aifwstatehandler.h>
@@ -56,14 +56,12 @@ public:
     /**
      * Two-phased constructor.
      */
-    static CAiStateProvider* NewL( 
-        MAiStateObserver& aObserver, CCoeEnv& aCoeEnv );
-
+    static CAiStateProvider* NewL( MAiStateObserver& aObserver ); 
+        
     /**
      * Two-phased constructor. Leaving on stack
      */
-    static CAiStateProvider* NewLC( 
-        MAiStateObserver& aObserver, CCoeEnv& aCoeEnv );
+    static CAiStateProvider* NewLC( MAiStateObserver& aObserver );         
 
     /**
      * Destructor
@@ -81,9 +79,26 @@ private:
     /**
      * C++ default constructor
      */
-    CAiStateProvider( 
-        MAiStateObserver& aObserver, CCoeEnv& aCoeEnv );
-        
+    CAiStateProvider( MAiStateObserver& aObserver );         
+     
+public:
+    // new methods
+    
+    /**
+     * Start state providing
+     * 
+     * @since S60 5.2
+     * @param aCoeEnv Control environment
+     */
+    void StartL( CCoeEnv& aCoeEnv );
+    
+    /**
+     * Stop state providing
+     * 
+     * @since S60 5.2
+     */
+    void Stop();
+    
 private:
     // from MCoeMessageMonitorObserver
     
@@ -167,13 +182,15 @@ private:
     /** State observer, Not owned */
     MAiStateObserver& iObserver;        
     /** Control environment, Not owned */
-    CCoeEnv& iCoeEnv;
+    CCoeEnv* iCoeEnv;
     /** Light status observer, Owned */
     CHWRMLight* iLightObserver;
     /** Skin server session, Owned */
     RAknsSrvSession iSkinSrv;
     /** Backup Restore observer, Owned */
     MAiPSPropertyObserver* iBackupRestoreObserver;
+    /** Flag to indicate whether state providing is started */
+    TBool iStarted;    
     
 private:
     // friend classes

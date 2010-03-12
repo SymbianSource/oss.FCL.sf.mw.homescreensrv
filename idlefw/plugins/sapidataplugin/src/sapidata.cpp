@@ -27,6 +27,7 @@
 #include "sapidataobserver.h"
 #include "sapidataplugin.h"
 
+const TUint KDisableNotification = 0x2000;
 // ======== MEMBER FUNCTIONS ========
 	
 // ---------------------------------------------------------------------------
@@ -757,6 +758,36 @@ void CSapiData::ChangePublisherStatusL(const TDesC& aStatus)
     outParamList->Reset();
    }
 
+// ---------------------------------------------------------------------------
+// TriggerActiveL
+// ---------------------------------------------------------------------------
+//
+void CSapiData::TriggerActiveL()
+    {
+    
+    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
+ 
+    TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
+    inParamList->AppendL( type );
+
+    CLiwDefaultMap* filter = CreateFilterLC( KAll(), KAll() );
+    filter->InsertL(KActionTrigger, TLiwVariant( KActive() ));
+   
+    TLiwGenericParam item( KFilter, TLiwVariant( filter ));
+    inParamList->AppendL( item );
+    if(iInterface)
+       {
+       iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList, KDisableNotification );
+       }
+    else
+       {
+       User::Leave( KErrNotSupported );
+       }
+    CleanupStack::PopAndDestroy( filter );
+    inParamList->Reset();
+    outParamList->Reset();
+   }
 // ---------------------------------------------------------------------------
 // UpdatePublisherStatusL
 // ---------------------------------------------------------------------------

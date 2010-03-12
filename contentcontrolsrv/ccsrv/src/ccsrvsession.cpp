@@ -215,11 +215,35 @@ void CCcSrvSession::UnregisterObserverSessionL(
 void CCcSrvSession::HandleWaitForApiReqL(
     RMessage2& aMessage )
     {
+    // Wait for the next API request or Observer notification
     CCcSrvMsg* tr = CCcSrvMsg::NewL();
     CleanupStack::PushL( tr );
     tr->SetMessage( aMessage );
     iRequests.AppendL( tr );
     CleanupStack::Pop( tr );
+
+    // Check if there is outstanding requests
+    for ( TInt i = 0; i < iRequests.Count(); i++ )
+        {
+        CCcSrvMsg* req = iRequests[ i ];
+        if ( req->MsgId() == ECcRegisterObserverNtf ||
+             req->MsgId() == ECcUnregisterObserverNtf )
+            {
+            iRequests.Remove( i );
+            CleanupStack::PushL( req );
+            SendObserverNtfL( req->Sender(), req->MsgId() );
+            CleanupStack::PopAndDestroy( req );
+            break;
+            }
+        else if ( req->Function() == ECcApiReq )
+            {
+            iRequests.Remove( i );
+            CleanupStack::PushL( req );
+            ReceiveMsgL( *req );
+            CleanupStack::PopAndDestroy( req );
+            break;
+            }
+        }    
     }
 
 // -----------------------------------------------------------------------
@@ -234,6 +258,20 @@ void CCcSrvSession::HandleWaitForApiNtfL(
     tr->SetMessage( aMessage );
     iRequests.AppendL( tr );
     CleanupStack::Pop( tr );
+    
+    // Check if there is outstanding API notifications
+    for ( TInt i = 0; i < iRequests.Count(); i++ )
+        {
+        CCcSrvMsg* req = iRequests[ i ];
+        if ( req->Function() == ECcApiNtf )
+            {
+            iRequests.Remove( i );
+            CleanupStack::PushL( req );
+            ReceiveMsgL( *req );
+            CleanupStack::PopAndDestroy( req );
+            break;
+            }
+        }
     }
 
 // -----------------------------------------------------------------------
@@ -289,12 +327,14 @@ void CCcSrvSession::HandleApiReqL(
     message->InternalizeL( stream );
     message->SetTrId( Server().GetTrId() );
     message->SetMessage( aMessage );
+    message->SetSender( iId );
+    message->SetReceiver( providerAddress );
     
-    Server().SendMsgL( iId, providerAddress, *message );
-
     iRequests.AppendL( message );
-    
     CleanupStack::Pop( message );    
+
+    Server().SendMsgL( *message );
+    
     CleanupStack::PopAndDestroy( msgBuf );
         
     }
@@ -325,9 +365,11 @@ void CCcSrvSession::HandleApiRespL(
     CleanupStack::PushL( message );
     message->InternalizeL( stream );
     message->SetMessage( aMessage );
+    message->SetSender( sender );
+    message->SetReceiver( receiver );
     
     // Forward message to receiver
-    Server().SendMsgL( sender, receiver, *message );
+    Server().SendMsgL( *message );
 
     CleanupStack::PopAndDestroy( message );    
     CleanupStack::PopAndDestroy( msgBuf );
@@ -396,11 +438,13 @@ void CCcSrvSession::HandleApiNtfL(
     CleanupStack::PushL( message );
     message->InternalizeL( stream );
     message->SetMessage( aMessage );
+    message->SetSender( iId );
 
     // Forward notification to observers
     for ( TInt i = 0; i < iObservers.Count(); i++ )
         {
-        Server().SendMsgL( iId, iObservers[ i ], *message );
+        message->SetReceiver( iObservers[ i ] );
+        Server().SendMsgL( *message );
         }
     
     message->Message().Complete( KErrNone );
@@ -414,49 +458,48 @@ void CCcSrvSession::HandleApiNtfL(
 // -----------------------------------------------------------------------
 //
 void CCcSrvSession::ReceiveMsgL(
-    TUint32 aSender,
-    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TBool found( EFalse );
     CCcSrvMsg* req( NULL );
-    TInt index( 0 );
     for ( TInt i = 0; i < iRequests.Count() && !found; i++ )
         {
         req = iRequests[ i ];
-        if ( aMessage.Message().Function() == ECcApiReq &&
-             req->Message().Function() == ECcWaitForApiReq &&  
+        if ( aMessage.Function() == ECcApiReq &&
+             req->Function() == ECcWaitForApiReq &&  
              !req->Message().IsNull() )
             {
             // Pending WaitForApiReq transaction found
-            index = i;
+            iRequests.Remove( i );
             found = ETrue;
             }
-        else if ( aMessage.Message().Function() == ECcApiResp &&
+        else if ( aMessage.Function() == ECcApiResp &&
                   req->TrId() == aMessage.TrId() )
             {
             // Pending ApiReq transaction found
-            index = i;
+            iRequests.Remove( i );
             found = ETrue;
             }
-        else if ( aMessage.Message().Function()  == ECcApiNtf &&
-                  req->Message().Function() == ECcWaitForApiNtf &&
+        else if ( aMessage.Function()  == ECcApiNtf &&
+                  req->Function() == ECcWaitForApiNtf &&
                   !req->Message().IsNull() )
             {
             // Pending WaitForApiNtf transaction found
-            index = i;
+            iRequests.Remove( i );
             found = ETrue;
             }
         }
     
     if ( found )
         {
+        CleanupStack::PushL( req );
+        
         // Write sender of message
-        TPckgBuf<TUint32> packagedSender( aSender );
+        TPckgBuf<TUint32> packagedSender( aMessage.Sender() );
         req->Message().WriteL( 1, packagedSender, 0 );
         
         // Write receiver of message
-        TPckgBuf<TUint32> packagedReceiver( aReceiver );
+        TPckgBuf<TUint32> packagedReceiver( aMessage.Receiver() );
         req->Message().WriteL( 2, packagedReceiver, 0 );
         
         // Externalize message header
@@ -477,27 +520,43 @@ void CCcSrvSession::ReceiveMsgL(
         req->Message().WriteL( 3, ptr, 0);
         CleanupStack::PopAndDestroy( des );
         CleanupStack::PopAndDestroy( buf );
-        
+
         // Complete request
         req->Message().Complete( KErrNone );
+
         if (  aMessage.DataSize() )
             {
             // Store request data to be read later
             // with GetMsgData()
             req->SetTrId( aMessage.TrId() );
             req->SetData( aMessage.Data() );
+            iRequests.AppendL( req );
+            CleanupStack::Pop( req );
             }
         else
             {
-            // Received request does not contain any data
-            // -> remove it from request array
-            iRequests.Remove( index );
-            delete req;
+            CleanupStack::PopAndDestroy( req );
             }
         }
     else
         {
-        User::Leave( KErrNotFound );
+        if ( aMessage.Function() == ECcApiReq ||
+             aMessage.Function() == ECcApiNtf )
+            {
+            // Store message to handled later
+            CCcSrvMsg* msg = CCcSrvMsg::NewL();
+            CleanupStack::PushL( msg );
+            msg->SetFunction( aMessage.Function() );
+            msg->SetSender( aMessage.Sender() );
+            msg->SetReceiver( aMessage.Receiver() );
+            msg->SetMsgId( aMessage.MsgId() );
+            msg->SetTrId( aMessage.TrId() );
+            msg->SetStatus( aMessage.Status() );
+            msg->SetData( aMessage.Data() );
+            iRequests.AppendL( msg );
+            CleanupStack::Pop( msg );
+            }
+        // ECcApiResp are ignored
         }    
     }
 
@@ -509,25 +568,30 @@ void CCcSrvSession::SendObserverNtfL(
     TUint32 aSender,
     TUint32 aNtf )
     {
+    // Create notification
+    CCcSrvMsg* ntf = CCcSrvMsg::NewL();
+    CleanupStack::PushL( ntf );
+    ntf->SetMsgId( aNtf );
+    ntf->SetSender( aSender );
+    
     // Notify provider of registered observer
     TBool found( EFalse );
     CCcSrvMsg* req( NULL );
-    TInt index( 0 );
     for ( TInt i = 0; i < iRequests.Count() && !found; i++ )
         {
         req = iRequests[ i ];
-        if ( req->Message().Function() == ECcWaitForApiReq &&
+        if ( req->Function() == ECcWaitForApiReq &&
              !req->Message().IsNull() )
             {
             // Pending WaitForApiReq transaction found
-            index = i;
+            iRequests.Remove( i );
             found = ETrue;
             }
         }
     if ( found )
         {
         // Write sender of message
-        TPckgBuf<TUint32> packagedSender( aSender );
+        TPckgBuf<TUint32> packagedSender( ntf->Sender() );
         req->Message().WriteL( 1, packagedSender, 0 );
         
         // Write receiver of message
@@ -535,9 +599,6 @@ void CCcSrvSession::SendObserverNtfL(
         req->Message().WriteL( 2, packagedReceiver, 0 );
         
         // Externalize notification
-        CCcSrvMsg* ntf = CCcSrvMsg::NewL();
-        CleanupStack::PushL( ntf );
-        ntf->SetMsgId( aNtf );
         HBufC8* ntfBuf = ntf->MarshalL();
         CleanupStack::PushL( ntfBuf );
         TPtr8 ntfPtr( NULL, 0);
@@ -550,13 +611,14 @@ void CCcSrvSession::SendObserverNtfL(
         
         // Complete request
         req->Message().Complete( KErrNone );
-        iRequests.Remove( index );
         delete req;
-
+        
         }
     else
         {
-        User::Leave( KErrNotFound );
+        // Store notification to be sent later
+        iRequests.AppendL( ntf );
+        CleanupStack::Pop( ntf );
         }
     }
 

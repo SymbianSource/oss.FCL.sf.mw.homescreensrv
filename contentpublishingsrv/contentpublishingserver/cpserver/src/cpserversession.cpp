@@ -284,13 +284,19 @@ void CCPServerSession::ExecuteActionL( const RMessage2& aMessage )
     {
     TInt error(KErrNone);
     CP_DEBUG( _L8("CCPServerSession::ExecuteActionSizeL()" ) );
+
+    TUint options = static_cast<TUint>( aMessage.Int2() ); // 2 == KOptionsPosition
+
     CCPLiwMap* map = UnpackFromClientLC( aMessage );
     CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC( );
     CLiwDefaultList* list = CLiwDefaultList::NewLC();
     error = iDataManager->GetActionL( *map, *paramList, list );
     //we notify apart from action execution result. So in fact
-    //notification means there was an attempt to execute action 
-    iDataManager->HandleChangeL( list );
+    //notification means there was an attempt to execute action
+    if ( !( options & KDisableNotification ) )
+        {
+        iDataManager->HandleChangeL( list );
+        }
     User::LeaveIfError( error );
     ExecuteL( *paramList );    
     CleanupStack::PopAndDestroy( list );

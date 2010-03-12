@@ -49,9 +49,11 @@
 // -----------------------------------------------------------------------------
 //
 ChspsThemeServerSession::ChspsThemeServerSession(
-    const TInt aAppUid )
+    const TInt aAppUid ) : 
+    iAppUid( aAppUid ),
+    iIconFileCopyRequired( ETrue ),
+    iResourceFileCopyRequired( ETrue )
     {
-    iAppUid = aAppUid;
     }
   
 // -----------------------------------------------------------------------------
@@ -68,7 +70,7 @@ void ChspsThemeServerSession::CreateL()
     iLogBus->LogText( _L( "--------------------------------------------------------" ) );
 #endif
     
-    Server().AddSession();
+    Server().AddSession( this );
     iHoldingResources = EFalse;
     User::LeaveIfError( iFs.Connect() );
     Server().CheckConfigurationL( iAppUid );
@@ -93,7 +95,7 @@ ChspsThemeServerSession::~ChspsThemeServerSession()
         }
     delete iClientRequestHandler;
    
-    Server().DropSession();
+    Server().DropSession( this );
 
 #ifdef HSPS_LOG_ACTIVE
     if( iLogBus )
@@ -284,7 +286,15 @@ void ChspsThemeServerSession::DoServiceL( const RMessage2& aMessage )
 #ifdef HSPS_LOG_ACTIVE    	
         	iLogBus->LogText( _L( "DoServiceL: EhspsCopyResources" ) );
 #endif    	        	
-        	CopyResourceFilesL( aMessage );
+        	if( iResourceFileCopyRequired )
+        	    {
+                CopyResourceFilesL( aMessage );
+                iResourceFileCopyRequired = EFalse;
+        	    }
+        	else
+        	    {
+                aMessage.Complete( EhspsResourceCopySuccess );        	
+        	    }
         	break;
         	}
         case EhspsAddPlugin:
@@ -999,6 +1009,51 @@ void ChspsThemeServerSession::CreateClientRequestHandlerL()
 RFs& ChspsThemeServerSession::FileSystem()
     {
     return iFs;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServerSession::IconFileCopyRequired
+// -----------------------------------------------------------------------------
+//
+TBool ChspsThemeServerSession::IconFileCopyRequired() const
+    {
+    return iIconFileCopyRequired;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServerSession::SetIconFileCopyRequired
+// -----------------------------------------------------------------------------
+//
+void ChspsThemeServerSession::SetIconFileCopyRequired( const TBool aCopyRequired )
+    {
+    iIconFileCopyRequired = aCopyRequired;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServerSession::ResourceFileCopyRequired
+// -----------------------------------------------------------------------------
+//
+TBool ChspsThemeServerSession::ResourceFileCopyRequired() const
+    {
+    return iResourceFileCopyRequired;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServerSession::SetResourceFileCopyRequired
+// -----------------------------------------------------------------------------
+//
+void ChspsThemeServerSession::SetResourceFileCopyRequired( const TBool aCopyRequired )
+    {
+    iResourceFileCopyRequired = aCopyRequired;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServerSession::AppUid
+// -----------------------------------------------------------------------------
+//
+TBool ChspsThemeServerSession::AppUid() const
+    {
+    return iAppUid;
     }
 
 // end of file

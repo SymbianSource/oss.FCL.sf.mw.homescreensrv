@@ -50,6 +50,47 @@ void ChspsODT::ConstructL()
     }
 
 // -----------------------------------------------------------------------------
+// ChspsODT::CopyODTDataL()
+// Helper to ODT cloning. Prevents duplicate code in two clone methods.
+// -----------------------------------------------------------------------------
+//
+void ChspsODT::CopyODTDataL( const ChspsODT& aSource, ChspsODT& aTarget )
+    {
+    // Properties.
+    aTarget.SetFamily(              aSource.Family() );
+    aTarget.SetConfigurationType(   aSource.ConfigurationType() );
+    aTarget.SetRootUid(             aSource.RootUid() );
+    aTarget.SetProviderUid(         aSource.ProviderUid() );
+    aTarget.SetThemeUid(            aSource.ThemeUid() );
+    aTarget.SetProviderNameL(       aSource.ProviderName() );
+    aTarget.SetThemeFullNameL(      aSource.ThemeFullName() );
+    aTarget.SetThemeShortNameL(     aSource.ThemeShortName() );
+    aTarget.SetThemeVersionL(       aSource.ThemeVersion() );
+    aTarget.SetPackageVersionL(     aSource.PackageVersion() );
+    aTarget.SetDescriptionL(        aSource.Description() );
+    aTarget.SetLogoFileL(           aSource.LogoFile() );
+    aTarget.SetPreviewFileL(        aSource.PreviewFile() );
+    aTarget.SetMultiInstance(       aSource.MultiInstance() );
+    aTarget.SetOdtLanguage(         aSource.OdtLanguage() );
+    aTarget.SetFlags(               aSource.Flags() );
+    
+    // Resources.
+    aTarget.DeleteAllResources();
+    TInt resourceCount = aSource.ResourceCount();    
+    for ( TInt index = 0; index < resourceCount ; index++ )
+        {
+        ChspsResource* resource = ( aSource.ResourceL( index ) ).CloneL();
+        CleanupStack::PushL( resource );
+        aTarget.AddResourceL( resource );
+        CleanupStack::Pop( resource );
+        resource = NULL;    
+        }
+
+    // DOM tree.
+    aTarget.CopyDomDocumentL( aSource.DomDocument() );    
+    }
+
+// -----------------------------------------------------------------------------
 // ChspsODT::NewL
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
@@ -204,6 +245,7 @@ void ChspsODT::ExternalizeHeaderL( RWriteStream& aStream ) const
     aStream.WriteUint32L( iProviderUid );
     aStream.WriteUint32L( iThemeUid );
     aStream.WriteInt32L( iMultiInstance );
+    
     if ( iDescription )
         {
         aStream << *iDescription;
@@ -263,8 +305,10 @@ void ChspsODT::ExternalizeHeaderL( RWriteStream& aStream ) const
         {
         aStream << KNullDesC;
         }
+    
     aStream.WriteInt32L( iLanguage );
     aStream.WriteUint32L( iFlags );
+    
     // end of the header delimiter
     aStream.WriteL( KDelim );
     }
@@ -394,6 +438,16 @@ EXPORT_C void ChspsODT::DeleteResourceL( TInt aIndex )
     }
 
 // -----------------------------------------------------------------------------
+// ChspsODT::DeleteResourceListL
+// Deletes all resources from the ODT.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------    
+EXPORT_C void ChspsODT::DeleteAllResources()
+    {
+    iResourceList->ResetAndDestroy();
+    }
+
+// -----------------------------------------------------------------------------
 // ChspsODT::ResourceL
 // Get the resource by the index
 // (other items were commented in a header).
@@ -461,7 +515,6 @@ EXPORT_C void ChspsODT::InternalizeResourceListL( RReadStream& aStream )
         resource = NULL;
 		}
     }
-
 
 // -----------------------------------------------------------------------------
 // ChspsODT::SetRootUid
@@ -689,61 +742,30 @@ EXPORT_C ChspsDomDocument& ChspsODT::DomDocument() const
     {
     return *iDomDocument;
     }
-  
+
 // -----------------------------------------------------------------------------
 // ChspsODT::CloneL()
 // Makes a clone of this ODT and returns pointer to it
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C ChspsODT* ChspsODT::CloneL()
+EXPORT_C ChspsODT* ChspsODT::CloneL() const
     {
-    ChspsODT* clone = new (ELeave) ChspsODT;
-    CleanupStack::PushL( clone );
-    clone->ConstructL();
-    clone->SetConfigurationType( iConfigurationType );
-    clone->SetRootUid( iRootUid );
-    clone->SetProviderUid( iProviderUid );
-    clone->SetThemeUid( iThemeUid );
-    if( iProviderName )
-        {
-        clone->SetProviderNameL( *iProviderName );
-        }
-    if( iThemeFullName )
-        {
-        clone->SetThemeFullNameL( *iThemeFullName );
-        }
-    if( iThemeShortName )
-        {
-        clone->SetThemeShortNameL( *iThemeShortName );
-        }
-    if( iThemeVersion )
-        {
-        clone->SetThemeVersionL( *iThemeVersion );
-        }
-    if( iPackageVersion )
-        {
-        clone->SetPackageVersionL( *iPackageVersion );
-        }
-    if( iDescription )
-        {
-        clone->SetDescriptionL( *iDescription );
-        }
-    clone->SetOdtLanguage( iLanguage );
-    clone->SetFlags( iFlags );
-          
-    TInt resourceCount = iResourceList->Count();
-
-    for ( TInt index = 0; index < resourceCount ; index++ )
-        {
-        ChspsResource& resource = ResourceL( index );
-        clone->AddResourceL( resource.CloneL() );
-        }
-       
-    CleanupStack::Pop( clone );
+    ChspsODT* clone = ChspsODT::NewL();
+    CleanupStack::PushL( clone );    
+    ChspsODT::CopyODTDataL( *this, *clone );
+    CleanupStack::Pop( clone );            
     return clone;
     }
-    
+ 
+// -----------------------------------------------------------------------------
+// Copies data from an exisiting ODT
+// -----------------------------------------------------------------------------
+EXPORT_C void ChspsODT::CloneL( ChspsODT& aODT )
+    {
+    ChspsODT::CopyODTDataL( aODT, *this );    
+    }
+
 // -----------------------------------------------------------------------------
 // ChspsODT::CopyDomDocumentL()
 // Clones the aDom and sets it as this ChspsODT's DomDocument

@@ -23,18 +23,13 @@
 
 #include <hspluginsettings.h>
 #include "hspsconfiguration.h"
-//#include "pluginmap.h"
 #include "itemmap.h"
 #include "propertymap.h"
-//#include "objectmap.h"
-//#include "plugininfo.h"
 #include <mhomescreensettingsif.h>
 #include <mhomescreensettingsobserver.h>
 
 _LIT8( KHSPS, "Service.HSPS" );
 _LIT8( KHSPSConfigurationIf, "IConfiguration" );
-
-
 
 _LIT8( KHSPSCommandGetPluginConf, "GetPluginConf" );
 _LIT8( KHSPSSetPluginSettings, "SetPluginSettings" );
@@ -45,7 +40,6 @@ _LIT8( KHspsAppUid, "appUid" );
 _LIT8( KKeyPluginId, "pluginId" );
 
 _LIT8( KKeyStoringParams, "storingParams" );
-
 
 _LIT8( KKeyStorePluginRefence, "storePluginConf" );
 _LIT8( KKeyStoreAppConf, "storeAppConf" );
@@ -58,17 +52,115 @@ _LIT8( KKeySettings, "settings" );
 
 _LIT8( KRequestNotification, "RequestNotification" );
 
-
 _LIT8( KSettingsChanged, "PluginSettingsChanged" );
+
 namespace HSPluginSettingsIf{
 
-
+NONSHARABLE_CLASS( CTlsEntry ): public CBase
+    {
+public:
+    /**
+     * Instance to home screen settings.
+     */
+    CHomescreenSettings* iInstance;
+    
+    /**
+     * Reference count.
+     */
+    TInt iRefCount;
+    };
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-CHomescreenSettings::CHomescreenSettings(MHomeScreenSettingsObserver* aObserver, const TDesC8& aPluginId )
-    : iObserver( aObserver ), iPluginId( aPluginId )
+EXPORT_C CHomescreenSettings* CHomescreenSettings::Instance()
+    {
+    CHomescreenSettings* instance = NULL;
+    
+    CTlsEntry* entry = static_cast<CTlsEntry*>( Dll::Tls() );
+    if( entry )
+        {
+        instance = entry->iInstance;
+        }
+    
+    return instance;
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CHomescreenSettings::InitializeL( const TDesC8& aAppUid )
+    {
+    CTlsEntry* entry = static_cast<CTlsEntry*>( Dll::Tls() );
+    
+    if( !entry )
+        {
+        entry = new (ELeave) CTlsEntry();
+        entry->iInstance = NULL;
+        entry->iRefCount = 1;
+        
+        CleanupStack::PushL( entry );
+        entry->iInstance = CHomescreenSettings::NewL( aAppUid );
+        CleanupStack::Pop( entry );                                
+        
+        Dll::SetTls( entry );
+        }
+    else
+        {
+        entry->iRefCount++;
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CHomescreenSettings::UnInitialize()
+    {
+    CTlsEntry* entry = static_cast<CTlsEntry*>( Dll::Tls() );
+    
+    if( !entry )
+        {
+        return;
+        }
+
+    entry->iRefCount--;
+    
+    if( entry->iRefCount == 0 )
+        {
+        delete entry->iInstance;
+        entry->iInstance = NULL;
+        delete entry;
+        Dll::SetTls( NULL );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CHomescreenSettings::AddObserverL( MHomeScreenSettingsObserver* aObserver )
+    {
+    if( iObservers.Find( aObserver ) == KErrNotFound )
+        {
+        iObservers.AppendL( aObserver );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CHomescreenSettings::RemoveObserver( MHomeScreenSettingsObserver* aObserver )
+    {
+    const TInt index = iObservers.Find( aObserver );
+    if( index != KErrNotFound )
+        {
+        iObservers.Remove( index );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+CHomescreenSettings::CHomescreenSettings()
     {
     }
 
@@ -118,48 +210,42 @@ void CHomescreenSettings::ConstructL( const TDesC8& aAppUid )
     inParamList.Reset();
     outParamList.Reset();
         
-    if( iObserver )
-        {        	
-        iTransactionId = -1;
-        iHspsInterface->ExecuteCmdL( KRequestNotification,
-                                     inParamList,
-                                     outParamList,
-                                     KLiwOptASyncronous,
-                                     this );   
-        const TLiwGenericParam* outParam( NULL );
-                
-       TInt pos( 0 );
-       outParam = outParamList.FindFirst( pos, _L8("status") );
-               
-       if ( outParam )
-           {
-           TInt retval;
-           retval = outParam->Value().AsTInt32();
-           if(retval == KErrNone )
-               {
-               pos = 0;
-               outParam = outParamList.FindFirst( pos, _L8("TransactionID") );
-               if( outParam )
-                   {
-                   retval = outParam->Value().AsTInt32();
-                   iTransactionId = retval;
-                   }
-               }
-          
-           }
-                  
+    iTransactionId = -1;
+    iHspsInterface->ExecuteCmdL( KRequestNotification,
+                                 inParamList,
+                                 outParamList,
+                                 KLiwOptASyncronous,
+                                 this );
+    
+    const TLiwGenericParam* outParam( NULL );
+            
+    pos = 0;
+    outParam = outParamList.FindFirst( pos, _L8("status") );
+           
+    if( outParam )
+        {
+        TInt retval;
+        retval = outParam->Value().AsTInt32();
+        if( retval == KErrNone )
+            {
+            pos = 0;
+            outParam = outParamList.FindFirst( pos, _L8( "TransactionID" ) );
+            if( outParam )
+                {
+                retval = outParam->Value().AsTInt32();
+                iTransactionId = retval;
+                }
+            }      
         }
     }
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CHomescreenSettings* CHomescreenSettings::NewL(
-    const TDesC8& aAppUid,
-    const TDesC8& aPluginId, 
-    MHomeScreenSettingsObserver* aObserver)
+CHomescreenSettings* CHomescreenSettings::NewL(
+    const TDesC8& aAppUid )
     {
-    CHomescreenSettings* self = CHomescreenSettings::NewLC(aAppUid, aPluginId, aObserver);
+    CHomescreenSettings* self = CHomescreenSettings::NewLC( aAppUid );
     CleanupStack::Pop( self );
     return self;
     }
@@ -167,22 +253,23 @@ EXPORT_C CHomescreenSettings* CHomescreenSettings::NewL(
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CHomescreenSettings* CHomescreenSettings::NewLC(
-    const TDesC8& aAppUid,
-    const TDesC8& aPluginId,
-    MHomeScreenSettingsObserver* aObserver)
-    {
-    CHomescreenSettings* self = new( ELeave ) CHomescreenSettings( aObserver, aPluginId );
+CHomescreenSettings* CHomescreenSettings::NewLC(
+    const TDesC8& aAppUid )
+    {    
+    CHomescreenSettings* self = new( ELeave ) CHomescreenSettings();
     CleanupStack::PushL( self );
-    self->ConstructL(aAppUid);
+    self->ConstructL( aAppUid );   
+    
     return self;
     }
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CHomescreenSettings::~CHomescreenSettings()
+CHomescreenSettings::~CHomescreenSettings()
     {
+    iObservers.Reset();
+    
     if( iHspsInterface )
         {
         // Close interface
@@ -201,10 +288,6 @@ EXPORT_C CHomescreenSettings::~CHomescreenSettings()
     delete iHspsService;
     delete iServiceHandler;    
     }
-
-
-
-
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -529,7 +612,7 @@ TInt CHomescreenSettings::HandleNotifyL( TInt aCmdId, TInt aEventId,
     {
     TInt retval( KErrNone );
    
-    if( iObserver && iTransactionId == aCmdId )
+    if( iTransactionId == aCmdId && iObservers.Count() > 0 )
         {                 
         const TLiwGenericParam* outParam( NULL );
         
@@ -566,16 +649,16 @@ TInt CHomescreenSettings::HandleNotifyL( TInt aCmdId, TInt aEventId,
             variant = outParam->Value();
             
             const CLiwMap* notifMap( variant.AsMap() );
-                                            
+                                          
             if ( notifMap->FindL( _L8("event"), variant ) )
                 {
                 event = variant.AsData().AllocLC();
                 pushCount++;
                 }    
-                
+               
             variant.Reset();    
             
-            if ( event->Des().Compare( KSettingsChanged ) == 0 )
+            if ( event && event->Des().Compare( KSettingsChanged ) == 0 )
                 {
                 if( notifMap->FindL( _L8("name"), variant ) )
                     {
@@ -610,20 +693,19 @@ TInt CHomescreenSettings::HandleNotifyL( TInt aCmdId, TInt aEventId,
                         HBufC8* pluginId( NULL );
                         pluginId = variant.AsData().AllocLC();
                         
-                        if( pluginId->Des().Compare(iPluginId)== 0 )
+                        for( TInt i = 0; i < iObservers.Count(); i++ )
                             {
-                            retval = iObserver->SettingsChangedL( 
+                            iObservers[i]->SettingsChangedL( 
                                 ( event ) ? *event : KNullDesC8(),  
                                 ( pluginName ) ? *pluginName : KNullDesC8(), 
                                 ( pluginUid ) ? *pluginUid : KNullDesC8(), 
-                                ( pluginId ) ? * pluginId : KNullDesC8() );
-                            }       
+                                ( pluginId ) ? *pluginId : KNullDesC8() );
+                            }
+       
                         CleanupStack::PopAndDestroy( pluginId );                                                      
                         
-                        variant.Reset();
-                         
-                        }
-                        
+                        variant.Reset();                         
+                        }                        
                     }
             
                 }
@@ -679,11 +761,10 @@ TInt CHomescreenSettings::HandleNotifyL( TInt aCmdId, TInt aEventId,
                 }     
             }
         
-        }
-   
+        }   
     
     return retval;    
-    } 
+    }
 
 }
 //End of file

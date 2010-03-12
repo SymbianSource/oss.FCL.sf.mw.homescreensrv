@@ -186,12 +186,14 @@ void CAiDeviceStatusPlugin::FreeResources()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiDeviceStatusPlugin::Start( TStartReason aReason )     
-    {    
-    if ( aReason == EPageStartup || aReason == ESystemStartup )
+void CAiDeviceStatusPlugin::Start( TStartReason /*aReason*/ )     
+    {   
+    iRequirePublish = ETrue;
+    
+    if ( iContentObservers )
         {
-        iRequirePublish = ETrue;
-        }
+        iContentObservers->ClearBlackList();
+        }    
     }
 
 // ----------------------------------------------------------------------------

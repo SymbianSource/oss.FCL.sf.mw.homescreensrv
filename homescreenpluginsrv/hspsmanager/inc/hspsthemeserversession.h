@@ -63,6 +63,41 @@ public:
      * @return Reference to RFs instance
      */
     RFs& FileSystem();
+
+    /**
+     * Return whether icon file copy required.
+     * 
+     * @return TBool    ETrue if icon file copy is required. Otherwise false.
+     */
+    TBool IconFileCopyRequired() const;
+
+    /**
+     * Set icon file copy requirement flag.
+     * 
+     * @param aCopyRequired     Value to be set.
+     */
+    void SetIconFileCopyRequired( const TBool aCopyRequired );    
+
+    /**
+     * Return whether resource file copy required.
+     * 
+     * @return TBool    ETrue if icon file copy is required. Otherwise false.
+     */
+    TBool ResourceFileCopyRequired() const;
+
+    /**
+     * Set resource file copy requirement flag.
+     * 
+     * @param aCopyRequired     Value to be set.
+     */
+    void SetResourceFileCopyRequired( const TBool aCopyRequired );    
+
+    /**
+     * Get app uid of session
+     * 
+     * @return App uid. 
+     */
+    TInt AppUid() const;     
     
 private:
     
@@ -303,6 +338,17 @@ private:
     RMessagePtr2 iMessagePtr;   
     TBool iHoldingResources;
     TInt iAppUid;
+    
+    
+    /**
+     * Boolean to indicate that icon files need to be copied.
+     */
+    TBool iIconFileCopyRequired;
+
+    /**
+     * Boolean to indicate that resource files need to be copied.
+     */
+    TBool iResourceFileCopyRequired;
     
 #ifdef HSPS_LOG_ACTIVE
     /**

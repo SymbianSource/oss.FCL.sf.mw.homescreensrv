@@ -339,9 +339,9 @@ const TUint8 requestnotify_6_ts_2_output[] = {
 //     - Variant value
 10,
 5,
-13,0,0,0,
-54,
-'P','l','u','g','i','n','U','p','d','a','t','e','d',
+15,0,0,0,
+62,
+'P','l','u','g','i','n','I','n','s','t','a','l','l','e','d',
 // - Notification(Output)::appConfUid
 //   - Variant name
 //     - Version 1.0
@@ -800,8 +800,9 @@ const TUint8 requestnotify_6_ts_5_output[] = {
 //     - Variant value
 10,
 5,
-0,0,0,0,
-2,
+10,0,0,0,
+42,
+'0','x','2','0','0','0','b','1','1','0',
 // - Notification(Output)::origUid
 //   - Variant name
 //     - Version 1.0
@@ -846,9 +847,8 @@ const TUint8 requestnotify_6_ts_5_output[] = {
 //     - Variant value
 10,
 5,
-21,0,0,0,
-86,
-'I','n','s','t','a','l','l','e','d',' ','-',' ','W','i','d','g','e','t',' ','V','2',
+0,0,0,0,
+2,
 // - Notification(Output)::pluginUid
 //   - Variant name
 //     - Version 1.0
@@ -912,7 +912,7 @@ const TUint8 requestnotify_6_ts_5_output[] = {
 5,
 1,0,0,0,
 6,
-'0'
+'9'
 };
 
 const TInt requestnotify_6_ts_5_trigger = EHspsTriggerRunUninstallationCase;

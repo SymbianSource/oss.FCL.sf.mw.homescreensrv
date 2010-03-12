@@ -156,6 +156,23 @@ public:
      * ShowSettingsL
      */
     void ShowSettingsL();
+    
+    /**
+    * Helper method. Adds a given constant to a value of reference counter
+    *
+    * @param aItem A Menu Item to update
+    * @param aValueToAdd A constant to add 
+    * @return The actual value of updated reference count
+    */
+    TInt UpdateMenuItemsRefCountL( 
+        CMenuItem* aItem, const TInt aValueToAdd );
+
+    /**
+     * CreateBkmMenuItemsL
+     * @param void
+     * @return void
+     */
+    void CreateBkmMenuItemsL();
 
 private:
     // from MMCSPluginWatcherObserver
@@ -204,16 +221,6 @@ private:
     TBool ConstructMenuItemForIconL( 
         const TDesC& aPath, CMenuItem& aMenuItem );
 
-    /**
-    * Helper method. Adds a given constant to a value of reference counter
-    *
-    * @param aItem A Menu Item to update
-    * @param aValueToAdd A constant to add 
-    * @return The actual value of updated reference count
-    */
-    TInt UpdateMenuItemsRefCountL( 
-        CMenuItem* aItem, const TInt aValueToAdd );
-    
 private:
     // data
     

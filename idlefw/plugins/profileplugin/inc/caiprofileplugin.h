@@ -178,6 +178,8 @@ private:
     HBufC* iActiveProfileAndChar;
 	/** Previous profile, owned */
 	HBufC* iPreviousProfileNameAndChar;
+	/** Flag to indicate whether publish is required */
+	TBool iPublishRequired;
     };
 
 #endif // CAIPROFILEPLUGIN_H

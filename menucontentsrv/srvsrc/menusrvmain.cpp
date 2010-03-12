@@ -16,7 +16,7 @@
 */
 
 // INCLUDE FILES
-
+#include <mw/memorymanager.h>
 #include "menusrv.h"
 
 // ==================== LOCAL FUNCTIONS ====================
@@ -27,6 +27,10 @@
 */
 GLDEF_C TInt E32Main()
     {
+    RAllocator* iAllocator = MemoryManager::SwitchToFastAllocator();
+    
     TInt err = RunMenuServer();
+    
+    MemoryManager::CloseFastAllocator(iAllocator);
     return err;
     }

@@ -63,8 +63,9 @@ const TInt KTIntMahspsumbers( 11 );
 // might leave.
 // -----------------------------------------------------------------------------
 //
-ChspsDefinitionRepository::ChspsDefinitionRepository()
-    {
+ChspsDefinitionRepository::ChspsDefinitionRepository() :
+        iCacheLastODT( NULL )
+    {        
     }
 
 // -----------------------------------------------------------------------------
@@ -121,6 +122,8 @@ ChspsDefinitionRepository::~ChspsDefinitionRepository()
     iObservers.Reset();
     iObservers.Close(); 
     delete iPath;
+    
+    delete iCacheLastODT;    
     
 	iTempFileName1 = KNullDesC;
 	iTempFileName2 = KNullDesC;    
@@ -200,6 +203,13 @@ EXPORT_C TInt ChspsDefinitionRepository::SetOdtL( const ChspsODT &aODT )
         }
 #endif
 
+    if( aODT.ConfigurationType() == EhspsAppConfiguration )
+        {
+        delete iCacheLastODT;
+		iCacheLastODT = NULL;        
+        iCacheLastODT = aODT.CloneL();                
+        }
+    
     return ret;
     }
 
@@ -212,6 +222,7 @@ EXPORT_C TInt ChspsDefinitionRepository::SetOdtL( const ChspsODT &aODT )
 EXPORT_C TInt ChspsDefinitionRepository::GetOdtL( ChspsODT& aODT )
     {
     TInt errorCode = KErrNone;
+    
     if ( aODT.Flags() & EhspsThemeStatusLicenceeDefault )
 		{
 		iLicenseDefault = ETrue;
@@ -221,12 +232,23 @@ EXPORT_C TInt ChspsDefinitionRepository::GetOdtL( ChspsODT& aODT )
 		iLicenseDefault = EFalse;		
 		}
 
-    TRAP( errorCode, GetPathL( aODT, EResourceODT ));
-    if ( !errorCode )
-    	{
-    	errorCode = ReadFromFileL( *iPath, aODT ); 
-    	}
-    iLicenseDefault = EFalse;  
+    if( iCacheLastODT &&
+        iCacheLastODT->RootUid() == aODT.RootUid() &&
+        iCacheLastODT->ThemeUid() == aODT.ThemeUid() )  
+        {
+        aODT.CloneL( *iCacheLastODT );
+        }
+    else       
+        {    
+        TRAP( errorCode, GetPathL( aODT, EResourceODT ));
+        if ( !errorCode )
+            {
+            errorCode = ReadFromFileL( *iPath, aODT ); 
+            }         
+        }
+    
+    iLicenseDefault = EFalse;
+    
     return errorCode;
     }
 

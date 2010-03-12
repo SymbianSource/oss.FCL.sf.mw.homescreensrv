@@ -80,66 +80,86 @@ private: // From CActive
 
 public: // From MHsContentController
     /**
-     * 
+     * See from API documentation
      */
     TInt WidgetListL( CHsContentInfoArray& aArray );
-    
+
     /**
-     * 
+     * See from API documentation
+     */
+    TInt WidgetListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
+
+    /**
+     * See from API documentation
      */
     TInt ViewListL( CHsContentInfoArray& aArray );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt AppListL( CHsContentInfoArray& aArray );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt AddWidgetL( CHsContentInfo& aInfo );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt RemoveWidgetL( CHsContentInfo& aInfo );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt AddViewL( CHsContentInfo& aInfo );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt RemoveViewL( CHsContentInfo& aInfo );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt ActivateViewL( CHsContentInfo& aInfo );
     
     /**
-     * 
+     * See from API documentation
      */
     TInt ActivateAppL( CHsContentInfo& aInfo );
 
-   /**
-    * 
-    */
+    /**
+     * See from API documentation
+     */
    TInt ActiveViewL( CHsContentInfo& aInfo );
    
    /**
-    * 
+    * See from API documentation
     */
    TInt ActiveAppL( CHsContentInfo& aInfo );
 
 private: // Functions
     /**
-     * 
+     * Requests receiving of content change notification
      */
     void WaitForApiNtfL();
     
+    /**
+     * Internalize received response message
+     */
+    TInt InternalizeRespL( TPtr8& aResp, TUint32& aTrId, TUint32& aDataSize );
+
+    /**
+     * Internalize received CHsContentInfo type response message data
+     */
+    TInt InternalizeContentInfoL( CHsContentInfo& aInfo, TUint32 aTrId, TUint32 aDataSize );
+
+    /**
+     * Internalize received CHsContentInfoArray type response message data
+     */
+    TInt InternalizeContentInfoArrayL( CHsContentInfoArray& aInfo, TUint32 aTrId, TUint32 aDataSize );
+
 private: // Data
     /**
      * Session to Homescreen content control server

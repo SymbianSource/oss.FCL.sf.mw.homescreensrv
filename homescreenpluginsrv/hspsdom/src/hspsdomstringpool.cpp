@@ -20,42 +20,8 @@
 // INCLUDE FILES
 #include    "hspsdomstringpool.h"
 
-
 // ============================ LOCAL FUNCTIONS ================================
-// -----------------------------------------------------------------------------
-// Adds string to string pool. If string doesn't appear yet, it is added to 
-// the string pool and index to pool is returned. 
-// @param aString String to add 
-// @param aArray A pool which holds strings
-// @return Index to string pool 
-// -----------------------------------------------------------------------------
-//
-LOCAL_C TInt AddToStringPoolL( const TDesC8& aString, RPointerArray<HBufC8>& aArray )
-    {
-    TBool found( EFalse );
-    TInt index( 0 );
-     
-    TInt count( aArray.Count() );
-    for (; index < count && !found;  )
-        {
-        if ( aArray[ index ]->Des().Compare( aString ) == 0 )
-            {
-            found = ETrue;
-            }
-        else
-            {
-            index++;
-            }    
-        }
-    if ( !found )
-        {
-        HBufC8* tmp = aString.AllocLC();
-        aArray.AppendL( tmp );
-        CleanupStack::Pop( tmp );
-        index = aArray.Count()-1;    //Last item
-        }
-    return index;
-    }
+
 // ============================ MEMBER FUNCTIONS ===============================
 // -----------------------------------------------------------------------------
 // ChspsDomStringPool::ChspsDomStringPool
@@ -63,7 +29,8 @@ LOCAL_C TInt AddToStringPoolL( const TDesC8& aString, RPointerArray<HBufC8>& aAr
 // might leave.
 // -----------------------------------------------------------------------------
 //
-ChspsDomStringPool::ChspsDomStringPool()
+ChspsDomStringPool::ChspsDomStringPool( const TBool aAllowDuplicates ) :
+    iAllowDuplicates( aAllowDuplicates )
     {
     }
 
@@ -81,9 +48,10 @@ void ChspsDomStringPool::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-ChspsDomStringPool* ChspsDomStringPool::NewL()
+ChspsDomStringPool* ChspsDomStringPool::NewL( const TBool aAllowDuplicates )
     {
-    ChspsDomStringPool* self = new( ELeave ) ChspsDomStringPool;
+    ChspsDomStringPool* self =
+            new( ELeave ) ChspsDomStringPool( aAllowDuplicates );
     
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -98,9 +66,10 @@ ChspsDomStringPool* ChspsDomStringPool::NewL()
 // Two-phased stream constructor.
 // -----------------------------------------------------------------------------
 //
-ChspsDomStringPool* ChspsDomStringPool::NewL( RReadStream& aStream )
+ChspsDomStringPool* ChspsDomStringPool::NewL( RReadStream& aStream,
+        const TBool aAllowDuplicates )
     {
-    ChspsDomStringPool* self = new( ELeave ) ChspsDomStringPool;
+    ChspsDomStringPool* self = new( ELeave ) ChspsDomStringPool( aAllowDuplicates );
     CleanupStack::PushL( self );
     aStream >> *self;
     CleanupStack::Pop(self);
@@ -116,6 +85,7 @@ ChspsDomStringPool* ChspsDomStringPool::NewL( RReadStream& aStream )
 ChspsDomStringPool::~ChspsDomStringPool()
     {
     iStringPool.ResetAndDestroy();
+    iStringPoolOptimizer.Close();
     }
 
 // -----------------------------------------------------------------------------
@@ -123,15 +93,23 @@ ChspsDomStringPool::~ChspsDomStringPool()
 // -----------------------------------------------------------------------------
 //
 ChspsDomStringPool* ChspsDomStringPool::CloneL()
-    {
-    ChspsDomStringPool* clone = ChspsDomStringPool::NewL();
+    {    
+    ChspsDomStringPool* clone = NULL;    
+    if( iAllowDuplicates )
+        {
+        clone = ChspsDomStringPool::NewL( ETrue );
+        }
+    else
+        {
+        clone = ChspsDomStringPool::NewL( EFalse );
+        }    
     CleanupStack::PushL( clone );
     
     TInt count( iStringPool.Count() );
-    for ( TInt i=0; i<count; i++ )
-        {
+    for ( TInt i = 0; i < count; i++ )
+        {    
         HBufC8* tmp = iStringPool[i]->Des().AllocLC();
-        clone->iStringPool.AppendL( tmp );
+        clone->DoAddStringL( tmp );
         CleanupStack::Pop( tmp );
         }
     CleanupStack::Pop( clone );
@@ -139,26 +117,77 @@ ChspsDomStringPool* ChspsDomStringPool::CloneL()
     }
 
 // -----------------------------------------------------------------------------
-// ChspsDomNode::AddStringL
+// ChspsDomStringPool::AddStringL
 // -----------------------------------------------------------------------------
 //
 EXPORT_C TInt ChspsDomStringPool::AddStringL( const TDesC8& aString )
-    {
-    return AddToStringPoolL( aString, iStringPool );
+    {   
+    TInt index = iStringPoolOptimizer.GetIndex( aString );
+
+    if( index == KErrNotFound )
+        {
+        HBufC8* string = aString.AllocLC();
+        index = DoAddStringL( string );        
+        CleanupStack::Pop( string );        
+        }    
+    
+    return index;    
     }
 
 // -----------------------------------------------------------------------------
-// ChspsDomNode::String
+// ChspsDomStringPool::AddStringL
+// -----------------------------------------------------------------------------
+//
+TInt ChspsDomStringPool::AddStringL( HBufC8* aString )
+    {   
+    if( !aString )
+        {
+        User::Leave( KErrArgument );
+        }
+    
+    TInt index = iStringPoolOptimizer.GetIndex( *aString );    
+    
+    if( index == KErrNotFound )
+        {
+        index = DoAddStringL( aString );       
+        }
+    else
+        {
+        delete aString;
+        }
+    
+    return index;    
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDomStringPool::AddStringL
+// -----------------------------------------------------------------------------
+//
+void ChspsDomStringPool::AddAllL( ChspsDomStringPool& aStringPool )
+    {
+    const TInt count = aStringPool.Count();
+    for( TInt i = 0; i < count; i++ )
+        {
+        AddStringL( aStringPool.String( i ) );
+        }    
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDomStringPool::String
 // -----------------------------------------------------------------------------
 //
 const TDesC8& ChspsDomStringPool::String( const TInt aStringRef )
-    {
-    if ( aStringRef < iStringPool.Count() )
+    {       
+    if( aStringRef >= 0 && aStringRef < iStringPool.Count() )
+        {
         return (*iStringPool[ aStringRef ]);
+        }
     else
+        {
         return KNullDesC8;
+        }
     }
-        
+
 // -----------------------------------------------------------------------------
 // ChspsDomStringPool::Size
 // -----------------------------------------------------------------------------
@@ -176,6 +205,15 @@ TInt ChspsDomStringPool::Size() const
         size += iStringPool[i]->Size();  //Buffer sixe in bytes     
         }
     return size;    
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDomStringPool::Count
+// -----------------------------------------------------------------------------
+//
+TInt ChspsDomStringPool::Count() const
+    {
+    return iStringPool.Count();
     }
 
 // -----------------------------------------------------------------------------
@@ -201,15 +239,39 @@ void ChspsDomStringPool::ExternalizeL( RWriteStream& aStream ) const
 void ChspsDomStringPool::InternalizeL( RReadStream& aStream )
     {
     TInt len(0);
-    TInt16 count ( aStream.ReadInt16L() );
-    
+    TInt16 count ( aStream.ReadInt16L() );    
+
     for ( TInt i=0; i<count; i++ )
         {
         len = aStream.ReadInt16L();
         HBufC8* tmp = HBufC8::NewLC( aStream, len );
-        iStringPool.AppendL( tmp );
+        AddStringL( tmp ); // OWNERSHIP TRANSFERRED!        
         CleanupStack::Pop( tmp );
         }
-   
     }
+
+// -----------------------------------------------------------------------------
+// ChspsDomStringPool::DoAddStringL
+// -----------------------------------------------------------------------------
+//
+TInt ChspsDomStringPool::DoAddStringL( HBufC8* aNewString )
+    {
+    if( !aNewString )
+        {
+        User::Leave( KErrArgument );
+        }       
+    
+    TInt index = iStringPool.Count();
+    
+    if( !iAllowDuplicates )
+        {
+        ThspsDomStringPoolOptimizerEntry tmp( index, *aNewString );
+        iStringPoolOptimizer.AddEntryL( tmp );
+        }
+    
+    iStringPool.AppendL( aNewString );       
+        
+    return index;
+    }
+
 //  End of File  

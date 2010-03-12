@@ -42,7 +42,7 @@ public:
      * @param aPluginUid Plugin uid
      * @param aPluginId Plugin id
      */
-    virtual TInt SettingsChangedL(
+    virtual void SettingsChangedL(
         const TDesC8& aEvent,
         const TDesC8& aPluginName,
         const TDesC8& aPluginUid,

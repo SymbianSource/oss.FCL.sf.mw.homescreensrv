@@ -114,13 +114,9 @@ public: // New functions
 
     /**
      * Sends message to defined session
-     * @param aSender Sender session
-     * @param aReceiver Receiver session
      * @param aMsgBuf Message buffer
      */
     void SendMsgL(
-        TUint32 aSender,
-        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
 private:

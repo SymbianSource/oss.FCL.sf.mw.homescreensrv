@@ -370,7 +370,7 @@ CAiStateManager::TState CAiStateManager::EvaluateNextState() const
 void CAiStateManager::ProcessStateChange( TState aNextState )
     {
     __PRINT( __DBG_FORMAT( 
-        "CAiStateManager::ProcessStateChange: current state: %d, next state: %d, halt: &d" ), 
+        "CAiStateManager::ProcessStateChange: current state: %d, next state: %d, halt: %d" ), 
             (TInt)iCurrentState, (TInt)aNextState, iHalt );     
         
     __TIME_MARK( time );
@@ -510,28 +510,41 @@ void CAiStateManager::ProcessOnlineStateChange()
 //
 void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin,
     CHsContentPublisher::TStartReason aReason )
-    {
-    __PRINTS( "CAiStateManager::StartPlugin" );
+    {    
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    __PRINT( __DBG_FORMAT( 
+        "CAiStateManager::StartPlugin: name: %S, reason: %d" ), &info.Name(), (TInt)aReason ); 
     
     aPlugin.Start( aReason );
     
     if ( iCurrentState == EAlive )
         {
-        aPlugin.Resume( CHsContentPublisher::EForeground );
+        __TIME( "CAiStateManager::StartPlugin, enter EAlive",
+                
+        aPlugin.Resume( CHsContentPublisher::EForeground ) );
         }
     else if ( iCurrentState == ESuspended )
         {
-        aPlugin.Suspend( CHsContentPublisher::EBackground );
+        __TIME( "CAiStateManager::StartPlugin, enter ESuspended",
+                
+        aPlugin.Suspend( CHsContentPublisher::EBackground ) );
         }    
     
     if ( iFlags.IsSet( EIsOnline ) )
         {
-        aPlugin.SetOnline();
+        __TIME( "CAiStateManager::StartPlugin, Set Online",
+            
+        aPlugin.SetOnline() );
         }
     else
         {
-        aPlugin.SetOffline();
+        __TIME( "CAiStateManager::StartPlugin, Set Offline",
+            
+        aPlugin.SetOffline() );
         }
+    
+    __PRINTS( "CAiStateManager::StartPlugin - done" );
     }
 
 // ----------------------------------------------------------------------------
@@ -542,14 +555,21 @@ void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin,
 void CAiStateManager::StopPlugin( CHsContentPublisher& aPlugin,
     CHsContentPublisher::TStopReason aReason )
     {
-    __PRINTS( "CAiStateManager::StopPlugin" );
-                
+    const THsPublisherInfo& info( aPlugin.PublisherInfo() );
+    
+    __PRINT( __DBG_FORMAT( 
+        "CAiStateManager::StopPlugin: name: %S, reason: %d" ), &info.Name(), (TInt)aReason ); 
+                      
     if ( iCurrentState == EAlive )
         {
-        aPlugin.Suspend( CHsContentPublisher::EBackground );
+        __TIME( "CAiStateManager::StopPlugin, enter ESuspended", 
+                
+        aPlugin.Suspend( CHsContentPublisher::EBackground ) );
         }
     
-    aPlugin.Stop( aReason );                    
+    aPlugin.Stop( aReason );   
+    
+    __PRINTS( "CAiStateManager::StopPlugin - done" );
     }
 
 // ----------------------------------------------------------------------------

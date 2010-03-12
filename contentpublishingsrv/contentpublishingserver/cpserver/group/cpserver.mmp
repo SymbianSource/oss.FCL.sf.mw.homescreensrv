@@ -51,6 +51,8 @@ LIBRARY 		estor.lib
 LIBRARY 		cputils.lib
 LIBRARY         cpstorage.lib
 LIBRARY		    inetprotutil.lib
+LIBRARY         MemMan.lib
+
 #ifdef CONTENT_PUBLISHER_DEBUG
 LIBRARY			cpdebug.lib
 #endif

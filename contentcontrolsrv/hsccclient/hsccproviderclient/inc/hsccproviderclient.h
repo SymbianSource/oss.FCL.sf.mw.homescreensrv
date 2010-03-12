@@ -106,84 +106,112 @@ private: // Functions
      * 
      */
     void HandleWidgetListReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleRegisterObserverNtfL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleUnregisterObserverNtfL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleAddWidgetReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleRemoveWidgetReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleViewListReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleAddViewReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleRemoveViewReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleActivateViewReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleActiveViewReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleAppListReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleActivateAppReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleActiveAppReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
      * 
      */
     void HandleNotSupportedReqL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
     /**
@@ -196,6 +224,8 @@ private: // Functions
      * 
      */
     void SendRespL(
+        TUint32 aSender,
+        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
 private: // Data

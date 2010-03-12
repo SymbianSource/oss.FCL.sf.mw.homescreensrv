@@ -90,8 +90,6 @@ public: // New functions
      *
      */
     void ReceiveMsgL(
-        TUint32 aSender,
-        TUint32 aReceiver,
         CCcSrvMsg& aMessage );
 
 private:

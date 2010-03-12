@@ -19,9 +19,13 @@
 #ifndef C_AIUIIDLEINTEGRATIONIMPL_H
 #define C_AIUIIDLEINTEGRATIONIMPL_H
 
-#include "aiuiidleintegration.h"
-#include <startupdomainpskeys.h>
+// System includes
+#include <e32property.h>
 
+// User includes
+#include "aiuiidleintegration.h"
+
+// Forward declarations
 class CActiveIdleState;
 class CAknIncallBubble;
 class MAiPSPropertyObserver;
@@ -32,7 +36,8 @@ class MAiFwEventHandler;
  */
 NONSHARABLE_CLASS( CAiUiIdleIntegrationImpl ) : public CAiUiIdleIntegration
     {
-public: // constructor and destructor
+public: 
+    // constructor and destructor
     
     static CAiUiIdleIntegrationImpl* NewL( CEikonEnv& aEikEnv,         
                 const TAiIdleKeySoundConfig& aKeySoundConfig,
@@ -40,49 +45,49 @@ public: // constructor and destructor
 
     ~CAiUiIdleIntegrationImpl();
 
-public: // new functions
+public: 
+    // new functions
         
     void HandleWsEventL( const TWsEvent& aEvent, 
                          CCoeControl* aDestination );
 
-private: // constructors
+private: 
+    // constructors
     
     CAiUiIdleIntegrationImpl(CEikonEnv& aEikEnv,
                              MAiFwEventHandler* aAiFwEventHandler);
     void ConstructL(const TAiIdleKeySoundConfig& aKeySoundConfig);
 
-private: // new functions
+private: 
+    // new functions
     
     void ActivateUI();
     
     void SetCallBubbleIfNeededL();
     void ClearCallBubbleL();
            
-    static TInt HandleSystemStateChange( TAny *aPtr );
-    static TInt HandleUiStartupStateChange( TAny *aPtr );
     static TInt HandleCallEvent( TAny *aPtr );
     
-private: // data  
+private: 
+    // data  
 
+    /**
+     * EikonEnv
+     * Not owned
+     */
     CEikonEnv& iEikEnv;  
+    
+    /**
+     * Active idle state
+     * Owned
+     */
     CActiveIdleState* iActiveIdleState;
-    TBool iThisApplicationForeground;
-    TBool iIncallBubbleAllowed;
-    TInt iThisApplicationWgId;
-    TInt iEikonServerWgId;
+        
+    /**
+     * Incall bubble
+     * Owned
+     */
     CAknIncallBubble* iIncallBubble;
-
-    /**
-     * Observer for system state Publish&Subscribe key.
-     * Owned.
-     */
-    MAiPSPropertyObserver* iSystemStateObserver;
-
-    /**
-     * Observer for system state Publish&Subscribe key.
-     * Owned.
-     */
-    MAiPSPropertyObserver* iUiStartupStateObserver;
 
     /**
     * Observer telephony state
@@ -95,10 +100,10 @@ private: // data
      */
     MAiFwEventHandler* iAiFwEventHandler;
     
-    TBool iSystemStateOk;
-    TBool iUiStartupPhaseOk;
+    TBool iForeground;
+    TBool iIncallBubbleAllowed;    
     };
-
 
 #endif // C_AIUIIDLEINTEGRATION_H
 
+// End of file

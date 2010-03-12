@@ -91,7 +91,7 @@ void CContentPublishingInterface::ProcessCommandL( const TDesC8& aCmdName,
     
     if ( aCmdName.CompareF( KExecuteAction ) == 0 )
        {
-       iCPClient->ExecuteActionL( aInParamList );
+       iCPClient->ExecuteActionL( aInParamList, aCmdOptions );
        }
    else
        {

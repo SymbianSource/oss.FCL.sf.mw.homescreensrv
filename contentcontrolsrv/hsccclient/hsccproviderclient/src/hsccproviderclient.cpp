@@ -102,12 +102,32 @@ CHsCcProviderClient::CHsCcProviderClient(
 void CHsCcProviderClient::RunL()
     {
     
-    if ( !iStatus.Int() )
+    TInt err( iStatus.Int() );
+    HBufC8* header( NULL );
+    TPtr8 headerPtr( NULL, 0 );
+    TUint32 sender( 0 );
+    TUint32 receiver( 0 );
+    if ( !err )
+        {
+        // Read API request header
+        header = iApiHeader->AllocL();
+        CleanupStack::PushL( header );
+        headerPtr.Set( header->Des() );
+        // Read sender
+        sender = iPckgSender();
+        // Read receiver
+        receiver = iPckgReceiver();
+        }
+    
+    // Receive next API request
+    WaitForApiReqL();
+
+    if ( !err )
         {
         // Get received message header
         CCcSrvMsg* message = CCcSrvMsg::NewL();
         CleanupStack::PushL( message );
-        RDesReadStream stream( iApiHeaderPtr );
+        RDesReadStream stream( headerPtr );
         CleanupClosePushL( stream );
         message->InternalizeHeaderL( stream );
         CleanupStack::PopAndDestroy( &stream );
@@ -127,54 +147,54 @@ void CHsCcProviderClient::RunL()
         switch ( message->MsgId() )
             {
             case ECcRegisterObserverNtf:
-                HandleRegisterObserverNtfL( *message );
+                HandleRegisterObserverNtfL( sender, receiver, *message );
                 break;
             case ECcUnregisterObserverNtf:
-                HandleUnregisterObserverNtfL( *message );
+                HandleUnregisterObserverNtfL( sender, receiver, *message );
                 break;
             case EHsCcWidgetListReq:
-                HandleWidgetListReqL( *message );
+                HandleWidgetListReqL( sender, receiver, *message );
                 break;
             case EHsCcAddWidgetReq:
-                HandleAddWidgetReqL( *message );
+                HandleAddWidgetReqL( sender, receiver, *message );
                 break;
             case EHsCcRemoveWidgetReq:
-                HandleRemoveWidgetReqL( *message );
+                HandleRemoveWidgetReqL( sender, receiver, *message );
                 break;
             case EHsCcViewListReq:
-                HandleViewListReqL( *message );
+                HandleViewListReqL( sender, receiver, *message );
                 break;
             case EHsCcAddViewReq:
-                HandleAddViewReqL( *message );
+                HandleAddViewReqL( sender, receiver, *message );
                 break;
             case EHsCcRemoveViewReq:
-                HandleRemoveViewReqL( *message );
+                HandleRemoveViewReqL( sender, receiver, *message );
                 break;
             case EHsCcActivateViewReq:
-                HandleActivateViewReqL( *message );
+                HandleActivateViewReqL( sender, receiver, *message );
                 break;
             case EHsCcAppListReq:
-                HandleAppListReqL( *message );
+                HandleAppListReqL( sender, receiver, *message );
                 break;
             case EHsCcActivateAppReq:
-                HandleActivateAppReqL( *message );
+                HandleActivateAppReqL( sender, receiver, *message );
                 break;
             case EHsCcActiveAppReq:
-                HandleActiveAppReqL( *message );
+                HandleActiveAppReqL( sender, receiver, *message );
                 break;
             case EHsCcActiveViewReq:
-                HandleActiveViewReqL( *message );
+                HandleActiveViewReqL( sender, receiver, *message );
                 break;
             default:
-                HandleNotSupportedReqL( *message );
+                HandleNotSupportedReqL( sender, receiver, *message );
                 break;
             }
         CleanupStack::PopAndDestroy( message );
         }
-    
-    // Receive next API request
-    WaitForApiReqL();
-    
+    if ( header )
+        {
+        CleanupStack::PopAndDestroy( header );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -255,6 +275,8 @@ void CHsCcProviderClient::WaitForApiReqL()
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleRegisterObserverNtfL(
+    TUint32 /* aSender */,
+    TUint32 /* aReceiver */,
     CCcSrvMsg& /* aMessage */ )
     {
     TUint32 observer = iPckgSender();
@@ -266,6 +288,8 @@ void CHsCcProviderClient::HandleRegisterObserverNtfL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleUnregisterObserverNtfL(
+    TUint32 /* aSender */,
+    TUint32 /* aReceiver */,
     CCcSrvMsg& /* aMessage */ )
     {
     TUint32 observer = iPckgSender();
@@ -284,12 +308,36 @@ void CHsCcProviderClient::HandleUnregisterObserverNtfL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleWidgetListReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
+    
+    TInt err( KErrNone );
     // Get widget list
     CHsContentInfoArray* widgets = CHsContentInfoArray::NewL();
     CleanupStack::PushL( widgets );
-    TInt err = iController.WidgetListL( *widgets );
+    
+    if ( aMessage.DataSize() )
+        {
+        // Internalize message data
+        RDesReadStream dataStream( aMessage.Data() );
+        CleanupClosePushL( dataStream );
+        CHsContentInfo* info = CHsContentInfo::NewL( dataStream );
+        CleanupStack::PopAndDestroy( &dataStream );
+        CleanupStack::PushL( info );
+
+        // Get list of widgets included in the defined 
+        // application configuration or view
+        err = iController.WidgetListL( *info, *widgets );
+        
+        CleanupStack::PopAndDestroy( info );        
+        }
+    else
+        {
+        // Get list of available widgets
+        err = iController.WidgetListL( *widgets );
+        }
 
     // Create and send WidgetListResp 
     CCcSrvMsg* message = CCcSrvMsg::NewL();
@@ -309,7 +357,7 @@ void CHsCcProviderClient::HandleWidgetListReqL(
         CleanupStack::PopAndDestroy( dataBuf );
         }
     
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     CleanupStack::PopAndDestroy( widgets );
@@ -321,6 +369,8 @@ void CHsCcProviderClient::HandleWidgetListReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleAddWidgetReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TInt err( KErrNone );
@@ -352,7 +402,7 @@ void CHsCcProviderClient::HandleAddWidgetReqL(
     message->SetStatus( err );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     }
@@ -362,6 +412,8 @@ void CHsCcProviderClient::HandleAddWidgetReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleRemoveWidgetReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TInt err( KErrNone );
@@ -393,7 +445,7 @@ void CHsCcProviderClient::HandleRemoveWidgetReqL(
     message->SetStatus( err );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     }
@@ -403,6 +455,8 @@ void CHsCcProviderClient::HandleRemoveWidgetReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleViewListReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     // Get view list
@@ -428,7 +482,7 @@ void CHsCcProviderClient::HandleViewListReqL(
         CleanupStack::PopAndDestroy( dataBuf );
         }
     
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     CleanupStack::PopAndDestroy( views );
@@ -440,6 +494,8 @@ void CHsCcProviderClient::HandleViewListReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleAddViewReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TInt err( KErrNone );
@@ -471,7 +527,7 @@ void CHsCcProviderClient::HandleAddViewReqL(
     message->SetStatus( err );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     }
@@ -481,6 +537,8 @@ void CHsCcProviderClient::HandleAddViewReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleRemoveViewReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TInt err( KErrNone );
@@ -512,7 +570,7 @@ void CHsCcProviderClient::HandleRemoveViewReqL(
     message->SetStatus( err );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     }
@@ -522,6 +580,8 @@ void CHsCcProviderClient::HandleRemoveViewReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleActivateViewReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TInt err( KErrNone );
@@ -553,7 +613,7 @@ void CHsCcProviderClient::HandleActivateViewReqL(
     message->SetStatus( err );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     }
@@ -563,6 +623,8 @@ void CHsCcProviderClient::HandleActivateViewReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleActiveViewReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     // Get active view
@@ -588,7 +650,7 @@ void CHsCcProviderClient::HandleActiveViewReqL(
         CleanupStack::PopAndDestroy( dataBuf );
         }
     
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     CleanupStack::PopAndDestroy( view );
@@ -600,6 +662,8 @@ void CHsCcProviderClient::HandleActiveViewReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleAppListReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     // Get app list
@@ -624,7 +688,7 @@ void CHsCcProviderClient::HandleAppListReqL(
         CleanupStack::PopAndDestroy( dataBuf );
         }
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     CleanupStack::PopAndDestroy( apps );
@@ -636,6 +700,8 @@ void CHsCcProviderClient::HandleAppListReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleActivateAppReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TInt err( KErrNone );
@@ -667,7 +733,7 @@ void CHsCcProviderClient::HandleActivateAppReqL(
     message->SetStatus( err );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     }
@@ -677,6 +743,8 @@ void CHsCcProviderClient::HandleActivateAppReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleActiveAppReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     // Get active application info
@@ -702,7 +770,7 @@ void CHsCcProviderClient::HandleActiveAppReqL(
         CleanupStack::PopAndDestroy( dataBuf );
         }
     
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
     CleanupStack::PopAndDestroy( app );
@@ -713,6 +781,8 @@ void CHsCcProviderClient::HandleActiveAppReqL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleNotSupportedReqL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     // Create and send NotSupportedResp
@@ -723,7 +793,7 @@ void CHsCcProviderClient::HandleNotSupportedReqL(
     message->SetStatus( KErrNone );
     message->SetData( KNullDesC8() );
 
-    SendRespL( *message );
+    SendRespL( aReceiver, aSender, *message );
     
     CleanupStack::PopAndDestroy( message );    
 
@@ -759,6 +829,8 @@ void CHsCcProviderClient::SendNtfL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::SendRespL(
+    TUint32 aSender,
+    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     HBufC8* msgBuf = aMessage.MarshalL();
@@ -767,7 +839,9 @@ void CHsCcProviderClient::SendRespL(
     msgPtr.Set( msgBuf->Des() );
 
     TPckgBuf<TUint32> provider( ECcHomescreen );
-    iSession.Send( ECcApiResp, provider, iPckgReceiver, iPckgSender, msgPtr  );
+    TPckgBuf<TUint32> sender( aSender );
+    TPckgBuf<TUint32> receiver( aReceiver );
+    iSession.Send( ECcApiResp, provider, sender, receiver, msgPtr  );
 
     CleanupStack::PopAndDestroy( msgBuf );    
     }

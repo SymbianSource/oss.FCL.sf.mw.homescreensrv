@@ -32,6 +32,7 @@ SOURCE      hspsdomattribute.cpp
 SOURCE      hspsdomlist.cpp
 SOURCE      hspsdomdepthiterator.cpp
 SOURCE      hspsdomstringpool.cpp
+SOURCE      hspsdomstringpooloptimizer.cpp
 
 USERINCLUDE . 
 USERINCLUDE ../inc

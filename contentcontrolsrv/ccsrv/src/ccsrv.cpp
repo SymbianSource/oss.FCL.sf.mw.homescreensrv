@@ -299,16 +299,14 @@ TUint32 CCcSrv::GetTrId()
 // -----------------------------------------------------------------------------
 //
 void CCcSrv::SendMsgL( 
-    TUint32 aSender,
-    TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
     TBool found( EFalse );
     for ( TUint32 i = 0; i < iSessions.Count() && !found; i++ )
         {
-        if ( iSessions[ i ]->Id() == aReceiver )
+        if ( iSessions[ i ]->Id() == aMessage.Receiver() )
             {
-            iSessions[ i ]->ReceiveMsgL( aSender, aReceiver, aMessage );
+            iSessions[ i ]->ReceiveMsgL( aMessage );
             found = ETrue;
             }
         }

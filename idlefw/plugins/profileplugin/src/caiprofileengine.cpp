@@ -20,6 +20,7 @@
 #include <w32std.h> 
 #include <ProEngFactory.h>
 #include <MProfileEngine.h>
+#include <MProfile.h>
 #include <MProEngEngine.h>
 #include <MProEngProfile.h>
 #include <MProEngProfileName.h>
@@ -124,7 +125,9 @@ void CAiProfileEngine::ConstructL()
     
     iProfileNotifier->RequestActiveProfileNotificationsL( *this );
     iProfileNotifier->RequestProfileNameArrayNotificationsL( *this );
-    iProfileNotifier->RequestProfileActivationNotificationsL( *this ); 
+    iProfileNotifier->RequestProfileActivationNotificationsL( *this );
+    
+    DetermineTimedAndSilentStatesL();
     }
     
 // ----------------------------------------------------------------------------
@@ -156,7 +159,30 @@ CAiProfileEngine::~CAiProfileEngine()
             
     iResourceLoader.Close();
     }
+
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::DetermineTimedAndSilentStatesL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiProfileEngine::DetermineTimedAndSilentStatesL()
+    {
+    iTimed = EFalse;
+    iSilent = EFalse;
     
+    MProfileEngine* engine = CreateProfileEngineL();
+                
+    iTimed = engine->IsActiveProfileTimedL();
+    
+    MProfile* profile = engine->ActiveProfileLC();
+    
+    iSilent = profile->IsSilent();
+    
+    CleanupStack::PopAndDestroy(); // profile
+    
+    engine->Release();    
+    }
+
 // ----------------------------------------------------------------------------
 // CAiProfileEngine::UpdateProfileNamesL()
 //
@@ -371,13 +397,7 @@ const TDesC& CAiProfileEngine::ProfileNameByIndex( TInt aIndex ) const
 //
 TBool CAiProfileEngine::IsActiveProfileSilentL() const
 	{
-    MProEngProfile* profile( iProfileEngine->ActiveProfileLC() );
-    	
-	TBool silent( profile->IsSilent() );
-	
-	CleanupStack::PopAndDestroy();
-	
-	return silent; 
+	return iSilent;
 	}
 
 // ----------------------------------------------------------------------------
@@ -387,15 +407,7 @@ TBool CAiProfileEngine::IsActiveProfileSilentL() const
 //
 TBool CAiProfileEngine::IsActiveProfileTimedL() const
 	{    
-    MProfileEngine* engine = CreateProfileEngineL();
-        
-    TBool retval( EFalse );
-    
-    TRAP_IGNORE( retval = engine->IsActiveProfileTimedL() );
-    
-    engine->Release();
-    
-    return retval;	
+    return iTimed;    
 	}
 
 // ----------------------------------------------------------------------------
@@ -622,6 +634,8 @@ void CAiProfileEngine::PhoneSettingChanged( TSSSettingsSetting aSetting,
 //
 void CAiProfileEngine::HandleActiveProfileModifiedL()
     {
+    DetermineTimedAndSilentStatesL();
+    
     NotifyContentUpdate();
     }
 
@@ -642,6 +656,8 @@ void CAiProfileEngine::HandleProfileNameArrayModificationL()
 //
 void CAiProfileEngine::HandleProfileActivatedL( TInt /*aProfileId*/ )
     {
+    DetermineTimedAndSilentStatesL();
+    
     NotifyContentUpdate();
     }
 

@@ -77,6 +77,8 @@ public:
                const TDesC8& aPropertyValue,  
                MAiContentObserver::TValueType aValueType);
 
+    void ClearBlackList();
+    
 private:
     CAiMultiContentObserver();
     void ConstructL();

@@ -196,7 +196,7 @@ void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustom
         }
         cba->DrawDeferred();
     }
-
+    iModel->UpdateSettingModelL( aCustomMessage);
     CGSBaseView::DoActivateL(aPrevViewId, aCustomMessageId, aCustomMessage);
     
     iModel->UpdateSettingsContainerL( aCustomMessage );

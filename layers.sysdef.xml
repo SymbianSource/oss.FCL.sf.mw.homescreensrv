@@ -23,6 +23,13 @@
 			</module>
 		</layer>
 		
+    <layer name="unit_test_layer">
+      <module name="homescreensrv_unit_tests">
+  			<unit unitID="hsdo.idlefw.test" name="idlefw.test" bldFile="&layer_real_source_path;/idlefw/Internal/tsrc/group" mrp="" />
+  			<unit unitID="hsdo.hsps.test" name="hsps.test" bldFile="&layer_real_source_path;/homescreensrv_plat/sapi_homescreenplugin/tsrc/group" mrp="" />
+      </module>
+    </layer>		
+		
 
   </systemModel>
 </SystemDefinition>

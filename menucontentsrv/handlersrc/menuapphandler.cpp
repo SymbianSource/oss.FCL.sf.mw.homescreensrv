@@ -18,6 +18,7 @@
 #include "mcsmenuitem.h"
 #include "menucompletedoperation.h"
 #include "menuuninstalloperation.h"
+#include "menutasklist.h"
 
 #include <mcsmenuutils.h>
 #include <w32std.h>
@@ -26,7 +27,6 @@
 #include <eikenv.h>
 #include <eikappui.h>
 #include <vwsdef.h>
-#include <AknTaskList.h>
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -158,9 +158,8 @@ void CMenuAppHandler::LaunchApplicationL( const TUid aUid, const TDesC8 &aParam,
     	User::LeaveIfError( wsSession.Connect() );
     	CleanupClosePushL<RWsSession>( wsSession );
     	
-    	TApaTaskList* taskList = new (ELeave) TApaTaskList( wsSession ); 
-        TApaTask task = taskList->FindApp( aUid );
-        
+        CMenuTaskList* taskList = CMenuTaskList::NewL( wsSession ); 
+        TApaTask task = taskList->FindRootApp( aUid );
         delete taskList;
 
         if ( task.Exists() )

@@ -19,6 +19,7 @@
 #define __INCLUDE_CAPABILITY_NAMES__
 
 // INCLUDE FILES
+#include <mw/memorymanager.h>
 #include <centralrepository.h>
 #include <f32file.h>
 #include <bautils.h>
@@ -179,6 +180,8 @@ static void RunServerL()
 //
 TInt E32Main()
     {
+    RAllocator* iAllocator = MemoryManager::SwitchToFastAllocator();
+    
     __UHEAP_MARK;
     CTrapCleanup* cleanup=CTrapCleanup::New();
     TInt r=KErrNoMemory;
@@ -188,6 +191,9 @@ TInt E32Main()
         delete cleanup;
         }
     __UHEAP_MARKEND;
+    
+    MemoryManager::CloseFastAllocator(iAllocator);
+    
     return r;
     }
     
@@ -398,6 +404,8 @@ ChspsThemeServer::~ChspsThemeServer()
     delete iLogBus;
     iLogBus = NULL;
 #endif    
+    
+    iSessions.Reset();
     }
 
 #ifdef _hsps_SERVER_SHUTDOWN_ENABLED_
@@ -489,9 +497,14 @@ CSession2* ChspsThemeServer::NewSessionL(const TVersion&,const RMessage2& aMessa
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void ChspsThemeServer::AddSession()
+void ChspsThemeServer::AddSession( ChspsThemeServerSession* aSession )
     {
-    iSessionCount++;
+    if( aSession == NULL )
+        {
+        return;
+        }
+    
+    iSessions.Append( aSession );    
 
 #ifdef _hsps_SERVER_SHUTDOWN_ENABLED_    
     if( iShutdown->IsActive() )
@@ -513,12 +526,16 @@ void ChspsThemeServer::AddSession()
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-void ChspsThemeServer::DropSession()
+void ChspsThemeServer::DropSession( ChspsThemeServerSession* aSession )
     {
-    iSessionCount--;
+    const TInt index = iSessions.Find( aSession );
+    if( index != KErrNotFound )
+        {
+        iSessions.Remove( index );
+        }
     
 #ifdef _hsps_SERVER_SHUTDOWN_ENABLED_    
-    if( iSessionCount == 0 )
+    if( iSessions.Count() == 0 )
         {
         iShutdown->Cancel();
         iShutdown->Start();
@@ -577,7 +594,20 @@ TBool ChspsThemeServer::HandleDefinitionRespositoryEvent( ThspsRepositoryInfo aR
 #ifdef HSPS_LOG_ACTIVE
     iLogBus->LogText( _L( "--------------------------------------------------------" ) );
 #endif        
-            
+
+    if( aRepositoryInfo.iEventType & EhspsODTUpdated ||
+        aRepositoryInfo.iEventType & EhspsODTModified ||
+        aRepositoryInfo.iEventType & EhspsPluginReplaced )
+        {
+        for( TInt i = 0; i < iSessions.Count(); i++ )
+            {
+            if( iSessions[i]->AppUid() == aRepositoryInfo.iAppUid )
+                {
+                iSessions[i]->SetResourceFileCopyRequired( ETrue );
+                }
+            }        
+        }    
+    
     // If header cache should be updated from files in the Plug-in Repository
     if (mask & EhspsCacheUpdate)
         {
@@ -3371,6 +3401,16 @@ void ChspsThemeServer::ValidateRestoredConfigurationL(
             {
             // Invalid configuration
             state.Set( KConfStateError );
+            // Delete related resource files
+            const TInt count = aOdt.ResourceCount();
+            for( TInt j( 0 ); j < count; j++ )
+                {
+                ChspsResource& resource = aOdt.ResourceL( j );
+                if( resource.ConfigurationUid() == uids[ i ] )
+                    {
+                    aOdt.DeleteResourceL( j );
+                    }
+                }
             }
         else if ( state.CompareF( KConfStateError ) != 0 )
             {

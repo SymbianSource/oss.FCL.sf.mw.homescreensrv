@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -21,6 +21,8 @@
 #include "ainetworkinfolistener.h"
 #include "ainetworkinfoobserver.h"
 #include "debug.h"
+#include <exterror.h>      // for KErrGsmMMNetworkFailure
+#include <featmgr.h>       // for FeatureManager
 
 const TInt KAiMessageCacheGranularity = 4;
 
@@ -39,7 +41,6 @@ void CAiNetworkInfoListener::ConstructL()
 
     //Create network handling engine session.
     iSession = CreateL( *this, iInfo );
-    
     iShowOpInd = EFalse;
     //Create message cache
     iMessageCache = new( ELeave )CArrayFixFlat
@@ -114,8 +115,7 @@ void CAiNetworkInfoListener::AddObserverL( MAiNetworkInfoObserver& aObserver )
         User::LeaveIfError( iObservers.Insert( &aObserver, freeSlot ) );
         }
     }
-    
-    
+
 void CAiNetworkInfoListener::RemoveObserver( MAiNetworkInfoObserver& aObserver )
     {
 	//Remove observer, removing is done by replacing it with NULL pointer.
@@ -162,24 +162,19 @@ void CAiNetworkInfoListener::HandleNetworkMessage( const TNWMessages aMessage )
         {
         err = KErrNone;
         }
-        
     if( err != KErrNone )
         {
-        return;        
+        return;
         }
 
 	iShowOpInd 		= !NotAllowedToDisplayOperatorIndicator( aMessage );
-	
-	
+
 	TBool hasNetInfoChanged = HasNetworkInfoChanged( aMessage );
-	
 	if ( !hasNetInfoChanged )
 		{
 		return;
 		}
-	
 	__PRINT(__DBG_FORMAT("XAI: Show operator indicator %d, info changed %d"), iShowOpInd, hasNetInfoChanged );
-	
     const TInt count( iObservers.Count() );
 
 
@@ -206,6 +201,9 @@ void CAiNetworkInfoListener::HandleNetworkMessage( const TNWMessages aMessage )
 void CAiNetworkInfoListener::HandleNetworkError( const TNWOperation aOperation, TInt aErrorCode )
     {
     __PRINT(__DBG_FORMAT("XAI: Error code %d"), aErrorCode );
+
+    TNWMessages errorCode = TNWMessages( KErrGeneral );
+
     switch ( aOperation )
         {
         case MNWMessageObserver::ENWGetNetworkProviderName:
@@ -228,14 +226,22 @@ void CAiNetworkInfoListener::HandleNetworkError( const TNWOperation aOperation, 
             iInfo.iPLMNField.Zero();
             __PRINTS("XAI: SPN error received");
             break;
+        case MNWMessageObserver::ENWNotifyNetworkRegistrationStatusChange:
+            if ( FeatureManager::FeatureSupported( KFeatureIdFfManualSelectionPopulatedPlmnList )
+                 && ( KErrGsmMMNetworkFailure == aErrorCode ) )
+                {
+                errorCode = static_cast<TNWMessages>( aErrorCode );
+                }
+            __PRINTS("XAI: ENWNotifyNetworkRegistrationStatusChange error received");
+
+        break;
         default:
             break;
         }
-    
-    HandleNetworkMessage( TNWMessages( KErrGeneral ) );
+
+    HandleNetworkMessage( errorCode );
     }
-    
-    
+
 TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMessages aMessage )
 	{
 	// Service provider name must have been fetched.
@@ -243,7 +249,8 @@ TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMes
     // Registration status and network information must have been received.
     // Operator name information must have been received.
     // Device must be camped to a network.
-	
+
+    TBool csAlphaFlag( EFalse );
 	switch ( aMessage )
     	{
         case MNWMessageObserver::ENWMessageNetworkInfoChange:
@@ -277,7 +284,24 @@ TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMes
             iReceivedMessageFlags &= 
                 ~( EProgrammableOperatorInfoReceived + 
                    EProgrammableOperatorInfoReceivedOk );
-            break;       
+            break;
+        case MNWMessageObserver::ENWMessageDynamicCapsChange:
+            TRAPD(fmerr, FeatureManager::InitializeLibL());
+            if ( fmerr == KErrNone )
+                {
+                if( FeatureManager::FeatureSupported( 
+                    KFeatureIdFfDisplayNetworkNameAfterCsRegistration ))
+                    {
+                    // CS flag is EFalse, alpha tag should not be shown.
+                    if ( !( RPacketService::KCapsRxCSCall & 
+                            iInfo.iDynamicCapsFlags ) )
+                        {
+                        csAlphaFlag = ETrue;
+                        }
+                    }
+                FeatureManager::UnInitializeLib();
+                }
+            break;
         default:
             break;
         }
@@ -298,7 +322,7 @@ TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMes
         !networkProviderNameFetched ||
         !( registrationStatusReceived && networkInformationReceived 
         	&& operatorNameInformationReceived ) ||
-        !currentNetworkOk;              
+        !currentNetworkOk || csAlphaFlag;
 	}
 
 
@@ -309,7 +333,9 @@ TBool CAiNetworkInfoListener::HasNetworkInfoChanged( const TNWMessages aMessage 
     // pass through
    	if ( aMessage == MNWMessageObserver::ENWMessageCurrentHomeZoneMessage 	||
    	 	 aMessage == MNWMessageObserver::ENWMessageNetworkConnectionFailure	||
-   	 	 aMessage == MNWMessageObserver::ENWMessageCurrentCellInfoMessage )
+   	 	 aMessage == MNWMessageObserver::ENWMessageCurrentCellInfoMessage ||
+   	 	 aMessage == static_cast<TNWMessages>( KErrGsmMMNetworkFailure )
+       )
    		{
    		return result;
    		}
@@ -337,6 +363,17 @@ TBool CAiNetworkInfoListener::HasNetworkInfoChanged( const TNWMessages aMessage 
                 iOldInfo.iServiceProviderNameDisplayReq ||
             iInfo.iNPName != iOldInfo.iNPName ||
             iInfo.iPLMNField != iOldInfo.iPLMNField;
+        TRAPD(fmerr, FeatureManager::InitializeLibL());
+        if ( fmerr == KErrNone )
+            {
+            if( FeatureManager::FeatureSupported( 
+                KFeatureIdFfDisplayNetworkNameAfterCsRegistration ))
+                {
+                    result = result || 
+                        iInfo.iDynamicCapsFlags != iOldInfo.iDynamicCapsFlags;
+                }
+            FeatureManager::UnInitializeLib();
+            }
         }
 
     iOldReceivedMessageFlags = iReceivedMessageFlags;

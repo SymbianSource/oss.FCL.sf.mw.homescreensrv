@@ -46,7 +46,7 @@ enum TCcSrvIPCFunctions
 // - Arg[1]:   Registered provider address (out), TUint32
 // - Arg[2]:   Not used
 // - Arg[2]:   Not used
-    ECcReqisterProvider = ECcIPCFunctionBase,
+    ECcReqisterProvider,
 // ----------------------------------------------------------------------------
 // RegisterObserver
 // ----------------------------------------------------------------------------
@@ -179,7 +179,7 @@ const TInt KCcHeaderSize = 16;
 // ----------------------------------------------------------------------------
 enum TCcSrvMessages
     {
-    ECcMessageBase = 0,
+    ECcMessageBase,
 // ----------------------------------------------------------------------------
 // RegisterObserverNtf
 // ----------------------------------------------------------------------------
@@ -190,7 +190,7 @@ enum TCcSrvMessages
 // - Message id:     EHsCcRegisterObserverNtf
 // - Transaction id: None
 // - Message data:   None
-    ECcRegisterObserverNtf = ECcMessageBase,
+    ECcRegisterObserverNtf,
 // ----------------------------------------------------------------------------
 // UnregisterObserverNtf
 // ----------------------------------------------------------------------------
@@ -256,6 +256,39 @@ public: // New functions
      * @param aMessage Pending request
      */
     IMPORT_C void SetMessage( RMessage2& aMessage );
+
+    /**
+     * Returns IPC function
+     */
+    IMPORT_C TInt Function();
+    
+    /**
+     * Stores IPC function
+     * @param aFunction IPC function
+     */
+    IMPORT_C void SetFunction( TInt aFunction );
+
+    /**
+     * Returns sender of the message
+     */
+    IMPORT_C TUint32 Sender();
+    
+    /**
+     * Stores sender of the message
+     * @param aSender Message sender
+     */
+    IMPORT_C void SetSender( TUint32 );
+
+    /**
+     * Returns receiver of the message
+     */
+    IMPORT_C TUint32 Receiver();
+    
+    /**
+     * Stores receiver of the message
+     * @param aReceiver Message receiver
+     */
+    IMPORT_C void SetReceiver( TUint32 );
 
     /**
      * Returns message id
@@ -342,6 +375,21 @@ private: // Data
      */
     RMessage2 iMessage;
 
+    /**
+     * IPC function
+     */
+    TInt iFunction;
+    
+    /**
+     * Sender
+     */
+    TUint32 iSender;
+    
+    /**
+     * Receiver
+     */
+    TUint32 iReceiver;
+    
     /**
      * Message id
      */
