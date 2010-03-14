@@ -19,18 +19,22 @@
 #ifndef AIDEVICESTATUSPLUGINENGINE_H
 #define AIDEVICESTATUSPLUGINENGINE_H
 
+// System includes
 #include <e32base.h>
-#include <aisystemuids.hrh>
 
+// User includes
+#include <aisystemuids.hrh>
 #include "aipublisherbroadcaster.h"
 #include "aidevicestatuspublisher.h"
 
+// Forward declarations
+class CHsContentPublisher;
+class MAiContentObserver;
+class MAiPublishPrioritizer;
+
+// Constants
 //device status plugin UI
 const TInt KImplUidDevStaPlugin = AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DEVSTAPLUGIN;
-
-class MAiContentObserver;
-class MAiPropertyExtension;
-class MAiPublishPrioritizer;
 
 
 /**
@@ -44,17 +48,20 @@ class MAiPublishPrioritizer;
  *
  *  @since S60 v3.2
  */
-class CAiDeviceStatusPluginEngine : public CBase, public MAiPublisherBroadcaster
+NONSHARABLE_CLASS( CAiDeviceStatusPluginEngine ) : public CBase, 
+    public MAiPublisherBroadcaster
     {
-
 public:
-
+    // constructor and destructor
+    
     static CAiDeviceStatusPluginEngine* NewL( MAiContentObserver& aObserver, 
-                                                MAiPropertyExtension& aExtension,
-                                                MAiPublishPrioritizer& aPrioritizer);
-
+        CHsContentPublisher& aExtension, MAiPublishPrioritizer& aPrioritizer );
+                                                
     virtual ~CAiDeviceStatusPluginEngine();
 
+public:
+    // new functions
+    
     /**
      * Resumes all publishers.
      */
@@ -77,27 +84,41 @@ public:
      */    
     TBool RefreshPublishersL( TInt aContentId, TBool aClean );
 
+    /**
+     * Suspends specific publishers.
+     * @param aContentId Indicates which publishers should suspend their 
+     *                  content.
+     * @param aClean Indicates if publishers should clean their content before
+     *                  suspend.
+     * @return ETrue if publisher informed that publish was successful.
+     */    
+    TBool SuspendPublishersL( TInt aContentId, TBool aClean );
+    
 
-public: // from MAiPublisherBroadcaster
+public: 
+    // from MAiPublisherBroadcaster
     
     TBool RefreshPriorizedPublishersL( TInt aContentId, TInt aPriority );
 
 
 private:
+    // constructors
 
     CAiDeviceStatusPluginEngine( MAiContentObserver& aObserver, 
-								    MAiPropertyExtension& aExtension,
-                                    MAiPublishPrioritizer& aPrioritizer);
-
+        CHsContentPublisher& aExtension, MAiPublishPrioritizer& aPrioritizer );
+                                    
     void ConstructL();
 
+private:
+    // new functions
+    
      /**
       * Add Device Status publisher.
       */
     void AddPublisherL( MAiDeviceStatusPublisher* aPublisher );
 
-
-private: // data
+private: 
+    // data
 
     /**
      * Array of publishers.
@@ -115,7 +136,7 @@ private: // data
      * Property extension.
      * Not own.
      */
-    MAiPropertyExtension* iExtension;
+    CHsContentPublisher* iExtension;
 
 	/**
 	 * Content prioritizer.
@@ -125,3 +146,5 @@ private: // data
     };
 
 #endif // AIDEVICESTATUSPLUGINENGINE_H
+
+// End of file

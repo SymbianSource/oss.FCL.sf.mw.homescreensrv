@@ -55,8 +55,6 @@
 // Directory for the SISX installation files
 _LIT( KImportDirectoryC, "c:\\private\\200159c0\\import\\" );
 
-// Directory for the ROM based installation files
-
 // Directories for backup folders
 _LIT( KBackupThemesDirectoryC, "c:\\private\\200159c0\\backup\\themes\\" );
 
@@ -2580,6 +2578,47 @@ TInt ChspsThemeServer::GetConfigurationL(
 	}
 
 // -----------------------------------------------------------------------------
+// ChspsThemeServer::InstallUDAWidgetsL()
+// -----------------------------------------------------------------------------
+//
+void ChspsThemeServer::InstallUDAWidgetsL()
+    {
+    //Get list of uda dir's
+    TPtrC filter( KFilterAllPluginImportsV1 );
+    CDir* importDir( NULL );           
+    TFindFile fileFinder( iFsSession );
+    fileFinder.FindWildByDir( filter, KImportDirectoryC, importDir );    
+    CleanupStack::PushL( importDir );
+    
+    if ( importDir && importDir->Count() > 0 )
+        {
+        CHSPSInstaller* installer = CHSPSInstaller::NewL( *this );
+        CleanupStack::PushL( installer );
+        
+        for ( TInt i = 0; i < importDir->Count(); i++ )
+            {
+            TPtrC udaName( (*importDir)[i].iName );
+            // Get manifest path
+            HBufC* manifestBuf = GetManifestFromImportLC( 
+                    udaName, 
+                    KImportDirectoryC );
+            
+            //install
+            TRAPD( err, installer->InstallConfigurationL( *manifestBuf ) );
+#ifdef HSPS_LOG_ACTIVE            
+            if ( err != KErrNone )
+                {
+                iLogBus->LogText( _L( "ChspsThemeServer::InstallUDAWidgetsL(): - Installation failed" ) );
+                }
+#endif
+            CleanupStack::PopAndDestroy( manifestBuf );
+            }
+        CleanupStack::PopAndDestroy( installer );
+        }
+    CleanupStack::PopAndDestroy( importDir ); 
+    }
+
+// -----------------------------------------------------------------------------
 // ChspsThemeServer::HandleRomInstallationsL()
 // -----------------------------------------------------------------------------
 //
@@ -2615,6 +2654,9 @@ void ChspsThemeServer::HandleRomInstallationsL()
         // Install manifest files from ROM
         InstallManifestsFromRomDriveL();
 
+        // install widgets from UDA image
+        InstallUDAWidgetsL();
+        
         // Post RFS installations have been done, prevent re-installations at next startup
         // by reading firmware version and saving it to cenrep.
         GetFWVersion( fwVersion );

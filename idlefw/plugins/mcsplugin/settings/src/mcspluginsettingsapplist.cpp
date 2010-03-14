@@ -43,6 +43,10 @@ _LIT( KInitialRefCount, "1" );
 _LIT( KMCSFolder, "mcsplugin_folder" );
 _LIT8( KItemLocked, "locked");
 _LIT8( KProperValueFolder, "folder" );
+_LIT( KMenuAttrUndefUid, "0x99999991" );
+_LIT( KMenuItemLongName, "long_name" );
+
+#define KMCSCmailMtmUidValue 0x2001F406
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -67,6 +71,48 @@ void CMCSPluginSettingsAppList::ConstructL()
     iSaveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
     iUpdateWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
     iRemoveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
+    
+    // Get "Undefined" icon and text
+    CMenuFilter* filter = CMenuFilter::NewL();
+    CleanupStack::PushL( filter );
+
+    // 'Undefined' item
+    filter->HaveAttributeL( KMenuAttrUid, KMenuAttrUndefUid );
+
+    TMenuItem item;
+    const TInt root = iMenu.RootFolderL();
+    RArray<TMenuItem> items;
+    CleanupClosePushL( items );
+    iMenu.GetItemsL( items, root, filter, ETrue );
+    TMenuItem undefItem;
+
+    if ( items.Count() > 0 )
+        {
+        undefItem = items[ 0 ];
+        CMenuItem* undefinedItem = CMenuItem::OpenL( iMenu, undefItem );
+        iUndefinedText = NULL;
+
+        if ( undefinedItem )
+            {
+            TBool exists( KErrNotFound );
+            CleanupStack::PushL( undefinedItem );
+            TPtrC undefined = undefinedItem->GetAttributeL( KMenuItemLongName, exists );
+
+            if ( exists )
+                {
+                iUndefinedText = HBufC::NewMaxL( undefined.Length() );
+                iUndefinedText->Des().Copy( undefined );
+                }
+            else
+                {
+                iUndefinedText = KNullDesC().Alloc();
+                }
+            CleanupStack::PopAndDestroy( undefinedItem );
+            }
+        }
+
+    CleanupStack::PopAndDestroy( &items );
+    CleanupStack::PopAndDestroy( filter );
     }
 
 // ---------------------------------------------------------------------------
@@ -96,6 +142,11 @@ CMCSPluginSettingsAppList::~CMCSPluginSettingsAppList()
     delete iUpdateWatcher;
     delete iRemoveWatcher;
     
+    if ( iUndefinedText )
+        {
+        delete iUndefinedText;
+        iUndefinedText = NULL;
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -115,14 +166,15 @@ TInt CMCSPluginSettingsAppList::MdcaCount() const
 //
 TPtrC CMCSPluginSettingsAppList::MdcaPoint( TInt aIndex ) const
     {
-    if (aIndex < 0 || aIndex >= iListItems.Count())
+    if ( aIndex < 0 || aIndex >= iListItems.Count() )
         {
-        TPtrC ret(KNullDesC);
+        TPtrC ret( KNullDesC );
         return ret;
         }
-    CMenuItem* item = iListItems[aIndex];
+    CMenuItem* item = iListItems[ aIndex ];
+
     TBool attrExists;
-    TPtrC itm; 
+    TPtrC itm;
     TRAP_IGNORE( 
         itm.Set( item->GetAttributeL( KMenuAttrLongName, attrExists ) );
         )
@@ -366,15 +418,16 @@ void CMCSPluginSettingsAppList::AddStaticItemsL()
         TPtrC type = itemArray[ i ].Type();
         
         // we add applications, shortcuts and folders to the list
-        if ( type == KMenuTypeApp || type == KMenuTypeShortcut || 
+        if ( type == KMenuTypeApp || 
+             type == KMenuTypeShortcut || 
              type == KMenuTypeFolder )
             {
             CMenuItem* menuItem = CMenuItem::OpenL( iMenu, itemArray[ i ] );
             CleanupStack::PushL( menuItem );
 
             // only non-hidden and non-missing items should be offered to the user
-            if ( ( menuItem->Flags() & TMenuItem::EHidden ) == EFalse &&
-                 ( menuItem->Flags() & TMenuItem::EMissing ) == EFalse )
+            if ( ( menuItem->Flags() & TMenuItem::EHidden ) == 0 &&
+                 ( menuItem->Flags() & TMenuItem::EMissing ) == 0 )
                 {
                 User::LeaveIfError( iListItems.InsertInOrderAllowRepeats( menuItem, sortMethod ) );
                 CleanupStack::Pop( menuItem );
@@ -398,7 +451,7 @@ void CMCSPluginSettingsAppList::AddStaticItemsL()
 //
 CMsvEntry* CMCSPluginSettingsAppList::GetRootEntryL()
     {
-    return iMsvSession->GetEntryL(KMsvRootIndexEntryIdValue);
+    return iMsvSession->GetEntryL( KMsvRootIndexEntryIdValue );
     }
 
 // ---------------------------------------------------------------------------
@@ -413,14 +466,22 @@ void CMCSPluginSettingsAppList::AddMailboxesL()
     CleanupStack::PushL(rootEntry);
     TBuf<255> mailboxId;
     
-    for ( TInt i = rootEntry->Count() - 1; i >= 0; --i )
+    TInt cnt = rootEntry->Count();
+    if ( cnt > 0 )
         {
-        const TMsvEntry& tentry = (*rootEntry)[i];
-
-        if (tentry.iMtm == KSenduiMtmImap4Uid || tentry.iMtm == KSenduiMtmPop3Uid)
+        rootEntry->SetSortTypeL( TMsvSelectionOrdering( 
+            KMsvGroupByType | KMsvGroupByStandardFolders, 
+            EMsvSortByDetailsReverse, ETrue ) );
+    
+        for ( TInt i = rootEntry->Count(); --i >= 0; )
             {
-            mailboxId.Num( tentry.Id() );  
-            AddMailboxL( tentry.iDetails, mailboxId );
+            const TMsvEntry& tentry = (*rootEntry)[i];
+    
+            if (tentry.iMtm.iUid == KMCSCmailMtmUidValue )
+                {
+                mailboxId.Num( tentry.Id() );  
+                AddMailboxL( tentry.iDetails, mailboxId );
+                }
             }
         }
     CleanupStack::PopAndDestroy(rootEntry);

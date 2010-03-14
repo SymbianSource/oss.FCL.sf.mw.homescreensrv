@@ -19,13 +19,16 @@
 #ifndef C_AIMULTICONTENTOBSERVER_H
 #define C_AIMULTICONTENTOBSERVER_H
 
-
+// System includes
 #include <e32base.h>
-#include "aicontentobserver.h"
 
+// User includes
+#include "aicontentobserver.h"
 
 // Forward declarations
 class CAiContentObserverOptimizer;
+class CHsContentPublisher;
+
 /**
  *  @ingroup group_devicestatusplugin
  *
@@ -34,9 +37,8 @@ class CAiContentObserverOptimizer;
  * @see MAiContentObserver
  * @since S60 3.2
  */
-class CAiMultiContentObserver : 
-        public CBase,
-        public MAiContentObserver
+NONSHARABLE_CLASS( CAiMultiContentObserver ) : public CBase,         
+    public MAiContentObserver
     {
 public:
     static CAiMultiContentObserver* NewL();
@@ -51,25 +53,25 @@ public:
     TInt StartTransaction( TInt aTxId );
     TInt Commit( TInt aTxId );
     TInt CancelTransaction( TInt aTxId );
-    TBool CanPublish( MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex );
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TBool CanPublish( CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex );
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   TInt aResource, TInt aIndex );
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   const TDesC16& aText, TInt aIndex );
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   const TDesC8& aBuf, TInt aIndex );
-    TInt Publish( MAiPropertyExtension& aPlugin, TInt aContent,
+    TInt Publish( CHsContentPublisher& aPlugin, TInt aContent,
                   RFile& aFile, TInt aIndex );
-    TInt Clean( MAiPropertyExtension& aPlugin, TInt aContent, TInt aIndex );
+    TInt Clean( CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex );
     TAny* Extension( TUid aUid );
-    TBool RequiresSubscription( const TAiPublisherInfo& aPublisherInfo ) const;
+    TBool RequiresSubscription( const THsPublisherInfo& aPublisherInfo ) const;
 
-    TInt SetProperty( MAiPropertyExtension& aPlugin,
+    TInt SetProperty( CHsContentPublisher& aPlugin,
                const TDesC8& aElementId,
                const TDesC8& aPropertyName,
                const TDesC8& aPropertyValue );
        
-    TInt SetProperty( MAiPropertyExtension& aPlugin,
+    TInt SetProperty( CHsContentPublisher& aPlugin,
                const TDesC8& aElementId,
                const TDesC8& aPropertyName,
                const TDesC8& aPropertyValue,  

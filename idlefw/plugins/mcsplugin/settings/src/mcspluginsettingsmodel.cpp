@@ -84,7 +84,9 @@ TPtrC CMCSPluginSettingsModel::ListBoxLineL( const TDesC& aCaption, TInt aIndex 
    TInt formatLength = KSettingListboxLineFormat().Length();
 
    HBufC* listBoxLine =
-       HBufC::NewLC(title->Length() + caption.Length() + formatLength);
+       HBufC::NewLC( title->Length() + 
+                     caption.Length() + 
+                     formatLength );
 
    TPtr ptr = listBoxLine->Des();
    ptr.Format(KSettingListboxLineFormat, title, &caption);
@@ -198,11 +200,11 @@ TSettingItem CMCSPluginSettingsModel::ItemL(
     TSettingItem setting = { KErrNotFound, EApplication , EFalse };
 
     TSettingType type = SettingTypeL( aProperties );
-    if( type == EApplication )
+    if ( type == EApplication )
         {
         setting = iAppList->FindItemL( aProperties );
         }
-    else if( type == EBookmark )
+    else if ( type == EBookmark )
         {
         setting = iBkmList->FindItemL( aProperties );
         }
@@ -394,7 +396,7 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                 }
             }
         }
- // ETrue tells that modified settings are stored also to plugin reference
+    // ETrue tells that modified settings are stored also to plugin reference
     iPluginSettings->SetSettingsL( *iPluginId, settingItems, ETrue );
     CleanupStack::Pop( &settingItems );
     settingItems.ResetAndDestroy();
@@ -459,10 +461,23 @@ TPtrC CMCSPluginSettingsModel::MdcaPoint( TInt aIndex ) const
     }
     if ( iSettings[aIndex].type == EApplication )
         {
-        const TDesC& caption = iAppList->MdcaPoint( iSettings[aIndex].id );
-        TPtrC line; 
-        TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
-        return line; 
+        // first, we need to check if the item is missing 
+        // (application unistaled or mmc card removed)
+        // If it is, we return "Undefined" application name instead
+        if ( iSettings[ aIndex ].id == KErrNotFound )
+            {
+            const TDesC& caption = iAppList->iUndefinedText->Des();
+            TPtrC line; 
+            TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
+            return line; 
+            }
+        else
+            {
+            const TDesC& caption = iAppList->MdcaPoint( iSettings[ aIndex ].id );
+            TPtrC line; 
+            TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
+            return line; 
+            }
         }
     else
         {

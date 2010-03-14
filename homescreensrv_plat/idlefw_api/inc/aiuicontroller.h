@@ -16,22 +16,25 @@
 */
 
 
-#ifndef C_AIUICONTROLLER_H
-#define C_AIUICONTROLLER_H
+#ifndef _AIUICONTROLLER_H
+#define _AIUICONTROLLER_H
 
+// System includes
 #include <ecom/ecom.h>
+
+// User includes
 #include "aicontentmodel.h"
-#include "aifwdefs.h"
 #include "aiuicontrolleruid.hrh"
 #include "aipluginsettings.h"
 
+// Forward declarations
 class MAiContentObserver;
 class MAiFwEventHandler;
-class MAiUiFrameworkObserver;
-class CCoeEnv;
-class CAiContentPublisher;
+class MAiFwStateHandler;
 class MAiMainUiController;
 class MAiSecondaryUiController;
+class THsPublisherInfo;
+class CCoeEnv;
 
 /**
  * ECom interface UID for CAiUiContoller
@@ -46,8 +49,7 @@ const TUid KInterfaceUidUiController = { AI_UID_ECOM_INTERFACE_UICONTROLLER };
 class CAiUiController : public CBase
     {
 public:
-
-// Constructors and destructor
+    // Constructors and destructor
 
     /**
      * Static factory method.
@@ -56,7 +58,7 @@ public:
      * @param ECom implementatoin uid
      * @return class instance
      */
-    inline static CAiUiController* NewL(TUid aImpUid);
+    inline static CAiUiController* NewL( TUid aImpUid );
 
     /**
      * Static factory method.
@@ -65,14 +67,15 @@ public:
      * @param mimetype
      * @return class instance
      */
-    inline static CAiUiController* NewL(const TDesC8& aMime);
+    inline static CAiUiController* NewL( const TDesC8& aMime );
 
     /**
      * Destructor.
      */
-    inline virtual ~CAiUiController();
+    inline ~CAiUiController();
 
-// New functions
+public:
+    // New functions
 
     /**
      * Instructs this UI controller to load its UI definition.
@@ -82,22 +85,15 @@ public:
     virtual void LoadUIDefinitionL() = 0;
 
     /**
-     * Retrieves the Content Publisher Plug-in list defined in this UI 
-     * controller's UI model.
-     *
-     * @since Series 60 3.2
-     */
-    virtual void GetPluginsL(RAiPublisherInfoArray& aPlugins) = 0;
-
-    /**
      * Retrieves plug-in settings specified in this UI controller's UI definition.
      *
-     * @param aPubInfo      Publisher info of the plug-in for which to 
-     *                      retrieve settings for.
+     * @param aPublisherInfo Publisher info of the plug-in for which to 
+     *                       retrieve settings for.
      * @param aSettings array to get settings items to.
      */
-    virtual void GetSettingsL(const TAiPublisherInfo& aPubInfo, 
-    							RAiSettingsItemArray& aSettings) = 0;
+    virtual void GetSettingsL( 
+        const THsPublisherInfo& aPublisherInfo, 
+        RAiSettingsItemArray& aSettings ) = 0;
 
     /**
      * Activate UI managed by this UI controller.
@@ -122,15 +118,16 @@ public:
      *                      Set to NULL to disable event callbacks from this
      *                      UI Controller.
      */
-    virtual void SetEventHandler(MAiFwEventHandler& aEventHandler) = 0;
+    virtual void SetEventHandler( MAiFwEventHandler& aEventHandler ) = 0;
     
     /**
-     * Remove specified plugin from the UI.
-     *
-     * @param aPlugin plugin that is removed.
-     */     
-    virtual void RemovePluginFromUI( MAiPropertyExtension& aPlugin ) = 0;
-
+     * Sets plugin state handler
+     * 
+     * @since S60 5.2
+     * @param aHandler Plugin State Handler     
+     */
+    virtual void SetStateHandler( MAiFwStateHandler& aStateHandler ) = 0; 
+    
     /**
      * Returns the main UI Controller interface, or NULL if this is not the 
      * main UI controller.
@@ -143,32 +140,49 @@ public:
      */
     virtual MAiSecondaryUiController* SecondaryInterface() = 0;   
     
-private:     // Data
+private:
+    // data
 
-    TUid iDestructKey; // An identifier used during destruction
-
+    /** An identifier used during destruction */
+    TUid iDestructKey; 
     };
 
-inline CAiUiController* CAiUiController::NewL(TUid aImplUid)
+// ----------------------------------------------------------------------------
+// CAiUiController::NewL
+//
+// ----------------------------------------------------------------------------
+//
+inline CAiUiController* CAiUiController::NewL( TUid aImplUid )
     {
-    TAny* ptr = REComSession::CreateImplementationL(aImplUid,
-        _FOFF(CAiUiController, iDestructKey));
+    TAny* ptr = REComSession::CreateImplementationL( aImplUid,
+        _FOFF( CAiUiController, iDestructKey ) );
 
-    return reinterpret_cast<CAiUiController*> (ptr);
+    return reinterpret_cast< CAiUiController* >( ptr );
     }
 
-inline CAiUiController* CAiUiController::NewL(const TDesC8& aMime)
+// ----------------------------------------------------------------------------
+// CAiUiController::NewL
+//
+// ----------------------------------------------------------------------------
+//
+inline CAiUiController* CAiUiController::NewL( const TDesC8& aMime )
     {
     TEComResolverParams params;
-    params.SetDataType(aMime);
-    TAny* ptr = REComSession::CreateImplementationL(KInterfaceUidUiController,
-        _FOFF(CAiUiController, iDestructKey), params);
-    return reinterpret_cast<CAiUiController*> (ptr);
+    params.SetDataType( aMime );
+    TAny* ptr = REComSession::CreateImplementationL( KInterfaceUidUiController,
+        _FOFF( CAiUiController, iDestructKey ), params );
+    
+    return reinterpret_cast< CAiUiController* >( ptr );
     }
 
+// ----------------------------------------------------------------------------
+// CAiUiController::~CAiUiController
+//
+// ----------------------------------------------------------------------------
+//
 inline CAiUiController::~CAiUiController()
     {
-    REComSession::DestroyedImplementation(iDestructKey);
+    REComSession::DestroyedImplementation( iDestructKey );
     }
 
 
@@ -181,6 +195,8 @@ inline CAiUiController::~CAiUiController()
 class MAiMainUiController
     {
 public:
+    // new functions
+    
     /**
      * Starts application framework and application event loop.
      * This function returns only when the application is shut down.
@@ -194,12 +210,7 @@ public:
      * Returns the CONE environment object this main UI controller uses.
      */
     virtual CCoeEnv& CoeEnv() = 0;
-    
-    /**
-     * Sets UI framework observer for this main UI controller.
-     */
-    virtual void SetUiFrameworkObserver( MAiUiFrameworkObserver& aObserver ) = 0; 
-    
+        
     /**
     * Exits the main ui controller
     **/
@@ -220,21 +231,16 @@ public:
 class MAiSecondaryUiController
     {
 public:
+    // new functions
+    
     /**
      * Sets the CONE environment object for this secondary UI controller to use.
      *
      * @param aCoeEnv the CONE environment object to use.
      */
-    virtual void SetCoeEnv( CCoeEnv& aCoeEnv ) = 0;
-    
-    /**
-     * Returns the UI framework observer of this secondary UI controller.
-     *
-     * @return The UI framework observer, or NULL if observer is not supported.
-     */
-    virtual MAiUiFrameworkObserver* UiFrameworkObserver() = 0; 
+    virtual void SetCoeEnv( CCoeEnv& aCoeEnv ) = 0;    
     };
 
-#endif // C_AIUICONTROLLER_H
+#endif // _AIUICONTROLLER_H
 
 // End of File.

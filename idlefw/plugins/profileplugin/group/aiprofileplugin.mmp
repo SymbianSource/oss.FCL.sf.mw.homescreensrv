@@ -51,6 +51,7 @@ LIBRARY         cone.lib
 LIBRARY         ecom.lib
 LIBRARY         aiutils.lib
 LIBRARY         sssettings.lib
+LIBRARY         profileengine.lib 
 LIBRARY         profileeng.lib
 LIBRARY         bafl.lib
 LIBRARY         avkon.lib

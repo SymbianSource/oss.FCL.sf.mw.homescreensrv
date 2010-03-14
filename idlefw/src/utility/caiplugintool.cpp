@@ -15,14 +15,29 @@
 *
 */
 
+// System includes
 
-#include <aicontentpublisher.h>
+// User includes 
+#include <hscontentpublisher.h>
+
 #include "caiplugintool.h"
 
+// ======== MEMBER FUNCTIONS ========
+
+// ----------------------------------------------------------------------------
+// CAiPluginTool::CAiPluginTool
+//
+// ----------------------------------------------------------------------------
+//
 CAiPluginTool::CAiPluginTool()
     {
     }
 
+// ----------------------------------------------------------------------------
+// CAiPluginTool::NewL
+//
+// ----------------------------------------------------------------------------
+//
 CAiPluginTool* CAiPluginTool::NewL()
     { 
     CAiPluginTool* self = new ( ELeave ) CAiPluginTool();
@@ -32,59 +47,37 @@ CAiPluginTool* CAiPluginTool::NewL()
     return self;
     }
 
+// ----------------------------------------------------------------------------
+// CAiPluginTool::ConstructL
+//
+// ----------------------------------------------------------------------------
+//
 void CAiPluginTool::ConstructL()
     {
     }
 
+// ----------------------------------------------------------------------------
+// CAiPluginTool::Release
+//
+// ----------------------------------------------------------------------------
+//
 void CAiPluginTool::Release()
     {
     delete this;
     }
-    
-const TAiPublisherInfo* CAiPluginTool::PublisherInfoL(
-                                        CAiContentPublisher& aContentPublisher )
-    {
-    const TAiPublisherInfo* result = NULL;
-    MAiPropertyExtension* propExt = PropertyExt( aContentPublisher );
-    if ( propExt )
-        {
-        result = propExt->PublisherInfoL();
-        }
-    return result;
-    }
-    
-MAiContentItemIterator* CAiPluginTool::ContentItemIteratorL(
-                                        CAiContentPublisher& aContentPublisher,
-                                        TInt aContentType )
-    {
-    MAiContentItemIterator* result = NULL;
-    MAiPropertyExtension* propExt = PropertyExt( aContentPublisher );
-    if ( propExt )
-        {
-        TAny* prop = NULL;
-        prop = propExt->GetPropertyL( aContentType );
-        if ( prop )
-            {
-            result = static_cast<MAiContentItemIterator*>( prop );
-            }
-        }
-    return result;
-    }
-    
-MAiPropertyExtension* CAiPluginTool::PropertyExt(
-                                        CAiContentPublisher& aContentPublisher )
-    {
-    return static_cast<MAiPropertyExtension*>(
-                        aContentPublisher.Extension( KExtensionUidProperty ) );
-    }
 
-MAiEventHandlerExtension* CAiPluginTool::EventHandlerExt(
-                                        CAiContentPublisher& aContentPublisher )
+// ----------------------------------------------------------------------------
+// CAiPluginTool::ContentItemIterator
+//
+// ----------------------------------------------------------------------------
+//
+MAiContentItemIterator* CAiPluginTool::ContentItemIterator(
+    CHsContentPublisher& aContentPublisher,
+    CHsContentPublisher::TProperty aType )
     {
-    return static_cast<MAiEventHandlerExtension*>(
-                        aContentPublisher.Extension( KExtensionUidEventHandler ) );
+    return static_cast< MAiContentItemIterator* >( 
+        aContentPublisher.GetProperty( aType ) );
     }
-
+    
  // End of File.
-
 

@@ -16,16 +16,15 @@
 */
 
 
-// INCLUDE FILES
-#include "caiprofileengine.h"
-#include "maiprofilepluginnotifier.h"
-#include "aiprofileplugincontentmodel.h"
-
+// System includes
 #include <w32std.h> 
+#include <ProEngFactory.h>
 #include <MProfileEngine.h>
-#include <MProfile.h>
-#include <MProfilesNamesArray.h>
-#include <MProfileName.h>
+#include <MProEngEngine.h>
+#include <MProEngProfile.h>
+#include <MProEngProfileName.h>
+#include <MProEngProfileNameArray.h>
+#include <MProEngNotifyHandler.h>
 #include <Profile.hrh>
 #include <CProfileChangeNotifyHandler.h>
 #include <PUAcodes.hrh> 
@@ -36,12 +35,15 @@
 #include <AknQueryDialog.h>
 #include <aknnotewrappers.h>
 #include <RSSSettings.h>
-
-
-#include <aiprofilepluginres.rsg>
-
 #include <startupdomainpskeys.h>
 
+// User includes
+#include <aiprofilepluginres.rsg>
+#include "caiprofileengine.h"
+#include "maiprofilepluginnotifier.h"
+#include "aiprofileplugincontentmodel.h"
+
+// Constants
 const TInt KMaxProfileNameLength( 64 );
 const TInt KGeneralProfileId( 0 );
 const TInt KSilentProfileId( 1 );
@@ -53,35 +55,41 @@ const TUid KProfileAppSettingViewId = { 2 };
 
 _LIT( KAiProfilePluginResourceFileName, "z:aiprofilepluginres.rsc");
 
-// ============================ MEMBER FUNCTIONS ===============================
-// ---------------------------------------------------------
-// Default constructor
-// ---------------------------------------------------------
+// ============================ MEMBER FUNCTIONS ==============================
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::CAiProfileEngine
 //
-CAiProfileEngine::CAiProfileEngine( MAiProfilePluginNotifier* aProfilePluginNotifier ) :
-    iProfilePluginNotifier ( aProfilePluginNotifier ),
+// ----------------------------------------------------------------------------
+//
+CAiProfileEngine::CAiProfileEngine( 
+    MAiProfilePluginNotifier* aProfilePluginNotifier )
+    : iProfilePluginNotifier ( aProfilePluginNotifier ),    
     iResourceLoader( *CCoeEnv::Static() )
     {
     }
     
-// ---------------------------------------------------------
-// Two-phased constructor.
-// Create instance of concrete ECOM interface implementation
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::NewL
+// 
+// ----------------------------------------------------------------------------
 //
-CAiProfileEngine* CAiProfileEngine::NewL( MAiProfilePluginNotifier* aProfilePluginNotifier )
+CAiProfileEngine* CAiProfileEngine::NewL( 
+    MAiProfilePluginNotifier* aProfilePluginNotifier )
     {
-    CAiProfileEngine* self = new( ELeave ) CAiProfileEngine( aProfilePluginNotifier );
+    CAiProfileEngine* self = 
+        new( ELeave ) CAiProfileEngine( aProfilePluginNotifier );
     CleanupStack::PushL( self );
+    
     self->ConstructL();
     CleanupStack::Pop( self );
 
     return self;
     }
 
-// ---------------------------------------------------------
-// Symbian 2nd phase constructor can leave
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::ConstructL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::ConstructL()
     {
@@ -97,87 +105,120 @@ void CAiProfileEngine::ConstructL()
     
     User::LeaveIfError( iSSSettings.Open() );
 
-    iProfileEngine = CreateProfileEngineL();    
-   }
+    // Register to listen ALS activation, if ALS status changes,
+    // profile must be republished.
+    TInt err( iSSSettings.Register( ESSSettingsAls, *this ) );
+        
+    if( err == KErrNotSupported || err == KErrAlreadyExists )
+        {
+        // ALS not supported or already registered, that's fine
+        err = KErrNone;
+        }
+
+    User::LeaveIfError( err );
     
+    iProfileEngine = ProEngFactory::NewEngineL();
     
-// ---------------------------------------------------------
-// Destructor.
-// ---------------------------------------------------------
+    // Start to listen profile changes.
+    iProfileNotifier = ProEngFactory::NewNotifyHandlerL();
+    
+    iProfileNotifier->RequestActiveProfileNotificationsL( *this );
+    iProfileNotifier->RequestProfileNameArrayNotificationsL( *this );
+    iProfileNotifier->RequestProfileActivationNotificationsL( *this ); 
+    }
+    
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::~CAiProfileEngine
+//
+// ----------------------------------------------------------------------------
 //
 CAiProfileEngine::~CAiProfileEngine()
     {
     iSSSettings.CancelAll( *this );
     iSSSettings.Close();
-    delete iProfileNotifier;
+    
 	delete iActiveProfileName;
 	delete iSwapProfileName;
 	
-	if( iProfileNamePointerArray.Count() )
-    	{
-        iProfileNamePointerArray.ResetAndDestroy();
-        }
-
+	iProfileNamePointerArray.ResetAndDestroy();
+	
+	if ( iProfileNotifier )
+	    {
+        iProfileNotifier->CancelAll();
+	    }
+	
+	delete iProfileNotifier;
+	
     if( iProfileEngine )
         {
         iProfileEngine->Release();
         }
-    
-    iResourceLoader.Close();            	 
+            
+    iResourceLoader.Close();
     }
     
-// ---------------------------------------------------------
-// Updates profiles
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::UpdateProfileNamesL()
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::UpdateProfileNamesL()
 	{
-	//update active profile name
-	HBufC* activeProfileName = NULL;
+    // Update active profile name
+    MProEngProfile* profile( iProfileEngine->ActiveProfileLC() );	
 	
-	MProfile* profile = iProfileEngine->ActiveProfileLC();	
-	const MProfileName& name = profile->ProfileName();	
-	activeProfileName = name.Name().AllocLC();
+	const MProEngProfileName& name( profile->ProfileName() );	
+
+	HBufC* activeProfileName( name.Name().AllocLC() );
 
 	SetActiveProfileNameL( *activeProfileName );
       
-    //update profile name list	
-	MProfilesNamesArray* profileNamesArray = iProfileEngine->ProfilesNamesArrayLC();
+    // Update profile name list	
+	MProEngProfileNameArray* profileNamesArray( 
+        iProfileEngine->ProfileNameArrayLC() );
     
     SetProfileNameListL( *profileNamesArray );
     
-    //update swap profile name
-    HBufC* swapProfileName = NULL;
+    // Update swap profile name
+    HBufC* swapProfileName( NULL );
     
-    TInt activeProfileId = iProfileEngine->ActiveProfileId();
+    TInt activeProfileId( iProfileEngine->ActiveProfileId() );
     
     if( activeProfileId == KSilentProfileId )
     	{
-        const MProfileName* generalProfileName = profileNamesArray->ProfileName( KGeneralProfileId );	
-		swapProfileName = generalProfileName->Name().AllocLC();	
+        TInt generalProfileIndex( 
+            profileNamesArray->FindById( KGeneralProfileId ) );
+        
+		swapProfileName = 
+            profileNamesArray->MdcaPoint( generalProfileIndex ).AllocLC() ;		        
     	}
     else
         {
-        const MProfileName* silentProfileName = profileNamesArray->ProfileName( KSilentProfileId );	
-		swapProfileName = silentProfileName->Name().AllocLC();	
+        TInt silentProfileIndex( 
+            profileNamesArray->FindById( KSilentProfileId ) );	
+		
+        swapProfileName = 
+            profileNamesArray->MdcaPoint( silentProfileIndex ).AllocLC() ;                
         }
     
     TPtrC swapProfileNamePtr( *swapProfileName );
-	HBufC* activateProfileString = NULL;
-    activateProfileString = StringLoader::LoadLC( R_AI_PERS_PROF_TOGGLE, swapProfileNamePtr );    	
+	   
+	HBufC* activateProfileString( StringLoader::LoadLC( 
+        R_AI_PERS_PROF_TOGGLE, swapProfileNamePtr ) );    	
     
     SetSwapProfileNameL( *activateProfileString );
 
-    CleanupStack::PopAndDestroy( 5 ); //profile, profileName, profileNamesArray, swapProfileName, activateProfileString 
+    CleanupStack::PopAndDestroy( 5 ); //profile, profileName, // profileNamesArray, swapProfileName, activateProfileString           
 	}
 
-// ---------------------------------------------------------
-// Checks SIM card status
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::ShowOfflineMessageL
+//
+// ----------------------------------------------------------------------------
 //
 TBool CAiProfileEngine::ShowOfflineMessageL()
 	{
-	TInt result = ETrue;
+	TInt result( ETrue );
 	
     TInt simCardStatus( ESimNotPresent );
         
@@ -186,42 +227,51 @@ TBool CAiProfileEngine::ShowOfflineMessageL()
     User::LeaveIfError( simStatus.Get( simCardStatus ) );
     simStatus.Close();
 
- 	if( simCardStatus == ESimNotPresent )
+ 	if ( simCardStatus == ESimNotPresent )
 		{
 		// SIM card does not exist.
-	    HBufC* infoNoteText = StringLoader::LoadLC( R_SU_NOTE_INSERT_SIM );
+	    HBufC* infoNoteText = StringLoader::LoadLC( R_SU_NOTE_INSERT_SIM_AND_RESTART );
+		
 	    CAknInformationNote* note = new( ELeave ) CAknInformationNote( ETrue );
 	    note->ExecuteLD( *infoNoteText );
+	    
 	    CleanupStack::PopAndDestroy( infoNoteText );
+	    
 	    result = EFalse;	
 		}
 	else
 		{
 		CAknQueryDialog* dlg = CAknQueryDialog::NewL();
+		
 		result = dlg->ExecuteLD( R_AI_LEAVE_OFFLINE_MODE_QUERY );	
 		}
        
 	return result;
 	}
-
-									  
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+								  
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::SetActiveProfileNameL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::SetActiveProfileNameL( const TDesC& aName )
     {
-    HBufC* temp = aName.AllocL();
+    HBufC* temp( aName.AllocL() );
+    
+    TPtr profileNamePtr( temp->Des() );
+    
+    AknTextUtils::DisplayTextLanguageSpecificNumberConversion( profileNamePtr );
+    
     delete iActiveProfileName;
     iActiveProfileName = NULL;
-    TPtr profileNamePtr = temp->Des();
-    AknTextUtils::DisplayTextLanguageSpecificNumberConversion( profileNamePtr );
+    
     iActiveProfileName = temp;  
     }
     
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::ActiveProfileName
+//
+// ----------------------------------------------------------------------------
 //
 const TDesC& CAiProfileEngine::ActiveProfileName() const
     {
@@ -233,23 +283,29 @@ const TDesC& CAiProfileEngine::ActiveProfileName() const
     return KNullDesC();
     }
 
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::SetSwapProfileNameL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::SetSwapProfileNameL( const TDesC& aName )
     {
-    HBufC* temp = aName.AllocL();
-    delete iSwapProfileName;
-    iSwapProfileName = NULL;
-    TPtr profileNamePtr = temp->Des();
+    HBufC* temp( aName.AllocL() );
+        
+    TPtr profileNamePtr( temp->Des() );
+    
     AknTextUtils::DisplayTextLanguageSpecificNumberConversion( profileNamePtr );
+    
+    delete iSwapProfileName;    
+    iSwapProfileName = NULL;
+
     iSwapProfileName = temp;  
     }
     
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::SwapProfileName
+//
+// ----------------------------------------------------------------------------
 //
 const TDesC& CAiProfileEngine::SwapProfileName() const
     {
@@ -261,82 +317,101 @@ const TDesC& CAiProfileEngine::SwapProfileName() const
     return KNullDesC();
     }
 
-
-// ---------------------------------------------------------
-// Set profile names
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::SetProfileNameListL
 //
-void CAiProfileEngine::SetProfileNameListL( const MProfilesNamesArray& aArray )
+// ----------------------------------------------------------------------------
+//
+void CAiProfileEngine::SetProfileNameListL( 
+    const MProEngProfileNameArray& aArray )
     {
-    if( iProfileNamePointerArray.Count() )
-    	{
-        iProfileNamePointerArray.ResetAndDestroy();
-        }
-      
-    const TInt count = aArray.MdcaCount();
+    iProfileNamePointerArray.ResetAndDestroy();
+
+    const TInt count( aArray.MdcaCount() );
+    
     TBufC<KMaxProfileNameLength> profileName;
          
-    for( TInt i = 0; i < count; i++ )
+    for ( TInt i = 0; i < count; i++ )
     	{
     	profileName = aArray.MdcaPoint( i );
-    	TPtr profileNamePtr = profileName.Des();
-    	AknTextUtils::DisplayTextLanguageSpecificNumberConversion( profileNamePtr );
-    	HBufC* profile = profileNamePtr.AllocLC();
-    	User::LeaveIfError( iProfileNamePointerArray.Append( profile ));
+    	
+    	TPtr profileNamePtr( profileName.Des() );
+    	
+    	AknTextUtils::DisplayTextLanguageSpecificNumberConversion( 
+    	        profileNamePtr );
+    	
+    	HBufC* profile( profileNamePtr.AllocLC() );
+    	
+    	iProfileNamePointerArray.AppendL( profile );    	
     	CleanupStack::Pop( profile );
     	}
     }
     
-
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::ProfileNameByIndex
+//
+// ----------------------------------------------------------------------------
 //
 const TDesC& CAiProfileEngine::ProfileNameByIndex( TInt aIndex ) const
     {
- 	if( iProfileNamePointerArray.Count() )
+    TInt count( iProfileNamePointerArray.Count() );
+    
+ 	if(  aIndex < count && aIndex >= 0 )
  		{
- 		return *iProfileNamePointerArray[aIndex];
+ 		return *iProfileNamePointerArray[ aIndex ];
  		}
  	
  	return KNullDesC();
     }
 
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::IsActiveProfileSilentL
 //
-TBool CAiProfileEngine::IsActiveProfileSilentL()
+// ----------------------------------------------------------------------------
+//
+TBool CAiProfileEngine::IsActiveProfileSilentL() const
 	{
-	TBool isSilent = EFalse;
-	MProfile* profile = iProfileEngine->ActiveProfileLC();
-	isSilent = profile->IsSilent();
+    MProEngProfile* profile( iProfileEngine->ActiveProfileLC() );
+    	
+	TBool silent( profile->IsSilent() );
+	
 	CleanupStack::PopAndDestroy();
-	return isSilent; 
+	
+	return silent; 
 	}
 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::IsActiveProfileTimedL
 // 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-TBool CAiProfileEngine::IsActiveProfileTimedL()
-	{
-	return iProfileEngine->IsActiveProfileTimedL();
+TBool CAiProfileEngine::IsActiveProfileTimedL() const
+	{    
+    MProfileEngine* engine = CreateProfileEngineL();
+        
+    TBool retval( EFalse );
+    
+    TRAP_IGNORE( retval = engine->IsActiveProfileTimedL() );
+    
+    engine->Release();
+    
+    return retval;	
 	}
 
-// ---------------------------------------------------------
-// Number of profiles
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::NumberOfProfiles
 //
-TInt CAiProfileEngine::NumberOfProfiles()
+// ----------------------------------------------------------------------------
+//
+TInt CAiProfileEngine::NumberOfProfiles() const
 	{	
 	return iProfileNamePointerArray.Count();
 	}
 
-
-// ---------------------------------------------------------
-// 
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleAiEventL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::HandleAiEventL( TInt aEvent, const TDesC& aParam )
 	{
@@ -357,86 +432,96 @@ void CAiProfileEngine::HandleAiEventL( TInt aEvent, const TDesC& aParam )
         case EAiProfileEditActive:
             HandleEditActiveProfileL();
             break;
+            
         default:
             break;
         }
 	}
 
-
-// -----------------------------------------------------------------------------
-// Handles profile switch by index event
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleSwitchByIndexL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::HandleSwitchByIndexL( const TDesC& aParam )
 	{
     if ( aParam.Length() > 0 )
     	{
-        TInt profileId = KErrNotFound;
+        TInt index( KErrNotFound );
 		TPtrC ptr( aParam );
 		TLex lexer( ptr );
 			
-    	TInt err = lexer.Val( profileId );  
+    	TInt err( lexer.Val( index ) );
+    	
 		if ( err == KErrNone )
 			{
-			MProfilesNamesArray* profileNamesArray = iProfileEngine->ProfilesNamesArrayLC();
-			const MProfileName* profileName = profileNamesArray->ProfileName( profileId );
-		 
-		    if( profileName )
-        		{
-	            profileId = profileName->Id();
-		    	SetActiveProfileL( profileId );
-        		}
+            MProEngProfileNameArray* profileNamesArray( 
+                iProfileEngine->ProfileNameArrayLC() );
+		
+            TInt profileId( profileNamesArray->ProfileId( index ) );
+             
+            if ( profileId != KErrNotFound )
+                {
+                SetActiveProfileL( profileId );
+                }            
 		    
 		    CleanupStack::PopAndDestroy();
 		   	}
     	}
 	}
 
-// -----------------------------------------------------------------------------
-// Handles profile switch by name event
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleSwitchByNameL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::HandleSwitchByNameL( const TDesC& aParam )
 	{
     if ( aParam.Length() > 0 )
-    	{
-    	TInt profileId = KErrNotFound;
-        MProfilesNamesArray* profileNamesArray = iProfileEngine->ProfilesNamesArrayLC();
-        profileId = profileNamesArray->FindByName( aParam );
-        if( profileId != KErrNotFound )
+    	{    	
+        MProEngProfileNameArray* profileNamesArray( 
+            iProfileEngine->ProfileNameArrayLC() );
+            
+        TInt index( profileNamesArray->FindByName( aParam ) );
+        
+        if( index != KErrNotFound )
         	{
-        	SetActiveProfileL( profileId );
+        	SetActiveProfileL( profileNamesArray->ProfileId( index ) );
         	}
-    	
+        
     	CleanupStack::PopAndDestroy();
     	}
 	}
 
-// -----------------------------------------------------------------------------
-// Handles profile swap event
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleSwapL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::HandleSwapL( const TDesC& aParam )
 	{
 	if ( aParam.Length() > 0 )
 		{
-		TInt profileId = KErrNotFound;
+		TInt profileId( KErrNotFound );
 		TPtrC ptr( aParam );
 		TLex lexer( ptr );
 			
-    	TInt err = lexer.Val( profileId );  
+    	TInt err( lexer.Val( profileId ) );
+    	
 		if ( err == KErrNone )
 			{
-			TInt activeProfile = iProfileEngine->ActiveProfileId();
+			TInt activeProfile( iProfileEngine->ActiveProfileId() );
 			
 			if( activeProfile != profileId )
 				{
-				MProfilesNamesArray* profileNamesArray = iProfileEngine->ProfilesNamesArrayLC();
+                MProEngProfileNameArray* profileNamesArray( 
+                    iProfileEngine->ProfileNameArrayLC() );
+	            						
         		profileId = profileNamesArray->FindById( profileId );
 		    
 		    	if( profileId != KErrNotFound )
         			{
-		    		TRAP_IGNORE( SetActiveProfileL( profileId ) );
+		    		SetActiveProfileL( profileId );
         			}
         		
         		CleanupStack::PopAndDestroy();	
@@ -449,45 +534,51 @@ void CAiProfileEngine::HandleSwapL( const TDesC& aParam )
 		}
 	}
 
-// -----------------------------------------------------------------------------
-// Handles edit active profile event
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleEditActiveProfileL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::HandleEditActiveProfileL()
     {
     RWsSession ws;
-    User::LeaveIfError(ws.Connect());
-    CleanupClosePushL(ws);
+    User::LeaveIfError( ws.Connect() );
+    CleanupClosePushL( ws );
 
     // Find the task with uid
-    TApaTaskList taskList(ws);
-    TApaTask task = taskList.FindApp( KUidProfileApp );
+    TApaTaskList taskList( ws );
+    TApaTask task( taskList.FindApp( KUidProfileApp ) );
 
     if ( task.Exists() )
         {
         task.EndTask();
         User::After( 500000 );
         }
-    CleanupStack::PopAndDestroy(&ws);
+    
+    CleanupStack::PopAndDestroy( &ws );
     
     TVwsViewId viewid( KUidProfileApp, KProfileAppSettingViewId );
-    TInt profileId = iProfileEngine->ActiveProfileId();
-    TBuf8<KMaxActiveProfileLength> buf;
-    buf.AppendNum(profileId);
-    CEikonEnv::Static()->AppUi()->ActivateViewL( viewid ,KProfileAppSettingViewId,buf);
     
-
+    TInt profileId( iProfileEngine->ActiveProfileId() );
+    
+    TBuf8<KMaxActiveProfileLength> buf;
+    buf.AppendNum( profileId );
+    
+    CEikonEnv::Static()->AppUi()->ActivateViewL( 
+        viewid, KProfileAppSettingViewId, buf );
     }
 
-// -----------------------------------------------------------------------------
-//  Set active profile
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::SetActiveProfileL
+//
+// ----------------------------------------------------------------------------
 //
 void CAiProfileEngine::SetActiveProfileL( const TInt aProfileId )
 	{
-	TInt activeProfileId = iProfileEngine->ActiveProfileId();
+	TInt activeProfileId( iProfileEngine->ActiveProfileId() );
 	
-	if ( activeProfileId == KOfflineProfileId && aProfileId != KOfflineProfileId )
+	if ( activeProfileId == KOfflineProfileId && 
+        aProfileId != KOfflineProfileId )
    		{
     	if( !ShowOfflineMessageL() )
     		{
@@ -499,82 +590,71 @@ void CAiProfileEngine::SetActiveProfileL( const TInt aProfileId )
     	
    	iProfileEngine->SetActiveProfileL( aProfileId );   	
  	}
-		
-// ---------------------------------------------------------------------------
-// Resumes the engine
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::IsOffline
 //
-void CAiProfileEngine::ResumeL()
-    {
-    User::LeaveIfError( iSSSettings.Open() );
- 
-    //Register to listen ALS activation, if ALS status changes,
-	//profile must be republished.
-    TInt err = iSSSettings.Register( ESSSettingsAls, *this );
-
-    if( err == KErrNotSupported || err == KErrAlreadyExists )
-        {
-        //ALS not supported or already registered, that's fine
-        err = KErrNone;
-        }
-
-    User::LeaveIfError( err );
-
-	//Start to listen profile changes.
-	delete iProfileNotifier;
-    iProfileNotifier = NULL;	
-		
-    iProfileNotifier = CProfileChangeNotifyHandler::NewL( this );
-   	}
-
-// ---------------------------------------------------------------------------
-// Suspends the engine
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-void CAiProfileEngine::Suspend()
+TBool CAiProfileEngine::IsOffline() const
     {
- 	iSSSettings.CancelAll( *this );
-    iSSSettings.Close();
-   	delete iProfileNotifier;
-   	iProfileNotifier = NULL;	
+    return iProfileEngine->ActiveProfileId() == KOfflineProfileId;
     }
 
-// ---------------------------------------------------------------------------
-// From class MProfileChangeObserver
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::PhoneSettingChanged
 //
-
-void CAiProfileEngine::HandleActiveProfileEventL(
-							TProfileEvent aProfileEvent,
-							TInt /*aProfileId*/ )
-    {
-	//Profile activated or modified.
-    if( ( aProfileEvent == EProfileNewActiveProfile ) ||
-    	( aProfileEvent == EProfileActiveProfileModified ) )
-        {
-        UpdateProfileNamesL();
-        iProfilePluginNotifier->NotifyContentUpdate();
-        }
-    }
-    
-// ---------------------------------------------------------------------------
-// From class MSSSettingsObserver.
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-void CAiProfileEngine::PhoneSettingChanged( 
-								TSSSettingsSetting aSetting,
-								TInt /*aNewValue*/ )
+void CAiProfileEngine::PhoneSettingChanged( TSSSettingsSetting aSetting, 							
+    TInt /*aNewValue*/ )
     {
     if( aSetting == ESSSettingsAls )
         {
-        TRAP_IGNORE( UpdateProfileNamesL() );
-        iProfilePluginNotifier->NotifyContentUpdate();
+        NotifyContentUpdate();
         }
     }
 
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleActiveProfileModifiedL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiProfileEngine::HandleActiveProfileModifiedL()
+    {
+    NotifyContentUpdate();
+    }
 
-TBool CAiProfileEngine::IsOffline()
-	{
-	return iProfileEngine->ActiveProfileId() == KOfflineProfileId;
-	}
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleProfileNameArrayModificationL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiProfileEngine::HandleProfileNameArrayModificationL()
+    {
+    NotifyContentUpdate();
+    }
 
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::HandleProfileActivatedL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiProfileEngine::HandleProfileActivatedL( TInt /*aProfileId*/ )
+    {
+    NotifyContentUpdate();
+    }
+
+// ----------------------------------------------------------------------------
+// CAiProfileEngine::NotifyContentUpdate
+//
+// ----------------------------------------------------------------------------
+//
+void CAiProfileEngine::NotifyContentUpdate() 
+    {
+    TRAP_IGNORE( UpdateProfileNamesL() );
+    
+    iProfilePluginNotifier->NotifyContentUpdate();    
+    }
+
+// End of file

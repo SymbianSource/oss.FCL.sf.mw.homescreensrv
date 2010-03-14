@@ -16,47 +16,81 @@
 */
 
 
+// System includes
+#include <featmgr.h>
+
+// User includes
 #include "aiwspluginanim.h"
 #include "aiwspluginanimdef.h"
-#include "keylockhandler.h"
 #include "numerickeyhandler.h"
-#include "logslaunchhandler.h"
-#include "sindlaunchhandler.h"
 
-#include <featmgr.h>
 
 using namespace AiWsPlugin;
 
+// ======== MEMBER FUNCTIONS ========
+
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::CAiWsPluginAnim
+//
+// ---------------------------------------------------------------------------
+//
 CAiWsPluginAnim::CAiWsPluginAnim()
     {
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::~CAiWsPluginAnim
+//
+// ---------------------------------------------------------------------------
+//
 CAiWsPluginAnim::~CAiWsPluginAnim()
     {
     iEventHandlers.ResetAndDestroy();
+    
     if ( iFunctions )
         {
         iFunctions->GetRawEvents( EFalse );
         }
+    
     FeatureManager::UnInitializeLib();
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::CommandReplyL
+//
+// ---------------------------------------------------------------------------
+//
 TInt CAiWsPluginAnim::CommandReplyL( TInt /*aOpcode*/, TAny* /*aArgs*/ )
     {
     return KErrNone;
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::Command
+//
+// ---------------------------------------------------------------------------
+//
 void CAiWsPluginAnim::Command( TInt /*aOpcode*/, TAny* /*aArgs*/ )
     {
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::Animate
+//
+// ---------------------------------------------------------------------------
+//
 void CAiWsPluginAnim::Animate( TDateTime* /*aDateTime*/ )
     {
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::AddEventHandlerAndPopL
+//
+// ---------------------------------------------------------------------------
+//
 void CAiWsPluginAnim::AddEventHandlerAndPopL( CEventHandler* aEventHandler )
     {
-    if( aEventHandler )
+    if ( aEventHandler )
         {
         aEventHandler->SetUiStateQuery( *this );
 	    iEventHandlers.AppendL( aEventHandler );
@@ -64,55 +98,75 @@ void CAiWsPluginAnim::AddEventHandlerAndPopL( CEventHandler* aEventHandler )
         }
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::ConstructL
+//
+// ---------------------------------------------------------------------------
+//
 void CAiWsPluginAnim::ConstructL( TAny* aArgs, TBool aHasFocus )
     {
-    FeatureManager::InitializeLibL();
-    
-    iFunctions->GetRawEvents( ETrue );
-    if( !aArgs )
+    if ( !aArgs )
         {
         User::Leave( KErrArgument );
         }
-    iWgInfo = *( static_cast<TAiWsPluginAnimInitData*>(aArgs) );
     
-    AddEventHandlerAndPopL( CKeyLockHandler::NewLC() );
-
-    MAnimGeneralFunctionsWindowExtension* ext = reinterpret_cast<MAnimGeneralFunctionsWindowExtension*>
-        ( iFunctions->ExtendedInterface( 
-         MAnimGeneralFunctions::EWindowExtensionInterface ) );
-    AddEventHandlerAndPopL( CNumericKeyHandler::NewLC( iWgInfo.iTargetWgId, ext ) );
+    FeatureManager::InitializeLibL();
+    
+    iFunctions->GetRawEvents( ETrue );
+       
+    iWgInfo = *( static_cast< TAiWsPluginAnimInitData* >( aArgs ) );
+        
+    // AddEventHandlerAndPopL( CKeyLockHandler::NewLC() );
+    
+    MAnimGeneralFunctionsWindowExtension* ext = 
+        reinterpret_cast<MAnimGeneralFunctionsWindowExtension*>
+            ( iFunctions->ExtendedInterface( 
+                MAnimGeneralFunctions::EWindowExtensionInterface ) ); 
+         
+    AddEventHandlerAndPopL( 
+        CNumericKeyHandler::NewLC( iWgInfo.iTargetWgId, ext ) );
 	
-	AddEventHandlerAndPopL( CLogsLaunchHandler::NewLC() );
-	
-/* Leave this commented code here for now.. 2.5.2007, unclear if needed still in some config.
-	if ( FeatureManager::FeatureSupported( KFeatureIdKeypadNoVoiceKey ) )
-	    {
-	    AddEventHandlerAndPopL( CSINDLaunchHandler::NewLC() );       
-	    }	
-*/
     // Update initial focus status
     FocusChanged( aHasFocus );
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::Redraw
+//
+// ---------------------------------------------------------------------------
+//
 void CAiWsPluginAnim::Redraw()
     {
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::FocusChanged
+//
+// ---------------------------------------------------------------------------
+//
 void CAiWsPluginAnim::FocusChanged( TBool aState )
     {
     iAiFocused = aState;
-    const TInt handlerCount = iEventHandlers.Count();
-    for( TInt i = 0; i < handlerCount; ++i )
+    
+    const TInt count( iEventHandlers.Count() );
+    
+    for ( TInt i = 0; i < count; ++i )
         {
         iEventHandlers[i]->FocusChanged( aState );
         }
     }
 
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::OfferRawEvent
+//
+// ---------------------------------------------------------------------------
+//
 TBool CAiWsPluginAnim::OfferRawEvent( const TRawEvent& aRawEvent )
     {
     // Forward event to all event handlers
-    const TInt handlerCount = iEventHandlers.Count();
-    for( TInt i = 0; i < handlerCount; ++i )
+    const TInt count( iEventHandlers.Count() );
+    
+    for ( TInt i = 0; i < count; ++i )
         {
         // All other are made to return EFalse
         // Except wait for 2ndkeyup and 2ndkeydown of keylock states.
@@ -127,14 +181,25 @@ TBool CAiWsPluginAnim::OfferRawEvent( const TRawEvent& aRawEvent )
     
     return EFalse;
     }
-	
+
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::Modifiers
+//
+// ---------------------------------------------------------------------------
+//
 TUint CAiWsPluginAnim::Modifiers() const
     {
     return iModifierTracker.Status();
     }
     
+// ---------------------------------------------------------------------------
+// CAiWsPluginAnim::HasFocus
+//
+// ---------------------------------------------------------------------------
+//
 TBool CAiWsPluginAnim::HasFocus() const
     {
     return iAiFocused;
     }
 	
+// End of file

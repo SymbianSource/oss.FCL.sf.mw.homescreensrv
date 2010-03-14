@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2007 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,15 +15,18 @@
 *
 */
 
+// System includes
 #include <ecom/ecom.h>
 #include <liwservicehandler.h>
 #include <aipluginsettings.h>
 #include <utf.h>
 
+// User includes
 #include "sapidata.h"
 #include "sapidatapluginconst.h"
 #include "sapidataobserver.h"
 #include "sapidataplugin.h"
+
 // ======== MEMBER FUNCTIONS ========
 	
 // ---------------------------------------------------------------------------
@@ -116,7 +119,7 @@ CSapiData::~CSapiData()
 	delete iPublisher;
 	delete iContentType;
 	delete iContentId;
-
+	delete iStartupReason;
 	
 	if(iPubObserver)
 		{
@@ -249,10 +252,27 @@ void CSapiData::ConfigureL(RAiSettingsItemArray& aConfigurations )
     iPubObserver = CSapiDataObserver::NewL( iInterface, this );
     }
 
+// ---------------------------------------------------------------------------
+// SetContentIdL
+// ---------------------------------------------------------------------------
+//
 void CSapiData::SetContentIdL(const TDesC8& aId)
 	{
 	iContentId = CnvUtfConverter::ConvertToUnicodeFromUtf8L(aId);
 	}
+
+// ---------------------------------------------------------------------------
+// SetStartupReasonL
+// ---------------------------------------------------------------------------
+//
+void CSapiData::SetStartupReasonL(const TDesC& aStartupReason)
+    {
+    delete iStartupReason;
+    iStartupReason = NULL;
+    iStartupReason = aStartupReason.AllocL();
+    ChangePublisherStatusL( aStartupReason );
+    }
+
 // ---------------------------------------------------------------------------
 // GetMenuItemsL
 // ---------------------------------------------------------------------------
@@ -702,6 +722,12 @@ TBool CSapiData::IsPluginActive()
 //
 void CSapiData::ChangePublisherStatusL(const TDesC& aStatus)
     {
+    if ( aStatus == KResume && iUpdateNeeded )
+        {
+        iPlugin->PublishL();
+        iUpdateNeeded = EFalse;
+        }
+    
     CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
     CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
     HBufC8* triggerName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(aStatus);
@@ -732,74 +758,6 @@ void CSapiData::ChangePublisherStatusL(const TDesC& aStatus)
    }
 
 // ---------------------------------------------------------------------------
-// ResumeL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::ResumeL()
-    {
-    if ( iUpdateNeeded )
-     	{
-     	iPlugin->PublishL();
-     	iUpdateNeeded = EFalse;
-     	}
-    ChangePublisherStatusL( KResume );
-    }
-
-// ---------------------------------------------------------------------------
-// SuspendL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::SuspendL()
-    {
-    ChangePublisherStatusL( KSuspend );
-    }
-
-// ---------------------------------------------------------------------------
-// ActivateL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::ActivateL()
-    {
-    ChangePublisherStatusL( KActive );
-    }
-
-// ---------------------------------------------------------------------------
-// DeActivateL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::DeActivateL()
-    {
-    ChangePublisherStatusL( KDeActive );
-    }
-
-// ---------------------------------------------------------------------------
-// OnLineL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::OnLineL()
-    {
-    ChangePublisherStatusL( KOnLine );
-    }
-
-// ---------------------------------------------------------------------------
-// offLineL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::OffLineL()
-    {
-    ChangePublisherStatusL( KOffLine );
-    }
-
-// ---------------------------------------------------------------------------
-// InActiveL
-// ---------------------------------------------------------------------------
-//
-void CSapiData::InActiveL()
-    {
-    ChangePublisherStatusL( KInActive );
-    }
-
-// ---------------------------------------------------------------------------
 // UpdatePublisherStatusL
 // ---------------------------------------------------------------------------
 //
@@ -808,23 +766,28 @@ void CSapiData::UpdatePublisherStatusL( TDesC& aPublisher )
 	 if ( aPublisher == iPublisher )
 		 {
 		 // Resend the plugin status to publisher
-		 ActivateL();
+         ChangePublisherStatusL( KActive );
+         if( iStartupReason->Length() != 0 )
+             {
+             ChangePublisherStatusL( *iStartupReason );
+             }
+         
 		 if ( iPlugin->IsActive() )
 			 {
-			 ResumeL();
+             ChangePublisherStatusL( KResume );
 			 }
 		 else
 			 {
-			 SuspendL();
+             ChangePublisherStatusL( KSuspend );
 			 }
 		  // forward the network status if it uses.
 		if ( iPlugin->NetworkStatus() == CSapiDataPlugin::EOnline )
 			{
-			OnLineL();
+            ChangePublisherStatusL( KOnLine );
 			}
 		else if ( iPlugin->NetworkStatus() == CSapiDataPlugin::EOffline )
 			{
-			OffLineL();
+            ChangePublisherStatusL( KOffLine );
 			}
 		 }
 	}

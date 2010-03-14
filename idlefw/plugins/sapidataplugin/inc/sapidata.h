@@ -19,22 +19,31 @@
 #ifndef SAPIDATA_H
 #define SAPIDATA_H
 
-// INCLUDE FILES
+// System includes
 #include <liwcommon.h> 
 #include <AknsItemID.h>
-#include <aieventhandlerextension.h>
-#include "sapidatapluginconst.h"
-#include "aicontentpublisher.h"
 
+// User includes
+#include <hscontentpublisher.h>
+#include "sapidatapluginconst.h"
+
+// Forward declarations
 class MLiwInterface;
 class CLiwServiceHandler;
 class CSapiDataObserver;
 class CSapiDataPlugin;
+class MAiContentObserver;
 
-
-class CContentItem :  public CBase
+/**
+ *  @ingroup group_sapidataplugin
+ *
+ *  Content item
+ *
+ *  @since S60 5.0
+ */
+NONSHARABLE_CLASS( CContentItem ) : public CBase
 	{
-	public :
+public:
 
 	/**
 	* Part of the two phased constuction
@@ -43,19 +52,18 @@ class CContentItem :  public CBase
 	* @return none
 	*/
 	static CContentItem* NewL();
-
 	
 	/*
 	* Destructor  
 	*/
 	~CContentItem();
 
-	private :
+private:
 		
 	/* 
 	* Constructor  
 	*/
-		CContentItem();   
+    CContentItem();   
 	
 	/**
 	* Part of the two phased construction
@@ -65,7 +73,7 @@ class CContentItem :  public CBase
 	*/
 	void ConstructL();
 
-	public :
+public:
 
     TInt iId;
 	/* item id */
@@ -81,12 +89,13 @@ class CContentItem :  public CBase
  *
  *  Sapi data
  *
- *  @since S60 v3.2
+ *  @since S60 5.0
  */
-class CSapiData : public CBase
+NONSHARABLE_CLASS( CSapiData ) : public CBase
    {
-   public:
- 
+public:
+    // constructor and destructor
+    
     /**
     * Part of the two phased construction
     *
@@ -103,9 +112,9 @@ class CSapiData : public CBase
     */
     ~CSapiData();
     
-   private :
-
-
+private:
+    // constructors
+    
     /**
     * Constructor
     *
@@ -113,8 +122,7 @@ class CSapiData : public CBase
     * @return none
     */
     CSapiData();
-   
-    
+       
     /**
     * Part of the two phased construction
     *
@@ -122,15 +130,9 @@ class CSapiData : public CBase
     * @return void
     */
     void ConstructL(CSapiDataPlugin* aPlugin);
-   
-    /**
-    * Change the publisher status
-    *
-    * @param aStatus new status of the publisher
-    * @return void
-    */
-    void ChangePublisherStatusL(const TDesC& aStatus);
-    
+
+    // new functions
+
     /**
     * Gets the menu item from the publisher
     *
@@ -139,7 +141,16 @@ class CSapiData : public CBase
     */
     void GetMenuItemsL();
     
-   public :
+public:
+    // new functions
+    
+    /**
+    * Change the publisher status
+    *
+    * @param aStatus new status of the publisher
+    * @return void
+    */
+    void ChangePublisherStatusL(const TDesC& aStatus);
     
     /**
     * Configures the subscriber and data to subscribe.
@@ -150,7 +161,20 @@ class CSapiData : public CBase
     */
     void ConfigureL(RAiSettingsItemArray& aConfigurations);
     
+    /**
+     * Sets content id
+     * 
+     * @param aId Content id
+     */
     void SetContentIdL(const TDesC8& aId);
+    
+    /**
+     * Sets startup reason, which will be communicated to CPS client
+     * in the case of late registration.
+     * 
+     * @param aStartupReason A reason
+     */
+    void SetStartupReasonL(const TDesC& aStartupReason);
     
     /**
 	* Execute the command to get the data from CPS
@@ -278,62 +302,6 @@ class CSapiData : public CBase
     * @return boolean (ETrue/EFalse).
     */
     TBool IsPluginActive();
-     
-    /**
-    * Resume the publisher
-    * 
-    * @param None
-    * @return void
-    */
-    void ResumeL();
-    
-    /**
-	* Suspend the publisher
-	* 
-	* @param None
-	* @return void
-	*/
-    void SuspendL();
-    
-    /**
-	* Activate the publisher
-	* 
-	* @param None
-	* @return void
-	*/
-    void ActivateL();
-    
-    /**
-	* Deactivate the publisher
-	* 
-	* @param None
-	* @return void
-	*/
-    void DeActivateL();
-    
-    /**
-	* OnLineL 
-	* 
-	* @param None
-	* @return void
-	*/
-    void OnLineL();
-    
-    /**
-	* OffLineL 
-	* 
-	* @param None
-	* @return void
-	*/
-    void OffLineL();
-    
-    /**
-	* InActiveL 
-	* 
-	* @param None
-	* @return void
-	*/
-	void InActiveL();
 	
     /**
 	* Update the publisher status 
@@ -366,54 +334,41 @@ class CSapiData : public CBase
 	*/
     void SetUpdateNeeded(TBool aStatus);
     
-    private :   
+private:   
+    // data
     
-    // Subscriber interface
-    // own
-    MLiwInterface* iInterface;
-      
-    // Data Observer to CPS content registry
-    // Own // iConObserver;
-    CSapiDataObserver* iContentObserver;
-    
-    // Data Observer to CPS publisher registry
-    // Own // iConObserver;
+    /** Subscriber interface, owned */    
+    MLiwInterface* iInterface;      
+    /** Data Observer to CPS content registry, owned */    
+    CSapiDataObserver* iContentObserver;    
+    /** Data Observer to CPS publisher registry, owned */    
     CSapiDataObserver* iPubObserver;
-   
-    // Service handler 
-    // Own
-    CLiwServiceHandler* iServiceHandler;
-    
-    // Array of configurations
-    // Own
+    /** Service handler, owned */    
+    CLiwServiceHandler* iServiceHandler;    
+    /** Array of configurations, owned */    
     RPointerArray<CContentItem> iItemList;
-
-    // Number of configurations 
-    TInt iItemCount;
-    
-    // Command name in configuration Array
+    /** Number of configurations */ 
+    TInt iItemCount;    
+    /** Command name in configuration Array, owned */
     HBufC8* iCommandName;
-	/* publisher id */
+	/** publisher id, owned */
 	HBufC* iPublisher;
-	/* content type */
+	/** content type, owned */
 	HBufC* iContentType;
-	/* content id */
+	/** content id, owned */
 	HBufC* iContentId;
-
-    // Reference of the sapi data plugin
-    // Not owned
-    CSapiDataPlugin* iPlugin;
-    
-    // Menu item names
-    // Own
-    RPointerArray<HBufC> iMenuItems; 
-    
-    // Trigger names for the menu items
-    // Own
-    RPointerArray<HBufC8> iMenuTriggers;
-    
-    // Store the status of update needed on resume
+	/** Startup reason, owned */
+	HBufC* iStartupReason;
+    /** Reference of the sapi data plugin, not owned */    
+    CSapiDataPlugin* iPlugin;    
+    /** Menu item names, owned */    
+    RPointerArray<HBufC> iMenuItems;    
+    /** Trigger names for the menu items, owned */
+    RPointerArray<HBufC8> iMenuTriggers;    
+    /** Store the status of update needed on resume */
     TBool iUpdateNeeded;
     };
 
-#endif /*SAPIDATA_H*/
+#endif // SAPIDATA_H
+
+// End of file

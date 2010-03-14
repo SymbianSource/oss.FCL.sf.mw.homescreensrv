@@ -16,7 +16,6 @@
 *
 */
 
-
 #include "aimulticontentobserver.h"
 #include "aicontentobserveroptimizer.h"
 
@@ -103,7 +102,7 @@ TInt CAiMultiContentObserver::CancelTransaction( TInt aTxId )
     }
     
     
-TBool CAiMultiContentObserver::CanPublish( MAiPropertyExtension& aPlugin,
+TBool CAiMultiContentObserver::CanPublish( CHsContentPublisher& aPlugin,
                                            TInt aContent,
                                            TInt aIndex )
     {
@@ -119,7 +118,7 @@ TBool CAiMultiContentObserver::CanPublish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiMultiContentObserver::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        TInt aResource,
                                        TInt aIndex )
@@ -138,7 +137,7 @@ TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiMultiContentObserver::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        const TDesC16& aText,
                                        TInt aIndex )
@@ -157,7 +156,7 @@ TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiMultiContentObserver::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        const TDesC8& aBuf,
                                        TInt aIndex )
@@ -176,7 +175,7 @@ TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiMultiContentObserver::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        RFile& aFile,
                                        TInt aIndex )
@@ -195,7 +194,7 @@ TInt CAiMultiContentObserver::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiMultiContentObserver::Clean( MAiPropertyExtension& aPlugin,
+TInt CAiMultiContentObserver::Clean( CHsContentPublisher& aPlugin,
                                      TInt aContent,
                                      TInt aIndex )
     {
@@ -219,12 +218,12 @@ TAny* CAiMultiContentObserver::Extension( TUid /*aUid*/ )
     }
 
 TBool CAiMultiContentObserver::RequiresSubscription( 
-    const TAiPublisherInfo& /*aPublisherInfo*/ ) const
+    const THsPublisherInfo& /*aPublisherInfo*/ ) const
     {
     return ETrue;
     }
 
-TInt CAiMultiContentObserver::SetProperty( MAiPropertyExtension& /*aPlugin*/,
+TInt CAiMultiContentObserver::SetProperty( CHsContentPublisher& /*aPlugin*/,
            const TDesC8& /*aElementId*/,
            const TDesC8& /*aPropertyName*/,
            const TDesC8& /*aPropertyValue*/ )
@@ -232,7 +231,7 @@ TInt CAiMultiContentObserver::SetProperty( MAiPropertyExtension& /*aPlugin*/,
         return KErrNotSupported;
     }
    
-TInt CAiMultiContentObserver::SetProperty( MAiPropertyExtension& /*aPlugin*/,
+TInt CAiMultiContentObserver::SetProperty( CHsContentPublisher& /*aPlugin*/,
            const TDesC8& /*aElementId*/,
            const TDesC8& /*aPropertyName*/,
            const TDesC8& /*aPropertyValue*/,  

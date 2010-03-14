@@ -15,35 +15,37 @@
 *
 */
 
+// System includes
 #include <ecom/implementationproxy.h>
 #include <eikenv.h>
 #include <sendui.h>
 #include <SendUiConsts.h>
-
-#include <mcsmenuutils.h>
-#include <mcsmenuitem.h>
-
 #include <viewcli.h>                // For CVwsSessionWrapper
 #ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
 #include <viewclipartner.h>
 #endif
 
 #include <vwsdef.h>                 // For TVwsViewId
+#include <mcsmenuutils.h>
+#include <mcsmenuitem.h>
 #include <mcspluginparamval.h>
 #include <LogsUiCmdStarter.h>
 
+// User includes
 #include "mcsplugincompletedoperation.h"
 #include "mcspluginhandler.h"
 #include "mcspluginuids.hrh"
 
-#include "aiscutdefs.h"
-class CVwsSessionWrapper;
-
+// Constants
 _LIT( KMenuTypeShortcut, "menu:shortcut" ); ///< Menu folder type.
 _LIT( KMenuAttrParamLogs, "logs:dialed" );
 
 /** Argument value for parameter*/
 _LIT( KMenuAttrParam, "param" );
+
+#define KMCSCmailUidValue 0x2001E277
+#define KMCSCmailMailboxViewIdValue 0x2
+#define KMCSCmailMtmUidValue 0x2001F406
 
 const TInt KImplUidMCSPluginHandler = AI_UID_ECOM_IMPLEMENTATION_MCSPLUGIN_HANDLER;
 
@@ -61,6 +63,7 @@ const TImplementationProxy ImplementationTable[] =
 CMCSPluginHandler::~CMCSPluginHandler()
     {
     delete iVwsSession;
+    delete iMsvSession;
     }
 
 // ---------------------------------------------------------
@@ -94,6 +97,7 @@ void CMCSPluginHandler::ConstructL()
     {
     BaseConstructL();
     iVwsSession = CVwsSessionWrapper::NewL();
+    iMsvSession = CMsvSession::OpenAsObserverL(*this);
     }
 
 // ---------------------------------------------------------
@@ -150,6 +154,20 @@ CMenuOperation* CMCSPluginHandler::HandleCommandL(
     return NULL;
     }
 
+// ---------------------------------------------------------------------------
+// From class MMsvSessionObserver.
+// Handles an event from the message server.
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginHandler::HandleSessionEventL(
+          TMsvSessionEvent /*aEvent*/, 
+          TAny* /*aArg1*/, 
+          TAny* /*aArg2*/,
+          TAny* /*aArg3*/ )
+    {
+    // No event handling
+    }
+
 // ---------------------------------------------------------
 // Handles menu:shortcut specific commands
 // Must be extended to launch e.g. MailBoxes
@@ -187,7 +205,15 @@ void CMCSPluginHandler::LaunchShortcutL( CMenuItem& aItem )
         }
     else if ( param == KParamValueEmail ) // New email
         {
-        sendUi->CreateAndSendMessageL( KSenduiMtmSmtpUid, NULL, KNullUid, EFalse );
+        if ( GetEmailAccountCountL() > 0 )
+            {
+            sendUi->CreateAndSendMessageL( KSenduiMtmSmtpUid, NULL, KNullUid, EFalse );
+            }
+        else
+            {
+            iVwsSession->StartApp( TUid::Uid( KMCSCmailUidValue ) );
+            }
+
         }
 #ifdef __SYNCML_DS_EMAIL
     else if ( param == KParamValueSyncMLMail ) // New SyncML mail
@@ -215,7 +241,7 @@ void CMCSPluginHandler::LaunchShortcutL( CMenuItem& aItem )
             TLex16 lextmp( mailboxId );
             lextmp.Val( number );
             TUid uId = TUid::Uid( number );
-            const TVwsViewId viewId( KScutMessagingUid, KScutRemoteMailboxViewId );
+            const TVwsViewId viewId( TUid::Uid( KMCSCmailUidValue ), TUid::Uid( KMCSCmailMailboxViewIdValue ) );
             iVwsSession->CreateActivateViewEvent( viewId, uId, KNullDesC8() );
             }
         }
@@ -224,6 +250,37 @@ void CMCSPluginHandler::LaunchShortcutL( CMenuItem& aItem )
         LogsUiCmdStarter::CmdStartL( LogsUiCmdStarterConsts::KDialledView() );
         }
     CleanupStack::PopAndDestroy( sendUi );
+    }
+
+// ---------------------------------------------------------------------------
+// Returns count of Email accounts
+// ---------------------------------------------------------------------------
+//
+TInt CMCSPluginHandler::GetEmailAccountCountL()
+    {
+    CMsvEntry* rootEntry = iMsvSession->GetEntryL( KMsvRootIndexEntryIdValue );
+    CleanupStack::PushL(rootEntry);
+    
+    TInt cnt = rootEntry->Count();
+    if ( cnt > 0 )
+        {
+        cnt = 0;
+        rootEntry->SetSortTypeL( TMsvSelectionOrdering( 
+            KMsvGroupByType | KMsvGroupByStandardFolders, 
+            EMsvSortByDetailsReverse, ETrue ) );
+    
+        for ( TInt i = rootEntry->Count(); --i >= 0; )
+            {
+            const TMsvEntry& tentry = (*rootEntry)[i];
+    
+            if (tentry.iMtm.iUid == KMCSCmailMtmUidValue )
+                {
+                cnt++;
+                }
+            }
+        }
+    CleanupStack::PopAndDestroy(rootEntry);
+    return cnt;
     }
 
 // ============================ GLOBAL FUNCTIONS ===============================

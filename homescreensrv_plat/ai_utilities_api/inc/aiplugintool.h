@@ -19,14 +19,15 @@
 #ifndef M_AIPLUGINTOOL_H
 #define M_AIPLUGINTOOL_H
 
+// System includes
 #include <e32base.h>
-#include <aipropertyextension.h>
 
-class TAiPublisherInfo;
-class CAiContentPublisher;
+// User incldues
+#include <hscontentpublisher.h>
+
+// Forward declarations
+class THsPublisherInfo;
 class MAiContentItemIterator;
-class MAiPropertyExtension;
-class MAiEventHandlerExtension;
 
 /**
 *  Plugin tool.
@@ -39,44 +40,15 @@ class MAiPluginTool
 public:
 
     /**
-     * Get the publisher info of the passed publisher.
-     *
-     * @since S60 3.2
-     * @param reference to content publisher
-     * @return pointer to publisher info 
-     */
-    virtual const TAiPublisherInfo* PublisherInfoL(
-                                CAiContentPublisher& aContentPublisher ) = 0;
-
-    /**
      * Get the content item iterator for the passed publisher.
      *
      * @param reference to content publisher
      * @param content type indication
      * @return pointer to content iterator 
      */
-    virtual MAiContentItemIterator* ContentItemIteratorL(
-                                CAiContentPublisher& aContentPublisher,
-                                TInt aContentType = EAiPublisherContent ) = 0;
-
-
-    /**
-     * Get the property extension for passed publisher.
-     *
-     * @param reference to content publisher
-     * @return property extension pointer
-     */
-    virtual MAiPropertyExtension* PropertyExt(
-                                CAiContentPublisher& aContentPublisher ) = 0;
-
-    /**
-     * Get the event handler extension for passed publisher.
-     *
-     * @param reference to content publisher
-     * @return event handler extension pointer
-     */                                
-    virtual MAiEventHandlerExtension* EventHandlerExt(
-                                CAiContentPublisher& aContentPublisher ) = 0;
+    virtual MAiContentItemIterator* ContentItemIterator(
+        CHsContentPublisher& aContentPublisher,
+        CHsContentPublisher::TProperty aType = CHsContentPublisher::EPublisherContent ) = 0;
 
     /**
      * Release the tool.
@@ -85,8 +57,7 @@ public:
 	    
 protected:
 	    
-	MAiPluginTool() { }
-    
+	MAiPluginTool() { }    
     };
 
 inline void Release( MAiPluginTool* aSelf )

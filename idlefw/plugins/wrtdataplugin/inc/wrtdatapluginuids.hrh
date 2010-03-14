@@ -20,8 +20,6 @@
 #ifndef WRTDATAPLUGINUIDS_HRH
 #define WRTDATAPLUGINUIDS_HRH
 
-#include <platform/mw/aicontentpublisheruid.hrh>
-
 /**
  * Ecom dll uid for AI Data plug-in.
  */

@@ -78,14 +78,14 @@ TInt CAiContentObserverOptimizer::CancelTransaction( TInt aTxId )
     }
     
     
-TBool CAiContentObserverOptimizer::CanPublish( MAiPropertyExtension& aPlugin,
+TBool CAiContentObserverOptimizer::CanPublish( CHsContentPublisher& aPlugin,
                                            TInt aContent,
                                            TInt aIndex )
     {
     return iObserver.CanPublish( aPlugin, aContent, aIndex );
     }
   
-TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiContentObserverOptimizer::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        TInt aResource,
                                        TInt aIndex )
@@ -111,7 +111,7 @@ TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiContentObserverOptimizer::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        const TDesC16& aText,
                                        TInt aIndex )
@@ -137,7 +137,7 @@ TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiContentObserverOptimizer::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        const TDesC8& aBuf,
                                        TInt aIndex )
@@ -164,7 +164,7 @@ TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
+TInt CAiContentObserverOptimizer::Publish( CHsContentPublisher& aPlugin,
                                        TInt aContent,
                                        RFile& aFile,
                                        TInt aIndex )
@@ -190,7 +190,7 @@ TInt CAiContentObserverOptimizer::Publish( MAiPropertyExtension& aPlugin,
     }
     
     
-TInt CAiContentObserverOptimizer::Clean( MAiPropertyExtension& aPlugin,
+TInt CAiContentObserverOptimizer::Clean( CHsContentPublisher& aPlugin,
                                      TInt aContent,
                                      TInt aIndex )
     {

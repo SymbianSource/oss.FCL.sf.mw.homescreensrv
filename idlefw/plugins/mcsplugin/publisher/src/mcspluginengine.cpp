@@ -16,37 +16,36 @@
 */
 
 
-// INCLUDE FILES
-#include "mcspluginengine.h"
-
+// System includes
 #include <gulicon.h>
 #include <AknsItemID.h>
 #include <gslauncher.h>
-#include <aisystemuids.hrh>
-
 #include <mcsmenuitem.h>
 #include <mcsmenufilter.h>
 #include <mcsmenuoperation.h>
 #include <mcsmenuiconutility.h>
 #include <activefavouritesdbnotifier.h>
 #include <favouritesitemlist.h>
-
 #include <bautils.h>
 #include <StringLoader.h>
 #include <aknnotedialog.h>
+#include <AknsConstants.h>
 #include <avkon.rsg>
 #include <mcspluginres.rsg>
+#include <apgtask.h>
+#include <apgcli.h> 
+#include <apacmdln.h>
+#include <gfxtranseffect/gfxtranseffect.h>      
+#include <akntranseffect.h>
+
+// User includes
+#include <aisystemuids.hrh>
+#include "mcspluginengine.h"
 #include "mcsplugin.h"
 #include "mcsplugindata.h"
 #include "mcspluginuids.hrh"
 
-#include <apgtask.h>
-#include <apgcli.h> 
-#include <apacmdln.h>
-#include <gfxtranseffect/gfxtranseffect.h>      // For Transition effect
-#include <akntranseffect.h>
-
-#include <AknsConstants.h>
+// Constants
 _LIT( KMyMenuData, "matrixmenudata" );
 _LIT( KSkin,         "skin" );
 _LIT( KMif,          "mif" );
@@ -65,37 +64,47 @@ const TUid KHomescreenUid = { AI_UID3_AIFW_COMMON };
 const TUid KMMUid = { 0x101F4CD2 };
 
 // ======== LOCAL FUNCTIONS ========
-
+// ----------------------------------------------------------------------------
+// NextIdToken
+//
+// ----------------------------------------------------------------------------
+//
 static TPtrC NextIdToken( TLex& aLexer )
    {
    aLexer.SkipSpace();
    aLexer.Mark();
+  
    while( !aLexer.Eos() && !aLexer.Peek().IsSpace() && aLexer.Peek() != ')' )
        {
        aLexer.Inc();
        }
+   
    return aLexer.MarkedToken();
    }
 
 // ============================ MEMBER FUNCTIONS ===============================
-// ---------------------------------------------------------
-// Default constructor
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CMCSPluginEngine::CMCSPluginEngine
 //
-CMCSPluginEngine::CMCSPluginEngine( CMCSPlugin& aPlugin, const TDesC8& aInstanceUid ) 
-    : iPlugin( aPlugin ), iInstanceUid( aInstanceUid ),
-      iSuspend( EFalse )
+// ----------------------------------------------------------------------------
+//
+CMCSPluginEngine::CMCSPluginEngine( CMCSPlugin& aPlugin, 
+    const TDesC8& aInstanceUid ) 
+    : iPlugin( aPlugin ), iInstanceUid( aInstanceUid )    
     {
     }
     
-// ---------------------------------------------------------
-// Two-phased constructor.
-// Create instance of concrete ECOM interface implementation
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CMCSPluginEngine::NewL
+// 
+// ----------------------------------------------------------------------------
 //
-CMCSPluginEngine* CMCSPluginEngine::NewL( CMCSPlugin& aPlugin, const TDesC8& aInstanceUid )
+CMCSPluginEngine* CMCSPluginEngine::NewL( CMCSPlugin& aPlugin, 
+    const TDesC8& aInstanceUid )
     {
-    CMCSPluginEngine* self = new( ELeave ) CMCSPluginEngine( aPlugin, aInstanceUid );
+    CMCSPluginEngine* self = 
+        new( ELeave ) CMCSPluginEngine( aPlugin, aInstanceUid );
+    
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -103,9 +112,10 @@ CMCSPluginEngine* CMCSPluginEngine::NewL( CMCSPlugin& aPlugin, const TDesC8& aIn
     return self;
     }
 
-// ---------------------------------------------------------
-// Symbian 2nd phase constructor can leave
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CMCSPluginEngine::ConstructL
+//
+// ----------------------------------------------------------------------------
 //
 void CMCSPluginEngine::ConstructL()
     {
@@ -119,12 +129,21 @@ void CMCSPluginEngine::ConstructL()
         CCoeEnv::Static()->AddResourceFileL( resourceFile );
     InitL();
     StartObservingL();
+    
+    // Get "Undefined" item
+    CMenuFilter* filter = CMenuFilter::NewL();
+    CleanupStack::PushL( filter );
+    filter->HaveAttributeL( KMenuAttrUid, KMenuAttrUndefUid );
+    iUndefinedItemHeader = FindMenuItemL( *filter );
+    CleanupStack::PopAndDestroy( filter );
+    filter = NULL;
+    iUndefinedItem = CMenuItem::OpenL( iMenu, iUndefinedItemHeader );    
     }
     
-
-// ---------------------------------------------------------
-// Destructor.
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CMCSPluginEngine::~CMCSPluginEngine
+//
+// ----------------------------------------------------------------------------
 //
 CMCSPluginEngine::~CMCSPluginEngine()
     {
@@ -136,12 +155,19 @@ CMCSPluginEngine::~CMCSPluginEngine()
     //iWatcher->Cancel();
     delete iWatcher;
     delete iNotifyWatcher;
+
     CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );
+        
+    if ( iUndefinedItem )
+        {
+        delete iUndefinedItem;
+        iUndefinedItem = NULL;
+        }    
     }
 
-
 // ---------------------------------------------------------------------------
-// 
+// CMCSPluginEngine::InitL
+//
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::InitL()
@@ -149,60 +175,48 @@ void CMCSPluginEngine::InitL()
     iMenu.OpenL( KMyMenuData );
     iPluginData = CMCSPluginData::NewL( *this, iInstanceUid );
     iWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
-    TInt err = iNotifier.Open( iMenu ); 
+    
+    TInt err( iNotifier.Open( iMenu ) ); 
+    
     if ( err == KErrNone )
         {
         iNotifyWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::ENotify );
+        
         iNotifier.Notify( 0,
             RMenuNotifier::EItemsAddedRemoved |
             RMenuNotifier::EItemsReordered |
             RMenuNotifier::EItemAttributeChanged,
             iNotifyWatcher->iStatus );
+        
         iNotifyWatcher->WatchNotify( this );
         }
     }
 
 // ---------------------------------------------------------------------------
-// Tells the settings container to start observing for changes
+// CMCSPluginEngine::StartObservingL
+//
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::StartObservingL()
     {
-    // registering to bookmarks db. changes observing
-    User::LeaveIfError( iBookmarkSession.Connect() );
-    User::LeaveIfError( iBookmarkDb.Open( iBookmarkSession, KBrowserBookmarks ) );
-
-    iBookmarkDbObserver = new (ELeave) CActiveFavouritesDbNotifier(
-                                        iBookmarkDb, *this );
-    iBookmarkDbObserver->Start();
-
     // registering to mailbox db. changes observing
-    iMsvSession = CMsvSession::OpenAsObserverL( *this) ;
+    iMsvSession = CMsvSession::OpenAsObserverL( *this );
     }
 
 // ---------------------------------------------------------------------------
-// Tells the settings container to stop observing for changes
+// CMCSPluginEngine::StopObserving
+//
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::StopObserving()
-    {
-    if ( iBookmarkDbObserver )
-        {
-        delete iBookmarkDbObserver;
-        iBookmarkDbObserver = NULL;
-        }
-    iBookmarkDb.Close();
-    iBookmarkSession.Close();
-
-    if ( iMsvSession )
-        {
-        delete iMsvSession;
-        iMsvSession = NULL;
-        }
+    {       
+    delete iMsvSession;
+    iMsvSession = NULL;    
     }
 
 // ---------------------------------------------------------------------------
-// 
+// CMCSPluginEngine::MenuDataL
+//
 // ---------------------------------------------------------------------------
 //
 TMCSData& CMCSPluginEngine::MenuDataL( const TInt& aIndex )
@@ -211,7 +225,8 @@ TMCSData& CMCSPluginEngine::MenuDataL( const TInt& aIndex )
     }
 
 // ---------------------------------------------------------------------------
-// 
+// CMCSPluginEngine::MenuItemCount
+//
 // ---------------------------------------------------------------------------
 //
 TInt CMCSPluginEngine::MenuItemCount()
@@ -220,27 +235,32 @@ TInt CMCSPluginEngine::MenuItemCount()
     }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::FindMenuItemL
 // Returns the menu item header, which matches the given filter.
 // ---------------------------------------------------------------------------
 //
 TMenuItem CMCSPluginEngine::FindMenuItemL( CMenuFilter& aFilter )
     {    
     TMenuItem item;
-    const TInt root = iMenu.RootFolderL();
+    const TInt root( iMenu.RootFolderL() );
+    
     RArray<TMenuItem> items;
     CleanupClosePushL( items );
+    
     iMenu.GetItemsL( items, root, &aFilter, ETrue );
-    if( items.Count() > 0 )
+    
+    if ( items.Count() > 0 )
         {
-
         item = items[0];
         }
 
     CleanupStack::PopAndDestroy( &items );
+    
     return item;
     }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::FetchMenuItemL
 // Returns the actual menu item for the given header.
 // ---------------------------------------------------------------------------
 //
@@ -250,66 +270,123 @@ CMenuItem* CMCSPluginEngine::FetchMenuItemL( const TMenuItem& aMenuItem )
     }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::ItemIconL
 // Returns MCS default icon if attribute is 'icon' else parses the
 // skin definition from attribute and sets attributes to aMenuItem.
 // ---------------------------------------------------------------------------
 //
-CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem& aMenuItem, const TDesC& aAttr )
+CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem& aMenuItem, 
+    const TDesC& aAttr )
     {
+    CMenuItem* menuItem;
+
+    TInt id = aMenuItem.Id();
+
+    // because the flags might have changed, we have
+    // to get a fresh copy of menu item from Menu Server
+    CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
+    TUint32 flags = mi->Flags();
+    delete mi;
+
+    TUint32 isHidden = flags & TMenuItem::EHidden;
+    TUint32 isMissing = flags & TMenuItem::EMissing;
+
+    if ( iUndefinedItem && ( isHidden || isMissing ) )
+        {
+        menuItem = iUndefinedItem;
+        }
+    else
+        {
+        menuItem = &aMenuItem;
+        }
+
     CAknIcon* icon( NULL );
     CGulIcon* gIcon( NULL );
     TBool exists( ETrue );
-    if( aAttr != KIcon )
+    
+    if ( aAttr != KIcon )
         {
         // Resolve secondary icon definition from attribute
-        TPtrC iconDef = aMenuItem.GetAttributeL( aAttr, exists );
-        if( exists )
+        TPtrC iconDef( menuItem->GetAttributeL( aAttr, exists ) );
+    
+        if ( exists )
             {
-            exists = ConstructMenuItemForIconL( iconDef, aMenuItem );
+            exists = ConstructMenuItemForIconL( iconDef, *menuItem );
             }
         }
-    if( exists )
+    
+    if ( exists )
         {
-        icon = MenuIconUtility::GetItemIconL( aMenuItem );
-        if( icon )
+        icon = MenuIconUtility::GetItemIconL( *menuItem );
+    
+        if ( icon )
             {
             CleanupStack::PushL( icon );
-            gIcon = CGulIcon::NewL(icon->Bitmap(), icon->Mask());
+            
+            gIcon = CGulIcon::NewL( icon->Bitmap(), icon->Mask() );
+            
             // Detach and delete
             icon->SetBitmap( NULL );
             icon->SetMask( NULL );    
+            
             CleanupStack::PopAndDestroy( icon );
             }
         }
+    
     return gIcon;
     }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::ItemTextL
 // Returns text string for the given attribute
 // ---------------------------------------------------------------------------
 //
-TPtrC CMCSPluginEngine::ItemTextL( CMenuItem& aMenuItem, const TDesC& aAttr  )
+TPtrC CMCSPluginEngine::ItemTextL( CMenuItem& aMenuItem, const TDesC& aAttr )
     {    
-    TBool exists( KErrNotFound );
-    TPtrC name = aMenuItem.GetAttributeL( aAttr, exists );
-    if( exists )
+    // if item is hidden or missing (mmc card removed)
+    // use "Undefined" text instead
+    CMenuItem* menuItem;
+
+    TInt id = aMenuItem.Id();
+
+    // because the flags might have changed, we have
+    // to get a fresh copy of the menu item from Menu Server
+    CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
+    TUint32 flags = mi->Flags();
+    delete mi;
+
+    TUint32 isHidden = flags & TMenuItem::EHidden;
+    TUint32 isMissing = flags & TMenuItem::EMissing;
+
+    if ( iUndefinedItem && ( isHidden || isMissing ) )
         {
-        return name;
+        menuItem = iUndefinedItem;
         }
     else
         {
-        return KNullDesC();
+        menuItem = &aMenuItem;
         }
+        
+    TBool exists( KErrNotFound );
+    
+    TPtrC name( menuItem->GetAttributeL( aAttr, exists ) );
+    
+    if ( exists )
+        {
+        return name;
+        }
+
+    return KNullDesC();
     }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::LaunchItemL
 // Calls the open command for the given menu item header
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
     {
-
-    if ( iSuspend )
+    if ( iBackupRestore )
         {
         HBufC* temp = StringLoader::LoadLC( R_MCS_DISABLE_OPEN_ITEM );
 
@@ -318,36 +395,71 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
             CAknNoteDialog::ENoTimeout );
         dialog->SetTextL( temp->Des() );
         dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
-        CleanupStack::PopAndDestroy( temp );
+        
+        CleanupStack::PopAndDestroy( temp );        
         return;
         }
+    
     if( iWatcher->IsActive())
         {
         return;
         }
 
-
-    TMCSData& dataItem = iPluginData->DataItemL( aIndex );
-    CMenuItem* item = CMenuItem::OpenL( iMenu, dataItem.MenuItem());
+    TMCSData& dataItem( iPluginData->DataItemL( aIndex ) );
+    
+    CMenuItem* item( CMenuItem::OpenL( iMenu, dataItem.MenuItem().Id() ) );
     CleanupStack::PushL( item );
-    TPtrC type = item->Type();
+    
+
+    TBool attrExists = ETrue;
+
+    TPtrC uid = item->GetAttributeL( KMenuAttrUid, attrExists );
+
+    // trying to run non-existing application ( that was replaced by "Undefined" app )
+    // OR trying to run hidden or missing application (e.g. unistalled app 
+    // or app on MMC which was removed )
+    // -> We display a note for a user that this is not possible¨
+    TUint32 isHidden = item->Flags() & TMenuItem::EHidden;
+    TUint32 isMissing = item->Flags() & TMenuItem::EMissing;
+
+    if ( ( attrExists && uid == KMenuAttrUndefUid ) || isHidden || isMissing )
+        {
+        CleanupStack::PopAndDestroy( item );
+
+        HBufC* temp = StringLoader::LoadLC( R_MCS_DISABLE_OPEN_ITEM_MISSING );
+
+        CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
+            CAknNoteDialog::EConfirmationTone,
+            CAknNoteDialog::ENoTimeout );
+        dialog->SetTextL( temp->Des() );
+        dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
+        CleanupStack::PopAndDestroy( temp );
+        temp = NULL;
+
+        return;
+        }
+
+    // run item based on its type
+    TPtrC type( item->Type() );
 
     // run folder
     if ( type == KMenuTypeFolder )
         {
-
         // message for MM application
         HBufC8* message; 
 
         // prepare message for launching folder
-        TBool hasApplicationGroupName = EFalse;
-        TPtrC applicationGroupName = item->GetAttributeL( KApplicationGroupName, 
-                                                          hasApplicationGroupName );
+        TBool hasApplicationGroupName( EFalse );
+        
+        TPtrC applicationGroupName( item->GetAttributeL(  
+            KApplicationGroupName, hasApplicationGroupName ) );
+                                                          
         if ( !hasApplicationGroupName )
             {
             CleanupStack::PopAndDestroy( item );
             return;
             }
+        
         message = HBufC8::NewLC( KMMApplication().Length() + 
                                  KSetFocusString().Length() +
                                  applicationGroupName.Length() + 
@@ -360,21 +472,25 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
 
         // find MM application
         TApaTaskList taskList( CCoeEnv::Static()->WsSession() );
-        TApaTask task = taskList.FindApp( KMMUid );
+        TApaTask task( taskList.FindApp( KMMUid ) );
 
         if ( task.Exists() )
             {
             // MM is already running in background - send APA Message
-            task.SendMessage( TUid::Uid( KUidApaMessageSwitchOpenFileValue ), *message );
+            task.SendMessage( 
+                TUid::Uid( KUidApaMessageSwitchOpenFileValue ), *message );
             }
         else
             { 
             // MM not running yet - use Command Line Tail
             RApaLsSession appArcSession;
             CleanupClosePushL( appArcSession );
+            
             User::LeaveIfError( appArcSession.Connect() );
+            
             TApaAppInfo appInfo;
-            TInt err = appArcSession.GetAppInfo( appInfo, KMMUid );
+            TInt err( appArcSession.GetAppInfo( appInfo, KMMUid ) );
+            
             if ( err == KErrNone )
                 {
                 CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
@@ -384,26 +500,31 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
                 appArcSession.StartApp( *cmdLine );
                 CleanupStack::PopAndDestroy( cmdLine );
                 }
+            
             CleanupStack::PopAndDestroy( &appArcSession ); 
             }
+        
         CleanupStack::PopAndDestroy( message );
         }
     else
         {
         TBool exists( EFalse );
+        
         TPtrC desc( item->GetAttributeL( KMenuAttrUid, exists ) );
         
-        if( exists )
+        if ( exists )
             {      
             _LIT( KPrefix, "0x" );
+            
             const TInt pos( desc.FindF( KPrefix ) );
             
-            if( pos != KErrNotFound )
+            if ( pos != KErrNotFound )
                 {
                 TLex lex( desc.Mid( pos + KPrefix().Length() ) );
+                
                 // Hex parsing needs unsigned int
-                TUint32 value = 0;
-                const TInt parseResult = lex.Val( value, EHex );
+                TUint32 value( 0 );
+                const TInt parseResult( lex.Val( value, EHex ) );
                 
                 if ( parseResult == KErrNone )
                     {
@@ -411,173 +532,94 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
                     TInt32 value32( value );
                     uid.iUid = value32;   
                     
-                    if( uid != KNullUid )
+                    if ( uid != KNullUid )
                         {
                         //start a full screen effect
                         GfxTransEffect::BeginFullScreen( 
-                        AknTransEffect::EApplicationStart,
-                        TRect(0,0,0,0), 
-                        AknTransEffect::EParameterType, 
-                        AknTransEffect::GfxTransParam( uid,
-                        AknTransEffect::TParameter::EActivateExplicitContinue ));
+                            AknTransEffect::EApplicationStart,
+                            TRect(), 
+                            AknTransEffect::EParameterType, 
+                            AknTransEffect::GfxTransParam( uid,
+                            AknTransEffect::TParameter::EActivateExplicitContinue ) );
                         }
                     }
                 }
             }
 
         // run application/shortcut/bookmark
-        CMenuOperation* operation = item->HandleCommandL(
-            KMenuCmdOpen, KNullDesC8, iWatcher->iStatus );
+        CMenuOperation* operation( item->HandleCommandL(
+            KMenuCmdOpen, KNullDesC8, iWatcher->iStatus ) );
+        
         iWatcher->Watch( operation );  
         }
+    
     CleanupStack::PopAndDestroy( item );
     }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::HandleNotifyL
 // Handle the change in Menu Content
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::HandleNotifyL()
     {
-    TInt count( iPluginData->DataCount());
-    for( TInt i = 0; i < count; i++ )
+    TInt count( iPluginData->DataCount() );
+    
+    for ( TInt i = 0; i < count; i++ )
         {
-        TMCSData& data = iPluginData->DataItemL(i);
+        TMCSData& data( iPluginData->DataItemL(i) );
+        data.SetDirty( ETrue );
+        
         // Check that all the data still exist is MCS, if flag is hidden or
         // missing, we have to remove data from UI
-        CMenuItem* menuItem = CMenuItem::OpenL( iMenu, data.MenuItem().Id() );
-        CleanupStack::PushL( menuItem );
-        if ( !menuItem || 
-             ( menuItem->Flags() & TMenuItem::EHidden ) ||
-             ( menuItem->Flags() & TMenuItem::EMissing ) )
+        CMenuItem* menuItem = NULL; 
+
+        TRAP_IGNORE (
+                menuItem = CMenuItem::OpenL( iMenu, data.MenuItem().Id() );
+        )
+
+        // item not found. Use "Undefined" item as a replacement
+        if ( !menuItem )
             {
-            // Get the replacement for hidden data
-            CMenuFilter* filter = CMenuFilter::NewL();
-            CleanupStack::PushL( filter );
-            // 'Undefined' item
-            filter->HaveAttributeL( KMenuAttrUid, KMenuAttrUndefUid );
-            TMenuItem undefItem = FindMenuItemL( *filter );
-            iPluginData->ReplaceMenuItemL( i, undefItem );
-            iPluginData->SaveSettingsL( i, *FetchMenuItemL(undefItem) );
-            CleanupStack::PopAndDestroy( filter );
+            CleanupStack::PushL( menuItem );
+            iPluginData->ReplaceMenuItemL( i, iUndefinedItemHeader );
+            iPluginData->SaveSettingsL( i, *iUndefinedItem );
+            CleanupStack::Pop( menuItem );
             }
-        CleanupStack::PopAndDestroy( menuItem );
+
+        delete menuItem;
         menuItem = NULL;
         }
+
     // Notification must be activated again
     iNotifyWatcher->Cancel();
+    
     iNotifier.Notify( 0,
-                RMenuNotifier::EItemsAddedRemoved |
-                RMenuNotifier::EItemsReordered |
-                RMenuNotifier::EItemAttributeChanged,
-                iNotifyWatcher->iStatus );
+        RMenuNotifier::EItemsAddedRemoved |
+        RMenuNotifier::EItemsReordered |
+        RMenuNotifier::EItemAttributeChanged,
+        iNotifyWatcher->iStatus );
 
     iNotifyWatcher->WatchNotify( this );
+    
     // Publish changed data
     iPlugin.PublishL();
     }
 
 // ---------------------------------------------------------------------------
-// From class MMsvSessionObserver.
+// CMCSPluginEngine::HandleSessionEventL
 // Handles an event from the message server.
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginEngine::HandleSessionEventL(
-    TMsvSessionEvent aEvent, TAny* /*aArg1*/, TAny* /*aArg2*/, TAny* /*aArg3*/)
+void CMCSPluginEngine::HandleSessionEventL( TMsvSessionEvent aEvent, 
+    TAny* /*aArg1*/, TAny* /*aArg2*/, TAny* /*aArg3*/)
     {
     switch ( aEvent )
         {
-    case EMsvEntriesDeleted:
+        case EMsvEntriesDeleted:
         // fall-through intended here
-    case EMsvEntriesChanged:
-        {
-
-        }
-        break;
-    default:
-        break;
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// From class MFavouritesDbObserver.
-// Handles database event.
-// -----------------------------------------------------------------------------
-//
-void CMCSPluginEngine::HandleFavouritesDbEventL( RDbNotifier::TEvent aEvent )
-    {
-    switch ( aEvent )
-        {
-        case RDbNotifier::ERollback:
-            // fall-through intended here
-        case RDbNotifier::ERecover:
-            // fall-through intended here
-        case RDbNotifier::ECommit:
+        case EMsvEntriesChanged:
             {
-            // Get list of favourites bookmarks
-            CFavouritesItemList* favItems =
-                    new (ELeave) CFavouritesItemList();
-            CleanupStack::PushL( favItems );
-            TInt err = iBookmarkDb.GetAll( *favItems, KFavouritesNullUid,
-                    CFavouritesItem::EItem );
-            if ( err != KErrNone )
-                {
-                ASSERT(0);
-                }
-            TInt count_fav = favItems->Count();
-
-            // Do for each plugin data (4x times)
-            TInt count_data( iPluginData->DataCount() );
-            for ( TInt item_index = 0; item_index < count_data; item_index++ )
-                {
-                // Get item ID and open its menu related item
-                TMCSData& data = iPluginData->DataItemL( item_index );
-                TInt itemID( data.MenuItem().Id() );
-                CMenuItem* menuItem = CMenuItem::OpenL( iMenu, itemID );
-                CleanupStack::PushL( menuItem );
-
-                // Get URL aatribute
-                TBool attrExists = EFalse;
-                TPtrC url = menuItem->GetAttributeL( _L("url"), attrExists );
-                // If bookmark...
-                if ( attrExists )
-                    {
-                    // Get bookmark UID
-                    TPtrC uid_item_ptr = menuItem->GetAttributeL(
-                            KMenuAttrUid, attrExists );
-
-                    // Compare with each item in fav. bookmarks list
-                    TBool itemExists = EFalse;
-                    for ( TInt fav_index = count_fav - 1; fav_index >= 0; fav_index-- ) // newest on top
-                        {
-                        // Get list item UID 
-                        TUid uid_fav = TUid::Uid( favItems->At( fav_index )->Uid() );
-                        if ( uid_fav.Name() == uid_item_ptr )
-                            {
-                            // Bookmark still exist in fav. bookmarks list
-                            itemExists = ETrue;
-                            break;
-                            }
-                        }
-
-                    if ( !itemExists )
-                        {
-                        // If item not axist any more, replace it by undefined icon
-                        CMenuFilter* filter = CMenuFilter::NewL();
-                        CleanupStack::PushL( filter );
-                        // 'Undefined' item
-                        filter->HaveAttributeL( KMenuAttrUid,
-                                KMenuAttrUndefUid );
-                        TMenuItem undefItem = FindMenuItemL( *filter );
-                        iPluginData->ReplaceMenuItemL( item_index, undefItem );
-                        iPluginData->SaveSettingsL( item_index, *FetchMenuItemL(
-                                undefItem ) );
-                        CleanupStack::PopAndDestroy( filter );
-                        }
-                    }
-                CleanupStack::PopAndDestroy( menuItem );
-                }
-            CleanupStack::PopAndDestroy( favItems );
             }
             break;
         default:
@@ -586,91 +628,103 @@ void CMCSPluginEngine::HandleFavouritesDbEventL( RDbNotifier::TEvent aEvent )
     }
 
 // ---------------------------------------------------------------------------
-// Resumes the engine
+// CMCSPluginEngine::SetBackupRestore
+//
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginEngine::ResumeL()
+void CMCSPluginEngine::SetBackupRestore( TBool aBackupRestore )
     {
-    iSuspend = EFalse;
+    iBackupRestore = aBackupRestore;
     }
 
 // ---------------------------------------------------------------------------
-// Suspends the engine
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginEngine::Suspend()
-    {
-    iSuspend = ETrue;
-    }
-
-// ---------------------------------------------------------------------------
+// CMCSPluginEngine::ShowSettingsL
 // Launch General Settings plugin
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::ShowSettingsL()
     { 
     TUid uid = {AI_UID_ECOM_IMPLEMENTATION_SETTINGS_MCSPLUGIN};
-    CGSLauncher* l = CGSLauncher::NewLC();
-    l->LaunchGSViewL ( uid,
-                       KHomescreenUid,
-                       iInstanceUid );            
-    CleanupStack::PopAndDestroy( l );
-
+    
+    CGSLauncher* launcher = CGSLauncher::NewLC();
+    
+    launcher->LaunchGSViewL ( uid, KHomescreenUid, iInstanceUid );
+                                                        
+    CleanupStack::PopAndDestroy( launcher );
     }
+
 // ---------------------------------------------------------------------------
-// ResolveSkinItemId
+// CMCSPluginEngine::ConstructMenuItemForIconL
 // Syntax: skin(major minor):mif(filename bimapId maskId)
 // ---------------------------------------------------------------------------
 //
-TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath, CMenuItem& aMenuItem )
+TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath, 
+    CMenuItem& aMenuItem )
    {
-   TInt pos = aPath.Locate( ':' );
-   if( pos == KErrNotFound )
+   TInt pos( aPath.Locate( ':' ) );
+   
+   if ( pos == KErrNotFound )
        {
        pos = aPath.Length();
        }
-   TPtrC skin = aPath.Left( pos );
-   TInt sf = skin.FindF( KSkin );
-   if( sf == KErrNotFound )
+   
+   TPtrC skin( aPath.Left( pos ) );
+   TInt sf( skin.FindF( KSkin ) );
+   
+   if ( sf == KErrNotFound )
        {
        return EFalse;
        }
-   TPtrC temp = skin.Mid( sf + KSkin().Length());
-   TLex input( temp );
+   
+   TPtrC temp( skin.Mid( sf + KSkin().Length() ) );
+   
+   TLex input( temp );   
    input.SkipSpace();
-   if( !input.Eos() && input.Peek() == '(')
+   
+   if ( !input.Eos() && input.Peek() == '(' )
        {
        input.Inc();
        }
-   TPtrC majorId = NextIdToken( input );
-   TPtrC minorId = NextIdToken( input );
+   
+   TPtrC majorId( NextIdToken( input ) );
+   TPtrC minorId( NextIdToken( input ) );
+   
    aMenuItem.SetAttributeL( KMenuAttrIconSkinMajorId, majorId );
    aMenuItem.SetAttributeL( KMenuAttrIconSkinMinorId, minorId );
       
    //TPtrC mif = aPath.Mid( pos + 1 );
    //TInt mf = mif.FindF( KMif );
-   if( aPath.Length() > pos && (aPath.Mid( pos + 1 ).FindF( KMif ) != KErrNotFound ))
+   
+   if ( aPath.Length() > pos && 
+      ( aPath.Mid( pos + 1 ).FindF( KMif ) != KErrNotFound ) )
        {
-       TPtrC mif = aPath.Mid( pos + 1 );
-       TInt mf = mif.FindF( KMif );
+       TPtrC mif( aPath.Mid( pos + 1 ) );
+       TInt mf( mif.FindF( KMif ) );
+       
        //TPtrC temp1 = mif.Mid( mf+ KMif().Length());
-       TLex input1( mif.Mid( mf+ KMif().Length()) );
+       
+       TLex input1( mif.Mid( mf + KMif().Length() ) );
        input1.SkipSpace();
-       if( !input1.Eos() && input1.Peek() == '(')
+       
+       if ( !input1.Eos() && input1.Peek() == '(' )
           {
           input1.Inc();
           }
-       TPtrC file = NextIdToken( input1 );
-       TPtrC bitmapId = NextIdToken( input1 );
-       TPtrC maskId = NextIdToken( input1 );
+       
+       TPtrC file( NextIdToken( input1 ) );
+       TPtrC bitmapId( NextIdToken( input1 ) );
+       TPtrC maskId( NextIdToken( input1 ) );
+       
        aMenuItem.SetAttributeL( KMenuAttrIconFile, file );
        aMenuItem.SetAttributeL( KMenuAttrIconId, bitmapId );
        aMenuItem.SetAttributeL( KMenuAttrMaskId, maskId );
        }
+   
    return ETrue;
    }
 
 // ---------------------------------------------------------------------------
+// CMCSPluginEngine::CleanMCSItemsL
 // Called during plugin desctruction
 // Decrements reference counters of all run-time generated items
 // and deletes those which have reference counter == 0
@@ -679,26 +733,32 @@ TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath, CMenuItem
 void CMCSPluginEngine::CleanMCSItemsL()
     {
     const TInt count( iPluginData->DataCount() );
+    
     for( TInt i = 0; i < count; i++ )
         {
-        TMCSData& data = iPluginData->DataItemL(i);
+        TMCSData& data( iPluginData->DataItemL(i) );
         
         CMenuItem* menuItem = CMenuItem::OpenL( iMenu, data.MenuItem().Id() );        
-        if( !menuItem )
+        
+        if ( !menuItem )
             {
             continue;
-            }        
+            }
+        
         CleanupStack::PushL( menuItem );
         
         // check if ref_count attribute exists
-        TBool exists = EFalse;
-        TPtrC param = menuItem->GetAttributeL( KMenuAttrRefcount, exists );
+        TBool exists( EFalse );
+        
+        TPtrC param( menuItem->GetAttributeL( KMenuAttrRefcount, exists ) );
+        
         if( exists )
             {                
-            const TInt references = UpdateMenuItemsRefCountL( menuItem, -1 );
+            const TInt references( UpdateMenuItemsRefCountL( menuItem, -1 ) );
             
             // Create a nested loop inside CActiveScheduler.
-            CActiveSchedulerWait* wait = new (ELeave) CActiveSchedulerWait;
+            CActiveSchedulerWait* wait = 
+                new ( ELeave ) CActiveSchedulerWait;
             CleanupStack::PushL( wait );
             
             if( references > 0 )
@@ -716,7 +776,8 @@ void CMCSPluginEngine::CleanMCSItemsL()
                  // so remove it from MCS
                  if( !iWatcher->IsActive() )
                      {
-                     CMenuOperation* op = iMenu.RemoveL( menuItem->Id(), iWatcher->iStatus );
+                     CMenuOperation* op = 
+                         iMenu.RemoveL( menuItem->Id(), iWatcher->iStatus );
                      iWatcher->StopAndWatch( op, wait );
                      
                       // Start the nested scheduler loop.
@@ -735,16 +796,18 @@ void CMCSPluginEngine::CleanMCSItemsL()
 
 
 // ---------------------------------------------------------------------------
-// Helper method. Adds a given constant to a value of reference counter  
+// CMCSPluginEngine::UpdateMenuItemsRefCountL
+// Adds a given constant to a value of reference counter  
 // ---------------------------------------------------------------------------
 //
 TInt CMCSPluginEngine::UpdateMenuItemsRefCountL( CMenuItem* aItem, 
-                                                 const TInt aValueToAdd )
+    const TInt aValueToAdd )
     {
-    TBool exists = EFalse;
+    TBool exists( EFalse );
     CleanupStack::PushL( aItem ); 
-    TPtrC param = aItem->GetAttributeL( KMenuAttrRefcount, exists );
+    TPtrC param( aItem->GetAttributeL( KMenuAttrRefcount, exists ) );
     CleanupStack::Pop( aItem );
+    
     if ( exists )
         {
         TInt references;
@@ -758,8 +821,13 @@ TInt CMCSPluginEngine::UpdateMenuItemsRefCountL( CMenuItem* aItem,
         CleanupStack::PushL( aItem ); 
         aItem->SetAttributeL( KMenuAttrRefcount, buf);
         CleanupStack::Pop( aItem );
+    
         // return new ref_count
         return references;
         }
+    
     return -1;
     }
+
+// End of file
+

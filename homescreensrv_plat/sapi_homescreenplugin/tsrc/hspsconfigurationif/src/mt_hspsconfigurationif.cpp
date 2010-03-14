@@ -116,6 +116,8 @@
 #include "mt_hsps_setactiveplugin_6.h"
 // restore configurations
 #include "mt_hsps_restoreconfigurations_1.h"
+// customizations
+#include "mt_hsps_customization_1.h"
 
 // ======== LOCAL CONSTANTS ====================================================
 
@@ -222,11 +224,12 @@ void MT_CHSPSConfigurationIf::SetupL()
     installationService->UninstallConfigurationL( KHSPSMTInterfaceUid, KHSPSFinnishWidgetConf );
     installationService->UninstallConfigurationL( KHSPSMTInterfaceUid, KHSPSInstalledWidgetConf );
 
-    // Remove test configurations from import folder
+    // Remove test configurations from import & install folder at C drive
     CFileMan* fileManager = CFileMan::NewL( iFileserver );
     CleanupStack::PushL( fileManager );
     fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133.dat" ) );     
     fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) );
+    fileManager->RmDir( _L( "d:\\data\\mt_hsps\\installed_widget\\widgetconfiguration.xml" ) );    
     CleanupStack::PopAndDestroy( fileManager );
     
     // Install test configurations    
@@ -2944,6 +2947,51 @@ void MT_CHSPSConfigurationIf::RestoreConfigurations_1_L()
     }
 
 //------------------------------------------------------------------------------
+// Test case: Customization(1)
+//------------------------------------------------------------------------------
+void MT_CHSPSConfigurationIf::Customization_1_L()
+    {        
+    // Pre conditions
+        
+    EUNIT_PRINT( _L8( "Pre conditions: Set Active configuration Minimal" ) );
+    SetActiveConfigurationL( KHSPSTestAppUid, KHSPSActiveConfMinimal );    
+        
+    EUNIT_PRINT( _L8( "Pre conditions: Attach to HSPS service IConfiguration interface" ) );
+    AttachServiceL( KHSPS, KHSPSConfigurationIf, KHSPSTestAppUid );
+            
+    // Simulate customization by copying configuration files to D drive ("ROM" stuff is on C)
+    CFileMan* fileManager = CFileMan::NewL( iFileserver );
+    CleanupStack::PushL( fileManager );
+    User::LeaveIfError( 
+        fileManager->Copy(
+            _L( "c:\\data\\mt_hsps\\installed_widget\\widgetconfiguration_customized.xml" ),
+            _L( "d:\\data\\mt_hsps\\installed_widget\\widgetconfiguration.xml" ),
+            CFileMan::ERecurse|CFileMan::EOverWrite 
+            )             
+        );    
+    CleanupStack::PopAndDestroy( fileManager );
+                
+    MT_CHspsInstallationService* installationService = MT_CHspsInstallationService::NewL();    
+    CleanupStack::PushL( installationService );
+        
+    // Test step 1: install installed_widget which has customized content in D drive
+    EUNIT_PRINT( _L8( "Test step 1" ) );        
+    installationService->InstallConfigurationL( KHSPSInstallInstalledWidgetConf );
+    EUNIT_PRINT( _L8( "Test step passed" ) );    
+            
+    // Test step 2: check settings from the installed_widget, it should hold
+    // settings from the widgetconfiguration_customized.xml file    
+    EUNIT_PRINT( _L8( "Test step 2" ) );             
+    RunTestStepSyncL(
+        ( TUint8* )customization_1_ts_2_method,
+        ( TUint8* )customization_1_ts_2_input,
+        ( TUint8* )customization_1_ts_2_output );             
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+                
+    CleanupStack::PopAndDestroy( installationService );    
+    }
+
+//------------------------------------------------------------------------------
 // Test case table
 //------------------------------------------------------------------------------
 EUNIT_BEGIN_TEST_TABLE(
@@ -3470,7 +3518,14 @@ EUNIT_BEGIN_TEST_TABLE(
        "SetActivePlugin",
        "FUNCTIONALITY",
        SetupL, RestoreConfigurations_1_L, Teardown )
-       
+
+    EUNIT_TEST(   
+       "Customization(1)",
+       "IConfiguration",
+       "SetActivePlugin",
+       "FUNCTIONALITY",
+       SetupL, Customization_1_L, Teardown )
+
        
     EUNIT_END_TEST_TABLE
 

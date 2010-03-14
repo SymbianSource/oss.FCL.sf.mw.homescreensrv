@@ -19,14 +19,17 @@
 #ifndef C_AIMCNPUBLISHER_H
 #define C_AIMCNPUBLISHER_H
 
-
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "aidevicestatuspublisher.h"
 #include "aidevicestatuscontentmodel.h"
 #include "ainetworkinfoobserver.h"
 
+// Forward declarations
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
 class CAiNetworkInfoListener;
 
 /**
@@ -39,8 +42,9 @@ class CAiNetworkInfoListener;
  *
  *  @since S60 3.2
  */
-class CAiMCNPublisher : public CBase, public MAiDeviceStatusPublisher,
-                                public MAiNetworkInfoObserver
+NONSHARABLE_CLASS( CAiMCNPublisher ) : public CBase, 
+    public MAiDeviceStatusPublisher,
+    public MAiNetworkInfoObserver
     {
 public:
 
@@ -54,7 +58,7 @@ protected:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
@@ -87,7 +91,7 @@ private: // data
      * Property extension.
      * Not own.
      */
-    MAiPropertyExtension* iExtension;
+    CHsContentPublisher* iExtension;
 
     /**
      * Network info listener.

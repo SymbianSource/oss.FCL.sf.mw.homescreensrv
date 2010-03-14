@@ -19,108 +19,112 @@
 #ifndef WRTDATAOBSERVER_H
 #define WRTDATAOBSERVER_H
 
-// INCLUDE FILES
+// System includes
 #include <liwcommon.h>
 
-// FORWARD DECLARATIONS
+// User includes
+
+// Forward declarations
 class CWrtData;
 
-// CLASS DECLARATION
 /**
- *  @ingroup group_wrtdataplugin
+ * @ingroup group_wrtdataplugin
  *
- *  Wrt data observer
+ * Wrt data observer
  *
- *  @since S60 v3.2
+ * @since S60 5.2
  */
-class CWrtDataObserver : public CBase, public MLiwNotifyCallback
+NONSHARABLE_CLASS( CWrtDataObserver ) : public CBase, 
+    public MLiwNotifyCallback
     {
-    public:
+public:
+    // constructor and destructor
 
-        /**
-        * Part of the two phased constuction
-        *
-        * @param aInterface reference of the interface 
-        * @param aData reference of the wrt data object
-        * @return none
-        */
-        static CWrtDataObserver* NewL( MLiwInterface* aInterface, CWrtData* aData );
+    /**
+    * Part of the two phased constuction
+    *
+    * @param aInterface reference of the interface 
+    * @param aData reference of the wrt data object
+    * @return none
+    */
+    static CWrtDataObserver* NewL( MLiwInterface* aInterface, CWrtData* aData );
     
-        /**
-        * Destructor
-        *
-        * @param none
-        * @return none
-        */   
-        ~CWrtDataObserver();
+    /**
+    * Destructor
+    *
+    * @param none
+    * @return none
+    */   
+    ~CWrtDataObserver();
 
-    private :
+private:
+    // constructors
     
-        /**
-        * Constructor
-        *
-        * @param none
-        * @return none
-        */
-        CWrtDataObserver();
-        
-        /**
-        * Part of the two phased construction
-        *
-        * @param aInterface reference of the interface
-        * @param aData reference of the wrt data object
-        * @return void
-        */
-        void ConstructL( MLiwInterface* aInterface, CWrtData* aData );
+    /**
+    * Constructor
+    *
+    * @param none
+    * @return none
+    */
+    CWrtDataObserver();
+    
+    /**
+    * Part of the two phased construction
+    *
+    * @param aInterface reference of the interface
+    * @param aData reference of the wrt data object
+    * @return void
+    */
+    void ConstructL( MLiwInterface* aInterface, CWrtData* aData );
        
-    public:  //from MLiwNotifyCallbackc
+public:  
+    //from MLiwNotifyCallbackc
     
-        /**
-        * Handles notifications caused by an asynchronous Execute*CmdL call
-        * or an event.
-        *
-        * @param aCmdId The service command associated to the event.
-        * @param aEventId occurred event, see LiwCommon.hrh.
-        * @param aEventParamList Event parameters, if any, as defined per
-        *        each event.
-        * @param aInParamList Input parameters, if any, given in the
-        *        related HandleCommmandL.
-        * @return Error code for the call back.
-        */
-        virtual TInt HandleNotifyL(
-            TInt aCmdId,
-            TInt /*aEventId*/,
-            CLiwGenericParamList& aEventParamList,
-            const CLiwGenericParamList& /*aInParamList*/);
+    /**
+    * Handles notifications caused by an asynchronous Execute*CmdL call
+    * or an event.
+    *
+    * @param aCmdId The service command associated to the event.
+    * @param aEventId occurred event, see LiwCommon.hrh.
+    * @param aEventParamList Event parameters, if any, as defined per
+    *        each event.
+    * @param aInParamList Input parameters, if any, given in the
+    *        related HandleCommmandL.
+    * @return Error code for the call back.
+    */
+    virtual TInt HandleNotifyL(
+        TInt aCmdId,
+        TInt /*aEventId*/,
+        CLiwGenericParamList& aEventParamList,
+        const CLiwGenericParamList& /*aInParamList*/);
 
-    public:
+public:
+    // new functions
     
-        /**
-        * Registers to CPS for add, delete , update and execute notifications
-        * @aFilter - filter for input parameter list
-        * @return void.
-        */
-        void RegisterL( CLiwDefaultMap* aFilter );
-    
-        /**
-        * Cancel all the registered notifications. 
-        * @return void.
-        */
-        void ReleaseL();
-            
-    private:
-            
-        // Reference of 
-        // Not owned
-        MLiwInterface* iInterface;
+    /**
+    * Registers to CPS for add, delete , update and execute notifications
+    * @aFilter - filter for input parameter list
+    * @return void.
+    */
+    void RegisterL( CLiwDefaultMap* aFilter );
+
+    /**
+    * Cancel all the registered notifications. 
+    * @return void.
+    */
+    void ReleaseL();
         
-        // Reference of the wrt data
-        // Not owned
-        CWrtData* iData;
+private:
+    // data 
         
-        // Call back error code
-        TInt iError;
-        
+    /** Interface Reference, not owned */     
+    MLiwInterface* iInterface;    
+    // Reference of the wrt data, not owned */    
+    CWrtData* iData;    
+    /** Call back error code */
+    TInt iError;        
     };
 
-#endif /*WRTDATAOBSERVER_H*/
+#endif // WRTDATAOBSERVER_H
+
+// End of file

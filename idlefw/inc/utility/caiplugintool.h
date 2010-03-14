@@ -15,18 +15,19 @@
 *
 */
 
-
 #ifndef C_AIPLUGINTOOL_H
 #define C_AIPLUGINTOOL_H
 
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "aiplugintool.h"
 
-class TAiPublisherInfo;
-class CAiContentPublisher;
+// Forward declarations
+class THsPublisherInfo;
+class CHsContentPublisher;
 class MAiContentItemIterator;
-class MAiPropertyExtension;
-class MAiEventHandlerExtension;
 
 /**
 *  @ingroup group_aiutils
@@ -39,35 +40,34 @@ NONSHARABLE_CLASS( CAiPluginTool ) :
     public CBase, public MAiPluginTool
 	{
 public:
+    // Constructor
 	
     static CAiPluginTool* NewL();
     
 private:
-
+    // Constructors
+    
+    /**
+     * C++ default contructor
+     */
     CAiPluginTool();
     
+    /**
+     * 2nd phase constructor
+     */
     void ConstructL();
     
+private:
+    // from MAiPluginTool
+
+    MAiContentItemIterator* ContentItemIterator( 
+        CHsContentPublisher& aContentPublisher,        
+        CHsContentPublisher::TProperty aType = CHsContentPublisher::EPublisherContent );
+    
     void Release();
-
-    const TAiPublisherInfo* PublisherInfoL(
-                                CAiContentPublisher& aContentPublisher );
-
-    MAiContentItemIterator* ContentItemIteratorL(
-                                CAiContentPublisher& aContentPublisher,
-                                TInt aContentType = EAiPublisherContent );
-
-    MAiPropertyExtension* PropertyExt(
-                                CAiContentPublisher& aContentPublisher );
-
-    MAiEventHandlerExtension* EventHandlerExt(
-                                CAiContentPublisher& aContentPublisher );
-
     };
 
 #endif // M_AIPLUGINTOOL_H
 
-
-
-
+// End of file
 

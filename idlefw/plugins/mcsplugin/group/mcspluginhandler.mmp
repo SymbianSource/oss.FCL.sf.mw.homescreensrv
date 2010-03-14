@@ -45,6 +45,7 @@ LIBRARY         sendui.lib
 LIBRARY         viewcli.lib
 LIBRARY         apparc.lib
 LIBRARY         apgrfx.lib
+LIBRARY         msgs.lib
 
 SOURCEPATH      ../data
 START RESOURCE  mcspluginhandler.rss

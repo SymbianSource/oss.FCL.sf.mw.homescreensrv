@@ -106,16 +106,10 @@ void CAiUiIdleIntegrationImpl::ConstructL(
             ->PushContextL( aKeySoundConfig.iContextResId );            
         }
     
-    // Set Active Idle application to be system application and disable
-    // priority switching performed by window server.
     iEikEnv.SetSystem( ETrue );
-    iEikEnv.WsSession().ComputeMode( RWsSession::EPriorityControlDisabled ); 
-             
+                 
     // Eikon server window group
     iThisApplicationWgId = iEikEnv.RootWin().Identifier();
-
-    iEikEnv.RootWin().EnableFocusChangeEvents(); 
-    iEikEnv.RootWin().EnableGroupChangeEvents();
     
     CApaWindowGroupName::FindByAppUid( KAknCapServerUid, 
                                        iEikEnv.WsSession(), 

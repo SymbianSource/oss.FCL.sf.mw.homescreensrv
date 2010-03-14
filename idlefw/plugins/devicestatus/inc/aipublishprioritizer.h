@@ -19,10 +19,16 @@
 #ifndef C_AIPUBLISHPRIORITIZER_H
 #define C_AIPUBLISHPRIORITIZER_H
 
+// System includes
 #include <e32def.h>
+
+// User includes
 #include "ainwidpriorities.h"
 #include "aiprioritizer.h"
-#include "aipropertyextension.h"
+
+// Forward declarations
+class CHsContentPublisher;
+
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -37,13 +43,13 @@
  *  @since S60 3.2
  */
  
-class CAiPublishPrioritizer : public CBase, public MAiPublishPrioritizer
+NONSHARABLE_CLASS( CAiPublishPrioritizer ) : public CBase, 
+    public MAiPublishPrioritizer
     {
-
 public:
 
     static CAiPublishPrioritizer* NewL( MAiContentObserver& aContentObserver,
-                                        MAiPropertyExtension& aPropertyExtension );
+                                        CHsContentPublisher& aPropertyExtension );
 
     virtual ~CAiPublishPrioritizer();
 
@@ -75,7 +81,7 @@ public:
 private:
 
     CAiPublishPrioritizer( MAiContentObserver& aContentObserver,
-                            MAiPropertyExtension& aPropertyExtension );
+                            CHsContentPublisher& aPropertyExtension );
 
 
 private: // data
@@ -88,7 +94,7 @@ private: // data
     /**
      * Property extension.
      */
-    MAiPropertyExtension& iPropertyExtension;
+    CHsContentPublisher& iPropertyExtension;
 
     /// Current priority
     TInt iPriority;

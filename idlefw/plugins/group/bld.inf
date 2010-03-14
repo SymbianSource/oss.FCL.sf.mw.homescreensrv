@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Bld.inf for all plugins under ActiveIdle2 project.
+* Description:  Bld.inf for all plugins under idlefw project.
 *
 */
 
@@ -22,20 +22,17 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_MMPFILES
-aidevstaplg.mmp
-aiwsplugin.mmp
 
 PRJ_EXPORTS
-../wsplugin/rom/aiwsplugin.iby        CORE_MW_LAYER_IBY_EXPORT_PATH(aiwsplugin.iby)
 
 // Include bld.inf-files of new plugins here
 
-#include "../shortcutplugin/group/bld.inf"
-//#include "../pslnactiveidleplugin/group/bld.inf"
+#include "../devicestatus/group/bld.inf"
 #include "../profileplugin/group/bld.inf"
 #include "../sapidataplugin/group/bld.inf"
 #include "../wrtdataplugin/group/bld.inf"
 #include "../mcsplugin/group/bld.inf"
+#include "../wsplugin/group/bld.inf"
 
 #endif // RD_CUSTOMIZABLE_AI
 

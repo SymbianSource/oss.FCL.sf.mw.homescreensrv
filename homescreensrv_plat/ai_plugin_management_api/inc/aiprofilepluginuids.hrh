@@ -19,8 +19,6 @@
 #ifndef AIPROFILEPLUGINUIDS_HRH
 #define AIPROFILEPLUGINUIDS_HRH
 
-#include <platform/mw/aicontentpublisheruid.hrh>
-
 /**
  * Ecom dll uid for AI Profile plug-in.
  */

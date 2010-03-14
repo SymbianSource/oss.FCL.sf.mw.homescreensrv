@@ -16,25 +16,59 @@
 */
 
 
-#ifndef AIFWDEFS_H
-#define AIFWDEFS_H
+#ifndef _AIFWDEFS_H
+#define _AIFWDEFS_H
 
+// System inclides
 
-#include <e32std.h>
-#include <aipropertyextension.h>
+// User includes
+
+// Type definitions
 
 /**
- * Array of publisher Content publisher info records.
+ * AiFw State definitions.
+ *
+ * @since S60 5.2
  */
-typedef RArray<TAiPublisherInfo> RAiPublisherInfoArray;
+enum TAiFwState
+    {
+    EAiFwBacklightOn = 1,
+    EAiFwBacklightOff,
+    EAiFwForeground,
+    EAiFwBackground,
+    EAiFwBackupRestoreStart,
+    EAiFwBackupRestoreEnd,
+    EAiFwGeneralThemeChange,    
+    EAiFwUiStartup,
+    EAiFwUiShutdown,
+    EAiFwOnline,
+    EAiFwOffline
+    };
 
-_LIT(KOnline_Offline, "online_offline");
+/**
+ * AiFw data plugin load reasons.
+ *
+ * @since S60 5.2
+ */    
+enum TAiFwLoadReason
+    {
+    EAiFwSystemStartup = 1,
+    EAiFwPageStartup,
+    EAiFwPluginStartup
+    };    
 
-enum TAifwStates
-	{
-	EAifwOffline,
-	EAifwOnline,
-	EAifwPageSwitch
-	};
+/**
+ * AiFw data plugin destroy reasons.
+ *
+ * @since S60 5.2
+ */        
+enum TAiFwDestroyReason
+    {
+    EAiFwSystemShutdown = 1,
+    EAiFwPageShutdown,
+    EAiFwPluginShutdown
+    };
 
-#endif // AIFWDEFS_H
+#endif // _AIFWDEFS_H
+
+// End of file

@@ -18,86 +18,96 @@
 // System includes
 #include <ecom/ecom.h>
 #include <ecom/implementationinformation.h>
-#include <AknGlobalNote.h>
-#include <StringLoader.h>
-#include <e32property.h>                    // For RProperty
 
 // User includes
+#include <aisystemuids.hrh>
+#include <hscontentpublisher.h>
+#include <hspublisherinfo.h>
 #include <aicontentobserver.h>
-#include <aiutility.h>
-#include <aiplugintool.h>
-#include <activeidle2domainpskeys.h>        // PubSub category
-#include <activeidle2internalpskeys.h>      // PubSub category key and values
+#include <aiuicontroller.h>
 
+#include "aiuicontrollermanager.h"
 #include "aipluginfactory.h"
-#include "aicontentpluginmanager.h"
-#include "aipluginlifecycleobserver.h"
-
-#include "aiuicontroller.h"
-#include "aifwpanic.h"
 #include "debug.h"
+
+// Constants
+const TUid KDeviceStatusPluginUid = 
+    { AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DEVSTAPLUGIN };
+
+_LIT( KDeviceStatusPluginName, "DeviceStatus" );
 
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
-// CleanupResetAndDestroy()
+// IsDeviceStatus()
+//
 // ----------------------------------------------------------------------------
 //
-template<class T>
-static void CleanupResetAndDestroy( TAny* aObj )
+TBool IsDeviceStatus( const THsPublisherInfo& aInfo )
     {
-    if( aObj )
-        {
-        static_cast<T*>( aObj )->ResetAndDestroy();
-        }
+    return ( aInfo.Name() == KDeviceStatusPluginName && 
+        aInfo.Uid() == KDeviceStatusPluginUid );
+    }
+
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroy()
+//
+// ----------------------------------------------------------------------------
+//
+template< class T >
+static void CleanupResetAndDestroy( TAny* aObj )
+    {        
+    static_cast< T* >( aObj )->ResetAndDestroy();    
     }
 
 // ----------------------------------------------------------------------------
 // CleanupResetAndDestroyPushL()
+//
 // ----------------------------------------------------------------------------
 //
-template<class T>
-static void CleanupResetAndDestroyPushL(T& aArray)
+template< class T >
+static void CleanupResetAndDestroyPushL( T& aArray )
     {
-    CleanupStack::PushL( TCleanupItem( &CleanupResetAndDestroy<T>, &aArray ) );
+    CleanupStack::PushL( 
+        TCleanupItem( &CleanupResetAndDestroy< T >, &aArray ) );
     }
     
 // ======== MEMBER FUNCTIONS ========    
 
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::CAiPluginFactory()
+//
 // ----------------------------------------------------------------------------
 //
-CAiPluginFactory::CAiPluginFactory( 
-    RPointerArray<CAiContentPublisher>& aPlugins,
-    CAiContentPluginManager& aManager )
-      : iPlugins( aPlugins ), iManager( aManager )    
+CAiPluginFactory::CAiPluginFactory( CAiUiControllerManager& aManager )
+    : iUiControllerManager( aManager )
     {
     }
 
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::~CAiPluginFactory()
+//
 // ----------------------------------------------------------------------------
 //
 CAiPluginFactory::~CAiPluginFactory()
-    {    
-    Release( iPluginTool );
-           
-    iEComPlugins.ResetAndDestroy();
-           
-    iLifecycleObservers.Reset();
+    {
+    // All publishers should be already deleted from CAiFw::HandleUiShutdown       
+    iPublishers.ResetAndDestroy();
+    
+    iEComPlugins.ResetAndDestroy();        
+    
+    REComSession::FinalClose();
     }
     
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::NewL()
+//
 // ----------------------------------------------------------------------------
 //
-CAiPluginFactory* CAiPluginFactory::NewL( 
-    RPointerArray<CAiContentPublisher>& aPlugins,
-    CAiContentPluginManager& aManager )
+CAiPluginFactory* CAiPluginFactory::NewL( CAiUiControllerManager& aManager )
     {
     CAiPluginFactory* self = 
-        new ( ELeave ) CAiPluginFactory( aPlugins, aManager );
+        new ( ELeave ) CAiPluginFactory( aManager );
                                                                       
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -107,222 +117,158 @@ CAiPluginFactory* CAiPluginFactory::NewL(
 
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::ConstructL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiPluginFactory::ConstructL()
-    {        
-    iPluginTool = AiUtility::CreatePluginToolL();
+    {               
+    REComSession::ListImplementationsL( 
+        KInterfaceUidHsContentPlugin, iEComPlugins );    
     }
         
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::AddLifecycleObserverL()
-// ----------------------------------------------------------------------------
-//
-void CAiPluginFactory::AddLifecycleObserverL(
-    MAiPluginLifecycleObserver& aObserver )
-    {
-    if( iLifecycleObservers.Find( &aObserver ) == KErrNotFound )
-        {
-        iLifecycleObservers.AppendL( &aObserver );
-        }    
-    }
-
-// ----------------------------------------------------------------------------
 // CAiPluginFactory::CreatePluginL()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::CreatePluginL(
-    const TAiPublisherInfo& aPublisherInfo,
-    RPointerArray<CAiUiController>& aControllerArray )                       
-    {           
-    iEComPlugins.ResetAndDestroy();
-    
-    // Discover Plugin implementations.
-    __TIME_MARK( ecomOverhead );
-    
-    REComSession::ListImplementationsL( 
-            KInterfaceUidContentPlugin, iEComPlugins );
-    
-    __TIME_ENDMARK( "FW: ECom Discover plug-ins", ecomOverhead );    
-                          
-    iPlugins.ReserveL( iPlugins.Count() + 1 );
-                       
+TInt CAiPluginFactory::CreatePlugin( 
+    const THsPublisherInfo& aPublisherInfo )                             
+    {                                            
+    __PRINTS( "*** CAiPluginFactory::CreatePlugin: Start ***" );
+                                    
+    if ( IsDeviceStatus( aPublisherInfo ) )
+        {
+        CHsContentPublisher* plugin( PluginByUid( aPublisherInfo.Uid() ) );
+        
+        if ( plugin )
+            {
+            // Devicestatus plugin already exists, update its namespace
+            THsPublisherInfo& info( 
+                const_cast< THsPublisherInfo& >( plugin->PublisherInfo() ) );
+            
+            info.iNamespace.Copy( aPublisherInfo.Namespace() );
+            
+            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - DeviceStatus plugin updated ***" );
+            
+            return KErrNone;
+            }
+        }
+            
     TBool implFound( EFalse );
     
     for( TInt i = 0; i < iEComPlugins.Count(); i++ )
         {
         CImplementationInformation* information( iEComPlugins[i] );
                                                                  
-        if( information->ImplementationUid().iUid == aPublisherInfo.iUid.iUid )
+        if( information->ImplementationUid().iUid == aPublisherInfo.Uid().iUid )
             {
             implFound = ETrue;
             break;
             }
         }
     
-    if( aPublisherInfo.iNamespace == KNullDesC8 || !implFound )
+    if( aPublisherInfo.Namespace() == KNullDesC8 || !implFound )
         {
-        // No namespace available or no ecom implementation available                               
-        User::Leave( KErrNotSupported );
+        // No namespace available or no ecom implementation available
+        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Failed to Load Plug-in: KErrNotSupported ***" );
+        
+        return KErrNotSupported;
         }
            
-    CAiContentPublisher* plugin( PluginByInfoL( aPublisherInfo ) );
+    CHsContentPublisher* plugin( PluginByInfo( aPublisherInfo ) );
     
     if( plugin )
         {                             
-        User::Leave( KErrAlreadyExists );
+        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Failed to Load Plug-in: KErrAlreadyExists ***" );
+        
+        return KErrAlreadyExists;
         }
-           
-    __PRINT( __DBG_FORMAT( "\t[I]\t Loading plug-in uid=%x name=%S"), 
-                            aPublisherInfo.iUid, &(aPublisherInfo.iName) );
-           
-    __TIME( "FW: Create plug-in:",
-        plugin = CreatePluginLC( aPublisherInfo );
-        ) // __TIME
-       
-    __TIME( "FW: Subscribe content observers",    
-        SubscribeContentObserversL( *plugin, 
-            aPublisherInfo, aControllerArray );
-        ) // __TIME
-                                              
-    // Plug-in settings
-    __TIME( "FW: Configure Plugin",
-        ConfigurePluginL( aControllerArray, *plugin, aPublisherInfo );
-        ) // __TIME
-                                  
-    __PRINTS( "*** FW: Done - Load Plug-in ***" );                          
     
-    // This might fail and the plugin ends up destroyed
-    for( TInt i = 0; i < iLifecycleObservers.Count(); ++i )
-        {
-        iLifecycleObservers[i]->PluginCreatedL( *plugin );
-        }
-                
-    for( TInt i = 0; i < iLifecycleObservers.Count(); ++i )
-        {
-        iLifecycleObservers[i]->AllPluginsCreated();
-        }
-                   
-    // Move plugins to manager
-    iPlugins.Append( plugin );
-    CleanupStack::Pop( plugin );
+    TInt err( KErrNone );
     
-    iEComPlugins.ResetAndDestroy();       
+    TRAP( err, CreatePluginL( aPublisherInfo ) );
+    
+    __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Load Plug-in ***" );
+    
+    return err;    
     }
         
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::DestroyPluginL()
+// CAiPluginFactory::DestroyPlugin()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::DestroyPluginL(
-    const TAiPublisherInfo& aPublisherInfo,
-    RPointerArray< CAiUiController >& /*aControllerArray*/ )                       
+void CAiPluginFactory::DestroyPlugin( const THsPublisherInfo& aPublisherInfo )                             
     {
-    // TODO: check is there need to call 
-    // iUiControllerManager->RemovePluginFromUI( aPlugin );
-    // it will clean the published content.     
+    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Start ***" );
     
-    if( iPlugins.Count() == 0 )
+    if ( IsDeviceStatus( aPublisherInfo ) )
         {
+        // Don't destroy device status plugin
+        __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done - Keepind DeviceStatus Plug-in ***" );
+        
         return;
         }
-               
-    CAiContentPublisher* plugin( PluginByInfoL( aPublisherInfo ) );
-    
-    TInt index( iPlugins.Find( plugin ) );
-    
-    if( plugin && index != KErrNotFound )
-        {               
-        for( TInt i = 0; i < iLifecycleObservers.Count(); i++ )
-            {                
-            iLifecycleObservers[i]->PluginDestroyed( *plugin );
-            }
         
-        iPlugins.Remove( index );
+    CHsContentPublisher* plugin( PluginByInfo( aPublisherInfo ) );
+    
+    if ( plugin )
+        {
+        iPublishers.Remove( iPublishers.Find( plugin ) );
         
         delete plugin;
-        plugin = NULL;
+        plugin = NULL;            
         }
-        
-    if( iPlugins.Count() == 0 )
-        {
-        for( TInt i = 0; i < iLifecycleObservers.Count(); i++ )
-            {                
-            iLifecycleObservers[i]->AllPluginsDestroyed();
-            }        
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CAiPluginFactory::DestroyPlugins()
-// ----------------------------------------------------------------------------
-//
-void CAiPluginFactory::DestroyPlugins()
-    {
-    for( TInt i = 0; i < iPlugins.Count(); i++ )
-        {
-        CAiContentPublisher* plugin( iPlugins[i] );
-        
-        for( TInt i = 0; i < iLifecycleObservers.Count(); i++ )
-            {                
-            iLifecycleObservers[i]->PluginDestroyed( *plugin );
-            }        
-        }
-
-    iPlugins.ResetAndDestroy();
     
-    for( TInt i = 0; i < iLifecycleObservers.Count(); i++ )
-        {                
-        iLifecycleObservers[i]->AllPluginsDestroyed();
-        }           
+    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done ***" );
     }
         
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::CreatePluginLC()
+// CAiPluginFactory::CreatePluginL()
+//
 // ----------------------------------------------------------------------------
 //
-CAiContentPublisher* CAiPluginFactory::CreatePluginLC(
-    const TAiPublisherInfo& aPluginInfo )
-    {
-    CAiContentPublisher* plugin = 
-            CAiContentPublisher::NewL( aPluginInfo.iUid );
-    
+void CAiPluginFactory::CreatePluginL(
+    const THsPublisherInfo& aPublisherInfo )
+    {       
+    __PRINT( __DBG_FORMAT( "\t[I]\t Loading plug-in uid=%x name=%S"), 
+    aPublisherInfo.Uid(), &(aPublisherInfo.Name() ) );
+
+    __TIME( "FW: Create plug-in:",
+            
+    iPublishers.ReserveL( iPublishers.Count() + 1 );    
+            
+    CHsContentPublisher* plugin = 
+        CHsContentPublisher::NewL( aPublisherInfo ) );            
     CleanupStack::PushL( plugin );
-        
-    MAiPropertyExtension* ext( iPluginTool->PropertyExt( *plugin ) );
     
-    if( !ext )
-        {
-        User::Leave( KErrNotFound );
-        }
+    __TIME( "FW: Subscribe content observers",    
+    SubscribeContentObserversL( *plugin, aPublisherInfo ) );             
+                                                      
+    __TIME( "FW: Configure Plugin",
+    ConfigurePluginL( *plugin, aPublisherInfo ) );
     
-    ext->SetPropertyL( EAiPublisherInfo, (TAny*)&aPluginInfo );
-    
-    const TAiPublisherInfo* info( ext->PublisherInfoL() );
-    
-    if( info->iNamespace != aPluginInfo.iNamespace )
-        {
-        // SetPropertyL is not implemented correctly
-        User::Leave( KErrNotSupported );
-        }
-    
-    return plugin;
+    // Take plugin's ownership
+    iPublishers.Append( plugin );
+    CleanupStack::Pop( plugin );
     }
 
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::SubscribeContentObserversL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiPluginFactory::SubscribeContentObserversL(
-    CAiContentPublisher& aContentPublisher,        
-    const TAiPublisherInfo& aPublisherInfo,
-    RPointerArray<CAiUiController>& aControllerArray )
-    {       
-    
-    for( TInt i = 0; i < aControllerArray.Count(); i++ )
+    CHsContentPublisher& aContentPublisher,        
+    const THsPublisherInfo& aPublisherInfo )    
+    {
+    RPointerArray< CAiUiController >& 
+        controllers( iUiControllerManager.UiControllers() );
+            
+    for( TInt i = 0; i < controllers.Count(); i++ )
         {
         MAiContentObserver& observer( 
-            aControllerArray[i]->GetContentObserver() );
+            controllers[i]->GetContentObserver() );
         
         if ( observer.RequiresSubscription( aPublisherInfo ) )
             {
@@ -334,44 +280,46 @@ void CAiPluginFactory::SubscribeContentObserversL(
 
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::ConfigurePluginL()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::ConfigurePluginL( 
-    RPointerArray<CAiUiController>& aControllerArray,
-    CAiContentPublisher& aContentPublisher,
-    const TAiPublisherInfo& aPubInfo )
+void CAiPluginFactory::ConfigurePluginL(     
+    CHsContentPublisher& aContentPublisher,
+    const THsPublisherInfo& aPublisherInfo )
     {    
-    RAiSettingsItemArray pluginSettings;
-    CleanupResetAndDestroyPushL( pluginSettings );
+    RAiSettingsItemArray settings;
+    CleanupResetAndDestroyPushL( settings );
     
-    for( TInt i = 0; i < aControllerArray.Count(); i++ )
+    RPointerArray< CAiUiController >& 
+        controllers( iUiControllerManager.UiControllers() );
+    
+    for( TInt i = 0; i < controllers.Count(); i++ )
         {
         // Get settings for plug-in        
-        aControllerArray[i]->GetSettingsL( aPubInfo, pluginSettings );
+        controllers[i]->GetSettingsL( aPublisherInfo, settings );
         }
     
     // Configure plug-in with its settings
-    aContentPublisher.ConfigureL( pluginSettings );
+    aContentPublisher.ConfigureL( settings );
     
-    CleanupStack::PopAndDestroy( &pluginSettings );    
+    CleanupStack::PopAndDestroy( &settings );    
     }
         
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::PluginByInfoL()
+// CAiPluginFactory::PluginByInfo()
+// Gets plugin by publisher info. Only this overload returns the exact match
 // ----------------------------------------------------------------------------
 //
-CAiContentPublisher* CAiPluginFactory::PluginByInfoL( 
-    const TAiPublisherInfo& aInfo ) const
+CHsContentPublisher* CAiPluginFactory::PluginByInfo( 
+    const THsPublisherInfo& aPublisherInfo ) const
     {       
-    for( TInt i = 0; i < iPlugins.Count(); i++ )
+    for( TInt i = 0; i < iPublishers.Count(); i++ )
         {         
-        const TAiPublisherInfo* info( NULL );
-                                                  
-        info = iPluginTool->PublisherInfoL( *iPlugins[i] );
-        
-        if( info && ( aInfo == *info ) ) 
+        const THsPublisherInfo& info( iPublishers[i]->PublisherInfo() ); 
+                                                                             
+        if( aPublisherInfo == info ) 
             {
-            return iPlugins[i];
+            return iPublishers[i];
             }
         }
     
@@ -379,25 +327,109 @@ CAiContentPublisher* CAiPluginFactory::PluginByInfoL(
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::PluginByNameL()
+// CAiPluginFactory::PluginByUid()
+// Gets plugin by UID
 // ----------------------------------------------------------------------------
 //
-CAiContentPublisher* CAiPluginFactory::PluginByNameL( 
+CHsContentPublisher* CAiPluginFactory::PluginByUid( const TUid& aUid ) const
+    {
+    for( TInt i = 0; i < iPublishers.Count(); i++ )
+        {
+        const THsPublisherInfo& info( iPublishers[i]->PublisherInfo() );
+                                                               
+        if( info.Uid() == aUid )
+            {
+            return iPublishers[i];            
+            }
+        }
+    
+    return NULL;        
+    }
+    
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::PluginByName()
+// Gets plugin by name
+// ----------------------------------------------------------------------------
+//
+CHsContentPublisher* CAiPluginFactory::PluginByName( 
     const TDesC& aName ) const
     {
-    for( TInt i = 0; i < iPlugins.Count(); i++ )
+    for( TInt i = 0; i < iPublishers.Count(); i++ )
         {
-        const TAiPublisherInfo* info( NULL );
-        
-        TRAP_IGNORE( info = iPluginTool->PublisherInfoL( *iPlugins[i] ) );
-                        
-        if( info && info->iName == aName )
+        const THsPublisherInfo& info( iPublishers[i]->PublisherInfo() );
+                                                               
+        if( info.Name() == aName )
             {
-            return iPlugins[i];            
+            return iPublishers[i];            
             }
         }
     
     return NULL;    
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::Publishers()
+//
+// ----------------------------------------------------------------------------
+//
+RPointerArray< CHsContentPublisher >& CAiPluginFactory::Publishers() const
+    {
+    return iPublishers;
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::ResolvePluginsToUpgradeL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::ResolvePluginsToUpgradeL( 
+    RArray< THsPublisherInfo >& aArray )
+    {
+    RImplInfoPtrArray ecomPlugins;
+    CleanupResetAndDestroyPushL( ecomPlugins );
+        
+    REComSession::ListImplementationsL( 
+        KInterfaceUidHsContentPlugin, ecomPlugins );
+    
+    for ( TInt i = 0; i < ecomPlugins.Count(); i++ )
+        {
+        CImplementationInformation* newInformation( ecomPlugins[i] );
+                 
+        for( TInt j = 0; j < iEComPlugins.Count(); j++ )
+            {            
+            CImplementationInformation* oldInformation( iEComPlugins[j] );
+                                                                 
+            if( newInformation->ImplementationUid() == oldInformation->ImplementationUid() )
+                {
+                if( newInformation->Version() != oldInformation->Version() )
+                    {                        
+                    for ( TInt k = 0; k < iPublishers.Count(); k++ )
+                        {
+                        const THsPublisherInfo& info( 
+                            iPublishers[k]->PublisherInfo() );
+                                                
+                        if ( info.Uid() == newInformation->ImplementationUid() )
+                            {                            
+                            __PRINT( __DBG_FORMAT( "\t[I]\t Plug-in to update uid=%x name=%S namespace=%S, version update %d to %d"), 
+                                info.Uid(), &(info.Name()), &(info.Namespace()), oldInformation->Version(), newInformation->Version()  );
+                            
+                            aArray.Append( info );
+                            }
+                        }
+                                                         
+                    break;
+                    }
+                }                
+            }
+        }
+    
+    CleanupStack::PopAndDestroy( &ecomPlugins );
+           
+    // Update ecom plugin array
+    iEComPlugins.ResetAndDestroy();
+    
+    REComSession::ListImplementationsL( 
+        KInterfaceUidHsContentPlugin, iEComPlugins );
     }
 
 // End of file

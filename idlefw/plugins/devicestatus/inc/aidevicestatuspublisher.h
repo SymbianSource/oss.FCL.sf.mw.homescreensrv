@@ -19,9 +19,14 @@
 #ifndef M_AIDEVICESTATUSPUBLISHER_H
 #define M_AIDEVICESTATUSPUBLISHER_H
 
+// System includes
 #include <e32std.h>
-#include "aicontentobserver.h"
 
+// User includes
+
+// Forward declarations
+class CHsContentPublisher;
+class MAiContentObserver;
 class MAiPublishPrioritizer;
 class MAiPublisherBroadcaster;
 
@@ -52,7 +57,7 @@ public:
      * @param aBroadcaster is reference for publisher broadcaster.
      */
     virtual void Subscribe( MAiContentObserver& aObserver, 
-                            MAiPropertyExtension& aExtension,
+                            CHsContentPublisher& aExtension,
                             MAiPublishPrioritizer& aPrioritizer,
                             MAiPublisherBroadcaster& aBroadcaster ) = 0;
 
@@ -84,6 +89,16 @@ public:
     virtual TBool RefreshL( TInt /*aContentId*/, TBool /*aClean*/ ) { return EFalse; }
 
     /**
+     * Suspends specific content.
+     *     
+     * Publisher suspends content publishing specified by aContentId.
+     * @param aContentId Id of the content item that is requested to suspend.
+     * @param aClean ETrue if current content needs to be cleaned.
+     * @return true if content was suspended.
+     */    
+    virtual TBool SuspendL( TInt /*aContentId*/, TBool /*aClean*/ ) { return EFalse; }
+    
+    /**
      * Refresh specific content with specific priority.
      *
      * This has the same effect as the publisher would get content update from system.
@@ -95,5 +110,6 @@ public:
     virtual TBool RefreshContentWithPriorityL( TInt /*aContentId*/, TInt /*aPriority*/ ) { return EFalse; }
     };
 
-
 #endif // M_AIDEVICESTATUSPUBLISHER_H
+
+// End of file

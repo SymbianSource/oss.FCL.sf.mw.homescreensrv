@@ -82,7 +82,7 @@ void CAiBTSAPPublisher::ResumeL()
 
 
 void CAiBTSAPPublisher::Subscribe( MAiContentObserver& /*aObserver*/,
-								    MAiPropertyExtension& aExtension,
+								    CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& aPrioritizer,
                                     MAiPublisherBroadcaster& aBroadcaster )
     {
@@ -95,6 +95,12 @@ void CAiBTSAPPublisher::Subscribe( MAiContentObserver& /*aObserver*/,
 void CAiBTSAPPublisher::RefreshL( TBool aClean )
     {
     iSuccess = EFalse;
+    
+    if ( iSuspended )
+        {
+        return;
+        }
+    
     if( aClean )
         {
         iPrioritizer->TryToCleanL( *iBroadcaster,
@@ -165,17 +171,32 @@ TInt CAiBTSAPPublisher::RunError( TInt /*aError*/ )
 
 TBool CAiBTSAPPublisher::RefreshL( TInt aContentId, TBool aClean )
 	{
-    if( aContentId == EAiDeviceStatusContentNetworkIdentity )
+    if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
         {
+        iSuspended = EFalse;
+        
    	    RefreshL( aClean );
-        if( iSuccess )
+        
+   	    if ( iSuccess )
 	        {
 	        return ETrue;
 	        }
         }
+    
     return EFalse;
 	}
 
+TBool CAiBTSAPPublisher::SuspendL( TInt aContentId, TBool /*aClean*/ )
+    {
+    if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
+        {
+        iSuspended = ETrue;
+        
+        return ETrue;
+        }
+    
+    return EFalse;
+    }
 
 TBool CAiBTSAPPublisher::RefreshContentWithPriorityL( TInt aContentId,
                                                         TInt aPriority )

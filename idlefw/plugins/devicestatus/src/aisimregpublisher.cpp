@@ -17,7 +17,7 @@
 
 
 #include "aisimregpublisher.h"
-#include "aicontentobserver.h"
+#include <aicontentobserver.h>
 #include "ainetworkinfolistener.h"
 #include <activeidle2domainpskeys.h>
 #include <e32property.h>
@@ -80,7 +80,7 @@ void CAiSimRegPublisher::ResumeL()
 
 
 void CAiSimRegPublisher::Subscribe( MAiContentObserver& aObserver,
-								    MAiPropertyExtension& aExtension,
+								    CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {

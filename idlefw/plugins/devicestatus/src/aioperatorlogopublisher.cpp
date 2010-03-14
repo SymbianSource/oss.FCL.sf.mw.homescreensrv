@@ -127,16 +127,23 @@ void CAiOperatorLogoPublisher::HandleNetworkInfoChange(
 							const TBool aShowOpInd )
     {
     __PRINT(__DBG_FORMAT("CAiOperatorLogoPublisher:: HandleNetworkInfoChange >> aShowOpInd %d "), aShowOpInd);
-        if( aShowOpInd )
-        	{
-        	TRAP_IGNORE(UpdateOperatorLogoL( ETrue ));
-        	}
-        else
-        	{
-        	TRAP_IGNORE (iPrioritizer->TryToCleanL( *iBroadcaster,
-            							EAiDeviceStatusContentNetworkIdentity,
-            							iPriority ));
-        	}
+
+    if ( iSuspended )
+        {
+        __PRINTS("CAiOperatorLogoPublisher:: HandleNetworkInfoChange - suspended <<");
+        return;
+        }
+    
+    if( aShowOpInd )
+        {
+        TRAP_IGNORE( UpdateOperatorLogoL( ETrue ) );
+        }
+    else
+        {
+        TRAP_IGNORE (iPrioritizer->TryToCleanL( *iBroadcaster,
+                                    EAiDeviceStatusContentNetworkIdentity,
+                                    iPriority ));
+        }
         
     __PRINTS("CAiOperatorLogoPublisher:: HandleNetworkInfoChange <<");
     }
@@ -154,7 +161,7 @@ void CAiOperatorLogoPublisher::HandleNotifyInt( TUint32 aId, TInt /*aNewValue*/ 
 	
 	
 void CAiOperatorLogoPublisher::Subscribe( MAiContentObserver& aObserver, 
-									        MAiPropertyExtension& aExtension,
+									        CHsContentPublisher& aExtension,
                                             MAiPublishPrioritizer& aPrioritizer,
                                             MAiPublisherBroadcaster& aBroadcaster )
     {
@@ -171,7 +178,6 @@ void CAiOperatorLogoPublisher::RefreshL( TBool aClean )
     TRAP_IGNORE( UpdateOperatorLogoL( aClean ) );
     __PRINTS("CAiOperatorLogoPublisher:: RefresL << ");
     }
-
 
 CFbsBitmap* CAiOperatorLogoPublisher::LoadLogoL( TInt aMCC, 
                                                  TInt aMNC )
@@ -233,6 +239,15 @@ void CAiOperatorLogoPublisher::UpdateOperatorLogoL( TBool aClean )
     {
     __PRINT(__DBG_FORMAT("CAiOperatorLogoPublisher:: UpdateOperatorLogoL >> aClean %d"), aClean);
     iSuccess = EFalse;
+    
+    if ( iSuspended )
+        {
+        // EAiDeviceStatusContentNetworkIdentity is suspended
+        
+        __PRINTS("CAiOperatorLogoPublisher:: UpdateOperatorLogoL - suspended <<");
+        return;
+        }
+    
     if( aClean )
         {
         iPrioritizer->TryToCleanL( *iBroadcaster,
@@ -493,10 +508,11 @@ TInt CAiOperatorLogoPublisher::GetTitlePaneSize( TSize& aSize )
 
 
 TBool CAiOperatorLogoPublisher::RefreshL( TInt aContentId, TBool aClean )
-	{
-	
-    if(aContentId == EAiDeviceStatusContentNetworkIdentity )
+	{	
+    if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
         {
+        iSuspended = EFalse;
+        
         __PRINTS("CAiOperatorLogoPublisher:: RefreshL >> ");
    	    RefreshL( aClean );
    	    if( iSuccess )
@@ -506,9 +522,21 @@ TBool CAiOperatorLogoPublisher::RefreshL( TInt aContentId, TBool aClean )
    	        }   
    	    __PRINTS("CAiOperatorLogoPublisher:: RefreshL << failed ");	    
     	}    	
+    
     return EFalse;
 	}
 
+TBool CAiOperatorLogoPublisher::SuspendL( TInt aContentId, TBool /*aClean*/ )
+    {
+    if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
+        {
+        iSuspended = ETrue;
+        
+        return ETrue;
+        }
+    
+    return EFalse;
+    }
 
 TInt CAiOperatorLogoPublisher::HandleOperatorLogoUpdateL( TAny *aPtr )
 	{

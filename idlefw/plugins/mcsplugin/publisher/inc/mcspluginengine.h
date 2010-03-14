@@ -19,43 +19,35 @@
 #ifndef CMCSPLUGINENGINE_H
 #define CMCSPLUGINENGINE_H
 
-// INCLUDE FILES
+// System includes
 #include <e32base.h>
 #include <mcsmenu.h>
 #include <mcsmenunotifier.h>
-#include <favouritesdbobserver.h>   // For MFavouritesDbObserver
-#include <favouritesdb.h>           // For RFavouritesDb
-#include <msvapi.h>                 // For MMsvSessionObserver
+#include <mcsmenuitem.h>
+#include <msvapi.h>
 
+// User includes
 #include "mcspluginwatcher.h"
 
+// Forward declarations
 class CGulIcon;
 class CMCSPluginData;
 class TMCSData;
 class CMCSPlugin;
-class CActiveFavouritesDbNotifier;
 
 /**
- *  @ingroup group_mcsplugin
+ * @ingroup group_mcsplugin
  *
- *  MCSPluginEngine class
+ * MCSPluginEngine class
  *
- *  @since S60 9.1
+ * @since S60 5.2
  */
-class CMCSPluginEngine : public CBase, public MMCSPluginWatcherObserver,
-    public MFavouritesDbObserver, public MMsvSessionObserver
-{
-
-public:  // Constructors and destructor
-
-    /**
-     * Constructor to use in the object creation. Initializes the necessary 
-     * data.
-     *
-     * @param aPlugin
-     * @param aInstanceUid
-     */
-    CMCSPluginEngine( CMCSPlugin& aPlugin, const TDesC8& aInstanceUid );
+NONSHARABLE_CLASS( CMCSPluginEngine ) : public CBase, 
+    public MMCSPluginWatcherObserver,
+    public MMsvSessionObserver
+    {
+public:  
+    // constructor and destructor
 
     /**
     * Part of the two phased constuction
@@ -75,6 +67,29 @@ public:  // Constructors and destructor
     */
     ~CMCSPluginEngine();
 
+private:
+    // constructors
+    
+    /**
+     * C++ default constructor 
+     */
+    CMCSPluginEngine( CMCSPlugin& aPlugin, const TDesC8& aInstanceUid );
+
+    /*
+     * 2nd phase constructor
+     */
+    void ConstructL();
+    
+public:
+    // new functions
+    
+    /**
+    * Called during plugin desctruction
+    * Decrements reference counters of all run-time generated items
+    * and deletes those which have reference counter == 0
+    */
+    void CleanMCSItemsL();
+    
     /**
      * Gets the menu data.
      * 
@@ -130,64 +145,37 @@ public:  // Constructors and destructor
     void LaunchItemL( const TInt& aIndex );
 
     /**
-    * Resumes the engine
+    * Set backup/restore state
     *
-    * @param void
+    * @param aBackupRestore ETrue if backup/restore is ongoing 
     * @return void
     */
-    void ResumeL();
-
-    /**
-    * Suspends the engine
-    *
-    * @param void
-    * @return void
-    */
-    void Suspend();
+    void SetBackupRestore( TBool aBackupRestore );
 
     /**
      * ShowSettingsL
      */
     void ShowSettingsL();
 
+private:
+    // from MMCSPluginWatcherObserver
+    
     /**
-     * From MMCSPluginWatcherObserver
+     * @see MMCSPluginWatcherObserver 
      */
     void HandleNotifyL();
 
-    // From MFavouritesDbObserver
-    /**
-     * Handles database event.
-     * @param aEvent Database event.
-     */
-    void HandleFavouritesDbEventL( RDbNotifier::TEvent aEvent );
+private:    
+    // from MMsvSessionObserver
 
-    // from base class MMsvSessionObserver
     /**
-     * Handles an event from the message server.
-     * Not used, but must be defined to be able to use the messaging server.
-     *
-     * @since S60 v3.2
-     * @param aEvent Indicates the event type.
-     * @param aArg1 Event type-specific argument value
-     * @param aArg2 Event type-specific argument value
-     * @param aArg3 Event type-specific argument value
-     */
+     * @see MMsvSessionObserver
+     */    
     void HandleSessionEventL( TMsvSessionEvent aEvent, TAny* aArg1,
         TAny* aArg2, TAny* aArg3 );
 
-    /**
-    * Called during plugin desctruction
-    * Decrements reference counters of all run-time generated items
-    * and deletes those which have reference counter == 0
-    */
-    void CleanMCSItemsL();
-
 private:
-    /*
-     * Part of the two phased construction
-     */
-    void ConstructL();
+    // new functions
 
     /**
      * InitL
@@ -195,16 +183,14 @@ private:
     void InitL();
 
     /**
-     * Tells the settings container to start observing for changes in favorites
-     * database and mailbox db.
-     *
+     * Tells the settings container to start observing 
+     * for changes in mailbox db.     
      */
     void StartObservingL();
 
     /**
-     * Tells the settings container to stop observing for changes in favorites
-     * database and mailbox db.
-     *
+     * Tells the settings container to stop observing 
+     * for changes in mailbox db.     
      */
     void StopObserving();
 
@@ -215,7 +201,8 @@ private:
      * @param aMenuItem
      * @return TBool
      */
-    TBool ConstructMenuItemForIconL( const TDesC& aPath, CMenuItem& aMenuItem );
+    TBool ConstructMenuItemForIconL( 
+        const TDesC& aPath, CMenuItem& aMenuItem );
 
     /**
     * Helper method. Adds a given constant to a value of reference counter
@@ -224,62 +211,39 @@ private:
     * @param aValueToAdd A constant to add 
     * @return The actual value of updated reference count
     */
-    TInt UpdateMenuItemsRefCountL( CMenuItem* aItem, const TInt aValueToAdd );
-
-protected:
-
+    TInt UpdateMenuItemsRefCountL( 
+        CMenuItem* aItem, const TInt aValueToAdd );
+    
 private:
-
-    /* Plugin data
-    * Own
-    */
+    // data
+    
+    /** Plugin data, owned */
     CMCSPluginData* iPluginData;
-
-    // MCS resource
+    /** MCS resource handle, owned */
     RMenu iMenu;
-
-    // MCS change notifier
+    /** MCS change notifier handle, owned */
     RMenuNotifier iNotifier;
-
-    // MCS asynchronous operation watcher
+    /** MCS asynchronous operation watcher, owned */
     CMCSPluginWatcher* iWatcher;
-
-    // MCS change notifier watcher
+    /** MCS change notifier watcher, owned */
     CMCSPluginWatcher* iNotifyWatcher;
-
-    //
+    /** MCS plugin, not owned */
     CMCSPlugin& iPlugin;
-
-    // Reference to plugin owned instanceUid
+    /** Reference to plugin owned instanceUid */
     const TDesC8& iInstanceUid;
-    // Indicating that backup is in progress
-    TBool iSuspend;
-    //Offset of resource file.
+    /** Flag Indicating that backup/restore is in progress */
+    TBool iBackupRestore;
+    /** Offset of resource file */
     TInt iResourceOffset;
-
-    /**
-     * Bookmark database change observer.
-     * Own.
-     */
-    CActiveFavouritesDbNotifier* iBookmarkDbObserver;
-
-    /**
-     * Bookmark database.
-     */
-    RFavouritesDb iBookmarkDb;
-
-    /**
-     * Bookmark database session.
-     */
-    RFavouritesSession iBookmarkSession;
-
-    /**
-     * Message server session
-     * Own.
-     */
-    CMsvSession* iMsvSession;
-};
+    /** Message server session, owned */
+    CMsvSession* iMsvSession;        
+    /** "Undefined" menu item, owned */
+    CMenuItem* iUndefinedItem;
+    /** "Undefined" menu item header */
+    TMenuItem iUndefinedItemHeader;    
+    };
 
 #endif // CMCSPLUGINENGINE_H
 
+// End of file
 

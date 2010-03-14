@@ -19,15 +19,19 @@
 #ifndef C_AIOPERATORPROVIDERNAMEPUBLISHER_H
 #define C_AIOPERATORPROVIDERNAMEPUBLISHER_H
 
-
+// System includes
 #include <e32base.h>
 #include <AknUtils.h>
+
+// User includes
 #include "aidevicestatuspublisher.h"
 #include "ainetworkinfoobserver.h"
 
+// Forward declarations
 class CAiNetworkInfoListener;
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
+
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -39,8 +43,9 @@ class MAiPropertyExtension;
  *
  *  @since S60 3.2
  */
-class CAiOperatorNamePublisher : public CBase, public MAiDeviceStatusPublisher,
-                               public MAiNetworkInfoObserver
+NONSHARABLE_CLASS( CAiOperatorNamePublisher ) : public CBase, 
+    public MAiDeviceStatusPublisher,
+    public MAiNetworkInfoObserver
     {
 public:
 
@@ -52,11 +57,12 @@ public:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
     TBool RefreshL( TInt aContentId, TBool aClean );
+    TBool SuspendL( TInt aContentId, TBool aClean );
     TBool RefreshContentWithPriorityL( TInt aContentId, TInt aPriority );
 
 
@@ -141,56 +147,28 @@ private:
 
 private: // data
 
-    /**
-     * Network info listener.
-     * Own.
-     */
+    /** Network info listener, not owned */
     CAiNetworkInfoListener* iListener;
-
-    /**
-     * Property extension.
-     * Not own.
-     */
-    MAiPropertyExtension* iExtension;
-
-	/**
-	 * Content prioritizer.
-	 * Not own.
-	 */
-	MAiPublishPrioritizer* iPrioritizer;
-    
-	/**
-	 * Publish broadcaster.
-	 * Not own.
-	 */
-	MAiPublisherBroadcaster* iBroadcaster;
-    
-    /**
-     * Used to do delayed clean operation.
-     * Own.
-     */
-    CPeriodic* iPeriodic;
-    
-    /**
-     * True if publish was successful.
-     */
-    TBool iSuccess;
-    
-    /**
-     * Operator name priority
-     */
-    TInt iPriority;
-    
-    /**
-     * Show operator indicator.
-     */
-    TBool iShowOpInd;
-    
-    /**
-     * Network identity name
-     */
-    TPtrC iNetworkIdentityName;
+    /** Property extension, not owned */
+    CHsContentPublisher* iExtension;
+	/** Content prioritizer, not owned */
+	MAiPublishPrioritizer* iPrioritizer;    
+	/** Publish broadcaster, not owned */
+	MAiPublisherBroadcaster* iBroadcaster;    
+    /** Used to do delayed clean operation, owned */
+    CPeriodic* iPeriodic;    
+    /** True if publish was successful */
+    TBool iSuccess;    
+    /** Operator name priority */
+    TInt iPriority;    
+    /** Show operator indicator */
+    TBool iShowOpInd;    
+    /** Network identity name */
+    TPtrC iNetworkIdentityName;    
+    /** Flag to indicate if the content is suspended */ 
+    TBool iSuspended;
     };
 
-
 #endif // C_AIOPERATORPROVIDERNAMEPUBLISHER_H
+
+// End of file

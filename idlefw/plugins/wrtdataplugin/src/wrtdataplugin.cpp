@@ -11,21 +11,14 @@
 *
 * Contributors:
 *
-* Description:
-* Profile plug-in publisher
-*
+* Description: WRT data plug-in publisher
+* 
 */
 
-
-
-// INCLUDE FILES
+// System includes
 #include <ecom/ecom.h>
 #include <ecom/implementationproxy.h>
-#include <aicontentobserver.h>
-#include <aiutility.h>
-#include <aipspropertyobserver.h>
 #include <PUAcodes.hrh>
-#include <aipluginsettings.h>
 #include <badesca.h>
 #include <fbs.h>
 #include <gulicon.h>
@@ -33,6 +26,13 @@
 #include <AknsUtils.h> 
 #include <AknsConstants.h>
 #include <e32property.h>
+
+// User includes
+#include <hspublisherinfo.h>
+#include <aicontentobserver.h>
+#include <aiutility.h>
+#include <aipspropertyobserver.h>
+#include <aipluginsettings.h>
 #include <activeidle2domainpskeys.h>
 
 #include "wrtdatapluginconst.h"
@@ -40,7 +40,7 @@
 #include "wrtdataplugin.h"
 #include "wrtdata.h"
 
-// CONST CLASS VARIABLES
+// Constants
 const TImplementationProxy KImplementationTable[] =
     {
     IMPLEMENTATION_PROXY_ENTRY( KImplUidDataPlugin, CWrtDataPlugin::NewL ) 
@@ -48,10 +48,12 @@ const TImplementationProxy KImplementationTable[] =
 
 // ======== MEMBER FUNCTIONS ========
 // ---------------------------------------------------------------------------
-// Constructs and returns an application object.
+// ImplementationGroupProxy
+//
 // ---------------------------------------------------------------------------
 //
-EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount )
+EXPORT_C const TImplementationProxy* ImplementationGroupProxy( 
+    TInt& aTableCount )
     {
     aTableCount = sizeof( KImplementationTable ) /
         sizeof( TImplementationProxy );
@@ -59,10 +61,10 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount 
     }
 
 // ======== MEMBER FUNCTIONS ========
-
-// ---------------------------------------------------------------------------
-// Symbian 2nd phase constructor can leave
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::NewL()
+//
+// ----------------------------------------------------------------------------
 //
 CWrtDataPlugin* CWrtDataPlugin::NewL()
     {
@@ -73,27 +75,26 @@ CWrtDataPlugin* CWrtDataPlugin::NewL()
     return self;
     }
     
-// ---------------------------------------------------------------------------
-// Default constructor
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::CWrtDataPlugin()
+//
+// ----------------------------------------------------------------------------
 //
 CWrtDataPlugin::CWrtDataPlugin()
+    : iNetworkStatus( EUnknown ), iPluginState( ENone ) 
     {
     }
     
-// ---------------------------------------------------------------------------
-// Symbian 2nd phase constructor can leave
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::ConstructL()
+//
+// ----------------------------------------------------------------------------
 //
 void CWrtDataPlugin::ConstructL()
-    { 
-    iInfo.iUid.iUid = WRTDP_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DATAPLUGIN; 
-    iPluginState = ENone;
-    iHSForeGround = EFalse;
-    iKeyLockOn = EFalse;
-    iNetworkStatus = EUnknown;
-    iData = CWrtData::NewL(this);
-
+    {
+    User::LeaveIfError( iRfs.Connect() );
+    
+    iData = CWrtData::NewL( this );
     }
     
 // ---------------------------------------------------------------------------
@@ -103,15 +104,7 @@ void CWrtDataPlugin::ConstructL()
 //
 CWrtDataPlugin::~CWrtDataPlugin()
     {
-    // deactivate the publishers
-    if( iData )
-        {
-        if ( iPluginState != EInActive )
-        	{
-        	TRAP_IGNORE(iData->DeActivateL());
-        	}
-        delete iData;
-        }
+    delete iData;
     iObservers.Close();
     Release( iContent );
     iDataArray.ResetAndDestroy();
@@ -125,71 +118,113 @@ CWrtDataPlugin::~CWrtDataPlugin()
         delete []iContentModel;
         }
     iIconArray.Reset();
-    }
-
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-in is requested to unload its engines due backup operation
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::Stop( TAiTransitionReason aReason )
-    {
-    if( iPluginState == EResume )
-        {
-        Suspend( aReason );
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-in is instructed that it is allowed to consume CPU resources
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::Resume( TAiTransitionReason aReason )
-    {
-    TRAP_IGNORE( DoResumeL( aReason ) ); 
-    }
     
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-in is instructed that it is not allowed to consume CPU resources
-// ---------------------------------------------------------------------------
+    iRfs.Close();
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::Start
 //
-void CWrtDataPlugin::Suspend( TAiTransitionReason aReason )
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::Start( TStartReason aReason )
     {
-    switch( aReason )
+    if( aReason == ESystemStartup || 
+        aReason == EPluginStartup )
         {
-        case EAiKeylockDisabled:
-        case EAiKeylockEnabled:
-            {
-            // handled in resume 
-            break;
-            }
-        default :
-            {
-            iPluginState = ESuspend;
-            TRAP_IGNORE ( iData->SuspendL() );
-            }
+        // publish the initial data
+        TRAP_IGNORE( PublishL());
         }
     }
 
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// The plug-in MUST maintain a registry of subscribers and send 
-// notification to all of them whenever the state changes or new content
-// is available
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::Stop
+//
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::Stop( TStopReason aReason )
+    {
+    if( aReason == EPluginShutdown ||
+        aReason == ESystemShutdown )
+        {
+        TRAP_IGNORE(iData->DeActivateL());
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::Resume
+//
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::Resume( TResumeReason aReason )
+    {
+    if ( aReason == EForeground )
+        {
+        iPluginState = EResume;
+
+        TRAP_IGNORE( iData->ResumeL() );        
+        }    
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::Suspend
+//
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::Suspend( TSuspendReason aReason )
+    {    
+    if ( aReason == EBackground )
+        {
+        iPluginState = ESuspend;
+        
+        TRAP_IGNORE ( iData->SuspendL() );        
+        }        
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::SetOnline
+//
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::SetOnline()
+    {    
+    if ( iNetworkStatus != EOnline )
+        {
+        iNetworkStatus = EOnline;
+        
+        TRAP_IGNORE( iData->OnLineL() );            
+        }    
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::SetOffline
+//
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::SetOffline()
+    {
+    if ( iNetworkStatus != EOffline )
+        {
+        iNetworkStatus = EOffline;
+        
+        TRAP_IGNORE( iData->OffLineL() );            
+        }    
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::SubscribeL
+//
+// ----------------------------------------------------------------------------
 //
 void CWrtDataPlugin::SubscribeL( MAiContentObserver& aObserver )
-    { 
+    {
     iObservers.AppendL( &aObserver );
     }
- 
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Plug-ins take ownership of the settings array, so it must either
-// store it in a member or free it.
-// ---------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::ConfigureL
+//
+// ----------------------------------------------------------------------------
 //
 void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     {
@@ -204,33 +239,41 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     RAiSettingsItemArray configurationItemsArr;
     RAiSettingsItemArray settingItemsArr;
     
-    TInt count = aSettings.Count();
-    for(TInt i = 0; i < count; i++ )
+    TInt count( aSettings.Count() );
+    
+    for ( TInt i = 0; i < count; i++ )
         {
-        MAiPluginSettings* pluginSetting = aSettings[i];
-        if( pluginSetting->AiPluginItemType() == EAiPluginContentItem )
+        MAiPluginSettings* setting( aSettings[i] );
+        
+        if( setting->AiPluginItemType() == EAiPluginContentItem )
             {
-            contentItemsArr.Append(pluginSetting);
+            contentItemsArr.Append( setting );
             }
-        else if( pluginSetting->AiPluginItemType() == EAiPluginConfigurationItem )
+        else if( setting->AiPluginItemType() == EAiPluginConfigurationItem )
             {
-            configurationItemsArr.Append(pluginSetting);
+            configurationItemsArr.Append( setting );
             }
         else 
             {
-            settingItemsArr.Append(pluginSetting);
+            settingItemsArr.Append( setting );
             }
         }
     
     iDataCount = contentItemsArr.Count();
-    if(iDataCount > 0 )
+    
+    if ( iDataCount > 0 )
         {
         // Create the content Model
-        HBufC16* contentId = HBufC16::NewLC( KAiContentIdMaxLength + KAiPluginNameMaxLength );
+        HBufC16* contentId = HBufC16::NewLC( 
+            KAiContentIdMaxLength + KAiPluginNameMaxLength );
+        
         iContentModel = new TAiContentItem[iDataCount];
-        for(TInt i = 0; i < iDataCount; i++)
+        
+        for( TInt i = 0; i < iDataCount; i++ )
             {
-            MAiPluginContentItem& contentItem = (contentItemsArr[i])->AiPluginContentItem();
+            MAiPluginContentItem& contentItem( 
+                contentItemsArr[i]->AiPluginContentItem() );
+            
             iContentModel[i].id = i;
             if( contentItem.Type() == KText() )
                 {
@@ -238,28 +281,36 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
                 iContentModel[i].type = KAiContentTypeText;
                 }
             if( contentItem.Type() == KImage() || 
-                    contentItem.Type() == KAnimation() )
+        		contentItem.Type() == KAnimation() )
                 {
                 // image
                 iContentModel[i].type = KAiContentTypeBitmap;
                 }
             
-            contentId->Des().Copy(contentItem.Name());
-            contentId->Des().Delete(0, contentId->Des().LocateReverse(KPluginNameSeprator) +1);
+            contentId->Des().Copy( contentItem.Name() );
+            contentId->Des().Delete( 0, 
+                contentId->Des().LocateReverse( KPluginNameSeprator ) + 1 );
   
-            TInt sizeOfContentId = contentId->Des().Size()+sizeof(wchar_t);
-            iContentModel[i].cid = static_cast<const wchar_t*>( User::Alloc( sizeOfContentId ) );
-            Mem::Copy((TAny*)iContentModel[i].cid, contentId->Des().PtrZ(), sizeOfContentId);
+            TInt sizeOfContentId( contentId->Des().Size()+sizeof( wchar_t ) );
             
-            contentId->Des().Delete( 0, contentId->Des().Length());
+            iContentModel[i].cid = 
+                static_cast< const wchar_t* >( User::Alloc( sizeOfContentId ) );
+                
+            Mem::Copy( ( TAny* )iContentModel[i].cid, 
+                contentId->Des().PtrZ(), sizeOfContentId );
+            
+            contentId->Des().Delete( 0, contentId->Des().Length() );
             }    
         
         CleanupStack::PopAndDestroy( contentId );
-        iContent = AiUtility::CreateContentItemArrayIteratorL( iContentModel, iDataCount );
+        iContent = AiUtility::CreateContentItemArrayIteratorL( 
+                iContentModel, iDataCount );
+                       
         // Configurations 
-        iData->ConfigureL(configurationItemsArr);
+        iData->ConfigureL( configurationItemsArr );
 
         iPluginState = ESuspend;
+
         // Register for notifications
         iData->RegisterL();
         
@@ -270,119 +321,79 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     settingItemsArr.Reset();
     contentItemsArr.Reset();
     configurationItemsArr.Reset();
+    
        // We own the array so destroy it
     aSettings.ResetAndDestroy();
-    // publish the initial data
-    PublishL();
     }
 
-// ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// Returns the extension interface. Actual type depends on the passed 
-// aUid argument.
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::GetProperty
 //
-TAny* CWrtDataPlugin::Extension( TUid aUid )
-    {    
-    if ( aUid == KExtensionUidProperty )
-        {
-        return static_cast<MAiPropertyExtension*>( this );
-        }
-    else if (aUid == KExtensionUidEventHandler)
-        {
-        return static_cast<MAiEventHandlerExtension*>( this );
-        }
-    else
-        {   
-        return NULL;
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// From class MAiPropertyExtension
-// Read property of publisher plug-in.
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-TAny* CWrtDataPlugin::GetPropertyL( TInt aProperty )
+TAny* CWrtDataPlugin::GetProperty( TProperty aProperty )
     {
-    TAny* property = NULL;
+    if ( aProperty == EPublisherContent )
+        {
+        return static_cast< MAiContentItemIterator* >( iContent );      
+        }
     
-    switch ( aProperty )
-        {
-    case EAiPublisherInfo:
-        {
-         property = static_cast<TAiPublisherInfo*>( &iInfo );
-        break;  
-        }       
-
-    case EAiPublisherContent:
-        {
-        property = static_cast<MAiContentItemIterator*>( iContent );
-        break;    
-        }        
-    default:
-        break;
-        }
-
-    return property;
+    return NULL;
     }
 
-// ---------------------------------------------------------------------------
-// From class MAiPropertyExtension
-// Write property value to optimize the content model.
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::HandleEvent
 //
-void CWrtDataPlugin::SetPropertyL( TInt aProperty, TAny* aValue )
-    {  
-    switch ( aProperty )
-        {
-        case EAiPublisherInfo:
-            {
-            if( aValue )
-                {
-                const TAiPublisherInfo* info = static_cast<const TAiPublisherInfo*>( aValue );
-                iInfo.iName.Copy( info->iName );
-                iInfo.iNamespace.Copy( info->iNamespace );
-                }
-            break;
-            }
-        default:
-            break;         
-        }
-    }
- 
-// ---------------------------------------------------------------------------
-// From class MAiEventHandlerExtension.
-// Handles an event sent by the AI framework.
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //
-void CWrtDataPlugin::HandleEvent( TInt /*aEvent*/, const TDesC& /*aParam*/ )
+void CWrtDataPlugin::HandleEvent( const TDesC& aEventName, 
+    const TDesC& aParam )
     {
-    // This is not as there is no event id to retrieve in this dynamic plugin. 
-    } 
-    
-// ---------------------------------------------------------------------------
-// From class MAiEventHandlerExtension.
-// Handles an event sent by the AI framework.
-// ---------------------------------------------------------------------------
+    TRAP_IGNORE( iData->ExecuteActionL( aEventName , aParam ) );    
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::HasMenuItem
 //
-void CWrtDataPlugin::HandleEvent( const TDesC& aEventName, const TDesC& aParam )
+// ----------------------------------------------------------------------------
+//
+TBool CWrtDataPlugin::HasMenuItem( const TDesC& aMenuItem )
     {
-    // We have no way of reporting errors to framework so just ignore them.
-    TRAP_IGNORE(iData->ExecuteActionL( aEventName , aParam ) );
+    return iData->HasMenuItem ( aMenuItem );
     }
 
-// ---------------------------------------------------------------------------
-// From class MAiEventHandlerExtension.
-// Invoked by the framework for querying if plugin has menu item
-// ---------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::IsActive
 //
-TBool CWrtDataPlugin::HasMenuItem( const TDesC16& aMenuItem )
-    { 
-    return iData->HasMenuItem ( aMenuItem );  
+// ----------------------------------------------------------------------------
+//
+TBool CWrtDataPlugin::IsActive() const
+    {
+    return iPluginState == EResume;
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::Data
+//
+// ----------------------------------------------------------------------------
+//
+CWrtData* CWrtDataPlugin::Data() const
+    {
+    return iData;
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::NetworkStatus
+//
+// ----------------------------------------------------------------------------
+//
+CWrtDataPlugin::TPluginNetworkStatus CWrtDataPlugin::NetworkStatus() const
+    {
+    return iNetworkStatus;
     }
 
 // ---------------------------------------------------------------------------
+// CWrtDataPlugin::GetIdL
 // Gets the id of a content  
 // ---------------------------------------------------------------------------
 //
@@ -405,6 +416,7 @@ TInt CWrtDataPlugin::GetIdL( TDesC16& aObjectId)
  
 
 // ---------------------------------------------------------------------------
+// CWrtDataPlugin::GetTypeL
 // Gets type of a content
 // ---------------------------------------------------------------------------
 //
@@ -464,15 +476,6 @@ void CWrtDataPlugin::RefreshL( TDesC16& aOperation, CLiwDefaultMap* aDataMap )
         // Release memory of the published icons
         iIconArray.Reset();
         }
-    }
-
-// ---------------------------------------------------------------------------
-// Is plugin active to publish the data 
-// ---------------------------------------------------------------------------
-//
-TBool CWrtDataPlugin::IsActive()
-    {
-    return (iPluginState == EResume );
     }
 
 // ---------------------------------------------------------------------------
@@ -577,23 +580,21 @@ void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver,
               }
           }
       else  // Interpret as File path
-          {
-          RFs rfs;
-          User::LeaveIfError( rfs.Connect() );
-          RFile* iconFile = new (ELeave) RFile();
-          err = iconFile->Open( rfs, aPath, EFileShareReadersOnly |  EFileRead );
+          {                   
+          RFile iconFile;
+          
+          err = iconFile.Open( iRfs, aPath, EFileShareReadersOnly |  EFileRead );
+          
           if( err == KErrNone )
             {
-             aObserver->Publish( *this, aContentId, *iconFile, aContentId );
+             aObserver->Publish( *this, aContentId, iconFile, aContentId );
             }
           else
               {
               aObserver->Clean( *this, aContentId, aContentId );
               }
-          iconFile->Close();
-          delete iconFile;
-          iconFile = NULL;
-          rfs.Close();
+          
+          iconFile.Close();
           }
         }
     }
@@ -695,100 +696,6 @@ void CWrtDataPlugin::PublishL()
     }
 
 // ---------------------------------------------------------------------------
-// From class CAiContentPublisher
-// framework instructs plug-in that it is allowed to consume CPU resources
-// ---------------------------------------------------------------------------
-//
-void CWrtDataPlugin::DoResumeL( TAiTransitionReason aReason )
-    {
-    //update in startup phase and idle is on foreground.
-    switch ( aReason )
-        {
-        case EAiIdleOnLine:
-            {
-            iNetworkStatus = EOnline;
-            iData->OnLineL();
-            break;
-            }
-        case EAiIdleOffLine:
-            {
-            iNetworkStatus = EOffline;
-            iData->OffLineL();
-            break;
-            }
-        case EAiIdlePageSwitch:
-            {
-            if ( iPluginState == EResume )
-                {
-                iData->SuspendL();
-                }
-            iPluginState = EInActive;
-            iData->InActiveL();
-            }
-            break;
-        case EAiSystemStartup:
-        case EAiIdleForeground:
-            {
-            iHSForeGround = ETrue;
-            }
-        case EAiBacklightOn:            
-            {
-            if ( iPluginState == ESuspend  && !iKeyLockOn )
-                {
-                iPluginState = EResume;
-                iData->ResumeL();
-                }
-            break;
-            }
-        case EAiKeylockDisabled:
-            {
-            iKeyLockOn = EFalse;
-            // Key lock events considered only if HS is in foreground  
-            if ( iHSForeGround && iPluginState == ESuspend )
-                {
-                iPluginState = EResume;
-                iData->ResumeL();
-                }
-            break;
-            }
-        case EAiKeylockEnabled:
-            {
-            iKeyLockOn = ETrue;
-            // Key lock events considered only if HS is in foreground
-            if ( iHSForeGround && iPluginState == EResume )
-                {
-                iPluginState = ESuspend ;
-                iData->SuspendL();
-                }
-            break;
-            }
-        case EAiScreenLayoutChanged:
-            {
-            // ignore events
-            break;
-            }
-      case EAiGeneralThemeChanged:
-          {
-          // ignore event
-          break;
-          }
-        case EAiIdleBackground: 
-            {
-            iHSForeGround = EFalse;
-            }
-        default :
-            {
-            if ( iPluginState == EResume )
-                {
-                iPluginState = ESuspend;
-                iData->SuspendL();
-                }
-            break;
-            }
-        }
-    }
-
-// ---------------------------------------------------------------------------
 // ResolveSkinItemId
 // ---------------------------------------------------------------------------
 //
@@ -866,3 +773,5 @@ TBool CWrtDataPlugin::ResolveSkinIdAndMifId( const TDesC& aPath, TAknsItemID& aI
        }
    return (error == KErrNone );
    }
+
+// End of file

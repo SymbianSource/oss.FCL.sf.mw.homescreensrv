@@ -25,15 +25,14 @@ DEFAULT
 
 
 PRJ_EXPORTS
-../plugins/devicestatus/loc/aidevstaplgres.loc          MW_LAYER_LOC_EXPORT_PATH(aidevstaplgres.loc)
-../loc/aifw.loc                                       MW_LAYER_LOC_EXPORT_PATH(aifw.loc)
+../loc/aifw.loc                             MW_LAYER_LOC_EXPORT_PATH(aifw.loc)
 
 // Generic configuration interface for component cenrep settings
 ../conf/activeidle2.confml                  APP_LAYER_CONFML(activeidle2.confml)
 ../conf/activeidle2_10275102.crml           APP_LAYER_CRML(activeidle2_10275102.crml)
 
-../rom/idlefw.iby                                  CORE_MW_LAYER_IBY_EXPORT_PATH(idlefw.iby)
-../rom/idlefw_resources.iby                        LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(idlefw_resources.iby)
+../rom/idlefw.iby                           CORE_MW_LAYER_IBY_EXPORT_PATH(idlefw.iby)
+../rom/idlefw_resources.iby                 LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(idlefw_resources.iby)
 
 PRJ_MMPFILES
 aiutils.mmp

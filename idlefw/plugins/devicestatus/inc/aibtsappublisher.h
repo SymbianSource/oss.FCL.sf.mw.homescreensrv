@@ -20,17 +20,20 @@
 #ifndef C_AIBTSAPPUBLISHER_H
 #define C_AIBTSAPPUBLISHER_H
 
-
+// System includes
 #include <e32base.h>
 #include <coemain.h>
 #include <RSSSettings.h>
 #include <MSSSettingsObserver.h>
 #include <MProfileChangeObserver.h>
+
+// User includes
 #include "aidevicestatuspublisher.h"
 #include "aidevicestatuscontentmodel.h"
 
+// Forward declarations
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -41,7 +44,8 @@ class MAiPropertyExtension;
  *
  *  @since S60 3.2
  */
-class CAiBTSAPPublisher : public CActive, public MAiDeviceStatusPublisher
+NONSHARABLE_CLASS( CAiBTSAPPublisher ) : public CActive, 
+    public MAiDeviceStatusPublisher
     {
 public:
 
@@ -53,11 +57,12 @@ public:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
     TBool RefreshL( TInt aContentId, TBool aClean );
+    TBool SuspendL( TInt aContentId, TBool aClean );
     TBool RefreshContentWithPriorityL( TInt aContentId, TInt aPriority );
     
 protected:
@@ -78,39 +83,22 @@ private:
 
 private: // data
 
-    /**
-     * Property extension.
-     * Not own.
-     */
-    MAiPropertyExtension* iExtension;
-    
-	/**
-	 * Content prioritizer.
-	 * Not own.
-	 */
-	MAiPublishPrioritizer* iPrioritizer;
-    
-	/**
-	 * Publish broadcaster.
-	 * Not own.
-	 */
-	MAiPublisherBroadcaster* iBroadcaster;
-	
-    /**
-     * Publish-subscribe client used to observer BT SAP activation.
-     */
+    /** Property extension, not owned */
+    CHsContentPublisher* iExtension;    
+	/** Content prioritizer, not owned */
+	MAiPublishPrioritizer* iPrioritizer;    
+	/**  Publish broadcaster, not owned */
+	MAiPublisherBroadcaster* iBroadcaster;	
+    /** Publish-subscribe client used to observer BT SAP activation */
     RProperty iPubSub;
-
-    /**
-     * Variable which tells if publisher has published previously or not.
-     */
+    /** Variable which tells if publisher has published previously or not */
     TBool iFirstPublish;
-
-    /**
-     * True if publish was successful.
-     */
-    TBool iSuccess;
+    /**  True if publish was successful */
+    TBool iSuccess;    
+    /** True if publisher content is suspended */
+    TBool iSuspended;
     };
 
-
 #endif // C_AIBTSAPPUBLISHER_H
+
+// End of file

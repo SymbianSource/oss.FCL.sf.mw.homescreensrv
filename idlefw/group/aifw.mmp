@@ -28,23 +28,12 @@ CAPABILITY      CAP_GENERAL_DLL
 // Framework sources
 SOURCEPATH      ../src/framework
 SOURCE          aifw.cpp
-SOURCE          aicontentpluginmanager.cpp
-SOURCE          aiuicontrollermanager.cpp
-SOURCE          aicallstatusobserver.cpp
-SOURCE          ailightstatusobserver.cpp
-SOURCE          aibackuprestorestatusobserver.cpp
-SOURCE          aienvironmentchangeobserver.cpp
-SOURCE          aifocusobserver.cpp
-SOURCE          aikeylockobserver.cpp
-SOURCE          aipsstatusobserver.cpp
-SOURCE          aipluginstatemanager.cpp
-SOURCE          aipluginstatemachineimpl.cpp
-SOURCE          aistatealive.cpp
-SOURCE          aistatesuspended.cpp
-SOURCE          aistateidle.cpp
+SOURCE          aieventhandler.cpp 
 SOURCE          aipluginfactory.cpp
-SOURCE          aiuiframeworkobserverimpl.cpp
-SOURCE          ainetworklistener.cpp
+SOURCE          aiuicontrollermanager.cpp
+SOURCE          aistatemanager.cpp
+SOURCE          aistateprovider.cpp
+SOURCE          aiecomobserver.cpp
 
 // Active Idle Framework shared sources
 SOURCEPATH      ../src/common
@@ -71,17 +60,13 @@ LIBRARY         aknnotify.lib
 LIBRARY         featmgr.lib
 LIBRARY         eikcore.lib
 LIBRARY         hwrmlightclient.lib
-LIBRARY         networkhandling.lib
+LIBRARY         aknskinsrv.lib
 
 // Active Idle internal dependencies
-LIBRARY     aiutils.lib aiidleint.lib
+LIBRARY         aiutils.lib 
+LIBRARY         aiidleint.lib
 
 // Debugging dependencies
-LIBRARY    flogger.lib
-
-//++HV
-LIBRARY akntransitionutils.lib
-//--HV
+LIBRARY         flogger.lib
 
 DEFFILE         aifwu.def
-

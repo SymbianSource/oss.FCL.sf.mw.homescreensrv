@@ -277,6 +277,12 @@ private:  // data
      * iMCSPluginFolderId
      */
     TInt iMCSPluginFolderId;
+
+public:
+    /**
+     * Name of "Undefined" application
+     */
+    HBufC* iUndefinedText;
 };
 
 #endif // CMCSPLUGINSETTINGSAPPLIST_H

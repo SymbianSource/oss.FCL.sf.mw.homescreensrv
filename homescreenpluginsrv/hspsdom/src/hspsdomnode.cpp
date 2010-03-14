@@ -571,19 +571,6 @@ EXPORT_C TInt ChspsDomNode::DescendantCount() const
      
     return count;
     }                  
-
- 
-// -----------------------------------------------------------------------------
-// ChspsDomNode::DeleteAttributeList
-// Deletes the attribute list
-// -----------------------------------------------------------------------------
-//   
-EXPORT_C void ChspsDomNode::DeleteAttributeList()
-    {
-    delete iAttributeList;
-    iAttributeList = NULL;
-    
-    }
     
 // -----------------------------------------------------------------------------
 // ChspsDomNode::AttributeValue

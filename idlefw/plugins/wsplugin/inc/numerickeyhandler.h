@@ -44,7 +44,8 @@ class CNumericKeyHandler :
         public CEventHandler, 
         private MCenRepNotifyHandlerCallback
     {
-public:
+public:    
+    
     /**
      * Creates a new instance of this class.
      *
@@ -118,6 +119,13 @@ private: // data
     
     /// Input language indicator.
     TInt iInputLanguage;
+    
+private:
+    // friend classes
+    
+#ifdef _AIWSPLUGIN_UNIT_TEST    
+    friend class UT_NumericKeyHandler;
+#endif    
     };
 
 } // namespace AiWsPlugin

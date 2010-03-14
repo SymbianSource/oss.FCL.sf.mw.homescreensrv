@@ -19,16 +19,19 @@
 #ifndef C_AISIMREGFAILPUBLISHER_H
 #define C_AISIMREGFAILPUBLISHER_H
 
-
+// System includes
 #include <e32base.h>
+
+// User includes
 #include "aidevicestatuspublisher.h"
 #include "aidevicestatuscontentmodel.h"
 #include "ainetworkinfoobserver.h"
 
-
+// Forward declarations
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
 class CAiNetworkInfoListener;
+
 
 /**
  *  @ingroup group_devicestatusplugin
@@ -37,8 +40,9 @@ class CAiNetworkInfoListener;
  *
  *  @since S60 3.2
  */
-class CAiSimRegPublisher : public CBase, public MAiDeviceStatusPublisher,
-                                public MAiNetworkInfoObserver
+NONSHARABLE_CLASS( CAiSimRegPublisher ) : public CBase, 
+    public MAiDeviceStatusPublisher,
+    public MAiNetworkInfoObserver
     {
 public:
 
@@ -50,7 +54,7 @@ public:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
@@ -84,7 +88,7 @@ private: // data
      * Property extension.
      * Not own.
      */
-    MAiPropertyExtension* iExtension;
+    CHsContentPublisher* iExtension;
 
     /**
      * Network info listener.

@@ -15,23 +15,40 @@
 *
 */
 
+#ifndef _AICONTENTOBSERVER_INL
+#define _AICONTENTOBSERVER_INL
 
-inline TInt MAiContentObserver::PublishPtr
-        (MAiPropertyExtension& aPlugin, TInt aContent, TAny* aPtr, TInt aIndex)
+// ---------------------------------------------------------------------------
+// MAiContentObserver::PublishPtr
+//
+// ---------------------------------------------------------------------------
+//
+inline TInt MAiContentObserver::PublishPtr( CHsContentPublisher& aPlugin, 
+    TInt aContent, TAny* aPtr, TInt aIndex )        
     {
     // Package the pointer to a buffer and delegate to buffer publish method
-    return this->Publish(aPlugin, aContent, TPckgC<TAny*>(aPtr), aIndex);
+    return this->Publish( aPlugin, aContent, TPckgC<TAny*>( aPtr ), aIndex );
     }
 
-template<class PtrT> inline 
-PtrT* MAiContentObserver::UnpackPtr(const TDesC8& aBuf)
+// ---------------------------------------------------------------------------
+// MAiContentObserver::UnpackPtr
+//
+// ---------------------------------------------------------------------------
+//
+template< class PtrT > inline PtrT* MAiContentObserver::UnpackPtr( 
+    const TDesC8& aBuf )
     {
-    TAny* result = NULL;
+    TAny* result( NULL );
+    
     if ( aBuf.Size() == sizeof( TAny* ) )
         {
-        TPckg<TAny*>(result).Copy(aBuf); // Effectively writes aBuf contents to result
+        // Effectively writes aBuf contents to result
+        TPckg< TAny* >( result ).Copy( aBuf ); 
         }
-    return static_cast<PtrT*>(result);
+        
+    return static_cast< PtrT* >( result );
     }
+
+#endif // _AICONTENTOBSERVER_INL
 
 // End of file    

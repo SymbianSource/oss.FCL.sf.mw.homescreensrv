@@ -16,38 +16,37 @@
 */
 
 
-#ifndef C_AIFW_H
-#define C_AIFW_H
+#ifndef _AIFW_H
+#define _AIFW_H
 
+// System includes
 #include <e32base.h>
-#include <aicontentpublisher.h>
-#include <centralrepository.h>
 #include <cenrepnotifyhandler.h>
 
-#include "aifwdefs.h"
-#include "aicontentmodel.h"
-#include "aifweventhandler.h"
+// User includes
+#include <aifweventhandler.h>
 
+// Forward declarations
 class CAiUiControllerManager;
-class CAiContentPluginManager;
+class CAiStateManager;
+class CAiStateProvider;
+class CAiPluginFactory;
+class CAiEventHandler;
 class CAiWsPluginManager;
-class CAiPluginStateManager;
-class RConeResourceLoader;
-class CAiContentPublisher;
 class MAiPSPropertyObserver;
-class CAiNetworkListener;
+class THsPublisherInfo;
 
+// Class declaration
 /**
  * @ingroup group_aifw
  * 
  * Active Idle Framework main class.
  */
-NONSHARABLE_CLASS( CAiFw ) : 
-        public CBase,
-        public MAiFwEventHandler,
-        public MCenRepNotifyHandlerCallback        
+NONSHARABLE_CLASS( CAiFw ) : public CBase, public MAiFwEventHandler,                
+    public MCenRepNotifyHandlerCallback        
     {
-public: // Constructors and destructors    
+public: 
+    // constructors and destructor    
 
     /**
      * Creates and returns a new Active Idle Framework object.
@@ -59,6 +58,9 @@ public: // Constructors and destructors
      */
     IMPORT_C static CAiFw* NewLC();
   
+    /**
+     * Destructor
+     */
     ~CAiFw();
   
 public: // New functions
@@ -72,11 +74,21 @@ public: // New functions
      */
     IMPORT_C void RunL();
         
-private: // Constructors      
+private: 
+    // constructors
+    
+    /**
+     * Default C++ constructor
+     */
     CAiFw();
+    
+    /**
+     * 2nd phase constructor
+     */
     void ConstructL();
   
-private: // From MAiFwEventHandler    
+private: 
+    // from MAiFwEventHandler    
         
     /**
      * @see MAiFwEventHandler
@@ -97,17 +109,7 @@ private: // From MAiFwEventHandler
      * @see MAiFwEventHandler
      */    
     void HandleUiShutdown( CAiUiController& aUiController );
-    
-    /**
-     * @see MAiFwEventHandler
-     */        
-    void HandleLoadPluginL( const TAiPublisherInfo& aPublisherInfo );
-    
-    /**
-     * @see MAiFwEventHandler
-     */        
-    void HandleDestroyPluginL( const TAiPublisherInfo& aPublisherInfo );            
-    
+        
     /**
      * @see MAiFwEventHandler
      */        
@@ -116,76 +118,88 @@ private: // From MAiFwEventHandler
     /**
      * @see MAiFwEventHandler
      */        
-    void HandlePluginEventL( const TAiPublisherInfo& aPublisherInfo, const TDesC& aParam );
+    void HandlePluginEventL( 
+        const THsPublisherInfo& aPublisherInfo, 
+        const TDesC& aParam );
 
     /**
      * @see MAiFwEventHandler
      */    
-    TBool HasMenuItemL( const TAiPublisherInfo& aPublisherInfo, const TDesC& aMenuItem );        
+    TBool HasMenuItemL( 
+        const THsPublisherInfo& aPublisherInfo, 
+        const TDesC& aMenuItem );        
 
     /**
      * @see MAiFwEventHandler
      */        
     TBool RefreshContent( const TDesC& aContentCid );
+
+    /**
+     * @see MAiFwEventHandler
+     */            
+    TBool RefreshContent( 
+        const THsPublisherInfo& aPublisherInfo,
+        const TDesC& aContentCid );
+
+    /**
+     * @see MAiFwEventHandler
+     */            
+    TBool SuspendContent( 
+        const THsPublisherInfo& aPublisherInfo,
+        const TDesC& aContentCid );
     
     /**
      * @see MAiFwEventHandler
      */        
     TBool QueryIsMenuOpen();
-
-    /**
-     * @see MAiFwEventHandler
-     */            
-    void ProcessStateChange( TAifwStates aState );    
         
-private: // From MCenRepNotifyHandlerCallback
+private: 
+    // from MCenRepNotifyHandlerCallback
 
     /**
      * @see MCenRepNotifyHandlerCallback
      */
     void HandleNotifyInt( TUint32 aId, TInt aNewValue );
     
-private: // New functions        
-                 
-    static TInt HandleFocusChangeEvent( TAny* aSelf );
+public:
+    // new functions
+    
+    /**
+     * Get repository
+     * 
+     * @since S60 5.2
+     * @return Repositury
+     */
+    CRepository& Repository() const;
+    
+private: 
+    // new functions        
+                     
     static TInt HandleRestartEvent( TAny* aSelf );
     void SwapUiControllerL( TBool aToExtHS );
 
-private: // Data     
+private: 
+    // data     
     
-    /**
-     * UI Controller manager, Owned.     
-     */
+    /** UI Controller manager, Owned. */
     CAiUiControllerManager* iUiControllerManager;
-
-    /**
-     * Content plugin manager, Owned.     
-     */
-    CAiContentPluginManager* iPluginManager;
-
-    /**
-     * Window server plug-in manager, Owned.
-     */
+    /** Plugin factory, Owned */
+    CAiPluginFactory* iFactory;
+    /** State manager, Owned */
+    CAiStateManager* iStateManager;
+    /** State provider, Owned */
+    CAiStateProvider* iStateProvider;
+    /** Plugin event handler, Owned. */
+    CAiEventHandler* iEventHandler;
+    /** Window server plug-in manager, Owned. */
     CAiWsPluginManager* iWsPluginManager;
-
-    /**
-     * Notify handler for cenrep, Owned.     
-     */
-    CCenRepNotifyHandler* iNotifyHandler;
-    
-    /**
-     * Notify handler for cenrep, Owned.     
-     */    
+    /** Notify handler for cenrep, Owned. */
+    CCenRepNotifyHandler* iNotifyHandler;    
+    /** Notify handler for cenrep, Owned. */
     CCenRepNotifyHandler* iNotifyHandlerESS;
-
-    /**
-     * Idle repository, Owned.
-     */
-    CRepository* iAIRepository;
-    
-    /**
-     * Idle restart PS observer, Owned.
-     */
+    /** Idle repository, Owned. */
+    CRepository* iRepository;    
+    /** Idle restart PS observer, Owned. */
     MAiPSPropertyObserver* iIdleRestartObserver;
     
     TBool iLibrariesLoaded;
@@ -195,5 +209,5 @@ private: // Data
     RLibrary iLibrary3;       
     };
 
-#endif // C_AIFW_H
+#endif // _AIFW_H
 

@@ -94,10 +94,10 @@ private:
 	/** 
 	 * Removes single widget.
 	 * @param aType Widget type.
-	 * @param aContentId Widget UID.
+	 * @param aPublisherId Widget UID.
 	 */
 	void RemoveWidgetL( const TDesC& aType, 
-        const TDesC& aContentId );
+        const TDesC& aPublisherId );
 	
 
 private:

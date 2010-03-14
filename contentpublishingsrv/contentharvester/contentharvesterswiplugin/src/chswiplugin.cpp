@@ -21,14 +21,13 @@
 
 #include <ecom/implementationproxy.h>
 #include <contentharvesterpluginuids.hrh>
-#include <LiwServiceHandler.h>
+#include <liwservicehandler.h>
 
 #include "cpglobals.h"
 #include "chswiusbhandler.h"
 #include "chswiusbobserver.h"
 
-_LIT( KHsWidgetPublisher, "hswidgetpublisher");
-_LIT( KHsPublisher, "ai3templatedwidget" );
+_LIT( KHSTemplate, "hstemplate" );
 _LIT8( KWidgetUid, "widget_uid");
 
 const TInt KWidgetArrayGran = 8;
@@ -162,8 +161,7 @@ void CCHSwiPlugin::UpdateWidgetsL()
 	inparam->AppendL( TLiwGenericParam( KType, TLiwVariant( KPublisher ) ) );
 	CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
 	
-	filter->InsertL( KPublisherId, TLiwVariant( KHsWidgetPublisher ));
-	filter->InsertL( KContentType, TLiwVariant( KHsPublisher ));
+	filter->InsertL( KContentType, TLiwVariant( KHSTemplate ));
 	inparam->AppendL( TLiwGenericParam( KFilter, TLiwVariant( filter ) ) );
 	
 	iCPSInterface->ExecuteCmdL( KGetList, *inparam, *outparam );
@@ -210,7 +208,7 @@ void CCHSwiPlugin::RemoveWidgetsL( CLiwGenericParamList* aWidgets )
                     if( KErrNotFound == iApaLsSession.GetAppInfo( 
                             appInfo, TUid::Uid( variant.AsTInt32() ) ) )
                         {
-                        if( map->FindL( KContentId, variant ) )
+                        if( map->FindL( KPublisherId, variant ) )
                             {
                             notFoundWidgets->AppendL( variant.AsDes() );
                             }
@@ -248,16 +246,14 @@ void CCHSwiPlugin::RemoveWidgetsL( CLiwGenericParamList* aWidgets )
 // ----------------------------------------------------------------------------
 //
 void CCHSwiPlugin::RemoveWidgetL( const TDesC& aType, 
-        const TDesC& aContentId )
+        const TDesC& aPublisherId )
     {
     CLiwGenericParamList* inparam = CLiwGenericParamList::NewLC( );
     CLiwGenericParamList* outparam = CLiwGenericParamList::NewLC( );
     inparam->AppendL( TLiwGenericParam( KType, TLiwVariant( aType ) ) );
     CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
     
-    filter->InsertL( KPublisherId, TLiwVariant( KHsWidgetPublisher ));
-    filter->InsertL( KContentType, TLiwVariant( KHsPublisher ));
-    filter->InsertL( KContentId, TLiwVariant( aContentId ));
+    filter->InsertL( KPublisherId, TLiwVariant( aPublisherId ));
     inparam->AppendL( TLiwGenericParam( KFilter, TLiwVariant( filter ) ) );
     
     iCPSInterface->ExecuteCmdL( KDelete, *inparam, *outparam );

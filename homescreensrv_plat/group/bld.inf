@@ -16,13 +16,13 @@
 *
 */
 
-
+PRJ_EXPORTS
+../../inc/aisystemuids.hrh              MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
 
 #include "../ai_content_model_api/group/bld.inf"
 #include "../ai_utilities_api/group/bld.inf"
 #include "../ai_plugin_management_api/group/bld.inf"
 #include "../ai_plugin_information_api/group/bld.inf"
-#include "../ai_shortcut_command_api/group/bld.inf"
 #include "../ai_variation_api/group/bld.inf"
 #include "../action_handler_plugin_api/group/bld.inf"
 #include "../content_harvester_plugin_api/group/bld.inf"
@@ -35,7 +35,6 @@
 #include "../sapi_actionhandler/group/bld.inf"
 #include "../sapi_homescreenplugin/group/bld.inf"
 #include "../sapi_menucontent/group/bld.inf"
-#include "../shortcutplugin_extension_api/group/bld.inf"
 #include "../xcfw_api/group/bld.inf"
 #include "../idlefw_api/group/bld.inf"
 #include "../hs_widget_publisher_api/group/bld.inf"

@@ -15,49 +15,42 @@
 *
 */
 
-
-#include <bautils.h>
-#include <coemain.h>
-#include <ConeResLoader.h>
-#include <e32property.h>
+// System includes
 #include <startupdomainpskeys.h>
+#include <centralrepository.h>
+#include <cenrepnotifyhandler.h>
+
+// User includes
+#include "aiuicontrollermanager.h"
+#include "aiuicontroller.h"
+#include "aieventhandler.h"
+#include "aistatemanager.h"
+#include "aistateprovider.h"
+#include "aipluginfactory.h"
+#include "aiwspluginmanager.h"
+#include "aiidleappregister.h"
+
+#include <activeidle2domaincrkeys.h>
 #include <activeidle2domainpskeys.h>
 #include <activeidle2internalpskeys.h>
-#include <cenrepnotifyhandler.h>
 #include <aipspropertyobserver.h>
 #include <aisystemuids.hrh>
 
-#include <AknWaitDialog.h>
-#include <AknGlobalNote.h>
-#include <StringLoader.h>
-
-
-#include <e32cmn.h>
-#include <e32def.h>
+#include "aiutility.h"
+#include "aifwpanic.h"
 
 #include "aifw.h"
-#include "aifwpanic.h"
-#include "aiutility.h"
-#include "aiuicontrollermanager.h"
-#include "aiuicontroller.h"
-#include "aicontentmodel.h"
-#include "aicontentpluginmanager.h"
-#include "aiwspluginmanager.h"
-#include "aipluginstatemanager.h"
-#include "aiidleappregister.h"
+
 #include "debug.h"
 
-#include <centralrepository.h>
-#include <activeidle2domaincrkeys.h>
-#include "ainetworklistener.h"
+// Constants
 
-
-#include <data_caging_path_literals.hrh>
 
 // ======== MEMBER FUNCTIONS ========
 
 // ----------------------------------------------------------------------------
-// CAiFw::NewL()
+// CAiFw::CAiFw()
+//
 // ----------------------------------------------------------------------------
 //
 CAiFw::CAiFw()
@@ -66,6 +59,7 @@ CAiFw::CAiFw()
 
 // ----------------------------------------------------------------------------
 // CAiFw::ConstructL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::ConstructL()
@@ -78,47 +72,50 @@ void CAiFw::ConstructL()
                                            
     if( secId == 0x2001CB4F )
         {
-        iAIRepository = CRepository::NewL( TUid::Uid( 0x2001952B ) );
+        iRepository = CRepository::NewL( TUid::Uid( 0x2001952B ) );
         }   
     else
         {
-        iAIRepository = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
+        iRepository = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
         }
 #else
-    iAIRepository = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
+    iRepository = CRepository::NewL( TUid::Uid( KCRUidActiveIdleLV ) );
 #endif
         
     TInt value( 0 );
     
-    iAIRepository->Get( KAiMainUIController, value );
+    iRepository->Get( KAiMainUIController, value );
     
-    if( !( value == AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML ||
+    if ( !( value == AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML ||
            value == AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE ||
            value == AI3_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML ||
            value == AI3_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE ) )
         {
         // Someone wrote an invalid configuration! Reset repository.
-        iAIRepository->Reset( KAiMainUIController );
-        iAIRepository->Reset( KAiFirstUIController );
-        iAIRepository->Delete( KAiFirstUIController + 1 );
+        iRepository->Reset( KAiMainUIController );
+        iRepository->Reset( KAiFirstUIController );
+        iRepository->Delete( KAiFirstUIController + 1 );
         }
     
-    iUiControllerManager = CAiUiControllerManager::NewL();
-           
-    iPluginManager = CAiContentPluginManager::NewL();
-                                                                   
-    // Hook framework as UI event observer
-    iUiControllerManager->SetEventHandler( *this );    
+    iUiControllerManager = CAiUiControllerManager::NewL( this );
+    
+    iFactory = CAiPluginFactory::NewL( *iUiControllerManager );
+    
+    iStateManager = CAiStateManager::NewL( *iFactory );
+                 
+    iEventHandler = CAiEventHandler::NewL( *iFactory );                                                                   
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::NewLC()
+//
 // ----------------------------------------------------------------------------
 //
 EXPORT_C CAiFw* CAiFw::NewLC()
     {
     CAiFw* self = new ( ELeave ) CAiFw;
     CleanupStack::PushL( self );
+    
     self->ConstructL();
 
     __TICK( "FW: Core FW constructed" );
@@ -129,54 +126,51 @@ EXPORT_C CAiFw* CAiFw::NewLC()
 
 // ----------------------------------------------------------------------------
 // CAiFw::~CAiFw()
+//
 // ----------------------------------------------------------------------------
 //
 CAiFw::~CAiFw()
-    {
-    if( iPluginManager )
-        {
-        delete iPluginManager;
-        iPluginManager = NULL;
-        }
-        
-    if( iIdleRestartObserver )
-        {
-        Release( iIdleRestartObserver );
-        iIdleRestartObserver = NULL;
-        }
-    
-    if( iWsPluginManager )
-        {
-        delete iWsPluginManager;
-        iWsPluginManager = NULL;
-        }
-        
-    if( iUiControllerManager )
-        {
-        delete iUiControllerManager;
-        iUiControllerManager = NULL;
-        }
-    
-    if( iNotifyHandler )
+    {        
+    if ( iNotifyHandler )
         {
         iNotifyHandler->StopListening();
-        delete iNotifyHandler;
-        iNotifyHandler = NULL;
         }
+
+    delete iNotifyHandler;
+    iNotifyHandler = NULL;
     
-    if( iNotifyHandlerESS )
+    if ( iNotifyHandlerESS )
         {
         iNotifyHandlerESS->StopListening();
-        delete iNotifyHandlerESS;
-        iNotifyHandlerESS = NULL;
         }
+
+    delete iNotifyHandlerESS;
+    iNotifyHandlerESS = NULL;
+   
+    Release( iIdleRestartObserver );
+    iIdleRestartObserver = NULL;
+        
+    delete iWsPluginManager;
+    iWsPluginManager = NULL;
     
-    if( iAIRepository )
-        {
-        delete iAIRepository;
-        iAIRepository = NULL;
-        }
+    delete iEventHandler;
+    iEventHandler = NULL;
     
+    delete iStateProvider;
+    iStateProvider = NULL;
+    
+    delete iStateManager;
+    iStateManager = NULL;
+    
+    delete iFactory;
+    iFactory = NULL;
+    
+    delete iUiControllerManager;
+    iUiControllerManager = NULL;
+                                
+    delete iRepository;
+    iRepository = NULL;
+           
     iLibrary1.Close();
     iLibrary2.Close();
     iLibrary3.Close();
@@ -184,6 +178,7 @@ CAiFw::~CAiFw()
 
 // ----------------------------------------------------------------------------
 // CAiFw::RunL()
+//
 // ----------------------------------------------------------------------------
 //
 EXPORT_C void CAiFw::RunL()
@@ -200,6 +195,7 @@ EXPORT_C void CAiFw::RunL()
 
 // ----------------------------------------------------------------------------
 // CAiFw::AppEnvReadyL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::AppEnvReadyL()
@@ -207,71 +203,56 @@ void CAiFw::AppEnvReadyL()
     // Initialize members which need to be connected to the app environment's
     // active scheduler or depend on the app environment being initialized.
 
-    // Create state managers system state observers
-    CAiPluginStateManager& stateManager( iPluginManager->StateManager() );
-    
-    stateManager.CreateSystemStateObserversL();
-
-    // Connect state managers UI observer to UI controllers
-    MAiUiFrameworkObserver* fwObserver( stateManager.UiFwObserver() );
-    
-    if ( fwObserver )
-        {
-        iUiControllerManager->AddObserverL( *fwObserver );
-        }
+    CCoeEnv& env( iUiControllerManager->CoeEnv() );
 
     // Create WS pluign manager
-    iWsPluginManager = CAiWsPluginManager::NewL
-        ( iUiControllerManager->CoeEnv() );
-
-    // CenRep notifier to listen key changes in cenrep. Application is restarted
-    // if key value is changed.
-    iNotifyHandler = CCenRepNotifyHandler::NewL( *this,
-                                                 *iAIRepository,
-                                                 CCenRepNotifyHandler::EIntKey,
-                                                 KAiMainUIController );
+    iWsPluginManager = CAiWsPluginManager::NewL( env );
+    
+    iStateProvider = CAiStateProvider::NewL( *iStateManager, env );
+    
+    iUiControllerManager->SetStateHandler( *iStateProvider );
+        
+    // CenRep notifier to listen key changes in cenrep. 
+    // Application is restarted if key value is changed.
+    iNotifyHandler = CCenRepNotifyHandler::NewL( *this, *iRepository,  
+        CCenRepNotifyHandler::EIntKey, KAiMainUIController );
+                                                                                                                                                  
     iNotifyHandler->StartListeningL();
 
-    // Cenrep notifier to listen ESS changes in cenrep
-    //
-    iNotifyHandlerESS = CCenRepNotifyHandler::NewL( *this,
-                                                    *iAIRepository,
-                                                     CCenRepNotifyHandler::EIntKey,
-                                                     KAIExternalStatusScreen );
+    // Cenrep notifier to listen ESS changes in cenrep    
+    iNotifyHandlerESS = CCenRepNotifyHandler::NewL( *this, *iRepository,                                                    
+         CCenRepNotifyHandler::EIntKey, KAIExternalStatusScreen );
+                                                     
     iNotifyHandlerESS->StartListeningL();
 
     iIdleRestartObserver = AiUtility::CreatePSPropertyObserverL(
-                        TCallBack( HandleRestartEvent, this ),
-                        KPSUidAiInformation,
-                        KActiveIdleRestartAI2 );
-    
-    stateManager.ReportStateChange( ESMAISystemBoot );
+        TCallBack( HandleRestartEvent, this ), 
+        KPSUidAiInformation, KActiveIdleRestartAI2 );                                                      
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::HandleUiReadyEventL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::HandleUiReadyEventL( CAiUiController& aUiController )
     {         
-    if( iUiControllerManager->IsMainUiController( aUiController ) )
-        {
-        iUiControllerManager->LoadUIDefinition();
-                
+    if ( iUiControllerManager->IsMainUiController( aUiController ) )
+        {                      
         TInt value( EIdlePhase1Ok );
         
         RProperty::Get( KPSUidStartup, 
                         KPSIdlePhase1Ok, 
                         value );
                                                       
-        if( value == EIdlePhase1NOK )
+        if ( value == EIdlePhase1NOK )
             {
             RProperty::Set( KPSUidStartup, 
                             KPSIdlePhase1Ok, 
                             EIdlePhase1Ok );                                                          
             }    
         
-        if( !iLibrariesLoaded )
+        if ( !iLibrariesLoaded )
             {
             _LIT( KAIVoiceUIDialer, "VoiceUiNameDialer.dll" );
             _LIT( KAIVoiceUIRecog, "VoiceUiRecognition.dll" );
@@ -284,11 +265,13 @@ void CAiFw::HandleUiReadyEventL( CAiUiController& aUiController )
             iLibrariesLoaded = ETrue;
             }
         
+        iUiControllerManager->LoadUIDefinition();
         }
     }
 
 // ---------------------------------------------------------------------------
 // CAiFw::HandleActivateUI()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::HandleActivateUI()
@@ -298,138 +281,109 @@ void CAiFw::HandleActivateUI()
 
 // ---------------------------------------------------------------------------
 // CAiFw::HandleUiShutdown()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::HandleUiShutdown( CAiUiController& aUiController )
     {
-    if( iUiControllerManager->IsMainUiController( aUiController ) )
+    if ( iUiControllerManager->IsMainUiController( aUiController ) )
         {
-        if( iNotifyHandler )
+        if ( iNotifyHandler )
             {
             iNotifyHandler->StopListening();
-            delete iNotifyHandler;
-            iNotifyHandler = NULL;
             }
 
-        if( iNotifyHandlerESS )
+        delete iNotifyHandler;
+        iNotifyHandler = NULL;
+
+        if ( iNotifyHandlerESS )
             {
             iNotifyHandlerESS->StopListening();
-            delete iNotifyHandlerESS;
-            iNotifyHandlerESS = NULL;
             }
-        
-        iPluginManager->PluginFactory().DestroyPlugins();
 
-        iPluginManager->StateManager().DestroySystemStateObservers();
-                
+        delete iNotifyHandlerESS;
+        iNotifyHandlerESS = NULL;
+        
         iUiControllerManager->DestroySecondaryUiControllers();
 
-        iUiControllerManager->RemoveObserver( 
-                *iPluginManager->StateManager().UiFwObserver() );
+        delete iWsPluginManager;
+        iWsPluginManager = NULL;
         
-        if( iWsPluginManager )
-            {
-            delete iWsPluginManager;
-            iWsPluginManager = NULL;
-            }
+        Release( iIdleRestartObserver );
+        iIdleRestartObserver = NULL;
         
-        if( iIdleRestartObserver )
-            {
-            Release( iIdleRestartObserver );
-            iIdleRestartObserver = NULL;
-            } 
+        delete iStateProvider;
+        iStateProvider = NULL;
         }
     }
 
 // ----------------------------------------------------------------------------
-// CAiFw::HandleLoadPluginL()
-// ----------------------------------------------------------------------------
-//
-void CAiFw::HandleLoadPluginL( const TAiPublisherInfo& aPublisherInfo )
-    {           
-    iPluginManager->PluginFactory().CreatePluginL( 
-       aPublisherInfo, iUiControllerManager->UiControllers() );                                                                                                                                                 
-    }
-
-// ----------------------------------------------------------------------------
-// CAiFw::HandleDestroyPluginL()
-// ----------------------------------------------------------------------------
-//
-void CAiFw::HandleDestroyPluginL( const TAiPublisherInfo& aPublisherInfo )
-    {    
-    iPluginManager->PluginFactory().DestroyPluginL(
-        aPublisherInfo, iUiControllerManager->UiControllers() );                                                                            
-    }
-
-// ----------------------------------------------------------------------------
 // CAiFw::HandlePluginEvent()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::HandlePluginEvent( const TDesC& aParam )
     {
-    iPluginManager->HandlePluginEvent( aParam );
+    iEventHandler->HandlePluginEvent( aParam );
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::HandlePluginEventL()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiFw::HandlePluginEventL( const TAiPublisherInfo& aPublisherInfo, 
+void CAiFw::HandlePluginEventL( const THsPublisherInfo& aPublisherInfo, 
     const TDesC& aParam )
     {
-    iPluginManager->HandlePluginEventL( aPublisherInfo, aParam );
+    iEventHandler->HandlePluginEventL( aPublisherInfo, aParam );
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::HasMenuItemL()
+//
 // ----------------------------------------------------------------------------
 //
-TBool CAiFw::HasMenuItemL( const TAiPublisherInfo& aPublisherInfo, 
+TBool CAiFw::HasMenuItemL( const THsPublisherInfo& aPublisherInfo, 
     const TDesC& aMenuItem )
     {            
-    return iPluginManager->HasMenuItemL( aPublisherInfo, aMenuItem ); 
+    return iEventHandler->HasMenuItemL( aPublisherInfo, aMenuItem ); 
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::RefreshContent()
+//
 // ----------------------------------------------------------------------------
 //
 TBool CAiFw::RefreshContent( const TDesC& aContentCid )
     {
-    return iPluginManager->RefreshContent( aContentCid );
+    return iEventHandler->RefreshContent( aContentCid );
     }
 
 // ----------------------------------------------------------------------------
-// CAiFw::ProcessStateChange()
+// CAiFw::RefreshContent()
+//
 // ----------------------------------------------------------------------------
 //
-void CAiFw::ProcessStateChange( TAifwStates aState )     
+TBool CAiFw::RefreshContent( const THsPublisherInfo& aPublisherInfo, 
+    const TDesC& aContentCid ) 
     {
-    switch ( aState )
-    	{
-    	case EAifwOnline :
-    		{
-    		iPluginManager->ProcessOnlineState( ETrue );
-    		}
-    		break;
-    	case EAifwOffline :
-			{
-			iPluginManager->ProcessOnlineState( EFalse );
-			}
-			break;
-    	case EAifwPageSwitch:
-    		{
-    		iPluginManager->StateManager().ReportStateChange( ESMAIPageSwitch );
-    		}
-    		break;
-    	default : 
-    		break;
-    	}
-    
+    return iEventHandler->RefreshContent( aPublisherInfo, aContentCid );
+    }
+
+// ----------------------------------------------------------------------------
+// CAiFw::SuspendContent()
+//
+// ----------------------------------------------------------------------------
+//
+TBool CAiFw::SuspendContent( const THsPublisherInfo& aPublisherInfo,     
+    const TDesC& aContentCid )
+    {
+    return iEventHandler->SuspendContent( aPublisherInfo, aContentCid );
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::QueryIsMenuOpen()
+//
 // ----------------------------------------------------------------------------
 //
 TBool CAiFw::QueryIsMenuOpen()
@@ -439,14 +393,15 @@ TBool CAiFw::QueryIsMenuOpen()
 
 // ----------------------------------------------------------------------------
 // CAiFw::HandleNotifyInt()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::HandleNotifyInt( TUint32 aId, TInt aNewValue )
     {
-    switch( aId )
+    switch ( aId )
         {
         case KAiMainUIController:
-            if( aNewValue == AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML ||
+            if ( aNewValue == AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML ||
                 aNewValue == AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE ||
                 aNewValue == AI3_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML ||
                 aNewValue == AI3_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE )
@@ -455,17 +410,14 @@ void CAiFw::HandleNotifyInt( TUint32 aId, TInt aNewValue )
                 }
             else
                 {
-                // Someone wrote an invalid configuration! Reset repository.
-                if( iAIRepository )
-                    {
-                    iAIRepository->Reset( KAiMainUIController );
-                    iAIRepository->Reset( KAiFirstUIController );
-                    iAIRepository->Delete( KAiFirstUIController + 1 );
-                    }
+                // Someone wrote an invalid configuration! Reset repository.               
+                iRepository->Reset( KAiMainUIController );
+                iRepository->Reset( KAiFirstUIController );
+                iRepository->Delete( KAiFirstUIController + 1 );
                 }
             break;
         case KAIExternalStatusScreen:
-            if( ( aNewValue & 0x7FFFFFFF ) != 0 )
+            if ( ( aNewValue & 0x7FFFFFFF ) != 0 )
                 {
                 TRAP_IGNORE( SwapUiControllerL( EFalse ) );
                 }
@@ -481,41 +433,41 @@ void CAiFw::HandleNotifyInt( TUint32 aId, TInt aNewValue )
 
 // ----------------------------------------------------------------------------
 // CAiFw::SwapUiControllerL()
+//
 // ----------------------------------------------------------------------------
 //
 void CAiFw::SwapUiControllerL( TBool aToExtHS )
-    {
-    TUid uid = { KCRUidActiveIdleLV };
-    CRepository* cenRep = CRepository::NewL( uid );
-
+    {      
     if( !aToExtHS ) // Switch to XML UI
         {
-        cenRep->Create( KAiFirstUIController, 
+        iRepository->Create( KAiFirstUIController, 
                 AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE );
         
-        cenRep->Set( KAiFirstUIController, 
+        iRepository->Set( KAiFirstUIController, 
                 AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE );
-        cenRep->Delete( KAiFirstUIController + 1 );
         
-        cenRep->Set( KAiMainUIController, 
+        iRepository->Delete( KAiFirstUIController + 1 );
+        
+        iRepository->Set( KAiMainUIController, 
                 AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_XML );
         }
     else // Switch to ExtHS
         {
-        cenRep->Delete( KAiFirstUIController );
-        cenRep->Delete( KAiFirstUIController + 1 );
-        cenRep->Set( KAiMainUIController, 
-                AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE );
+        iRepository->Delete( KAiFirstUIController );
+        
+        iRepository->Delete( KAiFirstUIController + 1 );
+        
+        iRepository->Set( KAiMainUIController, 
+            AI_UID_ECOM_IMPLEMENTATION_UICONTROLLER_NATIVE );
         }
-    
-    delete cenRep;
-
+       
     // Restart
     iUiControllerManager->ExitMainController();
     }
 
 // ----------------------------------------------------------------------------
 // CAiFw::HandleRestartEvent()
+//
 // ----------------------------------------------------------------------------
 //
 TInt CAiFw::HandleRestartEvent( TAny* aSelf )
@@ -524,19 +476,27 @@ TInt CAiFw::HandleRestartEvent( TAny* aSelf )
     
     TInt value( 0 );
     
-    if( self->iIdleRestartObserver )
+    if ( self->iIdleRestartObserver )
         {
         TInt err( self->iIdleRestartObserver->Get( value ) );
 
-        // Check the PS keys value and call manager with approriate parameter.
-        // Report either "idle foreground" or "idle background"
-        if( value == KActiveIdleRestartCode )
+        if ( err == KErrNone && value == KActiveIdleRestartCode )
             {
             self->iUiControllerManager->ExitMainController();
             }
         }
     
     return KErrNone;
+    }
+
+// ----------------------------------------------------------------------------
+// CAiFw::Repository()
+//
+// ----------------------------------------------------------------------------
+//
+CRepository& CAiFw::Repository() const
+    {
+    return *iRepository;
     }
 
 // End of file

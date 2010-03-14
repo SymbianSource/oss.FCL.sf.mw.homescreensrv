@@ -18,8 +18,8 @@
 
 #include <aidevstaplgres.rsg>
 #include <StringLoader.h>
+#include <aicontentobserver.h>
 #include "aicugpublisher.h"
-#include "aicontentobserver.h"
 #include "ainetworkinfolistener.h"
 
 
@@ -72,7 +72,7 @@ void CAiCUGPublisher::ResumeL()
 
 
 void CAiCUGPublisher::Subscribe( MAiContentObserver& aObserver, 
-							        MAiPropertyExtension& aExtension,
+							        CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {

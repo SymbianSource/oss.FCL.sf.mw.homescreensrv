@@ -123,6 +123,12 @@ const char KAiContentTypeBitmap[] = "image/x-s60-bitmap";
 const char KAiContentTypeText[] = "text/plain";
  
 
+/** MIME type for passing raw data.
+ *
+ * @see MAiContentObserver::PublishPtr
+ */
+const char KAiContentTypeData[] = "data/stream";
+ 
 /**
  *  Abstract interface which provides services to iterate content items
  *  supported by the plug-in. Only used by the Active Idle Framework.

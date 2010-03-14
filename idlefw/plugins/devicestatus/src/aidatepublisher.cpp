@@ -21,8 +21,9 @@
 #include <AknUtils.h>
 #include <aidevstaplgres.rsg>
 #include <bacntf.h>
+#include <aicontentobserver.h>
+
 #include "aidatepublisher.h"
-#include "aicontentobserver.h"
 
 const TInt KMaxDateStringLength = 100;
 
@@ -68,7 +69,7 @@ void CAiDatePublisher::ResumeL()
 
 
 void CAiDatePublisher::Subscribe( MAiContentObserver& aObserver, 
-								    MAiPropertyExtension& aExtension,
+								    CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {

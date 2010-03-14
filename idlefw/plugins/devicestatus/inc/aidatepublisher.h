@@ -19,13 +19,17 @@
 #ifndef C_AIDATEPUBLISHER_H
 #define C_AIDATEPUBLISHER_H
 
+// System includes
 #include <e32base.h>
 #include <coemain.h>
+
+// User includes
 #include "aidevicestatuspublisher.h"
 #include "aidevicestatuscontentmodel.h"
 
+// Forward declarations
 class MAiDeviceStatusContentObserver;
-class MAiPropertyExtension;
+class CHsContentPublisher;
 class CEnvironmentChangeNotifier;
 
 /**
@@ -38,7 +42,8 @@ class CEnvironmentChangeNotifier;
  *
  *  @since S60 3.2
  */
-class CAiDatePublisher : public CBase, public MAiDeviceStatusPublisher
+NONSHARABLE_CLASS( CAiDatePublisher ) : public CBase, 
+    public MAiDeviceStatusPublisher
     {
 public:
 
@@ -52,7 +57,7 @@ protected:
 
     void ResumeL();
     void Subscribe( MAiContentObserver& aObserver, 
-                    MAiPropertyExtension& aExtension,
+                    CHsContentPublisher& aExtension,
                     MAiPublishPrioritizer& aPrioritizer,
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
@@ -90,7 +95,7 @@ protected: // data
      * Property extension.
      * Not own.
      */
-    MAiPropertyExtension* iExtension;
+    CHsContentPublisher* iExtension;
  
 	/**
 	 * Content prioritizer.

@@ -17,7 +17,7 @@
 
 
 #include "ainwspublisher.h"
-#include "aicontentobserver.h"
+#include <aicontentobserver.h>
 #include "ainetworkinfolistener.h"
 
 #include <activeidle2domainpskeys.h>
@@ -73,7 +73,7 @@ void CAiNwsPublisher::ResumeL()
 
 
 void CAiNwsPublisher::Subscribe( MAiContentObserver& aObserver,
-								    MAiPropertyExtension& aExtension,
+								    CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {

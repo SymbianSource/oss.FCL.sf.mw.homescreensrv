@@ -19,17 +19,23 @@
 #ifndef CAIPROFILEENGINE_H
 #define CAIPROFILEENGINE_H
 
-// INCLUDE FILES
+// System includes
 #include <e32base.h>
 #include <badesca.h>
 #include <ConeResLoader.h>
 #include <MSSSettingsObserver.h>
-#include <MProfileChangeObserver.h>
+#include <MProEngActiveProfileObserver.h>
+#include <MProEngProfileNameArrayObserver.h>
+#include <MProEngProfileActivationObserver.h>
+
+// User includes
 #include "maiprofilepluginnotifier.h"
 
-class MProfileEngine;
-class CProfileChangeNotifyHandler;
-class MProfilesNamesArray;
+// Forward declarations
+class MProEngEngine;
+class MProEngNotifyHandler;
+class MProEngProfileNameArray;
+
 class RSSSettings;
 
 /**
@@ -39,21 +45,14 @@ class RSSSettings;
  *
  *  @since S60 v3.2
  */
-class CAiProfileEngine : public CBase, 
-						 public MSSSettingsObserver,
-						 public MProfileChangeObserver					 
-{
-
-public:  // Constructors and destructor
-
-    /**
-    * Constructor to use in the object creation. Initializes the necessary data.
-    *
-    * @param MAiProfilePluginNotifier* aNotifier a pointer to a object implementing MAiProfilePluginNotifier
-            (the object ordering a notification of the content status change)
-    * @return none
-    */
-    CAiProfileEngine( MAiProfilePluginNotifier* aProfilePluginNotifier );
+NONSHARABLE_CLASS( CAiProfileEngine ) : public CBase, 
+    public MSSSettingsObserver,
+    public MProEngActiveProfileObserver,
+    public MProEngProfileNameArrayObserver,
+    public MProEngProfileActivationObserver     						
+    {
+public:  
+    // constructors and destructor
 
     /**
     * Part of the two phased constuction
@@ -71,30 +70,32 @@ public:  // Constructors and destructor
     * @return none
     */
     ~CAiProfileEngine();
+
+private:
+    // constructors
     
     /**
-    * Resumes the engine
+    * Constructor to use in the object creation. Initializes the necessary data.
     *
-    * @param void
-    * @return void
+    * @param MAiProfilePluginNotifier* aNotifier a pointer to a object implementing MAiProfilePluginNotifier
+            (the object ordering a notification of the content status change)
+    * @return none
     */
-    void ResumeL();
-
+    CAiProfileEngine( MAiProfilePluginNotifier* aProfilePluginNotifier );
+    
     /**
-    * Suspends the engine
-    *
-    * @param void
-    * @return void
-    */
-    void Suspend();
-
+     * 2nd phase constructor
+     */
+    void ConstructL();
+    
 public:
-
+    // New functions
+    
 	const TDesC& ActiveProfileName() const;
 	
 	const TDesC& SwapProfileName() const;
 		
-	TInt NumberOfProfiles();
+	TInt NumberOfProfiles() const;
 	
 	const TDesC& ProfileNameByIndex( TInt aIndex ) const;
 	
@@ -102,23 +103,22 @@ public:
 	
 	void SetActiveProfileL( const TInt aProfileId );
 	
-	TBool IsActiveProfileSilentL();
+	TBool IsActiveProfileSilentL() const;
 	
-	TBool IsActiveProfileTimedL();
+	TBool IsActiveProfileTimedL() const;
 	
 	void UpdateProfileNamesL();
 	
-	TBool IsOffline();
+	TBool IsOffline() const;
    
-private:
-
-    void ConstructL();
+private:   
+    // new functions
     
     void SetActiveProfileNameL( const TDesC& aName );
     
     void SetSwapProfileNameL( const TDesC& aName );
     
-    void SetProfileNameListL( const MProfilesNamesArray& aArray );
+    void SetProfileNameListL( const MProEngProfileNameArray& aArray );
     
     void HandleSwitchByNameL( const TDesC& aParam );
     
@@ -130,72 +130,62 @@ private:
     
     TBool ShowOfflineMessageL();
            
+    void NotifyContentUpdate();
   
-protected:
-
-// from base class MSSSettingsObserver
-
-    /**
-     * Called when SS Settings changes.
-     */
-    void PhoneSettingChanged( TSSSettingsSetting aSetting, TInt aNewValue );
-
-
-// from base class MProfileChangeObserver
+private:
+    // from MSSSettingsObserver
 
     /**
-     * Called when active profile changes.
+     * @see MSSSettingsObserver
      */
-    void HandleActiveProfileEventL( TProfileEvent aProfileEvent, TInt aProfileId );
+    void PhoneSettingChanged( 
+        TSSSettingsSetting aSetting, TInt aNewValue );
+        
+private:
+    // from MProEngActiveProfileObserver
+
+    /**
+     * @see MProEngActiveProfileObserver    
+     */        
+    void HandleActiveProfileModifiedL();
     
 private:
-    /**
-     * Pointer to the class implementing the MAiProfilePluginNotifier interface
-     */
-    MAiProfilePluginNotifier* iProfilePluginNotifier;
+    // from MProEngProfileNameArrayObserver
     
     /**
-     * Client to listen SS setting changes.
-     */
+     * @see MProEngProfileNameArrayObserver    
+     */        
+    void HandleProfileNameArrayModificationL();
+    
+private:
+    // from MProEngProfileActivationObserver
+    
+    /**
+     * @see MProEngProfileActivationObserver    
+     */    
+    void HandleProfileActivatedL( TInt aProfileId ); 
+    
+private:
+    // data
+    
+    /** MAiProfilePluginNotifier interface, not owned */ 
+    MAiProfilePluginNotifier* iProfilePluginNotifier;    
+    /** Client to listen SS setting changes, owned */
     RSSSettings iSSSettings;
-
-    /**
-     * Profile engine.
-     * Own.
-     */
-    MProfileEngine* iProfileEngine;
-
-    /**
-     * Profile change notifier.
-     * Own
-     */
-    CProfileChangeNotifyHandler* iProfileNotifier;
-    
-    /*
-     * Active profile name
-     * Own
-     */    
-    HBufC* iActiveProfileName;
-    
-    /*
-     * Swap profile name
-     * Own
-     */    
-    HBufC* iSwapProfileName;
-    
-    /**
-     * Array of Profile Name Pointer.
-     * Own.
-     */
-    RPointerArray<HBufC> iProfileNamePointerArray;
-    
-    /**
-     * Resource loader for own resources.
-     */
+    /** Profile engine, owned */
+    MProEngEngine* iProfileEngine;
+    /** Profile change notifier, owned */
+    MProEngNotifyHandler* iProfileNotifier;    
+    /** Active profile name, owned */
+    HBufC* iActiveProfileName;    
+    /** Swap profile name, owned */
+    HBufC* iSwapProfileName;    
+    /** Array of Profile Names, owned */
+    RPointerArray< HBufC > iProfileNamePointerArray;    
+    /** Resource loader, owned */
     RConeResourceLoader iResourceLoader;
-
-};
+    };
 
 #endif // CAIPROFILEENGINE_H
 
-
+// End of file

@@ -448,6 +448,11 @@ NONSHARABLE_CLASS( MT_CHSPSConfigurationIf ) : public MT_CHSPS
          * See HSPS module test specification
          */
         void RestoreConfigurations_1_L();
+        /**
+         * Test case function for test case Customization(1)
+         * See HSPS module test specification
+         */
+        void Customization_1_L();
         
     private:    // Data
 

@@ -19,7 +19,7 @@
 #include <centralrepository.h>
 #include "activeidle2domaincrkeys.h"
 #include "aivhzpublisher.h"
-#include "aicontentobserver.h"
+#include <aicontentobserver.h>
 #include "ainetworkinfolistener.h"
 
 
@@ -74,7 +74,7 @@ void CAiVHZPublisher::ResumeL()
 
 
 void CAiVHZPublisher::Subscribe( MAiContentObserver& aObserver, 
-							        MAiPropertyExtension& aExtension,
+							        CHsContentPublisher& aExtension,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {

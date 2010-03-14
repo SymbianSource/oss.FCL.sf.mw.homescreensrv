@@ -15,7 +15,7 @@
 *
 */
 
-
+// System includes
 #include <ecom/ecom.h>
 #include <ecom/implementationproxy.h>
 #include <coemain.h>
@@ -23,6 +23,8 @@
 #include <bautils.h>
 #include <aiutility.h>
 #include <featmgr.h>
+
+// User includes
 #include "aidevicestatusplugin.h"
 #include "aidevicestatuspluginengine.h"
 #include "aipublishprioritizer.h"
@@ -31,9 +33,11 @@
 #include "aipluginsettings.h"
 #include "ainetworkinfolistener.h"
 
+// Constants
 _LIT( KResourceDrive, "Z:" );
 _LIT( KResourceFile, "aidevstaplgres.rsc" );
-#define KResourcePath KDC_APP_RESOURCE_DIR
+
+#define KResourcePath KDC_RESOURCE_FILES_DIR
 
 // ECOM implementation table
 const TImplementationProxy KImplementationTable[] =
@@ -43,17 +47,23 @@ const TImplementationProxy KImplementationTable[] =
 
 
 // ======== MEMBER FUNCTIONS ========
-
-CAiDeviceStatusPlugin::CAiDeviceStatusPlugin() :
-   	iResourceOffset( KErrNotFound )
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::CAiDeviceStatusPlugin
+//
+// ----------------------------------------------------------------------------
+//
+CAiDeviceStatusPlugin::CAiDeviceStatusPlugin() 
+    : iResourceOffset( KErrNotFound )   	
     {
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::ConstructL
+//
+// ----------------------------------------------------------------------------
+//
 void CAiDeviceStatusPlugin::ConstructL()
-    {
-    iInfo.iUid.iUid = AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_DEVSTAPLUGIN; 
-
+    {     
     FeatureManager::InitializeLibL();
     
     // Create master instance to prevent deletion on Stop()
@@ -62,11 +72,17 @@ void CAiDeviceStatusPlugin::ConstructL()
 	//Create content here since this is needed in optimization phase.
     iContent = AiUtility::CreateContentItemArrayIteratorL( KAiDeviceStatusContent );
     iResources = AiUtility::CreateContentItemArrayIteratorL( KAiDeviceStatusResources );
+    
     iContentObservers = CAiMultiContentObserver::NewL();
+    
     iPrioritizer = CAiPublishPrioritizer::NewL( *iContentObservers, *this );
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::NewL
+//
+// ----------------------------------------------------------------------------
+//
 CAiDeviceStatusPlugin* CAiDeviceStatusPlugin::NewL()
     {
     CAiDeviceStatusPlugin* self = CAiDeviceStatusPlugin::NewLC();
@@ -74,7 +90,11 @@ CAiDeviceStatusPlugin* CAiDeviceStatusPlugin::NewL()
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::NewLC
+//
+// ----------------------------------------------------------------------------
+//
 CAiDeviceStatusPlugin* CAiDeviceStatusPlugin::NewLC()
     {
     CAiDeviceStatusPlugin* self = new( ELeave ) CAiDeviceStatusPlugin;
@@ -83,57 +103,65 @@ CAiDeviceStatusPlugin* CAiDeviceStatusPlugin::NewLC()
     return self;
     }
 
-
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::~CAiDeviceStatusPlugin
+//
+// ----------------------------------------------------------------------------
+//
 CAiDeviceStatusPlugin::~CAiDeviceStatusPlugin()
     {
     delete iPrioritizer;
+    
     FreeResources();
+    
     delete iContentObservers;
+    
     Release( iResources );
     Release( iContent );
+    
     FeatureManager::UnInitializeLib();
+    
     if( iListener )
         {
         iListener->Release();
         }
     }
 
-
-/**
- * Allocates all resourcers required for plug-in operation.
- */
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::AllocateResourcesL
+//
+// ----------------------------------------------------------------------------
+//
 void CAiDeviceStatusPlugin::AllocateResourcesL()
     {
     //create engine
     if( !iEngine )
     	{
-   	    iEngine = CAiDeviceStatusPluginEngine::NewL( *iContentObservers,
-   	                                                    *this,
-   	                                                    *iPrioritizer);
+   	    iEngine = CAiDeviceStatusPluginEngine::NewL( 
+            *iContentObservers, *this, *iPrioritizer );   	                                                      	                                                  
     	}
 
 	if( iResourceOffset < 0 )
 		{
-		CCoeEnv* coe = CCoeEnv::Static();
+		CCoeEnv* coe( CCoeEnv::Static() );
 
-		if( !coe )
+		if ( coe )
 		    {
-		    User::Leave( KErrNotReady );
+	        //Add resource file to cone
+	        TFullName resourceFile( KResourceDrive );
+	        resourceFile.Append( KResourcePath );
+	        resourceFile.Append( KResourceFile );
+	        BaflUtils::NearestLanguageFile( coe->FsSession(), resourceFile );
+	        iResourceOffset = coe->AddResourceFileL( resourceFile );		    
 		    }
-
-		//Add resource file to cone
-		TFullName resourceFile( KResourceDrive );
-		resourceFile.Append( KResourcePath );
-		resourceFile.Append( KResourceFile );
-		BaflUtils::NearestLanguageFile( CCoeEnv::Static()->FsSession(), resourceFile );
-		iResourceOffset = coe->AddResourceFileL( resourceFile );
 		}
     }
 
-
-/**
- * Frees all allocated resources.
- */
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::FreeResources
+//
+// ----------------------------------------------------------------------------
+//
 void CAiDeviceStatusPlugin::FreeResources()
     {
 	if( iResourceOffset >= 0 )
@@ -153,155 +181,151 @@ void CAiDeviceStatusPlugin::FreeResources()
 	iEngine = NULL;
     }
 
-
-void CAiDeviceStatusPlugin::Resume(TAiTransitionReason aReason)
-    {
-    if( IgnoreReason( aReason ) )
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::Start
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::Start( TStartReason aReason )     
+    {    
+    if ( aReason == EPageStartup || aReason == ESystemStartup )
         {
-        return;
+        iRequirePublish = ETrue;
         }
-    // resume all publishers only in startup
-    if( iEngine )
+    }
+
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::Stop
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::Stop( TStopReason /*aReason*/ )     
+    {    
+    }
+
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::Resume
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::Resume( TResumeReason aReason )     
+    {          
+    if ( aReason == EForeground )
         {
-        if (  aReason == EAiIdleForeground || aReason == EAiKeylockDisabled )
-        	{
-        	// not much can be done if some publisher cannot be refreshed
-        	TRAP_IGNORE( iEngine->RefreshPublishersL( 
-        	                EAiDeviceStatusContentNetworkIdentity, ETrue ) );
-        	
-        	TRAP_IGNORE( iEngine->RefreshPublishersL( 
-        					EAiDeviceStatusContentCUGMCNIndicator, ETrue ) );
-        	}
-        // if layout changed republish some information
-        else if ( aReason == EAiScreenLayoutChanged )
+        if ( iRequirePublish )
             {
-            TRAP_IGNORE( iEngine->RefreshPublishersL( EAiDeviceStatusContentDate, ETrue )); 
-            TRAP_IGNORE( iEngine->RefreshPublishersL( EAiDeviceStatusContentCUGMCNIndicator, ETrue ));
-            TRAP_IGNORE( iEngine->RefreshPublishersL( EAiDeviceStatusContentVHZText, ETrue ));
-            TRAP_IGNORE( iEngine->RefreshPublishersL( EAiDeviceStatusContentNetworkIdentity, ETrue ));
-            }
-        return;
-        }
-    // If engine has been deleted. create it again.
-    else
-        {
-        iContentObservers->StartTransaction( KImplUidDevStaPlugin );
-
-        TRAPD( err, DoResumeL(aReason) );
-
-        if( err == KErrNone )
-            {
-            iContentObservers->Commit( KImplUidDevStaPlugin );
-            }
-        else
-            {
-            iContentObservers->CancelTransaction( KImplUidDevStaPlugin );
-            }
+            TRAP_IGNORE( DoResumeL() );
+            
+            iRequirePublish = EFalse;
+            }          
         }
     }
-
-
-void CAiDeviceStatusPlugin::DoResumeL(TAiTransitionReason /*aReason*/)
-    {
-    AllocateResourcesL( );
-    iEngine->ResumePublishersL();
-    iEngine->RefreshPublishersL( EFalse );
-    }
-    
-
-TBool CAiDeviceStatusPlugin::IgnoreReason( TAiTransitionReason aReason )
-    {
-    switch( aReason )
-        {
-        case EAiBacklightOff:
-            return ETrue;
-        }
-    return EFalse;
-    }
-
-
-void CAiDeviceStatusPlugin::Stop(TAiTransitionReason /*aReason*/)
-    {
-    FreeResources();
-    }
-
-
-void CAiDeviceStatusPlugin::Suspend(TAiTransitionReason /*aReason*/)
+  
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::Suspend
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::Suspend( TSuspendReason /*aReason*/ )    
     {
     }
 
-
-void CAiDeviceStatusPlugin::SubscribeL(MAiContentObserver& aObserver)
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::SubscribeL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::SubscribeL( MAiContentObserver& aObserver )
     {
     iContentObservers->AddObserverL( aObserver );
     }
 
-
-TAny* CAiDeviceStatusPlugin::Extension(TUid aUid)
-    {
-	//Access to extensions
-    if( aUid == KExtensionUidProperty )
-        {
-        return static_cast<MAiPropertyExtension*>(this);
-        }
-
-    return NULL;
-    }
-
-
-void CAiDeviceStatusPlugin::ConfigureL(RAiSettingsItemArray& aSettings)
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::ConfigureL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     {
 	aSettings.ResetAndDestroy();
+	
+	AllocateResourcesL();
     }
 
-TAny* CAiDeviceStatusPlugin::GetPropertyL(TInt aProperty)
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::GetProperty
+//
+// ----------------------------------------------------------------------------
+//
+TAny* CAiDeviceStatusPlugin::GetProperty( TProperty aProperty )     
     {
-	//Return properties.
-    switch (aProperty)
+    if ( aProperty == EPublisherContent )
         {
-        case EAiPublisherInfo:
-                return &iInfo;
-
-        case EAiPublisherContent:
-            return static_cast<MAiContentItemIterator*>(iContent);
-
-        case EAiPublisherResources:
-            return static_cast<MAiContentItemIterator*>(iResources);
-
-        case EAiContentRequest:
-            return static_cast<MAiContentRequest*>(this);
+        return static_cast< MAiContentItemIterator* >( iContent );
         }
-
+    else if ( aProperty ==  EPublisherResources )
+        {
+        return static_cast< MAiContentItemIterator* >( iResources );
+        }
+    else if ( aProperty == EContentRequest )
+        {
+        return static_cast< MAiContentRequest* >( this );
+        }
+    
     return NULL;
     }
 
-void CAiDeviceStatusPlugin::SetPropertyL(TInt aProperty, TAny* aValue)
-    {
-    if( aProperty == EAiPublisherInfo )
-        {
-        ASSERT( aValue );
-        
-        const TAiPublisherInfo* info( 
-                static_cast<const TAiPublisherInfo*>( aValue ) );
-        
-        iInfo = *info;
-        }
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::DoResumeL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPlugin::DoResumeL()
+    {    
+    iEngine->ResumePublishersL();
+    iEngine->RefreshPublishersL( EFalse );
     }
 
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::RefreshContent
+//
+// ----------------------------------------------------------------------------
+//
 TBool CAiDeviceStatusPlugin::RefreshContent( TInt aContentId )
     {
-    TBool result = EFalse;
+    TBool result( EFalse );
 
     TRAP_IGNORE( result = iEngine->RefreshPublishersL( aContentId, EFalse ) );
+    
     return result;
     }
 
-
-/**
- * ECom component entry point.
- */
-EXPORT_C const TImplementationProxy* ImplementationGroupProxy( TInt& aTableCount )
+// ----------------------------------------------------------------------------
+// CAiDeviceStatusPlugin::SuspendContent
+//
+// ----------------------------------------------------------------------------
+//
+TBool CAiDeviceStatusPlugin::SuspendContent( TInt aContentId )
     {
-    aTableCount = sizeof(KImplementationTable) / sizeof(TImplementationProxy);
+    TBool result( EFalse );
+    
+    TRAP_IGNORE( result = iEngine->SuspendPublishersL( aContentId, EFalse ) );
+    
+    return result;
+    }
+
+// ======== GLOBAL FUNCTIONS ========
+// ----------------------------------------------------------------------------
+// ImplementationGroupProxy
+//
+// ----------------------------------------------------------------------------
+//
+EXPORT_C const TImplementationProxy* ImplementationGroupProxy( 
+    TInt& aTableCount )
+    {
+    aTableCount = sizeof(KImplementationTable) / sizeof( TImplementationProxy );
+
     return KImplementationTable;
     }
+
+// End of file
