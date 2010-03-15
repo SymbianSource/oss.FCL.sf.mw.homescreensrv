@@ -63,7 +63,20 @@ class ChspsDomNode : public CBase, public MhspsDomListItem
             const TDesC8& aName, 
             const TDesC8& aNS,
             ChspsDomStringPool& aStringPool );
-              
+
+        /**
+        * Two-phased constructor.
+        * 
+        * @since S60 5.0
+        * @param aName          Name of node (string pool index).
+        * @param aNS            Namespace (string pool index).
+        * @param aStringPool    Attached string pool.
+        */
+        static ChspsDomNode* NewL( 
+            const TInt aName, 
+            const TInt aNS,
+            ChspsDomStringPool& aStringPool );        
+        
         /**
         * Two-phased stream constructor.
         * 
@@ -83,10 +96,13 @@ class ChspsDomNode : public CBase, public MhspsDomListItem
         * Makes a clone from this node and it's child nodes.
         * 
         * @since S60 5.0
-        * @param aStringPool A new string pool.
+        * @param aStringPool    A new string pool.
+        * @param aFastClone     If ETrue, then fast mode cloning is used. 
+        * 
         * @return Pointer to a clone node. Caller has the ownership.
         */
-        IMPORT_C ChspsDomNode* CloneL( ChspsDomStringPool& aStringPool );
+        IMPORT_C ChspsDomNode* CloneL( ChspsDomStringPool& aStringPool,
+                                       const TBool aFastClone = EFalse );
         
         /**
         * Makes a clone only from this node.
@@ -299,8 +315,7 @@ class ChspsDomNode : public CBase, public MhspsDomListItem
         IMPORT_C const TDesC8& AttributeValue(const TDesC8& aAttribute) const;
    
    public: //From MhspsDomListItem
-        
-        
+                
         /**
         * Documented in ChspsDomListItem::Size
         */
@@ -321,8 +336,7 @@ class ChspsDomNode : public CBase, public MhspsDomListItem
         * Documented in ChspsDomListItem::Name
         */
         IMPORT_C const TDesC8& Name();       
-        
-    
+            
     public:          
     
         /**
@@ -350,6 +364,16 @@ class ChspsDomNode : public CBase, public MhspsDomListItem
         * By default Symbian 2nd phase constructor is private.
         */
         void ConstructL( const TDesC8& aName, const TDesC8& aNS );
+
+        /**
+        * By default Symbian 2nd phase constructor is private.
+        */
+        void ConstructL( const TInt aName, const TInt aNS );        
+
+        /**
+        * Construct members
+        */
+        void Construct2L();        
         
     private:    // Data
         

@@ -40,18 +40,20 @@ TARGET          sapidataplugin.rsc
 END
 
 
-LIBRARY         euser.lib
-LIBRARY    	    bafl.lib
-LIBRARY         efsrv.lib
-LIBRARY    	    liwservicehandler.lib 
-LIBRARY         ecom.lib
-LIBRARY         aiutils.lib
-LIBRARY         cone.lib
-LIBRARY         avkon.lib
-LIBRARY         fbscli.lib
-LIBRARY         egul.lib
-LIBRARY         aknskins.lib  
-LIBRARY         charconv.lib 
+LIBRARY			euser.lib
+LIBRARY			bafl.lib
+LIBRARY			efsrv.lib
+LIBRARY			liwservicehandler.lib 
+LIBRARY			ecom.lib
+LIBRARY			aiutils.lib
+LIBRARY			cone.lib
+LIBRARY			avkon.lib
+LIBRARY			fbscli.lib
+LIBRARY			egul.lib
+LIBRARY			aknskins.lib  
+LIBRARY			charconv.lib 
+LIBRARY			estor.lib
+
 // End of File
 SOURCEPATH ../src
 

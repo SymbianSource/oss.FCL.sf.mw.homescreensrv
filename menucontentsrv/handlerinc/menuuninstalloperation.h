@@ -21,6 +21,7 @@
 
 #include <e32base.h>
 #include <SWInstApi.h>
+#include <widgetregistryclient.h>
 
 class RMenu;
 class CMenuItem;
@@ -51,11 +52,11 @@ private:    // construction
 
     void ConstructL( CMenuItem& aItem );
 
-    void AppInfoL( const TUid& aAppUid, TPtrC8& aMimeType, TUid& aPackageUid );
+    void AppInfoL( const TUid& aAppUid, RBuf8& aMimeType, TUid& aPackageUid );
 
     TBool GetInstallPkgUidL( const TDesC& aAppFullName, TUid& aPackageUid );
     void GetJavaSuitUidL( const TUid& aAppUid, TUid& aPackageUid );
-    TBool IsWidgetL( const TUid& aAppUid );
+    TBool IsWidget( const TUid& aAppUid );
 
 private:    // from CActive
 
@@ -73,6 +74,7 @@ private:
         }                   iState;
     SwiUI::RSWInstLauncher  iUninstaller;
     CMenuOperation*         iRemoveOperation;
+    RWidgetRegistryClientSession iWidgetRegistry;
     TInt                    iId;
     };
 

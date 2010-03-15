@@ -239,6 +239,14 @@ class ChspsInstallationHandler : public CBase,
         ThspsServiceCompletedMessage hspsInstallTheme( 
                 const TDesC& aManifestFileName, 
                 TDes8& aHeaderData );
+        
+        /**
+         * Parses the manifest file and requests installation of next phases.
+         * @since S60 5.2
+         * @param aManifest is full path of the installation script file - a manifest file
+         */
+        void DoInstallThemeL(
+                const TDesC& aManifest );
                         
         /**
         * From MhspsInstallationService hspsInstallNextPhaseL
@@ -640,24 +648,7 @@ class ChspsInstallationHandler : public CBase,
                 HBufC8& aValue8, 
                 const TDesC8& aTag,
                 HBufC*& aResultString );
-        
-        /**
-         * Enabler for customization where the input is
-         * searched from all unremovable drives (eclipsing).
-         * Drives are searched in descending alphabetical order, 
-         * from Y: to A:, and ending with the Z: drive. 
-         * All drives which end-user can freely modify/crack 
-         * are skipped from the search.         
-         * @since S60 5.2
-         * @param aPath Path to the resource file (input)
-         * @param aFilename Name and extension of the file (input)
-         * @param aDrivePathName Full path with a drive letter to the 
-         *                       resource file (output)
-         */
-        void FindFile(                
-                const TDesC& aPath,
-                const TDesC& aFilename,
-                TFileName& aDrivePathName );
+                
     public: 
         
         ChspsResult* iResult;
@@ -710,7 +701,7 @@ class ChspsInstallationHandler : public CBase,
         TBool iDefaultSpecificationSet;
                        
         // Path to installation files
-        TPtrC iThemeFilePath;
+        TPath iThemeFilePath;
         
         // Application or interface UID of the installed theme
         TUint iRootUid;
@@ -787,8 +778,8 @@ class ChspsInstallationHandler : public CBase,
         // Set if "EhspsODTAdded" -notifications should be blocked (e.g. ROM installations)
         TBool iDisableNotifications;
 
-        // Set if installation files are located in ROM
-        TBool iRomInstallation;
+        // Set if installation files are located in ROM or in UDA, validation is not required
+        TBool iTrustedInstallation;
         
         // Set if widget mutliinstance flag
         TInt32 iMultiInstance;

@@ -56,6 +56,7 @@ _LIT8(KUnknownMimeType, "unknown");
 _LIT8(KhspsDefinitionEngine, "hspsdefinitionengine");
 
 _LIT(KPathDelim, "\\");
+_LIT(KPrivateInstall, "\\private\\200159c0\\install\\");
 _LIT(KHsps, "\\hsps\\" );
 _LIT(KXuikon, "xuikon\\" );
 
@@ -99,7 +100,7 @@ ChspsInstallationHandler::ChspsInstallationHandler( ChspsThemeServer& aThemeServ
     iDefaultSpecificationSet = EFalse;
     iDefaultSpecification = ELangNone;
     iInstallationMode = EServiceHandler;
-    iRomInstallation = EFalse;
+    iTrustedInstallation = EFalse;
 	iInstallationType = EInstallationTypeNew;
 	iFamilyMask = 0;
     }
@@ -297,9 +298,11 @@ void ChspsInstallationHandler::hspsInstallNextPhaseL(
 // -----------------------------------------------------------------------------
 void ChspsInstallationHandler::ResetL()
     {
+    iThemeFilePath.FillZ();    
     iFamilyMask = 0;
     iInstallationPhase = EhspsPhaseInitialise;    
-    iThemeStatus = EhspsThemeStatusNone;  
+    iThemeStatus = EhspsThemeStatusNone;
+    iTrustedInstallation = EFalse;
     iFileNotFound = EFalse;
     delete iMediaType;
     iMediaType = NULL;
@@ -357,97 +360,21 @@ ThspsServiceCompletedMessage ChspsInstallationHandler::hspsInstallTheme(
         TDes8& aHeaderData)
     {
     // Assume that the installation fails
-    ThspsServiceCompletedMessage ret = EhspsInstallThemeFailed;           
-    iResult->iXuikonError = KErrManifestFileCorrupted;
-        
-    // Reset memeber variables
-    TInt errorCode = KErrNone;
-    TRAP( errorCode, ResetL() );
-    if ( !errorCode )
-        {        
-        // Get manifest file path
-        iThemeFilePath.Set( TParsePtrC( aManifestFileName ).DriveAndPath() );
-        // Check if ROM installation is requested
-        iRomInstallation = EFalse;
-        TParse driveParser;
-        driveParser.Set( iThemeFilePath, NULL, NULL );
-        TInt driveNumber;
-        if ( RFs::CharToDrive( driveParser.Drive()[0], driveNumber ) == KErrNone )
-            {
-            if ( driveNumber == EDriveZ )
-                {
-                iRomInstallation = ETrue;
-                }
-            }
-            
-#ifdef HSPS_LOG_ACTIVE    
-        if ( iLogBus )
-            {            
-            iLogBus->LogText( _L( "ChspsInstallationHandler::hspsInstallTheme() - *** Parsing a manifest file:" ) );
-            }
-#endif       
-        if( BaflUtils::FileExists( iFsSession, aManifestFileName ) )
-             {
-             // Parse XML from the manifest file
-             TRAP( errorCode, Xml::ParseL( *iXmlParser, iFsSession, aManifestFileName ));     
-             }        
-        else
-            {
-#ifdef HSPS_LOG_ACTIVE    
-            if ( iLogBus )
-                {           
-                iLogBus->LogText( _L( "ChspsInstallationHandler::hspsInstallTheme() - Manifest was not found!" ) );
-                }
-#endif            
-            iFileNotFound = ETrue;
-            errorCode = KErrNotFound;
-            }
+    ThspsServiceCompletedMessage ret = EhspsInstallThemeFailed;                       
+    iResult->iXuikonError = 0;    
+    iResult->iIntValue2 = 0;
+    
+    TRAPD( err, DoInstallThemeL(aManifestFileName) );
+    if( !err )
+        {
+        // correct headerdata is in iHeaderData set by CheckHeaderL()
+        aHeaderData = iHeaderData->Des();        
+                   
+        // Set next phase
+        iInstallationPhase = EhspsPhaseCleanup;
+        ret = EhspsInstallThemeSuccess;
         }
-        
-    if ( !errorCode && !iFileNotFound )
-        {        
-        // The manifest file has been read at this point and following callbacks have been executed:
-        // (unless the manifest was invalid): OnContent, OnStartElement, OnEndElement
-
-        // Detect installation type.
-        // Performance optimization: do not check if installing from rom.
-        if( !iRomInstallation )
-            {
-            // Check type of installation
-            TBool instancesFound = EFalse;
-            TRAP( errorCode, instancesFound = IsPluginUsedInAppConfsL() );            
-            if( iThemeServer.PluginInHeaderCache( TUid::Uid( iThemeUid ) ) && instancesFound )                    
-                {
-                // Plugin should be found from cache, update notifications are
-                // sent only when plugins are used by one/more app configurations
-                iInstallationType = EInstallationTypeUpdate;
-                }
-            else
-                {
-                iInstallationType = EInstallationTypeNew;
-                }
-            }                
-        if ( !errorCode )
-            {
-            // Check the manifest        
-            TRAP( errorCode, ValidateL() );
-            }
-        if ( !errorCode )
-            {
-            // correct headerdata is in iHeaderData set by CheckHeaderL()
-            aHeaderData = iHeaderData->Des();
-            
-            ret = EhspsInstallThemeSuccess;
-               
-            // Set next phase
-            iInstallationPhase = EhspsPhaseCleanup;
-           
-            // number of all resources to iResult
-            iResult->iIntValue2 = 0;
-            }
-        }
-
-    if ( errorCode )
+    else
         {     
 #ifdef HSPS_LOG_ACTIVE  
         if( iLogBus )
@@ -455,11 +382,87 @@ ThspsServiceCompletedMessage ChspsInstallationHandler::hspsInstallTheme(
             iLogBus->LogText( _L( "ChspsInstallationHandler::hspsInstallTheme(): - Installation failed with error code %d" ),
                     errorCode );
             }
-#endif              
+#endif       
         }
-    
-    iResult->iSystemError = errorCode;
+        
+    iResult->iSystemError = err;
     return ret;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsInstallationHandler::DoInstallThemeL()
+// -----------------------------------------------------------------------------
+void ChspsInstallationHandler::DoInstallThemeL(
+        const TDesC& aManifest )
+    {        
+    // Reset memeber variables    
+    ResetL();
+        
+    TParsePtrC parsePtr( aManifest );        
+                
+    // Store the path to the installation file     
+    __ASSERT_DEBUG( aManifest.Length() < KMaxFileName, User::Leave( KErrBadName ) );
+    iThemeFilePath.Copy( parsePtr.DriveAndPath() );    
+        
+    // If trying to install widgets from one of our private install directories
+    const TPath path = parsePtr.Path();
+    if( path.Length() > KPrivateInstall().Length() 
+            && path.Left( KPrivateInstall().Length() ) == KPrivateInstall() ) 
+        {                    
+        // Check if ROM or UDA installation was requested
+        if( parsePtr.DrivePresent() )
+            {            
+            TInt driveNumber;
+            if ( RFs::CharToDrive( parsePtr.Drive()[0], driveNumber ) == KErrNone )
+                {
+                iTrustedInstallation = ( driveNumber == EDriveZ || driveNumber == EDriveC );                
+                }
+            }
+        }    
+            
+    if( !BaflUtils::FileExists( iFsSession, aManifest ) )
+        {
+#ifdef HSPS_LOG_ACTIVE    
+        if ( iLogBus )
+            {           
+            iLogBus->LogText( _L( "ChspsInstallationHandler::DoInstallThemeL() - *** Manifest was not found!" ) );
+            }
+#endif    
+        User::Leave( KErrNotFound );
+        }
+       
+#ifdef HSPS_LOG_ACTIVE    
+    if ( iLogBus )
+        {            
+        iLogBus->LogText( _L( "ChspsInstallationHandler::DoInstallThemeL() - *** Parsing a manifest file" ) );
+        }
+#endif       
+    
+    // Parse XML from the manifest file
+    Xml::ParseL( *iXmlParser, iFsSession, aManifest );    
+                    
+    // The manifest file has been read at this point and following callbacks have been executed:
+    // OnContent(), OnStartElement() and OnEndElement()
+    
+    // Performance optimization: do not check if installing from rom.
+    if( !iTrustedInstallation )
+        {
+        // Check type of installation        
+        TBool instancesFound = IsPluginUsedInAppConfsL();            
+        if( iThemeServer.PluginInHeaderCache( TUid::Uid( iThemeUid ) ) && instancesFound )                    
+            {
+            // Plugin should be found from cache, update notifications are
+            // sent only when plugins are used by one/more app configurations
+            iInstallationType = EInstallationTypeUpdate;
+            }
+        else
+            {
+            iInstallationType = EInstallationTypeNew;
+            }
+        }                
+        
+    // Check the parsed input        
+    ValidateL();                    
     }
 
 // -----------------------------------------------------------------------------
@@ -489,7 +492,8 @@ TFileName ChspsInstallationHandler::GetInterfacePath()
 // -----------------------------------------------------------------------------
 //
 void ChspsInstallationHandler::ValidateL()
-    {                                    
+    {               
+    // Check resources
     TFileName interfacePath( GetInterfacePath() );       
     if ( interfacePath.Length() )        
        {
@@ -513,7 +517,7 @@ void ChspsInstallationHandler::ValidateL()
        AddLocalesL( iThemeFilePath );                       
        }       
           
-   // Validate input from the manifest
+   // Validate other input from the manifest
    CheckHeaderL();
            
    if ( iSecurityEnforcer.CheckThemeLockingL( *iOdt ) )
@@ -747,7 +751,7 @@ void ChspsInstallationHandler::InstallSkeletonL( ThspsServiceCompletedMessage& /
             _L8( "0" ) );
         }
 
-    if ( iRomInstallation )
+    if ( iTrustedInstallation )
         {
         // Update configuration state to KConfStateConfirmed
         hspsServerUtil::SetAttributeValueL( 
@@ -1739,54 +1743,7 @@ void ChspsInstallationHandler::ActivateThemeL()
         iMultiInstance = KMultiInstanceDefaultValue;
         }
     }
- 
- // -----------------------------------------------------------------------------
- // ChspsInstallationHandler::FindFile
- // Eclipsing support for customization 
- // -----------------------------------------------------------------------------
- //
- void ChspsInstallationHandler::FindFile(
-         const TDesC& aPath,
-         const TDesC& aFilename,         
-         TFileName& aDrivePathName )
-     {                   
-     TParsePtrC parser( aPath );
-     const TPath path = parser.Path();              
-               
-     // Find the input file, search from the user area (UDA) first, 
-     // exclude external/remote drives from the search - otherwise end-users  
-     // could introduce fixed configurations (e.g. operator locks wouldn't work)
-     TFindFile fileFinder( iFsSession );
-     fileFinder.SetFindMask( 
-         KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
-     iFsSession.SetSessionToPrivate( EDriveZ );
-     TInt err = fileFinder.FindByDir( aFilename, path );
-     iFsSession.SetSessionToPrivate( EDriveC );
-     if( !err )          
-         {         
-         // Return the path with a drive reference 
-         aDrivePathName = fileFinder.File();        
-         TParsePtrC drvParser( aDrivePathName );
-         if( !drvParser.DrivePresent() )
-             {             
-             err = KErrNotFound;
-             }
-         }
-     
-     if( err )
-         {
-         // Not found from C nor Z drives
-#ifdef HSPS_LOG_ACTIVE  
-         if( iLogBus )
-             {
-             iLogBus->LogText( 
-                     _L( "ChspsInstallationHandler::FindFile(): - couldnt' find file '%S'" ),
-                     &aDrivePathName );
-             }
-    #endif
-         }
-     }
- 
+  
 // -----------------------------------------------------------------------------
 // Parsing of the manifest elements.
 // -----------------------------------------------------------------------------
@@ -1987,10 +1944,11 @@ void ChspsInstallationHandler::OnEndElementL( const RTagInfo& aElement, TInt /*a
             HBufC* nameBuf = CnvUtfConverter::ConvertToUnicodeFromUtf8L( *iContent );                        
             // Find full path to the file 
             TFileName fullName;
-            FindFile( 
-                iThemeFilePath, 
-                nameBuf->Des(),
-                fullName );
+            hspsServerUtil::FindFile(
+                    iFsSession,                    
+                    iThemeFilePath, 
+                    nameBuf->Des(),
+                    fullName );
             delete nameBuf;
             nameBuf = NULL;
             if( !fullName.Length() )

@@ -30,6 +30,7 @@ class MAiContentObserver;
 class MAiContentItemIterator;
 class CSapiData;
 class CGulIcon;
+class CLiwDefaultMap;
 
 /**
  *  @ingroup group_sapidataplugin
@@ -189,11 +190,15 @@ public:
     /**
     * RefereshL a specific image of text in the widget
     *
-    * @param aContentType content type
-    * @param aOperation operation performed
+    * @param aContentType   content type
+    * @param aOperation     operation performed
+    * @param aDataMap       data map if available. Can be NULL.
+    *                       Ownership NOT transferred.
     * @return void
     */
-    void RefreshL(TDesC& aContentType, TDesC& aOperation);
+    void RefreshL( TDesC& aContentType,
+                   TDesC& aOperation,
+                   CLiwDefaultMap* aDataMap );
     
     /**
     * Is plugin active to publish the data 

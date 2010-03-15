@@ -17,11 +17,11 @@
 #include <apgcli.h>
 #include <swi/sisregistrysession.h>
 #include <swi/sisregistryentry.h>
-#include <widgetregistryclient.h>
 #include <javaregistry.h>
 #include <javaregistrypackageentry.h>
 #include <javaregistryapplicationentry.h>
 #include <mcsmenuutils.h>
+#include <utf.h>
 #include "mcsdef.h"
 #include "mcsmenu.h"
 #include "mcsmenuitem.h"
@@ -44,6 +44,7 @@ CMenuUninstallOperation::~CMenuUninstallOperation()
     Cancel();
     iUninstaller.Close();
     delete iRemoveOperation;
+    iWidgetRegistry.Close();
     }
 
 // ---------------------------------------------------------
@@ -84,12 +85,12 @@ iRemoveOperation( NULL )
 //
 void CMenuUninstallOperation::ConstructL( CMenuItem& aItem )
     {
+    User::LeaveIfError( iWidgetRegistry.Connect() );
     TBool exists;
     TPtrC uidAttr( aItem.GetAttributeL( KMenuAttrUid, exists ) );
     TUint uid;
     TUid packageUid = KNullUid;
-    TPtrC8 mimeType;
-
+    
 
     if( !exists )
         {
@@ -112,13 +113,16 @@ void CMenuUninstallOperation::ConstructL( CMenuItem& aItem )
     // Prepare parameters
     MenuUtils::GetTUint( uidAttr, uid );
     
+    
+    RBuf8 mimeType;
+    mimeType.CleanupClosePushL();
     AppInfoL( TUid::Uid( uid ), mimeType, packageUid );
 
     // Commence the uninstallations
     iUninstaller.Uninstall( iStatus, packageUid, mimeType );
     iObserverStatus = KRequestPending;
     if( mimeType == KMidletMimeType()
-            && IsWidgetL( TUid::Uid( uid ) ) )	
+            && IsWidget( TUid::Uid( uid ) ) )	
 		{
     	//we remove java type app(it will gain different uid
 		//during next install) and widget type app(it MIGHT get
@@ -131,7 +135,7 @@ void CMenuUninstallOperation::ConstructL( CMenuItem& aItem )
     	//appscanner will hide it for later passible reinstallation 
     	iState = ERemoving;
     	}
-    
+    CleanupStack::PopAndDestroy( &mimeType );
     SetActive();
     }
 
@@ -139,7 +143,8 @@ void CMenuUninstallOperation::ConstructL( CMenuItem& aItem )
 // CMenuUninstallOperation::AppInfo
 // ---------------------------------------------------------
 //
-void CMenuUninstallOperation::AppInfoL( const TUid& aAppUid, TPtrC8& aMimeType, TUid& aPackageUid )
+void CMenuUninstallOperation::AppInfoL( const TUid& aAppUid, 
+        RBuf8& aMimeType, TUid& aPackageUid )
 	{
 	TUid typeUid;
 	RApaLsSession apaLsSession;
@@ -152,12 +157,27 @@ void CMenuUninstallOperation::AppInfoL( const TUid& aAppUid, TPtrC8& aMimeType, 
     		typeUid == KMidletType )
         {
         GetJavaSuitUidL( aAppUid, aPackageUid );
-        aMimeType.Set( KMidletMimeType );
+        User::LeaveIfError( aMimeType.Create( KMidletMimeType() ) );
         }
-    else if( IsWidgetL( aAppUid ) )
+    else if( IsWidget( aAppUid ) )
         {
         aPackageUid = aAppUid;
-        aMimeType.Set( KWidgetMimeType );
+        CWidgetPropertyValue* widgetProperty( iWidgetRegistry.
+                GetWidgetPropertyValueL( aAppUid, EMimeType ) );
+        CleanupStack::PushL( widgetProperty );
+        TPtrC mimeType( *widgetProperty );
+        if (mimeType.Length() == 0)
+            {
+            User::LeaveIfError( aMimeType.Create( KWidgetMimeType() ) );
+            }
+        else 
+            {
+            HBufC8*  mimeType8 = CnvUtfConverter::ConvertFromUnicodeToUtf8L( mimeType );
+            CleanupStack::PushL( mimeType8 );
+            User::LeaveIfError( aMimeType.Create( *mimeType8 ) );
+            CleanupStack::PopAndDestroy( mimeType8 );
+            }
+        CleanupStack::PopAndDestroy( widgetProperty );
         }
     else
         {
@@ -167,7 +187,7 @@ void CMenuUninstallOperation::AppInfoL( const TUid& aAppUid, TPtrC8& aMimeType, 
         	{
         	aPackageUid = aAppUid;
         	}
-        aMimeType.Set( KAppMimeType );
+        User::LeaveIfError( aMimeType.Create( KAppMimeType() ) );
         }
 
     CleanupStack::PopAndDestroy( &apaLsSession );
@@ -278,21 +298,10 @@ void CMenuUninstallOperation::GetJavaSuitUidL( const TUid& aAppUid, TUid& aPacka
 // ---------------------------------------------------------
 //
 
-TBool CMenuUninstallOperation::IsWidgetL( const TUid& aAppUid )
-	{
-	RWidgetRegistryClientSession widgetReg;
-	TBool isWidget;
-
-	if( KErrNone != widgetReg.Connect() )
-		{
-		return EFalse;
-		}
-	CleanupClosePushL( widgetReg);
-	isWidget = widgetReg.IsWidget( aAppUid );
-	CleanupStack::PopAndDestroy( &widgetReg );
-
-	return isWidget;
-	}
+TBool CMenuUninstallOperation::IsWidget( const TUid& aAppUid )
+    {
+    return iWidgetRegistry.IsWidget( aAppUid );
+    }
 
 // ---------------------------------------------------------
 // CMenuUninstallOperation::RunL

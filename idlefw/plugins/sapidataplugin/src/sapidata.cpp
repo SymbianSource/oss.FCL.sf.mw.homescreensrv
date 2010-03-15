@@ -699,12 +699,15 @@ void CSapiData::RegisterContentObserverL()
 // RefreshL
 // ---------------------------------------------------------------------------
 //
-void CSapiData::RefreshL( TDesC& aPublisher, TDesC& aContentType, 
-                TDesC& aContentId, TDesC& aOperation )
+void CSapiData::RefreshL( TDesC& aPublisher,
+                          TDesC& aContentType, 
+                          TDesC& aContentId,
+                          TDesC& aOperation,
+                          CLiwDefaultMap* aDataMap )
     {
      if ( CanUpdate( aPublisher, aContentType, aContentId ) )
     	 {
-    	 iPlugin->RefreshL( aContentType, aOperation);
+    	 iPlugin->RefreshL( aContentType, aOperation, aDataMap );
     	 }
     }
 

@@ -20,4 +20,5 @@ rem
  
 if exist \epoc32\winscw\c\sys\bin\mt_*.dll del \epoc32\winscw\c\sys\bin\mt_*.dll
 if exist \epoc32\winscw\c\sys\hash\mt_*.dll del \epoc32\winscw\c\sys\hash\mt_*.dll
-copy \epoc32\release\winscw\udeb\mt_*.dll \epoc32\winscw\c\sys\bin
+md \epoc32\winscw\c\sys\bin\
+copy \epoc32\release\winscw\udeb\mt_*.dll \epoc32\winscw\c\sys\bin\

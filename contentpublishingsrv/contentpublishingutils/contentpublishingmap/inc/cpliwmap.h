@@ -112,7 +112,7 @@ public:
      */
     IMPORT_C TBool GetPropertyL( const TDesC8& aProperty,
              RBuf& aResult ) const;
-
+    
     /**
      * Fetches value for property(key) from internal map
      *
@@ -588,6 +588,14 @@ protected:
      * @return result of RSqlStatement::ColumnIndex
      */ 
     TInt ColumnIndexL( RSqlStatement& aStmt, const TDesC& aColumnName )	const;
+    
+    /**
+     * Returns ETrue if a property has valid name and type
+     * @param aProperty property name
+     * @return ETrue if property is valid, EFalse if not
+     */ 
+    TBool IsPropertyValidL( const TDesC8& aProperty ) const;
+
 protected:
 
     /**

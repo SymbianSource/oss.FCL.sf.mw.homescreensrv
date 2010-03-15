@@ -26,6 +26,7 @@
 #include <hspluginsettings.h>
 #include <propertymap.h>
 #include <mcsmenu.h>
+#include <msvapi.h>     // For MMsvSessionObserver
 
 class TMenuItem;
 class CMCSPluginEngine;
@@ -91,7 +92,8 @@ private:
  *  @since
  */
 class CMCSPluginData : public CBase,
-    public HSPluginSettingsIf::MHomeScreenSettingsObserver
+    public HSPluginSettingsIf::MHomeScreenSettingsObserver,
+    public MMsvSessionObserver
     {
 
 public:
@@ -172,11 +174,27 @@ public:
                            const TDesC8& aPluginUid, const TDesC8& aPluginId );
 
     /**
-     * CreateBkmMenuItemsL
+     * CreateRunTimeMenuItemsL
      * @param void
      * @return void
      */
-    void CreateBkmMenuItemsL();
+    void CreateRuntimeMenuItemsL();
+    
+    // from base class MMsvSessionObserver
+
+    /**
+     * Handles an event from the message server.
+     * Not used, but must be defined to be able to use the messaging server.
+     *
+     * @since S60 v3.2
+     * @param aEvent Indicates the event type.
+     * @param aArg1 Event type-specific argument value
+     * @param aArg2 Event type-specific argument value
+     * @param aArg3 Event type-specific argument value
+     */
+    void HandleSessionEventL( TMsvSessionEvent aEvent, TAny* aArg1, TAny* aArg2, 
+        TAny* aArg3 );
+    
 private:
 
     /**
@@ -217,10 +235,16 @@ private: // data
     const TDesC8& iInstanceUid;
 
     // MCS asynchronous operation watcher, owned 
-    CMCSPluginWatcher* iSaveWatcher;
+    CMCSPluginWatcher* iSaveWatcher; 
 
     // MCS resource handle, owned 
     RMenu iMenu;
+    
+    /**
+     * Message server session
+     * Own.
+     */
+    CMsvSession* iMsvSession;
     };
 
 #endif // CMCSPLUGINDATA_H

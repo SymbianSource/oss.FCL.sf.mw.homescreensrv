@@ -52,6 +52,17 @@ class ChspsDomAttribute : public CBase, public MhspsDomListItem
         IMPORT_C static ChspsDomAttribute* NewL( 
             const TDesC8& aName, 
             ChspsDomStringPool& aStringPool );
+
+        /**
+        * Two-phased constructor 8 bit.
+        * 
+        * @since S60 5.0
+        * @param aName          Name of attribute (String pool index).
+        * @param aStringPool    Attached string pool.
+        */
+        IMPORT_C static ChspsDomAttribute* NewL( 
+            const TInt aName, 
+            ChspsDomStringPool& aStringPool );        
         
         /**
         * Two-phased stream constructor.
@@ -83,9 +94,11 @@ class ChspsDomAttribute : public CBase, public MhspsDomListItem
         * 
         * @since S60 5.0
         * @param aStringPool Original string pool clone.
+        * @param aFastClone     If ETrue, then fast mode cloning is used.
         * @return Pointer to an attribute. Ownership is transferred to a caller.
         */
-        ChspsDomAttribute* CloneL( ChspsDomStringPool& aStringPool );        
+        ChspsDomAttribute* CloneL( ChspsDomStringPool& aStringPool,
+                                   const TBool aFastClone = EFalse );        
         
         /**
         * Get the attribute value.
@@ -102,6 +115,14 @@ class ChspsDomAttribute : public CBase, public MhspsDomListItem
         * @param aValue Attribute string value.
         */
         IMPORT_C void SetValueL( const TDesC8& aValue );
+        
+        /**
+        * Set attribute value.
+        * 
+        * @since S60 5.0
+        * @param aValue Attribute ref value.
+        */
+        IMPORT_C void SetValueL( const TInt aValue );
         
         /**
         * Get the attributes name string pool index.
@@ -127,8 +148,7 @@ class ChspsDomAttribute : public CBase, public MhspsDomListItem
         * @since S60 5.0
         * @return Name.
         */
-        IMPORT_C const TDesC8& Name();
-        
+        IMPORT_C const TDesC8& Name();        
        
         /**
         * Documented in ChspsDomListItem::Size.
@@ -159,6 +179,10 @@ class ChspsDomAttribute : public CBase, public MhspsDomListItem
         */
         void ConstructL( const TDesC8& aName );
 
+        /**
+        * By default Symbian 2nd phase constructor is private.
+        */
+        void ConstructL( const TInt aName );        
      
     private:    // Data
         //String pool to get string for references, not owned.

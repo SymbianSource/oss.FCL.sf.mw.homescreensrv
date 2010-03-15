@@ -374,15 +374,14 @@ void CCPDataManager::SendNotificationL( CLiwDefaultList* aListOfMaps,
 void CCPDataManager::ExtractActionL( const TLiwGenericParam* aParam, RBuf8& aAction )
     {
     CP_DEBUG( _L8("CCPDataManager::ExtractActionL()") );
-	CLiwDefaultMap* map = CLiwDefaultMap::NewLC( );
-	if ( !aParam->Value().Get( *map ) )
+    if ( aParam->Value().TypeId() != EVariantTypeMap )
 		{
 		User::Leave( KErrArgument );
 		}
 	
 	TLiwVariant variant; variant.PushL( );
 	TPtrC8 tempBuf( KNullDesC8 );
-	if ( map->FindL( KActionMap, variant ) 
+	if ( aParam->Value().AsMap()->FindL( KActionMap, variant ) 
 			&& variant.Get( tempBuf ) )
 		{
 		aAction.CreateL( tempBuf );
@@ -393,7 +392,6 @@ void CCPDataManager::ExtractActionL( const TLiwGenericParam* aParam, RBuf8& aAct
 		}
 	
 	CleanupStack::PopAndDestroy( &variant );
-	CleanupStack::PopAndDestroy( map );
     }
 
 // -----------------------------------------------------------------------------
@@ -437,15 +435,15 @@ TBool CCPDataManager::GetActivateInfoL( const CCPLiwMap* aMap )
         if( pos != KErrNotFound )
        	    {
    	    	TLiwVariant variant = (*outList)[pos].Value();
-		    CLiwDefaultMap *map = CLiwDefaultMap::NewLC();
-   			variant.Get( *map );
-   			if (map->FindL( KFlag, variant ))
-       		    {
-   	    		TUint flag;
-   		    	variant.Get( flag );
-   			   	result = flag & EActivate;
-       			}
-   	    	CleanupStack::PopAndDestroy( map );
+   	        if ( variant.TypeId() == EVariantTypeMap )
+   	        	{
+   	            if (variant.AsMap()->FindL( KFlag, variant ))
+       	            {
+   	    		    TUint flag;
+   		    	    variant.Get( flag );
+   			   	    result = flag & EActivate;
+       			    }
+   	            }
   		    variant.Reset();
    		    }
 	    }
@@ -462,26 +460,26 @@ void CCPDataManager::BuildChangeInfoL( const CCPLiwMap* aMap,
 		CLiwDefaultList* aChangeInfoList )
 	{
 	TLiwVariant resultVar = aParam->Value();
-	resultVar.PushL();
-	CLiwDefaultMap* changeInfoMap = CLiwDefaultMap::NewLC(); 
-	CLiwDefaultMap* resultMap = CLiwDefaultMap::NewLC(); 
-	resultVar.Get( *resultMap );
+	if ( resultVar.TypeId() == EVariantTypeMap )
+        {
+        resultVar.PushL();
+        CLiwDefaultMap* changeInfoMap = CLiwDefaultMap::NewLC(); 
 	
-	CopyVariantL(KId, resultMap, changeInfoMap );
-	CopyVariantL(KPublisherId, resultMap, changeInfoMap );
-	CopyVariantL(KContentType, resultMap, changeInfoMap );
-	CopyVariantL(KContentId, resultMap, changeInfoMap );
-	CopyVariantL(KFlag, resultMap, changeInfoMap );
-	CopyVariantL(KType, aMap, changeInfoMap );
-	CopyVariantL(KActionTrigger, aMap, changeInfoMap );
-	CopyActionTrigger16L( aMap, changeInfoMap );
+        CopyVariantL(KId, resultVar.AsMap(), changeInfoMap );
+        CopyVariantL(KPublisherId, resultVar.AsMap(), changeInfoMap );
+        CopyVariantL(KContentType, resultVar.AsMap(), changeInfoMap );
+        CopyVariantL(KContentId, resultVar.AsMap(), changeInfoMap );
+        CopyVariantL(KFlag, resultVar.AsMap(), changeInfoMap );
+        CopyVariantL(KType, aMap, changeInfoMap );
+        CopyVariantL(KActionTrigger, aMap, changeInfoMap );
+        CopyActionTrigger16L( aMap, changeInfoMap );
 	
-	changeInfoMap->InsertL( KOperation, TLiwVariant( KOperationExecute ) );
+        changeInfoMap->InsertL( KOperation, TLiwVariant( KOperationExecute ) );
 	
-	aChangeInfoList->AppendL( TLiwVariant( changeInfoMap ) );
-	CleanupStack::PopAndDestroy( resultMap );
-	CleanupStack::PopAndDestroy( changeInfoMap );
-	CleanupStack::PopAndDestroy( &resultVar );
+        aChangeInfoList->AppendL( TLiwVariant( changeInfoMap ) );
+        CleanupStack::PopAndDestroy( changeInfoMap );
+        CleanupStack::PopAndDestroy( &resultVar );
+        }
 	}
 
 

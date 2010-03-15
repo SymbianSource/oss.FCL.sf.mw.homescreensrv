@@ -106,26 +106,37 @@ TInt CAHAppLauncher::ExecuteCommmandLineL( const CLiwMap* aMap )
 
     if ( !ExtractUidL( aMap, appUid, KApplicationUid ) )
         {
-        RApaLsSession appSession;
-        CleanupClosePushL( appSession );
-        User::LeaveIfError( appSession.Connect( ) );
-
-        CApaCommandLine* cmd = CApaCommandLine::NewLC( );
-        cmd->SetCommandL( GetCommandL( aMap ) );
-        RBuf documentNameValue;
-        CleanupClosePushL( documentNameValue );
-        if( !ExtractDesL( aMap, documentNameValue, KDocumentName ) )
+        TApaTaskList taskList( iEnv->WsSession() );       
+        TApaTask task = taskList.FindApp( appUid );
+        if ( task.Exists( ) )
             {
-            cmd->SetDocumentNameL( documentNameValue );
+            errCode = KErrNone;
+            task.BringToForeground();
             }
-        TApaAppInfo appInfo;
-        appSession.GetAppInfo( appInfo, appUid );
-        cmd->SetExecutableNameL( appInfo.iFullName );
-        errCode = appSession.StartApp( *cmd );
-
-        CleanupStack::PopAndDestroy( &documentNameValue );
-        CleanupStack::PopAndDestroy( cmd );
-        CleanupStack::PopAndDestroy( &appSession );
+        else
+            {
+            // app not yet running
+            RApaLsSession appSession;
+            CleanupClosePushL( appSession );
+            User::LeaveIfError( appSession.Connect( ) );
+    
+            CApaCommandLine* cmd = CApaCommandLine::NewLC( );
+            cmd->SetCommandL( GetCommandL( aMap ) );
+            RBuf documentNameValue;
+            CleanupClosePushL( documentNameValue );
+            if( !ExtractDesL( aMap, documentNameValue, KDocumentName ) )
+                {
+                cmd->SetDocumentNameL( documentNameValue );
+                }
+            TApaAppInfo appInfo;
+            appSession.GetAppInfo( appInfo, appUid );
+            cmd->SetExecutableNameL( appInfo.iFullName );
+            errCode = appSession.StartApp( *cmd );
+    
+            CleanupStack::PopAndDestroy( &documentNameValue );
+            CleanupStack::PopAndDestroy( cmd );
+            CleanupStack::PopAndDestroy( &appSession );
+            }
         }
     return errCode;
     }

@@ -89,13 +89,8 @@ void CMCSPlugin::ConstructL()
 //
 CMCSPlugin::~CMCSPlugin()
     {
-    Release( iContent );
-    
-    if ( iEngine )
-        {
-        TRAP_IGNORE( iEngine->CleanMCSItemsL() );
-        }
-    
+     Release( iContent );
+
     delete iEngine;
     iObservers.Close();
     
@@ -162,7 +157,9 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
         return;
         }
 
-    CMenuItem* item( iEngine->FetchMenuItemL( aData.MenuItem() ) );
+    CMenuItem* item = NULL;
+    TRAP_IGNORE ( item = iEngine->FetchMenuItemL( aData.MenuItem() ) );
+    
     CleanupStack::PushL( item );
     
     // One widget item has iDataCount number of elements
@@ -173,7 +170,7 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
             //Publish image
             if ( aObserver.CanPublish( *this, i, aIndex ) )
                 {
-                CGulIcon* icon( iEngine->ItemIconL( *item, 
+                CGulIcon* icon( iEngine->ItemIconL( item, 
                     TPtrC16( ( const TText16* ) iContentModel[ i ].cid ) ) );
                 
                 aObserver.PublishPtr( *this, i, icon , aIndex );
@@ -184,7 +181,7 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
             //Publish  text
             if ( aObserver.CanPublish( *this, i, aIndex ) )
                 {
-                TPtrC name( iEngine->ItemTextL( *item, 
+                TPtrC name( iEngine->ItemTextL( item, 
                     TPtrC16( ( const TText16* ) iContentModel[ i ].cid ) ) );
                 
                 aObserver.Publish( *this, i, name, aIndex );
@@ -202,10 +199,10 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
 //
 void CMCSPlugin::Start( TStartReason aReason )
     {
-    if( aReason == EPluginStartup )
+    if ( aReason == EPluginStartup )
         {
-        TRAP_IGNORE( iEngine->CreateBkmMenuItemsL() );
-        }
+        TRAP_IGNORE( iEngine->CreateRuntimeMenuItemsL() );
+        }    
     }
 
 // ----------------------------------------------------------------------------
@@ -213,8 +210,12 @@ void CMCSPlugin::Start( TStartReason aReason )
 // 
 // ----------------------------------------------------------------------------
 //
-void CMCSPlugin::Stop( TStopReason /*aReason*/ )
+void CMCSPlugin::Stop( TStopReason aReason )
     {
+    if( aReason == EPluginShutdown )
+        {
+        TRAP_IGNORE( iEngine->CleanMCSItemsL() );
+        }
     }
 
 // ----------------------------------------------------------------------------

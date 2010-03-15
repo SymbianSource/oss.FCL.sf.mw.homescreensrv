@@ -15,7 +15,7 @@
 *
 */
 
-#include <mw/memorymanager.h>
+#include <mw/MemoryManager.h>
 #include <liwcommon.h>
 #include <ecom/ecom.h>
 #include <fbs.h>

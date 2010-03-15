@@ -37,6 +37,5 @@
 #include "../xcfw_api/group/bld.inf"
 #include "../idlefw_api/group/bld.inf"
 #include "../hs_widget_publisher_api/group/bld.inf"
-#include "../context_utility_api/group/bld.inf"
 #include "../hs_settings_api/group/bld.inf"
 #include "../hs_content_control_api/group/bld.inf"

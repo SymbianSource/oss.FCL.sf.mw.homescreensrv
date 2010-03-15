@@ -523,6 +523,26 @@ class hspsServerUtil
                         const TDesC8& aNodeTag,
                         ChspsDomNode& aDomNode );	
         
+	    /**	     
+         * Eclipsing enabler for customization where the input is 
+         * searched from all secure unremovable drives. 
+         * Drives are searched in descending alphabetical order, 
+         * from Y: to A:, and ending with the Z: drive. 
+         * All drives which end-user can freely modify/crack 
+         * are skipped from the search.         
+         * @since S60 5.2
+	     * @param aFs is a reference to open file server session handle
+	     * @param aPath is path of the file
+	     * @param aFilename is name and extension of the file
+	     * @param aDrivePathName Full path with a drive letter to the 
+         *                       resource file (output)
+	     */
+	    static TInt FindFile(
+	             RFs& aFs,
+	             const TDesC& aPath,
+	             const TDesC& aFilename,         
+	             TFileName& aDrivePathName );
+	    
 	private:
         /**
          * Internal method. Do not call directly!

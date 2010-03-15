@@ -57,6 +57,7 @@ LIBRARY         eikcore.lib
 LIBRARY         cone.lib
 LIBRARY         efsrv.lib 
 LIBRARY         avkon.lib
+LIBRARY         charconv.lib
 
 SOURCEPATH      ../data
 START RESOURCE  200113DE.rss

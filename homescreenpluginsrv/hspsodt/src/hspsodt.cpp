@@ -15,16 +15,12 @@
 *
 */
 
-
 #include "hspsodt.h"
 #include <s32strm.h>
 #include <s32mem.h>
 #include "hspsthememanagement.h"
 #include "hspsdomdocument.h"
 #include "hspsresource.h"
-
-/* Literal delim is used in separation of theme header and and other data in ODT-streaming. */
-_LIT(KDelim, "#");
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -148,20 +144,16 @@ ChspsODT::~ChspsODT()
 // -----------------------------------------------------------------------------    
 EXPORT_C HBufC8* ChspsODT::MarshalHeaderL() const
     {
-    CBufFlat* buf = CBufFlat::NewL( KMaxHeaderDataLength8 );
-    CleanupStack::PushL( buf );
-    RBufWriteStream stream( *buf );     //stream over the buffer
-    CleanupClosePushL( stream );
+    HBufC8* buf = HBufC8::NewLC( HeaderSize() );
+    TPtr8 ptr = buf->Des();
+    RDesWriteStream stream( ptr );
+    stream.PushL();
     ExternalizeHeaderL( stream );
-    CleanupStack::PopAndDestroy( &stream );
+    stream.Pop();
+    stream.Close();
+    CleanupStack::Pop( buf );
     
-    //Create a heap descriptor from the buffer
-    HBufC8* des = HBufC8::NewL( buf->Size() );
-    TPtr8 ptr( des->Des() );
-    buf->Read( 0, ptr, buf->Size() );
-    CleanupStack::PopAndDestroy( buf );
-    
-    return des;
+    return buf;
     }
 
 // -----------------------------------------------------------------------------
@@ -188,7 +180,6 @@ EXPORT_C ChspsODT* ChspsODT::UnMarshalHeaderLC( const TDesC8& aStreamData )
 // -----------------------------------------------------------------------------
 EXPORT_C void ChspsODT::UnMarshalHeaderL( const TDesC8& aStreamData )
     {
-
     RDesReadStream stream( aStreamData );
     CleanupClosePushL( stream );
     InternalizeHeaderL( stream );
@@ -215,9 +206,8 @@ EXPORT_C void ChspsODT::ExternalizeL( RWriteStream& aStream ) const
 EXPORT_C void ChspsODT::InternalizeL( RReadStream& aStream )
     {
     InternalizeHeaderL( aStream );
-    // consumes header delimiter
-    aStream.ReadInt16L();
     InternalizeResourceListL( aStream );    
+
     delete iDomDocument;
     iDomDocument = NULL;
     iDomDocument = ChspsDomDocument::NewL( aStream );
@@ -229,88 +219,147 @@ EXPORT_C void ChspsODT::InternalizeL( RReadStream& aStream )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------    
 void ChspsODT::ExternalizeHeaderL( RWriteStream& aStream ) const
-    {
-    if ( iPackageVersion )
+    {    
+    const TDesC& packageVersion = PackageVersion();
+    aStream.WriteInt32L( packageVersion.Length() );
+    if( packageVersion.Length() > 0 )
         {
-        aStream << *iPackageVersion;
+        aStream << packageVersion;
         }
-    else
-        {
-        aStream << KNullDesC;
-        }
-    
-    aStream.WriteUint32L( iFamilyMask );
-    aStream.WriteUint32L( iConfigurationType );
-    aStream.WriteUint32L( iRootUid );
-    aStream.WriteUint32L( iProviderUid );
+        
     aStream.WriteUint32L( iThemeUid );
-    aStream.WriteInt32L( iMultiInstance );
     
-    if ( iDescription )
+    const TDesC& providerName = ProviderName();
+    aStream.WriteInt32L( providerName.Length() );
+    if( providerName.Length() > 0 )
         {
-        aStream << *iDescription;
-        }    
-    else
+        aStream << providerName;
+        }         
+
+    const TDesC& themeFullName = ThemeFullName();
+    aStream.WriteInt32L( themeFullName.Length() );
+    if( themeFullName.Length() > 0 )
         {
-        aStream << KNullDesC;
-        }
-    if ( iLogoFile )
-        {
-        aStream << *iLogoFile;
-        }    
-    else
-        {
-        aStream << KNullDesC;
-        }
-    if ( iPreviewFile )
-        {
-        aStream << *iPreviewFile;
-        }    
-    else
-        {
-        aStream << KNullDesC;
-        }
-    if ( iProviderName )
-        {
-        aStream << *iProviderName;
-        }
-    else
-        {
-        aStream << KNullDesC;
-        }
+        aStream << themeFullName;
+        }      
     
-    if ( iThemeFullName )
+    const TDesC& themeShortName = ThemeShortName();
+    aStream.WriteInt32L( themeShortName.Length() );
+    if( themeShortName.Length() > 0 )
         {
-        aStream << *iThemeFullName;
-        }
-    else 
+        aStream << themeShortName;
+        }    
+
+    const TDesC& themeVersion = ThemeVersion();
+    aStream.WriteInt32L( themeVersion.Length() );
+    if( themeVersion.Length() > 0 )
         {
-        aStream << KNullDesC;
-        }
+        aStream << themeVersion;
+        }              
         
-    if ( iThemeShortName )
+    const TDesC& description = Description();
+    aStream.WriteInt32L( description.Length() );
+    if( description.Length() > 0 )
         {
-        aStream << *iThemeShortName;
-        }
-    else 
+        aStream << description;
+        }            
+
+    const TDesC& logoFile = LogoFile();
+    aStream.WriteInt32L( logoFile.Length() );
+    if( logoFile.Length() > 0 )
         {
-        aStream << KNullDesC;
-        }
-        
-    if ( iThemeVersion )
+        aStream << logoFile;
+        }        
+
+    const TDesC& previewFile = PreviewFile();
+    aStream.WriteInt32L( previewFile.Length() );
+    if( previewFile.Length() > 0 )
         {
-        aStream << *iThemeVersion;
-        }
-    else
-        {
-        aStream << KNullDesC;
-        }
-    
-    aStream.WriteInt32L( iLanguage );
+        aStream << previewFile;
+        }            
+
+    aStream.WriteUint32L( iFamilyMask );    
+    aStream.WriteUint32L( iConfigurationType );    
+    aStream.WriteUint32L( iRootUid );    
+    aStream.WriteUint32L( iProviderUid );  
     aStream.WriteUint32L( iFlags );
     
-    // end of the header delimiter
-    aStream.WriteL( KDelim );
+    aStream.WriteInt32L( iLanguage );    
+    aStream.WriteInt32L( iMultiInstance );    
+    }
+
+
+// -----------------------------------------------------------------------------
+// ChspsODT::HeaderSize
+// Calculate header size in bytes.
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------    
+TInt ChspsODT::HeaderSize() const
+    {
+    TInt size = sizeof( TInt32 );
+    if( PackageVersion().Length() > 0 )
+        {         
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += PackageVersion().Size();
+        }
+    
+    size += sizeof( TUint32 ); // iThemeUid
+    
+    size += sizeof( TInt32 );
+    if( ProviderName().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += ProviderName().Size();
+        }    
+    
+    size += sizeof( TInt32 );
+    if( ThemeFullName().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += ThemeFullName().Size();
+        }    
+    
+    size += sizeof( TInt32 );
+    if( ThemeShortName().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += ThemeShortName().Size();
+        }    
+    
+    size += sizeof( TInt32 );
+    if( ThemeVersion().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += ThemeVersion().Size();
+        }    
+    
+    size += sizeof( TInt32 );
+    if( Description().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += Description().Size();
+        }    
+    
+    size += sizeof( TInt32 );
+    if( LogoFile().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += LogoFile().Size();
+        }    
+    
+    size += sizeof( TInt32 );
+    if( PreviewFile().Length() > 0 )
+        {
+        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+        size += PreviewFile().Size();
+        }    
+    
+    size += sizeof( TUint32 ) * 5; // iFamilyMask, iConfigurationType,
+                                   // iRootUid, iProviderUid, iFlags
+
+    size += sizeof( TInt32 ) * 2; // iLanguage, iMultiInstance                
+    
+    return size;
     }
 
 // -----------------------------------------------------------------------------
@@ -319,59 +368,111 @@ void ChspsODT::ExternalizeHeaderL( RWriteStream& aStream ) const
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------       
 EXPORT_C void ChspsODT::InternalizeHeaderL( RReadStream& aStream )
-    {
-    HBufC* version = HBufC::NewL( aStream, KMaxFileName );
-    CleanupStack::PushL( version );
-    if ( iPackageVersion && version->Des().Compare( iPackageVersion->Des() ) != 0 )
+    {    
+    TInt len = aStream.ReadInt32L();
+    HBufC* version = NULL;
+    if( len > 0 )
         {
-        // Package version check requested (iPackageVersion defined) 
-        // and package version not supported
-        User::Leave( KErrNotSupported );
+        version = HBufC::NewL( aStream, len );
         }
-    if ( !iPackageVersion && version->Length() )
+    CleanupStack::PushL( version );    
+    
+    // Check version request.
+    if( iPackageVersion )
         {
-        // Package version check not requested
+        TBool supported = ETrue;
+        if( version == NULL )
+            {
+            supported = EFalse;
+            }
+        else if( version &&
+                 version->Compare( *iPackageVersion ) != 0 )
+            {
+            supported = EFalse;
+            }    
+    
+        if( !supported )
+            {
+            // Package version check requested (iPackageVersion defined) 
+            // and package version not supported
+            User::Leave( KErrNotSupported );
+            }
+        }
+    
+    if( version )
+        {
+        delete iPackageVersion;
+        iPackageVersion = NULL;    
         iPackageVersion = version->AllocL();
         }
     CleanupStack::PopAndDestroy( version );
-    
-    iFamilyMask = aStream.ReadUint32L();    
-    iConfigurationType = aStream.ReadUint32L();
-    iRootUid = aStream.ReadUint32L();
-    iProviderUid = aStream.ReadUint32L();
+
     iThemeUid = aStream.ReadUint32L();
-    iMultiInstance = aStream.ReadInt32L();
-    
-    delete iDescription;
-    iDescription = NULL;
-    iDescription = HBufC::NewL(aStream, KMaxDescLength );
-    
-    delete iLogoFile;
-    iLogoFile = NULL;
-    iLogoFile = HBufC::NewL(aStream, KMaxFileName );
-    
-    delete iPreviewFile;
-    iPreviewFile = NULL;
-    iPreviewFile = HBufC::NewL(aStream, KMaxFileName );
-        
+          
     delete iProviderName;
     iProviderName = NULL;
-    iProviderName = HBufC::NewL(aStream, KMaxFileName );
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {
+        iProviderName = HBufC::NewL( aStream, len );
+        }
     
     delete iThemeFullName;
     iThemeFullName = NULL;
-    iThemeFullName = HBufC::NewL(aStream, KMaxFileName );
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {
+        iThemeFullName = HBufC::NewL( aStream, len );
+        }
     
     delete iThemeShortName;
     iThemeShortName = NULL;
-    iThemeShortName = HBufC::NewL(aStream, KMaxFileName );
-    
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {    
+        iThemeShortName = HBufC::NewL( aStream, len );
+        }
+
     delete iThemeVersion;
     iThemeVersion = NULL;
-    iThemeVersion = HBufC::NewL(aStream, KMaxFileName );
-        
-    iLanguage = aStream.ReadInt32L();
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {    
+        iThemeVersion = HBufC::NewL( aStream, len );
+        }
+
+    delete iDescription;
+    iDescription = NULL;
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {    
+        iDescription = HBufC::NewL( aStream, len );
+        }
+
+    delete iLogoFile;
+    iLogoFile = NULL;
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {    
+        iLogoFile = HBufC::NewL( aStream, len );
+        }
+
+    delete iPreviewFile;
+    iPreviewFile = NULL;
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {    
+        iPreviewFile = HBufC::NewL( aStream, len );
+        }
+    
+    iFamilyMask = aStream.ReadUint32L();     
+    iConfigurationType = aStream.ReadUint32L();    
+    iRootUid = aStream.ReadUint32L();    
+    iProviderUid = aStream.ReadUint32L();    
     iFlags = aStream.ReadUint32L();
+    
+    iLanguage = aStream.ReadInt32L();
+    iMultiInstance = aStream.ReadInt32L();        
     }
 
 // -----------------------------------------------------------------------------
@@ -583,9 +684,16 @@ EXPORT_C  TInt ChspsODT::ThemeUid() const
 // -----------------------------------------------------------------------------
 EXPORT_C void ChspsODT::SetProviderNameL( const TDesC& aName )
     {
-    delete iProviderName;
-    iProviderName = NULL;
-    iProviderName = aName.AllocL();
+    if( iProviderName )
+        {
+        delete iProviderName;
+        iProviderName = NULL;
+        }
+    
+    if( aName.Length() != 0 )
+        {        
+        iProviderName = aName.AllocL();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -612,9 +720,16 @@ EXPORT_C const TDesC& ChspsODT::ProviderName() const
 // -----------------------------------------------------------------------------
 EXPORT_C void ChspsODT::SetThemeFullNameL( const TDesC& aName )
     {
-    delete iThemeFullName;
-    iThemeFullName = NULL;
-    iThemeFullName = aName.AllocL();
+    if( iThemeFullName )
+        {
+        delete iThemeFullName;
+        iThemeFullName = NULL;
+        }
+    
+    if( aName.Length() != 0 )
+        {        
+        iThemeFullName = aName.AllocL();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -641,9 +756,16 @@ EXPORT_C const TDesC& ChspsODT::ThemeFullName() const
 // -----------------------------------------------------------------------------    
 EXPORT_C void ChspsODT::SetThemeShortNameL( const TDesC& aName )
     {
-    delete iThemeShortName;
-    iThemeShortName = NULL;
-    iThemeShortName = aName.AllocL();
+    if( iThemeShortName )
+        {
+        delete iThemeShortName;
+        iThemeShortName = NULL;
+        }
+    
+    if( aName.Length() != 0 )
+        {        
+        iThemeShortName = aName.AllocL();
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -670,9 +792,16 @@ EXPORT_C const TDesC& ChspsODT::ThemeShortName() const
 // -----------------------------------------------------------------------------    
 EXPORT_C void ChspsODT::SetThemeVersionL( const TDesC& aVersion )
     {
-    delete iThemeVersion;
-    iThemeVersion = NULL;
-    iThemeVersion = aVersion.AllocL();
+    if( iThemeVersion )
+        {
+        delete iThemeVersion;
+        iThemeVersion = NULL;
+        }
+    
+    if( aVersion.Length() != 0 )
+        {        
+        iThemeVersion = aVersion.AllocL();
+        }    
     }
 
 // -----------------------------------------------------------------------------
@@ -804,9 +933,16 @@ EXPORT_C TUint ChspsODT::ConfigurationType() const
 // -----------------------------------------------------------------------------    
 EXPORT_C void ChspsODT::SetPackageVersionL( const TDesC& aVersion )
     {
-    delete iPackageVersion;
-    iPackageVersion = NULL;
-    iPackageVersion = aVersion.AllocL();
+    if( iPackageVersion )
+        {
+        delete iPackageVersion;
+        iPackageVersion = NULL;
+        }
+    
+    if( aVersion.Length() != 0 )
+        {        
+        iPackageVersion = aVersion.AllocL();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -867,9 +1003,16 @@ EXPORT_C  TInt ChspsODT::MultiInstance() const
 // -----------------------------------------------------------------------------
 EXPORT_C void ChspsODT::SetDescriptionL( const TDesC& aDesc )
     {    
-    delete iDescription;
-    iDescription = NULL;
-    iDescription = aDesc.AllocL();
+    if( iDescription )
+        {
+        delete iDescription;
+        iDescription = NULL;
+        }
+    
+    if( aDesc.Length() != 0 )
+        {        
+        iDescription = aDesc.AllocL();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -891,10 +1034,17 @@ EXPORT_C const TDesC& ChspsODT::Description() const
 // ChspsODT::SetLogoFileL
 // -----------------------------------------------------------------------------
 EXPORT_C void ChspsODT::SetLogoFileL( const TDesC& aPath )
-    {    
-    delete iLogoFile;
-    iLogoFile = NULL;
-    iLogoFile = aPath.AllocL();
+    {
+    if( iLogoFile )
+        {
+        delete iLogoFile;
+        iLogoFile = NULL;
+        }
+    
+    if( aPath.Length() != 0 )
+        {        
+        iLogoFile = aPath.AllocL();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -916,10 +1066,17 @@ EXPORT_C const TDesC& ChspsODT::LogoFile() const
 // ChspsODT::SetPreviewFileL
 // -----------------------------------------------------------------------------
 EXPORT_C void ChspsODT::SetPreviewFileL( const TDesC& aPath )
-    {    
-    delete iPreviewFile;
-    iPreviewFile = NULL;
-    iPreviewFile = aPath.AllocL();
+    {
+    if( iPreviewFile )
+        {
+        delete iPreviewFile;
+        iPreviewFile = NULL;
+        }
+    
+    if( aPath.Length() != 0 )
+        {        
+        iPreviewFile = aPath.AllocL();
+        }
     }
 
 // -----------------------------------------------------------------------------

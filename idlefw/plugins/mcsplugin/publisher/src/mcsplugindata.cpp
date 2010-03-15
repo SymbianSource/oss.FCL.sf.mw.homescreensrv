@@ -20,6 +20,10 @@
 #include <aistrcnv.h>
 #include <favouritesdbobserver.h>
 #include <favouritesdb.h>        
+#include <msvuids.h>        // For KMsvRootIndexEntryIdValue
+
+#include <mcsmenuitem.h>
+#include <mcsmenufilter.h>
 
 #include "mcsplugindata.h"
 #include "mcspluginengine.h"
@@ -36,14 +40,22 @@ _LIT8( KProperValueFolder, "folder" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
 
+_LIT( KMailboxUid, "0x100058c5" );
+_LIT8( KMailboxUid8, "0x100058c5" );
+_LIT( KMenuMailboxIconId, "16388" );
+_LIT( KMenuMailboxMaskId, "16389" );
+
 _LIT( KUrl, "url" );
 _LIT( KMenuIconFile, "aimcsplugin.mif" );
-_LIT( KMenuIconId, "16386" );
-_LIT( KMenuMaskId, "16387" );
+_LIT( KMenuBookmarkIconId, "16386" );
+_LIT( KMenuBookmarkMaskId, "16387" );
 _LIT( KInitialRefCount, "1" );
 _LIT( KMenuAttrRefcount, "ref_count" );
 _LIT( KMyMenuData, "matrixmenudata" );
+_LIT( KMenuTypeShortcut, "menu:shortcut" );
+_LIT( KMenuAttrParameter, "param" );
 
+#define KMCSCmailMtmUidValue 0x2001F406
 
 // ======== LOCAL FUNCTIONS ========
 
@@ -105,6 +117,7 @@ CMCSPluginData::CMCSPluginData( CMCSPluginEngine& aEngine, const TDesC8& aInstan
 //
 void CMCSPluginData::ConstructL()
     {
+    iMsvSession = CMsvSession::OpenAsObserverL( *this );
     iPluginSettings = CHomescreenSettings::Instance();
     if( iPluginSettings == NULL )
         {
@@ -134,6 +147,7 @@ CMCSPluginData::~CMCSPluginData()
     iMenu.Close();
 
     delete iSaveWatcher;
+    delete iMsvSession;
     }
 
 // ---------------------------------------------------------------------------
@@ -433,11 +447,22 @@ TInt CMCSPluginData::GetMCSPluginFolderIdL()
     }
 
 // ---------------------------------------------------------------------------
-// Creates bookmark menu item if it does not exist
+// Creates runtime generated menuitems (bookmarks/mailboxes if they 
+// it does not exist yet in MCS. If they do, their ref_count is incremented.
+// Called during Plugin startup.
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginData::CreateBkmMenuItemsL()
+void CMCSPluginData::CreateRuntimeMenuItemsL()
     {
+    
+    // start mailboxes observing and get the number of
+    // mailboxes defined in the device
+
+    TMsvId entryID = KMsvRootIndexEntryIdValue;
+    CMsvEntry* rootEntry = iMsvSession->GetEntryL( entryID );
+    TInt mailboxCount = rootEntry->Count();
+    CleanupStack::PushL( rootEntry );
+    
     RPointerArray<CItemMap> settings;
     TCleanupItem settingsCleanupItem( ItemMapArrayCleanupFunc, &settings );
     CleanupStack::PushL( settingsCleanupItem );
@@ -456,7 +481,7 @@ void CMCSPluginData::CreateBkmMenuItemsL()
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
             = itemMap->Properties();
 
-        TPtrC8 uid8, type;
+        TPtrC8 uid8, type, param8;
 
         for( TInt j = 0; j < properties.Count(); j++ )
             {
@@ -469,10 +494,16 @@ void CMCSPluginData::CreateBkmMenuItemsL()
                 {
                 uid8.Set( properties[j]->Value() );
                 }
+            else if ( properties[j]->Name() ==  KProperNameParam )
+                {
+                param8.Set( properties[j]->Value() );
+                }
             }
 
         if( type == KProperValueBookmark )
             {
+            
+            // The shortcut is a bookmark
             TMenuItem menuItem = CreateMenuItemL( properties );
 
             CActiveSchedulerWait* wait = 
@@ -501,40 +532,168 @@ void CMCSPluginData::CreateBkmMenuItemsL()
                 newItem->SetAttributeL( KMenuAttrUid, *uid );
                 newItem->SetAttributeL( KMenuAttrLongName, bkmItem->Name() );
                 newItem->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
-                newItem->SetAttributeL( KMenuAttrIconId, KMenuIconId );
-                newItem->SetAttributeL( KMenuAttrMaskId, KMenuMaskId );
+                newItem->SetAttributeL( KMenuAttrIconId, KMenuBookmarkIconId );
+                newItem->SetAttributeL( KMenuAttrMaskId, KMenuBookmarkMaskId );
                 newItem->SetAttributeL( KMenuAttrRefcount, KInitialRefCount );
                 newItem->SetAttributeL( KUrl , bkmItem->Url() );
 
                 CMenuOperation* op = newItem->SaveL( iSaveWatcher->iStatus );
-                TInt newId = newItem->Id();
-                iData[i].MenuItem().SetId( newId );
 
                 iSaveWatcher->StopAndWatch( op, wait );
 
                 // Start the nested scheduler loop.
                 wait->Start();
 
-                CleanupStack::Pop( newItem );
+                SaveSettingsL( i, *newItem );
+
+                CleanupStack::PopAndDestroy( newItem );
                 CleanupStack::PopAndDestroy( uid );
                 CleanupStack::PopAndDestroy( bkmItem );
                 }
             else
                 {
                 CMenuItem* item = CMenuItem::OpenL( iMenu, menuItem );
-
-                if( iEngine.UpdateMenuItemsRefCountL( item, 1 ) > 0 )
+                CleanupStack::PushL( item );
+                if ( iEngine.UpdateMenuItemsRefCountL( item, 1 ) > 0 )
                     {
                     CMenuOperation* op = item->SaveL( iSaveWatcher->iStatus );
                     iSaveWatcher->StopAndWatch( op, wait );
                     // Start the nested scheduler loop.
                     wait->Start();
+                    SaveSettingsL( i, *item );
                     }
+                CleanupStack::PopAndDestroy( item );
                 }
 
             CleanupStack::PopAndDestroy( wait );
             wait = NULL;
             }
+
+        else if ( uid8 == KMailboxUid8 && mailboxCount > 0 )
+             {
+             // The shortcut is a Mailbox
+             
+             TMenuItem menuItem = CreateMenuItemL( properties );
+
+             CActiveSchedulerWait* wait = 
+                             new ( ELeave ) CActiveSchedulerWait;
+             CleanupStack::PushL( wait );
+
+             if ( menuItem.Id() == 0 )
+                {
+                // mailbox menuitem does not exist yet. We have to create it
+                // first, we try to find its ID among existing mailboxes:bì 
+
+                // extract Mailbox ID from HSPS
+                TInt pos = param8.Locate( TChar( ':' ) ) + 1;
+                TPtrC8 mailboxId8 = param8.Mid( pos );
+                
+                HBufC *mailboxId( NULL );
+                mailboxId = AiUtility::CopyToBufferL( mailboxId, mailboxId8 );
+                CleanupStack::PushL( mailboxId );
+                
+                // compare ID with existing mailboxes
+                rootEntry->SetSortTypeL( TMsvSelectionOrdering( 
+                            KMsvGroupByType | KMsvGroupByStandardFolders, 
+                            EMsvSortByDetailsReverse, ETrue ) );
+                
+                TBuf<255> boxId;
+                TBool found = EFalse;
+                TInt index = rootEntry->Count();
+
+                while ( !found && --index >= 0 )
+                    {
+                    const TMsvEntry& tentry = ( *rootEntry )[ index ];
+                    if ( tentry.iMtm.iUid == KMCSCmailMtmUidValue )
+                        {
+                        boxId.Num( tentry.Id() );
+                        if ( boxId == *mailboxId )
+                            {
+                            found = ETrue;
+                            }
+                        }
+                    }
+
+                CleanupStack::PopAndDestroy( mailboxId );
+                
+                // mailbox still exists in Mail application
+                // we have to create a new menuitem
+                if ( found )
+                    {
+
+                    // get the mailbox name
+                    const TMsvEntry& tentry = ( *rootEntry )[ index ];
+                    TPtrC name = tentry.iDetails;
+
+                    HBufC *param( NULL );
+                    param = AiUtility::CopyToBufferL( param, param8 );
+                    CleanupStack::PushL( param );
+
+                    // create a new menuitem with ref_count 1
+                    CMenuItem* newItem = CMenuItem::CreateL( iMenu, 
+                                                         KMenuTypeShortcut, 
+                                                         GetMCSPluginFolderIdL(), 
+                                                         0 );
+                    CleanupStack::PushL( newItem );
+
+                    // mailbox is a shortcut item with "mailbox:mailboxID" parameter
+                    newItem->SetAttributeL( KMenuAttrUid, KMailboxUid );
+                    newItem->SetAttributeL( KMenuAttrLongName, name );
+                    newItem->SetAttributeL( KMenuAttrParameter, *param );
+                    newItem->SetAttributeL( KMenuAttrRefcount, KInitialRefCount );
+
+                    // setting icon for the shortcut
+                    newItem->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
+                    newItem->SetAttributeL( KMenuAttrIconId, KMenuMailboxIconId );
+                    newItem->SetAttributeL( KMenuAttrMaskId, KMenuMailboxMaskId );
+
+                    CMenuOperation* op = newItem->SaveL( iSaveWatcher->iStatus );
+                    iSaveWatcher->StopAndWatch( op, wait );
+
+                    // Start the nested scheduler loop.
+                    wait->Start();
+
+                    SaveSettingsL( i, *newItem );
+
+                    CleanupStack::PopAndDestroy( newItem );
+                    CleanupStack::PopAndDestroy( param );
+                    }
+                }
+             else 
+                {
+                // mailbox menu item already exists -> increment ref_count by 1
+                CMenuItem* item = CMenuItem::OpenL( iMenu, menuItem );
+                CleanupStack::PushL( item );
+                if ( iEngine.UpdateMenuItemsRefCountL( item, 1 ) > 0 )
+                    {
+                    CMenuOperation* op = item->SaveL( iSaveWatcher->iStatus );
+                    iSaveWatcher->StopAndWatch( op, wait );
+
+                    // Start the nested scheduler loop.
+                    wait->Start();
+                    SaveSettingsL( i, *item );
+                    }
+                 CleanupStack::PopAndDestroy( item );
+                }
+             CleanupStack::PopAndDestroy( wait );
+             wait = NULL;
+             
+             }
         }
     CleanupStack::PopAndDestroy(); // settingsCleanupItem
+    CleanupStack::PopAndDestroy( rootEntry );
+    }
+
+// ---------------------------------------------------------------------------
+// From class MMsvSessionObserver.
+// Handles an event from the message server.
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginData::HandleSessionEventL(
+                                     TMsvSessionEvent /*aEvent*/, 
+                                     TAny* /*aArg1*/, 
+                                     TAny* /*aArg2*/,
+                                     TAny* /*aArg3*/ )
+    {
+
     }

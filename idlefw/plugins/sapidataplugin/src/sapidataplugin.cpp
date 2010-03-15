@@ -362,33 +362,42 @@ const TDesC& CSapiDataPlugin::GetTypeL(TDesC& aObjectId )
 //Refresh a specific image of text in the widget
 // ---------------------------------------------------------------------------
 //
-void CSapiDataPlugin::RefreshL(TDesC& aContentType, TDesC& aOperation)
-    {     
-	 TInt observers( iObservers.Count() );        
-	 TInt transactionId = reinterpret_cast<TInt>( this );
-	 
-	 for ( TInt obsIndex = 0; obsIndex < observers; obsIndex++ )
-		{
-		MAiContentObserver* observer = iObservers[obsIndex];
-		
-		if ( observer->StartTransaction( transactionId ) == KErrNone ) 				
-			{
-			if ( aOperation != KOperationDelete )
-				{
-				iData->PublishL( observer, aContentType );
-				}
-			else
-				{
-				iData->RemoveL( observer, aContentType  );	
-				}
-			
-			observer->Commit( transactionId );
-			}
-		
-		 // Relese memory of the published text
-         iDataArray.ResetAndDestroy();
-		 iIconArray.Reset();
-		}	 
+void CSapiDataPlugin::RefreshL( TDesC& aContentType,
+                                TDesC& aOperation,
+                                CLiwDefaultMap* aDataMap )
+    {    
+    const TInt observerCount( iObservers.Count() );    
+    const TInt transactionId = reinterpret_cast<TInt>( this );
+    
+    for( TInt obsIndex = 0; obsIndex < observerCount; obsIndex++ )
+        {
+        MAiContentObserver* observer = iObservers[obsIndex];
+    
+        if( observer->StartTransaction( transactionId ) == KErrNone ) 				
+            {
+            if ( aOperation != KOperationDelete )
+                {
+                if( aDataMap )
+                    {
+                    iData->PublishDataL( observer, aDataMap );
+                    }
+                else
+                    {
+                    iData->PublishL( observer, aContentType );
+                    }            
+                }
+            else
+                {
+                iData->RemoveL( observer, aContentType  );
+                }
+    
+            observer->Commit( transactionId );
+            }
+    
+        // Relese memory of the published text
+        iDataArray.ResetAndDestroy();
+        iIconArray.Reset();
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -413,6 +422,7 @@ void CSapiDataPlugin::Start( TStartReason aReason )
     {
     if( aReason == ESystemStartup )
         {
+        TRAP_IGNORE( PublishL() );
         TRAP_IGNORE( iData->SetStartupReasonL( KSystemStartup ));
         }
     else if( aReason == EPageStartup )
@@ -421,6 +431,7 @@ void CSapiDataPlugin::Start( TStartReason aReason )
         }
     else if( aReason == EPluginStartup )
         {
+        TRAP_IGNORE( PublishL() );
         TRAP_IGNORE( iData->SetStartupReasonL( KPluginStartup));
         }
     }
@@ -600,17 +611,17 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         // Configurations 
         iData->ConfigureL( configurationItemsArr );
         
-        // Activate the publisher
-        iData->ChangePublisherStatusL( KActive );
-        iData->TriggerActiveL();
-                
-        // Register for notifications
-        iData->RegisterPublisherObserverL();
-        
-        PublishL();
-        
         iPluginState = ESuspend;
         
+        // Activate the publisher
+        iData->ChangePublisherStatusL( KActive );
+        // Register for notifications
+        iData->RegisterPublisherObserverL();
+        // Execute the active trigger 
+        iData->TriggerActiveL();
+        // There must be at least 1 milli second delay 
+        // to register the second observer as both are using the 
+        // same MLiwInterface object
         iData->RegisterContentObserverL();
         }
     

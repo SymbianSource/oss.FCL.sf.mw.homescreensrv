@@ -20,6 +20,7 @@
 #include <liwgenericparam.h>
 #include <escapeutils.h>
 #include <badesca.h>
+#include <aiwvarianttype.hrh>
 
 #include "cpliwmap.h"
 #include "cpdebug.h"
@@ -737,16 +738,7 @@ CCPLiwMap::TCPSortOrder CCPLiwMap::GetSortL() const
 //
 TBool CCPLiwMap::IsPublisherNameL() const
     {
-    TBool result( EFalse );
-    RBuf buffer;
-    buffer.CleanupClosePushL();
-    result = GetPropertyL( KPublisherId, buffer );
-    if( result && buffer.Length() == KErrNone )
-        {
-        User::Leave( KErrArgument );
-        }
-    CleanupStack::PopAndDestroy( &buffer );
-    return result;
+    return IsPropertyValidL( KPublisherId );
     }
 
 // ---------------------------------------------------------------------------
@@ -755,16 +747,7 @@ TBool CCPLiwMap::IsPublisherNameL() const
 //
 TBool CCPLiwMap::IsContentTypeL() const
     {
-    TBool result( EFalse );
-    RBuf buffer;
-    buffer.CleanupClosePushL();
-    result = GetPropertyL( KContentType, buffer );
-    if( result && buffer.Length() == KErrNone )
-        {
-        User::Leave( KErrArgument );
-        }
-    CleanupStack::PopAndDestroy( &buffer );
-    return result;
+    return IsPropertyValidL( KContentType );
     }
 
 // ---------------------------------------------------------------------------
@@ -773,16 +756,7 @@ TBool CCPLiwMap::IsContentTypeL() const
 //
 TBool CCPLiwMap::IsContentIdL() const
     {
-    TBool result( EFalse );
-    RBuf buffer;
-    buffer.CleanupClosePushL();
-    result = GetPropertyL( KContentId, buffer );
-    if( result && buffer.Length() == KErrNone )
-        {
-        User::Leave( KErrArgument );
-        }
-    CleanupStack::PopAndDestroy( &buffer );
-    return result;
+    return IsPropertyValidL( KContentId );
     }
 
 // ---------------------------------------------------------------------------
@@ -1266,5 +1240,38 @@ TInt CCPLiwMap::ColumnIndexL(RSqlStatement& aStmt, const TDesC& aColumnName )
     return ret;
     }
 
-
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+TBool CCPLiwMap::IsPropertyValidL( const TDesC8& aProperty ) const
+    {
+    CP_DEBUG( _L8("CCPLiwMap::IsPropertyValidL") );
+    TBool found( EFalse );
+    TInt pos( 0 );
+    const TLiwGenericParam* paramForValue = iMap->FindFirst( pos, aProperty );
+    if ( pos != KErrNotFound )
+        {
+        found = ETrue;
+        TInt length;
+        if( paramForValue->Value().TypeId() == EVariantTypeDesC )
+            {
+            length = paramForValue->Value().AsDes().Length(); 
+            }
+        else if ( paramForValue->Value().TypeId() == EVariantTypeDesC8 )
+            {
+            length = paramForValue->Value().AsData().Length();
+            }
+        else
+            {
+            User::Leave( KErrBadName );
+            }
+        
+        if ( length == 0 )
+            {
+            User::Leave( KErrArgument );
+            }
+        }
+    return found;
+    }
     

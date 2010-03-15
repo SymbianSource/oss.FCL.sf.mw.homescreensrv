@@ -4580,14 +4580,15 @@ void ChspsMaintenanceHandler::RestoreDefaultAppConfL(
     ChspsODT& aOdt)
     {
     
+    // If active application configuration is LicenceeRestorable 
     if ( aHeader->Flags() & EhspsThemeStatusLicenceeRestorable )
         {
-        // Licensee restorable configuration active -> Reinstall configuration
+        // Reinstall the configuration from ROM
         iThemeServer.ReinstallConfL( aHeader->RootUid(), aHeader->ThemeUid() );
         }
     else
         {
-        // Get licensee restorable configuation
+        // Try to activate a configuation with the LicenceeRestorable status
         ChspsODT* searchMask = ChspsODT::NewL();
         CleanupStack::PushL( searchMask );
         searchMask->SetRootUid( aHeader->RootUid() );

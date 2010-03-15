@@ -27,8 +27,14 @@
 #include "hspsclientrequesthandler.h"
 #include "hspsserverutil.h"
 
-_LIT( KInstallDirectoryZ, "z:\\private\\200159c0\\install\\" );
-_LIT( KHsps, "hsps");
+_LIT(KPrivateInstallZ, "Z:\\private\\200159c0\\install\\");
+_LIT(KPrivateInstallC, "C:\\private\\200159c0\\install\\");
+_LIT(KMaskAllFiles, "*");
+_LIT(KBackslash, "\\");
+_LIT(KHsps, "hsps");
+_LIT(KTestLanguage, "00");
+_LIT(KManifest, "manifest.dat");
+
 
 // ========================= MEMBER FUNCTIONS ==================================
 
@@ -95,108 +101,147 @@ ChspsRomInstaller::ChspsRomInstaller(
 ChspsRomInstaller::~ChspsRomInstaller()
     {            
     Cancel(); // Causes call to DoCancel()    
-    delete iInstallationHandler; 
-    iImportsArrayV1.ResetAndDestroy();    
+    delete iInstallationHandler;         
     }
 
 // -----------------------------------------------------------------------------
-// ChspsRomInstaller::SetImportsFilterL()
+// ChspsRomInstaller::FindInstallationFilesL()
 // -----------------------------------------------------------------------------
 //
-TBool ChspsRomInstaller::SetImportsFilterL(      
-        const TDesC& aFileFilter )                        
-    {
-    TFindFile fileFinder( iFsSession );
-    CDir* fileList( NULL );
-    fileFinder.FindWildByDir( aFileFilter, KInstallDirectoryZ, fileList );
-    if ( fileList )
-        {
-        CleanupStack::PushL( fileList );
-                
-        TFileName sourceName;               
-        for( TInt i = 0; i < fileList->Count(); i++ )       
-            {
-            const TEntry& entry = (*fileList)[i];                        
-            sourceName.Copy( KInstallDirectoryZ );          
-            sourceName.Append( entry.iName );                   
-            iImportsArrayV1.AppendL( sourceName.AllocL() );            
-            }
-        
-        CleanupStack::PopAndDestroy( fileList );
-        fileList = NULL;
-        }
-           
-    return EFalse;
-    }
-
-// -----------------------------------------------------------------------------
-// ChspsRomInstaller::GetInstallationFoldersL()
-// -----------------------------------------------------------------------------
-//
-void ChspsRomInstaller::GetInstallationFoldersL(  
+void ChspsRomInstaller::FindInstallationFilesL(  
         RPointerArray<HBufC>& aFolders )
     {
-    aFolders.ResetAndDestroy();
+    __ASSERT_DEBUG( aFolders.Count() == 0, User::Leave( KErrArgument ) );
     
-    _LIT(KAllFolders, "*");    
-    _LIT(KFolderSuffix, "\\");
-    CDir* fileList( NULL );    
-    TFindFile fileFinder( iFsSession );    
-    fileFinder.FindWildByDir( KAllFolders, KInstallDirectoryZ, fileList );        
-    if ( fileList )
-        {
-        CleanupStack::PushL( fileList );
-        
-        TFileName sourceName;
-        TBool verChecked = EFalse;
-        for( TInt i = 0; i < fileList->Count(); i++ )       
-            {
-            const TEntry& entry = (*fileList)[i];                        
-            if ( entry.IsDir() )
-                {                                  
-                const TEntry& entry = (*fileList)[i];                        
-                sourceName.Copy( KInstallDirectoryZ );          
-                sourceName.Append( entry.iName );
-                sourceName.Append( KFolderSuffix );
+    DoFindInstallationFilesL( aFolders, KPrivateInstallC );    
+    DoFindInstallationFilesL( aFolders, KPrivateInstallZ );    
+    }
 
-                if ( !verChecked )
+// -----------------------------------------------------------------------------
+// ChspsRomInstaller::DoFindInstallationFilesL()
+// -----------------------------------------------------------------------------
+//
+void ChspsRomInstaller::DoFindInstallationFilesL(  
+        RPointerArray<HBufC>& aFolders,
+        const TDesC& aPath )
+    {               
+    TFindFile fileFinder( iFsSession );    
+    fileFinder.SetFindMask( 
+         KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+    CDir* dirList( NULL );             
+    fileFinder.FindWildByDir( KMaskAllFiles, aPath, dirList );
+    if ( dirList )
+        {
+        CleanupStack::PushL( dirList );
+                     
+        const TInt count = dirList->Count();
+        const TInt KMaxEntryLength = KMaxFileName - 50; 
+        for( TInt i = 0; i < count; i++ )
+            {
+            const TEntry& dirEntry = (*dirList)[i];                        
+            if ( dirEntry.IsDir() )
+                {
+                // Populate path for the manifest file
+                const TEntry& folderEntry = (*dirList)[i];
+
+                // Check for length of the directory name
+                if( dirEntry.iName.Length() > KMaxEntryLength ) 
                     {
-                    // Check whether the V2 directory structure is available
-                    TFileName nameV2;
-                    nameV2.Copy( sourceName );                    
-                    nameV2.Append( KHsps );
-                    nameV2.Append( KFolderSuffix );
-                    if( !BaflUtils::FolderExists( iFsSession, nameV2 ) )
-                        {
-                        CleanupStack::PopAndDestroy( fileList );
-                        return;            
-                        }
-                    verChecked = ETrue;
+                    // Skip plugins which have too long name
+                    continue;
                     }
                 
-                aFolders.AppendL( sourceName.AllocL() );                    
+                TFileName manifest( aPath );
+                manifest.Append( dirEntry.iName );
+                manifest.Append( KBackslash );
+                manifest.Append( KHsps );
+                manifest.Append( KBackslash );
+                manifest.Append( KTestLanguage );
+                manifest.Append( KBackslash );
+                manifest.Append( KManifest );
+                
+                // Check for duplicates
+                TBool isShadowed = EFalse;
+                TParsePtrC manifestPtr( manifest );                
+                for( TInt i=0; i < aFolders.Count(); i++ )
+                    {
+                    TParsePtrC ptr( aFolders[i]->Des() );
+                    if( ptr.Path() == manifestPtr.Path() )
+                        {
+                        isShadowed = ETrue;
+                        break;
+                        }
+                    }
+                
+                if( !isShadowed )
+                    {
+                    // Append the drive information (C or Z)
+                    TFileName driveIncluded;
+                    hspsServerUtil::FindFile(
+                            iFsSession,
+                            manifest,
+                            KNullDesC,
+                            driveIncluded );
+                    if( driveIncluded.Length() )
+                        {                        
+                        HBufC* nameBuf = driveIncluded.AllocLC();                
+                        aFolders.AppendL( nameBuf );
+                        CleanupStack::Pop( nameBuf );
+                        }
+                    }
                 }
             }
         
-        CleanupStack::PopAndDestroy( fileList );
-        fileList = NULL;
-        }            
-    }
-
-void ChspsRomInstaller::FindImportsV1L()
-    {
-    iImportsArrayV1.ResetAndDestroy();
-    SetImportsFilterL( KFilterAllPluginImportsV1 );            
-    SetImportsFilterL( KFilterAllAppImportsV1 );
+        CleanupStack::PopAndDestroy( dirList );
+        dirList = 0;
+        }           
     }
 
 // -----------------------------------------------------------------------------
-// ChspsRomInstaller::ImportsV1
+// ChspsRomInstaller::FindInstallationFileL
 // -----------------------------------------------------------------------------
 //
-const RPointerArray<HBufC>& ChspsRomInstaller::ImportsV1()
-    {
-    return iImportsArrayV1;
+void ChspsRomInstaller::FindInstallationFileL(  
+        const TInt aConfigurationUid,
+        TFileName& aManifest )
+    {                                
+    aManifest.FillZ();
+    
+    _LIT(KFormat, "*_%X");    
+    TFileName fileMask;
+    fileMask.Format( KFormat, aConfigurationUid );
+                            
+    TFindFile fileFinder( iFsSession );
+    CDir* dirList( NULL );           
+    fileFinder.FindWildByDir( fileMask, KPrivateInstallZ, dirList );
+    if ( !dirList )
+        {
+        User::Leave( KErrNotFound );
+        }
+    
+    CleanupStack::PushL( dirList );                
+
+    const TInt count = dirList->Count();        
+    for( TInt i = 0; i < count; i++ )
+        {        
+        const TEntry& dirEntry = (*dirList)[i];                        
+        if ( dirEntry.IsDir() )
+            {
+            // Populate path for the manifest file
+            const TEntry& folderEntry = (*dirList)[i];
+                        
+            aManifest.Copy( KPrivateInstallZ );
+            aManifest.Append( dirEntry.iName );
+            aManifest.Append( KBackslash );
+            aManifest.Append( KHsps );
+            aManifest.Append( KBackslash );
+            aManifest.Append( KTestLanguage );
+            aManifest.Append( KBackslash );
+            aManifest.Append( KManifest );
+            break;
+            }
+        }            
+    CleanupStack::PopAndDestroy( dirList );               
     }
 
 // -----------------------------------------------------------------------------
@@ -228,51 +273,43 @@ ThspsServiceCompletedMessage ChspsRomInstaller::InstallThemeL(
 ThspsServiceCompletedMessage ChspsRomInstaller::ReinstallThemeL(
         const TInt aAppUid,
         const TInt aConfigurationUid )
-    {    
+    {                 
+    __ASSERT_DEBUG( aAppUid > 0 && aConfigurationUid > 0, User::Leave( KErrArgument ) );                 
+    
     ThspsServiceCompletedMessage ret = EhspsInstallThemeFailed;
     
-    iImportsArrayV1.ResetAndDestroy();
-    
-    if ( aAppUid > 0 && aConfigurationUid > 0 )
-        {
-        // Setup a filter for finding a specific import
-        _LIT(KFormat, "app_%X_*_%X_1.0.dat");    
-        HBufC* filter = HBufC::NewLC( KMaxFileName );
-        filter->Des().AppendFormat( KFormat, aAppUid, aConfigurationUid );                        
-        SetImportsFilterL( *filter );        
-        CleanupStack::PopAndDestroy( filter );
-        
-        // There should be only one import matching the UIDs
-        if ( iImportsArrayV1.Count() == 1 )
-            {           
-            // Get path for a manifest from the import's file name
-            HBufC* manifestBuf = iThemeServer.GetManifestFromImportLC( 
-                    iImportsArrayV1[0]->Des(),
-                    KInstallDirectoryZ );
-            if ( manifestBuf )
-                {         
-                // Sync request
-                ret = InstallThemeL( manifestBuf->Des() );
-                CleanupStack::PopAndDestroy( manifestBuf );
-                }
+    // Find an installation file from the ROM
+    TFileName manifest;
+    FindInstallationFileL( 
+        aConfigurationUid,
+        manifest );                           
+    if ( manifest.Length() > 0 )
+        {                                
+        // Install the plugin configuration (sync request)
+        ret = InstallThemeL( manifest );                
+        }        
+    if( ret == EhspsInstallThemeSuccess )
+        {                          
+        // The installed application configuration should now hold only plugin references,
+        // in addition it hasn't been updated to the header cache        
+        iThemeServer.UpdateHeaderListCacheL();
+                        
+        // Complete reinstallation of the application configuration
+        ChspsODT* odt = ChspsODT::NewL();
+        CleanupStack::PushL( odt );
+        User::LeaveIfError( iThemeServer.GetConfigurationL( aAppUid, aConfigurationUid, *odt ) );               
+        if ( odt->ConfigurationType() == EhspsAppConfiguration )
+            {    
+            ChspsClientRequestHandler* clientReqHandler = ChspsClientRequestHandler::NewL( iThemeServer );
+            CleanupStack::PushL( clientReqHandler );
+            
+            // Append configurations from referred plugins to the application configuration's DOM
+            clientReqHandler->HandlePluginReferencesL( *odt );
+            
+            CleanupStack::PopAndDestroy( clientReqHandler );
             }
-        
-        iImportsArrayV1.ResetAndDestroy();
+        CleanupStack::PopAndDestroy( odt );
         }
-    
-    // Complete application configuration reinstallation
-    ChspsODT* odt = ChspsODT::NewL();
-    CleanupStack::PushL( odt );
-    User::LeaveIfError( iThemeServer.GetConfigurationL( aAppUid, aConfigurationUid, *odt ) );
-    if ( odt->ConfigurationType() == EhspsAppConfiguration )
-        {
-        // Add plugin configurations to the application configuration
-        ChspsClientRequestHandler* clientReqHandler = ChspsClientRequestHandler::NewL( iThemeServer );
-        CleanupStack::PushL( clientReqHandler );
-        clientReqHandler->HandlePluginReferencesL( *odt );
-        CleanupStack::PopAndDestroy( clientReqHandler );
-        }
-    CleanupStack::PopAndDestroy( odt );
     
     return ret;
     }

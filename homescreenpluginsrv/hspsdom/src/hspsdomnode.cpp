@@ -54,7 +54,29 @@ void ChspsDomNode::ConstructL(
     {
     iNameRef = iStringPool.AddStringL( aName );
     iNSRef = iStringPool.AddStringL( aNS );
-    
+    Construct2L();
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDomNode::ConstructL
+// Symbian 2nd phase constructor can leave.
+// -----------------------------------------------------------------------------
+//
+void ChspsDomNode::ConstructL(
+    const TInt aName,
+    const TInt aNS )
+    {
+    iNameRef = aName;
+    iNSRef = aNS;
+    Construct2L();
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDomNode::Construct2L 
+// -----------------------------------------------------------------------------
+//
+void ChspsDomNode::Construct2L()
+    {
     iChildList = ChspsDomList::NewL( ChspsDomList::ENodeList, iStringPool );
     iAttributeList = ChspsDomList::NewL( ChspsDomList::EAttributeList, iStringPool );
     }
@@ -67,6 +89,25 @@ void ChspsDomNode::ConstructL(
 ChspsDomNode* ChspsDomNode::NewL(
     const TDesC8& aName,
     const TDesC8& aNS, 
+    ChspsDomStringPool& aStringPool )
+    {
+    ChspsDomNode* self = new( ELeave ) ChspsDomNode( aStringPool );
+    
+    CleanupStack::PushL( self );
+    self->ConstructL( aName, aNS );
+    CleanupStack::Pop( self );
+
+    return self;
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDomNode::NewL
+// Two-phased constructor.
+// -----------------------------------------------------------------------------
+//
+ChspsDomNode* ChspsDomNode::NewL(
+    const TInt aName,
+    const TInt aNS, 
     ChspsDomStringPool& aStringPool )
     {
     ChspsDomNode* self = new( ELeave ) ChspsDomNode( aStringPool );
@@ -109,26 +150,38 @@ ChspsDomNode::~ChspsDomNode()
 // Clones this node and it's child nodes. This is a recursive function.
 // -----------------------------------------------------------------------------
 //
-EXPORT_C ChspsDomNode* ChspsDomNode::CloneL( ChspsDomStringPool& aStringPool )
+EXPORT_C ChspsDomNode* ChspsDomNode::CloneL( ChspsDomStringPool& aStringPool,
+                                             const TBool aFastClone )
     {
-    const TDesC8& name = iStringPool.String( iNameRef );
-    const TDesC8& ns = iStringPool.String( iNSRef );
+    ChspsDomNode* clone = NULL;
     
-    ChspsDomNode*  clone = ChspsDomNode::NewL( name, ns, aStringPool );
+    if( aFastClone )
+        {
+        clone = ChspsDomNode::NewL( iNameRef, iNSRef, aStringPool );
+        }
+    else
+        {
+        const TDesC8& name = iStringPool.String( iNameRef );
+        const TDesC8& ns = iStringPool.String( iNSRef );        
+        clone = ChspsDomNode::NewL( name, ns, aStringPool );
+        }
+
     CleanupStack::PushL( clone );
+
     if ( iPCData )
         {
         clone->AppendPCDataL( *iPCData );
         }
+    
     clone->iNodeId = iNodeId;
     clone->iRefNode = iRefNode;
     
     TInt childCount( iChildList->Length() );
    
-    for ( TInt i=0; i<childCount; i++ )
+    for( TInt i = 0; i < childCount; i++ )
         {
         ChspsDomNode* childClone = 
-            static_cast<ChspsDomNode*>( iChildList->Item(i) )->CloneL( aStringPool );
+            static_cast<ChspsDomNode*>( iChildList->Item(i) )->CloneL( aStringPool, aFastClone );
         CleanupStack::PushL( childClone );
         childClone->iParentNode = clone;
         clone->iChildList->AddItemL( childClone );
@@ -136,10 +189,10 @@ EXPORT_C ChspsDomNode* ChspsDomNode::CloneL( ChspsDomStringPool& aStringPool )
         }
     
     TInt attrCount( iAttributeList->Length() );
-    for ( TInt j=0; j<attrCount; j++ )
+    for( TInt j = 0; j < attrCount; j++ )
         {
         ChspsDomAttribute* attrClone = 
-            static_cast<ChspsDomAttribute*>( iAttributeList->Item(j) )->CloneL( aStringPool );
+            static_cast<ChspsDomAttribute*>( iAttributeList->Item(j) )->CloneL( aStringPool, aFastClone );
         CleanupStack::PushL( attrClone );
         clone->iAttributeList->AddItemL( attrClone );
         CleanupStack::Pop( attrClone );
@@ -490,8 +543,7 @@ TInt ChspsDomNode::Size() const
 // -----------------------------------------------------------------------------
 //
 void ChspsDomNode::ExternalizeL( RWriteStream& aStream ) const
-    {
-    
+    {    
     aStream.WriteInt16L( iNameRef );
     aStream.WriteInt16L( iNSRef );
     aStream.WriteInt8L( iRefNode );

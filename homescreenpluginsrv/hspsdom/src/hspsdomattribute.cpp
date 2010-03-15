@@ -35,7 +35,6 @@ ChspsDomAttribute::ChspsDomAttribute( ChspsDomStringPool& aStringPool ):
     {
     }
 
-
 // -----------------------------------------------------------------------------
 // ChspsDomAttribute::ConstructL
 // Symbian 2nd phase constructor can leave.
@@ -45,6 +44,17 @@ void ChspsDomAttribute::ConstructL( const TDesC8& aName )
     {
     iNameRef = iStringPool.AddStringL( aName );
     }
+
+// -----------------------------------------------------------------------------
+// ChspsDomAttribute::ConstructL
+// Symbian 2nd phase constructor can leave.
+// -----------------------------------------------------------------------------
+//
+void ChspsDomAttribute::ConstructL( const TInt aName )
+    {
+    iNameRef = aName;
+    }
+
 // -----------------------------------------------------------------------------
 // ChspsDomAttribute::NewL
 // Two-phased constructor.
@@ -63,6 +73,23 @@ EXPORT_C ChspsDomAttribute* ChspsDomAttribute::NewL(
     return self;
     }    
 
+// -----------------------------------------------------------------------------
+// ChspsDomAttribute::NewL
+// Two-phased constructor.
+// -----------------------------------------------------------------------------
+//
+EXPORT_C ChspsDomAttribute* ChspsDomAttribute::NewL( 
+        const TInt aName,
+        ChspsDomStringPool& aStringPool )
+    {
+    ChspsDomAttribute* self = new( ELeave ) ChspsDomAttribute( aStringPool );
+    
+    CleanupStack::PushL( self );
+    self->ConstructL( aName );
+    CleanupStack::Pop( self );
+
+    return self;
+    } 
 
 // -----------------------------------------------------------------------------
 // ChspsDomAttribute::NewL
@@ -106,18 +133,38 @@ EXPORT_C ChspsDomAttribute* ChspsDomAttribute::CloneL()
 // ChspsDomAttribute::CloneL
 // -----------------------------------------------------------------------------
 //
-ChspsDomAttribute* ChspsDomAttribute::CloneL( ChspsDomStringPool& aStringPool )
-    {
-    const TDesC8& name = iStringPool.String( iNameRef );
+ChspsDomAttribute* ChspsDomAttribute::CloneL( ChspsDomStringPool& aStringPool,
+                                              const TBool aFastClone )
+    {        
+    ChspsDomAttribute* clone = NULL;
     
-    ChspsDomAttribute* clone = ChspsDomAttribute::NewL( name, aStringPool );
+    if( aFastClone )
+        {
+        clone = ChspsDomAttribute::NewL( iNameRef, aStringPool );
+        }
+    else
+        {    
+        const TDesC8& name = iStringPool.String( iNameRef );
+        clone = ChspsDomAttribute::NewL( name, aStringPool );
+        }
+    
     CleanupStack::PushL( clone );
+    
     if ( iValueRef > KErrNotFound )
         {
-        const TDesC8& value = iStringPool.String( iValueRef );
-        clone->SetValueL( value );
+        if( aFastClone )
+            {
+            clone->SetValueL( iValueRef );
+            }
+        else
+            {
+            const TDesC8& value = iStringPool.String( iValueRef );
+            clone->SetValueL( value );
+            }
         }
+    
     CleanupStack::Pop( clone );    
+    
     return clone;
     
     }
@@ -169,6 +216,14 @@ EXPORT_C void ChspsDomAttribute::SetValueL( const TDesC8& aValue )
     iValueRef = iStringPool.AddStringL( aValue );
     }
 
+// -----------------------------------------------------------------------------
+// ChspsDomAttribute::SetValueL
+// -----------------------------------------------------------------------------
+//
+EXPORT_C void ChspsDomAttribute::SetValueL( const TInt aValue )
+    {
+    iValueRef = aValue;
+    }
    
 // -----------------------------------------------------------------------------
 // ChspsDomAttribute::Size

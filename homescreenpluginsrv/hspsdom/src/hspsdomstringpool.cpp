@@ -117,6 +117,23 @@ ChspsDomStringPool* ChspsDomStringPool::CloneL()
     }
 
 // -----------------------------------------------------------------------------
+// ChspsDomStringPool::Reset
+// -----------------------------------------------------------------------------
+//
+void ChspsDomStringPool::Reset()
+    {    
+    if( iStringPool.Count() > 0 )
+        {
+        iStringPool.ResetAndDestroy();        
+        }
+    
+    if( iStringPoolOptimizer.Count() > 0 )
+        {
+        iStringPoolOptimizer.Reset();
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // ChspsDomStringPool::AddStringL
 // -----------------------------------------------------------------------------
 //

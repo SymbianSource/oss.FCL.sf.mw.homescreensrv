@@ -16,7 +16,7 @@
 */
 
 // INCLUDE FILES
-#include <mw/memorymanager.h>
+#include <mw/MemoryManager.h>
 #include "menusrv.h"
 
 // ==================== LOCAL FUNCTIONS ====================

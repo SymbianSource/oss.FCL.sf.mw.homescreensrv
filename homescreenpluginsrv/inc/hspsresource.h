@@ -289,15 +289,15 @@ class ChspsResource : public CBase
         TInt iConfigurationUid;
         
         // Filename without the extension
-        TDesC* iResourceID;
+        HBufC* iResourceID;
         
         // Full path and name
-        TDesC* iFileName;
+        HBufC* iFileName;
                 
         TDataType iMimeType;
         
         // Tags seperated with a colon
-        TDesC* iTags;
+        HBufC* iTags;
 
          // Reserved pointer for future extension
         TAny* iReserved;

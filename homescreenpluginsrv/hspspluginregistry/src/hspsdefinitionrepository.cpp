@@ -20,6 +20,7 @@
 #include <s32file.h>
 #include <s32mem.h>
 #include <sysutil.h>
+#include <bautils.h>
 
 #include "hsps_builds_cfg.hrh"
 
@@ -638,8 +639,7 @@ EXPORT_C TInt ChspsDefinitionRepository::SetResourceListL( ChspsODT& aODT, const
 			    }
 			
 			CleanupStack::PopAndDestroy( fileName );
-			
-			
+						
 			// Set drive information
 			iTempFileName1.Format( _L("%S"), &res->FileName() );				
 			TParsePtr f( iTempFileName1 );		
@@ -1048,19 +1048,22 @@ TInt ChspsDefinitionRepository::WriteToFileL( const ChspsODT& aODT )
     if ( !errorCode )
    	    {
         // Create the directory structure
-	    TInt err = iFs.MkDirAll( *iPath );
-	    if ( err != KErrNone && err != KErrAlreadyExists )
-	        {
-	        errorCode = err;
-	        
-#ifdef HSPS_LOG_ACTIVE
-            if( iLogBus )
+        if( !BaflUtils::FolderExists( iFs, *iPath ) )
+            {
+            TInt err = iFs.MkDirAll( *iPath );
+            if ( err != KErrNone && err != KErrAlreadyExists )
                 {
-                iLogBus->LogText( _L( "ChspsDefinitionRepository::WriteToFileL(): - error %d." ),
-                        err );
-                }
+                errorCode = err;
+                
+#ifdef HSPS_LOG_ACTIVE
+                if( iLogBus )
+                    {
+                    iLogBus->LogText( _L( "ChspsDefinitionRepository::WriteToFileL(): - error %d." ),
+                            err );
+                    }
 #endif	        
-	        }
+                }
+            }
 	   	       
 	    if ( !errorCode )    
 		    {

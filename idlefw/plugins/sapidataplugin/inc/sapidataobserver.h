@@ -37,8 +37,7 @@ class CSapiData;
 NONSHARABLE_CLASS( CSapiDataObserver ) : public CBase, 
     public MLiwNotifyCallback
     {
-public:
-    // constructor and destructor
+public: // constructor and destructor
     
     /**
     * Part of the two phased constuction
@@ -57,8 +56,7 @@ public:
     */   
     ~CSapiDataObserver();
 
-private:
-    // construtors
+private:  // construtors
     
     /**
     * Constructor
@@ -77,8 +75,7 @@ private:
     */
     void ConstructL( MLiwInterface* aInterface, CSapiData* aData );
        
-public:  
-    //from MLiwNotifyCallbackc
+public: //from MLiwNotifyCallback
     
     /**
     * Handles notifications caused by an asynchronous Execute*CmdL call
@@ -98,8 +95,7 @@ public:
         CLiwGenericParamList& aEventParamList,
         const CLiwGenericParamList& /*aInParamList*/);
 
-public:
-    // new functions
+public:  // new functions
     
     /**
     * Registers to CPS for add, delete , update and execute notifications
@@ -114,15 +110,12 @@ public:
     */
     void ReleaseL();
         
-private:
-    // data
+private: // data
     
     /** Interface Reference, not owned */    
     MLiwInterface* iInterface;   
     /** Reference of the sapi data, not owned */
     CSapiData* iData;    
-    /** Call back error code */
-    TInt iError;        
     };
 
 #endif // SAPIDATAOBSERVER_H

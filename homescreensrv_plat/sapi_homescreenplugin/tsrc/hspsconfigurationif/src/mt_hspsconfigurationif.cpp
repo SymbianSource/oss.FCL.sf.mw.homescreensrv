@@ -118,6 +118,9 @@
 #include "mt_hsps_restoreconfigurations_1.h"
 // customizations
 #include "mt_hsps_customization_1.h"
+// restoractiveeappconf
+#include "mt_hsps_restoreactiveappconf_1.h"
+#include "mt_hsps_restoreactiveappconf_2.h"
 
 // ======== LOCAL CONSTANTS ====================================================
 
@@ -2992,6 +2995,68 @@ void MT_CHSPSConfigurationIf::Customization_1_L()
     }
 
 //------------------------------------------------------------------------------
+// Test case: RestoreActiveAppConf(1)
+//------------------------------------------------------------------------------
+void MT_CHSPSConfigurationIf::RestoreActiveAppConf_1_L()
+    {        
+    // Pre conditions: activate configuration which hasn't got statuslicenceerestorable status        
+    EUNIT_PRINT( _L8( "Pre conditions: Set Active configuration Minimal" ) );
+    SetActiveConfigurationL( KHSPSTestAppUid, KHSPSActiveConfMinimal );    
+
+    // Get ODT and fill in the plugin DOMs
+    EUNIT_PRINT( _L8( "Pre conditions: Attach to HSPS service IConfiguration interface" ) );
+    AttachServiceL( KHSPS, KHSPSConfigurationIf, KHSPSTestAppUid );
+    
+    // Test step 1: invalidate state of the active application configuration
+    EUNIT_PRINT( _L8( "Test step 1" ) );    
+    RunTestStepSyncL(                   
+        ( TUint8* )restoreactiveappconf_1_ts_1_method,
+        ( TUint8* )restoreactiveappconf_1_ts_1_input,
+        ( TUint8* )restoreactiveappconf_1_ts_1_output );   
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+        
+    // Test step 2: retrieve the app conf, Operator configuration should be now active    
+    EUNIT_PRINT( _L8( "Test step 2" ) );
+    RunTestStepSyncL(                   
+        ( TUint8* )restoreactiveappconf_1_ts_2_method,
+        ( TUint8* )restoreactiveappconf_1_ts_2_input,
+        ( TUint8* )restoreactiveappconf_1_ts_2_output );        
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    }
+
+
+//------------------------------------------------------------------------------
+// Test case: RestoreActiveAppConfL(2)
+//------------------------------------------------------------------------------
+void MT_CHSPSConfigurationIf::RestoreActiveAppConf_2_L()
+    {        
+    // Pre conditions: activate configuration with a statuslicenceerestorable status        
+    EUNIT_PRINT( _L8( "Pre conditions: Set Active configuration Operator" ) );
+    SetActiveConfigurationL( KHSPSTestAppUid, KHSPSActiveConfOperator );    
+
+    // Get ODT and fill in the plugin DOMs
+    EUNIT_PRINT( _L8( "Pre conditions: Attach to HSPS service IConfiguration interface" ) );
+    AttachServiceL( KHSPS, KHSPSConfigurationIf, KHSPSTestAppUid );
+    
+    // Test step 1: invalidate state of the active application configuration
+    EUNIT_PRINT( _L8( "Test step 1" ) );    
+    RunTestStepSyncL(                   
+        ( TUint8* )restoreactiveappconf_2_ts_1_method,
+        ( TUint8* )restoreactiveappconf_2_ts_1_input,
+        ( TUint8* )restoreactiveappconf_2_ts_1_output );   
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+        
+    // Test step 2: retrieve the app conf, we should fail installing the Operator 
+    // configuration as it is not in ROM
+    EUNIT_PRINT( _L8( "Test step 2" ) );
+    RunTestStepSyncL(                   
+        ( TUint8* )restoreactiveappconf_2_ts_2_method,
+        ( TUint8* )restoreactiveappconf_2_ts_2_input,
+        ( TUint8* )restoreactiveappconf_2_ts_2_output );        
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    }
+
+//------------------------------------------------------------------------------
 // Test case table
 //------------------------------------------------------------------------------
 EUNIT_BEGIN_TEST_TABLE(
@@ -3526,6 +3591,19 @@ EUNIT_BEGIN_TEST_TABLE(
        "FUNCTIONALITY",
        SetupL, Customization_1_L, Teardown )
 
+    EUNIT_TEST(   
+       "RestoreActiveAppConfL(1)",
+       "IConfiguration",
+       "SetActivePlugin",
+       "FUNCTIONALITY",
+       SetupL, RestoreActiveAppConf_1_L, Teardown )
+
+    EUNIT_TEST(   
+       "RestoreActiveAppConfL(2)",
+       "IConfiguration",
+       "SetActivePlugin",
+       "FUNCTIONALITY",
+       SetupL, RestoreActiveAppConf_2_L, Teardown )
        
     EUNIT_END_TEST_TABLE
 

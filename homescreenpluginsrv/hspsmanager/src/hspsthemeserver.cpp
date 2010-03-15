@@ -19,7 +19,7 @@
 #define __INCLUDE_CAPABILITY_NAMES__
 
 // INCLUDE FILES
-#include <mw/memorymanager.h>
+#include <mw/MemoryManager.h>
 #include <centralrepository.h>
 #include <f32file.h>
 #include <bautils.h>
@@ -2269,6 +2269,7 @@ TBool ChspsThemeServer::LocalizeL(
 		ChspsODT& aOdt )
 	{		  			
 	TBool localized = ETrue;
+	iFsSession.SetSessionToPrivate( EDriveC );
 	
 	TLanguage requestedLanguage = DeviceLanguage();
 	if ( requestedLanguage == ELangNone )
@@ -2635,12 +2636,12 @@ void ChspsThemeServer::InstallUDAWidgetsL()
             
             //install
             TRAPD( err, installer->InstallConfigurationL( *manifestBuf ) );
-#ifdef HSPS_LOG_ACTIVE            
             if ( err != KErrNone )
                 {
-                iLogBus->LogText( _L( "ChspsThemeServer::InstallUDAWidgetsL(): - Installation failed" ) );
-                }
+#ifdef HSPS_LOG_ACTIVE                            
+                iLogBus->LogText( _L( "ChspsThemeServer::InstallUDAWidgetsL(): - Installation failed" ) );                
 #endif
+                }
             CleanupStack::PopAndDestroy( manifestBuf );
             }
         CleanupStack::PopAndDestroy( installer );
@@ -2681,10 +2682,10 @@ void ChspsThemeServer::HandleRomInstallationsL()
     if( ( errorCode == KErrNone ) &&
         ( fwVersion.Length() == 0 ) )
         {
-        // Install manifest files from ROM
-        InstallManifestsFromRomDriveL();
+        // Install widgets from \private\200159C0\install\ directories (ROM and UDA image)
+        InstallWidgetsL();
 
-        // install widgets from UDA image
+        // Install widgets from \private\200159C0\imports\ directory (UDA image)
         InstallUDAWidgetsL();
         
         // Post RFS installations have been done, prevent re-installations at next startup
@@ -2719,7 +2720,7 @@ void ChspsThemeServer::HandleRomInstallationsL()
             {
             // Phone software has been updated.
             CreateBackupDataL();
-            InstallManifestsFromRomDriveL();
+            InstallWidgetsL();
             RestoreApplicationConfigurationsL();
             // Save new firmware version to cenrep
             if ( errorCode == KErrNone )
@@ -2762,103 +2763,62 @@ void ChspsThemeServer::HandleRomInstallationsL()
     }
 
 // -----------------------------------------------------------------------------
-// ChspsThemeServer::InstallManifestsFromRomDriveL()
+// ChspsThemeServer::InstallWidgetsL()
 // -----------------------------------------------------------------------------
 //
-void ChspsThemeServer::InstallManifestsFromRomDriveL()
-	{							
-	if ( iRomInstaller || iManifestFiles.Count() )
-	    {
-	    // Invalid usage
-	    User::Leave( KErrGeneral );
-	    }	
+void ChspsThemeServer::InstallWidgetsL()
+    {    
+    __ASSERT_DEBUG( !iRomInstaller, User::Leave( KErrGeneral) );	
 	iRomInstaller = ChspsRomInstaller::NewL( *this, iFsSession );	
 #ifdef HSPS_LOG_ACTIVE            	
 	iRomInstaller->SetLogBus( iLogBus );
 #endif
-	
-	// An array for installation files with V2 directory structure
+		
 	RPointerArray<HBufC> pluginFolders;
     CleanupClosePushL( pluginFolders );				
 	        
-    // Retrieve an array of folder names 
-    iRomInstaller->GetInstallationFoldersL( pluginFolders );  
-		
-    // Add manifest files from the subfolders
-    FindRomInstallationsV2L( pluginFolders );
-    
-    pluginFolders.ResetAndDestroy();
-        
-    if ( iManifestFiles.Count() < 1 )
-        {
+    // Find UDA and ROM widgets to be installed     
+    iRomInstaller->FindInstallationFilesL( pluginFolders );
+            
+	// Install the manifest files    
+    for( TInt index=0; index < pluginFolders.Count(); index++ )
+        {         
+        TPtrC namePtr( pluginFolders[index]->Des() );                               
 #ifdef HSPS_LOG_ACTIVE            
-        iLogBus->LogText( _L( "ChspsThemeServer::InstallManifestsFromRomDriveL(): - mandatory plugins were not found from the ROM drive!" ) );
-#endif                                  
-        // Mandatory plugins were missing from the ROM drive
-        User::Leave( KErrGeneral );
-        }
-    
-	CleanupStack::PopAndDestroy( 1, &pluginFolders );
-	
-	
-	// Install configurations from the manifest files 
-    ThspsServiceCompletedMessage ret = EhspsInstallThemeFailed;
-    for( TInt manifestIndex=0; manifestIndex < iManifestFiles.Count(); manifestIndex++ )
-        {                               
-        // Synchronous API call 
-        TPtr name( iManifestFiles[manifestIndex]->Des() );
-#ifdef HSPS_LOG_ACTIVE            
-        iLogBus->LogText( _L( "ChspsThemeServer::InstallManifestsFromRomDriveL(): - installing ROM configuration from: %S" ), &name );
+        iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - installing configuration: %S" ), &namePtr );
 #endif      
-        ret = iRomInstaller->InstallThemeL( name  );
+                
+        // Synchronous method
+        ThspsServiceCompletedMessage ret = iRomInstaller->InstallThemeL( namePtr  );
         if ( ret != EhspsInstallThemeSuccess )
             {
 #ifdef HSPS_LOG_ACTIVE            
-            iLogBus->LogText( _L( "ChspsThemeServer::InstallManifestsFromRomDriveL(): - configuration is corrupted, critical error - shutting down!" ) );
+            iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - installation failed: %S" ), &namePtr );
 #endif                  
 //            User::Leave( KErrAbort );
             }
         }
+    
+    if ( pluginFolders.Count() == 0 )
+        {
+#ifdef HSPS_LOG_ACTIVE            
+        iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - mandatory plugins were not found!" ) );
+#endif                                  
+        // Mandatory plugins were missing 
+        User::Leave( KErrCorrupt );
+        }
         
-    // Cancel any actions done in the previous functionality
-    iManifestFiles.ResetAndDestroy();
+    pluginFolders.ResetAndDestroy();
+    CleanupStack::PopAndDestroy( 1, &pluginFolders );
 		
 	// The ROM installer is not needed anymore and therefore it can be released
 	delete iRomInstaller;
-	iRomInstaller = NULL;
+	iRomInstaller = 0;
 	
 	// Force updating of the header cache
     ThspsRepositoryInfo info( EhspsCacheUpdate );
     iDefinitionRepository->RegisterNotification( info );
 	}
-
-// -----------------------------------------------------------------------------
-// ChspsThemeServer::FindRomInstallationsV2L()
-// -----------------------------------------------------------------------------
-//
-void ChspsThemeServer::FindRomInstallationsV2L(        
-        RPointerArray<HBufC>& aPluginFolders )
-    {    
-    _LIT(KHspsFolder, "hsps\\");
-    TFileName hspsPath;
-    for( TInt folderIndex=0; folderIndex < aPluginFolders.Count(); folderIndex++ )
-        {
-        // Set path
-        hspsPath.Copy( aPluginFolders[folderIndex]->Des() );
-        hspsPath.Append( KHspsFolder );        
-                        
-        // Add full path into the installation queue
-        TInt len = hspsPath.Length() + 3 + KDoubleBackSlash().Length() + KManifestFile().Length();
-        HBufC* manifestBuf = HBufC::NewLC( len );        
-        manifestBuf->Des().Copy( hspsPath );
-        manifestBuf->Des().Append( _L("00") );                        
-        manifestBuf->Des().Append( KDoubleBackSlash );
-        manifestBuf->Des().Append( KManifestFile );        
-                
-        iManifestFiles.AppendL( manifestBuf );                
-        CleanupStack::Pop( manifestBuf );                       
-        }
-    }
 
 // -----------------------------------------------------------------------------
 // ChspsThemeServer::GetConfigurationHeader()

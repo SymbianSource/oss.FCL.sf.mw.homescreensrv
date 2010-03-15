@@ -77,22 +77,6 @@ class ChspsRomInstaller : public CActive
         virtual ~ChspsRomInstaller();
       
     public: // New functions
-           
-        /**         
-         * Finds plugin_*.dat and app_*.dat files from Z\private\200159C0\install
-         * File names are stored into iImportsArrayV1 member array
-         * @since S60 5.0
-         */
-        void FindImportsV1L();                
-                                                
-        /**
-         * Imports.
-         * Returns a reference to the imports list, which is maintained by the class.
-         * Contents of the list is set in FindImportsL() function.
-         * @since S60 5.0
-         * @return an array of *.DAT files which were found from the ROM drive.
-         */
-        const RPointerArray<HBufC>& ImportsV1();
         
         /**
          * InstallTheme
@@ -118,10 +102,11 @@ class ChspsRomInstaller : public CActive
                 const TInt aConfigurationUid );
         
         /**         
-         * Gets names of the folders which should be installed from Z\private\200159C0\install
+         * Retrieves manifest files from both Z and C drives located in
+         * \\private\200159C0\install\ paths.
          * @since S60 5.0
          */
-        void GetInstallationFoldersL(  
+        void FindInstallationFilesL(  
                 RPointerArray<HBufC>& aFolders );
         
 #ifdef HSPS_LOG_ACTIVE        
@@ -175,18 +160,21 @@ class ChspsRomInstaller : public CActive
         * @since S60 5.0
         */
         void ConstructL();           
+                        
+        void DoFindInstallationFilesL(  
+                RPointerArray<HBufC>& aFolders,
+                const TDesC& aPath );
         
         /**
-         * SetImportsFilterL.
-         * Finds specific imports ("plugin_*.dat"/"app_*.dat" files) from ROM drive's 
-         * import folder. Search results are appended into iImportsArray member.
-         * @since S60 5.0
-         * @param aFileFilter is a filter for finding the imports
-         * @param 
-         * @return ETrue if files were found and added into the array
+         * Finds an installation file from a directory structure 
+         * which has UID in hex format as folder name.
+         * @since S60 5.2
+         * @param aConfigurationUid Configuration to be found
+         * @param aManifest Found manifest file
          */
-        TBool SetImportsFilterL(      
-                const TDesC& aFileFilter );
+        void FindInstallationFileL(  
+                const TInt aConfigurationUid,
+                TFileName& aManifest );
         
     private: // Data    
     	               
@@ -199,10 +187,7 @@ class ChspsRomInstaller : public CActive
         ChspsInstallationHandler* iInstallationHandler;
         
         // Required by the installation process
-        TBuf8<KMaxHeaderDataLength8> iHeaderData;
-        
-        // An array of found *.DAT files
-        RPointerArray<HBufC> iImportsArrayV1;                              
+        TBuf8<KMaxHeaderDataLength8> iHeaderData;                                    
         
         // Results of the previous installation 
         ThspsServiceCompletedMessage iRet;

@@ -401,6 +401,8 @@ CLiwGenericParamList* MT_CHSPSTeststep::CreateInParamListL(
 
     RDesReadStream inParamStream;
     inParamStream.Open( inParamBufPtr );
+    
+    // If this fails, field sizes are invalid in the "LIW" input
     CLiwGenericParamList* inParamList = 
         CLiwGenericParamList::NewL( inParamStream );
     inParamStream.Release();

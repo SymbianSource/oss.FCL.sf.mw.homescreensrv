@@ -1131,15 +1131,6 @@ void CHSPSConfigurationIf::SetActivePluginL(
         {
         inParamVariant = inParam->Value();
         pluginId.Set( inParamVariant.AsData() );
-        // Check that plugin node exists
-        ChspsDomNode* node = &( CHspsLiwUtilities::FindRootNodeByIdentifierL( 
-            KPluginElement,
-            pluginId,
-            *( iHspsConfigurationService->GetDOML().RootNode() ) ) );
-        if ( !node )
-            {
-            User::Leave( KErrNotFound );
-            }
         }
     else
         {

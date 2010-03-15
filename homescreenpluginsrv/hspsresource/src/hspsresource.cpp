@@ -63,16 +63,20 @@ EXPORT_C ChspsResource* ChspsResource::NewL()
 EXPORT_C ChspsResource* ChspsResource::CloneL()
     {
     ChspsResource* clone = ChspsResource::NewL();
+    
     CleanupStack::PushL( clone );
+    
     clone->SetLockingPolicy( iLockingPolicy );    
     clone->SetResourceType( iResourceType );
-    clone->SetLanguage( iLanguage );         
-    clone->SetResourceIdL( *iResourceID );    
-    clone->SetFileNameL( *iFileName );
+    clone->SetLanguage( iLanguage );
+    clone->SetResourceIdL( ResourceId() );    
+    clone->SetFileNameL( FileName() );
     clone->SetMimeTypeL( iMimeType );
     clone->SetConfigurationUid( iConfigurationUid );
+    clone->SetTagsL( Tags() );
     
     CleanupStack::Pop( clone );
+    
     return clone;
     }
 
@@ -95,37 +99,30 @@ EXPORT_C void ChspsResource::ExternalizeL( RWriteStream& aStream ) const
     aStream.WriteUint32L( iLockingPolicy );    
     aStream.WriteUint32L( iResourceType );
     aStream.WriteUint32L( iLanguage );
-        
-    if ( iResourceID )
+
+    const TDesC& resourceId = ResourceId();
+    aStream.WriteInt32L( resourceId.Length() );
+    if ( resourceId.Length() > 0 )
         {
-        aStream << *iResourceID;
-        }
-    else
-        {
-        aStream << KNullDesC;
+        aStream << resourceId;
         }
           
-    if ( iFileName )
+    const TDesC& fileName = FileName(); 
+    aStream.WriteInt32L( fileName.Length() );
+    if ( fileName.Length() > 0 )
         {
-        aStream << *iFileName;
-        }
-    else 
-        {
-        aStream << KNullDesC;
-        }
-    
+        aStream << fileName;
+        }    
      
     iMimeType.ExternalizeL(aStream);    
     
     aStream.WriteUint32L( iConfigurationUid );
     
-    if ( iTags )
+    const TDesC& tags = Tags();
+    aStream.WriteInt32L( tags.Length() );
+    if ( tags.Length() > 0 )
         {
-        aStream << *iTags;
-        }
-    else 
-        {
-        aStream << KNullDesC;
+        aStream << tags;
         }
     }
        
@@ -141,12 +138,20 @@ EXPORT_C void ChspsResource::InternalizeL( RReadStream& aStream )
     iLanguage = (TLanguage)aStream.ReadUint32L();    
 
     delete iResourceID;
-    iResourceID = NULL;
-    iResourceID = HBufC::NewL(aStream, KMaxFileName );
+    iResourceID = NULL;    
+    TInt len = aStream.ReadInt32L();
+    if( len > 0 )
+        {
+        iResourceID = HBufC::NewL( aStream, len );
+        }
      
     delete iFileName;
     iFileName = NULL;
-    iFileName = HBufC::NewL(aStream, KMaxFileName );
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {
+        iFileName = HBufC::NewL( aStream, len );
+        }
     
     iMimeType.InternalizeL(aStream);          
     
@@ -154,7 +159,11 @@ EXPORT_C void ChspsResource::InternalizeL( RReadStream& aStream )
     
     delete iTags;
     iTags = NULL;
-    iTags = HBufC::NewL(aStream, KMaxTagsLength );
+    len = aStream.ReadInt32L();
+    if( len > 0 )
+        {
+        iTags = HBufC::NewL( aStream, len );
+        }
     }
     
 // -----------------------------------------------------------------------------
@@ -205,9 +214,16 @@ EXPORT_C ThspsResourceType ChspsResource::ResourceType() const
 //
 EXPORT_C void ChspsResource::SetResourceIdL( const TDesC& aResourceId )
     {
-    delete iResourceID;
-    iResourceID = NULL;
-    iResourceID = aResourceId.AllocL();
+    if( iResourceID )
+        {
+        delete iResourceID;
+        iResourceID = NULL;
+        }
+    
+    if( aResourceId.Length() > 0 )
+        {
+        iResourceID = aResourceId.AllocL();
+        }
     }
     
 // -----------------------------------------------------------------------------
@@ -234,9 +250,16 @@ EXPORT_C const TDesC& ChspsResource::ResourceId() const
 //
 EXPORT_C void ChspsResource::SetFileNameL( const TDesC& aFileName )
     {
-    delete iFileName;
-    iFileName = NULL;
-    iFileName = aFileName.AllocL();
+    if( iFileName )
+        {
+        delete iFileName;
+        iFileName = NULL;
+        }
+    
+    if( aFileName.Length() > 0 )
+        {
+        iFileName = aFileName.AllocL();
+        }
     }
     
 // -----------------------------------------------------------------------------
@@ -254,8 +277,7 @@ EXPORT_C const TDesC& ChspsResource::FileName() const
         {
         return KNullDesC;
         }
-    }
-    
+    }    
     
 // -----------------------------------------------------------------------------
 // ChspsResource::SetMimeTypeL().
@@ -322,9 +344,16 @@ EXPORT_C TInt ChspsResource::ConfigurationUid() const
 //
 EXPORT_C void ChspsResource::SetTagsL( const TDesC& aTag )
     {
-    delete iTags;
-    iTags = NULL;
-    iTags = aTag.AllocL();
+    if( iTags )
+        {
+        delete iTags;
+        iTags = NULL;
+        }
+    
+    if( aTag.Length() > 0 )
+        {
+        iTags = aTag.AllocL();
+        }
     }
     
 // -----------------------------------------------------------------------------

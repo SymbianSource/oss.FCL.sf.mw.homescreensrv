@@ -127,7 +127,7 @@ public:
      * @param aAttr
      * @return CGulIcon*
      */
-    CGulIcon* ItemIconL( CMenuItem& aMenuItem, const TDesC& aAttr );
+    CGulIcon* ItemIconL( CMenuItem* aMenuItem, const TDesC& aAttr );
 
     /**
      * Returns text for given menu item and given attribute
@@ -135,7 +135,7 @@ public:
      * @param aMenuItem
      * @param aAttr
      */
-    TPtrC ItemTextL( CMenuItem& aMenuItem, const TDesC& aAttr );
+    TPtrC ItemTextL( CMenuItem* aMenuItem, const TDesC& aAttr );
 
     /** 
      * Launches menu item
@@ -168,11 +168,11 @@ public:
         CMenuItem* aItem, const TInt aValueToAdd );
 
     /**
-     * CreateBkmMenuItemsL
+     * CreateRuntimeMenuItemsL
      * @param void
      * @return void
      */
-    void CreateBkmMenuItemsL();
+    void CreateRuntimeMenuItemsL();
 
 private:
     // from MMCSPluginWatcherObserver
@@ -198,10 +198,10 @@ private:
      * InitL
      */
     void InitL();
-
+    
     /**
      * Tells the settings container to start observing 
-     * for changes in mailbox db.     
+     * for changes in mailbox db and changes in MCS.
      */
     void StartObservingL();
 

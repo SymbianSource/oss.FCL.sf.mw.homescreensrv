@@ -808,21 +808,11 @@ private:
     void HandleRomInstallationsL();
     
     /**
-     * Executes installation of manifest files from the ROM drive.
+     * Installs widgets located at \private\200159C0\install\ directories.
      * @since S60 5.0 
      */
-    void InstallManifestsFromRomDriveL();
-                                
-    /**
-     * V2 method for finding manifest files from Z\private\200159C0\install subfolders,
-     * these folders should have a "hsps" subfolder.
-     * Appends iManifestFiles array. 
-     * @since S60 5.0     
-     * @param aPluginFolders holds names of the plugin folders which are V2 based
-     */
-    void FindRomInstallationsV2L(        
-        RPointerArray<HBufC>& aPluginFolders );
-    
+    void InstallWidgetsL();
+                                        
     /**
      * Initiates uninstallation of a manifest file located under the imports folder.
      * @since S60 5.0

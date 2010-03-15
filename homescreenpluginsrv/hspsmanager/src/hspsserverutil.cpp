@@ -1842,6 +1842,56 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
     CleanupStack::PopAndDestroy( iter );
     return targetNode;
     } 
+
+
+// -----------------------------------------------------------------------------
+ // hspsServerUtil::FindFile
+ // Eclipsing support for customization 
+ // -----------------------------------------------------------------------------
+ //
+ TInt hspsServerUtil::FindFile(
+         RFs& aFs,
+         const TDesC& aPath,
+         const TDesC& aFilename,         
+         TFileName& aDrivePathName )
+     {   
+     TInt err = KErrNotFound;
+     
+     TParsePtrC parser( aPath );
+     const TPath path = parser.Path();
+          
+     TFileName filename( aFilename );         
+     if( filename.Length() == 0 )
+         {
+         filename.Copy( parser.NameAndExt() );
+         }
+     
+     if( filename.Length() > 0 && path.Length() > 0 )
+         {              
+         // Find the input file, search from the user area (UDA) first, 
+         // exclude external/remote drives from the search - otherwise end-users  
+         // could introduce fixed configurations (e.g. operator locks wouldn't work)
+         TFindFile fileFinder( aFs );
+         fileFinder.SetFindMask( 
+             KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+         aFs.SetSessionToPrivate( EDriveE );
+         err = fileFinder.FindByDir( filename, path );
+         aFs.SetSessionToPrivate( EDriveC );     
+         if( !err )          
+             {         
+             // Return the path with a drive reference 
+             aDrivePathName = fileFinder.File();        
+             TParsePtrC drvParser( aDrivePathName );
+             if( !drvParser.DrivePresent() )
+                 {             
+                 err = KErrNotFound;
+                 }
+             }
+         }
+              
+     return err;
+     }
+
 // -----------------------------------------------------------------------------
 // hspsServerUtil::hspsServerUtil
 // -----------------------------------------------------------------------------

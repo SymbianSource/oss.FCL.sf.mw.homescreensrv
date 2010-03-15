@@ -19,6 +19,7 @@
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <liwgenericparam.h>
+#include <S32MEM.H>
 #include "sapidata.h"
 #include "sapidataobserver.h"
 #include "sapidatapluginconst.h"
@@ -56,9 +57,7 @@ void CSapiDataObserver::RegisterL( CLiwDefaultMap* aFilter, const TDesC& aRegist
     inParamList->AppendL(TLiwGenericParam(KType,TLiwVariant(aRegistry)));
     inParamList->AppendL(TLiwGenericParam(KFilter ,TLiwVariant(aFilter)));
         
-    iError = KErrNone;
-    TRAP( iError, iInterface->ExecuteCmdL( 
-                KRequestNotification,
+    TRAP_IGNORE( iInterface->ExecuteCmdL(KRequestNotification,
                 *inParamList,
                 *outParamList,
                 0,
@@ -81,9 +80,7 @@ void CSapiDataObserver ::ReleaseL()
         CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
         CleanupStack::PushL( outParamList );
         
-        TInt err(KErrNone);
-        TRAP(err, iInterface->ExecuteCmdL( 
-                KRequestNotification,
+        TRAP_IGNORE( iInterface->ExecuteCmdL( KRequestNotification,
                 *inParamList,
                 *outParamList,
                 KLiwOptCancel,
@@ -129,7 +126,6 @@ TInt CSapiDataObserver::HandleNotifyL(
     {
      
     // Is plugin active to refresh the published data
-	iError = aErrorCode;        
 	TInt count(0);
 	TInt pos(0);
 	const TLiwGenericParam* param(NULL);
@@ -178,31 +174,61 @@ TInt CSapiDataObserver::HandleNotifyL(
 				  }
 			   }
 		   else if ( iData->IsPluginActive() ) 
-			   { 
-			   // notification from content registry
-			   found = map->FindL( KContentType, variant );
-			   if (found)
-				  {
-				  contentType = variant.AsDes().AllocLC();
-				  }
-			   variant.Reset();
-			   found = map->FindL( KContentId, variant );
-			   if (found)
-				  {
-				  contentId = variant.AsDes().AllocLC();
-				  }
-			   variant.Reset();
-			   iData->RefreshL( *publisher, *contentType, *contentId, *operation );
-			   
-			   if ( contentId )
-				   {
-				   CleanupStack::PopAndDestroy( contentId );
-				   }
-			  if ( contentType )
-				   {
-				   CleanupStack::PopAndDestroy( contentType );
-				   }
-			   }
+		       {                                              
+                // notification from content registry
+                found = map->FindL( KContentType, variant );
+                if( found )
+                    {
+                    contentType = variant.AsDes().AllocLC();
+                    }
+                variant.Reset();
+                
+                // content id
+                found = map->FindL( KContentId, variant );
+                if( found )
+                    {
+                    contentId = variant.AsDes().AllocLC();
+                    }
+                variant.Reset();
+                                
+                // Data map. Optional.
+                CLiwDefaultMap* dataMap = NULL;
+                
+                found = map->FindL( KDataMap, variant);
+                if( found )
+                    {
+                    TPtrC8 data = variant.AsData();                    
+                    RDesReadStream datastrm ( data );
+                    CleanupClosePushL( datastrm );
+                    dataMap = CLiwDefaultMap::NewLC( datastrm );
+                    // There is no CLiwDefaultMap::NewL( RReadStream )
+                    // so, must do some work with cleanup stack here.
+                    CleanupStack::Pop( dataMap );
+                    CleanupStack::PopAndDestroy(); // datastrm                    
+                    dataMap->PushL();
+                    }                
+                
+                iData->RefreshL( *publisher,
+                                 *contentType,
+                                 *contentId,
+                                 *operation,
+                                 dataMap );
+                
+                if( dataMap )
+                    {
+                    CleanupStack::PopAndDestroy( dataMap );
+                    }
+                
+                if( contentId )
+                    {
+                    CleanupStack::PopAndDestroy( contentId );
+                    }
+                
+                if( contentType )
+                    {
+                    CleanupStack::PopAndDestroy( contentType );
+                    }			  
+                }
 		   else
 			   {
 			   // remember update if plugin is in suspend mode

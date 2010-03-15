@@ -68,6 +68,13 @@ class ChspsDomStringPool : public CBase
         */
         ChspsDomStringPool* CloneL(); 
         
+        /**
+        * Reset string pool to be reused.
+        * 
+        * @since Series 60 5.2
+        */
+        void Reset();         
+        
    public: //Adding
         
         /**

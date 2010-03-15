@@ -117,7 +117,7 @@ private:
      * @param aFilter filter to compare with
      * @return ETrue if argument matches filter
      */
-    TBool IsProperForFilterL( const CLiwDefaultMap& aMap, 
+    TBool IsProperForFilterL( const CLiwMap& aMap, 
     		const CCPLiwMap& aFilter );
 
     /**
@@ -127,7 +127,7 @@ private:
      * @param aProperty Key of parameter to extract
      * @param aResult Target for value
      */
-    void GetPropertyL( const CLiwDefaultMap& aMap, const TDesC8& aProperty,
+    void GetPropertyL( const CLiwMap& aMap, const TDesC8& aProperty,
         RBuf& aResult );
     
     /**
@@ -137,7 +137,7 @@ private:
      * @param aFilter filter to compare with
      * @return ETrue if ID are identical
      */
-    TBool CheckIdL( const CLiwDefaultMap& aMap, const CCPLiwMap& aFilter );
+    TBool CheckIdL( const CLiwMap& aMap, const CCPLiwMap& aFilter );
     
     /**
      * Checks if Properties like publisher,content type 
@@ -147,7 +147,7 @@ private:
      * @param aFilter filter to compare with
      * @return ETrue if Parameters are identical
      */
-    TBool CheckPropertiesL( const CLiwDefaultMap& aMap, 
+    TBool CheckPropertiesL( const CLiwMap& aMap, 
     		const CCPLiwMap& aFilter );
     
     /**
@@ -157,7 +157,7 @@ private:
      * @param aFilter filter to compare with
      * @return ETrue if operation types are the same
      */
-    TBool CheckOperationTypeL( const CLiwDefaultMap& aMap, 
+    TBool CheckOperationTypeL( const CLiwMap& aMap, 
     		const CCPLiwMap& aFilter );
     
     /**
@@ -167,7 +167,7 @@ private:
      * @param aFilter filter to compare with
      * @return ETrue if registry types are the same
      */ 
-    TBool CheckRegistryTypeL( const CLiwDefaultMap& aMap,
+    TBool CheckRegistryTypeL( const CLiwMap& aMap,
     		const CCPLiwMap& aFilter );
 
 private:

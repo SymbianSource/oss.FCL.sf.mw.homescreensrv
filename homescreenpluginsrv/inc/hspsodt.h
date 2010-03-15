@@ -498,19 +498,16 @@ class ChspsODT : public CBase
         */
         static void CopyODTDataL( const ChspsODT& aSource, ChspsODT& aTarget );
         
-    private:    // Data
-
-        // Family mask (bits for e.g. vga, qhd_tch etc resolutions)
-        TUint32 iFamilyMask;
+        /**
+        * Calculate header size in bytes.
+        * 
+        * @return TInt  Header size.
+        */
+        TInt HeaderSize() const;
         
-    	// Configuration type
-    	TUint	iConfigurationType;
-    	
-    	// Application or interface uid
-        TUint  iRootUid;
-        
-        // The publisher
-        TUint  iProviderUid;
+    private:    // Data        
+        // Indicates whether we are able to internalize the instance        
+        HBufC* iPackageVersion;        
         
         // Identifies specific configuration
         TUint  iThemeUid;
@@ -519,17 +516,8 @@ class ChspsODT : public CBase
         HBufC* iThemeShortName;
         
         // Revision number
-        HBufC* iThemeVersion;
-        
-        // Indicates whether we are able to internalize the instance        
-        HBufC* iPackageVersion;
-        
-        // Language of the ODT instance
-        TInt   iLanguage;
-        
-        // Multiple instances allowed/not
-        TInt   iMultiInstance;
-        
+        HBufC* iThemeVersion;        
+                
         // Description of the widget
         HBufC* iDescription;
         
@@ -538,10 +526,28 @@ class ChspsODT : public CBase
         
         // Path to the preview file
         HBufC* iPreviewFile;
+
+        // Family mask (bits for e.g. vga, qhd_tch etc resolutions)
+        TUint32 iFamilyMask;
         
+        // Configuration type
+        TUint   iConfigurationType;
+        
+        // Application or interface uid
+        TUint  iRootUid;
+        
+        // The publisher
+        TUint  iProviderUid;
+
         // ThspsThemeStatus
-        TUint  iFlags;
-                        
+        TUint  iFlags;        
+        
+        // Language of the ODT instance
+        TInt   iLanguage;
+        
+        // Multiple instances allowed/not
+        TInt   iMultiInstance;        
+        
         // Pointer to list of unlocalized resources
         CArrayPtrSeg<ChspsResource>* iResourceList;
                 

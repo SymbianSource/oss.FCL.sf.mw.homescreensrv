@@ -270,14 +270,20 @@ public:
     /**
     * Called by the observer to refresh the changed content
     *   
-    * @param aPublisher  publisher.
-    * @param aContentType  content type.
-    * @param aContentId content Id.
-    * @param aOperation operation (add/delete/update/execute).
+    * @param aPublisher     publisher.
+    * @param aContentType   content type.
+    * @param aContentId     content Id.
+    * @param aOperation     operation (add/delete/update/execute).
+    * @param aDataMap       data map if available. Can be NULL.
+    *                       Ownership NOT transferred.
+    * 
     * @return void
     */
-    void RefreshL( TDesC& aPublisher, TDesC& aContentType, 
-            TDesC& aContentId, TDesC& aOperation );
+    void RefreshL( TDesC& aPublisher,
+                   TDesC& aContentType, 
+                   TDesC& aContentId,
+                   TDesC& aOperation,
+                   CLiwDefaultMap* aDataMap );
      
     /**
     * Createts the filter map and push it in the stack

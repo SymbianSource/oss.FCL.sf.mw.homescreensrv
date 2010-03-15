@@ -123,4 +123,9 @@ const TUint32 KAIWallpaperChangeType = 0x00000850;
  */
 const TUint32 KAIWallpaperPath = 0x00000851;
 
+/**
+ * Key id to store plugin id of active view
+ */
+const TUint32 KAIActiveViewPluginId = 0x00000852;
+
 #endif // __AI2INTERNALCRKEYS_H__

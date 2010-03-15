@@ -26,7 +26,7 @@ class CCPDebug;
 #endif
 class CLiwServiceHandler;
 class MLiwInterface;
-class CLiwDefaultMap;
+class CLiwMap;
 
 /**
  *  Used to execute action using Action Handler Service
@@ -88,10 +88,10 @@ private:
     /**
      * Extracts and adds attributes from aMap to aTarget.
      * @since Series 60 3.2
-     * @param aMap CLiwDefaultMap with action.
+     * @param aMap CLiwMap with action.
      * @param aTarget CLiwGenericParamList with Uid and Map.
      */
-    void ExtractUidAndMapL( const CLiwDefaultMap& aMap,
+    void ExtractUidAndMapL( const CLiwMap& aMap,
         CLiwGenericParamList& aTarget );
 
 private:

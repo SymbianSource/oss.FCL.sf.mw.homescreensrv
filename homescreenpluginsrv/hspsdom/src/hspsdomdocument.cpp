@@ -38,7 +38,7 @@ EXPORT_C ChspsDomDocument* ChspsDomDocument::CloneL()
     clone->iDomStringPool = iDomStringPool->CloneL();
     if ( iRootNode )
         {
-        clone->iRootNode = iRootNode->CloneL( *clone->iDomStringPool );
+        clone->iRootNode = iRootNode->CloneL( *clone->iDomStringPool, ETrue );
         }
     
     CleanupStack::Pop( clone );
@@ -101,6 +101,7 @@ EXPORT_C ChspsDomDocument* ChspsDomDocument::NewL(
     ChspsDomDocument* self = new( ELeave ) ChspsDomDocument;
     
     CleanupStack::PushL( self );
+    self->ConstructL();
     aStream >> *self;
     CleanupStack::Pop(self);
 
@@ -174,13 +175,9 @@ EXPORT_C void ChspsDomDocument::ExternalizeL( RWriteStream& aStream ) const
 //
 EXPORT_C void ChspsDomDocument::InternalizeL( RReadStream& aStream )
     {
-    if(iDomStringPool)
-        {
-        delete iDomStringPool;
-        iDomStringPool = NULL;    
-        }
-    iDomStringPool = ChspsDomStringPool::NewL( aStream );
-        
+    iDomStringPool->Reset();
+    iDomStringPool->InternalizeL( aStream );    
+    
     if ( iRootNode )
         {
         delete iRootNode;

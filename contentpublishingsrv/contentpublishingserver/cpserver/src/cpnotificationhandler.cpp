@@ -26,6 +26,7 @@
 #include "cpglobals.h"
 #include "cpserverdef.h"
 
+using namespace LIW;
 // ======== MEMBER FUNCTIONS ========
 
 // ---------------------------------------------------------------------------
@@ -182,7 +183,7 @@ void CCPNotificationHandler::RemoveObserverL( const RMessage2& aMessage )
 // 
 // -----------------------------------------------------------------------------
 //
-TBool CCPNotificationHandler::IsProperForFilterL( const CLiwDefaultMap& aMap, 
+TBool CCPNotificationHandler::IsProperForFilterL( const CLiwMap& aMap, 
 		const CCPLiwMap& aFilter )
     {
     CP_DEBUG( _L8("CCPNotificationHandler::IsProperForFilter()") );
@@ -298,21 +299,25 @@ TBool CCPNotificationHandler::SendChangeInfoListL(
         {
         
         CLiwDefaultList* listOfMatchingMaps = CLiwDefaultList::NewLC( );
-
+        TInt count = aListOfMaps->Count( );
         //for every item in the input list
-		for ( TInt j = 0; j < aListOfMaps->Count( ); j++ )
+		for ( TInt j = 0; j < count; j++ )
 			{
-			CLiwDefaultMap* map = CLiwDefaultMap::NewLC( );
 	        TLiwVariant variant;
 	        variant.PushL( );
 			aListOfMaps->AtL( j, variant );
-			variant.Get( *map );
-			if ( IsProperForFilterL( *map, **filter ) )
-				{
-				listOfMatchingMaps->AppendL( TLiwVariant( map ) );
-				}
-			CleanupStack::PopAndDestroy( &variant );
-			CleanupStack::PopAndDestroy( map );
+            if ( variant.TypeId() == EVariantTypeMap )
+                {
+                if ( IsProperForFilterL( *variant.AsMap(), **filter ) )
+                    {
+                    listOfMatchingMaps->AppendL( variant );
+                    }
+                else 
+                    {
+                    variant.Reset();
+                    }
+                }
+			CleanupStack::Pop( &variant );
 			}
 		if ( listOfMatchingMaps->Count( ) )
 			{
@@ -339,7 +344,7 @@ TBool CCPNotificationHandler::SendChangeInfoListL(
 //
 // ----------------------------------------------------------------------------
 //
-void CCPNotificationHandler::GetPropertyL( const CLiwDefaultMap& aMap,
+void CCPNotificationHandler::GetPropertyL( const CLiwMap& aMap,
     const TDesC8& aProperty, RBuf& aResult )
     {
     TLiwVariant value;
@@ -357,7 +362,7 @@ void CCPNotificationHandler::GetPropertyL( const CLiwDefaultMap& aMap,
 //
 // ----------------------------------------------------------------------------
 //
-TBool CCPNotificationHandler::CheckIdL( const CLiwDefaultMap& aMap, 
+TBool CCPNotificationHandler::CheckIdL( const CLiwMap& aMap, 
 		const CCPLiwMap& aFilter )
     {
     TBool result = EFalse;
@@ -386,7 +391,7 @@ TBool CCPNotificationHandler::CheckIdL( const CLiwDefaultMap& aMap,
 //
 // ----------------------------------------------------------------------------
 //
-TBool CCPNotificationHandler::CheckPropertiesL( const CLiwDefaultMap& aMap,
+TBool CCPNotificationHandler::CheckPropertiesL( const CLiwMap& aMap,
 		const CCPLiwMap& aFilter )
     {
     TBool result( EFalse );
@@ -459,7 +464,7 @@ TBool CCPNotificationHandler::CheckPropertiesL( const CLiwDefaultMap& aMap,
 //
 // ----------------------------------------------------------------------------
 //
-TBool CCPNotificationHandler::CheckOperationTypeL( const CLiwDefaultMap& aMap,
+TBool CCPNotificationHandler::CheckOperationTypeL( const CLiwMap& aMap,
 		const CCPLiwMap& aFilter )
     {
     TBool result = ETrue;
@@ -491,7 +496,7 @@ TBool CCPNotificationHandler::CheckOperationTypeL( const CLiwDefaultMap& aMap,
 //
 // ----------------------------------------------------------------------------
 //
-TBool CCPNotificationHandler::CheckRegistryTypeL( const CLiwDefaultMap& aMap,
+TBool CCPNotificationHandler::CheckRegistryTypeL( const CLiwMap& aMap,
 		const CCPLiwMap& aFilter )
     {
     TBool result = ETrue;

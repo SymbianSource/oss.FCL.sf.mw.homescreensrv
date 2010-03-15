@@ -155,10 +155,7 @@ void CCPActionManager::PrepareInputListL( const CLiwGenericParamList& aList,
     param = aList.FindFirst( pos, KListMap, EVariantTypeMap );
     if ( param && pos !=KErrNotFound )
         {
-        CLiwDefaultMap* map = CLiwDefaultMap::NewLC( );
-        param->Value().Get( *map );
-        ExtractUidAndMapL( *map, aTarget );
-        CleanupStack::PopAndDestroy( map );
+        ExtractUidAndMapL( *param->Value().AsMap(), aTarget );
         }
     else
         {
@@ -170,7 +167,7 @@ void CCPActionManager::PrepareInputListL( const CLiwGenericParamList& aList,
 // CCPActionManager::ExtractUidAndMapL
 // --------------- --------------------------------------------------------------
 //
-void CCPActionManager::ExtractUidAndMapL( const CLiwDefaultMap& aMap,
+void CCPActionManager::ExtractUidAndMapL( const CLiwMap& aMap,
     CLiwGenericParamList& aTarget )
     {
     CP_DEBUG( _L8("CCPActionManager::ExtractUidAndMapL()") );
@@ -178,21 +175,23 @@ void CCPActionManager::ExtractUidAndMapL( const CLiwDefaultMap& aMap,
     variant.PushL( );
     if ( aMap.FindL( KActionMap, variant ) )
         {
-        CLiwDefaultMap* map = CLiwDefaultMap::NewLC( );
-        variant.Get( *map );
-        if ( map->FindL( KDataForActionHandler, variant ) )
-            {
-            TLiwGenericParam param( KDataForActionHandler, variant);
-            aTarget.AppendL( param );
-            }
-        if ( map->FindL( KPluginUid, variant ) )
-            {
-            TLiwGenericParam param( KPluginUid, variant);
-            aTarget.AppendL( param );
-            }
-        CleanupStack::PopAndDestroy( map );
+        TLiwVariant valueVariant;
+        valueVariant.PushL( );
+        if ( variant.TypeId() == EVariantTypeMap )
+        	{
+        	if ( variant.AsMap()->FindL( KDataForActionHandler, valueVariant ) )
+        		{
+        		TLiwGenericParam param( KDataForActionHandler, valueVariant);
+        		aTarget.AppendL( param );
+        		}
+        	if ( variant.AsMap()->FindL( KPluginUid, valueVariant ) )
+        		{
+        		TLiwGenericParam param( KPluginUid, valueVariant);
+        		aTarget.AppendL( param );
+        		}
+        	}
+        CleanupStack::PopAndDestroy( &valueVariant );
         }
-
     CleanupStack::PopAndDestroy( &variant );
     }
 

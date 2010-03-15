@@ -187,7 +187,6 @@ void CMCSPluginEngine::InitL()
             RMenuNotifier::EItemsReordered |
             RMenuNotifier::EItemAttributeChanged,
             iNotifyWatcher->iStatus );
-        
         iNotifyWatcher->WatchNotify( this );
         }
     }
@@ -275,29 +274,39 @@ CMenuItem* CMCSPluginEngine::FetchMenuItemL( const TMenuItem& aMenuItem )
 // skin definition from attribute and sets attributes to aMenuItem.
 // ---------------------------------------------------------------------------
 //
-CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem& aMenuItem, 
+CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem* aMenuItem, 
     const TDesC& aAttr )
     {
+    
     CMenuItem* menuItem;
 
-    TInt id = aMenuItem.Id();
+    // check if item exists in MCS
+    if ( aMenuItem )
+        { 
+        TInt id = aMenuItem->Id();
 
-    // because the flags might have changed, we have
-    // to get a fresh copy of menu item from Menu Server
-    CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
-    TUint32 flags = mi->Flags();
-    delete mi;
+        // because the flags might have changed, we have
+        // to get a fresh copy of menu item from Menu Server
+        CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
+        TUint32 flags = mi->Flags();
+        delete mi;
 
-    TUint32 isHidden = flags & TMenuItem::EHidden;
-    TUint32 isMissing = flags & TMenuItem::EMissing;
+        TUint32 isHidden = flags & TMenuItem::EHidden;
+        TUint32 isMissing = flags & TMenuItem::EMissing;
 
-    if ( iUndefinedItem && ( isHidden || isMissing ) )
-        {
-        menuItem = iUndefinedItem;
+        if ( iUndefinedItem && ( isHidden || isMissing ) )
+            {
+            menuItem = iUndefinedItem;
+            }
+        else
+            {
+            menuItem = aMenuItem;
+            }
         }
-    else
+    else 
         {
-        menuItem = &aMenuItem;
+        // item not found in MCS. Use Undefined Icon
+        menuItem = iUndefinedItem;
         }
 
     CAknIcon* icon( NULL );
@@ -341,32 +350,42 @@ CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem& aMenuItem,
 // Returns text string for the given attribute
 // ---------------------------------------------------------------------------
 //
-TPtrC CMCSPluginEngine::ItemTextL( CMenuItem& aMenuItem, const TDesC& aAttr )
-    {    
-    // if item is hidden or missing (mmc card removed)
-    // use "Undefined" text instead
+TPtrC CMCSPluginEngine::ItemTextL( CMenuItem* aMenuItem, const TDesC& aAttr )
+    {
+
     CMenuItem* menuItem;
 
-    TInt id = aMenuItem.Id();
-
-    // because the flags might have changed, we have
-    // to get a fresh copy of the menu item from Menu Server
-    CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
-    TUint32 flags = mi->Flags();
-    delete mi;
-
-    TUint32 isHidden = flags & TMenuItem::EHidden;
-    TUint32 isMissing = flags & TMenuItem::EMissing;
-
-    if ( iUndefinedItem && ( isHidden || isMissing ) )
+    // check if item exists in MCS
+    if ( aMenuItem )
         {
+        TInt id = aMenuItem->Id();
+
+        // because the flags might have changed, we have
+        // to get a fresh copy of the menu item from Menu Server
+        CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
+        TUint32 flags = mi->Flags();
+        delete mi;
+
+        TUint32 isHidden = flags & TMenuItem::EHidden;
+        TUint32 isMissing = flags & TMenuItem::EMissing;
+
+        // if item is hidden or missing (mmc card removed)
+        // use "Undefined" text instead
+        if ( iUndefinedItem && ( isHidden || isMissing ) )
+            {
+            menuItem = iUndefinedItem;
+            }
+        else
+            {
+            menuItem = aMenuItem;
+            }
+        }
+    else 
+        {
+        // item not found in MCS. Use "Undefined" text
         menuItem = iUndefinedItem;
         }
-    else
-        {
-        menuItem = &aMenuItem;
-        }
-        
+    
     TBool exists( KErrNotFound );
     
     TPtrC name( menuItem->GetAttributeL( aAttr, exists ) );
@@ -393,9 +412,10 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
         CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
             CAknNoteDialog::EConfirmationTone,
             CAknNoteDialog::ENoTimeout );
+        CleanupStack::PushL( dialog );
         dialog->SetTextL( temp->Des() );
         dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
-        
+        CleanupStack::Pop( dialog );
         CleanupStack::PopAndDestroy( temp );        
         return;
         }
@@ -407,16 +427,34 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
 
     TMCSData& dataItem( iPluginData->DataItemL( aIndex ) );
     
-    CMenuItem* item( CMenuItem::OpenL( iMenu, dataItem.MenuItem().Id() ) );
+    CMenuItem* item = NULL;
+    TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, dataItem.MenuItem().Id() ) );
+
+    // item does not exist at all in MCS
+    if ( item == NULL )
+        {
+        HBufC* temp = StringLoader::LoadLC( R_MCS_DISABLE_OPEN_ITEM_MISSING );
+
+        CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
+            CAknNoteDialog::EConfirmationTone,
+            CAknNoteDialog::ENoTimeout );
+        CleanupStack::PushL( dialog );
+        dialog->SetTextL( temp->Des() );
+        dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
+        CleanupStack::Pop( dialog );
+        CleanupStack::PopAndDestroy( temp );
+        temp = NULL;
+
+        return;
+        }
+
     CleanupStack::PushL( item );
-    
 
     TBool attrExists = ETrue;
 
     TPtrC uid = item->GetAttributeL( KMenuAttrUid, attrExists );
 
-    // trying to run non-existing application ( that was replaced by "Undefined" app )
-    // OR trying to run hidden or missing application (e.g. unistalled app 
+    // trying to run hidden or missing application (e.g. unistalled app 
     // or app on MMC which was removed )
     // -> We display a note for a user that this is not possible¨
     TUint32 isHidden = item->Flags() & TMenuItem::EHidden;
@@ -431,8 +469,10 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
         CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
             CAknNoteDialog::EConfirmationTone,
             CAknNoteDialog::ENoTimeout );
+        CleanupStack::PushL( dialog );
         dialog->SetTextL( temp->Des() );
         dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
+        CleanupStack::Pop( dialog );
         CleanupStack::PopAndDestroy( temp );
         temp = NULL;
 
@@ -567,28 +607,8 @@ void CMCSPluginEngine::HandleNotifyL()
     
     for ( TInt i = 0; i < count; i++ )
         {
-        TMCSData& data( iPluginData->DataItemL(i) );
+        TMCSData& data( iPluginData->DataItemL( i ) );
         data.SetDirty( ETrue );
-        
-        // Check that all the data still exist is MCS, if flag is hidden or
-        // missing, we have to remove data from UI
-        CMenuItem* menuItem = NULL; 
-
-        TRAP_IGNORE (
-                menuItem = CMenuItem::OpenL( iMenu, data.MenuItem().Id() );
-        )
-
-        // item not found. Use "Undefined" item as a replacement
-        if ( !menuItem )
-            {
-            CleanupStack::PushL( menuItem );
-            iPluginData->ReplaceMenuItemL( i, iUndefinedItemHeader );
-            iPluginData->SaveSettingsL( i, *iUndefinedItem );
-            CleanupStack::Pop( menuItem );
-            }
-
-        delete menuItem;
-        menuItem = NULL;
         }
 
     // Notification must be activated again
@@ -837,9 +857,9 @@ TInt CMCSPluginEngine::UpdateMenuItemsRefCountL( CMenuItem* aItem,
 // Creates bookmark menu item if it does not exist
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginEngine::CreateBkmMenuItemsL()
+void CMCSPluginEngine::CreateRuntimeMenuItemsL()
     {
-    iPluginData->CreateBkmMenuItemsL();
+    iPluginData->CreateRuntimeMenuItemsL();
     }
 
 // End of file

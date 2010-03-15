@@ -557,32 +557,33 @@ TBool CMCSPluginSettingsModel::ReplaceItemL( const TInt& aSettingIndex,
     {
     if (aSettingIndex >= 0 && aSettingIndex < iSettings.Count())
         {
-        // Old setting type is bookmark. Remove bookmark item from MCS 
-        // if it was created in runtime.
-        if( iSettings[aSettingIndex].type == EBookmark )
-            {
-                iBkmList->RemoveMenuItemL( iSettings[aSettingIndex].id );
-            }
-
-        // Old setting type is application.
-        // Remove app item from MCS if it was created in runtime (mailbox).
-        if ( iSettings[ aSettingIndex ].type == EApplication )
-            {
-                iAppList->RemoveMenuItemL( iSettings[ aSettingIndex ].id );
-            }
-
-        iSettings[aSettingIndex].id = aId;
-        iSettings[aSettingIndex].type = aType;
+        TSettingItem oldItem = iSettings[ aSettingIndex ];
+        iSettings[ aSettingIndex ].id = aId;
+        iSettings[ aSettingIndex ].type = aType;
 
         if ( aType == EApplication )
             {
             CMenuItem& item = iAppList->ItemL( aId );
             SaveSettingsL( aSettingIndex, item );
             }
-        else
+         else
             {
             CMenuItem& item = iBkmList->ItemL( aId );
             SaveSettingsL( aSettingIndex, item );
+            }
+        
+        // Old setting type is bookmark. Remove bookmark item from MCS 
+        // if it was created in runtime.
+        if ( oldItem.type == EBookmark )
+            {
+                iBkmList->RemoveMenuItemL( oldItem.id );
+            }
+
+        // Old setting type is application.
+        // Remove app item from MCS if it was created in runtime (mailbox).
+        if ( oldItem.type == EApplication )
+            {
+                iAppList->RemoveMenuItemL( oldItem.id );
             }
 
         return ETrue;
