@@ -1,0 +1,6 @@
+PRJ_EXPORTS
+platform_paths.hrh             platform_paths.hrh
+defaultcaps.hrh                defaultcaps.hrh
+bldvariant.hrh                 bldvariant.hrh
+
+#include "xcfw/bld.inf"

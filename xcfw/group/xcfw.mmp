@@ -17,6 +17,7 @@
 
 
 #include <platform_paths.hrh>
+#include <defaultcaps.hrh>
 
 TARGET          XCFW.dll
 TARGETTYPE      DLL
