@@ -24,7 +24,7 @@ PRJ_EXPORTS
 #include "../homescreenpluginsrv/group/bld.inf"
 #include "../idlefw/group/bld.inf"
 #include "../menucontentsrv/group/bld.inf"
-#include "../backsteppingsrv/group/bld.inf"
+//#include "../backsteppingsrv/group/bld.inf"
 #include "../contentpublishingsrv/group/bld.inf"
 #include "../homescreensrv_plat/group/bld.inf"
 #include "../contextutility/group/bld.inf"

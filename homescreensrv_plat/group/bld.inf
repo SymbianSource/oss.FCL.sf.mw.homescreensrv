@@ -31,7 +31,7 @@
 #include "../external_home_screen_api/group/bld.inf"
 #include "../menu_content_service_api/group/bld.inf"
 #include "../sapi_contentpublishing/group/bld.inf"
-#include "../sapi_backstepping/group/bld.inf"
+//#include "../sapi_backstepping/group/bld.inf"
 #include "../sapi_actionhandler/group/bld.inf"
 #include "../sapi_homescreenplugin/group/bld.inf"
 #include "../sapi_menucontent/group/bld.inf"
