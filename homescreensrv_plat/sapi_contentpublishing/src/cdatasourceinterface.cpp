@@ -143,7 +143,7 @@ void CDataSourceInterface::ProcessCommandL( const TDesC8& aCmdName,
         }
     else if ( aCmdName.CompareF( KAdd ) == 0 )
         {
-        iCPClient->AddL( aInParamList, aOutParamList, aCmdOptions );
+        iCPClient->AddL( aInParamList, aOutParamList );
         }
     else if ( aCmdName.CompareF( KDelete ) == 0 )
         {

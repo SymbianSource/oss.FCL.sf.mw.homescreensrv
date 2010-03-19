@@ -1,0 +1,89 @@
+EXPORTS
+	?AddAttributeL@CCaInnerEntry@@QAEXABVTDesC16@@0@Z @ 1 NONAME ; void CCaInnerEntry::AddAttributeL(class TDesC16 const &, class TDesC16 const &)
+	?Exist@RCaEntryAttrArray@@QAEHABVTDesC16@@@Z @ 2 NONAME ; int RCaEntryAttrArray::Exist(class TDesC16 const &)
+	?ExternalizeL@CCaInnerEntry@@QBEXAAVRWriteStream@@@Z @ 3 NONAME ; void CCaInnerEntry::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CCaInnerNotifierFilter@@QBEXAAVRWriteStream@@@Z @ 4 NONAME ; void CCaInnerNotifierFilter::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@CCaInnerQuery@@QBEXAAVRWriteStream@@@Z @ 5 NONAME ; void CCaInnerQuery::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@RCaEntriesArray@@QBEXAAVRWriteStream@@@Z @ 6 NONAME ; void RCaEntriesArray::ExternalizeL(class RWriteStream &) const
+	?ExternalizeL@RCaIdsArray@@QBEXAAVRWriteStream@@@Z @ 7 NONAME ; void RCaIdsArray::ExternalizeL(class RWriteStream &) const
+	?Find@RCaEntryAttrArray@@QAEHABVTDesC16@@AAVTDes16@@@Z @ 8 NONAME ; int RCaEntryAttrArray::Find(class TDesC16 const &, class TDes16 &)
+	?FindAttribute@CCaInnerEntry@@QAEHABVTDesC16@@AAVTDes16@@@Z @ 9 NONAME ; int CCaInnerEntry::FindAttribute(class TDesC16 const &, class TDes16 &)
+	?GetAttributeName@CCaLocalizationEntry@@QBEABVRBuf16@@XZ @ 10 NONAME ; class RBuf16 const & CCaLocalizationEntry::GetAttributeName(void) const
+	?GetAttributes@CCaInnerEntry@@QBEABVRCaEntryAttrArray@@XZ @ 11 NONAME ; class RCaEntryAttrArray const & CCaInnerEntry::GetAttributes(void) const
+	?GetCount@CCaInnerQuery@@QBEIXZ @ 12 NONAME ; unsigned int CCaInnerQuery::GetCount(void) const
+	?GetDescription@CCaInnerEntry@@QBEABVRBuf16@@XZ @ 13 NONAME ; class RBuf16 const & CCaInnerEntry::GetDescription(void) const
+	?GetEntryRole@CCaInnerNotifierFilter@@QBE?AW4TEntryRole@@XZ @ 14 NONAME ; enum TEntryRole CCaInnerNotifierFilter::GetEntryRole(void) const
+	?GetEntryTypeName@CCaInnerEntry@@QBEABVRBuf16@@XZ @ 15 NONAME ; class RBuf16 const & CCaInnerEntry::GetEntryTypeName(void) const
+	?GetEntryTypeNames@CCaInnerQuery@@QBEPBVCDesC16ArrayFlat@@XZ @ 16 NONAME ; class CDesC16ArrayFlat const * CCaInnerQuery::GetEntryTypeNames(void) const
+	?GetFlags@CCaInnerEntry@@QBEIXZ @ 17 NONAME ; unsigned int CCaInnerEntry::GetFlags(void) const
+	?GetFlagsOff@CCaInnerQuery@@QBEIXZ @ 18 NONAME ; unsigned int CCaInnerQuery::GetFlagsOff(void) const
+	?GetFlagsOn@CCaInnerQuery@@QBEIXZ @ 19 NONAME ; unsigned int CCaInnerQuery::GetFlagsOn(void) const
+	?GetIcon@CCaInnerEntry@@QBEABUTIconAttributes@1@XZ @ 20 NONAME ; struct CCaInnerEntry::TIconAttributes const & CCaInnerEntry::GetIcon(void) const
+	?GetIconId@CCaInnerEntry@@QBEHXZ @ 21 NONAME ; int CCaInnerEntry::GetIconId(void) const
+	?GetId@CCaInnerEntry@@QBEHXZ @ 22 NONAME ; int CCaInnerEntry::GetId(void) const
+	?GetIds@CCaInnerNotifierFilter@@QBE?AV?$RArray@H@@XZ @ 23 NONAME ; class RArray<int> CCaInnerNotifierFilter::GetIds(void) const
+	?GetIds@CCaInnerQuery@@QBEABV?$RArray@H@@XZ @ 24 NONAME ; class RArray<int> const & CCaInnerQuery::GetIds(void) const
+	?GetLocalizedString@CCaLocalizationEntry@@QBEABVRBuf16@@XZ @ 25 NONAME ; class RBuf16 const & CCaLocalizationEntry::GetLocalizedString(void) const
+	?GetNotifierType@CCaInnerNotifierFilter@@QBE?AW4TNotifierType@1@XZ @ 26 NONAME ; enum CCaInnerNotifierFilter::TNotifierType CCaInnerNotifierFilter::GetNotifierType(void) const
+	?GetParentId@CCaInnerNotifierFilter@@QBEHXZ @ 27 NONAME ; int CCaInnerNotifierFilter::GetParentId(void) const
+	?GetParentId@CCaInnerQuery@@QBEHXZ @ 28 NONAME ; int CCaInnerQuery::GetParentId(void) const
+	?GetRole@CCaInnerEntry@@QBEIXZ @ 29 NONAME ; unsigned int CCaInnerEntry::GetRole(void) const
+	?GetRole@CCaInnerQuery@@QBEHXZ @ 30 NONAME ; int CCaInnerQuery::GetRole(void) const
+	?GetRowId@CCaLocalizationEntry@@QBEHXZ @ 31 NONAME ; int CCaLocalizationEntry::GetRowId(void) const
+	?GetSort@CCaInnerQuery@@QBE?AW4TSortAttribute@1@XZ @ 32 NONAME ; enum CCaInnerQuery::TSortAttribute CCaInnerQuery::GetSort(void) const
+	?GetStringId@CCaLocalizationEntry@@QBEABVRBuf16@@XZ @ 33 NONAME ; class RBuf16 const & CCaLocalizationEntry::GetStringId(void) const
+	?GetTUint@MenuUtils@@SAHABVTDesC16@@AAI@Z @ 34 NONAME ; int MenuUtils::GetTUint(class TDesC16 const &, unsigned int &)
+	?GetTableName@CCaLocalizationEntry@@QBEABVRBuf16@@XZ @ 35 NONAME ; class RBuf16 const & CCaLocalizationEntry::GetTableName(void) const
+	?GetText@CCaInnerEntry@@QBEABVRBuf16@@XZ @ 36 NONAME ; class RBuf16 const & CCaInnerEntry::GetText(void) const
+	?GetTextId@CCaLocalizationEntry@@QBEHXZ @ 37 NONAME ; int CCaLocalizationEntry::GetTextId(void) const
+	?GetTypeNames@CCaInnerNotifierFilter@@QBEPAVCDesC16ArrayFlat@@XZ @ 38 NONAME ; class CDesC16ArrayFlat * CCaInnerNotifierFilter::GetTypeNames(void) const
+	?GetUid@CCaInnerEntry@@QBEJXZ @ 39 NONAME ; long CCaInnerEntry::GetUid(void) const
+	?GetUid@CCaInnerQuery@@QBEIXZ @ 40 NONAME ; unsigned int CCaInnerQuery::GetUid(void) const
+	?InternalizeL@CCaInnerEntry@@QAEXAAVRReadStream@@@Z @ 41 NONAME ; void CCaInnerEntry::InternalizeL(class RReadStream &)
+	?InternalizeL@CCaInnerNotifierFilter@@QAEXAAVRReadStream@@@Z @ 42 NONAME ; void CCaInnerNotifierFilter::InternalizeL(class RReadStream &)
+	?InternalizeL@CCaInnerQuery@@QAEXAAVRReadStream@@@Z @ 43 NONAME ; void CCaInnerQuery::InternalizeL(class RReadStream &)
+	?InternalizeL@RCaEntriesArray@@QAEXAAVRReadStream@@@Z @ 44 NONAME ; void RCaEntriesArray::InternalizeL(class RReadStream &)
+	?InternalizeL@RCaIdsArray@@QAEXAAVRReadStream@@@Z @ 45 NONAME ; void RCaIdsArray::InternalizeL(class RReadStream &)
+	?MarshalDataLC@RCaIdsArray@@QBEPAVHBufC8@@XZ @ 46 NONAME ; class HBufC8 * RCaIdsArray::MarshalDataLC(void) const
+	?NewL@CCaEntryAttribute@@SAPAV1@ABVTDesC16@@@Z @ 47 NONAME ; class CCaEntryAttribute * CCaEntryAttribute::NewL(class TDesC16 const &)
+	?NewL@CCaInnerEntry@@SAPAV1@XZ @ 48 NONAME ; class CCaInnerEntry * CCaInnerEntry::NewL(void)
+	?NewL@CCaInnerNotifierFilter@@SAPAV1@W4TNotifierType@1@@Z @ 49 NONAME ; class CCaInnerNotifierFilter * CCaInnerNotifierFilter::NewL(enum CCaInnerNotifierFilter::TNotifierType)
+	?NewL@CCaInnerQuery@@SAPAV1@XZ @ 50 NONAME ; class CCaInnerQuery * CCaInnerQuery::NewL(void)
+	?NewL@CCaLocalizationEntry@@SAPAV1@XZ @ 51 NONAME ; class CCaLocalizationEntry * CCaLocalizationEntry::NewL(void)
+	?NewLC@CCaEntryAttribute@@SAPAV1@ABVTDesC16@@@Z @ 52 NONAME ; class CCaEntryAttribute * CCaEntryAttribute::NewLC(class TDesC16 const &)
+	?NewLC@CCaInnerEntry@@SAPAV1@XZ @ 53 NONAME ; class CCaInnerEntry * CCaInnerEntry::NewLC(void)
+	?NewLC@CCaInnerNotifierFilter@@SAPAV1@W4TNotifierType@1@@Z @ 54 NONAME ; class CCaInnerNotifierFilter * CCaInnerNotifierFilter::NewLC(enum CCaInnerNotifierFilter::TNotifierType)
+	?NewLC@CCaInnerQuery@@SAPAV1@XZ @ 55 NONAME ; class CCaInnerQuery * CCaInnerQuery::NewLC(void)
+	?NewLC@CCaLocalizationEntry@@SAPAV1@XZ @ 56 NONAME ; class CCaLocalizationEntry * CCaLocalizationEntry::NewLC(void)
+	?RemoveAttribute@RCaEntryAttrArray@@QAEXABVTDesC16@@@Z @ 57 NONAME ; void RCaEntryAttrArray::RemoveAttribute(class TDesC16 const &)
+	?RemoveAttributeL@CCaInnerEntry@@QAEXABVTDesC16@@@Z @ 58 NONAME ; void CCaInnerEntry::RemoveAttributeL(class TDesC16 const &)
+	?SetAttributeNameL@CCaLocalizationEntry@@QAEXABVTDesC16@@@Z @ 59 NONAME ; void CCaLocalizationEntry::SetAttributeNameL(class TDesC16 const &)
+	?SetCount@CCaInnerQuery@@QAEXI@Z @ 60 NONAME ; void CCaInnerQuery::SetCount(unsigned int)
+	?SetDescriptionL@CCaInnerEntry@@QAEXABVTDesC16@@@Z @ 61 NONAME ; void CCaInnerEntry::SetDescriptionL(class TDesC16 const &)
+	?SetEntryRole@CCaInnerNotifierFilter@@QAEXW4TEntryRole@@@Z @ 62 NONAME ; void CCaInnerNotifierFilter::SetEntryRole(enum TEntryRole)
+	?SetEntryTypeNameL@CCaInnerEntry@@QAEXABVTDesC16@@@Z @ 63 NONAME ; void CCaInnerEntry::SetEntryTypeNameL(class TDesC16 const &)
+	?SetEntryTypeNames@CCaInnerQuery@@QAEXPAVCDesC16ArrayFlat@@@Z @ 64 NONAME ; void CCaInnerQuery::SetEntryTypeNames(class CDesC16ArrayFlat *)
+	?SetFlags@CCaInnerEntry@@QAEXI@Z @ 65 NONAME ; void CCaInnerEntry::SetFlags(unsigned int)
+	?SetFlagsOff@CCaInnerQuery@@QAEXI@Z @ 66 NONAME ; void CCaInnerQuery::SetFlagsOff(unsigned int)
+	?SetFlagsOn@CCaInnerQuery@@QAEXI@Z @ 67 NONAME ; void CCaInnerQuery::SetFlagsOn(unsigned int)
+	?SetIconDataL@CCaInnerEntry@@QAEXHHHHABVTDesC16@@@Z @ 68 NONAME ; void CCaInnerEntry::SetIconDataL(int, int, int, int, class TDesC16 const &)
+	?SetIconId@CCaInnerEntry@@QAEXH@Z @ 69 NONAME ; void CCaInnerEntry::SetIconId(int)
+	?SetId@CCaInnerEntry@@QAEXI@Z @ 70 NONAME ; void CCaInnerEntry::SetId(unsigned int)
+	?SetIdsL@CCaInnerNotifierFilter@@QAEXABV?$RArray@H@@@Z @ 71 NONAME ; void CCaInnerNotifierFilter::SetIdsL(class RArray<int> const &)
+	?SetIdsL@CCaInnerQuery@@QAEXABV?$RArray@H@@@Z @ 72 NONAME ; void CCaInnerQuery::SetIdsL(class RArray<int> const &)
+	?SetLocalizedStringL@CCaLocalizationEntry@@QAEXABVTDesC16@@@Z @ 73 NONAME ; void CCaLocalizationEntry::SetLocalizedStringL(class TDesC16 const &)
+	?SetParentId@CCaInnerNotifierFilter@@QAEXH@Z @ 74 NONAME ; void CCaInnerNotifierFilter::SetParentId(int)
+	?SetParentId@CCaInnerQuery@@QAEXH@Z @ 75 NONAME ; void CCaInnerQuery::SetParentId(int)
+	?SetRole@CCaInnerEntry@@QAEXI@Z @ 76 NONAME ; void CCaInnerEntry::SetRole(unsigned int)
+	?SetRole@CCaInnerQuery@@QAEXH@Z @ 77 NONAME ; void CCaInnerQuery::SetRole(int)
+	?SetRowId@CCaLocalizationEntry@@QAEXI@Z @ 78 NONAME ; void CCaLocalizationEntry::SetRowId(unsigned int)
+	?SetSort@CCaInnerQuery@@QAEXW4TSortAttribute@1@@Z @ 79 NONAME ; void CCaInnerQuery::SetSort(enum CCaInnerQuery::TSortAttribute)
+	?SetStringIdL@CCaLocalizationEntry@@QAEXABVTDesC16@@@Z @ 80 NONAME ; void CCaLocalizationEntry::SetStringIdL(class TDesC16 const &)
+	?SetTableNameL@CCaLocalizationEntry@@QAEXABVTDesC16@@@Z @ 81 NONAME ; void CCaLocalizationEntry::SetTableNameL(class TDesC16 const &)
+	?SetTextId@CCaLocalizationEntry@@QAEXI@Z @ 82 NONAME ; void CCaLocalizationEntry::SetTextId(unsigned int)
+	?SetTextL@CCaInnerEntry@@QAEXABVTDesC16@@@Z @ 83 NONAME ; void CCaInnerEntry::SetTextL(class TDesC16 const &)
+	?SetTypeNames@CCaInnerNotifierFilter@@QAEXPAVCDesC16ArrayFlat@@@Z @ 84 NONAME ; void CCaInnerNotifierFilter::SetTypeNames(class CDesC16ArrayFlat *)
+	?SetUid@CCaInnerEntry@@QAEXJ@Z @ 85 NONAME ; void CCaInnerEntry::SetUid(long)
+	?SetUid@CCaInnerQuery@@QAEXI@Z @ 86 NONAME ; void CCaInnerQuery::SetUid(unsigned int)
+	?SetValueL@CCaEntryAttribute@@QAEXABVTDesC16@@@Z @ 87 NONAME ; void CCaEntryAttribute::SetValueL(class TDesC16 const &)
+

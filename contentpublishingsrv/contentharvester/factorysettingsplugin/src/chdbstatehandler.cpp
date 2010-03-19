@@ -50,7 +50,7 @@ CCHDbStateHandler* CCHDbStateHandler::NewL(
 	CCHDbStateHandler* self = new (ELeave) CCHDbStateHandler( aCallback );
 	CleanupStack::PushL( self );
 	self->ConstructL();
-	CleanupStack::Pop(); // self
+	CleanupStack::Pop( self );
 	return self;
 	}
 

@@ -19,7 +19,6 @@
 #include <e32std.h>
 #include <ecom/implementationproxy.h>
 #include "ahpapplauncher.h"
-#include "ahmessagehandler.h"
 #include "ahtelkeyhandler.h"
 #include "ahhelplauncher.h"
 
@@ -28,7 +27,6 @@ const TImplementationProxy ImplementationTable[] =
     {
     IMPLEMENTATION_PROXY_ENTRY( 0x10282E5F, CAHAppLauncher::NewL ), 
     IMPLEMENTATION_PROXY_ENTRY( 0x10282E61, CAHTelKeyHandler::NewL ),
-    IMPLEMENTATION_PROXY_ENTRY( 0x10282E62, CAHMessageHandler::NewL ),
     IMPLEMENTATION_PROXY_ENTRY( 0x2001B285, CAHHelpLauncher::NewL ),
 };
 

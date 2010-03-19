@@ -25,9 +25,8 @@ UID           0x10009D8D 0x10282E64
 CAPABILITY    CAP_ECOM_PLUGIN
 
 SOURCEPATH    	../src
-SOURCE		proxy.cpp
+SOURCE		Proxy.cpp
 SOURCE      ahpapplauncher.cpp
-SOURCE		ahmessagehandler.cpp
 SOURCE		ahtelkeyhandler.cpp
 SOURCE      ahhelplauncher.cpp
     

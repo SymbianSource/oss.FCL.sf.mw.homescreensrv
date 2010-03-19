@@ -21,17 +21,12 @@
 
 #include <ecom/implementationproxy.h>
 #include <contentharvesterpluginuids.hrh>
-#include <LiwServiceHandler.h>
-
+#include <liwservicehandler.h>
 #include "cpglobals.h"
-#include "chswiusbhandler.h"
-#include "chswiusbobserver.h"
 
 _LIT( KHsWidgetPublisher, "hswidgetpublisher");
 _LIT( KHsPublisher, "ai3templatedwidget" );
 _LIT8( KWidgetUid, "widget_uid");
-
-const TInt KWidgetArrayGran = 8;
 
 // Map the interface UIDs to implementation factory functions
 // ============================= LOCAL FUNCTIONS ===============================
@@ -74,12 +69,6 @@ void CCHSwiPlugin::ConstructL()
     {
     iNotifier = CApaAppListNotifier::NewL( this, CActive::EPriorityStandard );
     User::LeaveIfError( iApaLsSession.Connect() );
-    User::LeaveIfError( iFs.Connect() );
-    
-    iUsbHandler = CCHSwiUsbHandler::NewL( this, iFs );
-    
-    iUsbObserver = CCHSwiUsbObserver::NewL( iUsbHandler, iFs );
-    iUsbObserver->Start();
     }
 
 // ----------------------------------------------------------------------------
@@ -103,11 +92,8 @@ CCHSwiPlugin* CCHSwiPlugin::NewL(  MLiwInterface* aInterface)
 //
 CCHSwiPlugin::~CCHSwiPlugin()
     {
-    delete iNotifier;
-    delete iUsbHandler;
-    delete iUsbObserver;
     iApaLsSession.Close();
-    iFs.Close();
+    delete iNotifier;
     }
 
 // ----------------------------------------------------------------------------
@@ -131,48 +117,28 @@ void CCHSwiPlugin::HandleAppListEvent( TInt /*aEvent*/ )
     }
 
 // ----------------------------------------------------------------------------
-// CCHSwiPlugin::HandleMassStorageModeEndEvent
-// (refer to MCHSwiMassModeObserver declaration).
-// ----------------------------------------------------------------------------
-//  
-void CCHSwiPlugin::HandleMassStorageModeEndEvent()
-	{
-	TRAP_IGNORE( UpdateWidgetsL() );
-	}
-
-// ----------------------------------------------------------------------------
-// CCHSwiPlugin::HandleSuccessfulAsynchDriveScan
-// (refer to MCHSwiMassModeObserver declaration).
-// ----------------------------------------------------------------------------
-//  
-void CCHSwiPlugin::HandleSuccessfulAsynchDriveScan()
-	{
-	iUsbObserver->Start();
-	}
-
-// ----------------------------------------------------------------------------
 // CCHSwiPlugin::UpdateWidgetsL
 // MMC watcher callback.
 // ----------------------------------------------------------------------------
 //
 void CCHSwiPlugin::UpdateWidgetsL()
     {
-	CLiwGenericParamList* inparam = CLiwGenericParamList::NewLC( );
-	CLiwGenericParamList* outparam = CLiwGenericParamList::NewLC( );
-	inparam->AppendL( TLiwGenericParam( KType, TLiwVariant( KPublisher ) ) );
-	CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
-	
-	filter->InsertL( KPublisherId, TLiwVariant( KHsWidgetPublisher ));
-	filter->InsertL( KContentType, TLiwVariant( KHsPublisher ));
-	inparam->AppendL( TLiwGenericParam( KFilter, TLiwVariant( filter ) ) );
-	
-	iCPSInterface->ExecuteCmdL( KGetList, *inparam, *outparam );
-	
-	RemoveWidgetsL( outparam );
-	
-	CleanupStack::PopAndDestroy( filter );
-	CleanupStack::PopAndDestroy( outparam );
-	CleanupStack::PopAndDestroy( inparam );  
+    CLiwGenericParamList* inparam = CLiwGenericParamList::NewLC( );
+    CLiwGenericParamList* outparam = CLiwGenericParamList::NewLC( );
+    inparam->AppendL( TLiwGenericParam( KType, TLiwVariant( KPublisher ) ) );
+    CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
+    
+    filter->InsertL( KPublisherId, TLiwVariant( KHsWidgetPublisher ));
+    filter->InsertL( KContentType, TLiwVariant( KHsPublisher ));
+    inparam->AppendL( TLiwGenericParam( KFilter, TLiwVariant( filter ) ) );
+    
+    iCPSInterface->ExecuteCmdL( KGetList, *inparam, *outparam );
+    
+    RemoveWidgetsL( outparam );
+    
+    CleanupStack::PopAndDestroy( filter );
+    CleanupStack::PopAndDestroy( outparam );
+    CleanupStack::PopAndDestroy( inparam );
     }
 
 // ----------------------------------------------------------------------------
@@ -183,19 +149,14 @@ void CCHSwiPlugin::UpdateWidgetsL()
 void CCHSwiPlugin::RemoveWidgetsL( CLiwGenericParamList* aWidgets )
     {
     TInt pos ( 0 );
-    aWidgets->FindFirst( pos, KResults ); 	
-    
-    if ( pos != KErrNotFound )
+    aWidgets->FindFirst( pos, KResults );
+    if( pos != KErrNotFound )
         {
-        CDesC16ArrayFlat* notFoundWidgets = new (ELeave) CDesC16ArrayFlat( KWidgetArrayGran ); 
-        CleanupStack::PushL( notFoundWidgets );
-        
         TLiwVariant variant = (*aWidgets)[pos].Value();
         variant.PushL();
         CLiwIterable* iterable = variant.AsIterable();
         iterable->Reset();
-        
-        while ( iterable->NextL( variant ) )
+        if( iterable->NextL( variant ) )
             {
             CLiwDefaultMap *map = CLiwDefaultMap::NewLC();
             variant.Get( *map );
@@ -212,7 +173,8 @@ void CCHSwiPlugin::RemoveWidgetsL( CLiwGenericParamList* aWidgets )
                         {
                         if( map->FindL( KContentId, variant ) )
                             {
-                            notFoundWidgets->AppendL( variant.AsDes() );
+                            RemoveWidgetL( KPublisher, variant.AsDes() );
+                            RemoveWidgetL( KCpData, variant.AsDes() );
                             }
                         }
                     }
@@ -220,26 +182,8 @@ void CCHSwiPlugin::RemoveWidgetsL( CLiwGenericParamList* aWidgets )
                 }
             CleanupStack::PopAndDestroy( map );
             }
-        
-        if ( notFoundWidgets->Count() > 0 )
-        	{
-        	iUsbHandler->SynchronousDriveScan();
-        			
-        	if ( !IsMassStorageMode() )
-        		{
-        		for ( TInt i = 0; i < notFoundWidgets->Count(); i++ )
-        			{
-        			RemoveWidgetL( KPublisher, (*notFoundWidgets)[i] );
-        			RemoveWidgetL( KCpData, (*notFoundWidgets)[i] );
-        			}
-        	   	}
-        	}
-        
-        CleanupStack::PopAndDestroy( &variant );
-        CleanupStack::PopAndDestroy( notFoundWidgets );
+        CleanupStack::PopAndDestroy(&variant);
         }
-    	
-
     }
 
 // ----------------------------------------------------------------------------
@@ -266,25 +210,5 @@ void CCHSwiPlugin::RemoveWidgetL( const TDesC& aType,
     CleanupStack::PopAndDestroy( outparam );
     CleanupStack::PopAndDestroy( inparam );
     }
-
-// ----------------------------------------------------------------------------
-// CCHSwiPlugin::SetMassStorageMode
-// Sets Mass Storage mode.
-// ----------------------------------------------------------------------------
-//
-void CCHSwiPlugin::SetMassStorageMode( TBool aMode )
-	{
-	iMassStorageMode = aMode;
-	}
-
-// ----------------------------------------------------------------------------
-// CCHSwiPlugin::IsMassStorageMode
-// Gets Mass Storage mode.
-// ----------------------------------------------------------------------------
-//
-TBool CCHSwiPlugin::IsMassStorageMode()
-	{
-	return iMassStorageMode;
-	}
 
 //  End of File  

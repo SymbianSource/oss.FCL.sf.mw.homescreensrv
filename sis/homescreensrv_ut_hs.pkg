@@ -1,0 +1,82 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+; Language
+&EN
+
+; SIS heade name, uid, version
+#{"hssrv ut hs"},(0x20022F67),1,0,0
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Supports S60 5th Edition
+[0x1028315F], 0, 0, 0, {"S60ProductID"}
+
+;--------------- appfoundation ---------------
+
+;servicemodel:
+"/epoc32/release/armv5/urel/t_hsservicemodelexe.exe"                           - "c:/sys/bin/t_hsservicemodelexe.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsservicemodelexe_reg.rsc"      - "c:/private/10003a3f/import/apps/t_hsservicemodelexe_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsservicemodelexe.rsc"                         - "c:/resource/apps/t_hsservicemodelexe.rsc"
+"/epoc32/release/armv5/urel/testserviceprovider.dll" - "c:/sys/bin/testserviceprovider.dll"
+"/epoc32/data/z/hsresources/testresources/hsresources/plugins/serviceproviders/testserviceprovider.qtplugin" - "c:/hsresources/testresources/hsresources/plugins/serviceproviders/testserviceprovider.qtplugin"
+"/epoc32/data/z/hsresources/testresources/hsresources/plugins/serviceproviders/test1serviceprovider.manifest" - "c:/hsresources/testresources/hsresources/plugins/serviceproviders/test1serviceprovider.manifest"
+"/epoc32/data/z/hsresources/testresources/hsresources/plugins/serviceproviders/test2serviceprovider.manifest" - "c:/hsresources/testresources/hsresources/plugins/serviceproviders/test2serviceprovider.manifest"
+"../appfoundation/servicemodel/tsrc/t_hsservicemodelexe/invalidservice.manifest" - "c:/hsresources/testresources/invalidservice.manifest"
+"../appfoundation/servicemodel/tsrc/t_hsservicemodelexe/notwellformedservice.manifest" - "c:/hsresources/testresources/notwellformedservice.manifest"
+"../appfoundation/servicemodel/tsrc/t_hsservicemodelexe/validservice.manifest" - "c:/hsresources/testresources/validservice.manifest"
+"../appfoundation/servicemodel/tsrc/t_hsservicemodelexe/validservice2.manifest" - "c:/hsresources/testresources/validservice2.manifest"
+
+;statemodel:
+"/epoc32/release/armv5/urel/t_hsstatemodelexe.exe"                           - "c:/sys/bin/t_hsstatemodelexe.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsstatemodelexe_reg.rsc"      - "c:/private/10003a3f/import/apps/t_hsstatemodelexe_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsstatemodelexe.rsc"                         - "c:/resource/apps/t_hsstatemodelexe.rsc"
+"/epoc32/release/armv5/urel/teststateprovider.dll"     - "c:/sys/bin/teststateprovider.dll"
+"/epoc32/data/z/hsresources/testresources/plugins/stateproviders/teststateprovider.qtplugin"     - "c:/hsresources/testresources/plugins/stateproviders/teststateprovider.qtplugin"
+"/epoc32/data/z/hsresources/testresources/plugins/stateproviders/teststateprovider.manifest"  - "c:/hsresources/testresources/plugins/stateproviders/teststateprovider.manifest"
+"../appfoundation/statemodel/tsrc/t_hsstatemodelexe/invalidstate.manifest" - "c:/hsresources/testresources/invalidstate.manifest"
+"../appfoundation/statemodel/tsrc/t_hsstatemodelexe/notwellformedstate.manifest" - "c:/hsresources/testresources/notwellformedstate.manifest"
+"../appfoundation/statemodel/tsrc/t_hsstatemodelexe/validstate2.manifest" - "c:/hsresources/testresources/validstate2.manifest"
+"../appfoundation/statemodel/tsrc/t_hsstatemodelexe/validstate.manifest" - "c:/hsresources/testresources/validstate.manifest"
+
+;appruntimemodel:
+"/epoc32/release/armv5/urel/t_hsruntimemodelexe.exe"                           - "c:/sys/bin/t_hsruntimemodelexe.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hsruntimemodelexe_reg.rsc"      - "c:/private/10003a3f/import/apps/t_hsruntimemodelexe_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hsruntimemodelexe.rsc"                         - "c:/resource/apps/t_hsruntimemodelexe.rsc"
+"/epoc32/release/armv5/urel/testruntimeprovider.dll"     - "c:/sys/bin/testruntimeprovider.dll"
+"/epoc32/data/z/hsresources/testresources/plugins/runtimeproviders/testruntimeprovider.qtplugin"     - "c:/hsresources/testresources/plugins/runtimeproviders/testruntimeprovider.qtplugin"
+"/epoc32/data/z/hsresources/testresources/plugins/runtimeproviders/testruntimeprovider.manifest"  - "c:/hsresources/testresources/plugins/runtimeproviders/testruntimeprovider.manifest"
+"../appfoundation/appruntimemodel/tsrc/t_hsruntimemodelexe/invalidruntime.manifest" - "c:/hsresources/testresources/invalidruntime.manifest"
+"../appfoundation/appruntimemodel/tsrc/t_hsruntimemodelexe/notwellformedruntime.manifest" - "c:/hsresources/testresources/notwellformedruntime.manifest"
+"../appfoundation/appruntimemodel/tsrc/t_hsruntimemodelexe/validruntime2.manifest" - "c:/hsresources/testresources/validruntime2.manifest"
+"../appfoundation/appruntimemodel/tsrc/t_hsruntimemodelexe/validruntime.manifest" - "c:/hsresources/testresources/validruntime.manifest"
+
+;--------------- hswidgetmodel ---------------
+
+"/epoc32/release/armv5/urel/t_hswidgetmodelexe.exe"                        - "c:/sys/bin/t_hswidgetmodelexe.exe"
+"/epoc32/data/z/private/10003a3f/import/apps/t_hswidgetmodelexe_reg.rsc"   - "c:/private/10003a3f/import/apps/t_hswidgetmodelexe_reg.rsc"
+"/epoc32/data/z/resource/apps/t_hswidgetmodelexe.rsc"                      - "c:/resource/apps/t_hswidgetmodelexe.rsc"
+"/epoc32/release/armv5/urel/testwidgetprovider.dll"     - "c:/sys/bin/testwidgetprovider.dll"
+"/epoc32/data/z/hsresources/testresources/plugins/widgetproviders/testwidgetprovider.qtplugin"     - "c:/hsresources/testresources/plugins/widgetproviders/testwidgetprovider.qtplugin"
+"/epoc32/data/z/hsresources/testresources/plugins/widgetproviders/testwidgetprovider.manifest"  - "c:/hsresources/testresources/plugins/widgetproviders/testwidgetprovider.manifest"
+"../hswidgetmodel/tsrc/t_hswidgetmodelexe/invalidwidget.manifest" - "c:/hsresources/testresources/invalidwidget.manifest"
+"../hswidgetmodel/tsrc/t_hswidgetmodelexe/notwellformedwidget.manifest" - "c:/hsresources/testresources/notwellformedwidget.manifest"
+"../hswidgetmodel/tsrc/t_hswidgetmodelexe/validwidget2.manifest" - "c:/hsresources/testresources/validwidget2.manifest"
+"../hswidgetmodel/tsrc/t_hswidgetmodelexe/validwidget.manifest" - "c:/hsresources/testresources/validwidget.manifest"

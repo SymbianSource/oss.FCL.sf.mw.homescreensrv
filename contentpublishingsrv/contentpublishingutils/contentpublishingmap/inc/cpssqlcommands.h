@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  
- *  Version     : %version: 8 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#7.1.1 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 

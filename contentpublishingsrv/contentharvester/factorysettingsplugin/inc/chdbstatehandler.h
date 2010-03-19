@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -20,6 +20,8 @@
 #define C_CHDBSTATEHANDLER_H
 
 #include <e32base.h>	// For CActive, link against: euser.lib
+#include <f32file.h>
+
 
 class CRepository;
 class CCHFactorySettings;
@@ -63,13 +65,13 @@ private:
 	* Invoke for canceling asynchronous request.
 	*
 	* @since S60 S60 v3.1
-	*/	
+	*/
 	void DoCancel();
 
 	/**
 	 * Override to handle leaves from RunL(). Default implementation causes
 	 * the active scheduler to panic.
-	 * 
+	 *
 	 * @since S60 S60 v3.1
 	 */
 	TInt RunError(TInt aError);
@@ -78,19 +80,19 @@ private:
 	/**
 	 */
 	void ConstructFactorySettingsPathL();
-	
+
 	/**
 	 * Removes parsed Factory Settings files
 	 */
 	void RemoveFactorySettingsParsedFilesL();
-	
+
 	/**
 	 * Handle repository db state.
 	 * If KSQLDBStateRestored state match then calls HandleRestoredDbStateL
 	 * remove repository db state KSQLDBStateRestored, add KSQLDBStateNormal.
 	 */
 	void HandleDbStateL();
-	
+
 	/**
 	 * Handle restored db state.
 	 * Calls RemoveFactorySettingsParsedFilesL and call UpdateL on iCallback
@@ -105,13 +107,13 @@ private:
 	 * Own.
 	 */
     CRepository* iRepository;
-    
+
     /**
      * Interface for notifying need of update after DB restore.
      * Not own.
      */
     CCHFactorySettings* iCallback;
-    
+
     /**
      * File server session.
      */

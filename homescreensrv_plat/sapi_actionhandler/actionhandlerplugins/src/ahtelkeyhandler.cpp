@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:
+* Description:  
  *
 */
 
@@ -19,7 +19,6 @@
 #include <AiwServiceHandler.h>      // AIW
 #include <aiwdialdata.h>    //include\oem
 #include <liwvariant.h>
-#include <mmf/common/mmfcontrollerpluginresolver.h>
 
 #include "ahtelkeyhandler.h"
 #include "ahproperties.hrh"
@@ -31,6 +30,24 @@
 // ---------------------------------------------------------------------------
 void CAHTelKeyHandler::ConstructL()
     {
+    iServiceHandler = CAiwServiceHandler::NewL( );
+    TAiwServiceCommands serviceCommand = KAiwCmdCall;
+
+    //service command used as criteria item ID
+    _LIT8( KStar, "*" );
+    CAiwCriteriaItem* criteria = CAiwCriteriaItem::NewLC( serviceCommand,
+        serviceCommand, KStar );
+
+    RCriteriaArray interest;
+    CleanupClosePushL( interest );
+    // We are using a base service.
+    TUid base( KNullUid);
+    base.iUid = KAiwClassBase;
+    criteria->SetServiceClass( base );
+    User::LeaveIfError( interest.Append( criteria ) );
+    iServiceHandler->AttachL( interest );
+    CleanupStack::PopAndDestroy( &interest );
+    CleanupStack::PopAndDestroy( criteria );
     }
 
 // ---------------------------------------------------------------------------
@@ -63,32 +80,6 @@ CAHTelKeyHandler::~CAHTelKeyHandler()
     }
 
 // ---------------------------------------------------------------------------
-// Helper method for AIW attach
-// ---------------------------------------------------------------------------
-void CAHTelKeyHandler::AttachServiceHandlerL()
-    {
-    iServiceHandler = CAiwServiceHandler::NewL();
-
-    RCriteriaArray interest;
-    CleanupResetAndDestroy<RCriteriaArray>::PushL( interest );
-
-    TAiwServiceCommands serviceCommand = KAiwCmdCall;
-    _LIT8( KStar, "*" );
-    // Service command used as criteria item ID
-    CAiwCriteriaItem* criteria = CAiwCriteriaItem::NewLC( serviceCommand,
-        serviceCommand, KStar );
-
-    // We are using a base service.
-    TUid base = { KAiwClassBase };
-    criteria->SetServiceClass( base );
-    interest.AppendL( criteria );
-    CleanupStack::Pop( criteria );
-
-    iServiceHandler->AttachL( interest );
-    CleanupStack::PopAndDestroy( &interest );
-    }
-
-// ---------------------------------------------------------------------------
 // Executes provided action
 // ---------------------------------------------------------------------------
 //
@@ -107,14 +98,11 @@ TInt CAHTelKeyHandler::ExecuteActionL( const CLiwMap* aMap )
             dialData->SetPhoneNumberL( number );
             dialData->SetWindowGroup( AIWDialData::KAiwGoToIdle );
             // Attach the interest to the AIW framework.
-            if ( !iServiceHandler )
-                {
-                AttachServiceHandlerL();
-                }
+
             // Set parameters for the AIW call
             CAiwGenericParamList* paramList = CAiwGenericParamList::NewLC( );
             CAiwGenericParamList& paramListOut =
-                iServiceHandler->OutParamListL( );
+                    iServiceHandler->OutParamListL( );
 
             dialData->FillInParamListL( *paramList );
             iServiceHandler->ExecuteServiceCmdL( KAiwCmdCall, *paramList,

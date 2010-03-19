@@ -132,19 +132,7 @@ TUint CCPDataManager::AddDataL( CCPLiwMap& aMap )
     }
 
 // ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CCPDataManager::AddNonPersistentDataL( const CCPLiwMap* aMap )
-    {
-    CLiwDefaultList* notificationList = CLiwDefaultList::NewLC( );
-    BuildChangeInfoForAddL( aMap, notificationList );
-    HandleChangeL( notificationList );
-    CleanupStack::PopAndDestroy( notificationList );
-    }
-
-// ---------------------------------------------------------------------------
-//
+// 
 // ---------------------------------------------------------------------------
 //
 void CCPDataManager::GetListL( const CCPLiwMap& aMap,
@@ -510,35 +498,10 @@ void CCPDataManager::BuildDefaultChangeInfoL( const CCPLiwMap* aMap,
 	}
 
 // -----------------------------------------------------------------------------
-//
+// 
 // -----------------------------------------------------------------------------
-//
-void CCPDataManager::BuildChangeInfoForAddL( const CCPLiwMap* aMap,
-        CLiwDefaultList* aChangeInfoList )
-    {
-    CLiwDefaultMap* changeInfoMap = CLiwDefaultMap::NewLC();
-
-    CopyVariantL(KId, aMap, changeInfoMap );
-    CopyVariantL(KPublisherId, aMap, changeInfoMap );
-    CopyVariantL(KContentType, aMap, changeInfoMap );
-    CopyVariantL(KContentId, aMap, changeInfoMap );
-    CopyVariantL(KFlag, aMap, changeInfoMap );
-    CopyVariantL(KType, aMap, changeInfoMap );
-    CopyVariantL(KActionTrigger, aMap, changeInfoMap );
-    CopyVariantL(KDataMap, aMap, changeInfoMap );
-    CopyActionTrigger16L( aMap, changeInfoMap );
-
-    changeInfoMap->InsertL( KOperation, TLiwVariant( KOperationAdd ) );
-
-    aChangeInfoList->AppendL( TLiwVariant( changeInfoMap ) );
-    CleanupStack::PopAndDestroy( changeInfoMap );
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCPDataManager::CopyVariantL(const TDesC8& aKey,
+//   
+void CCPDataManager::CopyVariantL(const TDesC8& aKey, 
 		const CLiwMap* aInMap, CLiwDefaultMap* aOutMap )
 	{
 	TLiwVariant variant;

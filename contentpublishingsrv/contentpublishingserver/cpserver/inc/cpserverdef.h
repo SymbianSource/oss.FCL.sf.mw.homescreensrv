@@ -30,7 +30,6 @@ enum TCpServerRqst
     {
     ECpServerAddData = 1,
     ECpServerRemoveData = 2,
-    ECpServerAddDataNonPersistent = 3,
     ECpServerGetListSize = 10,
     ECpServerGetListData = 11,
     ECpServerRegisterObserver = 20,

@@ -267,23 +267,6 @@ void CContentHarvesterServer::CContentHarvesterAppUi::ConstructL()
     CEikAppUi::BaseConstructL( ENoAppResourceFile|ENoScreenFurniture );
     }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-TErrorHandlerResponse CContentHarvesterServer::CContentHarvesterAppUi::HandleError( TInt aError, 
-                                            const SExtendedError& /*aExtErr*/, 
-                                            TDes& /*aErrorText*/, 
-                                            TDes& /*aContextText*/ )
-    {
-    RDebug::Printf("CContentHarvesterAppUi::HandleError %d", aError);
-	if ( aError != KErrNoMemory )       
-        {       
-        return ENoDisplay; // we dont want to handle this error       
-        }       
-    return EErrorNotHandled;  
-    }
-	
 // ============================= LOCAL FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------

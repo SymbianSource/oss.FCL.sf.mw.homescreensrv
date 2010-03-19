@@ -59,9 +59,7 @@ public:
      * @param aInParamList const reference to the input list
      * @param aOutParamList reference to the output list
      */
-    void AddL( const CCPLiwMap& aMap,
-               CLiwGenericParamList& aOutParamList,
-               TUint aCmdOptions );
+    void AddL( const CCPLiwMap& aMap, CLiwGenericParamList& aOutParamList );
 
     /**
      * Pass GetList request to the server

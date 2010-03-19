@@ -68,14 +68,6 @@ public:
     TUint AddDataL( CCPLiwMap& aMap );
 
     /**
-     * Data is not added to database. Only notification is send to observers.
-     *
-     * @param aData Data to be added.
-     * @return Id of a newly created data item
-     */
-    void AddNonPersistentDataL( const CCPLiwMap* aMap );
-
-    /**
      * Fetches data from database
      * @param aInParamList filter and sorting criteria
      * @param aOutParamList results
@@ -203,7 +195,7 @@ private:
     TBool GetActivateInfoL( const CCPLiwMap* aMap );
     
     /**
-    * Builds change info list based on query result to database
+    * Builds change info list
     * @param aMap - map containing parameters needed to build change info list
     * @param aParam - param from getlist result 
     * @param aChangeInfoList - output list containing change info list sent
@@ -222,15 +214,7 @@ private:
     void BuildDefaultChangeInfoL( 
     		const CCPLiwMap* aMap, 
     		CLiwDefaultList* aChangeInfoList );
-    /**
-    * Builds change info list when query to database returned nothing
-    * @param aMap - map containing parameters needed to build change info list
-    * @param aChangeInfoList - output list containing change info list sent
-    * as notification
-    */
-    void BuildChangeInfoForAddL(
-            const CCPLiwMap* aMap,
-            CLiwDefaultList* aChangeInfoList );
+    
 
     /**
     * Copies variant from in to out map if entry with provided key exists

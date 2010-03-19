@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  Class used by session to handle access control list
- *  Version     : %version: 5 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#4.1.1 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 

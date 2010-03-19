@@ -64,10 +64,6 @@ public:
 public:
         ~CContentHarvesterAppUi();
         void ConstructL();
-		TErrorHandlerResponse HandleError( TInt aError, 
-										   const SExtendedError &aExtErr, 
-                                           TDes &aErrorText, 
-                                           TDes &aContextText );
         };
 
 public:

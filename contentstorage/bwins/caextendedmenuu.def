@@ -1,0 +1,12 @@
+EXPORTS
+	??0CCaHandler@@IAE@XZ @ 1 NONAME ; CCaHandler::CCaHandler(void)
+	??1CCaHandler@@UAE@XZ @ 2 NONAME ; CCaHandler::~CCaHandler(void)
+	??1CCaHandlerEngine@@UAE@XZ @ 3 NONAME ; CCaHandlerEngine::~CCaHandlerEngine(void)
+	?BaseConstructL@CCaHandler@@IAEXXZ @ 4 NONAME ; void CCaHandler::BaseConstructL(void)
+	?GetItemIcon@CaMenuIconUtility@@SAPAVCAknIcon@@ABVCCaInnerEntry@@@Z @ 5 NONAME ; class CAknIcon * CaMenuIconUtility::GetItemIcon(class CCaInnerEntry const &)
+	?HandleCommandL@CCaHandler@@UAEXAAVCCaInnerEntry@@ABVTDesC8@@@Z @ 6 NONAME ; void CCaHandler::HandleCommandL(class CCaInnerEntry &, class TDesC8 const &)
+	?HandleCommandL@CCaHandlerEngine@@QAEXAAVCCaInnerEntry@@ABVTDesC8@@@Z @ 7 NONAME ; void CCaHandlerEngine::HandleCommandL(class CCaInnerEntry &, class TDesC8 const &)
+	?NewL@CCaHandlerEngine@@SAPAV1@XZ @ 8 NONAME ; class CCaHandlerEngine * CCaHandlerEngine::NewL(void)
+	?NewLC@CCaHandlerEngine@@SAPAV1@XZ @ 9 NONAME ; class CCaHandlerEngine * CCaHandlerEngine::NewLC(void)
+	?SupportsType@CCaHandler@@UAEHABVTDesC16@@@Z @ 10 NONAME ; int CCaHandler::SupportsType(class TDesC16 const &)
+

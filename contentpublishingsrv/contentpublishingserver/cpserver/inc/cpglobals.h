@@ -43,7 +43,6 @@ enum TFlag
     
 const TInt KNameArgumentsLimit = 5;
 const TInt KThreadNameLimit = 64;
-const TUint KDisablePersist = 0x1000;
 
 _LIT( KService, "CP Service" );
 

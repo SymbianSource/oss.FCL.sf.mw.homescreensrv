@@ -52,11 +52,6 @@ private:
 
     void ConstructL();
 
-    /**
-     * Helper method for AIW attach.
-     */
-    void AttachServiceHandlerL();
-
 private:
 
     CAiwServiceHandler* iServiceHandler;

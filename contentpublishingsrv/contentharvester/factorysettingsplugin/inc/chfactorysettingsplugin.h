@@ -23,11 +23,11 @@
 #include <f32file.h>
 #include <badesca.h>
 
-class CCHFactorySettingsParser;
 class MLiwInterface;
 class CCHFactorySettingsInstallNotifier;
 class CFileMan;
 class CCHDbStateHandler;
+class CCHFactorySettingsDOMParser; // mw
 
 class CCHFactorySettings : public CContentHarvesterPlugin
 
@@ -114,7 +114,7 @@ private:
     /**
      * Pointer to a parser object
      */
-    CCHFactorySettingsParser* iParser;
+    CCHFactorySettingsDOMParser* iParser; //
 
     /**
      * Descriptor containing a path to a directory with files to parse
