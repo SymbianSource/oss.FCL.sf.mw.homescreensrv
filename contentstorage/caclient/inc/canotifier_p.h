@@ -26,8 +26,7 @@ class CaNotifierPrivate
 {
 public:
 
-    enum NotifierType
-    {
+    enum NotifierType {
         EntryChangedWithIdNotifierType = 0,
         EntryChangedWithEntryNotifierType,
         EntryTouchedNotifierType,

@@ -45,9 +45,9 @@ public:
 
     void addEntryTypeName(const QString &entryTypeName);
 
-    void setFlagsOn(EntryFlags onFlags);
+    void setFlagsOn(const EntryFlags &onFlags);
     EntryFlags flagsOn() const;
-    void setFlagsOff(EntryFlags offFlags);
+    void setFlagsOff(const EntryFlags &offFlags);
     EntryFlags flagsOff() const;
 
     void setSort(SortAttribute sortAttribute, 

@@ -22,7 +22,6 @@
 #include <e32base.h>
 
 // FORWARD DECLARATION
-class CTimeout;
 class CCaSrvEngUtils;
 class CCaSrvManager;
 class CCaStorageProxy;
@@ -99,11 +98,6 @@ private:
 
 private:
     // Data
-    
-    /**
-     * Exit timer. Own.
-     */
-    CTimeout* iExitTimer; 
     
     /**
      * Data storage proxy. Own.

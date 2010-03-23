@@ -11,7 +11,7 @@
  *
  * Contributors:
  *
- * Description: 
+ * Description:
  *
  */
 
@@ -38,8 +38,7 @@ public:
     /**
      * Insert into group type.
      */
-    enum InsertType
-    {
+    enum InsertType {
         AfterTheLastEntry = -1,
         BeforeTheFirstEntry = 0
     };
@@ -71,8 +70,8 @@ public:
      * @param targetEntry entry.
      * @return error code.
      */
-    ErrorCode addData(const CaEntry& entryToAdd,
-        CaEntry& targetEntry);
+    ErrorCode addData(const CaEntry &entryToAdd,
+                      CaEntry &targetEntry);
 
     /**
      * Method for removing entries.
@@ -89,7 +88,7 @@ public:
      * @return error code.
      */
     ErrorCode insertEntriesIntoGroup(int groupId,
-        const QList<int> &entryIdList, int beforeEntryId);
+                                     const QList<int> &entryIdList, int beforeEntryId);
 
     /**
      * Remove entries from group.
@@ -100,8 +99,8 @@ public:
      * @return error code.
      */
     ErrorCode removeEntriesFromGroup(int groupId,
-        const QList<int> &entryIdList,
-        bool calledDirectly = true);
+                                     const QList<int> &entryIdList,
+                                     bool calledDirectly = true);
 
     /**
      * Method for fetching entries.
@@ -110,7 +109,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const QList<int>& entryIdList, QList<CaEntry*>& sourceList);
+    ErrorCode getData(const QList<int>& entryIdList, QList<CaEntry *>& sourceList);
 
     /**
      * Method for fetching entries.
@@ -119,7 +118,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const CaQuery &query, QList<CaEntry*>& sourceList);
+    ErrorCode getData(const CaQuery &query, QList<CaEntry *>& sourceList);
 
     /**
      * Method for fetching entries.
@@ -129,7 +128,7 @@ public:
      * @return error code
      */
     ErrorCode getEntryIds(const CaQuery &query,
-        QList<int>& sourceIdList);
+                          QList<int>& sourceIdList);
 
     /**
      * Method for executing command
@@ -138,8 +137,8 @@ public:
      * @param command command to execute
      * @return error code
      */
-    ErrorCode executeCommand(const CaEntry& entry,
-        const QString& command);
+    ErrorCode executeCommand(const CaEntry &entry,
+                             const QString &command);
 
     /**
      * Method for touching entry.
@@ -147,12 +146,12 @@ public:
      * @param entry entry to touch
      * @return error code
      */
-    ErrorCode touch(const CaEntry& entry);
-    
+    ErrorCode touch(const CaEntry &entry);
+
     /**
      * Method for custom sort.
      * @param entryIdList list of ids.
-     * @param groupId Group id. 
+     * @param groupId Group id.
      * @return error code.
      */
     ErrorCode customSort(const QList<int> &entryIdList, int groupId);
@@ -163,23 +162,23 @@ public:
      * @param parentIds a list of parent ids.
      * @return true if the operation is successful.
      */
-    bool GetParentsIds( const QList<int> &entryIds,
-        QList<int> &parentIds);
+    bool GetParentsIds(const QList<int> &entryIds,
+                       QList<int> &parentIds);
 
 private:
     bool hsWidgetExists(int uid);
     void addWidgetEntry(const HsWidgetToken &widgetToken);
-    
-    void modifyQueryForSortOrder(QString& queryString,
-        const CaQuery &query, bool parent) const;
-    bool setIconInDb(CaEntry* entryClone) const;
-    bool setEntryInDb(CaEntry* entryClone) const;
-    bool setAttributesInDb(CaEntry* entryClone) const;
+
+    void modifyQueryForSortOrder(QString &queryString,
+                                 const CaQuery &query, bool parent) const;
+    bool setIconInDb(CaEntry *entryClone) const;
+    bool setEntryInDb(CaEntry *entryClone) const;
+    bool setAttributesInDb(CaEntry *entryClone) const;
     void CreateGetParentsIdsQuery(
         const QList<int> &entryIds,
         const QList<int> &parentIds,
         QString &query);
-        
+
 private:
     QString mWidgetRegistryPath;
 };

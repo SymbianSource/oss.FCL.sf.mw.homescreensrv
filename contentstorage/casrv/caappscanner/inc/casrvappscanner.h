@@ -170,12 +170,6 @@ private:
      */
     void RemoveEntryFromDownloadedL( TInt aEntryId );
 
-    /**
-     * Handles removal of stub items from download collection
-     * @param aEntryId application entry id.
-     */
-    void HandleStubUpdatesL ();
-
     TBool HandleLockDeleteFlagUpdateL( CCaInnerEntry* aItem );
 
     /**
@@ -225,10 +219,11 @@ private:
     void GetApaItemsL( RArray<TCaAppAtributes>& aArray );
 
     /**
-     * Remove sat applications from array(found in AppArc)
+     * Remove application from array (found in AppArc)
      * @param aArray RArray with application
+     * @param aUid uid of application to remove
      */
-    void RemoveSatApp( RArray<TCaAppAtributes>& aArray );
+    void RemoveApp( RArray<TCaAppAtributes>& aArray, TInt32 aUid );
 
     /**
      * Get applications from CaStorage
@@ -243,6 +238,16 @@ private:
      * contains applications
      */
     void RemoveSatAppL( RPointerArray<CCaInnerEntry>& aArray );
+    
+    /**
+     * Ensure that HsApplicaiton is not visible: Add HsApplication 
+     * as hidden to CaStorage or remove HsApplication entry
+     * from array (found in CaStorage).
+     * @param aArray RPointerArray with CCaInnerEntries
+     * contains application
+     */
+    void HandleHsAppEntryL( RPointerArray<CCaInnerEntry>& aArray );
+
     /**
      * Get application with specified uid from CaStorage
      * @param aUid RPointerArray with CCaInnerEntries

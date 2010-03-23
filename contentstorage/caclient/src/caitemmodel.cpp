@@ -21,6 +21,7 @@
 #include "caitemmodel_p.h"
 #include "canotifier.h"
 #include "canotifierfilter.h"
+#include "caclienttest_global.h"
 
 // Constants
 const QSize defaultIconSize(30, 30);
@@ -52,7 +53,7 @@ const QSize defaultIconSize(30, 30);
  \param query query describing entries that should be present in a model.
  \param parent parent of a model
  */
-CaItemModel::CaItemModel(const CaQuery& query, QObject * parent) :
+CaItemModel::CaItemModel(const CaQuery &query, QObject *parent) :
     QAbstractItemModel(parent), m_d(new CaItemModelPrivate(query, this))
 {
 
@@ -122,7 +123,7 @@ int CaItemModel::rowCount(const QModelIndex &parent) const
 
  */
 QModelIndex CaItemModel::index(int row, int column,
-    const QModelIndex &parent) const
+                               const QModelIndex &parent) const
 {
     Q_UNUSED(column);
     Q_UNUSED(parent);
@@ -263,7 +264,7 @@ bool CaItemModel::isAutoUpdate() const
 
  */
 void CaItemModel::setSort(SortAttribute sortAttribute,
-    Qt::SortOrder sortOrder)
+                          Qt::SortOrder sortOrder)
 {
     m_d->setSort(sortAttribute, sortOrder);
 }
@@ -330,6 +331,44 @@ void CaItemModel::setParentId(int parentId)
 }
 
 /*!
+ Sets flags to mQuery which should be enabled.
+ This method does not update current model - only mQuery member.
+ Now to do this setParentId have to be invoke.
+ \param onFlags flags.
+
+ \code
+ ...
+ // to set a flags enabled
+ model->setFlagsOn(RemovableEntryFlag);
+ ...
+ \endcode
+
+ */
+void CaItemModel::setFlagsOn(const EntryFlags &onFlags)
+{
+    m_d->setFlagsOn(onFlags);
+}
+
+/*!
+ Sets flags to mQuery which should be disabled.
+ This method does not update current model - only mQuery member.
+ Now to do this setParentId have to be invoke.
+ \param offFlags flags.
+
+ \code
+ ...
+ // to set a flags disabled
+ model->setFlagsOff(RemovableEntryFlag);
+ ...
+ \endcode
+
+ */
+void CaItemModel::setFlagsOff(const EntryFlags &offFlags)
+{
+    m_d->setFlagsOff(offFlags);
+}
+
+/*!
  Returns an entry from model
  \param index of entry in model
  \retval pointer to an entry
@@ -343,7 +382,7 @@ void CaItemModel::setParentId(int parentId)
  \endcode
 
  */
-CaEntry* CaItemModel::entry(const QModelIndex &index) const
+CaEntry *CaItemModel::entry(const QModelIndex &index) const
 {
     return m_d->entry(index);
 }
@@ -354,7 +393,7 @@ CaEntry* CaItemModel::entry(const QModelIndex &index) const
  \param pointer to public implementation object connected
  */
 CaItemModelPrivate::CaItemModelPrivate(const CaQuery &query,
-    CaItemModel *itemModelPublic) :
+                                       CaItemModel *itemModelPublic) :
     QObject(), m_q(itemModelPublic), mParentEntry(0), mQuery(query),
     mService(CaService::instance()), mEntries(mService), mNotifier(NULL),
     mSize(defaultIconSize), mSecondLineVisibility(true)
@@ -403,27 +442,36 @@ QModelIndex CaItemModelPrivate::index(int row)
  \retval models data as QVariant
  */
 QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
-    int role) const
+                                  int role) const
 {
-    if (!modelIndex.isValid())
-        return QVariant();
-
-    switch (role) {
-    case Qt::DisplayRole:
-        return displayRole(modelIndex);
-    case Qt::DecorationRole:
-        return QVariant(HbIcon(entry(modelIndex)->makeIcon(mSize)));
-    case CaItemModel::IdRole:
-        return QVariant(entry(modelIndex)->id());
-    case CaItemModel::TypeRole:
-        return QVariant(entry(modelIndex)->entryTypeName());
-    case CaItemModel::FlagsRole:
-        return qVariantFromValue(entry(modelIndex)->flags());
-    case CaItemModel::TextRole:
-        return QVariant(entry(modelIndex)->text());
-    default:
-        return QVariant(QVariant::Invalid);
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::data");
+    QVariant variant;
+    if (modelIndex.isValid()) {
+        switch (role) {
+        case Qt::DisplayRole:
+            variant = displayRole(modelIndex);
+            break;
+        case Qt::DecorationRole:
+            variant = QVariant(HbIcon(entry(modelIndex)->makeIcon(mSize)));
+            break;
+        case CaItemModel::IdRole:
+            variant = QVariant(entry(modelIndex)->id());
+            break;
+        case CaItemModel::TypeRole:
+            variant = QVariant(entry(modelIndex)->entryTypeName());
+            break;
+        case CaItemModel::FlagsRole:
+            variant = qVariantFromValue(entry(modelIndex)->flags());
+            break;
+        case CaItemModel::TextRole:
+            variant = QVariant(entry(modelIndex)->text());
+            break;
+        default:
+            variant = QVariant(QVariant::Invalid);
+        }
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::data");
+    return variant;
 }
 
 /*!
@@ -432,6 +480,7 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
  */
 void CaItemModelPrivate::setAutoUpdate(bool autoUpdate)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::setAutoUpdate");
     if (autoUpdate) {
         if (!mNotifier) {
             CaNotifierFilter filter(mQuery);
@@ -443,6 +492,7 @@ void CaItemModelPrivate::setAutoUpdate(bool autoUpdate)
         delete mNotifier;
         mNotifier = NULL;
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::setAutoUpdate");
 }
 
 /*!
@@ -451,10 +501,12 @@ void CaItemModelPrivate::setAutoUpdate(bool autoUpdate)
  \param  sortOrder sorting order (SortAttribute)
  */
 void CaItemModelPrivate::setSort(SortAttribute sortAttribute,
-    Qt::SortOrder sortOrder)
+                                 Qt::SortOrder sortOrder)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::setSort");
     mQuery.setSort(sortAttribute, sortOrder);
     updateLayout();
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::setSort");
 }
 
 /*!
@@ -498,7 +550,7 @@ QModelIndex CaItemModelPrivate::root()
  \param modelIndex index of entry in model
  \retval pointer to an entry
  */
-CaEntry* CaItemModelPrivate::entry(const QModelIndex &modelIndex) const
+CaEntry *CaItemModelPrivate::entry(const QModelIndex &modelIndex) const
 {
     if (modelIndex.column() == 1) {
         return mParentEntry;
@@ -536,6 +588,8 @@ bool CaItemModelPrivate::secondLineVisibility() const
  */
 QVariant CaItemModelPrivate::displayRole(const QModelIndex &modelIndex) const
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::displayRole")
+
     QVariant result;
     if (mSecondLineVisibility) {
         if (entry(modelIndex)->description().isEmpty()) {
@@ -549,6 +603,7 @@ QVariant CaItemModelPrivate::displayRole(const QModelIndex &modelIndex) const
     } else {
         result = entry(modelIndex)->text();
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::displayRole")
     return result;
 }
 
@@ -558,6 +613,7 @@ QVariant CaItemModelPrivate::displayRole(const QModelIndex &modelIndex) const
  */
 void CaItemModelPrivate::setParentId(int parentId)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::setParentId");
     mQuery.setParentId(parentId);
     if (mNotifier) {
         delete mNotifier;
@@ -565,8 +621,36 @@ void CaItemModelPrivate::setParentId(int parentId)
         reconnectSlots();
     }
     updateModel();
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::setParentId");
+
 }
 
+/*!
+ Sets flags to mQuery which should be enabled.
+ \param onFlags flags.
+
+  */
+void CaItemModelPrivate::setFlagsOn(const EntryFlags &onFlags)
+{
+    mQuery.setFlagsOn(onFlags);
+}
+
+/*!
+ Sets flags to mQuery which should be disabled.
+ \param offFlags flags.
+
+ \code
+ ...
+ // to set a new parent id
+ model->setFlagsOff(RemovableEntryFlag);
+ ...
+ \endcode
+
+ */
+void CaItemModelPrivate::setFlagsOff(const EntryFlags &offFlags)
+{
+    mQuery.setFlagsOff(offFlags);
+}
 
 /*!
  Checks if notifier exists
@@ -586,9 +670,13 @@ bool CaItemModelPrivate::notifierExists() const
  */
 void CaItemModelPrivate::updateModel()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModel");
+
     mEntries.reloadEntries(mQuery);
     updateParentEntry();
     m_q->reset();
+
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModel");
 }
 
 /*!
@@ -596,10 +684,15 @@ void CaItemModelPrivate::updateModel()
  */
 void CaItemModelPrivate::updateParentEntry()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateParentEntry");
+
     if (mQuery.parentId()) {
         delete mParentEntry;
         mParentEntry = mService->getEntry(mQuery.parentId());
     }
+
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateParentEntry");
+
 }
 
 /*!
@@ -608,13 +701,15 @@ void CaItemModelPrivate::updateParentEntry()
  */
 void CaItemModelPrivate::updateItemData(int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateItemData");
+
     mEntries.updateEntry(id);
 
     QList<int> ids = mService->getEntryIds(mQuery);
     if (mEntries.indexOf(id) >= 0 && ids.indexOf(id)
-        == mEntries.indexOf(id)) {
+            == mEntries.indexOf(id)) {
         emit m_q->dataChanged(index(mEntries.indexOf(id)), index(
-            mEntries.indexOf(id)));
+                                  mEntries.indexOf(id)));
     } else {
         if (mParentEntry && id == mParentEntry->id()) {
             updateParentEntry();
@@ -623,6 +718,7 @@ void CaItemModelPrivate::updateItemData(int id)
             updateLayout();
         }
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateItemData");
 }
 
 /*!
@@ -631,6 +727,8 @@ void CaItemModelPrivate::updateItemData(int id)
  */
 void CaItemModelPrivate::addItem(int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::addItem");
+
     int row = itemRow(id);
     //we use beginInsertRows and endInsertRows to emit proper signal
     //(see Qt documentation of QAbstractItemModel)
@@ -639,6 +737,7 @@ void CaItemModelPrivate::addItem(int id)
         mEntries.insert(row, id);
         m_q->endInsertRows();
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::addItem");
 }
 
 /*!
@@ -647,21 +746,26 @@ void CaItemModelPrivate::addItem(int id)
  */
 void CaItemModelPrivate::handleAddItems(QList<int> &itemsList)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::handleAddItems");
+
     int entriesCount = mEntries.count();
     if (entriesCount) {
         int lastRow = itemsList.indexOf(mEntries[entriesCount - 1]);
         if (itemsList.count() == entriesCount && lastRow == (entriesCount
-            - 1)) {
+                - 1)) {
             //count is same and last item is in same position
             //so we update whole model
             updateModel();
         } else if ((itemsList.count() - entriesCount) == 1 && lastRow
-            == entriesCount) {
+                   == entriesCount) {
             //just one item added - collection
             int i = 0;
             for (i = 0; i < entriesCount; i++) {
                 if (itemsList[i] != mEntries[i]) {
                     addItem(itemsList[i]);
+                    updateLayout();
+                    emit m_q->scrollTo(i,
+                                       QAbstractItemView::PositionAtTop);
                 }
             }
             while (i < itemsList.count()) {
@@ -676,11 +780,12 @@ void CaItemModelPrivate::handleAddItems(QList<int> &itemsList)
             //some items were added
             updateLayout();
             emit m_q->scrollTo(lastRow + 1,
-                QAbstractItemView::PositionAtTop);
+                               QAbstractItemView::PositionAtTop);
         }
     } else {
         updateModel();
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::handleAddItems");
 }
 
 /*!
@@ -690,7 +795,9 @@ void CaItemModelPrivate::handleAddItems(QList<int> &itemsList)
  */
 int CaItemModelPrivate::itemRow(int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::itemRow");
     QList<int> ids = mService->getEntryIds(mQuery);
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::itemRow");
     return ids.indexOf(id);
 }
 
@@ -700,13 +807,18 @@ int CaItemModelPrivate::itemRow(int id)
  */
 void CaItemModelPrivate::removeItem(int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::removeItem");
     int row = mEntries.indexOf(id);
     if (row >= 0) {
         m_q->beginRemoveRows(QModelIndex(), mEntries.indexOf(id),
-            mEntries.indexOf(id));
+                             mEntries.indexOf(id));
         mEntries.remove(id);
         m_q->endRemoveRows();
+    } else {
+        updateLayout();
     }
+    
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::removeItem");
 }
 
 /*!
@@ -715,6 +827,7 @@ void CaItemModelPrivate::removeItem(int id)
  */
 void CaItemModelPrivate::removeItems(const QList<int> &itemsList)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::removeItems");
     int i = 0;
     for (i = 0; i < itemsList.count(); i++) {
         if (itemsList[i] != mEntries[i]) {
@@ -725,6 +838,7 @@ void CaItemModelPrivate::removeItems(const QList<int> &itemsList)
         removeItem(mEntries[i]);
         i++;
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::removeItems");
 }
 
 /*!
@@ -732,10 +846,12 @@ void CaItemModelPrivate::removeItems(const QList<int> &itemsList)
  */
 void CaItemModelPrivate::updateLayout()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateLayout");
     m_q->layoutAboutToBeChanged();
     mEntries.updateEntries(mQuery);
     updateParentEntry();
     m_q->layoutChanged();
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateLayout");
 }
 
 /*!
@@ -743,13 +859,15 @@ void CaItemModelPrivate::updateLayout()
  */
 void CaItemModelPrivate::connectSlots()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::connectSlots");
     connect(mNotifier, SIGNAL(entryChanged(int,ChangeType)),
-    this, SLOT(updateModelItem(int,ChangeType)) );
+            this, SLOT(updateModelItem(int,ChangeType)));
 
     if (mQuery.parentId() > 0) {
         connect(mNotifier, SIGNAL(groupContentChanged(int)),
-        this, SLOT(updateModelContent(int)) );
+                this, SLOT(updateModelContent(int)));
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::connectSlots");
 }
 
 /*!
@@ -757,12 +875,14 @@ void CaItemModelPrivate::connectSlots()
  */
 void CaItemModelPrivate::disconnectSlots()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::disconnectSlots");
     disconnect(mNotifier, SIGNAL(entryChanged(int,ChangeType)),
-    this, SLOT(updateModelItem(int,ChangeType)) );
+               this, SLOT(updateModelItem(int,ChangeType)));
     if (mQuery.parentId() > 0) {
         disconnect(mNotifier, SIGNAL(groupContentChanged(int)),
-        this, SLOT(updateModelContent(int)) );
+                   this, SLOT(updateModelContent(int)));
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::disconnectSlots");
 }
 
 /*!
@@ -770,8 +890,10 @@ void CaItemModelPrivate::disconnectSlots()
  */
 void CaItemModelPrivate::reconnectSlots()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::reconnectSlots");
     disconnectSlots();
     connectSlots();
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::reconnectSlots");
 }
 
 /*!
@@ -781,6 +903,7 @@ void CaItemModelPrivate::reconnectSlots()
  */
 void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModelItem");
     switch (changeType) {
     case AddChangeType:
         addItem(id);
@@ -792,6 +915,7 @@ void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
         updateItemData(id);
         break;
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelItem");
 }
 
 /*!
@@ -801,7 +925,7 @@ void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
 void CaItemModelPrivate::updateModelContent(int id)
 {
     Q_UNUSED(id);
-
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModelContent");
     QList<int> ids = mService->getEntryIds(mQuery);
 
     if (ids.count() >= mEntries.count()) {
@@ -809,4 +933,5 @@ void CaItemModelPrivate::updateModelContent(int id)
     } else {
         removeItems(ids);
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelContent");
 }

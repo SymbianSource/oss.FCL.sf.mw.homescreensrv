@@ -72,7 +72,7 @@ private:
      * Points to the CaEntry instance that uses
      * this private implementation.
      */
-    CaEntry * const m_q;
+    CaEntry *const m_q;
 
     /*!
      *

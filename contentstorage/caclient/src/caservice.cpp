@@ -30,6 +30,7 @@
 
 #include "caclientproxy.h"
 #include "caobjectadapter.h"
+#include "caclienttest_global.h"
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -102,15 +103,14 @@ CaService::~CaService()
 
  \endcode
  */
-CaEntry * CaService::getEntry(int entryId) const
+CaEntry *CaService::getEntry(int entryId) const
 {
     QList<CaEntry *> entries = getEntries(QList<int> () << entryId);
     if (entries.count()) {
         // there should be exactly one entry with specified ID if present
         Q_ASSERT(entries.count() == 1);
         return entries[0];
-    }
-    else {
+    } else {
         return NULL;
     }
 }
@@ -216,7 +216,7 @@ QList<int> CaService::getEntryIds(const CaQuery &query) const
  ...
  \endcode
  */
-CaEntry * CaService::createEntry(const CaEntry &entry) const
+CaEntry *CaService::createEntry(const CaEntry &entry) const
 {
     return m_d->createEntry(entry);
 }
@@ -294,8 +294,8 @@ bool CaService::removeEntries(const QList<CaEntry *> &entryList) const
     QList<int> idList;
     CaEntry *entry(NULL);
     foreach(entry, entryList) {
-            idList << entry->id();
-        }
+        idList << entry->id();
+    }
     return removeEntries(idList);
 }
 
@@ -358,10 +358,10 @@ bool CaService::touch(const CaEntry &entry) const
  \endcode
  */
 bool CaService::insertEntryIntoGroup(int groupId, int entryId,
-    int beforeEntryId) const
+                                     int beforeEntryId) const
 {
     return insertEntriesIntoGroup(groupId, QList<int> () << entryId,
-        beforeEntryId);
+                                  beforeEntryId);
 }
 
 /*!
@@ -386,7 +386,7 @@ bool CaService::insertEntryIntoGroup(int groupId, int entryId,
  \endcode
  */
 bool CaService::insertEntryIntoGroup(const CaEntry &group,
-    const CaEntry &entry, int beforeEntryId) const
+                                     const CaEntry &entry, int beforeEntryId) const
 {
     return insertEntryIntoGroup(group.id(), entry.id(), beforeEntryId);
 }
@@ -414,17 +414,16 @@ bool CaService::insertEntryIntoGroup(const CaEntry &group,
  \endcode
  */
 bool CaService::insertEntriesIntoGroup(int groupId,
-    const QList<int> &entryIdList, int beforeEntryId) const
+                                       const QList<int> &entryIdList, int beforeEntryId) const
 {
     if (beforeEntryId < 0) {
         qWarning(
             "CaService::insertEntriesIntoGroup: beforeEntryId cannot be negative: %d",
             beforeEntryId);
         return false;
-    }
-    else {
+    } else {
         return m_d->insertEntriesIntoGroup(groupId, entryIdList,
-            beforeEntryId);
+                                           beforeEntryId);
     }
 }
 
@@ -450,13 +449,13 @@ bool CaService::insertEntriesIntoGroup(int groupId,
  \endcode
  */
 bool CaService::insertEntriesIntoGroup(const CaEntry &group,
-    const QList<CaEntry *> &entryList, int beforeEntryId) const
+                                       const QList<CaEntry *> &entryList, int beforeEntryId) const
 {
     QList<int> idList;
     CaEntry *entry(NULL);
     foreach(entry, entryList) {
-            idList << entry->id();
-        }
+        idList << entry->id();
+    }
     return insertEntriesIntoGroup(group.id(), idList, beforeEntryId);
 }
 
@@ -508,7 +507,7 @@ bool CaService::removeEntryFromGroup(int groupId, int entryId) const
  \endcode
  */
 bool CaService::removeEntryFromGroup(const CaEntry &group,
-    const CaEntry &entry) const
+                                     const CaEntry &entry) const
 {
     return removeEntryFromGroup(group.id(), entry.id());
 }
@@ -536,7 +535,7 @@ bool CaService::removeEntryFromGroup(const CaEntry &group,
  \endcode
  */
 bool CaService::removeEntriesFromGroup(int groupId,
-    const QList<int> &entryIdList) const
+                                       const QList<int> &entryIdList) const
 {
     return m_d->removeEntriesFromGroup(groupId, entryIdList);
 }
@@ -564,13 +563,13 @@ bool CaService::removeEntriesFromGroup(int groupId,
  \endcode
  */
 bool CaService::removeEntriesFromGroup(const CaEntry &group,
-    const QList<CaEntry *> &entryList) const
+                                       const QList<CaEntry *> &entryList) const
 {
     QList<int> idList;
     CaEntry *entry(NULL);
     foreach(entry, entryList) {
-            idList << entry->id();
-        }
+        idList << entry->id();
+    }
     return removeEntriesFromGroup(group.id(), idList);
 }
 
@@ -579,7 +578,7 @@ bool CaService::removeEntriesFromGroup(const CaEntry &group,
  \param entry to be touched
  \retval boolean with result of operation
  */
-bool CaServicePrivate::touch(const CaEntry& entry)
+bool CaServicePrivate::touch(const CaEntry &entry)
 {
     qDebug() << "CaServicePrivate::touch" << "entryId: " << entry.id();
 
@@ -636,7 +635,7 @@ bool CaService::appendEntryToGroup(int groupId, int entryId) const
  \endcode
  */
 bool CaService::appendEntryToGroup(const CaEntry &group,
-    const CaEntry &entry) const
+                                   const CaEntry &entry) const
 {
     return appendEntryToGroup(group.id(), entry.id());
 }
@@ -663,7 +662,7 @@ bool CaService::appendEntryToGroup(const CaEntry &group,
  \endcode
  */
 bool CaService::appendEntriesToGroup(int groupId,
-    const QList<int> &entryIdList) const
+                                     const QList<int> &entryIdList) const
 {
     return m_d->appendEntriesToGroup(groupId, entryIdList);
 }
@@ -689,13 +688,13 @@ bool CaService::appendEntriesToGroup(int groupId,
  \endcode
  */
 bool CaService::appendEntriesToGroup(const CaEntry &group,
-    const QList<CaEntry *> &entryList) const
+                                     const QList<CaEntry *> &entryList) const
 {
     QList<int> idList;
     CaEntry *entry(NULL);
     foreach(entry, entryList) {
-            idList << entry->id();
-        }
+        idList << entry->id();
+    }
     return appendEntriesToGroup(group.id(), idList);
 }
 
@@ -745,7 +744,7 @@ bool CaService::prependEntryToGroup(int groupId, int entryId) const
  \endcode
  */
 bool CaService::prependEntryToGroup(const CaEntry &group,
-    const CaEntry &entry) const
+                                    const CaEntry &entry) const
 {
     return prependEntryToGroup(group.id(), entry.id());
 }
@@ -772,7 +771,7 @@ bool CaService::prependEntryToGroup(const CaEntry &group,
  \endcode
  */
 bool CaService::prependEntriesToGroup(int groupId,
-    const QList<int> &entryIdList) const
+                                      const QList<int> &entryIdList) const
 {
     return m_d->prependEntriesToGroup(groupId, entryIdList);
 }
@@ -798,13 +797,13 @@ bool CaService::prependEntriesToGroup(int groupId,
  \endcode
  */
 bool CaService::prependEntriesToGroup(const CaEntry &group,
-    const QList<CaEntry *> &entryList) const
+                                      const QList<CaEntry *> &entryList) const
 {
     QList<int> idList;
     CaEntry *entry(NULL);
     foreach(entry, entryList) {
-            idList << entry->id();
-        }
+        idList << entry->id();
+    }
     return prependEntriesToGroup(group.id(), idList);
 }
 
@@ -882,7 +881,7 @@ bool CaService::executeCommand(const CaEntry &entry, const QString &command) con
  ...
  \endcode
  */
-CaNotifier * CaService::createNotifier(const CaNotifierFilter &filter) const
+CaNotifier *CaService::createNotifier(const CaNotifierFilter &filter) const
 {
     return m_d->createNotifier(filter);
 }
@@ -941,7 +940,7 @@ CaServicePrivate::CaServicePrivate(CaService *servicePublic) :
     const ErrorCode connectionResult = mProxy->connect();
 
     USE_QWARNING_IF(connectionResult)
-        << "CaServicePrivate::CaServicePrivate - unable to connect proxy";
+            << "CaServicePrivate::CaServicePrivate - unable to connect proxy";
 
     mErrorCode = connectionResult;
 }
@@ -959,24 +958,27 @@ CaServicePrivate::~CaServicePrivate()
  \param entryIdList list of entry ids
  \retval list of entries (pointers)
  */
-QList<CaEntry*> CaServicePrivate::getEntries(const QList<int> &entryIdList) const
+QList<CaEntry *> CaServicePrivate::getEntries(const QList<int> &entryIdList) const
 {
     qDebug() << "CaServicePrivate::getEntries"
-    << "entryIdList:" << entryIdList;
+             << "entryIdList:" << entryIdList;
 
-    QList<CaEntry*> resultList;
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::getEntries");
+
+    QList<CaEntry *> resultList;
 
     mErrorCode = mProxy->getData(entryIdList, resultList);
 
     // figure out whether all entries have been retrieved and
     // store the operation status
     if (mErrorCode == NoErrorCode
-        && entryIdList.count() != resultList.count()) {
+            && entryIdList.count() != resultList.count()) {
         mErrorCode = NotFoundErrorCode;
     }
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::getEntries");
 
     qDebug() << "CaServicePrivate::getEntries mErrorCode:"
-        << mErrorCode;
+             << mErrorCode;
 
     return resultList;
 }
@@ -986,9 +988,9 @@ QList<CaEntry*> CaServicePrivate::getEntries(const QList<int> &entryIdList) cons
  \param query the query information to select specific entries.
  \param placeholder list of entries for a specific select.
  */
-QList<CaEntry*> CaServicePrivate::getEntries(const CaQuery &query) const
+QList<CaEntry *> CaServicePrivate::getEntries(const CaQuery &query) const
 {
-    QList<CaEntry*> resultList;
+    QList<CaEntry *> resultList;
 
     mErrorCode = mProxy->getData(query, resultList);
 
@@ -1004,12 +1006,12 @@ QList<CaEntry*> CaServicePrivate::getEntries(const CaQuery &query) const
  */
 QList<int> CaServicePrivate::getEntryIds(const CaQuery &query) const
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::getEntryIds");
+
     QList<int> resultList;
-
     mErrorCode = mProxy->getEntryIds(query, resultList);
-
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::getEntryIds");
     qDebug() << "CaServicePrivate::getEntryIds mErrorCode:" << mErrorCode;
-
     return resultList;
 }
 
@@ -1018,12 +1020,14 @@ QList<int> CaServicePrivate::getEntryIds(const CaQuery &query) const
  \param query const reference to entry to copy
  \retval pointer to newely created copy
  */
-CaEntry* CaServicePrivate::createEntry(const CaEntry &entry)
+CaEntry *CaServicePrivate::createEntry(const CaEntry &entry)
 {
     qDebug() << "CaServicePrivate::createEntry"
-    << "entry id:" << entry.id();
+             << "entry id:" << entry.id();
 
-    CaEntry* newEntry = NULL;
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::createEntry");
+
+    CaEntry *newEntry = NULL;
     ErrorCode addDataResult = NoErrorCode;
 
     try {
@@ -1037,9 +1041,7 @@ CaEntry* CaServicePrivate::createEntry(const CaEntry &entry)
 
         addDataResult =
             mProxy->addData(*entryClone, *newEntry);
-    }
-    catch(const std::bad_alloc&)
-    {
+    } catch (const std::bad_alloc &) {
         addDataResult = OutOfMemoryErrorCode;
     }
 
@@ -1052,6 +1054,8 @@ CaEntry* CaServicePrivate::createEntry(const CaEntry &entry)
 
     qDebug() << "CaServicePrivate::createEntry mErrorCode:" << mErrorCode;
 
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::createEntry");
+
     return newEntry;
 }
 
@@ -1063,7 +1067,9 @@ CaEntry* CaServicePrivate::createEntry(const CaEntry &entry)
 bool CaServicePrivate::updateEntry(const CaEntry &entry)
 {
     qDebug() << "CaServicePrivate::updateEntry"
-    << "entry id:" << entry.id();
+             << "entry id:" << entry.id();
+
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::updateEntry");
 
     ErrorCode updateEntryResult = UnknownErrorCode;
 
@@ -1073,9 +1079,7 @@ bool CaServicePrivate::updateEntry(const CaEntry &entry)
 
             updateEntryResult = mProxy->addData(entry, *updatedEntry);
 
-        }
-        catch(const std::bad_alloc&)
-        {
+        } catch (const std::bad_alloc &) {
             updateEntryResult = OutOfMemoryErrorCode;
         }
     }
@@ -1083,7 +1087,8 @@ bool CaServicePrivate::updateEntry(const CaEntry &entry)
     mErrorCode = updateEntryResult;
 
     qDebug() << "CaServicePrivate::updateEntry mErrorCode on return:"
-        << mErrorCode;
+             << mErrorCode;
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::updateEntry");
 
     return (updateEntryResult == NoErrorCode);
 }
@@ -1096,11 +1101,15 @@ bool CaServicePrivate::updateEntry(const CaEntry &entry)
 bool CaServicePrivate::removeEntries(const QList<int> &entryIdList)
 {
     qDebug() << "CaServicePrivate::removeEntries"
-    << "entryIdList: " << entryIdList;
+             << "entryIdList: " << entryIdList;
+
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::removeEntries");
 
     mErrorCode = mProxy->removeData(entryIdList);
 
     qDebug() << "CaServicePrivate::removeEntries mErrorCode:" << mErrorCode;
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::removeEntries");
 
     return (mErrorCode == NoErrorCode);
 }
@@ -1118,13 +1127,17 @@ bool CaServicePrivate::insertEntriesIntoGroup(
     int beforeEntryId) // all others are convenience methods implemented in terms of this one
 {
     qDebug() << "CaServicePrivate::insertEntriesIntoGroup"
-        << "groupId: " << groupId << " beforeEntryId: " << beforeEntryId
-        << "entryIdList: " << entryIdList;
+             << "groupId: " << groupId << " beforeEntryId: " << beforeEntryId
+             << "entryIdList: " << entryIdList;
+
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::insertEntriesIntoGroup");
 
     mErrorCode = mProxy->insertEntriesIntoGroup(groupId, entryIdList, beforeEntryId);
 
     qDebug() << "CaServicePrivate::insertEntriesIntoGroup mErrorCode:"
-        << mErrorCode;
+             << mErrorCode;
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::insertEntriesIntoGroup");
 
     return (mErrorCode == NoErrorCode);
 }
@@ -1141,12 +1154,16 @@ bool CaServicePrivate::removeEntriesFromGroup(
     const QList<int> &entryIdList)
 {
     qDebug() << "CaServicePrivate::removeEntriesFromGroup"
-        << "groupId: " << groupId << "entryIdList" << entryIdList;
+             << "groupId: " << groupId << "entryIdList" << entryIdList;
+
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::removeEntriesFromGroup");
 
     mErrorCode = mProxy->removeEntriesFromGroup(groupId, entryIdList);
 
     qDebug() << "CaServicePrivate::removeEntriesFromGroup mErrorCode:"
-        << mErrorCode;
+             << mErrorCode;
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::removeEntriesFromGroup");
 
     return (mErrorCode == NoErrorCode);
 }
@@ -1162,15 +1179,19 @@ bool CaServicePrivate::appendEntriesToGroup(
     const QList<int> &entryIdList)
 {
     qDebug() << "CaServicePrivate::appendEntriesToGroup"
-    << "groupId: " << groupId << "entryIdList: " << entryIdList;
+             << "groupId: " << groupId << "entryIdList: " << entryIdList;
+
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::appendEntriesToGroup");
 
     const bool result = insertEntriesIntoGroup(
-        groupId,
-        entryIdList,
-        CaClientProxy::AfterTheLastEntry);
+                            groupId,
+                            entryIdList,
+                            CaClientProxy::AfterTheLastEntry);
 
     qDebug() << "CaServicePrivate::appendEntriesToGroup result:"
-        << QString(result ? "true" : "false");
+             << QString(result ? "true" : "false");
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::appendEntriesToGroup");
 
     return result;
 }
@@ -1182,19 +1203,23 @@ bool CaServicePrivate::appendEntriesToGroup(
  \retval true if operation was successful.
  */
 bool CaServicePrivate::prependEntriesToGroup(int groupId,
-    const QList<int> &entryIdList)
+        const QList<int> &entryIdList)
 {
     qDebug() << "CaServicePrivate::prependEntriesToGroup"
-    << "groupId: " << groupId << "entryIdList: " << entryIdList;
+             << "groupId: " << groupId << "entryIdList: " << entryIdList;
+
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::prependEntriesToGroup");
 
     const bool result =
-    insertEntriesIntoGroup(
-        groupId,
-        entryIdList,
-        CaClientProxy::BeforeTheFirstEntry);
+        insertEntriesIntoGroup(
+            groupId,
+            entryIdList,
+            CaClientProxy::BeforeTheFirstEntry);
 
     qDebug() << "CaServicePrivate::prependEntriesToGroup result:"
-        << QString(result ? "PASS" : "FAIL");
+             << QString(result ? "PASS" : "FAIL");
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::prependEntriesToGroup");
 
     return result;
 }
@@ -1206,17 +1231,23 @@ bool CaServicePrivate::prependEntriesToGroup(int groupId,
  \retval boolean which is used as an error code return value, true means positive result
  */
 bool CaServicePrivate::executeCommand(const CaEntry &entry,
-    const QString &command)
+                                      const QString &command)
 {
     qDebug() << "CaServicePrivate::executeCommand"
-        << "entry id:" << entry.id() << "command:" << command;
+             << "entry id:" << entry.id() << "command:" << command;
 
-    touch(entry);
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::executeCommand");
+
+    if (command == caCmdOpen) {
+        touch(entry);
+    }
 
     mErrorCode = mProxy->executeCommand(entry, command);
 
     qDebug() << "CaServicePrivate::executeCommand mErrorCode on return:"
-        << mErrorCode;
+             << mErrorCode;
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::executeCommand");
 
     return (mErrorCode == NoErrorCode);
 }
@@ -1226,7 +1257,7 @@ bool CaServicePrivate::executeCommand(const CaEntry &entry,
  \param CaNotifierFilter which is used be new notifier
  \retval pointer to new Notifier
  */
-CaNotifier * CaServicePrivate::createNotifier(const CaNotifierFilter &filter)
+CaNotifier *CaServicePrivate::createNotifier(const CaNotifierFilter &filter)
 {
     return new CaNotifier(new CaNotifierPrivate(filter));
 }
@@ -1240,7 +1271,12 @@ CaNotifier * CaServicePrivate::createNotifier(const CaNotifierFilter &filter)
  */
 bool CaServicePrivate::customSort(int groupId, QList<int> &entryIdList)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::customSort");
+
     mErrorCode = mProxy->customSort(entryIdList, groupId);
+
+    CACLIENTTEST_FUNC_EXIT("CaServicePrivate::customSort");
+
     return (mErrorCode == NoErrorCode);
 }
 

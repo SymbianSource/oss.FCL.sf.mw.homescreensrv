@@ -31,7 +31,7 @@ class CaNotifierFilterPrivate
 public:
 
     explicit
-        CaNotifierFilterPrivate(CaNotifierFilter *notifierFilterPublic);
+    CaNotifierFilterPrivate(CaNotifierFilter *notifierFilterPublic);
     CaNotifierFilterPrivate &operator=(
         const CaNotifierFilterPrivate &notifierFilterPrivate);
     ~CaNotifierFilterPrivate();
@@ -61,7 +61,7 @@ private:
      * Points to the CaNotifierFilter instance that uses
      *  this private implementation.
      */
-    CaNotifierFilter * const m_q;
+    CaNotifierFilter *const m_q;
 
 };
 

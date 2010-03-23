@@ -72,12 +72,12 @@ ErrorCode CaClientProxy::connect()
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::addData(const CaEntry &entryToAdd,
-    CaEntry &targetEntry)
+                                 CaEntry &targetEntry)
 {
     TRAPD(error, addDataL(entryToAdd, targetEntry));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::addData - Error ("
-        <<  error << ")";
+                         <<  error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -90,7 +90,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
     TRAPD(error, removeDataL(entryIdList));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::removeData - Error ("
-        << error << ")";
+                         << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -99,13 +99,13 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::insertEntriesIntoGroup(int groupId,
-    const QList<int> &entryIdList, int beforeEntryId)
+        const QList<int> &entryIdList, int beforeEntryId)
 {
     TRAPD(error,
-        insertEntriesIntoGroupL(groupId, entryIdList, beforeEntryId));
+          insertEntriesIntoGroupL(groupId, entryIdList, beforeEntryId));
 
     USE_QDEBUG_IF(error)<< "CaClientProxy::insertEntriesIntoGroup - Error ("
-        << error << ")";
+                        << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -114,12 +114,12 @@ ErrorCode CaClientProxy::insertEntriesIntoGroup(int groupId,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::removeEntriesFromGroup(int groupId,
-    const QList<int> &entryIdList)
+        const QList<int> &entryIdList)
 {
     TRAPD(error, removeEntriesFromGroupL(groupId, entryIdList));
 
     USE_QDEBUG_IF(error)<< "CaClientProxy::removeEntriesFromGroup - Error ("
-        << error << ")";
+                        << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -128,12 +128,12 @@ ErrorCode CaClientProxy::removeEntriesFromGroup(int groupId,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
-    QList<CaEntry*> &sourceList)
+                                 QList<CaEntry *> &sourceList)
 {
     TRAPD(error, getDataL(entryIdList, sourceList));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::getData - Error ("
-        << error << ")";
+                         << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -142,12 +142,12 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const CaQuery &query,
-    QList<CaEntry*> &sourceList)
+                                 QList<CaEntry *> &sourceList)
 {
     TRAPD(error, getDataL(query, sourceList));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::getData - Error ("
-        << error << ")";
+                         << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -156,12 +156,12 @@ ErrorCode CaClientProxy::getData(const CaQuery &query,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
-    QList<int> &sourceIdList)
+                                     QList<int> &sourceIdList)
 {
     TRAPD(error, getEntryIdsL(query, sourceIdList));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::getEntryIds - Error ("
-        << error << ")";
+                         << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -170,12 +170,12 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
-    const QString &command)
+                                        const QString &command)
 {
     TRAPD(error, executeCommandL(entry, command));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::executeCommand - Error ("
-        << error << ")";
+                         << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -183,12 +183,12 @@ ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-ErrorCode CaClientProxy::touch(const CaEntry& aEntry)
+ErrorCode CaClientProxy::touch(const CaEntry &aEntry)
 {
     TRAPD(error, touchL(aEntry));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::touch - Error ("
-        << error << ")";
+                         << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -197,12 +197,12 @@ ErrorCode CaClientProxy::touch(const CaEntry& aEntry)
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
-        int groupId)
+                                    int groupId)
 {
     TRAPD(error, customSortL(entryIdList, groupId));
 
     USE_QDEBUG_IF(error)<< "CaClientProxy::customSort - Error ("
-        << error << ")";
+                        << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);
 }
@@ -211,7 +211,7 @@ ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::addDataL(const CaEntry &entryToAdd,
-    CaEntry &targetEntry)
+                             CaEntry &targetEntry)
 {
     CCaInnerEntry *newEntryToAdd = CCaInnerEntry::NewLC();
 
@@ -235,7 +235,7 @@ void CaClientProxy::removeDataL(const QList<int> &entryIdList)
 }
 
 void CaClientProxy::insertEntriesIntoGroupL(int groupId,
-    const QList<int> &entryIdList, int beforeEntryId)
+        const QList<int> &entryIdList, int beforeEntryId)
 {
     RCaIdsArray array;
     CleanupClosePushL(array);
@@ -251,7 +251,7 @@ void CaClientProxy::insertEntriesIntoGroupL(int groupId,
     default:
         if (beforeEntryId < 1) {
             qWarning("CaClientProxy::insertEntriesIntoGroupL"
-                "- wrong beforeEntryId: (%d)", beforeEntryId);
+                     "- wrong beforeEntryId: (%d)", beforeEntryId);
         }
         operationType = TCaOperationParams::EInsert;
         break;
@@ -265,14 +265,14 @@ void CaClientProxy::insertEntriesIntoGroupL(int groupId,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::removeEntriesFromGroupL(int groupId,
-    const QList<int> &entryIdList)
+        const QList<int> &entryIdList)
 {
     RCaIdsArray array;
     CleanupClosePushL(array);
     CaObjectAdapter::convertL(entryIdList, array);
     TCaOperationParams params = { TCaOperationParams::ERemove,
-        groupId, 0 /*not used*/
-    };
+                                  groupId, 0 /*not used*/
+                                };
     mSession.OrganizeL(array, params);
     CleanupStack::PopAndDestroy(&array);
 }
@@ -281,7 +281,7 @@ void CaClientProxy::removeEntriesFromGroupL(int groupId,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::getDataL(const QList<int> &entryIdList,
-    QList<CaEntry*> &sourceList)
+                             QList<CaEntry *> &sourceList)
 {
     CCaInnerQuery *query = CCaInnerQuery::NewLC();
     RArray<TInt> array;
@@ -301,7 +301,7 @@ void CaClientProxy::getDataL(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::getDataL(const CaQuery &query,
-    QList<CaEntry*> &sourceList)
+                             QList<CaEntry *> &sourceList)
 {
     CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
     CaObjectAdapter::convertL(query, *innerQuery);
@@ -317,7 +317,7 @@ void CaClientProxy::getDataL(const CaQuery &query,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::getEntryIdsL(const CaQuery &query,
-    QList<int> &sourceIdList)
+                                 QList<int> &sourceIdList)
 {
     CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
     CaObjectAdapter::convertL(query, *innerQuery);
@@ -333,15 +333,15 @@ void CaClientProxy::getEntryIdsL(const CaQuery &query,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::executeCommandL(const CaEntry &entry,
-    const QString &command)
+                                    const QString &command)
 {
     CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
     CaObjectAdapter::convertL(entry, *innerEntry);
 
     TPtrC16 commandPtr16(
-        reinterpret_cast<const TUint16*> (command.utf16()));
+        reinterpret_cast<const TUint16 *>(command.utf16()));
     HBufC8 *convertedCommand = CnvUtfConverter::ConvertFromUnicodeToUtf7L(
-        commandPtr16, false);
+                                   commandPtr16, false);
     CleanupStack::PushL(convertedCommand);
     if (!mHandler) {
         mHandler = CCaHandlerEngine::NewL();
@@ -354,14 +354,14 @@ void CaClientProxy::executeCommandL(const CaEntry &entry,
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-void CaClientProxy::touchL(const CaEntry& entry)
+void CaClientProxy::touchL(const CaEntry &entry)
 {
-    CCaInnerEntry* innerEntry = CCaInnerEntry::NewLC();
+    CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
 
-    CaObjectAdapter::convertL(entry, *innerEntry);    
-    
+    CaObjectAdapter::convertL(entry, *innerEntry);
+
     mSession.TouchL(*innerEntry);
-    
+
     CleanupStack::PopAndDestroy(innerEntry);
 }
 
@@ -373,7 +373,7 @@ void CaClientProxy::customSortL(const QList<int> &entryIdList, int groupId)
     RCaIdsArray array;
     CleanupClosePushL(array);
     CaObjectAdapter::convertL(entryIdList, array);
-    
+
     mSession.CustomSortL(array, groupId);
     CleanupStack::PopAndDestroy(&array);
 }

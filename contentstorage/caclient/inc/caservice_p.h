@@ -35,8 +35,8 @@ public:
     explicit CaServicePrivate(CaService *servicePublic);
     ~CaServicePrivate();
 
-    QList<CaEntry*> getEntries(const QList<int> &entryIdList) const;
-    QList<CaEntry*> getEntries(const CaQuery &query) const;
+    QList<CaEntry *> getEntries(const QList<int> &entryIdList) const;
+    QList<CaEntry *> getEntries(const CaQuery &query) const;
     QList<int> getEntryIds(const CaQuery &query) const;
 
     CaEntry *createEntry(const CaEntry &entry);
@@ -48,7 +48,7 @@ public:
     bool touch(const CaEntry &entry);
 
     bool insertEntriesIntoGroup(int groupId, const QList<int> &entryIdList,
-        int beforeEntryId);
+                                int beforeEntryId);
 
     bool removeEntriesFromGroup(int groupId, const QList<int> &entryIdList);
 
@@ -58,7 +58,7 @@ public:
 
     bool executeCommand(const CaEntry &entry, const QString &command);
 
-    CaNotifier * createNotifier(const CaNotifierFilter &filter);
+    CaNotifier *createNotifier(const CaNotifierFilter &filter);
 
     bool customSort(int groupId, QList<int> &entryIdList);
 
@@ -69,12 +69,12 @@ private:
     /**
      * Points to the CaService instance that uses this private implementation.
      */
-    CaService * const m_q;
+    CaService *const m_q;
 
     /**
      * Proxy to communicate with Symbian server.
      */
-    CaClientProxy * mProxy;
+    CaClientProxy *mProxy;
 
     /**
      * code of error caused by last operation.

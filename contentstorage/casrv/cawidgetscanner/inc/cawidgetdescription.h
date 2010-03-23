@@ -120,6 +120,12 @@ public:
     void SetVisible( TBool aVisible );
 
     /*
+     * Used flag setter
+     * @param aUsed flag
+     */
+    void SetUsed( TBool aUsed );    
+    
+    /*
      * Content arsenal entry id getter
      * @return CA entry id
      */
@@ -168,10 +174,28 @@ public:
     TBool IsMissing( ) const;
 
     /*
+     * Used flag
+     * @return ETrue if flag used is set
+     */
+    TBool IsUsed( ) const;    
+    
+    /*
      * Entry getter
      * @return entry representing widget
      */
     CCaInnerEntry* GetEntryLC( ) const;
+    
+    /*
+     * Modification time setter
+     * @param aModificationTime
+     */
+    void SetModificationTimeL( const TDesC& aModificationTime );
+
+    /*
+     * Modification time getter
+     * @return widget Modification time
+     */
+    TPtrC GetModificationTime( ) const;
 
 private:
 
@@ -250,6 +274,11 @@ private:
      * Widgets flags.
      */
     TInt iFlags;
+    
+    /*
+     * Modification time.
+     */
+    RBuf iModificationTime;
     };
 
 typedef RPointerArray<CCaWidgetDescription> RWidgetArray;

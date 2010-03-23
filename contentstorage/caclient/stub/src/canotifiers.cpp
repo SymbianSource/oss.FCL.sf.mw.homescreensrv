@@ -24,8 +24,8 @@
 CaNotifiers::NotifierHash CaNotifiers::mNotifiers;
 
 int CaNotifiers::addNotifier(const CaNotifierFilter *notifierFilter,
-    CaNotifierPrivate::NotifierType notifierType,
-    const CaClientNotifierProxy *notifierProxy)
+                             CaNotifierPrivate::NotifierType notifierType,
+                             const CaClientNotifierProxy *notifierProxy)
 {
     NotifierKey key = NotifierKey(notifierFilter, notifierType);
     if (!mNotifiers.contains(key)) {
@@ -35,7 +35,7 @@ int CaNotifiers::addNotifier(const CaNotifierFilter *notifierFilter,
 }
 
 void CaNotifiers::removeNotifier(const CaNotifierFilter *notifierFilter,
-    CaNotifierPrivate::NotifierType notifierType)
+                                 CaNotifierPrivate::NotifierType notifierType)
 {
     mNotifiers.remove(NotifierKey(notifierFilter, notifierType));
 }
@@ -43,12 +43,12 @@ void CaNotifiers::removeNotifier(const CaNotifierFilter *notifierFilter,
 void CaNotifiers::Notify(int groupId)
 {
     for (NotifierHash::const_iterator i = mNotifiers.constBegin();
-        i != mNotifiers.constEnd();
-        ++i) {
+            i != mNotifiers.constEnd();
+            ++i) {
         const CaNotifierFilter *filter = i.key().first;
         if (filter->getIds().isEmpty() || filter->getIds().contains(groupId)) {
             if (i.key().second
-                == CaNotifierPrivate::GroupContentChangedNotifierType) {
+                    == CaNotifierPrivate::GroupContentChangedNotifierType) {
                 i.value()->groupContentChanged(groupId);
             }
         }
@@ -56,22 +56,22 @@ void CaNotifiers::Notify(int groupId)
 }
 
 void CaNotifiers::Notify(const CaEntry &targetEntry,
-    ChangeType changeType,
-    QList<int> &parentIds)
+                         ChangeType changeType,
+                         QList<int> &parentIds)
 {
     for (NotifierHash::const_iterator i = mNotifiers.constBegin();
-        i != mNotifiers.constEnd();
-        ++i) {
+            i != mNotifiers.constEnd();
+            ++i) {
         if (isRegisterdForNotification(
-            *i.key().first, targetEntry, parentIds)) {
+                    *i.key().first, targetEntry, parentIds)) {
             if (i.key().second
-                == CaNotifierPrivate::EntryChangedWithIdNotifierType) {
+                    == CaNotifierPrivate::EntryChangedWithIdNotifierType) {
                 i.value()->entryChanged(targetEntry.id(), changeType);
             } else if (i.key().second
-                == CaNotifierPrivate::EntryChangedWithEntryNotifierType) {
+                       == CaNotifierPrivate::EntryChangedWithEntryNotifierType) {
                 i.value()->entryChanged(targetEntry, changeType);
             } else if (i.key().second
-                == CaNotifierPrivate::EntryTouchedNotifierType) {
+                       == CaNotifierPrivate::EntryTouchedNotifierType) {
                 i.value()->entryChanged(targetEntry.id(), changeType);
             }
         }
@@ -85,7 +85,7 @@ bool CaNotifiers::isRegisterdForNotification(
 {
     bool ret = true;
     if (!filter.getIds().isEmpty()) {
-            ret = ret && filter.getIds().contains(entry.id());
+        ret = ret && filter.getIds().contains(entry.id());
     }
     if (filter.getParentId() > 0) {
         if (entry.id() == filter.getParentId()) {

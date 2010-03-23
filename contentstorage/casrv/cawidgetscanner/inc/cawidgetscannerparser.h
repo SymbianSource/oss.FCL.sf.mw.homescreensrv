@@ -85,10 +85,12 @@ private:
 
     /**
     * Parse a widget, store parsed object in an internal array
+    * @param aFilePath full file path to manifest file
     * @param aElement widget element
     * @param aPackageUid descriptor containing package uid
     */
-    void ParseWidgetL( TXmlEngElement aElement, const TDesC& aPackageUid );
+    void ParseWidgetL( const TDesC& aFilePath,
+            TXmlEngElement aElement, const TDesC& aPackageUid );
 
     /**
      * Gets all directories from import folder
@@ -126,7 +128,7 @@ private:
      * @param aWidget widget to set value
      */
     void SetLibraryL( TXmlEngElement & aElement, const TDesC & aPackageUid,
-    		CCaWidgetDescription * aWidget );
+            CCaWidgetDescription * aWidget );
 
     /**
      * Sets widgets title
@@ -134,7 +136,7 @@ private:
      * @param aWidget widget to set value
      */
     void SetTitleL( TXmlEngElement & aElement, 
-    		CCaWidgetDescription * aWidget );
+            CCaWidgetDescription * aWidget );
 
     /**
      * Sets widgets description
@@ -142,7 +144,7 @@ private:
      * @param aWidget widget to set value
      */
     void SetDescriptionL( TXmlEngElement & aElement,
-    		CCaWidgetDescription * aWidget );
+            CCaWidgetDescription * aWidget );
 
     /**
      * Sets widgets visibility
@@ -150,7 +152,7 @@ private:
      * @param aWidget widget to set value
      */
     void SetVisibilityL( TXmlEngElement & aElement,
-    		CCaWidgetDescription * aWidget );
+            CCaWidgetDescription * aWidget );
 
     /**
      * Sets icons URI

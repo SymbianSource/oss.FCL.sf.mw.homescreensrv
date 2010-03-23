@@ -35,7 +35,7 @@ public:
     void setId(int id);
 
     QString filename() const;
-    void setFileName(const QString& fileName);
+    void setFileName(const QString &fileName);
 
     int bitmapId() const;
     void setBitmapId(int bitmapId);
@@ -53,7 +53,7 @@ private:
     /*!
      * Points to the CaEntry instance that uses this private implementation.
      */
-    CaIconDescription * const m_q;
+    CaIconDescription *const m_q;
 
     /*!
      *

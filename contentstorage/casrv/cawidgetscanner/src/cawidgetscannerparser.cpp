@@ -31,6 +31,7 @@
 
 const TInt KChunkSize = 8192;
 const TInt KDriveLetterLength = 2;
+const TInt KModificationTimeLength = 17;
 
 _LIT( KManifest, ".manifest");
 _LIT( KColen, ":" );
@@ -212,7 +213,7 @@ void CCaWidgetScannerParser::ParseManifestFileL(
         element = elementList.Next();
         if ( element.HasAttributes() )
             {
-            ParseWidgetL( element, aPackageUid );
+            ParseWidgetL( aFilePath, element, aPackageUid );
             }
         }
     CleanupStack::PopAndDestroy(&elementList);
@@ -225,7 +226,8 @@ void CCaWidgetScannerParser::ParseManifestFileL(
 // ----------------------------------------------------------------------------
 //
 void CCaWidgetScannerParser::ParseWidgetL(
-        TXmlEngElement aElement, const TDesC& aPackageUid )
+        const TDesC& aFilePath, TXmlEngElement aElement,
+        const TDesC& aPackageUid )
     {
     CCaWidgetDescription* widget = CCaWidgetDescription::NewLC();
 
@@ -236,7 +238,17 @@ void CCaWidgetScannerParser::ParseWidgetL(
     SetVisibilityL( aElement, widget );
     SetIconUriL( aElement, aPackageUid, widget);
     widget->SetPackageUidL( aPackageUid );
-    SetMmcIdL( widget);
+    SetMmcIdL( widget );
+    
+    TTime modificationTime;
+    iFs.Modified( aFilePath, modificationTime);
+    TInt64 modificationIntTime = modificationTime.Int64();
+    RBuf16 rBuf;
+    rBuf.CleanupClosePushL();
+    rBuf.CreateL( KModificationTimeLength );
+    rBuf.AppendNum( modificationIntTime );
+    widget->SetModificationTimeL( rBuf );
+    CleanupStack::PopAndDestroy( &rBuf );
 
     TInt index = iWidgets.Find( widget, CCaWidgetDescription::Compare );
     if ( index != KErrNotFound )

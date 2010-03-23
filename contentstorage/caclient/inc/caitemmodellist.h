@@ -46,7 +46,7 @@ public:
     void updateEntry(int id);
     void updateEntries(const CaQuery &query);
     int indexOf(const int &id) const;
-    void insert( int row, int id);
+    void insert(int row, int id);
     void remove(int id);
     const int &operator[](int row) const;
 
@@ -61,7 +61,7 @@ private: // data
     QList<int> mOrderedList;
     QHash<int, CaEntry *> mEntriesHash;
     QSharedPointer<CaService> mService;
-    
+
 };
 
 #endif // CAITEMMODELLIST_P_H

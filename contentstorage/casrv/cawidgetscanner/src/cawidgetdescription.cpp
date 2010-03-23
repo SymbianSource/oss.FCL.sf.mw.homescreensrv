@@ -63,10 +63,10 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     TBuf<KMaxUidName> uidDesc;
     aEntry->FindAttribute( KCaPackageUid, uidDesc );
     if ( uidDesc.Length() )
-    	{
-    	TLex uidLex(uidDesc);
-    	User::LeaveIfError( uidLex.Val( iPackageUid, EHex ));
-    	}
+        {
+        TLex uidLex(uidDesc);
+        User::LeaveIfError( uidLex.Val( iPackageUid, EHex ));
+        }
     iTitle.CreateL(aEntry->GetText().Length());
     iTitle = aEntry->GetText();
     iIconUri.CreateL(aEntry->GetIcon().iFileName.Length());
@@ -80,14 +80,21 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     //mmc id
     TBuf<KUidChars> mmcId;
     if( aEntry->FindAttribute( KCaAttrMmcId, mmcId ) )
-    	{
+        {
         TLex mmcLex( mmcId );
         User::LeaveIfError( mmcLex.Val( iMmcId, EHex ));
-    	}
+        }
     if( aEntry->GetFlags() &  EMissing )
         {
         iFlags = iFlags | EMissing;
         }
+    if( aEntry->GetFlags() &  EUsed )
+        {
+        iFlags = iFlags | EUsed;
+        }
+    
+    iModificationTime.CreateL(KCaMaxAttrValueLen);
+    aEntry->FindAttribute( KCaAttrInstallationTime, iModificationTime );
     }
 
 // -----------------------------------------------------------------------------
@@ -139,6 +146,7 @@ CCaWidgetDescription::~CCaWidgetDescription()
     iUri.Close();
     iIconUri.Close();
     iLibrary.Close();
+    iModificationTime.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -169,7 +177,9 @@ TBool CCaWidgetDescription::Compare( const CCaWidgetDescription& aToCompare )
             aToCompare.GetUri() == GetUri() &&
             aToCompare.GetIconUri() == GetIconUri() &&
             aToCompare.GetTitle() == GetTitle() &&
-            aToCompare.GetLibrary() != KNoLibrary )
+            aToCompare.GetLibrary() != KNoLibrary &&
+            aToCompare.GetModificationTime() == GetModificationTime()
+            )
         {
         return ETrue;
         }
@@ -268,6 +278,15 @@ void CCaWidgetDescription::SetVisible( TBool aVisible )
 //
 // -----------------------------------------------------------------------------
 //
+void CCaWidgetDescription::SetUsed( TBool aUsed )
+    {
+    SetFlag( EUsed, aUsed );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CCaWidgetDescription::SetFlag( TInt aFlag, TBool aValue )
     {
     if( aValue )
@@ -278,6 +297,16 @@ void CCaWidgetDescription::SetFlag( TInt aFlag, TBool aValue )
         {
         iFlags = iFlags & ~aFlag;
         }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetModificationTimeL( const TDesC& aModificationTime )
+    {
+    iModificationTime.Close();
+    iModificationTime.CreateL( aModificationTime );
     }
 
 // -----------------------------------------------------------------------------
@@ -341,13 +370,22 @@ TPtrC CCaWidgetDescription::GetIconUri( ) const
 TPtrC CCaWidgetDescription::GetTitle( ) const
     {
     if ( iTitle == KNullDesC )
-    	{
-    	return GetLibraryName();
+        {
+        return GetLibraryName();
         }
     else
-    	{
-    	return iTitle;
-    	}
+        {
+        return iTitle;
+        }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetModificationTime( ) const
+    {
+    return iModificationTime;
     }
 
 
@@ -358,6 +396,16 @@ TPtrC CCaWidgetDescription::GetTitle( ) const
 TBool CCaWidgetDescription::IsMissing( ) const
     {
     return iFlags & EMissing;
+    }
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CCaWidgetDescription::IsUsed( ) const
+    {
+    return iFlags & EUsed;
     }
 
 // -----------------------------------------------------------------------------
@@ -375,11 +423,11 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         }
 
     if ( iPackageUid )
-    	{
-    	TBuf<KMaxUidName> uidDesc;
-    	uidDesc.AppendNum( iPackageUid,EHex );
-    	entry->AddAttributeL( KCaPackageUid, uidDesc );
-    	}
+        {
+        TBuf<KMaxUidName> uidDesc;
+        uidDesc.AppendNum( iPackageUid,EHex );
+        entry->AddAttributeL( KCaPackageUid, uidDesc );
+        }
 
     if ( iEntryId != KNoId )
         {
@@ -426,6 +474,12 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         {
         entry->SetIconDataL(0, 0, 0, 0, iIconUri);
         }
+
+    if( iModificationTime != KNullDesC )
+        {
+        entry->AddAttributeL( KCaAttrInstallationTime, iModificationTime );
+        }
+
     return entry;
     }
 

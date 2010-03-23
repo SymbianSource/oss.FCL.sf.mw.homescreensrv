@@ -186,14 +186,12 @@ void CCaSrvAppScanner::UpdateApplicationEntryL(
     // This app is not in the storage, add it now.
     // We don't add hidden items, there are too many of them!
     // do not display Menu app
-    if( !resultArray.Count()
-    //TODO still needed?
-            && appuid != KMmUid3.iUid )
+    if( !resultArray.Count() )
         {
         AddAppEntryL( appuid, aMmcId );
         }//if
 
-    // "hidden", "missing" and "lock_delete"  flags update
+    // "removable", "missing" and "visible"  flags update
     for( TInt j = 0; j < resultArray.Count(); j++ )
         {
         //we need to handle first run of appscanner,
@@ -333,12 +331,14 @@ void CCaSrvAppScanner::UpdateApplicationEntriesL()
     RPointerArray<CCaInnerEntry> resultArray;
     CleanupResetAndDestroyPushL( resultArray );
     GetCaAppEntriesL( resultArray );
+    HandleHsAppEntryL( resultArray );
     RemoveSatAppL( resultArray );
 
     RArray<TCaAppAtributes> apaItems;
     CleanupClosePushL( apaItems );
     GetApaItemsL( apaItems );
-    RemoveSatApp( apaItems );
+    RemoveApp( apaItems, KSatUid.iUid );
+    RemoveApp( apaItems, KHsAppUid.iUid );
 
     //for every item in apaAndCrItems array
     for( TInt i = 0; i < apaItems.Count(); i++ )
@@ -350,47 +350,9 @@ void CCaSrvAppScanner::UpdateApplicationEntriesL()
         }
     // Here the big list cwith items that refer to missing apps.
     HandleMissingItemsL( resultArray );
-    HandleStubUpdatesL( );
     CleanupStack::PopAndDestroy( &apaItems );
     CleanupStack::PopAndDestroy( &resultArray );
     }
-
-
-// ---------------------------------------------------------
-// CCaSrvAppScanner::HandleStubUpdatesL
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::HandleStubUpdatesL()
-    {
-    RPointerArray<CCaInnerEntry> downloadedArray;
-    CleanupResetAndDestroyPushL( downloadedArray );
-
-    CCaInnerQuery* query = CCaInnerQuery::NewLC();
-    CDesC16ArrayFlat* appType = new (ELeave) CDesC16ArrayFlat( 1 );
-    CleanupStack::PushL( appType );
-    appType->AppendL( KCaTypeApp );
-    query->SetEntryTypeNames( appType );
-    CleanupStack::Pop( appType );
-    query->SetParentId( GetCollectionDownloadIdL() );
-    query->SetFlagsOn( EVisible );
-    query->SetFlagsOff( EMissing );
-    query->SetFlagsOff( ERemovable );
-    iCaStorageProxy.GetEntriesL( query, downloadedArray );
-
-    for(TInt i=0; i<downloadedArray.Count(); i++)
-        {
-        if( IsInRom( downloadedArray[i]->GetUid() ) )
-            {
-            RemoveEntryFromDownloadedL( downloadedArray[i]->GetId() );
-            }
-        }
-
-    CleanupStack::PopAndDestroy( query );
-    CleanupStack::PopAndDestroy( &downloadedArray );
-
-    }
-
-
 
 // ---------------------------------------------------------
 // CCaSrvAppScanner::HandleLockDeleteFlagUpdateL
@@ -438,13 +400,13 @@ TBool CCaSrvAppScanner::HandleMissingFlagUpdate( CCaInnerEntry* aItem )
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::RemoveSatApp
+// CCaSrvAppScanner::RemoveApp
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::RemoveSatApp( RArray<TCaAppAtributes>& aArray )
+void CCaSrvAppScanner::RemoveApp( RArray<TCaAppAtributes>& aArray, TInt32 aUid )
     {
-    TCaAppAtributes sat( KSatUid.iUid );
-    TInt id = aArray.Find( sat, TCaAppAtributes::MatchItems );
+    TCaAppAtributes app( aUid );
+    TInt id = aArray.Find( app, TCaAppAtributes::MatchItems );
     if( id != KErrNotFound )
         {
         aArray.Remove( id );
@@ -468,6 +430,39 @@ void CCaSrvAppScanner::RemoveSatAppL( RPointerArray<CCaInnerEntry>& aArray )
         }
     delete sat;
     }
+
+// ---------------------------------------------------------
+// CCaSrvAppScanner::HandleHsAppEntryL
+// ---------------------------------------------------------
+//
+void CCaSrvAppScanner::HandleHsAppEntryL( RPointerArray<CCaInnerEntry>& aArray )
+    {
+    CCaInnerEntry* appEntry = CCaInnerEntry::NewLC();
+    appEntry->SetUid( KHsAppUid.iUid );
+    TInt index = aArray.Find(
+            appEntry, TIdentityRelation<CCaInnerEntry>( UidMatch ) );
+    
+    if ( index != KErrNotFound )
+        { // hs app already in storage - ensure it is hidden and remove from resultArray
+        if ( ( aArray[index]->GetFlags() & EVisible ) != 0 )
+            {
+            aArray[index]->SetFlags( aArray[index]->GetFlags() & ~EVisible);
+            iCaStorageProxy.AddL( aArray[index] );
+            }        
+        delete aArray[index];
+        aArray.Remove( index );        
+        }
+    else
+        { // if not found add as not visible to the storage
+        appEntry->SetEntryTypeNameL( KCaTypeApp );
+        appEntry->SetFlags( 0 ); 
+        appEntry->SetRole( EItemEntryRole );
+        SetApaAppInfoL( appEntry );
+        iCaStorageProxy.AddL( appEntry );
+        }
+    CleanupStack::PopAndDestroy( appEntry );
+    }
+
 
 // ---------------------------------------------------------
 // CCaSrvAppScanner::GetApaItemsL

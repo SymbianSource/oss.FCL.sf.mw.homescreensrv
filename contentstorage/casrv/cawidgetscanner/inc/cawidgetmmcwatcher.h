@@ -44,8 +44,8 @@ public:
  *  @since S60 S60 v3.1
  */ 
 class CCaWidgetMmcWatcher : public CActive
-	{
-	
+    {
+    
 public:
 
     /**
@@ -53,52 +53,52 @@ public:
     * @param aObserver Pointer to notifier interface.
     * @param aFs file server session.
     */
-	static CCaWidgetMmcWatcher* NewL( RFs& aFs,
-	        MWidgetMmcWatcherCallback* aObserver );
+    static CCaWidgetMmcWatcher* NewL( RFs& aFs,
+            MWidgetMmcWatcherCallback* aObserver );
 
     /**
     * Two-phased constructor.
     * @param aObserver Pointer to notifier interface.
     * @param aFs file server session.
     */
-	static CCaWidgetMmcWatcher* NewLC( RFs& aFs, 
-	        MWidgetMmcWatcherCallback* aObserver );
-	
+    static CCaWidgetMmcWatcher* NewLC( RFs& aFs, 
+            MWidgetMmcWatcherCallback* aObserver );
+    
     /**
     * Destructor
     */
-	~CCaWidgetMmcWatcher();
-	
+    ~CCaWidgetMmcWatcher();
+    
 private:
-	
+    
     /**
     * C++ default constructor
     * @param aObserver Pointer to notifier interface.
     * @param aFs file server session.
     */
-	CCaWidgetMmcWatcher( RFs& aFs, MWidgetMmcWatcherCallback* aObserver );
+    CCaWidgetMmcWatcher( RFs& aFs, MWidgetMmcWatcherCallback* aObserver );
 
     /**
     * By default Symbian OS constructor is private.
     */
-	void ConstructL();
-	
+    void ConstructL();
+    
     /**
     * Set notification request
     */
-	void WaitForChangeL();		
+    void WaitForChangeL();        
 
     /**
     * From CActive.
     */
-	void DoCancel();
+    void DoCancel();
 
     /**
     * From CActive.
     */
-	void RunL();
-	
-	/**
+    void RunL();
+    
+    /**
      * From CActive.
      */
     TInt RunError( TInt aError );
@@ -109,14 +109,14 @@ private:
      * File server session. 
      * Not Own
      */
-	RFs iFs;
-	
+    RFs iFs;
+    
     /**
      * MMC events observer
      * Not own.
      */
-	MWidgetMmcWatcherCallback* iObserver;	
-	};
+    MWidgetMmcWatcherCallback* iObserver;    
+    };
 
 
 #endif      // C_CAWIDGETMMCWATCHER_H

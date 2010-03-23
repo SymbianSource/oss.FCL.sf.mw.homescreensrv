@@ -22,6 +22,8 @@
 #include "caentry.h"
 #include "caentry_p.h"
 #include "caobjectadapter.h"
+#include "caiconcache.h"
+#include "caclienttest_global.h"
 
 
 // ======== MEMBER FUNCTIONS ========
@@ -407,9 +409,18 @@ void CaEntry::setAttribute(const QString &name, const QString &value)
  icon.size() == iconSize;
  \endcode
  */
-HbIcon CaEntry::makeIcon(const QSize& size) const
+HbIcon CaEntry::makeIcon(const QSize &size) const
 {
-    return m_d->makeIcon(size);
+    CACLIENTTEST_FUNC_ENTRY("CaEntry::makeIcon");
+    HbIcon icon;
+    if (CaIconCache::cache()->exist(*this,size)) {
+        icon = CaIconCache::cache()->icon(*this,size);
+    } else {
+        icon = m_d->makeIcon(size);
+        CaIconCache::cache()->insert(*this, size, icon);
+    }
+    CACLIENTTEST_FUNC_EXIT("CaEntry::makeIcon");
+    return icon;
 }
 
 /*!
@@ -460,7 +471,7 @@ EntryRole CaEntry::role() const
  \param entryPublic associated public entry
  */
 CaEntryPrivate::CaEntryPrivate(CaEntry *entryPublic) :
-    m_q(entryPublic), mId(0), mText(), mDescription(), mIconDescription(), 
+    m_q(entryPublic), mId(0), mText(), mDescription(), mIconDescription(),
     mFlags(RemovableEntryFlag|VisibleEntryFlag),mEntryTypeName(),
     mAttributes()
 {
@@ -616,7 +627,7 @@ void CaEntryPrivate::setAttribute(const QString &name, const QString &value)
  \param  size icon size to display
  \retval created icon (HbIcon).
  */
-HbIcon CaEntryPrivate::makeIcon(const QSize& size) const
+HbIcon CaEntryPrivate::makeIcon(const QSize &size) const
 {
     return CaObjectAdapter::makeIcon(*m_q, size);
 }

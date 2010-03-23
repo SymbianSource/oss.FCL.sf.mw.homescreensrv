@@ -41,10 +41,10 @@ CaClientNotifierProxy::~CaClientNotifierProxy()
 //
 //----------------------------------------------------------------------------
 void CaClientNotifierProxy::entryChanged(int entryId,
-    ChangeType changeType) const
+        ChangeType changeType) const
 {
     qDebug() << "CaClientProxy::entryChanged entryId:"
-        << entryId << "changeType:" << changeType;
+             << entryId << "changeType:" << changeType;
     emit signalEntryChanged(entryId, changeType);
 }
 
@@ -52,7 +52,7 @@ void CaClientNotifierProxy::entryChanged(int entryId,
 //
 //----------------------------------------------------------------------------
 void CaClientNotifierProxy::entryChanged(const CaEntry &entry,
-    ChangeType changeType) const
+        ChangeType changeType) const
 {
     qDebug() << "CaClientProxy::entryChanged changeType:" << changeType;
     CaEntry *caEntry = new CaEntry(entry);
@@ -86,7 +86,7 @@ int CaClientNotifierProxy::registerNotifier(
     const CaClientNotifierProxy *notifierProxy)
 {
     qDebug() << "CaClientProxy::registerNotifier notifierType:"
-        << notifierType;
+             << notifierType;
     QMutexLocker locker(&mMutex);
     return CaNotifiers::addNotifier(notifierFilter, notifierType, notifierProxy);
 }
@@ -95,11 +95,11 @@ int CaClientNotifierProxy::registerNotifier(
 //
 //----------------------------------------------------------------------------
 void CaClientNotifierProxy::unregisterNotifier(
-     const CaNotifierFilter &notifierFilter,
-     CaNotifierPrivate::NotifierType notifierType)
+    const CaNotifierFilter &notifierFilter,
+    CaNotifierPrivate::NotifierType notifierType)
 {
     qDebug() << "CaClientProxy::unregisterNotifier notifierType:"
-        << notifierType;
+             << notifierType;
     QMutexLocker locker(&mMutex);
     CaNotifiers::removeNotifier(&notifierFilter, notifierType);
 }

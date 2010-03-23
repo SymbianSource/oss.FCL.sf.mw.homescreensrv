@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (c)2008 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
@@ -31,7 +31,7 @@ HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 {
     HbIcon icon;
     QString filename(entry.iconDescription().filename());
-    if(!filename.isEmpty()) {
+    if (!filename.isEmpty()) {
         icon = HbIcon(filename);
     }
     if (icon.isNull() || !(icon.size().isValid())) {
@@ -45,7 +45,7 @@ HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::setId(CaEntry &entry,
-    int id)
+                            int id)
 {
     entry.setId(id);
 }
@@ -54,7 +54,7 @@ void CaObjectAdapter::setId(CaEntry &entry,
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::setId(CaIconDescription &iconDescription,
-    int id)
+                            int id)
 {
     iconDescription.setId(id);
 }

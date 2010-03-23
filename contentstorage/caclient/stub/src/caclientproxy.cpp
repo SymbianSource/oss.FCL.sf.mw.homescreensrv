@@ -34,9 +34,9 @@
 
 #include "hswidgetregistryservice.h"
 
-const char* DATABASE_CONNECTION_NAME = "CaService";
-const char* DATABASE_TYPE = "QSQLITE";
-const char* DATABASE_NAME = "castoragedb";
+const char *DATABASE_CONNECTION_NAME = "CaService";
+const char *DATABASE_TYPE = "QSQLITE";
+const char *DATABASE_NAME = "castoragedb";
 
 static QSqlDatabase dbConnection()
 {
@@ -70,7 +70,7 @@ ErrorCode CaClientProxy::connect()
 {
     ErrorCode errorCode = NotFoundErrorCode;
     QSqlDatabase db = QSqlDatabase::addDatabase(DATABASE_TYPE,
-        DATABASE_CONNECTION_NAME);
+                      DATABASE_CONNECTION_NAME);
     if (db.isValid()) {
         db.setDatabaseName(DATABASE_NAME);
         if (db.open()) {
@@ -90,23 +90,23 @@ ErrorCode CaClientProxy::connect()
 void CaClientProxy::updateWidgets()
 {
     qDebug("CaClientProxy::updateWidgets start");
-    
+
     HsWidgetRegistryService *rs =
         new HsWidgetRegistryService(mWidgetRegistryPath);
     QList<HsWidgetToken> widgets = rs->widgets();
-    
+
     // Read widgets in order to add synchronize the content of the widgets
     // registry with Content Storage database.
-    foreach (const HsWidgetToken &widgetToken, widgets) {
+    foreach(const HsWidgetToken &widgetToken, widgets) {
         int uid = widgetToken.mUid;
-        
+
         if (!hsWidgetExists(uid)) {
             // The given widget does not have a corresonding entry
             // in the databse, so such an entry needs do be created.
             addWidgetEntry(widgetToken);
         }
     }
-    
+
     delete rs;
     qDebug("CaClientProxy::updateWidgets end");
 }
@@ -127,71 +127,71 @@ void CaClientProxy::addWidgetEntry(const HsWidgetToken &widgetToken)
     QString hexUid;
     hexUid.setNum(uid,16);
     QDir currentDir = QDir::current();
-    
+
     // Add icon.
     QString queryAddIcon =
         "INSERT INTO CA_ICON " \
-            "(IC_FILENAME) " \
+        "(IC_FILENAME) " \
         "VALUES " \
-            "(?)";
+        "(?)";
 
     query.prepare(queryAddIcon);
     query.addBindValue(iconUri);
     query.exec();
     qDebug() << query.executedQuery();
-    
+
     // Add entry.
     QString queryAddEntry =
         "INSERT INTO CA_ENTRY " \
-            "(EN_TEXT, EN_DESCRIPTION, EN_ROLE, EN_TYPE_NAME, EN_ICON_ID) " \
+        "(EN_TEXT, EN_DESCRIPTION, EN_ROLE, EN_TYPE_NAME, EN_ICON_ID) " \
         "VALUES " \
-            "(?, ?, 1, 'widget', last_insert_rowid())";
+        "(?, ?, 1, 'widget', last_insert_rowid())";
 
-    query.prepare(queryAddEntry);    
+    query.prepare(queryAddEntry);
     query.addBindValue(title);
     query.addBindValue(description);
     query.exec();
     qDebug() << query.executedQuery();
-    
-    // Get last id 
+
+    // Get last id
     QString queryLastId = "SELECT last_insert_rowid() AS LAST_ID";
     query.prepare(queryLastId);
     query.exec();
     query.next();
     int lastId = query.value(query.record().indexOf("LAST_ID")).toInt();
-    
+
     // Add attribute packageuid
     QString queryAddAttribute1 =
         "INSERT INTO CA_ATTRIBUTE " \
-            "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
+        "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
         "VALUES " \
-            "(?, 'packageuid', ?)";
+        "(?, 'packageuid', ?)";
 
     query.prepare(queryAddAttribute1);
     query.addBindValue(lastId);
     query.addBindValue(hexUid);
     query.exec();
     qDebug() << query.executedQuery();
-    
+
     // Add attribute widget uri
     QString queryAddAttribute2 =
         "INSERT INTO CA_ATTRIBUTE " \
-            "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
+        "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
         "VALUES " \
-            "(?, 'widget:uri', ?)";
+        "(?, 'widget:uri', ?)";
 
     query.prepare(queryAddAttribute2);
     query.addBindValue(lastId);
     query.addBindValue(uri);
     query.exec();
     qDebug() << query.executedQuery();
-    
+
     // Add attribute widget library
     QString queryAddAttribute3 =
         "INSERT INTO CA_ATTRIBUTE " \
-            "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
+        "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
         "VALUES " \
-            "(?, 'widget:library', ?)";
+        "(?, 'widget:library', ?)";
 
     query.prepare(queryAddAttribute3);
     query.addBindValue(lastId);
@@ -208,20 +208,20 @@ bool CaClientProxy::hsWidgetExists(int uid)
     bool exists(false);
     QSqlDatabase db = dbConnection();
     QSqlQuery query(db);
-    QString hexUid;    
+    QString hexUid;
     hexUid.setNum(uid,16);
-    
+
     QString queryString =
         "SELECT " \
-            "AT_ENTRY_ID " \
+        "AT_ENTRY_ID " \
         "FROM " \
-            "CA_ATTRIBUTE " \
+        "CA_ATTRIBUTE " \
         "WHERE " \
-            "AT_VALUE LIKE ?";
-    
+        "AT_VALUE LIKE ?";
+
     query.prepare(queryString);
     query.addBindValue(hexUid);
-    
+
     if (query.exec() && query.next()) {
         // Query returned a non empty result.
         exists = true;
@@ -229,9 +229,9 @@ bool CaClientProxy::hsWidgetExists(int uid)
         // The widget with the given uid was not found.
         exists = false;
     }
-    
+
     qDebug() << query.executedQuery();
-    
+
     return exists;
 }
 
@@ -239,10 +239,10 @@ bool CaClientProxy::hsWidgetExists(int uid)
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::addData(const CaEntry &entryToAdd,
-    CaEntry &targetEntry)
+                                 CaEntry &targetEntry)
 {
     qDebug() << "CaClientProxy::addData" << "entry id: "
-        << entryToAdd.id();
+             << entryToAdd.id();
 
     targetEntry = entryToAdd;
     QSqlDatabase db = dbConnection();
@@ -252,8 +252,8 @@ ErrorCode CaClientProxy::addData(const CaEntry &entryToAdd,
     }
     query.exec("begin");
     bool success = (setIconInDb(&targetEntry)
-        && setEntryInDb(&targetEntry)
-        && setAttributesInDb(&targetEntry));
+                    && setEntryInDb(&targetEntry)
+                    && setAttributesInDb(&targetEntry));
     if (success) {
         query.exec("commit");
         QList<int> parentIds;
@@ -276,12 +276,12 @@ ErrorCode CaClientProxy::addData(const CaEntry &entryToAdd,
 ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
 {
     qDebug() << "CaClientProxy::removeData" << "entryIdList: "
-        << entryIdList;
+             << entryIdList;
 
-    QList<CaEntry*> entryList;
+    QList<CaEntry *> entryList;
     getData(entryIdList, entryList);
     QList<QList<int> > parentsIds;
-    foreach (CaEntry *entry, entryList) {
+    foreach(CaEntry *entry, entryList) {
         QList<int> parentIds;
         GetParentsIds(QList<int>() << entry->id(), parentIds);
         parentsIds.append(parentIds);
@@ -299,8 +299,8 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         success = query.exec();
         if (success && query.next()) {
             success
-                = query.value(query.record().indexOf("ENTRY_ID")).toInt()
-                    > 0;
+            = query.value(query.record().indexOf("ENTRY_ID")).toInt()
+              > 0;
         }
         if (!success) {
             break;
@@ -311,9 +311,9 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         query.addBindValue(entryId);
         int iconId(0);
         success = query.exec();
-        if (success && query.next()){
+        if (success && query.next()) {
             iconId
-                = query.value(query.record().indexOf("EN_ICON_ID")).toInt();
+            = query.value(query.record().indexOf("EN_ICON_ID")).toInt();
         } else {
             break;
         }
@@ -323,7 +323,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         success = query.exec();
         if (success) {
             qDebug() << query.lastQuery() << " rows deleted: "
-                << query.numRowsAffected();
+                     << query.numRowsAffected();
         } else {
             break;
         }
@@ -334,7 +334,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         success = query.exec();
         if (success) {
             qDebug() << query.lastQuery() << " rows deleted: "
-                << query.numRowsAffected();
+                     << query.numRowsAffected();
         } else {
             break;
         }
@@ -345,7 +345,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         success = query.exec();
         if (success) {
             qDebug() << query.lastQuery() << " rows deleted: "
-                << query.numRowsAffected();
+                     << query.numRowsAffected();
         } else {
             break;
         }
@@ -355,7 +355,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         success = query.exec();
         if (success) {
             qDebug() << query.lastQuery() << " rows deleted: "
-                << query.numRowsAffected();
+                     << query.numRowsAffected();
         } else {
             break;
         }
@@ -365,7 +365,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
         success = query.exec();
         if (success) {
             qDebug() << query.lastQuery() << " rows deleted: "
-                << query.numRowsAffected();
+                     << query.numRowsAffected();
         } else {
             break;
         }
@@ -376,7 +376,7 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
             success = query.exec();
             if (success) {
                 qDebug() << query.lastQuery() << " rows deleted: "
-                    << query.numRowsAffected();
+                         << query.numRowsAffected();
             } else {
                 // ignore, this means that the icon cannot be removed
                 // because some other entry has the same icon.
@@ -406,23 +406,23 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::insertEntriesIntoGroup(int groupId,
-    const QList<int> &entryIdList, int beforeEntryId)
+        const QList<int> &entryIdList, int beforeEntryId)
 {
     qDebug() << "CaClientProxy::insertEntriesIntoGroup" << "groupId: "
-        << groupId << "beforeEntryId: " << beforeEntryId << "entryIdList: "
-        << entryIdList;
+             << groupId << "beforeEntryId: " << beforeEntryId << "entryIdList: "
+             << entryIdList;
 
     removeEntriesFromGroup(groupId, entryIdList, false);
     QString queryText;
     if (beforeEntryId == AfterTheLastEntry) {
         queryText = QString("INSERT INTO CA_GROUP_ENTRY (GE_GROUP_ID,GE_ENTRY_ID,GE_POSITION) "
-            "VALUES ( ?, ?,(SELECT MAX(DATA) FROM ( SELECT MAX(GE_POSITION)+ 1 AS DATA FROM CA_GROUP_ENTRY "
-            "WHERE GE_GROUP_ID = %1 UNION SELECT 1 AS DATA FROM CA_GROUP_ENTRY ) ) )").arg(groupId);
+                            "VALUES ( ?, ?,(SELECT MAX(DATA) FROM ( SELECT MAX(GE_POSITION)+ 1 AS DATA FROM CA_GROUP_ENTRY "
+                            "WHERE GE_GROUP_ID = %1 UNION SELECT 1 AS DATA FROM CA_GROUP_ENTRY ) ) )").arg(groupId);
     } else if (beforeEntryId == BeforeTheFirstEntry) {
         queryText = "INSERT INTO CA_GROUP_ENTRY (GE_GROUP_ID,GE_ENTRY_ID,GE_POSITION) VALUES ( ?, ?, 0 ) ";
     } else {
         queryText = QString("INSERT INTO CA_GROUP_ENTRY (GE_GROUP_ID,GE_ENTRY_ID,GE_POSITION) VALUES ( "
-            "?, ?, ( SELECT GE_POSITION FROM CA_GROUP_ENTRY WHERE GE_ENTRY_ID = %1 ) ) ").arg(beforeEntryId);
+                            "?, ?, ( SELECT GE_POSITION FROM CA_GROUP_ENTRY WHERE GE_ENTRY_ID = %1 ) ) ").arg(beforeEntryId);
     }
 
     bool success = true;
@@ -451,11 +451,11 @@ ErrorCode CaClientProxy::insertEntriesIntoGroup(int groupId,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::removeEntriesFromGroup(int groupId,
-    const QList<int> &entryIdList,
-    bool calledDirectly)
+        const QList<int> &entryIdList,
+        bool calledDirectly)
 {
     qDebug() << "CaClientProxy::removeEntriesFromGroup" << "groupId: "
-        << groupId << "entryIdList: " << entryIdList;
+             << groupId << "entryIdList: " << entryIdList;
 
     bool success = true;
     QSqlDatabase db = dbConnection();
@@ -486,15 +486,15 @@ ErrorCode CaClientProxy::removeEntriesFromGroup(int groupId,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
-    QList<CaEntry*> &sourceList)
+                                 QList<CaEntry *> &sourceList)
 {
     qDebug() << "CaClientProxy::getData" << "entryIdList: "
-        << entryIdList;
+             << entryIdList;
 
     QSqlDatabase db = dbConnection();
 
     bool success(true);
-    foreach (int i, entryIdList) {
+    foreach(int i, entryIdList) {
         QSqlQuery query(db);
         query.prepare(
             "SELECT ENTRY_ID, EN_TEXT, EN_DESCRIPTION, EN_TYPE_NAME, EN_FLAGS, EN_ROLE, EN_UID,  \
@@ -507,39 +507,39 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
             qDebug() << query.executedQuery();
             int role =
                 query.value(query.record().indexOf("EN_ROLE")).toInt();
-            CaEntry* entry = new CaEntry((EntryRole) role);
+            CaEntry *entry = new CaEntry((EntryRole) role);
             CaObjectAdapter::setId(*entry,
-                query.value(query.record().indexOf("ENTRY_ID")).toInt());
+                                   query.value(query.record().indexOf("ENTRY_ID")).toInt());
             entry->setText(query.value(
-                query.record().indexOf("EN_TEXT")).toString());
+                               query.record().indexOf("EN_TEXT")).toString());
             entry->setDescription(query.value(
-                query.record().indexOf("EN_DESCRIPTION")).toString());
+                                      query.record().indexOf("EN_DESCRIPTION")).toString());
             entry->setEntryTypeName(query.value(query.record().indexOf(
-                "EN_TYPE_NAME")).toString());
-            entry->setFlags(static_cast<EntryFlag> (query.value(
-                query.record().indexOf("EN_FLAGS")).toUInt()));
+                                                    "EN_TYPE_NAME")).toString());
+            entry->setFlags(static_cast<EntryFlag>(query.value(
+                    query.record().indexOf("EN_FLAGS")).toUInt()));
 
             CaIconDescription icon;
             CaObjectAdapter::setId(icon,
-                query.value(query.record().indexOf("ICON_ID")).toInt());
+                                   query.value(query.record().indexOf("ICON_ID")).toInt());
             icon.setBitmapId(query.value(query.record().indexOf(
-                "IC_BITMAP_ID")).toInt());
+                                             "IC_BITMAP_ID")).toInt());
             icon.setMaskId(query.value(query.record().indexOf(
-                "IC_MASK_ID")).toInt());
+                                           "IC_MASK_ID")).toInt());
             icon.setSkinMajorId(query.value(query.record().indexOf(
-                "IC_SKINMAJOR_ID")).toInt());
+                                                "IC_SKINMAJOR_ID")).toInt());
             icon.setSkinMinorId(query.value(query.record().indexOf(
-                "IC_SKINMINOR_ID")).toInt());
+                                                "IC_SKINMINOR_ID")).toInt());
             icon.setFilename(query.value(query.record().indexOf(
-                "IC_FILENAME")).toString());
+                                             "IC_FILENAME")).toString());
             entry->setIconDescription(icon);
 
             // attributes
             // UID as attribute
             if (query.value(query.record().indexOf("EN_UID")).toString().length()
-                > 0) {
+                    > 0) {
                 entry->setAttribute("application:uid", query.value(
-                    query.record().indexOf("EN_UID")).toString());
+                                        query.record().indexOf("EN_UID")).toString());
             }
 
             // fetch from DB attributes
@@ -574,7 +574,7 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const CaQuery &query,
-    QList<CaEntry*> &sourceList)
+                                 QList<CaEntry *> &sourceList)
 {
     QList<int> entryIdList;
     ErrorCode errorCode = getEntryIds(query, entryIdList);
@@ -588,7 +588,7 @@ ErrorCode CaClientProxy::getData(const CaQuery &query,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
-    QList<int> &sourceIdList)
+                                     QList<int> &sourceIdList)
 {
     qDebug() << "CaClientProxy::getEntryIds";
 
@@ -598,16 +598,16 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
     QString whereStatement;
     if (query.flagsOn() != 0)
         whereStatement.append(" AND ").append(QString().setNum(
-            query.flagsOn())).append(" & EN_FLAGS == ").append(
-            QString().setNum(query.flagsOn()));
+                query.flagsOn())).append(" & EN_FLAGS == ").append(
+                    QString().setNum(query.flagsOn()));
     if (query.flagsOff() != 0)
         whereStatement.append(" AND ").append(QString().setNum(
-            query.flagsOff())).append(" & (~EN_FLAGS) == ").append(
-            QString().setNum(query.flagsOff()));
+                query.flagsOff())).append(" & (~EN_FLAGS) == ").append(
+                    QString().setNum(query.flagsOff()));
     if (query.entryRoles() != 0)
         whereStatement.append(" AND ").append(QString().setNum(
-            query.entryRoles())) .append(" | EN_ROLE == ").append(
-            QString().setNum(query.entryRoles()));
+                query.entryRoles())) .append(" | EN_ROLE == ").append(
+                    QString().setNum(query.entryRoles()));
     //TODO: by uid???
 
     if (query.entryTypeNames().count()) {
@@ -629,40 +629,39 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
         if (query.count() > 0)
             queryString.append(" LIMIT ").append(query.count());
         qDebug() << "CaServicePrivate::getEntryIds query text: "
-            << queryString;
+                 << queryString;
         success = sqlquery.prepare(queryString);
         success = sqlquery.exec();
         if (success) {
             while (sqlquery.next()) {
                 sourceIdList << sqlquery.value(sqlquery.record().indexOf(
-                    "ENTRY_ID")).toInt();
+                                                   "ENTRY_ID")).toInt();
             }
         }
-    }
-    else {
+    } else {
         QString
-            queryString(
-                "SELECT ENTRY_ID FROM CA_ENTRY \
+        queryString(
+            "SELECT ENTRY_ID FROM CA_ENTRY \
         LEFT JOIN CA_GROUP_ENTRY ON GE_ENTRY_ID = ENTRY_ID WHERE GE_GROUP_ID  = ? ");
         queryString.append(whereStatement);
         modifyQueryForSortOrder(queryString, query, true);
         if (query.count() > 0)
             queryString.append(" LIMIT ").append(query.count());
         qDebug() << "CaServicePrivate::getEntryIds query text: "
-            << queryString;
+                 << queryString;
         sqlquery.prepare(queryString);
         sqlquery.addBindValue(query.parentId());
         success = sqlquery.exec();
         if (success) {
             while (sqlquery.next()) {
                 sourceIdList << sqlquery.value(sqlquery.record().indexOf(
-                    "ENTRY_ID")).toInt();
+                                                   "ENTRY_ID")).toInt();
             }
         }
     }
     ErrorCode error = UnknownErrorCode;
     if (success) {
-            error = NoErrorCode;
+        error = NoErrorCode;
     }
     return error;
 }
@@ -671,11 +670,11 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
-    const QString &command)
+                                        const QString &command)
 {
     qDebug() << "CaClientProxy::executeCommand" << "entry id: "
-        << entry.id() << "command: " << command;
-    return touch(entry);
+             << entry.id() << "command: " << command;
+    return NoErrorCode;
 }
 
 //----------------------------------------------------------------------------
@@ -718,7 +717,7 @@ ErrorCode CaClientProxy::touch(const CaEntry &entry)
         query.exec("rollback");
         error = UnknownErrorCode;
     }
-    
+
     return error;
 }
 
@@ -726,7 +725,7 @@ ErrorCode CaClientProxy::touch(const CaEntry &entry)
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
-        int groupId)
+                                    int groupId)
 {
     bool success = true;
     QSqlDatabase db = dbConnection();
@@ -735,7 +734,7 @@ ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
     for (int i = 0; i < entryIdList.count(); i++) {
         int position = i+1;
         query.prepare(
-            "UPDATE CA_GROUP_ENTRY SET GE_POSITION = ? WHERE GE_ENTRY_ID = ? AND GE_GROUP_ID = ?" );
+            "UPDATE CA_GROUP_ENTRY SET GE_POSITION = ? WHERE GE_ENTRY_ID = ? AND GE_GROUP_ID = ?");
         query.addBindValue(position);
         query.addBindValue(entryIdList.at(i));
         query.addBindValue(groupId);
@@ -759,8 +758,8 @@ ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
 /*!
  //TODO:
  */
-void CaClientProxy::modifyQueryForSortOrder(QString& queryString,
-    const CaQuery &query, bool parent) const
+void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
+        const CaQuery &query, bool parent) const
 {
     SortAttribute sortAttribute;
     Qt::SortOrder sortOrder;
@@ -770,40 +769,34 @@ void CaClientProxy::modifyQueryForSortOrder(QString& queryString,
 
     if (sortAttribute == NameSortAttribute) {
         queryString.append(oldQueryString).append(" ORDER BY EN_TEXT ");
-    }
-    else if (sortAttribute == CreatedTimestampSortAttribute) {
+    } else if (sortAttribute == CreatedTimestampSortAttribute) {
         queryString.append(oldQueryString).append(
             " ORDER BY EN_CREATION_TIME ");
-    }
-    else if (sortAttribute == MostUsedSortAttribute) {
+    } else if (sortAttribute == MostUsedSortAttribute) {
         queryString.append("SELECT ENTRY_ID FROM (").append(oldQueryString).append(
             " \
                 ) LEFT JOIN \
                 (SELECT LA_ENTRY_ID, COUNT(*) AS USAGE_DATA FROM CA_LAUNCH GROUP BY LA_ENTRY_ID) \
                 ON ENTRY_ID = LA_ENTRY_ID ORDER BY USAGE_DATA ");
-    }
-    else if (sortAttribute == LastUsedSortAttribute) {
+    } else if (sortAttribute == LastUsedSortAttribute) {
         queryString.append("SELECT ENTRY_ID FROM (").append(oldQueryString).append(
             " \
                 ) LEFT JOIN \
                 (SELECT LA_ENTRY_ID, MAX(LA_LAUNCH_TIME) AS USAGE_DATA FROM CA_LAUNCH GROUP BY LA_ENTRY_ID) \
                 ON ENTRY_ID = LA_ENTRY_ID ORDER BY USAGE_DATA ");
-    }
-    else if (parent && sortAttribute == DefaultSortAttribute) {
+    } else if (parent && sortAttribute == DefaultSortAttribute) {
         queryString.append(oldQueryString).append(
             " ORDER BY GE_GROUP_ID, GE_POSITION ");
-    }
-    else if (!parent && sortAttribute == DefaultSortAttribute) {
+    } else if (!parent && sortAttribute == DefaultSortAttribute) {
         queryString.append(oldQueryString).append(" ORDER BY ENTRY_ID ");
-    }
-    else {
+    } else {
         queryString.append(oldQueryString);
     }
 
     if (sortAttribute == NameSortAttribute || sortAttribute
-        == CreatedTimestampSortAttribute || sortAttribute
-        == MostUsedSortAttribute || sortAttribute == LastUsedSortAttribute
-        || (sortAttribute == DefaultSortAttribute && parent)) {
+            == CreatedTimestampSortAttribute || sortAttribute
+            == MostUsedSortAttribute || sortAttribute == LastUsedSortAttribute
+            || (sortAttribute == DefaultSortAttribute && parent)) {
         if (sortOrder == Qt::AscendingOrder)
             queryString.append(" ASC ");
         else
@@ -826,14 +819,14 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
             AND IC_SKINMAJOR_ID = :IC_SKINMAJOR_ID \
             AND IC_SKINMINOR_ID = :IC_SKINMINOR_ID");
     query.bindValue(":IC_FILENAME",
-        entryClone->iconDescription().filename());
+                    entryClone->iconDescription().filename());
     query.bindValue(":IC_BITMAP_ID",
-        entryClone->iconDescription().bitmapId());
+                    entryClone->iconDescription().bitmapId());
     query.bindValue(":IC_MASK_ID", entryClone->iconDescription().maskId());
     query.bindValue(":IC_SKINMAJOR_ID",
-        entryClone->iconDescription().skinMajorId());
+                    entryClone->iconDescription().skinMajorId());
     query.bindValue(":IC_SKINMINOR_ID",
-        entryClone->iconDescription().skinMinorId());
+                    entryClone->iconDescription().skinMinorId());
 
     bool success = query.exec();
     if (success && query.next()) {
@@ -842,9 +835,9 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
         qDebug() << "iconId = " << iconId;
         CaIconDescription iconDescription = entryClone->iconDescription();
         if (iconId <= 0 && (iconDescription.filename() != ""
-            || iconDescription.bitmapId() != 0 || iconDescription.maskId() != 0
-            || iconDescription.skinMajorId() != 0
-            || iconDescription.skinMinorId() != 0)) {
+                            || iconDescription.bitmapId() != 0 || iconDescription.maskId() != 0
+                            || iconDescription.skinMajorId() != 0
+                            || iconDescription.skinMinorId() != 0)) {
             query.prepare(
                 "INSERT INTO CA_ICON \
                            (IC_FILENAME,IC_BITMAP_ID,IC_MASK_ID,IC_SKINMAJOR_ID,IC_SKINMINOR_ID) \
@@ -872,17 +865,16 @@ bool CaClientProxy::setEntryInDb(CaEntry *entryClone) const
     QSqlQuery query(dbConnection());
     bool isNewEntry(entryClone->id() <= 0);
     QString
-        queryText(
-            "INSERT INTO CA_ENTRY \
+    queryText(
+        "INSERT INTO CA_ENTRY \
         (EN_TEXT,EN_ROLE,EN_TYPE_NAME,EN_FLAGS,EN_ICON_ID ) VALUES ( ?, ?, ?, ?, ");
     if (!isNewEntry)
         queryText
-            = "REPLACE INTO CA_ENTRY \
+        = "REPLACE INTO CA_ENTRY \
         (ENTRY_ID,EN_TEXT,EN_ROLE,EN_TYPE_NAME,EN_FLAGS,EN_ICON_ID ) VALUES ( ?, ?, ?, ?, ?, ";
     if (entryClone->iconDescription().id() > 0) {
         queryText.append("?");
-    }
-    else {
+    } else {
         queryText.append("NULL");
     }
     queryText.append(")");
@@ -913,7 +905,7 @@ bool CaClientProxy::setEntryInDb(CaEntry *entryClone) const
             query.addBindValue(newEntryId);
             success = query.exec();
             qDebug() << "CaServicePrivate::setEntryInDb"
-                << query.executedQuery();
+                     << query.executedQuery();
         }
     }
     return success;
@@ -928,24 +920,24 @@ bool CaClientProxy::setAttributesInDb(CaEntry *entryClone) const
     QSqlQuery query(dbConnection());
     if (entryClone->attributes().count() > 0) {
         QMap<QString, QString> attributesMap = entryClone->attributes();
-        foreach (QString key, attributesMap.keys()) {
-                query.prepare(
-                    "REPLACE INTO CA_ATTRIBUTE (AT_ENTRY_ID,AT_NAME,AT_VALUE) VALUES ( \
+        foreach(QString key, attributesMap.keys()) {
+            query.prepare(
+                "REPLACE INTO CA_ATTRIBUTE (AT_ENTRY_ID,AT_NAME,AT_VALUE) VALUES ( \
                 :AT_ENTRY_ID,\
                 :AT_NAME,\
                 :AT_VALUE )");
-                query.bindValue(":AT_ENTRY_ID", entryClone->id());
-                query.bindValue(":AT_NAME", key);
-                query.bindValue(":AT_VALUE", attributesMap.value(key));
-                success = query.exec();
-                if (!success) {
-                    break;
-                }
-                qDebug() << "CaServicePrivate::setAttributesInDb"
-                    << query.boundValues();
+            query.bindValue(":AT_ENTRY_ID", entryClone->id());
+            query.bindValue(":AT_NAME", key);
+            query.bindValue(":AT_VALUE", attributesMap.value(key));
+            success = query.exec();
+            if (!success) {
+                break;
             }
+            qDebug() << "CaServicePrivate::setAttributesInDb"
+                     << query.boundValues();
+        }
     }
-     return success;
+    return success;
 }
 
 
@@ -964,7 +956,7 @@ void CaClientProxy::CreateGetParentsIdsQuery(
         entryIdList.append(QString::number(entryIds[lastItemIndex]));
     }
     query = QString("SELECT GE_GROUP_ID FROM CA_GROUP_ENTRY "
-        "WHERE GE_ENTRY_ID IN ( %1 )").arg(entryIdList);
+                    "WHERE GE_ENTRY_ID IN ( %1 )").arg(entryIdList);
 
     int lastParentIndex = parentIds.count()-1;
     if (lastParentIndex >= 0) {
@@ -979,8 +971,8 @@ void CaClientProxy::CreateGetParentsIdsQuery(
 }
 
 
-bool CaClientProxy::GetParentsIds( const QList<int> &entryIds,
-    QList<int> &parentIds)
+bool CaClientProxy::GetParentsIds(const QList<int> &entryIds,
+                                  QList<int> &parentIds)
 {
     QString getParentIdsQuery;
     CreateGetParentsIdsQuery(entryIds, parentIds, getParentIdsQuery);

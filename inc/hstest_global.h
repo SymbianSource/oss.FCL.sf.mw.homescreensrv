@@ -39,7 +39,7 @@
 #endif //HOMESCREEN_TEST
 
 #define HSCATCHDEBUG qDebug("Catched in: %s on line: %d",__FILE__,__LINE__);
-#define HSDEBUG(a) qDebug("%s in: %s on line: %d", (a),  __FILE__,__LINE__);
+#define HSDEBUG(a) qDebug() << a << " in: " << __FILE__ << " on line: " << __LINE__;
 
 
 #ifdef NFT

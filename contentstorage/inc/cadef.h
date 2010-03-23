@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: ou1s60ui#10.1.1 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.4 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -61,6 +61,7 @@ _LIT( KCaAttrUrl, "url" );
 _LIT( KCaAttrWindowGroupId, "window_group_id" );
 _LIT( KCaTypeCollectionDownload, "collection::downloaded" );
 _LIT( KCaPackageUid,"packageuid");
+_LIT( KCaAttrInstallationTime, "installationTime");
 
 const TInt KGranularityOne = 1;
 const TInt KUidChars = 10;
@@ -77,14 +78,15 @@ _LIT( KCaMmcHistoryFname, "mmchistory" );
 
 
 // CONSTANTS
-const TUid KMmUid3 =
-    {
-    0x101f4cd2
-    };
     
 const TUid KSatUid =
     {
     0x101F4CE0
+    };
+
+const TUid KHsAppUid =
+    {
+    0x20022F35
     };
 
 const TInt KCenRepBufferSize = 255;

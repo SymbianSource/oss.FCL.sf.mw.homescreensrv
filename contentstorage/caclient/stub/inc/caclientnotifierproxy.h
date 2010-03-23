@@ -41,7 +41,7 @@ public:
      * @param changeType change type.
      */
     virtual void entryChanged(int entryId,
-        ChangeType changeType) const = 0;
+                              ChangeType changeType) const = 0;
 
     /**
      * Method invoked when entry is changed.
@@ -49,7 +49,7 @@ public:
      * @param changeType change type.
      */
     virtual void entryChanged(const CaEntry &entry,
-        ChangeType changeType) const = 0;
+                              ChangeType changeType) const = 0;
 
     /**
      * Method invoked when entry was changed.
@@ -67,7 +67,7 @@ public:
 
 class CACLIENT_EXPORT CaClientNotifierProxy: public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
 
@@ -95,7 +95,7 @@ public:
      * @param changeType change type.
      */
     virtual void entryChanged(const CaEntry &entry,
-        ChangeType changeType) const;
+                              ChangeType changeType) const;
 
     /**
      * Method invoked when entry was changed.
@@ -135,7 +135,7 @@ signals:
 
     void signalEntryChanged(int entryId, ChangeType changeType) const;
     void signalEntryChanged(const CaEntry &entry,
-        ChangeType changeType) const;
+                            ChangeType changeType) const;
     void signalEntryTouched(int id) const;
     void signalGroupContentChanged(int groupId) const;
 

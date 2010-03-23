@@ -73,6 +73,8 @@ public:
     QSize getIconSize() const;
     void updateModel();
     void setParentId(int parentId);
+    void setFlagsOn(const EntryFlags &onFlags);
+    void setFlagsOff(const EntryFlags &offFlags);
     CaEntry* entry(const QModelIndex &index) const;
 
     signals:

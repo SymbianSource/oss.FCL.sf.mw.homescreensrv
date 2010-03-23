@@ -21,6 +21,7 @@
 #include "caitemmodel_p.h"
 #include "canotifier.h"
 #include "canotifierfilter.h"
+#include "caclienttest_global.h"
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -46,9 +47,11 @@ CaItemModelList::~CaItemModelList()
  */
 void CaItemModelList::clear()
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::clear");
     mOrderedList.clear();
     qDeleteAll(mEntriesHash);
     mEntriesHash.clear();
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::clear");
 }
 
 /*!
@@ -77,14 +80,16 @@ CaEntry *CaItemModelList::at(int row) const
  */
 void CaItemModelList::reloadEntries(const CaQuery &query)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::reloadEntries");
     clear();
     int id=0;
-    QList<CaEntry*> eList = mService->getEntries(query);
+    QList<CaEntry *> eList = mService->getEntries(query);
     for (int i = 0; i < eList.count(); i++) {
         id = eList[i]->id();
         mOrderedList << id;
         mEntriesHash.insert(id, eList[i]);
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::reloadEntries");
 }
 
 /*!
@@ -93,10 +98,12 @@ void CaItemModelList::reloadEntries(const CaQuery &query)
  */
 void CaItemModelList::updateEntry(int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::updateEntry");
     if (mEntriesHash.contains(id)) {
         delete mEntriesHash.take(id);
         mEntriesHash.insert(id, mService->getEntry(id));
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::updateEntry");
 }
 
 /*!
@@ -105,13 +112,15 @@ void CaItemModelList::updateEntry(int id)
  */
 void CaItemModelList::updateEntries(const CaQuery &query)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::updateEntries");
     mOrderedList = mService->getEntryIds(query);
     for (int i = 0; i < mOrderedList.count(); i++) {
         if (!mEntriesHash.contains(mOrderedList[i])) {
             mEntriesHash.insert(mOrderedList[i], mService->getEntry(
-                mOrderedList[i]));
+                                    mOrderedList[i]));
         }
     }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::updateEntries");
 }
 
 /*!
@@ -132,8 +141,10 @@ int CaItemModelList::indexOf(const int &id) const
  */
 void CaItemModelList::insert(int row, int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::insert");
     mOrderedList.insert(row, id);
     mEntriesHash.insert(id, mService->getEntry(id));
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::insert");
 }
 
 /*!
@@ -142,10 +153,12 @@ void CaItemModelList::insert(int row, int id)
  */
 void CaItemModelList::remove(int id)
 {
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelList::remove");
     if (mEntriesHash.contains(id)) {
         delete mEntriesHash.take(id);
     }
     mOrderedList.removeOne(id);
+    CACLIENTTEST_FUNC_EXIT("CaItemModelList::remove");
 }
 
 /*!

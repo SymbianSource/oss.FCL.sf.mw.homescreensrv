@@ -37,29 +37,31 @@ CA_CLIENT_TEST_CLASS(TestCaClient)
 class CaItemModelPrivate: public QObject
 {
 
-Q_OBJECT
+    Q_OBJECT
     CA_CLIENT_TEST_FRIEND_CLASS(TestCaClient)
 
 public:
 
     // Function declarations
     explicit CaItemModelPrivate(const CaQuery &query,
-        CaItemModel *itemModelPublic);
+                                CaItemModel *itemModelPublic);
     ~CaItemModelPrivate();
     int rowCount() const;
     QModelIndex index(int row);
     QVariant data(const QModelIndex &modelIndex, int role) const;
     void setAutoUpdate(bool autoUpdate);
     void setSort(SortAttribute sortAttribute, Qt::SortOrder sortOrder =
-        Qt::AscendingOrder);
+                     Qt::AscendingOrder);
     void setIconSize(const QSize &size);
     QSize getIconSize() const;
     QModelIndex root();
-    CaEntry* entry(const QModelIndex &modelIndex) const;
+    CaEntry *entry(const QModelIndex &modelIndex) const;
     void setSecondLineVisibility(bool secondLineVisibility);
     bool secondLineVisibility() const;
     QVariant displayRole(const QModelIndex &modelIndex) const;
     void setParentId(int parentId);
+    void setFlagsOn(const EntryFlags &onFlags);
+    void setFlagsOff(const EntryFlags &offFlags);
     bool notifierExists() const;
 
 public slots:
@@ -91,7 +93,7 @@ private slots:
 private:
     // data
 
-    CaItemModel * const m_q;
+    CaItemModel *const m_q;
     CaEntry *mParentEntry;//own
     CaQuery mQuery;
     QSharedPointer<CaService> mService;

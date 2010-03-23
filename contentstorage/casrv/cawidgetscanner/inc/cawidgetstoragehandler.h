@@ -38,7 +38,7 @@ class CCaWidgetDescription;
 class CCaWidgetStorageHandler : public CBase
     {
 public:
-	CA_STORAGE_TEST_FRIEND_CLASS    (T_CaWidgetScanner)
+    CA_STORAGE_TEST_FRIEND_CLASS    (T_CaWidgetScanner)
 
 public:
     // Constructors and destructor

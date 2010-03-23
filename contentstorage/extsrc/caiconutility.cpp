@@ -18,7 +18,7 @@
 // INCLUDE FILES
 #include <e32base.h>
 #include <AknsUtils.h>
-#include <SATDomainPSKeys.h>
+#include <satdomainpskeys.h>
 #include <e32property.h>
 #include <apgcli.h>
 #include <AknInternalIconUtils.h>

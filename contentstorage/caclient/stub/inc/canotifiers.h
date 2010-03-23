@@ -11,7 +11,7 @@
  *
  * Contributors:
  *
- * Description: 
+ * Description:
  *
  */
 
@@ -30,27 +30,27 @@ class CaNotifiers
 {
 public:
     static int addNotifier(const CaNotifierFilter *notifierFilter,
-        CaNotifierPrivate::NotifierType notifierType,
-        const CaClientNotifierProxy *notifierProxy);
+                           CaNotifierPrivate::NotifierType notifierType,
+                           const CaClientNotifierProxy *notifierProxy);
 
     static void removeNotifier(const CaNotifierFilter *notifierFilter,
-        CaNotifierPrivate::NotifierType notifierType);
+                               CaNotifierPrivate::NotifierType notifierType);
 
     static void Notify(int groupId);
 
     static void Notify(const CaEntry &targetEntry,
-        ChangeType changeType,
-        QList<int> &parentIds);
+                       ChangeType changeType,
+                       QList<int> &parentIds);
 
 private:
     static bool isRegisterdForNotification(
         const CaNotifierFilter &filter,
         const CaEntry &entry,
         const QList<int> &parentIds);
-    
+
 private:
     typedef QPair<const CaNotifierFilter *,
-        CaNotifierPrivate::NotifierType> NotifierKey;
+            CaNotifierPrivate::NotifierType> NotifierKey;
     typedef QHash<NotifierKey, const CaClientNotifierProxy *> NotifierHash;
 
 private:

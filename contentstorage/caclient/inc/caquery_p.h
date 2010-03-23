@@ -44,15 +44,15 @@ public:
 
     void addEntryTypeName(const QString &entryTypeName);
 
-    void setFlagsOn(EntryFlags onFlags);
+    void setFlagsOn(const EntryFlags &onFlags);
     EntryFlags flagsOn() const;
-    void setFlagsOff(EntryFlags offFlags);
+    void setFlagsOff(const EntryFlags &offFlags);
     EntryFlags flagsOff() const;
 
-    void getSort(SortAttribute& sortAttribute, 
-        Qt::SortOrder& sortOrder) const;
-    void setSort(SortAttribute sortAttribute, 
-        Qt::SortOrder = Qt::AscendingOrder);
+    void getSort(SortAttribute &sortAttribute,
+                 Qt::SortOrder &sortOrder) const;
+    void setSort(SortAttribute sortAttribute,
+                 Qt::SortOrder = Qt::AscendingOrder);
 
     unsigned int count() const;
     void setCount(unsigned int count);
@@ -64,7 +64,7 @@ private:
     /**
      * Points to the CaQuery instance that uses this private implementation.
      */
-    CaQuery * const m_q;
+    CaQuery *const m_q;
 
     EntryRoles mEntryRoles;
 

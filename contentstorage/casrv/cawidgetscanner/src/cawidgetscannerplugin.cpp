@@ -117,7 +117,7 @@ CCaWidgetScannerPlugin::~CCaWidgetScannerPlugin ()
 // ----------------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------------
-//	
+//
 void CCaWidgetScannerPlugin::SynchronizeL()
     {
     iStorageHandler->SynchronizeL( iParser->WidgetsScanL() );

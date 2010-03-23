@@ -36,27 +36,27 @@ const char CONTENTTYPE[] = "contenttype";
     ?Qt_style_documentation
 */
 HsWidgetRegistryServicePrivate::HsWidgetRegistryServicePrivate(
-    const QString& installationPath, HsWidgetRegistryService* ptrToPublic,
-    QObject* parent) : QObject(parent)
+    const QString &installationPath, HsWidgetRegistryService *ptrToPublic,
+    QObject *parent) : QObject(parent)
 {
     Q_UNUSED(ptrToPublic);
     QStringList manifestPaths;
-    
+
     this->mInstallationPath = installationPath;
     QDir currentDir = QDir::current();
     QString currentPath = currentDir.absolutePath();
-    
+
     //Check widget installation dirs from root of different drives
     QFileInfoList drives = QDir::drives();
-    
+
     // ?
-    for(int i=0; i < drives.count(); i++) {
+    for (int i=0; i < drives.count(); i++) {
         QFileInfo drive = drives.at(i);
         QString driveLetter = drive.absolutePath();
         QString path = currentPath + "/" + mInstallationPath;
         QDir registryDir(path);
 
-        if(registryDir.exists()) {
+        if (registryDir.exists()) {
             // ?
             mManifestDirectories[path] = readManifestDirectories(path);
         }
@@ -74,17 +74,18 @@ HsWidgetRegistryServicePrivate::~HsWidgetRegistryServicePrivate()
 /*!
     ?Qt_style_documentation
 */
-QList<HsWidgetToken> HsWidgetRegistryServicePrivate::widgets() {
-   QList<HsWidgetToken> widgets; 
-   QMapIterator<QString, QStringList> i(mManifestDirectories);
+QList<HsWidgetToken> HsWidgetRegistryServicePrivate::widgets()
+{
+    QList<HsWidgetToken> widgets;
+    QMapIterator<QString, QStringList> i(mManifestDirectories);
 
-   while (i.hasNext()) {
+    while (i.hasNext()) {
         i.next();
         QStringList manifestFileList = i.value();
         QDir manifestDir(i.key());
 
-		// ?
-        for(int h=0; h < manifestFileList.count(); h++) {
+        // ?
+        for (int h=0; h < manifestFileList.count(); h++) {
             widgets << readManifestFile(manifestDir.absoluteFilePath(manifestFileList.at(h)));
         }
     }
@@ -94,15 +95,15 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::widgets() {
 /*!
     ?Qt_style_documentation
 */
-IHsWidgetProvider* HsWidgetRegistryServicePrivate::loadProviderFromPlugin(
-        const QString& pluginName)
-{   
+IHsWidgetProvider *HsWidgetRegistryServicePrivate::loadProviderFromPlugin(
+    const QString &pluginName)
+{
     QPluginLoader loader(pluginName);
     QObject *plugin = loader.instance();
     IHsWidgetProvider *provider = qobject_cast<IHsWidgetProvider *>(plugin);
-    
+
     if (provider) {
-		// ?
+        // ?
         return provider;
     }
 
@@ -111,7 +112,7 @@ IHsWidgetProvider* HsWidgetRegistryServicePrivate::loadProviderFromPlugin(
         //qDebug("Widget provider load - !provider, deleting plugin.")
         delete plugin;
     }
-    
+
     // qDebug("Widget provider load failed - Not found.")
     return 0;
 }
@@ -123,10 +124,10 @@ QStringList HsWidgetRegistryServicePrivate::readManifestDirectories(const QStrin
 {
     QStringList widgetDirPaths;
     QDir registryDir(path);
-    QStringList widgetDirs = registryDir.entryList(QDir::AllDirs); 
-    
-	// ?
-	for (int i=0; i < widgetDirs.count(); ++i) {
+    QStringList widgetDirs = registryDir.entryList(QDir::AllDirs);
+
+    // ?
+    for (int i=0; i < widgetDirs.count(); ++i) {
         widgetDirPaths << registryDir.absoluteFilePath(widgetDirs.at(i));
     }
     return widgetDirPaths;
@@ -135,8 +136,8 @@ QStringList HsWidgetRegistryServicePrivate::readManifestDirectories(const QStrin
 /*!
     ?Qt_style_documentation
 */
-void HsWidgetRegistryServicePrivate::doWidgetRemove(const QString &path, 
-    const QStringList &originalList, const QStringList &currentList)
+void HsWidgetRegistryServicePrivate::doWidgetRemove(const QString &path,
+        const QStringList &originalList, const QStringList &currentList)
 {
     Q_UNUSED(path);
     const int originalCount = originalList.count();
@@ -167,7 +168,7 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
     QStringList manifestDir = dir.entryList(filters, QDir::Files);
 
     if (!manifestDir.isEmpty()) {
-		// ?
+        // ?
         QString fileName = manifestDir.first();
 
         if (fileName != "hsposterwidgetprovider.manifest") {
@@ -177,18 +178,18 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
             widgets = manifest.widgets();
             int widgetUid = dir.dirName().toUInt(0, 16);
 
-		    // ?
-            for (int i=0; i<widgets.count();i++) {
+            // ?
+            for (int i=0; i<widgets.count(); i++) {
                 widgets[i].mUid = widgetUid;
                 widgets[i].mLibrary = manifestFilePath + "/" + widgets[i].mLibrary;
                 if (widgets[i].mIconUri != "") {
-				    // ?
+                    // ?
                     widgets[i].mIconUri = manifestFilePath + "/" + widgets[i].mIconUri;
                 }
             }
 
             qDebug() << "HsWidgetRegistryServicePrivate::readManifestFile - " \
-                "widget added: " << fileName;
+                     "widget added: " << fileName;
         }
     }
     return widgets;
@@ -203,12 +204,12 @@ void HsWidgetRegistryServicePrivate::ensureWidgetRegistryPaths()
     mFileSystemWatcher.disconnect();
     QStringList pathList = mManifestDirectories.keys();
 
-	// ?
+    // ?
     for(int i=0; i < pathList.count(); i++) {
         QDir registryDir(pathList.at(i));
-        
-		if(!registryDir.exists()) {
-			// ?
+
+    	if(!registryDir.exists()) {
+    		// ?
             registryDir.mkpath(pathList.at(i));
         }
     }
@@ -226,10 +227,10 @@ void HsWidgetRegistryServicePrivate::directoryChanged(const QString &path)
 {
     Q_UNUSED(path);
     /*
-	int installationStatus = mInstallerObserver.value();
+    int installationStatus = mInstallerObserver.value();
 
     if ((installationStatus & KSASwisOperationMask) == ESASwisNone) {
-	    // ?
+        // ?
         QStringList originalList = mManifestDirectories.value(path);
         QStringList currentList = readManifestDirectories(path);
         doWidgetAdd(path, originalList, currentList);
@@ -237,13 +238,13 @@ void HsWidgetRegistryServicePrivate::directoryChanged(const QString &path)
         mManifestDirectories[path] = currentList;
         ensureWidgetRegistryPaths();
     } else {
-	    // ?
+        // ?
         mFileSystemWatcher.disconnect();
         connect(&mInstallerObserver,SIGNAL(valueChanged(int)),SLOT(installerStateChanged(int)));
         mInstallerObserver.subscribe();
         mLatestChangedDirectory = path;
     }
-	*/
+    */
 }
 
 /*!
@@ -252,9 +253,9 @@ void HsWidgetRegistryServicePrivate::directoryChanged(const QString &path)
 void HsWidgetRegistryServicePrivate::installerStateChanged(int newValue)
 {
     Q_UNUSED(newValue);
-	/*
+    /*
     if ((newValue & KSASwisOperationMask) == ESASwisNone) {
-		// ?
+    	// ?
         mInstallerObserver.unSubscribe();
         mInstallerObserver.disconnect();
         QStringList originalList = mManifestDirectories.value(mLatestChangedDirectory);
@@ -265,7 +266,7 @@ void HsWidgetRegistryServicePrivate::installerStateChanged(int newValue)
         mManifestDirectories[mLatestChangedDirectory] = currentList;
         ensureWidgetRegistryPaths();
     }
-	*/
+    */
 }
 
 
@@ -274,28 +275,28 @@ void HsWidgetRegistryServicePrivate::installerStateChanged(int newValue)
     \ingroup group_hsruntimeservices
     \brief Manages installed widgets information
 
-    Manages information on available widgets and inform observers on 
+    Manages information on available widgets and inform observers on
     registry modifications, i.e installing and uninstalling widgets.
-  
+
 */
 
 /*!
     Constructor.
     \a installationPath is the path where the widget is installed
     and the \a parent is the parent object.
-*/ 
+*/
 HsWidgetRegistryService::HsWidgetRegistryService(
-    const QString& installationPath,
-    QObject* parent)
+    const QString &installationPath,
+    QObject *parent)
     :QObject(parent),
-    mPrivate(new HsWidgetRegistryServicePrivate(installationPath, this, this))
+     mPrivate(new HsWidgetRegistryServicePrivate(installationPath, this, this))
 {
-    
+
 }
 
 /*!
     Destructor.
-*/  
+*/
 HsWidgetRegistryService::~HsWidgetRegistryService()
 {
 
@@ -304,35 +305,35 @@ HsWidgetRegistryService::~HsWidgetRegistryService()
 /*!
     Fetch available widgets information
     Return List of widget tokens.
-*/   
+*/
 QList<HsWidgetToken> HsWidgetRegistryService::widgets()
 {
- return mPrivate->widgets();
+    return mPrivate->widgets();
 }
 
 /*!
     \fn HsWidgetRegistryService::widgetAddedToRegistry(const QList<HsWidgetToken> &widgetTokenList);
     Emitted when new widgets are added to registry. \a widgetTokenList
     contains list of widget tokens.
-*/  
+*/
 
 /*!
     \fn HsWidgetRegistryService::widgetRemovedFromRegistry(int uid)
-    Emitted when a widget is removed from registry    
-    
-*/   
+    Emitted when a widget is removed from registry
 
- 
+*/
+
+
 /*!
     \fn HsWidgetRegistryService::posterWidgetRemovedFromRegistry(int posterWidgetId)
-    Emitted when a poster widget publisher is removed from cps    
+    Emitted when a poster widget publisher is removed from cps
     \a posterWidgetId Poster widget id.
-*/   
+*/
 
 /*!
     Emits the widgetAddedToRegistry() signal
     \a widgetsAdded Identifies the added widgets.
-*/   
+*/
 void HsWidgetRegistryService::emitWidgetAddedToRegistry(const QList<HsWidgetToken> &widgetsAdded)
 {
     emit widgetAddedToRegistry(widgetsAdded);
@@ -342,7 +343,7 @@ void HsWidgetRegistryService::emitWidgetAddedToRegistry(const QList<HsWidgetToke
 /*!
     Emits the widgetRemovedFromRegistry() signal
     \a uid HsWidget uid.
-*/   
+*/
 void HsWidgetRegistryService::emitWidgetRemovedFromRegistry(int uid)
 {
     emit widgetRemovedFromRegistry(uid);

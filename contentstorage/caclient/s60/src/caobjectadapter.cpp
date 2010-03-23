@@ -36,10 +36,11 @@
 #include "camenuiconutility.h"
 #include "canotifierfilter.h"
 #include "cainnernotifierfilter.h"
+
 static  QImage::Format TDisplayMode2Format(TDisplayMode mode)
 {
     QImage::Format format;
-    switch(mode) {
+    switch (mode) {
     case EGray2:
         format = QImage::Format_MonoLSB;
         break;
@@ -72,27 +73,27 @@ static  QImage::Format TDisplayMode2Format(TDisplayMode mode)
     return format;
 }
 
-QPixmap fromSymbianCFbsBitmap(CFbsBitmap* aBitmap)
-    {
+QPixmap fromSymbianCFbsBitmap(CFbsBitmap *aBitmap)
+{
     aBitmap->BeginDataAccess();
-    uchar *data = (uchar*)aBitmap->DataAddress();
+    uchar *data = (uchar *)aBitmap->DataAddress();
     TSize size = aBitmap->SizeInPixels();
-    TDisplayMode displayMode = aBitmap->DisplayMode();    
-    
+    TDisplayMode displayMode = aBitmap->DisplayMode();
+
     // QImage format must match to bitmap format
     QImage image(data, size.iWidth, size.iHeight, TDisplayMode2Format(displayMode));
     aBitmap->EndDataAccess();
-      
+
     // No data copying happens because image format matches native OpenVG format.
     // So QPixmap actually points to CFbsBitmap data.
     return QPixmap::fromImage(image);
-    }
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(const CaEntry &fromEntry,
-    CCaInnerEntry &toEntry)
+                               CCaInnerEntry &toEntry)
 {
     toEntry.SetId(fromEntry.id());
 
@@ -103,9 +104,9 @@ void CaObjectAdapter::convertL(const CaEntry &fromEntry,
     toEntry.SetEntryTypeNameL(
         convertToDescriptor(fromEntry.entryTypeName()));
 
-    toEntry.SetFlags(static_cast<TUint> (fromEntry.flags()));
+    toEntry.SetFlags(static_cast<TUint>(fromEntry.flags()));
 
-    toEntry.SetRole(static_cast<TUint> (fromEntry.role()));
+    toEntry.SetRole(static_cast<TUint>(fromEntry.role()));
 
     const CaIconDescription fromIconDescription =
         fromEntry.iconDescription();
@@ -119,12 +120,11 @@ void CaObjectAdapter::convertL(const CaEntry &fromEntry,
 
     const QMap<QString, QString> attributesMap = fromEntry.attributes();
 
-    foreach (QString key, attributesMap.keys()) {
+    foreach(QString key, attributesMap.keys()) {
         if (key == applicationUidAttributeName()) {
             const TInt32 uid = attributesMap.value(key).toInt();
             toEntry.SetUid(uid);
-        }
-        else {
+        } else {
             toEntry.AddAttributeL(
                 convertToDescriptor(key),
                 convertToDescriptor(attributesMap.value(key)));
@@ -136,7 +136,7 @@ void CaObjectAdapter::convertL(const CaEntry &fromEntry,
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(const CaQuery &fromQuery,
-    CCaInnerQuery &toQuery)
+                               CCaInnerQuery &toQuery)
 {
     toQuery.SetParentId(fromQuery.parentId());
 
@@ -151,10 +151,10 @@ void CaObjectAdapter::convertL(const CaQuery &fromQuery,
     const QStringList list = fromQuery.entryTypeNames();
 
     CDesC16ArrayFlat *sourceList =
-        new (ELeave)CDesC16ArrayFlat(KDefaultGranularity);
+        new(ELeave)CDesC16ArrayFlat(KDefaultGranularity);
     CleanupStack::PushL(sourceList);
 
-    foreach (const QString str, list) {
+    foreach(const QString str, list) {
         sourceList->AppendL(convertToDescriptor(str));
     }
 
@@ -173,7 +173,7 @@ void CaObjectAdapter::convertL(const CaQuery &fromQuery,
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convert(const CCaInnerEntry &fromEntry,
-    CaEntry &toEntry)
+                              CaEntry &toEntry)
 {
     toEntry.setId(fromEntry.GetId());
 
@@ -200,9 +200,9 @@ void CaObjectAdapter::convert(const CCaInnerEntry &fromEntry,
     const RCaEntryAttrArray &attributesArray = fromEntry.GetAttributes();
 
     if (toEntry.entryTypeName() == applicationEntryName()
-        || toEntry.entryTypeName() == widgetEntryName()) {
+            || toEntry.entryTypeName() == widgetEntryName()) {
         toEntry.setAttribute(applicationUidAttributeName(),
-                QString::number(fromEntry.GetUid()));
+                             QString::number(fromEntry.GetUid()));
     }
 
     const int attributesArrayCount = attributesArray.Count();
@@ -210,7 +210,7 @@ void CaObjectAdapter::convert(const CCaInnerEntry &fromEntry,
     for (int i = 0; i < attributesArrayCount; ++i) {
         const CCaEntryAttribute *const attribute = attributesArray[i];
         toEntry.setAttribute(convertToString(attribute->Name()),
-            convertToString(attribute->Value()));
+                             convertToString(attribute->Value()));
     }
 }
 
@@ -220,7 +220,7 @@ void CaObjectAdapter::convert(const CCaInnerEntry &fromEntry,
 //----------------------------------------------------------------------------
 const TPtrC CaObjectAdapter::convertToDescriptor(const QString &string)
 {
-    const TPtrC result(reinterpret_cast<const TUint16*> (string.utf16()));
+    const TPtrC result(reinterpret_cast<const TUint16 *>(string.utf16()));
     return result;
 }
 
@@ -236,7 +236,7 @@ QString CaObjectAdapter::convertToString(const TDesC &des)
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(const CaNotifierFilter &notifierFilter,
-    CCaInnerNotifierFilter &source)
+                               CCaInnerNotifierFilter &source)
 {
     source.SetParentId(static_cast<TInt>(notifierFilter.getParentId()));
 
@@ -258,7 +258,7 @@ void CaObjectAdapter::convertL(const CaNotifierFilter &notifierFilter,
         source.SetEntryRole(ENoneEntryRole);
         break;
     }
-    CDesC16ArrayFlat *typeNames = new (ELeave) CDesC16ArrayFlat(
+    CDesC16ArrayFlat *typeNames = new(ELeave) CDesC16ArrayFlat(
         KDefaultGranularity);
     CleanupStack::PushL(typeNames);
 
@@ -278,7 +278,7 @@ void CaObjectAdapter::convertL(const CaNotifierFilter &notifierFilter,
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(
     const RPointerArray<CCaInnerEntry> &fromEntriesArray,
-    QList<CaEntry*> &toEntryList)
+    QList<CaEntry *> &toEntryList)
 {
     for (int i = 0; i < fromEntriesArray.Count(); ++i) {
         CaEntry *const toEntry = new CaEntry(
@@ -294,19 +294,18 @@ void CaObjectAdapter::convertL(
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(const QList<int> &entryIdList,
-    RArray<TInt> &source)
+                               RArray<TInt> &source)
 {
-    foreach(int id, entryIdList)
-        {
-            source.AppendL(static_cast<TInt>(id));
-        }
+    foreach(int id, entryIdList) {
+        source.AppendL(static_cast<TInt>(id));
+    }
 }
 
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(const RArray<TInt> &innerEntryIdList,
-    QList<int> &idList)
+                               QList<int> &idList)
 {
     for (TInt i = 0; i < innerEntryIdList.Count(); ++i) {
         idList.append(innerEntryIdList[i]);
@@ -318,11 +317,12 @@ void CaObjectAdapter::convertL(const RArray<TInt> &innerEntryIdList,
 //----------------------------------------------------------------------------
 HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 {
+
     HbIcon icon;
     TRAPD(leaveCode, icon = makeIconL(entry, size));
 
     USE_QDEBUG_IF(leaveCode) << "CaObjectAdapter::makeIcon leaveCode:"
-        << leaveCode;
+                             << leaveCode;
 
     return icon;
 }
@@ -385,7 +385,7 @@ const QString &CaObjectAdapter::widgetEntryName()
 //----------------------------------------------------------------------------
 CFbsBitmap *CaObjectAdapter::copyBitmapLC(CFbsBitmap *input)
 {
-    CFbsBitmap *bmp = new (ELeave) CFbsBitmap();
+    CFbsBitmap *bmp = new(ELeave) CFbsBitmap();
     CleanupStack::PushL(bmp);
     bmp->Create(input->SizeInPixels(), input->DisplayMode());
 
@@ -421,16 +421,15 @@ HbIcon CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
             //need to disable compression to properly convert the bitmap
             AknIconUtils::DisableCompression(aknIcon->Bitmap());
             AknIconUtils::SetSize(aknIcon->Bitmap(), TSize(size.width(),
-                size.height()), EAspectRatioPreservedAndUnusedSpaceRemoved);
+                                  size.height()), EAspectRatioPreservedAndUnusedSpaceRemoved);
             if (aknIcon->Bitmap()->Header().iCompression
-                == ENoBitmapCompression) {
+                    == ENoBitmapCompression) {
                 pixmap = fromSymbianCFbsBitmap(aknIcon->Bitmap());
                 QPixmap mask = fromSymbianCFbsBitmap(
-                    aknIcon->Mask());
+                                   aknIcon->Mask());
                 pixmap.setAlphaChannel(mask);
-            }
-            else // we need special handling for icons in 9.2 (NGA)
-            { // let's hope that in future it will be in QT code
+            } else { // we need special handling for icons in 9.2 (NGA)
+                // let's hope that in future it will be in QT code
                 CFbsBitmap *temp(NULL);
                 temp = copyBitmapLC(aknIcon->Bitmap());
                 pixmap = fromSymbianCFbsBitmap(temp);
@@ -456,7 +455,7 @@ void CaObjectAdapter::convert(
     CaNotifierPrivate::NotifierType src,
     CCaInnerNotifierFilter::TNotifierType &dest)
 {
-    switch(src){
+    switch (src) {
     case CaNotifierPrivate::EntryChangedWithIdNotifierType:
         dest = CCaInnerNotifierFilter::EEntryChangedWithId;
         break;
@@ -478,7 +477,7 @@ void CaObjectAdapter::convert(
 void CaObjectAdapter::convert(
     TChangeType src, ChangeType &dest)
 {
-    switch(src){
+    switch (src) {
     case EAddChangeType:
         dest = AddChangeType;
         break;
@@ -497,35 +496,30 @@ CCaInnerQuery::TSortAttribute CaObjectAdapter::getSortCode(
     CCaInnerQuery::TSortAttribute sortCode(CCaInnerQuery::Default);
 
     switch (sortAttribute) {
-    case NameSortAttribute:
-    {
+    case NameSortAttribute: {
         sortCode = (sortOrder == Qt::AscendingOrder) ? CCaInnerQuery::Name
-            : CCaInnerQuery::NameDesc;
+                   : CCaInnerQuery::NameDesc;
         break;
     }
-    case CreatedTimestampSortAttribute:
-    {
+    case CreatedTimestampSortAttribute: {
         sortCode = (sortOrder == Qt::AscendingOrder)
-            ? CCaInnerQuery::CreatedTimestamp
-            : CCaInnerQuery::CreatedTimestampDesc;
+                   ? CCaInnerQuery::CreatedTimestamp
+                   : CCaInnerQuery::CreatedTimestampDesc;
         break;
     }
-    case MostUsedSortAttribute:
-    {
+    case MostUsedSortAttribute: {
         sortCode = (sortOrder == Qt::AscendingOrder)
-            ? CCaInnerQuery::MostUsed : CCaInnerQuery::MostUsedDesc;
+                   ? CCaInnerQuery::MostUsed : CCaInnerQuery::MostUsedDesc;
         break;
     }
-    case LastUsedSortAttribute:
-    {
+    case LastUsedSortAttribute: {
         sortCode = (sortOrder == Qt::AscendingOrder)
-            ? CCaInnerQuery::LastUsed : CCaInnerQuery::LastUsedDesc;
+                   ? CCaInnerQuery::LastUsed : CCaInnerQuery::LastUsedDesc;
         break;
     }
-    case DefaultSortAttribute:
-    {
+    case DefaultSortAttribute: {
         sortCode = (sortOrder == Qt::AscendingOrder)
-            ? CCaInnerQuery::Default : CCaInnerQuery::DefaultDesc;
+                   ? CCaInnerQuery::Default : CCaInnerQuery::DefaultDesc;
         break;
     }
     }
@@ -537,7 +531,7 @@ CCaInnerQuery::TSortAttribute CaObjectAdapter::getSortCode(
 //
 //----------------------------------------------------------------------------
 void CaObjectAdapter::setId(CaEntry &entry,
-    int id)
+                            int id)
 {
     entry.setId(id);
 }

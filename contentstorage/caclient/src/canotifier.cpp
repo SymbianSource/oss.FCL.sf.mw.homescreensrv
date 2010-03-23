@@ -92,7 +92,7 @@
  Constructor.
  \param entryPrivate pointer to private implementation.
  */
-CaNotifier::CaNotifier(CaNotifierPrivate * const notifierPrivate) :
+CaNotifier::CaNotifier(CaNotifierPrivate *const notifierPrivate) :
     QObject(0), m_d(notifierPrivate)
 {
     m_d->m_q = this;
@@ -118,31 +118,28 @@ void CaNotifier::connectNotify(const char *signal)
     qDebug("CaNotifier::connectNotify");
     qDebug("\tsignal: %s", signal);
     if (QLatin1String(signal)
-        == SIGNAL(entryChanged(int,ChangeType))) {
-         // signal is entryChanged(int, ChangeType)
+            == SIGNAL(entryChanged(int,ChangeType))) {
+        // signal is entryChanged(int, ChangeType)
         if (receivers(SIGNAL(entryChanged(int,ChangeType))) == 1) {
             m_d->registerNotifier(
                 CaNotifierPrivate::EntryChangedWithIdNotifierType);
         }
-     }
-    else if (QLatin1String(signal)
-        == SIGNAL(entryChanged(CaEntry,ChangeType))) {
+    } else if (QLatin1String(signal)
+               == SIGNAL(entryChanged(CaEntry,ChangeType))) {
         // signal is entryChanged(const CaEntry &, ChangeType)
         if (receivers(SIGNAL(entryChanged(const CaEntry &,ChangeType))) == 1) {
             m_d->registerNotifier(
                 CaNotifierPrivate::EntryChangedWithEntryNotifierType);
         }
-    }
-    else if (QLatin1String(signal)
-        == SIGNAL(entryTouched(int))) {
+    } else if (QLatin1String(signal)
+               == SIGNAL(entryTouched(int))) {
         // signal is entryTouched(int)
         if (receivers(SIGNAL(entryTouched(int)))) {
             m_d->registerNotifier(
                 CaNotifierPrivate::EntryTouchedNotifierType);
         }
-    }
-    else if (QLatin1String(signal)
-        == SIGNAL(groupContentChanged(int))) {
+    } else if (QLatin1String(signal)
+               == SIGNAL(groupContentChanged(int))) {
         // signal is groupContentChanged(int)
         if (receivers(SIGNAL(groupContentChanged(int)))) {
             m_d->registerNotifier(
@@ -161,31 +158,28 @@ void CaNotifier::disconnectNotify(const char *signal)
     qDebug("CaNotifier::disconnectNotify");
     qDebug("\tsignal: %s", signal);
     if (QLatin1String(signal)
-        == SIGNAL(entryChanged(int,ChangeType))) {
-         // signal is entryChanged(int, ChangeType)
-        if(receivers(SIGNAL(entryChanged(int,ChangeType)))==0) {
+            == SIGNAL(entryChanged(int,ChangeType))) {
+        // signal is entryChanged(int, ChangeType)
+        if (receivers(SIGNAL(entryChanged(int,ChangeType)))==0) {
             m_d->unregisterNotifier(
                 CaNotifierPrivate::EntryChangedWithIdNotifierType);
         }
-     }
-    else if (QLatin1String(signal)
-        == SIGNAL(entryChanged(CaEntry,ChangeType))) {
+    } else if (QLatin1String(signal)
+               == SIGNAL(entryChanged(CaEntry,ChangeType))) {
         // signal is entryChanged(const CaEntry &, ChangeType)
         if (receivers(SIGNAL(entryChanged(const CaEntry &,ChangeType)))==0) {
             m_d->unregisterNotifier(
                 CaNotifierPrivate::EntryChangedWithEntryNotifierType);
         }
-    }
-    else if (QLatin1String(signal)
-        == SIGNAL(entryTouched(int))) {
+    } else if (QLatin1String(signal)
+               == SIGNAL(entryTouched(int))) {
         // signal is entryTouched(int)
         if (receivers(SIGNAL(entryTouched(int))) == 0) {
             m_d->unregisterNotifier(
                 CaNotifierPrivate::EntryTouchedNotifierType);
         }
-    }
-    else if (QLatin1String(signal)
-        == SIGNAL(groupContentChanged(int))) {
+    } else if (QLatin1String(signal)
+               == SIGNAL(groupContentChanged(int))) {
         // signal is groupContentChanged(int)
         if (receivers(SIGNAL(groupContentChanged(int))) == 0) {
             m_d->unregisterNotifier(
@@ -204,7 +198,7 @@ CaNotifierPrivate::CaNotifierPrivate(
     mNotifierFilter(NULL),
     mNotifierProxy(NULL)
 {
-        mNotifierFilter = new CaNotifierFilter(notifierFilter);
+    mNotifierFilter = new CaNotifierFilter(notifierFilter);
 }
 
 /*!
@@ -214,13 +208,13 @@ CaNotifierPrivate::~CaNotifierPrivate()
 {
     if (mNotifierProxy) {
         mNotifierProxy->unregisterNotifier(*mNotifierFilter,
-            EntryChangedWithIdNotifierType);
+                                           EntryChangedWithIdNotifierType);
         mNotifierProxy->unregisterNotifier(*mNotifierFilter,
-            EntryChangedWithEntryNotifierType);
+                                           EntryChangedWithEntryNotifierType);
         mNotifierProxy->unregisterNotifier(*mNotifierFilter,
-            EntryTouchedNotifierType);
+                                           EntryTouchedNotifierType);
         mNotifierProxy->unregisterNotifier(*mNotifierFilter,
-            GroupContentChangedNotifierType);
+                                           GroupContentChangedNotifierType);
     }
     delete mNotifierFilter;
     delete mNotifierProxy;
@@ -233,9 +227,9 @@ int CaNotifierPrivate::registerNotifier(NotifierType notifierType)
 {
     if (mNotifierProxy) {
         return mNotifierProxy->registerNotifier(
-            mNotifierFilter,
-            notifierType,
-            mNotifierProxy);
+                   mNotifierFilter,
+                   notifierType,
+                   mNotifierProxy);
     }
     return 0;
 }
@@ -261,21 +255,21 @@ void CaNotifierPrivate::makeConnect()
             mNotifierProxy = new CaClientNotifierProxy();
         }
         m_q->connect(mNotifierProxy,
-            SIGNAL(signalEntryChanged(int,ChangeType)),
-            m_q,
-            SIGNAL(entryChanged(int,ChangeType)));
+                     SIGNAL(signalEntryChanged(int,ChangeType)),
+                     m_q,
+                     SIGNAL(entryChanged(int,ChangeType)));
         m_q->connect(mNotifierProxy,
-            SIGNAL(signalEntryChanged(const CaEntry &,ChangeType)),
-            m_q,
-            SIGNAL(entryChanged(const CaEntry &,ChangeType)));
+                     SIGNAL(signalEntryChanged(const CaEntry &,ChangeType)),
+                     m_q,
+                     SIGNAL(entryChanged(const CaEntry &,ChangeType)));
         m_q->connect(mNotifierProxy,
-            SIGNAL(signalEntryTouched(int)),
-            m_q,
-            SIGNAL(entryTouched(int)));
+                     SIGNAL(signalEntryTouched(int)),
+                     m_q,
+                     SIGNAL(entryTouched(int)));
         m_q->connect(mNotifierProxy,
-            SIGNAL(signalGroupContentChanged(int)),
-            m_q,
-            SIGNAL(groupContentChanged(int)));
+                     SIGNAL(signalGroupContentChanged(int)),
+                     m_q,
+                     SIGNAL(groupContentChanged(int)));
     }
 }
 /*!
@@ -285,20 +279,20 @@ void CaNotifierPrivate::makeDisconnect()
 {
     if (m_q && mNotifierProxy) {
         m_q->disconnect(mNotifierProxy,
-            SIGNAL(signalEntryChanged(int,ChangeType)),
-            m_q,
-            SIGNAL(entryChanged(int,ChangeType)));
+                        SIGNAL(signalEntryChanged(int,ChangeType)),
+                        m_q,
+                        SIGNAL(entryChanged(int,ChangeType)));
         m_q->disconnect(mNotifierProxy,
-            SIGNAL( signalEntryChanged(const CaEntry &,ChangeType)),
-            m_q,
-            SIGNAL(entryChanged(const CaEntry &,ChangeType)));
+                        SIGNAL(signalEntryChanged(const CaEntry &,ChangeType)),
+                        m_q,
+                        SIGNAL(entryChanged(const CaEntry &,ChangeType)));
         m_q->disconnect(mNotifierProxy,
-            SIGNAL(signalEntryTouched(int)),
-            m_q,
-            SIGNAL(entryTouched(int)));
+                        SIGNAL(signalEntryTouched(int)),
+                        m_q,
+                        SIGNAL(entryTouched(int)));
         m_q->disconnect(mNotifierProxy,
-            SIGNAL(signalGroupContentChanged(int)),
-            m_q,
-            SIGNAL(groupContentChanged(int)));
+                        SIGNAL(signalGroupContentChanged(int)),
+                        m_q,
+                        SIGNAL(groupContentChanged(int)));
     }
 }

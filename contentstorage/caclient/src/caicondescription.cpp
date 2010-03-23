@@ -248,7 +248,7 @@ QString CaIconDescriptionPrivate::filename() const
  Sets a file name.
  \param fileName file name
  */
-void CaIconDescriptionPrivate::setFileName(const QString& fileName)
+void CaIconDescriptionPrivate::setFileName(const QString &fileName)
 {
     mFilename = fileName;
 }

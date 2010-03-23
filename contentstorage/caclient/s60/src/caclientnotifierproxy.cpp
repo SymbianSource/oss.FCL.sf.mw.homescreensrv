@@ -39,10 +39,10 @@ CaClientNotifierProxy::~CaClientNotifierProxy()
 //
 //----------------------------------------------------------------------------
 void CaClientNotifierProxy::entryChanged(TInt entryId,
-    TChangeType changeType) const
+        TChangeType changeType) const
 {
     qDebug() << "CaClientProxy::entryChanged entryId:"
-        << entryId << "changeType:" << changeType;
+             << entryId << "changeType:" << changeType;
 
     int entryChangedId(entryId);
     ChangeType entryChangeType(AddChangeType);
@@ -55,7 +55,7 @@ void CaClientNotifierProxy::entryChanged(TInt entryId,
 //
 //----------------------------------------------------------------------------
 void CaClientNotifierProxy::entryChanged(const CCaInnerEntry &entry,
-    TChangeType changeType) const
+        TChangeType changeType) const
 {
     qDebug() << "CaClientProxy::entryChanged changeType:" << changeType;
 
@@ -97,21 +97,21 @@ int CaClientNotifierProxy::registerNotifier(
     const CaClientNotifierProxy *notifierProxy)
 {
     qDebug() << "CaClientProxy::registerNotifier notifierType:"
-        << notifierType;
+             << notifierType;
 
     CCaInnerNotifierFilter::TNotifierType innerNotifierType(
         CCaInnerNotifierFilter::EEntryChangedWithId);
 
     CaObjectAdapter::convert(notifierType,
-        innerNotifierType);
+                             innerNotifierType);
     CCaInnerNotifierFilter *innerNotifierFilter(NULL);
 
     TRAPD(error,
-        innerNotifierFilter =
-            CCaInnerNotifierFilter::NewLC(innerNotifierType);
-        CaObjectAdapter::convertL(*notifierFilter, *innerNotifierFilter);
-        CleanupStack::Pop(innerNotifierFilter)
-    );
+          innerNotifierFilter =
+              CCaInnerNotifierFilter::NewLC(innerNotifierType);
+          CaObjectAdapter::convertL(*notifierFilter, *innerNotifierFilter);
+          CleanupStack::Pop(innerNotifierFilter)
+         );
 
     if (!error) {
         // Lock the access to mSessions.
@@ -123,7 +123,7 @@ int CaClientNotifierProxy::registerNotifier(
         }
         if (!error) {
             error = session->RegisterNotifier(innerNotifierFilter,
-                notifierFilter, notifierProxy);
+                                              notifierFilter, notifierProxy);
         }
     }
 
@@ -136,11 +136,11 @@ int CaClientNotifierProxy::registerNotifier(
 //
 //----------------------------------------------------------------------------
 void CaClientNotifierProxy::unregisterNotifier(
-     const CaNotifierFilter &notifierFilter,
-     CaNotifierPrivate::NotifierType notifierType)
+    const CaNotifierFilter &notifierFilter,
+    CaNotifierPrivate::NotifierType notifierType)
 {
     qDebug() << "CaClientProxy::unregisterNotifier notifierType:"
-        << notifierType;
+             << notifierType;
 
     CCaInnerNotifierFilter::TNotifierType innerNotifierType(
         CCaInnerNotifierFilter::EEntryChangedWithId);
@@ -153,7 +153,7 @@ void CaClientNotifierProxy::unregisterNotifier(
         // It will be automatically unlocked at the end of the current range.
         QMutexLocker locker(&mMutex);
         mSessions[pos].UnregisterNotifier(&notifierFilter,
-            innerNotifierType);
+                                          innerNotifierType);
         if (mSessions[pos].SubsessionsCount() == 0) {
             mSessions[pos].Close();
             mSessions.Remove(pos);
@@ -188,7 +188,7 @@ TInt CaClientNotifierProxy::findSession(
     TInt pos(KErrNotFound);
     for (int i = 0; i < count; i++) {
         if (mSessions[i].ContainsSubsession(&notifierFilter,
-            innerNotifierType)) {
+                                            innerNotifierType)) {
             pos = i;
             break;
         }
@@ -210,8 +210,7 @@ RCaClientNotifierSession *CaClientNotifierProxy::newSession(TInt &error)
         session.Close();
         qDebug("CaClientProxy::newSession: error (%d)", error);
         return NULL;
-    }
-    else {
+    } else {
         return &mSessions[mSessions.Count() - 1];
     }
 }

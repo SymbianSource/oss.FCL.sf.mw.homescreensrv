@@ -122,9 +122,13 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
     entry->SetId( aEntryId );
-    if( !aWidget->IsMissing() )
+    if( !aWidget->IsMissing() && ( aWidget->GetLibrary() != KNoLibrary ) )
         {
         entry->SetFlags( entry->GetFlags() & ~EUsed );
+        }
+    else if(aWidget->IsUsed())
+        {
+        entry->SetFlags( entry->GetFlags() | EUsed );
         }
     entry->SetFlags( entry->GetFlags() & ~EMissing );
     iStorage->AddL( entry );
@@ -152,6 +156,7 @@ void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
                     iWidgets[index]->IsMissing() )
                 {
                 aWidgets[i]->SetMissing( iWidgets[index]->IsMissing() );
+                aWidgets[i]->SetUsed( iWidgets[index]->IsUsed() );
                 UpdateL( aWidgets[i], iWidgets[index]->GetEntryId() );
                 }
             iUpdatedIndexes.AppendL( index );
@@ -267,6 +272,10 @@ void CCaWidgetStorageHandler::SetMissingFlagL(
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
     entry->SetFlags( entry->GetFlags() | EMissing );
+    if(aWidget->IsUsed())
+        {
+        entry->SetFlags( entry->GetFlags() | EUsed );
+        }
     iStorage->AddL( entry );
     CleanupStack::PopAndDestroy( entry );
     }

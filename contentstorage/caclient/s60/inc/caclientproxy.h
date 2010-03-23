@@ -11,7 +11,7 @@
  *
  * Contributors:
  *
- * Description: 
+ * Description:
  *
  */
 
@@ -43,8 +43,7 @@ public:
     /**
      * Insert into group type.
      */
-    enum InsertType
-    {
+    enum InsertType {
         AfterTheLastEntry = -1,
         BeforeTheFirstEntry = 0
     };
@@ -72,7 +71,7 @@ public:
      * @return error code.
      */
     ErrorCode addData(const CaEntry &entryToAdd,
-        CaEntry &targetEntry);
+                      CaEntry &targetEntry);
 
     /**
      * Method for removing entries.
@@ -89,7 +88,7 @@ public:
      * @return error code.
      */
     ErrorCode insertEntriesIntoGroup(int groupId,
-        const QList<int> &entryIdList, int beforeEntryId);
+                                     const QList<int> &entryIdList, int beforeEntryId);
 
     /**
      * Remove entries from group.
@@ -98,7 +97,7 @@ public:
      * @return error code.
      */
     ErrorCode removeEntriesFromGroup(int groupId,
-        const QList<int> &entryIdList);
+                                     const QList<int> &entryIdList);
 
     /**
      * Method for fetching entries.
@@ -107,7 +106,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const QList<int> &entryIdList, QList<CaEntry*> &sourceList);
+    ErrorCode getData(const QList<int> &entryIdList, QList<CaEntry *> &sourceList);
 
     /**
      * Method for fetching entries.
@@ -116,7 +115,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const CaQuery &query, QList<CaEntry*> &sourceList);
+    ErrorCode getData(const CaQuery &query, QList<CaEntry *> &sourceList);
 
     /**
      * Method for fetching entries.
@@ -126,7 +125,7 @@ public:
      * @return error code
      */
     ErrorCode getEntryIds(const CaQuery &query,
-        QList<int> &sourceIdList);
+                          QList<int> &sourceIdList);
 
     /**
      * Method for executing command
@@ -136,7 +135,7 @@ public:
      * @return error code
      */
     ErrorCode executeCommand(const CaEntry &entry,
-        const QString &command);
+                             const QString &command);
 
     /**
      * Method for touching entry.
@@ -144,15 +143,15 @@ public:
      * @param aEntry entry to touch
      * @return error code
      */
-    ErrorCode touch(const CaEntry& aEntry);
-    
+    ErrorCode touch(const CaEntry &aEntry);
+
     /**
      * Method for custom sort.
      * @param entryIdList list of ids.
-     * @param groupId Group id. 
+     * @param groupId Group id.
      * @return error code.
      */
-    ErrorCode customSort(const QList<int> &entryIdList, int groupId);    
+    ErrorCode customSort(const QList<int> &entryIdList, int groupId);
 
 private:
 
@@ -163,7 +162,7 @@ private:
      *
      */
     void addDataL(const CaEntry &entryToAdd,
-        CaEntry &targetEntry);
+                  CaEntry &targetEntry);
 
     /**
      * Method for removing entries. Symbian specific.
@@ -181,7 +180,7 @@ private:
      *
      */
     void insertEntriesIntoGroupL(int groupId,
-        const QList<int> &entryIdList, int beforeEntryId);
+                                 const QList<int> &entryIdList, int beforeEntryId);
 
     /**
      * Method for removing entries from a group
@@ -190,23 +189,23 @@ private:
      *
      */
     void removeEntriesFromGroupL(int groupId,
-        const QList<int> &entryIdList);
+                                 const QList<int> &entryIdList);
 
     /**
      * Method for fetching entries. Symbian specific.
      * @param entryIdList list of ids
      * @param sourceList list of entries.
      */
-    void getDataL(const QList<int> &entryIdList, 
-        QList<CaEntry*> &sourceList);
+    void getDataL(const QList<int> &entryIdList,
+                  QList<CaEntry *> &sourceList);
 
     /**
      * Method for fetching entries. Symbian specific.
      * @param entryIdList list of ids
      * @param sourceList list of entries.
      */
-    void getDataL(const CaQuery &query, 
-        QList<CaEntry*> &sourceList);
+    void getDataL(const CaQuery &query,
+                  QList<CaEntry *> &sourceList);
 
     /**
      * Method for fetching entries. Symbian specific.
@@ -214,7 +213,7 @@ private:
      * @param sourceList list of ids.
      */
     void getEntryIdsL(const CaQuery &query,
-        QList<int> &sourceIdList);
+                      QList<int> &sourceIdList);
 
     /**
      * Method for fetching entries. Symbian specific.
@@ -222,19 +221,19 @@ private:
      * @param command command.
      */
     void executeCommandL(const CaEntry &entry,
-        const QString &command);
+                         const QString &command);
 
     /**
      * Touch.
      * @param aEntry entry to be touched.
      */
-    void touchL(const CaEntry& aEntry);
-    
+    void touchL(const CaEntry &aEntry);
+
     /**
      * Custom Sort.
      * @param aEntry entry to be touched.
      */
-    void customSortL(const QList<int> &entryIdList, int groupId); 
+    void customSortL(const QList<int> &entryIdList, int groupId);
 
 private:
     // Session to server.

@@ -160,7 +160,7 @@ void CaQuery::addEntryTypeName(const QString &entryTypeName)
  Sets flags which should be enabled.
  \param onFlags flags.
  */
-void CaQuery::setFlagsOn(EntryFlags onFlags)
+void CaQuery::setFlagsOn(const EntryFlags &onFlags)
 {
     m_d->setFlagsOn(onFlags);
 }
@@ -178,7 +178,7 @@ EntryFlags CaQuery::flagsOn() const
  Sets flags which should be disabled.
  \param offFlags flags.
  */
-void CaQuery::setFlagsOff(EntryFlags offFlags)
+void CaQuery::setFlagsOff(const EntryFlags &offFlags)
 {
     m_d->setFlagsOff(offFlags);
 }
@@ -207,8 +207,8 @@ void CaQuery::setSort(SortAttribute sortAttribute, Qt::SortOrder sortOrder)
  \param[out] sortAttribute enum describing what is taken into account to sort.
  \param[out] sortOrder sort order (ascending, descending).
  */
-void CaQuery::getSort(SortAttribute& sortAttribute,
-    Qt::SortOrder& sortOrder) const
+void CaQuery::getSort(SortAttribute &sortAttribute,
+                      Qt::SortOrder &sortOrder) const
 {
     m_d->getSort(sortAttribute, sortOrder);
 }
@@ -347,7 +347,7 @@ void CaQueryPrivate::addEntryTypeName(const QString &entryTypeName)
  Sets flags which should be enabled.
  \param onFlags flags.
  */
-void CaQueryPrivate::setFlagsOn(EntryFlags onFlags)
+void CaQueryPrivate::setFlagsOn(const EntryFlags &onFlags)
 {
     mFlagsOn = onFlags;
 }
@@ -365,7 +365,7 @@ EntryFlags CaQueryPrivate::flagsOn() const
  Sets flags which should be disabled.
  \param offFlags flags.
  */
-void CaQueryPrivate::setFlagsOff(EntryFlags offFlags)
+void CaQueryPrivate::setFlagsOff(const EntryFlags &offFlags)
 {
     mFlagsOff = offFlags;
 }
@@ -385,7 +385,7 @@ EntryFlags CaQueryPrivate::flagsOff() const
  \param[out] sortOrder sort order (ascending, descending).
  */
 void CaQueryPrivate::getSort(SortAttribute &sortAttribute,
-    Qt::SortOrder &sortOrder) const
+                             Qt::SortOrder &sortOrder) const
 {
     sortAttribute = mSortAttribute;
     sortOrder = mSortOrder;
@@ -397,7 +397,7 @@ void CaQueryPrivate::getSort(SortAttribute &sortAttribute,
  \param sortOrder sort order (ascending, descending).
  */
 void CaQueryPrivate::setSort(SortAttribute sortAttribute,
-    Qt::SortOrder sortOrder)
+                             Qt::SortOrder sortOrder)
 {
     mSortAttribute = sortAttribute;
     mSortOrder = sortOrder;

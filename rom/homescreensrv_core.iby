@@ -61,4 +61,6 @@ file=ABI_DIR\BUILD_DIR\screensavermodel.dll    SHARED_LIB_DIR\screensavermodel.d
 // ---- bagetmodel --------------------------------------------
 file=ABI_DIR\BUILD_DIR\bagetmodel.dll    SHARED_LIB_DIR\bagetmodel.dll
 
+// ---- homescreen_information_api --------------------------------------------
+data=\epoc32\data\c\resource\qt\crml\homescreeninformation.qcrml   resource\qt\crml\homescreeninformation.qcrml
 #endif // __HOMESCREENSRV_CORE_IBY__

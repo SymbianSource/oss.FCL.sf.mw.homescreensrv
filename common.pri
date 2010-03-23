@@ -82,7 +82,8 @@ win32 {
                 $$PWD/homescreensrv_plat/contentstorage_api \
                 $$PWD/homescreensrv_plat/hswidgetmodel_api \
                 $$PWD/homescreensrv_plat/servicemodel_api \
-                $$PWD/homescreensrv_plat/statemodel_api
+                $$PWD/homescreensrv_plat/statemodel_api \
+                $$PWD/homescreensrv_plat/homescreen_information_api/inc
 }
 
 defineTest(exportResources) {
@@ -110,7 +111,14 @@ win32 {
 }
 }
 
+# support for NFT
+nft:DEFINES += NFT
+
 release:DEFINES+=QT_NO_DEBUG_OUTPUT
+
+nft:release {
+DEFINES -=QT_NO_DEBUG_OUTPUT
+}
 
 symbian {
 SYMBIAN_PLATFORMS = WINSCW ARMV5

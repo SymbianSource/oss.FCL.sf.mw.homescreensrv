@@ -31,9 +31,9 @@ class HsWidgetRegistryService : public QObject
     Q_OBJECT
 
 public:
-  
+
     HsWidgetRegistryService(const QString &installationPath,
-        QObject *parent = 0);
+                            QObject *parent = 0);
 
     virtual ~HsWidgetRegistryService();
 
@@ -62,7 +62,7 @@ private:
     friend class HsWidgetRegistryServicePrivate;
 };
 
-Q_DECLARE_METATYPE(HsWidgetRegistryService*)
+Q_DECLARE_METATYPE(HsWidgetRegistryService *)
 
 
 #endif

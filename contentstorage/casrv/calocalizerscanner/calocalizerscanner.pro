@@ -14,7 +14,7 @@
 # Description: 
 #
 
-include(.\..\..\..\common.pri)
+include(./../../../common.pri)
 
 TRANSLATIONS=contentstorage.ts
 
@@ -45,9 +45,9 @@ symbian: {
     MMP_RULES += rssResource
     MMP_RULES -= EXPORTUNFROZEN
     MMP_RULES += "$${LITERAL_HASH}if defined(WINSCW)" \
-        "DEFFILE .\bwins\calocalizerscanner.def" \
+        "DEFFILE ./bwins/calocalizerscanner.def" \
         "$${LITERAL_HASH}else" \
-        "DEFFILE .\eabi\calocalizerscanner.def" \
+        "DEFFILE ./eabi/calocalizerscanner.def" \
         "$${LITERAL_HASH}endif"
     HEADERS += ./inc/*.h
     SOURCES += ./src/*.cpp
@@ -55,9 +55,8 @@ symbian: {
         -lecom \
         -lcautils \
         -lcamenu
-    
-    
 }
+CONFIG += symbian_i18n
 
 exportResources(./*.qm, resource/qt/translations)
 

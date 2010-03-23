@@ -22,7 +22,6 @@
 #include "casrvdef.h"
 #include "casrvsession.h"
 #include "casrvengutils.h"
-#include "catimeout.h"
 #include "castorageproxy.h"
 #include "casrvmanager.h"
 
@@ -139,7 +138,6 @@ CCaSrv::~CCaSrv()
     delete iSrvManager;
     delete iSrvEngUtils;
     delete iStorageProxy;
-    delete iExitTimer;
     }
 
 // ---------------------------------------------------------
@@ -167,8 +165,6 @@ CCaSrv::CCaSrv() :
 void CCaSrv::ConstructL()
     {
     iSessionCount = 0;
-    iExitTimer = CTimeout::NewL( CActive::EPriorityStandard, TCallBack(
-            StopScheduler, NULL ) );
     iStorageProxy = CCaStorageProxy::NewL();
     iSrvEngUtils = CCaSrvEngUtils::NewL();
     TRAPD( err, iSrvManager = CCaSrvManager::NewL(
@@ -196,7 +192,6 @@ CSession2* CCaSrv::NewSessionL( const TVersion& aVersion,
         }
     CSession2* session;
     session = CCaSrvSession::NewL( const_cast<CCaSrv&> ( *this ) );
-    iExitTimer->Cancel(); // We have a client, cancel exit (if pending).
     return session;
     }
 
@@ -216,17 +211,6 @@ void CCaSrv::IncreaseSessionCount()
 void CCaSrv::DecreaseSessionCount()
     {
     iSessionCount--;
-    if( iSessionCount == 0 )
-        {
-        iExitTimer->Cancel();
-        CActiveScheduler* currentScheduler = CActiveScheduler::Current();
-        // No more sessions; schedule self-deletion.
-        if( currentScheduler )
-            {
-            iExitTimer->After(
-                    TTimeIntervalMicroSeconds32( KCaSrvExitDelay ) );
-            }
-        }
     }
 
 //  End of File

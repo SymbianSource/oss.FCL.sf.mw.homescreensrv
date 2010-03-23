@@ -41,7 +41,7 @@ public:
      * @return QPixmap.
      */
     static HbIcon makeIcon(
-        const CaEntry& entry,
+        const CaEntry &entry,
         const QSize &size);
 
     /**
@@ -50,7 +50,7 @@ public:
      * @param id entry id.
      */
     static void setId(CaEntry &entry,
-        int id);
+                      int id);
 
     /**
      * Set icon description id.
@@ -58,7 +58,7 @@ public:
      * @param id icon description id.
      */
     static void setId(CaIconDescription &iconDescription,
-        int id);
+                      int id);
 
 };
 

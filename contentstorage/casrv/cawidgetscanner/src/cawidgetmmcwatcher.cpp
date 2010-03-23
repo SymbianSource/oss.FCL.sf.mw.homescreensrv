@@ -28,12 +28,12 @@
 //
 CCaWidgetMmcWatcher* CCaWidgetMmcWatcher::NewL( RFs& aFs, 
         MWidgetMmcWatcherCallback* aObserver )
-	{
-	CCaWidgetMmcWatcher* self = NewLC( aFs, aObserver );
-	CleanupStack::Pop( self );
-	return self;
-	}
-	
+    {
+    CCaWidgetMmcWatcher* self = NewLC( aFs, aObserver );
+    CleanupStack::Pop( self );
+    return self;
+    }
+    
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::NewLC
 // Second phase constructor
@@ -41,23 +41,23 @@ CCaWidgetMmcWatcher* CCaWidgetMmcWatcher::NewL( RFs& aFs,
 //
 CCaWidgetMmcWatcher* CCaWidgetMmcWatcher::NewLC( RFs& aFs,
         MWidgetMmcWatcherCallback* aObserver )
-	{
-	CCaWidgetMmcWatcher* self = new (ELeave) CCaWidgetMmcWatcher( aFs, 
-	        aObserver );
-	CleanupStack::PushL ( self );
-	self->ConstructL();
-	return self;	
-	}
-	
+    {
+    CCaWidgetMmcWatcher* self = new (ELeave) CCaWidgetMmcWatcher( aFs, 
+            aObserver );
+    CleanupStack::PushL ( self );
+    self->ConstructL();
+    return self;
+    }
+    
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::~CCaWidgetMmcWatcher
 // Destructor
 // ---------------------------------------------------------
 //
 CCaWidgetMmcWatcher::~CCaWidgetMmcWatcher()
-	{	
-	Cancel();
-	}
+    {    
+    Cancel();
+    }
 
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::CCaWidgetMmcWatcher
@@ -66,12 +66,12 @@ CCaWidgetMmcWatcher::~CCaWidgetMmcWatcher()
 //
 CCaWidgetMmcWatcher::CCaWidgetMmcWatcher( RFs& aFs,
         MWidgetMmcWatcherCallback* aObserver )
-	: CActive( CActive::EPriorityStandard ),
-	iFs(aFs),
-	iObserver(aObserver)
-	{
-	CActiveScheduler::Add(this);
-	}
+    : CActive( CActive::EPriorityStandard ),
+    iFs(aFs),
+    iObserver(aObserver)
+    {
+    CActiveScheduler::Add(this);
+    }
 
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::ConstructL
@@ -79,34 +79,34 @@ CCaWidgetMmcWatcher::CCaWidgetMmcWatcher( RFs& aFs,
 // ---------------------------------------------------------
 //
 void CCaWidgetMmcWatcher::ConstructL()
-	{
-	WaitForChangeL();
-	}
+    {
+    WaitForChangeL();
+    }
 
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::WaitForChangeL
 // Request notification for disk change
 // ---------------------------------------------------------
-//	
+//    
 void CCaWidgetMmcWatcher::WaitForChangeL()
-	{
-	TInt mmcDrive;
-	User::LeaveIfError( DriveInfo::GetDefaultDrive(
-	    DriveInfo::EDefaultRemovableMassStorage, mmcDrive ) );
-	TDriveName mmcDriveName( TDriveUnit( mmcDrive ).Name() );
-	iFs.NotifyChange( ENotifyEntry, iStatus, mmcDriveName );
-	SetActive();
-	}
+    {
+    TInt mmcDrive;
+    User::LeaveIfError( DriveInfo::GetDefaultDrive(
+        DriveInfo::EDefaultRemovableMassStorage, mmcDrive ) );
+    TDriveName mmcDriveName( TDriveUnit( mmcDrive ).Name() );
+    iFs.NotifyChange( ENotifyEntry, iStatus, mmcDriveName );
+    SetActive();
+    }
 
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::DoCancel
 // ---------------------------------------------------------
 //
 void CCaWidgetMmcWatcher::DoCancel()
-	{
-	iFs.NotifyChangeCancel();
-	}
-	
+    {
+    iFs.NotifyChangeCancel();
+    }
+    
 // ---------------------------------------------------------------------------
 // CCaWidgetMmcWatcher::RunError
 // ---------------------------------------------------------------------------
@@ -115,19 +115,19 @@ TInt CCaWidgetMmcWatcher::RunError( TInt /*aError*/ )
     {
     // No need to do anything  
     return KErrNone;
-    }	
+    }    
 
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::RunL
 // ---------------------------------------------------------
-//	
+//    
 void CCaWidgetMmcWatcher::RunL()
     {
-	TInt status( iStatus.Int() );
-	WaitForChangeL();
-	if ( status >= KErrNone ) 
-		{
-		iObserver->MmcChangeL();
-		}	
-	}
-	
+    TInt status( iStatus.Int() );
+    WaitForChangeL();
+    if ( status >= KErrNone ) 
+        {
+        iObserver->MmcChangeL();
+        }
+    }
+    

@@ -32,11 +32,11 @@ class HsWidgetRegistryService;
 class HsWidgetRegistryServicePrivate : public QObject
 {
     Q_OBJECT
-    
+
 public:
 
-    HsWidgetRegistryServicePrivate(const QString& installationPath,
-	    HsWidgetRegistryService *ptrToPublic, QObject *parent=0);
+    HsWidgetRegistryServicePrivate(const QString &installationPath,
+                                   HsWidgetRegistryService *ptrToPublic, QObject *parent=0);
 
     ~HsWidgetRegistryServicePrivate();
 
@@ -45,19 +45,19 @@ public:
 private:
 
     Q_DISABLE_COPY(HsWidgetRegistryServicePrivate)
-    
-    IHsWidgetProvider* loadProviderFromPlugin(const QString &pluginName);
+
+    IHsWidgetProvider *loadProviderFromPlugin(const QString &pluginName);
 
     QStringList readManifestDirectories(const QString &path);
 
     void doWidgetRemove(const QString &path, const QStringList &originalList,
-        const QStringList &currentList);
+                        const QStringList &currentList);
 
     QList<HsWidgetToken> readManifestFile(const QString &path);
 
     void ensureWidgetRegistryPaths();
-    
-public slots: 
+
+public slots:
 
 private slots:
 
@@ -66,12 +66,12 @@ private slots:
     void installerStateChanged(int newValue);
 
 private:
-   
-   QString mInstallationPath;
 
-   QMap<QString,QStringList> mManifestDirectories;
+    QString mInstallationPath;
 
-   HsWidgetRegistryService *mPublic;
+    QMap<QString,QStringList> mManifestDirectories;
+
+    HsWidgetRegistryService *mPublic;
 };
 
 #endif //HSWIDGETREGISTRYSERVICE_P_H

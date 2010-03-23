@@ -54,16 +54,16 @@ public:
      * @param toEntry inner entry resulting from conversion
      */
     static void convertL(
-        const CaEntry& fromEntry,
-        CCaInnerEntry& toEntry);
+        const CaEntry &fromEntry,
+        CCaInnerEntry &toEntry);
 
     /**
      * Converts inner entry to entry.
      * @param fromEntry inner entry to be converted
      * @param toEntry entry resulting from conversino
      */
-    static void convert(const CCaInnerEntry& fromEntry,
-        CaEntry& toEntry);
+    static void convert(const CCaInnerEntry &fromEntry,
+                        CaEntry &toEntry);
 
     /**
      * Converts query to inner query.
@@ -71,8 +71,8 @@ public:
      * @param toQuery inner query resutling from conversion
      */
     static void convertL(
-        const CaQuery& fromQuery,
-        CCaInnerQuery& toQuery);
+        const CaQuery &fromQuery,
+        CCaInnerQuery &toQuery);
 
     /**
      * Wraps a QString internal buffer into TPtrC object.
@@ -81,14 +81,14 @@ public:
      * @param string QString.
      * @return descriptor.
      */
-    static const TPtrC convertToDescriptor(const QString& string);
+    static const TPtrC convertToDescriptor(const QString &string);
 
     /**
      * Converts descriptor to QString.
      * @param des descriptor.
      * @return QString.
      */
-    static QString convertToString(const TDesC& des);
+    static QString convertToString(const TDesC &des);
 
     /**
      * Converts inner entry table to QList of pointers to entries.
@@ -98,7 +98,7 @@ public:
      */
     static void convertL(
         const RPointerArray<CCaInnerEntry>& fromEntriesArray,
-        QList<CaEntry*>& toEntriesArray);
+        QList<CaEntry *>& toEntriesArray);
 
     /**
      * Converts QList of ids to RArray of TInts.
@@ -106,7 +106,7 @@ public:
      * @param toEntryIdArray array of entry ids
      */
     static void convertL(const QList<int> &fromEntryIdList,
-        RArray<TInt>& toEntryIdArray);
+                         RArray<TInt>& toEntryIdArray);
 
     /**
      * Converts RArray of TInts to QList of ids.
@@ -114,7 +114,7 @@ public:
      * @param toEntryIdList resulgin list of entry ids.
      */
     static void convertL(const RArray<TInt>& fromEntryIdList,
-        QList<int>& toEntryIdList);
+                         QList<int>& toEntryIdList);
 
     /**
      * Converts symbian error code to error code (used in QT code).
@@ -127,7 +127,7 @@ public:
      * @param entry entry.
      * @return HbIcon.
      */
-    static HbIcon makeIcon(const CaEntry& entry, const QSize &size);
+    static HbIcon makeIcon(const CaEntry &entry, const QSize &size);
 
     /**
      * Converts notifier type to inner notifier type.
@@ -136,7 +136,7 @@ public:
      */
     static void convert(
         CaNotifierPrivate::NotifierType from,
-        CCaInnerNotifierFilter::TNotifierType& to);
+        CCaInnerNotifierFilter::TNotifierType &to);
 
     /**
      * Converts inner change type to change type.
@@ -144,7 +144,7 @@ public:
      * @param to resulting change type.
      */
     static void convert(
-            TChangeType src, ChangeType& dest);
+        TChangeType src, ChangeType &dest);
 
     /**
      * Converts filter to inner filter.
@@ -158,17 +158,17 @@ public:
     /**
      * @return  uid attribute name
      */
-    static const QString& applicationUidAttributeName();
+    static const QString &applicationUidAttributeName();
 
     /**
      * @return  attribute type name
      */
-    static const QString& applicationEntryName();
-    
+    static const QString &applicationEntryName();
+
     /**
      * @return  widget type name
      */
-    static const QString& widgetEntryName();
+    static const QString &widgetEntryName();
 
     /**
      * Set entry id.
@@ -176,7 +176,7 @@ public:
      * @param id entry id.
      */
     static void setId(CaEntry &entry,
-        int id);
+                      int id);
 
 private:
     /**
@@ -184,14 +184,14 @@ private:
      * @param entry entry.
      * @return HbIcon.
      */
-    static HbIcon makeIconL(const CaEntry& entry, const QSize &size);
+    static HbIcon makeIconL(const CaEntry &entry, const QSize &size);
 
     /**
      * Make bitmap copy, used to get rid of compression for extended bitmap
      * @param input input bitmap.
      * @return copied bitmap.
      */
-    static CFbsBitmap* copyBitmapLC(CFbsBitmap* input);
+    static CFbsBitmap *copyBitmapLC(CFbsBitmap *input);
 
     /**
      * Maps a given sort subject and the order to be applied
