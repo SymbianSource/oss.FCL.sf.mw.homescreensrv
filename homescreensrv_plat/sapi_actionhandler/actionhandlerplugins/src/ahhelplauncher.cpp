@@ -17,8 +17,8 @@
 
 
 #include <eikenv.h>
-#include <hlplch.h> // help launcher
-#include <liwvariant.h>
+#include <HLPLCH.H> // help launcher
+#include <LiwVariant.h>
 
 #include "ahproperties.hrh"
 #include "ahhelplauncher.h"

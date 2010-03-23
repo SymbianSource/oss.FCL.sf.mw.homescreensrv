@@ -16,7 +16,7 @@
 */
 
 
-#include <ecom/registryinfo.rh>
+#include <ecom/RegistryInfo.rh>
 #include "ahpluginuids.hrh"
 
 // ---------------------------------------------------------------------------
@@ -55,22 +55,13 @@ RESOURCE REGISTRY_INFO theInfo
 					default_data = "2";
 					opaque_data = "";
 					},
-				// Info for Message Handler
-				IMPLEMENTATION_INFO
-					{
-					implementation_uid = 0x10282E62;
-					version_no = 1;
-					display_name = "Implementation 3";
-					default_data = "3";
-					opaque_data = "";
-					},
 				// Info for HelpLauncher
 				IMPLEMENTATION_INFO
 					{
 					implementation_uid = 0x2001B285;
 					version_no = 1;
-					display_name = "Implementation 4";
-					default_data = "4";
+					display_name = "Implementation 3";
+					default_data = "3";
 					opaque_data = "";
 					}
 				};

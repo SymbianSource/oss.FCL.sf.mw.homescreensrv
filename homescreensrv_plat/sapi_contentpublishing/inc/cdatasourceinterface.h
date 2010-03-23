@@ -19,7 +19,7 @@
 #ifndef CDATASOURCEINTERFACE_H
 #define CDATASOURCEINTERFACE_H
 
-#include <liwcommon.h>
+#include <LiwCommon.h>
 
 class CCPClient;
 

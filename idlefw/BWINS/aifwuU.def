@@ -1,4 +1,0 @@
-EXPORTS
-	?NewLC@CAiFw@@SAPAV1@XZ @ 1 NONAME ; class CAiFw * CAiFw::NewLC(void)
-	?RunL@CAiFw@@QAEXXZ @ 2 NONAME ; void CAiFw::RunL(void)
-

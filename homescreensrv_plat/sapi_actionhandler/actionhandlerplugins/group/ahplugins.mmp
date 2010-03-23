@@ -27,7 +27,6 @@ CAPABILITY    CAP_ECOM_PLUGIN
 SOURCEPATH    	../src
 SOURCE		proxy.cpp
 SOURCE      ahpapplauncher.cpp
-SOURCE		ahmessagehandler.cpp
 SOURCE		ahtelkeyhandler.cpp
 SOURCE      ahhelplauncher.cpp
     

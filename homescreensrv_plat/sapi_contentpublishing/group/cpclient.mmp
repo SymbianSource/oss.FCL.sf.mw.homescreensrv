@@ -24,40 +24,40 @@ UID                     0x10009D8D 0x20016B7D
 
 CAPABILITY              CAP_ECOM_PLUGIN
 
-VENDORID 		VID_DEFAULT
+VENDORID        VID_DEFAULT
 
-LANG 			SC
+LANG            SC
 
-SOURCEPATH      ../src 
+SOURCEPATH      ../src
 SOURCE          cpclient.cpp
-SOURCE			cpclientsession.cpp
-SOURCE       	cpclientactivenotifier.cpp 
-SOURCE          cdatasourceinterface.cpp 
+SOURCE          cpclientsession.cpp
+SOURCE          cpclientactivenotifier.cpp
+SOURCE          cdatasourceinterface.cpp
 SOURCE          ccontentpublishinginterface.cpp
-SOURCE          cpclientiterable.cpp 
+SOURCE          cpclientiterable.cpp
 SOURCE          cpclientservice.cpp
 
 
 SOURCEPATH              ../data
 START RESOURCE           cpclient.rss
 TARGET                   cpclient.rsc
-TARGETPATH               /resource/plugins 
+TARGETPATH               /resource/plugins
 END // RESOURCE
 
-USERINCLUDE   	.
+USERINCLUDE     .
 USERINCLUDE     ../inc
 USERINCLUDE     ../../../inc
 
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
-LIBRARY	        estor.lib
+LIBRARY         estor.lib
 LIBRARY         efsrv.lib
-LIBRARY		liwservicehandler.lib
-LIBRARY		cputils.lib
+LIBRARY     liwservicehandler.lib
+LIBRARY     cputils.lib
 
 #ifdef CONTENT_PUBLISHER_DEBUG
-LIBRARY			cpdebug.lib
+LIBRARY         cpdebug.lib
 #endif
 
 //end of file

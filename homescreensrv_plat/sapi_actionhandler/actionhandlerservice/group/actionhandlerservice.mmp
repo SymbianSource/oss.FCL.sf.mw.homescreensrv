@@ -27,23 +27,23 @@ VENDORID                VID_DEFAULT
 
 SOURCEPATH              ../src
 SOURCE                  actionhandlerservice.cpp
-SOURCE                  actionhandlerinterface.cpp 
+SOURCE                  actionhandlerinterface.cpp
 
 SOURCEPATH              ../data
 START RESOURCE           actionhandlerservice.rss
 TARGET                   actionhandlerservice.rsc
-TARGETPATH               /resource/plugins 
+TARGETPATH               /resource/plugins
 END // RESOURCE
 
-USERINCLUDE   	.
-USERINCLUDE 	../inc
-USERINCLUDE 	../../inc
-USERINCLUDE 	../../../../inc
+USERINCLUDE     .
+USERINCLUDE     ../inc
+USERINCLUDE     ../../inc
+USERINCLUDE     ../../../../inc
 
 MW_LAYER_SYSTEMINCLUDE
 
-LIBRARY        	euser.lib
-LIBRARY		    liwservicehandler.lib
+LIBRARY         euser.lib
+LIBRARY         liwservicehandler.lib
 LIBRARY         estor.lib
-LIBRARY       	ECom.lib
+LIBRARY         ECom.lib
 LIBRARY         pluginvalidator.lib

@@ -29,10 +29,14 @@ _LIT8( KNullDes8, "" );
 _LIT( KMainDataItem, "cps:data" );
 _LIT( KMainPublisherItem, "cps:publisher" );
 _LIT( KDataItem, "cps:data_item" );
+_LIT8( KDataItem8, "data_item" );
 _LIT( KNoArgumentsString, "-1" );
 _LIT( KAttributeKey, "key" );
+_LIT8( KAttributeKey8, "key" );
 _LIT( KAttributeType, "type" );
+_LIT8( KAttributeType8, "type" );
 _LIT( KAttributeValue, "value" );
+_LIT8( KAttributeValue8, "value" );
 _LIT( KTrue, "true" );
 _LIT( KFalse, "false" );
 

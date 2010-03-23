@@ -20,7 +20,7 @@
 #define FACTSETCHUTILS_H
 
 //  INCLUDES
-#include <e32base.h>
+#include <E32BASE.H>
 
 // CLASS DECLARATION
 class CGECODefaultObject;

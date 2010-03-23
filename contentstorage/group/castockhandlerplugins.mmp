@@ -1,0 +1,65 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project castockhandlerplugins
+*
+*/
+
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+TARGET          castockhandlerplugins.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x20022F82
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../handlersrc
+
+SOURCE          castockhandlersproxy.cpp
+SOURCE          caapphandlerplugin.cpp
+SOURCE          cauninstalloperation.cpp
+SOURCE          caurlhandlerplugin.cpp  
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../handlerinc
+USERINCLUDE     ../cautils/inc
+USERINCLUDE     ../extinc
+
+MW_LAYER_SYSTEMINCLUDE
+
+//TODO: check which ones are really needed
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         swinstcli.lib
+LIBRARY         camenu.lib
+LIBRARY         cautils.lib
+LIBRARY         apgrfx.lib
+LIBRARY         ws32.lib
+
+LIBRARY         apparc.lib
+LIBRARY         sisregistryclient.lib
+LIBRARY         eikcore.lib
+LIBRARY         cone.lib
+LIBRARY         efsrv.lib
+LIBRARY         avkon.lib
+LIBRARY         caextendedmenu.lib
+
+SOURCEPATH      ../data
+START RESOURCE  20022F82.rss
+LANG            sc
+TARGET          castockhandlerplugins.rsc
+END // RESOURCE
+

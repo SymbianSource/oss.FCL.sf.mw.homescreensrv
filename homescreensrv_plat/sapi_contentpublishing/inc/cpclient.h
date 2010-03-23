@@ -78,11 +78,9 @@ public:
      * @since S6CCPActiveNotifierNotifier v 5.CCPActiveNotifierNotifier
      * @param aInParamList input parameter list (data to add)
      * @param aOutParamList output parameter list (id of data or error code)
-     * @param aCmdOptions options for the command
      */
     void AddL( const CLiwGenericParamList& aInParamList,
-               CLiwGenericParamList& aOutParamList,
-               TUint aCmdOptions );
+        CLiwGenericParamList& aOutParamList );
 
     /**
      * Send command to server to Delete data from Content Publisher Database

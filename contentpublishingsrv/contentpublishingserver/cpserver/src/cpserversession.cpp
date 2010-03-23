@@ -20,7 +20,7 @@
 #include <s32mem.h>
 // for CleanupResetAndDestroyPushL
 #include <mmf/common/mmfcontrollerpluginresolver.h>
-#include <liwgenericparam.h>
+#include <LiwGenericParam.h>
 
 #include "cpserversession.h"
 #include "cpliwmap.h"
@@ -70,13 +70,13 @@ CCPServerSession* CCPServerSession::NewLC( TPointersForSession& aPasser )
 //
 CCPServerSession::~CCPServerSession()
     {
-    //remove notification handler from an array of sessions in data manager
-    if ( iNotificationHandler && iDataManager )
-        {
-        iDataManager->RemoveObserver( iNotificationHandler );
-        }
     if ( isRegister && iNotificationHandler )
         {
+        //remove notification handler from an array of sessions in data manager
+        if ( iDataManager )
+        	{
+        	iDataManager->RemoveObserver( iNotificationHandler );
+        	}
         iNotificationHandler->ErrorComplete( KErrCancel );
         }
     if ( iServer )
@@ -153,9 +153,6 @@ void CCPServerSession::DispatchMessageL( const RMessage2& aMessage, TBool& aPani
         case ECpServerAddData:
             AddDataL( aMessage );
             break;
-        case ECpServerAddDataNonPersistent:
-            AddDataNonPersistentL( aMessage );
-            break;
         case ECpServerGetListSize:
             GetListSizeL( aMessage );
             break;
@@ -214,22 +211,7 @@ void CCPServerSession::AddDataL( const RMessage2& aMessage )
 	    }
     CleanupStack::PopAndDestroy( map );
     }
-
-// -----------------------------------------------------------------------------
-// CCPServerSession::AddDataNonPersistentL
-// --------------- --------------------------------------------------------------
-//
-void CCPServerSession::AddDataNonPersistentL( const RMessage2& aMessage )
-    {
-    CP_DEBUG( _L8("CCPServerSession::AddDataL()" ) );
-    CCPLiwMap* map = UnpackFromClientLC( aMessage );
-    map->SetSecurityL( aMessage );
-    TUint id( 0 );
-    TPckg<TUint> idData(id);
-    iDataManager->AddNonPersistentDataL( map );
-    aMessage.WriteL( KReturnPosition, idData );
-    CleanupStack::PopAndDestroy( map );
-    }
+    
 // -----------------------------------------------------------------------------
 // CCPServerSession::GetListL
 // --------------- --------------------------------------------------------------

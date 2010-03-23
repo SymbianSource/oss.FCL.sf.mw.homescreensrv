@@ -1,4 +1,0 @@
-EXPORTS
-	?CreateTestSuiteL@@YAPAVMEUnitTest@@XZ @ 1 NONAME ; class MEUnitTest * CreateTestSuiteL(void)
-	?NewL@MT_CHspsInstallationService@@SAPAV1@XZ @ 2 NONAME ; class MT_CHspsInstallationService * MT_CHspsInstallationService::NewL(void)
-

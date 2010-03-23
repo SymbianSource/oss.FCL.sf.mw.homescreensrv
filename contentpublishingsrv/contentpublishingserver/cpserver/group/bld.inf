@@ -23,10 +23,12 @@ DEFAULT
 
 
 PRJ_EXPORTS
-../data/backup_registration.xml z:/private/20016b7b/backup_registration.xml
+../data/backup_registration.xml /epoc32/release/winscw/udeb/z/private/20016b7b/backup_registration.xml
+../data/backup_registration.xml /epoc32/data/z/private/20016b7b/backup_registration.xml
 
 // Cenrep
-../data/20016b7b.txt z:/private/10202be9/20016b7b.txt
+../data/20016b7b.txt   /epoc32/release/winscw/udeb/z/private/10202be9/20016b7b.txt
+../data/20016b7b.txt   /epoc32/data/z/private/10202be9/20016b7b.txt
 
 ../inc/cpglobals.h 	          		|../../../../inc/cpglobals.h
 ../inc/cpserverdef.h 	            |../../../../inc/cpserverdef.h
@@ -34,4 +36,4 @@ PRJ_EXPORTS
 PRJ_MMPFILES
 cpserver.mmp
 
-//  End of File
+//  End of File  

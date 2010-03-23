@@ -19,7 +19,7 @@
 #ifndef C_ACTIONHANDLERINTERFACE_H
 #define C_ACTIONHANDLERINTERFACE_H
 
-#include <liwcommon.h>
+#include <Liwcommon.h>
 
 class CPluginValidator;
 class CLiwMap;

@@ -16,7 +16,7 @@
 */
 
 
-#include <liwgenericparam.h>
+#include <LiwGenericParam.h>
 
 #include "cpliwmap.h"
 #include "cpclient.h"
@@ -109,15 +109,14 @@ void CCPClient::GetListL( const CLiwGenericParamList& aInParamList,
 // -----------------------------------------------------------------------------
 //     
 void CCPClient::AddL( const CLiwGenericParamList& aInParamList,
-                      CLiwGenericParamList& aOutParamList,
-                      TUint aCmdOptions )
+    CLiwGenericParamList& aOutParamList )
     {
     CP_DEBUG( _L8("CCPClient::AddL()") );
     CheckMapL( aInParamList, KItem );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList ) ;
     inMapForServer->PushL( );
     inMapForServer->IsValidForAddL( );
-    iServerClient.AddL( *inMapForServer, aOutParamList, aCmdOptions );
+    iServerClient.AddL( *inMapForServer, aOutParamList );
     CleanupStack::PopAndDestroy( inMapForServer );
     }
 

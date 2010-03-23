@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
  *
 */
 
@@ -20,11 +20,11 @@
 #include <ecom/implementationproxy.h>
 #include <sacls.h>
 
-#include "chfactorysettingsplugin.h"
-#include "chfactorysettingsparser.h"
 #include "chfactorysettingsinstallnotifier.h"
 #include "cpdebug.h"
 #include "chdbstatehandler.h"
+#include "chfactorysettingsdomparser.h"
+#include "chfactorysettingsplugin.h"
 
 // LOCAL CONSTANTS AND MACROS
 const TInt KADatFactorySettingsServerPluginUid( 0x102830EF);
@@ -90,7 +90,7 @@ void CCHFactorySettings::ConstructL( MLiwInterface* aInterface )
     iInstallNotifier = CCHFactorySettingsInstallNotifier::NewL( this,
         KUidSystemCategory, KSAUidSoftwareInstallKeyValue );
 
-    iParser = CCHFactorySettingsParser::NewL( iCPSInterface );
+    iParser = CCHFactorySettingsDOMParser::NewL( iCPSInterface, iFs ); // mw
 
     iFileMan = CFileMan::NewL( iFs );
     iFilePath.CreateL( KMaxPath );
@@ -153,16 +153,16 @@ CCHFactorySettings::~CCHFactorySettings()
 
 // ----------------------------------------------------------------------------
 // CCHFactorySettings::UpdateL
-// 
+//
 // ----------------------------------------------------------------------------
-//	
+//
 void CCHFactorySettings::UpdateL()
     {
     CP_DEBUG(_L8("CCHFactorySettings::UpdateL" ));
     CheckDrivesL( ); // fill in list with file names from all drives
     AddNewL( ); // if any of them isn't added to db then add
-    UnInstallL( ); // if any of files from any drive was removed remove data 
-    // from DB	 
+    UnInstallL( ); // if any of files from any drive was removed remove data
+    // from DB
 
     }
 
@@ -170,7 +170,7 @@ void CCHFactorySettings::UpdateL()
 // CCHFactorySettings::AddNewL
 // Add new entries after sis intallation.
 // ----------------------------------------------------------------------------
-//    
+//
 void CCHFactorySettings::AddNewL()
     {
     CP_DEBUG(_L8("CCHFactorySettings::AddNewL" ));
@@ -188,7 +188,7 @@ void CCHFactorySettings::AddNewL()
     for ( TInt i(0); i<iFileNewList->Count( ); i++ )
         {
         TBool parse(ETrue);
-        TPtrC fileNewName = 
+        TPtrC fileNewName =
             (*iFileNewList)[i].Mid( (*iFileNewList)[i].LocateReverse( '\\' ) + 1 );
         TInt count = fileListInstalled->Count( );
         for ( TInt j(0); j< count; j++ )
@@ -206,14 +206,14 @@ void CCHFactorySettings::AddNewL()
             }
         if ( parse )
             {
-            //file wasn't found in afterinstallation dir 
-            //so should be copied and entries install  
+            //file wasn't found in afterinstallation dir
+            //so should be copied and entries install
             TBool fileOpened(ETrue);
             iFs.IsFileOpen( (*iFileNewList)[i], fileOpened );
 
             if ( !fileOpened )
                 {
-                TInt error = iParser->RestoreL( (*iFileNewList)[i], EFalse );
+                TInt error = iParser->Restore( (*iFileNewList)[i], EFalse );
                 if ( error == KErrNone )
                     {
                     iFileMan->Copy( (*iFileNewList)[i], filePath );
@@ -230,7 +230,7 @@ void CCHFactorySettings::AddNewL()
 // CCHFactorySettings::UnInstallL
 // Removes entries after uninstallation.
 // ----------------------------------------------------------------------------
-//  
+//
 void CCHFactorySettings::UnInstallL()
     {
     CP_DEBUG(_L8("CCHFactorySettings::UnInstallL" ));
@@ -253,7 +253,7 @@ void CCHFactorySettings::UnInstallL()
         for ( TInt j(0); j<iFileNewList->Count( ); j++ )
             {
             TPtrC fileNewPath = (*iFileNewList)[j];
-            TPtrC fileNewName = 
+            TPtrC fileNewName =
                 (*iFileNewList)[j].Mid( (*iFileNewList)[j].LocateReverse( '\\' ) + 1 );
             if ( fileInstalledName.Compare( fileNewName )==0 )
                 {
@@ -264,7 +264,7 @@ void CCHFactorySettings::UnInstallL()
                     }
                 }
             }
-        if ( !found ) //this file should be removed also entries from database 
+        if ( !found ) //this file should be removed also entries from database
             {
             filePath.Zero( );
             filePath.Append( KDriveC );
@@ -272,7 +272,7 @@ void CCHFactorySettings::UnInstallL()
             filePath.Append( KParsedDir );
             filePath.Append( fileInstalledName );
 
-            iParser->RestoreL( filePath, ETrue );
+            iParser->Restore( filePath, ETrue );
             iFileMan->Delete( filePath );
             }
         }
@@ -282,9 +282,9 @@ void CCHFactorySettings::UnInstallL()
 
 // ----------------------------------------------------------------------------
 // CCHFactorySettings::CheckDrivesL
-// 
+//
 // ----------------------------------------------------------------------------
-//	
+//
 void CCHFactorySettings::CheckDrivesL()
     {
     CP_DEBUG(_L8("CCHFactorySettings::CheckDrivesL" ));

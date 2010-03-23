@@ -15,9 +15,9 @@
 *
 */
 
-#include <liwcommon.h>
-#include <liwservicehandler.h>
-#include <s32mem.h>
+#include <LiwCommon.h>
+#include <LiwServiceHandler.h>
+#include <S32MEM.h>
 
 #include "cpserveractionmanager.h"
 #include "cpdebug.h"

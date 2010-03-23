@@ -17,7 +17,7 @@
 
 
 #include <ecom/registryinfov2.rh>
-#include <liwcommon.hrh>
+#include <LiwCommon.hrh>
 
 RESOURCE REGISTRY_INFO theInfo
     {

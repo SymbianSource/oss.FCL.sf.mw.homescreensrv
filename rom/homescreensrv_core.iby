@@ -1,0 +1,64 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+#ifndef __HOMESCREENSRV_CORE_IBY__
+#define __HOMESCREENSRV_CORE_IBY__
+
+////////////////////////////////////////
+// Homescreen srv
+////////////////////////////////////////
+
+// ---- contentstorage --------------------------------------------
+
+file=ABI_DIR\BUILD_DIR\caclient.dll     SHARED_LIB_DIR\caclient.dll
+file=ABI_DIR\BUILD_DIR\cautils.dll     SHARED_LIB_DIR\cautils.dll
+file=ABI_DIR\BUILD_DIR\camenu.dll     SHARED_LIB_DIR\camenu.dll
+file=ABI_DIR\BUILD_DIR\camenuserver.exe     PROGRAMS_DIR\camenuserver.exe
+file=ABI_DIR\BUILD_DIR\caextendedmenu.dll     SHARED_LIB_DIR\caextendedmenu.dll
+file=ABI_DIR\BUILD_DIR\casathandler.dll     SHARED_LIB_DIR\casathandler.dll
+file=ABI_DIR\BUILD_DIR\castorage.dll     SHARED_LIB_DIR\castorage.dll
+file=ABI_DIR\BUILD_DIR\MenuInterface.dll     SHARED_LIB_DIR\MenuInterface.dll
+ECOM_PLUGIN( castockhandlerplugins.dll, castockhandlerplugins.rsc )
+file=ABI_DIR\BUILD_DIR\casrvmanager.dll     SHARED_LIB_DIR\casrvmanager.dll
+ECOM_PLUGIN( casatmonitor.dll, casatmonitor.rsc )
+ECOM_PLUGIN( caappscanner.dll, caappscanner.rsc )
+ECOM_PLUGIN( cawidgetscanner.dll, cawidgetscanner.rsc )
+ECOM_PLUGIN( calocalizerscanner.dll, calocalizerscanner.rsc )
+ECOM_PLUGIN( carunningappmonitor.dll, carunningappmonitor.rsc )
+
+data=ZPRIVATE\20022F90\castoragedb          private\20022F90\castoragedb
+
+// ---- appfoundation --------------------------------------------
+
+// -------- servicemodel
+file=ABI_DIR\BUILD_DIR\hsservicemodel.dll     SHARED_LIB_DIR\hsservicemodel.dll
+
+// -------- statemodel
+file=ABI_DIR\BUILD_DIR\statemodel.dll       SHARED_LIB_DIR\statemodel.dll
+
+// -------- appruntimemodel
+file=ABI_DIR\BUILD_DIR\appruntimemodel.dll  SHARED_LIB_DIR\appruntimemodel.dll
+
+// ----  hswidgetmodel --------------------------------------------
+file=ABI_DIR\BUILD_DIR\hswidgetmodel.dll    SHARED_LIB_DIR\hswidgetmodel.dll
+
+// ---- screensavermodel --------------------------------------------
+file=ABI_DIR\BUILD_DIR\screensavermodel.dll    SHARED_LIB_DIR\screensavermodel.dll
+
+// ---- bagetmodel --------------------------------------------
+file=ABI_DIR\BUILD_DIR\bagetmodel.dll    SHARED_LIB_DIR\bagetmodel.dll
+
+#endif // __HOMESCREENSRV_CORE_IBY__

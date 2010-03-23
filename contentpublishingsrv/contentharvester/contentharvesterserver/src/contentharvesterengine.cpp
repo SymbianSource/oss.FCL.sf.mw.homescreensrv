@@ -19,7 +19,7 @@
 // for CleanupResetAndDestroyPushL
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 #include <contentharvesterplugin.h> // harvesting plugin
-#include <liwservicehandler.h>
+#include <LiwServiceHandler.h>
 #include <e32property.h>
 
 #include "charvesterpluginvalidator.h"

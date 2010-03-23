@@ -16,9 +16,9 @@
 */
 
 
-#include <ecom/implementationproxy.h>
-#include <liwcommon.h>
-#include <liwserviceifbase.h>
+#include <ecom/ImplementationProxy.h>
+#include <LiwCommon.h>
+#include <LiwServiceIfBase.h>
 
 #include "ahplugindefs.h"
 #include "actionhandlerservice.h"

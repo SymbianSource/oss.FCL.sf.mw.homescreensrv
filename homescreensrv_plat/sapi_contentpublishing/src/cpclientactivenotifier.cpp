@@ -12,12 +12,12 @@
 * Contributors:
 *
 * Description:  
-*
+ *
 */
 
 
-#include <s32mem.h>
-#include <liwcommon.h>
+#include <S32MEM.H>
+#include <LiwCommon.H>
 #include "cpclientactivenotifier.h"
 #include "ccontentmap.h"
 #include "cpdebug.h"

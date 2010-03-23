@@ -19,7 +19,7 @@
 #ifndef C_CPSERVERITERABLE_H
 #define C_CPSERVERITERABLE_H
 
-#include <liwcommon.h>
+#include <LiwCommon.h>
 
 /**
  * Implemenation of abstract interface to iterate over data items

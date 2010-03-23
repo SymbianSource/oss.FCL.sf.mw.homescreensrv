@@ -16,7 +16,7 @@
 */
 
 
-#include <liwcommon.h>
+#include <LiwCommon.h>
 #include <ecom/ecom.h>
 #include <fbs.h>
 

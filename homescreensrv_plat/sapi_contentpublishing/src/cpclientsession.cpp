@@ -16,8 +16,8 @@
 */
 
 
-#include <s32mem.h>
-#include <liwcommon.h>
+#include <S32MEM.H>
+#include <LiwCommon.H>
 
 #include "cpserverdef.h"
 #include "cpliwmap.h"
@@ -80,8 +80,7 @@ void RCPServerClient::Close()
 // -----------------------------------------------------------------------------
 //
 void RCPServerClient::AddL( const CCPLiwMap& aMap,
-                            CLiwGenericParamList& aOutParamList,
-                            TUint aCmdOptions )
+    CLiwGenericParamList& aOutParamList )
     {
     CP_DEBUG( _L8("RCPServerClient::AddL()") );
     HBufC8 *inbuf = aMap.PackForServerLC( );
@@ -90,14 +89,7 @@ void RCPServerClient::AddL( const CCPLiwMap& aMap,
     TIpcArgs args;
     args.Set( KDescriptorPosition, &*inbuf );
     args.Set( KReturnPosition, &sizeDes );
-    if( aCmdOptions & KDisablePersist )
-        {
-        User::LeaveIfError( SendReceive( ECpServerAddDataNonPersistent, args ) );
-        }
-    else
-        {
-        User::LeaveIfError( SendReceive( ECpServerAddData, args ) );
-        }
+    User::LeaveIfError( SendReceive( ECpServerAddData, args ) );
     TLiwGenericParam param( KItemId, id);
     aOutParamList.AppendL( param );
     CleanupStack::PopAndDestroy( inbuf );

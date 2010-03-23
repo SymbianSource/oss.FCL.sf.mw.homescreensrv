@@ -18,7 +18,7 @@
 
 // INCLUDE FILES
 #include <xcfwnodeinterface.h>
-#include <gecodefaultobject.h>
+#include <GECODefaultObject.h>
 
 #include "chfactsetutils.h"
 #include "chfactorysettingsglobals.h"

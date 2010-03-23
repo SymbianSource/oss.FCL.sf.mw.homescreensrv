@@ -100,13 +100,6 @@ private:
     void AddDataL( const RMessage2& aMessage );
 
     /**
-     * Specific add data request - data is not actually added to database
-     * but notification is send.
-     * @param Message from client
-     */
-    void AddDataNonPersistentL( const RMessage2& aMessage );
-
-    /**
      * Get data request - first phase
      * @param Message from client
      */
