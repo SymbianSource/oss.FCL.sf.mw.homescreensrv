@@ -18,7 +18,7 @@
 #include <e32std.h>
 #include <QList>
 #include <QDebug>
-#include <UTF.H>  // charconv.lib
+#include <utf.h>  // charconv.lib
 #include <QMutexLocker>
 
 #include "caclientproxy.h"

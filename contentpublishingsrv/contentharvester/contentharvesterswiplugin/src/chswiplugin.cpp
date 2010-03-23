@@ -21,7 +21,7 @@
 
 #include <ecom/implementationproxy.h>
 #include <contentharvesterpluginuids.hrh>
-#include <LiwServiceHandler.h>
+#include <liwservicehandler.h>
 #include "cpglobals.h"
 
 _LIT( KHsWidgetPublisher, "hswidgetpublisher");

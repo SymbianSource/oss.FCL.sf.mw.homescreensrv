@@ -15,7 +15,7 @@
  *
 */
 
-#include <LiwCommon.h>
+#include <liwcommon.h>
 #include <s32mem.h>
 #include "cpserverdef.h"
 

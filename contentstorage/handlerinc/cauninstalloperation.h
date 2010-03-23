@@ -19,7 +19,7 @@
 #define C_CAUNINSTALLOPERATION_H
 
 #include <e32base.h>
-#include <SWinstApi.h>
+#include <SWInstApi.h>
 
 /**
  * Uninstall CMenuOperation

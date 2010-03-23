@@ -16,9 +16,9 @@
 */
 
 
-#include <ecom/ImplementationProxy.h>
-#include <LiwCommon.h>
-#include <LiwServiceIfBase.h>
+#include <ecom/implementationproxy.h>
+#include <liwcommon.h>
+#include <liwserviceifbase.h>
 
 #include "cpclientservice.h"
 #include "cpdebug.h"

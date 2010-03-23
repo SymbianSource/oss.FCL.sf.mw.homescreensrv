@@ -15,6 +15,7 @@
  *
  */
 // INCLUDE FILES
+#include <sqldb.h>
 #include <eikenv.h>
 #include <eikappui.h>
 #include "casrv.h"
@@ -56,7 +57,7 @@ LOCAL_C TInt CreateServer( CCaSrv*& aServer )
 // ==================== GLOBAL FUNCTIONS ====================
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 EXPORT_C TInt RunCaServer()
@@ -107,7 +108,7 @@ EXPORT_C TInt RunCaServer()
 // ==================== MEMBER FUNCTIONS ====================
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 CCaSrv* CCaSrv::NewL()
@@ -120,7 +121,7 @@ CCaSrv* CCaSrv::NewL()
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 CCaSrv::~CCaSrv()
@@ -142,7 +143,7 @@ CCaSrv::~CCaSrv()
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 CCaStorageProxy* CCaSrv::GetStorageProxy()
@@ -151,7 +152,7 @@ CCaStorageProxy* CCaSrv::GetStorageProxy()
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 CCaSrv::CCaSrv() :
@@ -160,7 +161,7 @@ CCaSrv::CCaSrv() :
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 void CCaSrv::ConstructL()
@@ -170,11 +171,19 @@ void CCaSrv::ConstructL()
             StopScheduler, NULL ) );
     iStorageProxy = CCaStorageProxy::NewL();
     iSrvEngUtils = CCaSrvEngUtils::NewL();
-    iSrvManager = CCaSrvManager::NewL( *iStorageProxy, iSrvEngUtils );
+    TRAPD( err, iSrvManager = CCaSrvManager::NewL(
+            *iStorageProxy, iSrvEngUtils ) );
+    if( KSqlErrNotDb <= err && err <= KSqlErrGeneral )
+        {
+        //problem in loading one of plugins, probably data base is corrupted
+        //lets load it from ROM and try again
+        iStorageProxy->LoadDataBaseFromRomL();
+        iSrvManager = CCaSrvManager::NewL( *iStorageProxy, iSrvEngUtils );
+        }
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 CSession2* CCaSrv::NewSessionL( const TVersion& aVersion,
@@ -192,7 +201,7 @@ CSession2* CCaSrv::NewSessionL( const TVersion& aVersion,
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 void CCaSrv::IncreaseSessionCount()
@@ -201,7 +210,7 @@ void CCaSrv::IncreaseSessionCount()
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 void CCaSrv::DecreaseSessionCount()

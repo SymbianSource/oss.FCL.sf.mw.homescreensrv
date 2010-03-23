@@ -18,4 +18,5 @@ EXPORTS
 	?SetDBPropertyL@CCaStorageProxy@@QAEXABVTDesC16@@0@Z @ 17 NONAME ; void CCaStorageProxy::SetDBPropertyL(class TDesC16 const &, class TDesC16 const &)
 	?AddL@CCaStorageProxy@@QAEXPAVCCaInnerEntry@@H@Z @ 18 NONAME ; void CCaStorageProxy::AddL(class CCaInnerEntry *, int)
 	?CustomSortL@CCaStorageProxy@@QAEXABV?$RArray@H@@H@Z @ 19 NONAME ; void CCaStorageProxy::CustomSortL(class RArray<int> const &, int)
+	?LoadDataBaseFromRomL@CCaStorageProxy@@QAEXXZ @ 20 NONAME ; void CCaStorageProxy::LoadDataBaseFromRomL(void)
 

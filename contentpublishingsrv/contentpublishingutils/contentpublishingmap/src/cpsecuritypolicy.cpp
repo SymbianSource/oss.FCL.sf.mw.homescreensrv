@@ -12,13 +12,13 @@
 * Contributors:
 *
 * Description:  ?Description
- *  Version     : %version: ou1s60ui#6 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#5.1.2 % << Don't touch! Updated by Synergy at check-out.
  *
 */
 
 
 #include <s32mem.h>
-#include <LiwCommon.h>
+#include <liwcommon.h>
 #include <e32std.h>
 
 #include "cpsecuritypolicy.h"

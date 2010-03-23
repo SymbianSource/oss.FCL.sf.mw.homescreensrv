@@ -18,7 +18,7 @@
 #ifndef C_CPLIWIDSMAP_H
 #define C_CPLIWIDSMAP_H
 
-#include <LiwVariant.h>
+#include <liwvariant.h>
 #include <sqldb.h>
 #include "cpglobals.h"
 

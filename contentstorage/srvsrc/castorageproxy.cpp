@@ -36,7 +36,7 @@ CCaStorageProxy::CCaStorageProxy()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCaStorageProxy::ConstructL()
@@ -87,9 +87,9 @@ EXPORT_C void CCaStorageProxy::GetEntriesL(const CCaInnerQuery* aQuery,
     iStorage->GetEntriesL( aQuery, aResultContainer );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// --------------- --------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::GetEntriesIdsL(const CCaInnerQuery* aQuery,
         RArray<TInt>& aResultIdArray)
@@ -97,9 +97,9 @@ EXPORT_C void CCaStorageProxy::GetEntriesIdsL(const CCaInnerQuery* aQuery,
     iStorage->GetEntriesIdsL( aQuery, aResultIdArray );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// --------------- --------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry, TBool aUpdate )
     {
@@ -123,9 +123,9 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry, TBool aUpdate )
     CleanupStack::PopAndDestroy( &parentArray );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// --------------- --------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::RemoveL( const RArray<TInt>& aEntryIds )
     {
@@ -145,7 +145,7 @@ EXPORT_C void CCaStorageProxy::RemoveL( const RArray<TInt>& aEntryIds )
         {
         for( TInt j( 0 ); j < iHandlerNotifier.Count(); j++ )
             {
-            iHandlerNotifier[j]->EntryChanged( resultContainer[i], 
+            iHandlerNotifier[j]->EntryChanged( resultContainer[i],
                     ERemoveChangeType, parentArray );
             }
         }
@@ -154,9 +154,9 @@ EXPORT_C void CCaStorageProxy::RemoveL( const RArray<TInt>& aEntryIds )
     CleanupStack::PopAndDestroy( query );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// --------------- --------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::OrganizeL( const RArray<TInt>& aEntryIds,
         TCaOperationParams aParams )
@@ -173,36 +173,36 @@ EXPORT_C void CCaStorageProxy::OrganizeL( const RArray<TInt>& aEntryIds,
     CleanupStack::PopAndDestroy( &parentArray );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
     {
     CCaInnerQuery* touchQuery = CCaInnerQuery::NewLC();
-    
+
     TInt entryId = aEntry->GetId();
-    
+
     if ( entryId == 0 && aEntry->GetUid() != 0)
         {
         CCaInnerQuery* idQuery = CCaInnerQuery::NewLC();
         idQuery->SetUid( static_cast<TUint>( aEntry->GetUid()) );
-        
+
         RArray<TInt> idArray;
         CleanupClosePushL( idArray );
-        
+
         iStorage->GetEntriesIdsL( idQuery, idArray );
-        
+
         if (idArray.Count() == 1 )
             {
             entryId = idArray[0];
             aEntry->SetId( entryId );
-            } 
-        
-        CleanupStack::PopAndDestroy( &idArray );        
-        CleanupStack::PopAndDestroy( idQuery );  
+            }
+
+        CleanupStack::PopAndDestroy( &idArray );
+        CleanupStack::PopAndDestroy( idQuery );
         }
-    
+
     RArray<TInt> id;
     CleanupClosePushL( id );
     id.AppendL( entryId );
@@ -224,7 +224,8 @@ EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
             iStorage->GetParentsIdsL( id, parentArray );
             for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
                 {
-                iHandlerNotifier[i]->EntryChanged( resultArray[0], EUpdateChangeType,
+                iHandlerNotifier[i]->EntryChanged( resultArray[0],
+                        EUpdateChangeType,
                         parentArray );
                 }
             CleanupStack::PopAndDestroy( &parentArray );
@@ -235,9 +236,9 @@ EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
     CleanupStack::PopAndDestroy( touchQuery );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::GetLocalizationsL(
         RPointerArray<CCaLocalizationEntry>& aResultArray )
@@ -245,9 +246,9 @@ EXPORT_C void CCaStorageProxy::GetLocalizationsL(
     iStorage->GetLocalizationsL( aResultArray );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::LocalizeEntryL(
         CCaLocalizationEntry& aLocalization )
@@ -255,9 +256,9 @@ EXPORT_C void CCaStorageProxy::LocalizeEntryL(
     iStorage->LocalizeEntryL( aLocalization );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::DbPropertyL( const TDesC& aProperty,
         TDes& aPropertyValue )
@@ -265,9 +266,9 @@ EXPORT_C void CCaStorageProxy::DbPropertyL( const TDesC& aProperty,
     iStorage->DbPropertyL( aProperty, aPropertyValue );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::SetDBPropertyL( const TDesC& aProperty,
         const TDesC& aPropertyValue )
@@ -275,15 +276,15 @@ EXPORT_C void CCaStorageProxy::SetDBPropertyL( const TDesC& aProperty,
     iStorage->SetDBPropertyL( aProperty, aPropertyValue );
     }
 
-// -----------------------------------------------------------------------------
-// 
-// ------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
 //
 EXPORT_C void CCaStorageProxy::CustomSortL( const RArray<TInt>& aEntryIds,
         const TInt aGroupId )
     {
     iStorage->CustomSortL( aEntryIds, aGroupId );
-    
+
     RArray<TInt> parentArray;
     CleanupClosePushL( parentArray );
     parentArray.AppendL( aGroupId );
@@ -294,19 +295,29 @@ EXPORT_C void CCaStorageProxy::CustomSortL( const RArray<TInt>& aEntryIds,
     CleanupStack::PopAndDestroy( &parentArray );
     }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCaStorageProxy::LoadDataBaseFromRomL()
+    {
+    iStorage->LoadDataBaseFromRomL();
+    }
+
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 void CCaStorageProxy::AddSessionL( MCaSessionNorifier* aHandlerNotifier )
     {
-    __ASSERT_ALWAYS( iHandlerNotifier.Find( aHandlerNotifier ) == KErrNotFound,
+    __ASSERT_ALWAYS(
+            iHandlerNotifier.Find( aHandlerNotifier ) == KErrNotFound,
             User::Invariant() );
     iHandlerNotifier.AppendL( aHandlerNotifier );
     }
 
 // ---------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------
 //
 void CCaStorageProxy::RemoveSession( MCaSessionNorifier* aHandlerNotifier )

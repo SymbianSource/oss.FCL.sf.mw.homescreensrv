@@ -19,10 +19,10 @@
 #include <apgcli.h>
 #include <apacmdln.h>
 #include <apgtask.h>
-#include <VWSDEF.H>
+#include <vwsdef.h>
 #include <eikenv.h>
-#include <EIKAPPUI.H>
-#include <LiwVariant.h>
+#include <eikappui.h>
+#include <liwvariant.h>
 
 #include "ahproperties.hrh"
 #include "ahpapplauncher.h"

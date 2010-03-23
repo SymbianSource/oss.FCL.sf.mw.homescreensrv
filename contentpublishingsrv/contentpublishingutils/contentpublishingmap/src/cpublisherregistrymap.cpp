@@ -16,7 +16,7 @@
 */
 
 
-#include <LiwCommon.h>
+#include <liwcommon.h>
 
 #include "cpserverdef.h"
 #include "cpublisherregistrymap.h"

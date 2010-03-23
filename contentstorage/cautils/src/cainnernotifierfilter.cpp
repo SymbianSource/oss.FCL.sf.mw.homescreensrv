@@ -16,7 +16,7 @@
  */
 
 #include <s32strm.h>
-#include <BADESCA.H>
+#include <badesca.h>
 #include "cainnernotifierfilter.h"
 
 // ======== MEMBER FUNCTIONS ========

@@ -78,10 +78,12 @@ CaEntry *CaItemModelList::at(int row) const
 void CaItemModelList::reloadEntries(const CaQuery &query)
 {
     clear();
-    mOrderedList = mService->getEntryIds(query);
-    for (int i = 0; i < mOrderedList.count(); i++) {
-        mEntriesHash.insert(mOrderedList[i], mService->getEntry(
-            mOrderedList[i]));
+    int id=0;
+    QList<CaEntry*> eList = mService->getEntries(query);
+    for (int i = 0; i < eList.count(); i++) {
+        id = eList[i]->id();
+        mOrderedList << id;
+        mEntriesHash.insert(id, eList[i]);
     }
 }
 

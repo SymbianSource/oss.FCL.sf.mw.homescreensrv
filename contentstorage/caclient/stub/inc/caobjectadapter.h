@@ -24,6 +24,7 @@
 class QSize;
 class CaEntry;
 class CaIconDescription;
+class HbIcon;
 
 /**
  *  CaObjectAdapter
@@ -39,7 +40,7 @@ public:
      * @param size size of the icon
      * @return QPixmap.
      */
-    static QPixmap makeIcon(
+    static HbIcon makeIcon(
         const CaEntry& entry,
         const QSize &size);
 

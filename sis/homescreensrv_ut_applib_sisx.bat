@@ -11,9 +11,20 @@
 @rem
 @rem Contributors:
 @rem
-@rem Description: 
+@rem Description:
 @rem
+@echo off
 
-call cd ../../../../contentstorage/casatinterface/group
-call ctcpost -p profile.txt
-call ctc2html -nsb -i profile.txt
+if exist homescreensrv_ut_applib.sisx del homescreensrv_ut_applib.sisx
+
+makesis homescreensrv_ut_applib.pkg
+signsis homescreensrv_ut_applib.sis homescreensrv_ut_applib.sisx rd.cer rd-key.pem
+
+if exist homescreensrv_ut_applib.sisx (
+echo homescreensrv_ut_applib.sisx creation SUCCEEDED
+del homescreensrv_ut_applib.sis
+)
+
+if not exist homescreensrv_ut_applib.sisx (
+echo homescreensrv_ut_applib.sisx creation FAILED
+)

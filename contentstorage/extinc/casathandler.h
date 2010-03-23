@@ -18,12 +18,12 @@
 #ifndef __CASATHANDLER_H__
 #define __CASATHANDLER_H__
 
-#include <akniconutils.h>
+#include <AknIconUtils.h>
 
 #include <RSatSession.h>
-#include <TSatIconInfo.h>
+#include <tsaticoninfo.h>
 #ifdef SIM_ATK_SERVICE_API_V1
-#include <RSatService.h>// MCL
+#include <rsatservice.h>// MCL
 #else
 #include <RSatIcon.h> // 5.0 
 #endif

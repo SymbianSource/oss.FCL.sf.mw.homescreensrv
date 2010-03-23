@@ -16,6 +16,7 @@
  */
 
 #include <canotifierfilter.h>
+#include <QStringList>
 
 #include "canotifiers.h"
 #include "caclientnotifierproxy.h"

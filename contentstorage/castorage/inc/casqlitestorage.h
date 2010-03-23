@@ -18,6 +18,7 @@
 #ifndef C_CASTORAGE_ENGINE_H
 #define C_CASTORAGE_ENGINE_H
 
+#include <BAUTILS.H>
 #include <e32cons.h>
 #include <sqldb.h>
 #include "castorage.h"
@@ -61,6 +62,10 @@ public:
     ~CCaSqLiteStorage();
 
     //from CCpStorage
+    /**
+     * Loads data base from rom.
+     */
+    void LoadDataBaseFromRomL();
 
     /**
      * Localizes one entry attribute.
@@ -74,7 +79,8 @@ public:
      *
      * @param aMap Filtering and sorting criteria
      */
-    void GetLocalizationsL( RPointerArray<CCaLocalizationEntry>& aResultContainer );
+    void GetLocalizationsL(
+            RPointerArray<CCaLocalizationEntry>& aResultContainer );
 
     /**
      * Fetches data from database.
@@ -82,7 +88,7 @@ public:
      * @param aQuery .
      * @param aResultContainer Target for results.
      */
-    void GetEntriesL( const CCaInnerQuery* aQuery, 
+    void GetEntriesL( const CCaInnerQuery* aQuery,
             RPointerArray<CCaInnerEntry>& aResultContainer );
 
     /**
@@ -131,7 +137,7 @@ public:
      * @param aEntryId.
      */
     void TouchL( const TInt aEntryId );
-    
+
     /**
      * Get database property from db.
      *
@@ -139,14 +145,15 @@ public:
      * @param aPropertyValue The value of property.
      */
     void DbPropertyL( const TDesC& aProperty, TDes& aPropertyValue );
-    
+
     /**
      * Set property .
      *
      * @param aProperty The property to set.
      * @param aPropertyValue The value of property.
      */
-    void SetDBPropertyL( const TDesC& aProperty, const TDesC& aPropertyValue );
+    void SetDBPropertyL( const TDesC& aProperty,
+        const TDesC& aPropertyValue );
 
     /**
      * Remove from localization table .
@@ -154,7 +161,7 @@ public:
      * @param aEntryId Entry Id to remove.
      */
     void RemoveFromLocalizationL( const TInt aEntryId );
-    
+
     /**
      * Organizes data within a group in custom order.
      *
@@ -166,7 +173,7 @@ public:
 private:
 
     /**
-     * Perform the second phase construction of a CCpStorageEngine 
+     * Perform the second phase construction of a CCpStorageEngine
      * object.
      */
     void ConstructL();
@@ -177,31 +184,33 @@ private:
     CCaSqLiteStorage();
 
     TInt CreatePrivateDirPath( TFileName& aPrivatePath,
-        const TDesC& aDrive, const TDesC& aDbName, RFs& aFsSession );
-        
+            const TDesC& aDrive, const TDesC& aDbName );
+
     void ExecuteStatementL( const TDesC& aStatement );
-    
+
     void ExecuteAddL( CCaInnerEntry* aEntry,
             RPointerArray<CCaSqlQuery>& sqlQuery );
-            
+
     void ExecuteRemoveL( const RArray<TInt>& aEntryIds );
-    
+
     void ExecuteRemoveFromLocalizationL( const TInt aEntryId );
-    
+
     void ExecuteOrganizeL( const RArray<TInt>& aEntryIds,
             TCaOperationParams aParams );
-            
+
     void ExecuteTouchL( const TInt aEntryId );
-    
+
     void ExecuteDbPropertyL( const TDesC& aProperty, TDes& aPropertyValue );
-    
-    void ExecuteSetDbPropertyL( const TDesC& aProperty, const TDesC& aPropertyValue );
-    
-    void ExecuteCustomSortL( const RArray<TInt>& aEntryIds, const TInt aGroupId,
+
+    void ExecuteSetDbPropertyL( const TDesC& aProperty,
+            const TDesC& aPropertyValue );
+
+    void ExecuteCustomSortL( const RArray<TInt>& aEntryIds,
+            const TInt aGroupId,
             RPointerArray<CCaSqlQuery>& aSqlQuery );
-    
+
     void RemoveOldEntriesFromLaunchTableL( TInt aDays );
-    
+
     void VerifyOrganizeParamsL( const RArray<TInt>& aEntryIds,
             TCaOperationParams aParams );
 
@@ -220,6 +229,26 @@ private:
      * Own.
      */
     RSqlDatabase iSqlDb;
+
+    /**
+     * Path to data base in private path on C-drive.
+     */
+    TFileName iPrivatePathCDriveDb;
+
+    /**
+     * Path to data base in private path on Z-drive.
+     */
+    TFileName iPrivatePathZDriveDb;
+
+    /**
+     * Private path on C-drive.
+     */
+    TFileName iPrivatePathCDrive;
+
+    /**
+     * RFs session.
+     */
+    RFs iRfs;
 
     };
 

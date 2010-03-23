@@ -22,7 +22,7 @@
 #include <xmlengnodelist.h>
 #include <xmlengdomparser.h>
 #include <xmlengdocument.h>
-#include <UTF.H>
+#include <utf.h>
 
 #include "cawidgetscannerparser.h"
 #include "widgetscannerutils.h"

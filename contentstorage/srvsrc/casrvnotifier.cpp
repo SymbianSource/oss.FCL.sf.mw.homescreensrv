@@ -15,7 +15,7 @@
  *
  */
 
-#include <BADESCA.H>
+#include <badesca.h>
 #include "casrvnotifier.h"
 #include "cainnernotifierfilter.h"
 #include "cainnerentry.h"

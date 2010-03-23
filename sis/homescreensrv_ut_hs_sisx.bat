@@ -15,16 +15,16 @@
 @rem
 @echo off
 
-if exist homescreensrv_ut_krakow.sisx del homescreensrv_ut_krakow.sisx
+if exist homescreensrv_ut_hs.sisx del homescreensrv_ut_hs.sisx
 
-makesis homescreensrv_ut_krakow.pkg
-signsis homescreensrv_ut_krakow.sis homescreensrv_ut_krakow.sisx rd.cer rd-key.pem
+makesis homescreensrv_ut_hs.pkg
+signsis homescreensrv_ut_hs.sis homescreensrv_ut_hs.sisx rd.cer rd-key.pem
 
-if exist homescreensrv_ut_krakow.sisx (
-echo homescreensrv_ut_krakow.sisx creation SUCCEEDED
-del homescreensrv_ut_krakow.sis
+if exist homescreensrv_ut_hs.sisx (
+echo homescreensrv_ut_hs.sisx creation SUCCEEDED
+del homescreensrv_ut_hs.sis
 )
 
-if not exist homescreensrv_ut_krakow.sisx (
-echo homescreensrv_ut_krakow.sisx creation FAILED
+if not exist homescreensrv_ut_hs.sisx (
+echo homescreensrv_ut_hs.sisx creation FAILED
 )

@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: ou1s60ui#4 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#3.1.1 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 #ifndef CAINTERNALTYPES_H

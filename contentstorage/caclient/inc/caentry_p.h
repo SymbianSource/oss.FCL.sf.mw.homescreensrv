@@ -28,6 +28,7 @@
 #include "caicondescription.h"
 
 class CaEntry;
+class HbIcon;
 
 class CaEntryPrivate: public QSharedData
 {
@@ -60,7 +61,7 @@ public:
     QString attribute(const QString &name) const;
     void setAttribute(const QString &name, const QString &value);
 
-    QPixmap makeIcon(const QSize &size) const;
+    HbIcon makeIcon(const QSize &size) const;
 
     EntryRole role() const;
     void setRole(const EntryRole &role);

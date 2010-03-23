@@ -22,7 +22,6 @@
 
 // CLASS DECLARATION
 #include <QList>
-#include <QPixmap>
 
 #include <cadefs.h>
 
@@ -36,6 +35,8 @@ class CaQuery;
 class CaNotifierFilter;
 class CCaInnerEntry;
 class CCaInnerNotifierFilter;
+class HbIcon;
+class CFbsBitmap;
 
 /**
  *  CaObjectAdapter
@@ -124,11 +125,9 @@ public:
     /**
      * Creates icon.
      * @param entry entry.
-     * @return QPixmap.
+     * @return HbIcon.
      */
-    static QPixmap makeIcon(
-        const CaEntry& entry,
-        const QSize &size);
+    static HbIcon makeIcon(const CaEntry& entry, const QSize &size);
 
     /**
      * Converts notifier type to inner notifier type.
@@ -183,11 +182,9 @@ private:
     /**
      * Creates icon. Leaving version.
      * @param entry entry.
-     * @return QPixmap.
+     * @return HbIcon.
      */
-    static QPixmap makeIconL(
-        const CaEntry& entry,
-        const QSize &size);
+    static HbIcon makeIconL(const CaEntry& entry, const QSize &size);
 
     /**
      * Make bitmap copy, used to get rid of compression for extended bitmap

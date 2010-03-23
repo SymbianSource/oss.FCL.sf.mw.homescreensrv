@@ -17,8 +17,8 @@
 #ifndef __HOMESCREENSRV_LANGUAGE_IBY__
 #define __HOMESCREENSRV_LANGUAGE_IBY__
 
-data=\epoc32\data\z\resource\Contentstorage_texmap_pl_PL.qm  resource\Contentstorage_texmap_pl_PL.qm
-data=\epoc32\data\z\resource\Contentstorage_texmap_fr_FR.qm  resource\Contentstorage_texmap_fr_FR.qm
-data=\epoc32\data\z\resource\Contentstorage_texmap_en_GB.qm  resource\Contentstorage_texmap_en_GB.qm
+#include <data_caging_paths_for_iby.hrh> 
+
+data=DATAZ_\resource\qt\translations\contentstorage.qm  resource\qt\translations\contentstorage.qm
 
 #endif // __HOMESCREENSRV_LANGUAGE_IBY__

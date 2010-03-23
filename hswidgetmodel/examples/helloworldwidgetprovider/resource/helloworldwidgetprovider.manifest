@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<widgetprovider>
-    <widget library="helloworldwidgetprovider.dll"
-            uri="homescreen.nokia.com/widget/helloworld"
-            title="HelloWorld"
-            iconuri="helloworldwidgetprovider.png"/>
-</widgetprovider>

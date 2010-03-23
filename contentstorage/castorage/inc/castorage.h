@@ -53,14 +53,14 @@ public:
      * @param aResultContainer The result list of entries .
      * for a specific select.
      */
-    virtual void GetEntriesL( const CCaInnerQuery* aQuery, 
+    virtual void GetEntriesL( const CCaInnerQuery* aQuery,
             RPointerArray<CCaInnerEntry>& aResultContainer ) = 0;
 
     /**
      * Fetches data from database by ids.
      *
      * @param aQuery The query information to select specific entries.
-     * @param aResultIdArray The result list of entries' ids. 
+     * @param aResultIdArray The result list of entries' ids.
      * for a specific select.
      */
     virtual void GetEntriesIdsL( const CCaInnerQuery* aQuery,
@@ -73,7 +73,7 @@ public:
      * @param aParentIdArray The result list of parents' ids
      * for a specific select.
      */
-    virtual void GetParentsIdsL( const RArray<TInt>& aEntryIdArray, 
+    virtual void GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
             RArray<TInt>& aParentIdArray ) = 0;
 
     /**
@@ -105,7 +105,7 @@ public:
      * @param aEntryId The entry id for which touch data should be stored.
      */
     virtual void TouchL( const TInt aEntryId ) = 0;
-    
+
     /**
      * Get database property from db.
      *
@@ -113,7 +113,7 @@ public:
      * @param aPropertyValue The value of property.
      */
     virtual void DbPropertyL( const TDesC& aProperty, TDes& aPropertyValue ) = 0;
-   
+
     /**
      * Set property .
      *
@@ -121,14 +121,14 @@ public:
      * @param aPropertyValue The value of property.
      */
     virtual void SetDBPropertyL( const TDesC& aProperty, const TDesC& aPropertyValue ) = 0;
-    
+
     /**
      * Remove from localization table .
      *
      * @param aEntryId Entry Id to remove.
      */
     virtual void RemoveFromLocalizationL( const TInt aEntryId ) = 0;
-    
+
     /**
      * Organizes data within a group in custom order.
      *
@@ -136,7 +136,12 @@ public:
      * @param aGroupId Group to sort.
      */
     virtual void CustomSortL( const RArray<TInt>& aEntryIds,
-            const TInt aGroupId ) = 0;    
+            const TInt aGroupId ) = 0;
+
+    /**
+     * Loads data base from rom.
+     */
+    virtual void LoadDataBaseFromRomL() = 0;
 
     };
 

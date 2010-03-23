@@ -15,7 +15,7 @@
 *
 */
 
-#include <ecom/RegistryInfo.rh>
+#include <ecom/registryinfo.rh>
 #include "casrvpluginuids.hrh"
 
 RESOURCE REGISTRY_INFO theInfo

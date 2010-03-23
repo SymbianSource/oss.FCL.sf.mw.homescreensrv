@@ -13,7 +13,7 @@
 *
 * Description: 	Top level service provider error codes.
  *	%created_by:	smatasah %
- *	%date_created:	Fri Jan 22 17:24:14 2010 %
+ *	%date_created:	Wed Jan 27 16:21:04 2010 %
  *
 */
 /**********************************************************************
@@ -22,7 +22,7 @@
  *	Instance:	bh1sapi_1
  *	Description:	Top level service provider error codes.
  *	%created_by:	smatasah %
- *	%date_created:	Fri Jan 22 17:24:14 2010 %
+ *	%date_created:	Wed Jan 27 16:21:04 2010 %
  *
  **********************************************************************/
 #ifndef SERVICEERRNO_H

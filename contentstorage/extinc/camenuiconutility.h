@@ -19,7 +19,7 @@
 #ifndef __CAMENUICONUTILITY_H__
 #define __CAMENUICONUTILITY_H__
 
-#include <akniconutils.h>
+#include <AknIconUtils.h>
 
 class CCaInnerEntry;
 

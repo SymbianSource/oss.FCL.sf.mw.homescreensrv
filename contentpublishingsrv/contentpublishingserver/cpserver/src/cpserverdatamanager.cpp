@@ -16,9 +16,9 @@
 */
 
 
-#include <LiwCommon.h>
-#include <S32MEM.h>
-#include <EscapeUtils.h>
+#include <liwcommon.h>
+#include <s32mem.h>
+#include <escapeutils.h>
 
 #include "cpserverdatamanager.h"
 #include "ccontentmap.h"

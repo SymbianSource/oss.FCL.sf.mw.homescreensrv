@@ -15,6 +15,9 @@
 #
 
 TEMPLATE = lib
+CONFIG += hb
+HB = hbcore
+
 DEFINES += CACLIENT_LIB
 
 include(../../common.pri)

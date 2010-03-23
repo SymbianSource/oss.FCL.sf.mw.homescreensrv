@@ -16,7 +16,7 @@
 */
 
 
-#include <ecom/RegistryInfo.rh>
+#include <ecom/registryinfo.rh>
 #include "ahpluginuids.hrh"
 
 // ---------------------------------------------------------------------------

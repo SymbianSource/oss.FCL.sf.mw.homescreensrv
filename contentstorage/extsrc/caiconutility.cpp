@@ -17,11 +17,11 @@
 
 // INCLUDE FILES
 #include <e32base.h>
-#include <aknsutils.h>
+#include <AknsUtils.h>
 #include <SATDomainPSKeys.h>
 #include <e32property.h>
 #include <apgcli.h>
-#include <akninternaliconutils.h>
+#include <AknInternalIconUtils.h>
 #include "cadef.h"
 #include "cautils.h"
 #include "cainnerentry.h"

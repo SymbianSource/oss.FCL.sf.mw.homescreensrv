@@ -19,8 +19,8 @@
 #define CAENTRY_H
 
 #include <QMap>
-#include <QPixmap>
 #include <QSharedDataPointer>
+#include <QSize>
 
 #include "caclient_global.h"
 #include "cadefs.h"
@@ -29,8 +29,8 @@
 CA_CLIENT_TEST_CLASS( TestCaClient )
 
 class CaObjectAdapter;
-
 class CaEntryPrivate;
+class HbIcon;
 
 class CACLIENT_EXPORT CaEntry
 {
@@ -66,7 +66,7 @@ public:
     QString attribute(const QString &name) const;
     void setAttribute(const QString &name, const QString &value);
 
-    QPixmap makeIcon(const QSize &size = QSize(70, 70)) const;
+    HbIcon makeIcon(const QSize &size = QSize(70, 70)) const;
 
     EntryRole role() const;
 

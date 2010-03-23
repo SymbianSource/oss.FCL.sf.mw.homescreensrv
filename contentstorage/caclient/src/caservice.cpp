@@ -890,7 +890,7 @@ CaNotifier * CaService::createNotifier(const CaNotifierFilter &filter) const
 /*!
     Set new order of collection's items set by user.
     \groupId Group id.
-    \param collectionIds consists of new order of items.
+    \param entryIdList consists of new order of items.
     \retval true if new order of collection's items is set correctly,
      otherwise return false.
  */

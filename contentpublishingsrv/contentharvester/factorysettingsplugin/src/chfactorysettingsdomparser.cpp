@@ -22,8 +22,8 @@
 #include <xmlengnodelist.h>
 #include <xmlengdomparser.h>
 #include <xmlengdocument.h>
-#include <UTF.H>
-#include <LiwServiceHandler.h>
+#include <utf.h>
+#include <liwservicehandler.h>
 #include "chfactorysettingsdomparser.h"
 #include "chfactorysettingsglobals.h"
 #include "chfactsetutils.h"

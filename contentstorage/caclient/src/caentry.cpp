@@ -17,7 +17,7 @@
 
 #include <QSharedDataPointer>
 #include <QDebug>
-#include <QPixmap>
+#include <HbIcon>
 
 #include "caentry.h"
 #include "caentry_p.h"
@@ -394,21 +394,20 @@ void CaEntry::setAttribute(const QString &name, const QString &value)
 /*!
  Creates an icon.
  \param  size icon size to display
- \retval created icon (QPixmap).
+ \retval created icon (HbIcon).
 
  \code
  ...
  QSize iconSize( 50, 80 );
- QPixmap pixmap = resultEntry->makeIcon( iconSize );
- QIcon icon(pixmap);
+ HbIcon icon = resultEntry->makeIcon( iconSize );
 
  \b Output:
- pixmap.width() == 50
- pixmap.height() == 80
- pixmap.size() == iconSize;
+ icon.width() == 50
+ icon.height() == 80
+ icon.size() == iconSize;
  \endcode
  */
-QPixmap CaEntry::makeIcon(const QSize& size) const
+HbIcon CaEntry::makeIcon(const QSize& size) const
 {
     return m_d->makeIcon(size);
 }
@@ -615,9 +614,9 @@ void CaEntryPrivate::setAttribute(const QString &name, const QString &value)
 /*!
  Creates an icon.
  \param  size icon size to display
- \retval created icon (QPixmap).
+ \retval created icon (HbIcon).
  */
-QPixmap CaEntryPrivate::makeIcon(const QSize& size) const
+HbIcon CaEntryPrivate::makeIcon(const QSize& size) const
 {
     return CaObjectAdapter::makeIcon(*m_q, size);
 }

@@ -15,7 +15,7 @@
  *
 */
 
-#include <S32MEM.H>
+#include <s32mem.h>
 
 #include "cpclientiterable.h"
 #include "cpglobals.h"

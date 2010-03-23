@@ -16,7 +16,7 @@
 */
 
 
-#include <LiwCommon.h>
+#include <liwcommon.h>
 
 #include "ccontentmap.h"
 #include "cpglobals.h"

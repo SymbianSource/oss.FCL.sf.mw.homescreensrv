@@ -18,7 +18,7 @@
 #ifndef CAICONDESCRIPTION_PRIVATE_H
 #define CAICONDESCRIPTION_PRIVATE_H
 
-#include <QString.h>
+#include <qstring.h>
 #include <QSharedData>
 
 class CaIconDescription;

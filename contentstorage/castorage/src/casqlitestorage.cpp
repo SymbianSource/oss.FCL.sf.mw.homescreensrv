@@ -14,10 +14,8 @@
  * Description:
  *
  */
-
-#include <BAUTILS.H>
-#include "caconsts.h"
 #include "casqlitestorage.h"
+#include "caconsts.h"
 #include "casqlcommands.h"
 #include "casqlquery.h"
 #include "casqlquerycreator.h"
@@ -42,51 +40,56 @@ CCaSqLiteStorage::CCaSqLiteStorage()
 //
 void CCaSqLiteStorage::ConstructL()
     {
-    RFs rfs;
-    CleanupClosePushL( rfs );
-    User::LeaveIfError( rfs.Connect() );
+    User::LeaveIfError( iRfs.Connect() );
 
-    TFileName privatePathCDriveDb;
-    User::LeaveIfError( CreatePrivateDirPath( privatePathCDriveDb, KCDrive,
-            KDbName, rfs ) );
+    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDriveDb, KCDrive,
+            KDbName ) );
 
-    TFileName privatePathZDriveDb;
-    User::LeaveIfError( CreatePrivateDirPath( privatePathZDriveDb, KZDrive,
-            KDbName, rfs ) );
+    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathZDriveDb, KZDrive,
+            KDbName ) );
 
-    TFileName privatePathCDrive;
-    User::LeaveIfError( CreatePrivateDirPath( privatePathCDrive, KCDrive,
-            KNullDesC, rfs ) );
+    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDrive, KCDrive,
+            KNullDesC ) );
 
-    if( iSqlDb.Open( privatePathCDriveDb, &KSqlDbConfig ) )
+    if( iSqlDb.Open( iPrivatePathCDriveDb, &KSqlDbConfig ) )
         {
-        if( ( BaflUtils::FileExists( rfs, privatePathCDriveDb ) ) )
-            {
-            User::LeaveIfError( BaflUtils::DeleteFile( rfs,
-                    privatePathCDriveDb ) );
-            }
+        //we could not load data base from C-drive lets try Rom
+        LoadDataBaseFromRomL();
+        }
+    }
 
-        if( !( BaflUtils::FileExists( rfs, privatePathZDriveDb ) ) )
-            {
-            User::Panic( _L("fatal error - castoragedb not exists in ROM"),
-                    KErrNotFound );
-            }
-        else
-            {
-            if( !( BaflUtils::FolderExists( rfs, privatePathCDrive ) ) )
-                {
-                User::LeaveIfError( rfs.CreatePrivatePath( EDriveC ) );
-                }
-            User::LeaveIfError( BaflUtils::CopyFile( rfs,
-                    privatePathZDriveDb, privatePathCDrive ) );
-            User::LeaveIfError( rfs.SetAtt( privatePathCDriveDb,
-                    KEntryAttNormal, KEntryAttReadOnly ) );
-            User::LeaveIfError( iSqlDb.Open( privatePathCDriveDb,
-                    &KSqlDbConfig ) );
-            }
+// ---------------------------------------------------------------------------
+// CCASqLiteStorage::NewL()
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::LoadDataBaseFromRomL()
+    {
+    if( ( BaflUtils::FileExists( iRfs, iPrivatePathCDriveDb ) ) )
+        {
+        iSqlDb.Close();
+        User::LeaveIfError( BaflUtils::DeleteFile( iRfs,
+                iPrivatePathCDriveDb ) );
         }
 
-    CleanupStack::PopAndDestroy( &rfs );
+    if( !( BaflUtils::FileExists( iRfs, iPrivatePathZDriveDb ) ) )
+        {
+        User::Panic( _L("fatal error - castoragedb not exists in ROM"),
+                KErrNotFound );
+        }
+    else
+        {
+        if( !( BaflUtils::FolderExists( iRfs, iPrivatePathCDrive ) ) )
+            {
+            User::LeaveIfError( iRfs.CreatePrivatePath( EDriveC ) );
+            }
+        User::LeaveIfError( BaflUtils::CopyFile( iRfs,
+                iPrivatePathZDriveDb, iPrivatePathCDrive ) );
+        User::LeaveIfError( iRfs.SetAtt( iPrivatePathCDriveDb,
+                KEntryAttNormal, KEntryAttReadOnly ) );
+        User::LeaveIfError( iSqlDb.Open( iPrivatePathCDriveDb,
+                &KSqlDbConfig ) );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -122,6 +125,7 @@ CCaSqLiteStorage* CCaSqLiteStorage::NewLC()
 CCaSqLiteStorage::~CCaSqLiteStorage()
     {
     iSqlDb.Close();
+    iRfs.Close();
     }
 
 // ---------------------------------------------------------------------------
@@ -130,7 +134,7 @@ CCaSqLiteStorage::~CCaSqLiteStorage()
 // ---------------------------------------------------------------------------
 //
 TInt CCaSqLiteStorage::CreatePrivateDirPath( TFileName& aPrivatePath,
-        const TDesC& aDrive, const TDesC& aDbName, RFs& aFsSession )
+        const TDesC& aDrive, const TDesC& aDbName )
     {
     TInt error( KErrNone );
 
@@ -138,7 +142,7 @@ TInt CCaSqLiteStorage::CreatePrivateDirPath( TFileName& aPrivatePath,
     TFileName KPathWithoutDrive( KDoubleSlash );
 #else
     TFileName KPathWithoutDrive;
-    error = aFsSession.PrivatePath( KPathWithoutDrive );
+    error = iRfs.PrivatePath( KPathWithoutDrive );
     if( error != KErrNone )
         {
         return error;
@@ -197,11 +201,13 @@ void CCaSqLiteStorage::LocalizeEntryL( CCaLocalizationEntry& aLocalization )
     CleanupStack::PopAndDestroy( sqlLocalizeEntryQuery );
     }
 
-void CCaSqLiteStorage::GetLocalizationsL( RPointerArray<CCaLocalizationEntry>& aResultContainer )
+void CCaSqLiteStorage::GetLocalizationsL(
+        RPointerArray<CCaLocalizationEntry>& aResultContainer )
     {
     CCaSqlQuery* sqlGetLocalizationsQuery = CCaSqlQuery::NewLC( iSqlDb );
-    CaSqlQueryCreator::CreateGetLocalizationsQueryL( sqlGetLocalizationsQuery );
-    
+    CaSqlQueryCreator::CreateGetLocalizationsQueryL(
+            sqlGetLocalizationsQuery );
+
     sqlGetLocalizationsQuery->PrepareL();
     sqlGetLocalizationsQuery->ExecuteLocalizationsL( aResultContainer );
     CleanupStack::PopAndDestroy( sqlGetLocalizationsQuery );
@@ -212,7 +218,7 @@ void CCaSqLiteStorage::GetLocalizationsL( RPointerArray<CCaLocalizationEntry>& a
 //
 // ---------------------------------------------------------------------------
 //
-void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery, 
+void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
         RArray<TInt>& aResultIdArray )
     {
     CCaSqlQuery* sqlGetEntriesIdsQuery = CCaSqlQuery::NewLC( iSqlDb );
@@ -273,7 +279,7 @@ void CCaSqLiteStorage::AddL( CCaInnerEntry* aEntry, TBool aUpdate)
     ExecuteStatementL( KSqlStatementCommit );
 
     CleanupStack::PopAndDestroy( &sqlQueries );
-    
+
     if( aUpdate )
         {
         RemoveFromLocalizationL( aEntry->GetId() );
@@ -298,7 +304,7 @@ void CCaSqLiteStorage::RemoveL( const RArray<TInt>& aEntryIds )
     }
 
 // ---------------------------------------------------------------------------
-// CCASqLiteStorage::OrganizeL( const RArray<TInt>& aEntryIds, 
+// CCASqLiteStorage::OrganizeL( const RArray<TInt>& aEntryIds,
 //        TCaOperationParams aParams )
 //
 // ---------------------------------------------------------------------------
@@ -334,8 +340,8 @@ void CCaSqLiteStorage::TouchL( const TInt aEntryId )
     }
 
 // ---------------------------------------------------------------------------
-// CCASqLiteStorage::DbPropertyL( ( const TDesC& aProperty, TDes& aPropertyValue )
-//
+// CCASqLiteStorage::DbPropertyL
+// ( const TDesC& aProperty, TDes& aPropertyValue )
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::DbPropertyL( const TDesC& aProperty,
@@ -352,8 +358,8 @@ void CCaSqLiteStorage::DbPropertyL( const TDesC& aProperty,
     }
 
 // ---------------------------------------------------------------------------
-// CCASqLiteStorage::SetDBPropertyL( const TDesC& aProperty, const TDesC& aPropertyValue )
-//
+// CCASqLiteStorage::SetDBPropertyL
+// ( const TDesC& aProperty, const TDesC& aPropertyValue )
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::SetDBPropertyL( const TDesC& aProperty,
@@ -386,10 +392,9 @@ void CCaSqLiteStorage::RemoveFromLocalizationL( const TInt aEntryId )
     ExecuteStatementL( KSqlStatementCommit );
     }
 
-
 // ---------------------------------------------------------------------------
-// CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds, const TInt aGroupId )
-//
+// CCaSqLiteStorage::CustomSortL
+// ( const RArray<TInt>& aEntryIds, const TInt aGroupId )
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
@@ -398,7 +403,8 @@ void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
     RPointerArray<CCaSqlQuery> sqlQueries;
     CleanupResetAndDestroyPushL( sqlQueries );
 
-    CaSqlQueryCreator::CreateCustomSortQueryL( aEntryIds, sqlQueries, iSqlDb );
+    CaSqlQueryCreator::CreateCustomSortQueryL(
+            aEntryIds, sqlQueries, iSqlDb );
 
     ExecuteStatementL( KSqlStatementBegin );
     TRAPD( err, ExecuteCustomSortL( aEntryIds, aGroupId, sqlQueries ) );
@@ -413,8 +419,8 @@ void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
     }
 
 // ---------------------------------------------------------------------------
-// CCaSqLiteStorage::ExecuteCustomSortL( const RArray<TInt>& aEntryIds, const TInt aGroupId )
-//
+// CCaSqLiteStorage::ExecuteCustomSortL
+// ( const RArray<TInt>& aEntryIds, const TInt aGroupId )
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::ExecuteCustomSortL( const RArray<TInt>& aEntryIds,
@@ -424,7 +430,7 @@ void CCaSqLiteStorage::ExecuteCustomSortL( const RArray<TInt>& aEntryIds,
         {
         TInt newPosition = i + 1;
         TInt entryId = aEntryIds[i];
-        
+
         aSqlQuery[i]->PrepareL();
         aSqlQuery[i]->BindValuesForCustomSortL( aGroupId, entryId, newPosition );
         aSqlQuery[i]->ExecuteL();
@@ -462,12 +468,12 @@ void CCaSqLiteStorage::ExecuteStatementL( const TDesC& aStatement )
     }
 
 // ---------------------------------------------------------------------------
-// CCASqLiteStorage::ExecuteAddL(CCaInnerEntry* aEntry, 
+// CCASqLiteStorage::ExecuteAddL(CCaInnerEntry* aEntry,
 //         RPointerArray<CCASqlQuery>& sqlQuery)
 //
 // ---------------------------------------------------------------------------
 //
-void CCaSqLiteStorage::ExecuteAddL( CCaInnerEntry* aEntry, 
+void CCaSqLiteStorage::ExecuteAddL( CCaInnerEntry* aEntry,
         RPointerArray<CCaSqlQuery>& aSqlQuery )
     {
     TBool isAttributeDeleted( EFalse );
@@ -484,7 +490,7 @@ void CCaSqLiteStorage::ExecuteAddL( CCaInnerEntry* aEntry,
             CCaInnerEntry::TIconAttributes iconAttributes;
             TInt countIcons = query->ExecuteL( iconAttributes );
             CleanupStack::PopAndDestroy( query );
-   
+
             aSqlQuery[i]->PrepareL();
             aSqlQuery[i]->BindValuesForAddL( aEntry );
             TInt tmpId( 0 );
@@ -639,9 +645,9 @@ void CCaSqLiteStorage::ExecuteOrganizeL( const RArray<TInt>& aEntryIds,
                 sqlQueries[i]->PrepareL();
                 for( TInt j = 0; j < aEntryIds.Count(); j++ )
                     {
-                    TInt k = (revereseInsertOrder) ? 
+                    TInt k = (revereseInsertOrder) ?
                         (aEntryIds.Count() - 1) - j : j;
-                    sqlQueries[i]->BindValuesForOrganizeL( 
+                    sqlQueries[i]->BindValuesForOrganizeL(
                             aEntryIds, aParams, aEntryIds[k] );
                     sqlQueries[i]->ExecuteL();
                     sqlQueries[i]->ResetStatement();

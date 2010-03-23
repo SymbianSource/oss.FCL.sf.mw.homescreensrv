@@ -20,7 +20,7 @@
 #include <s32mem.h>
 // for CleanupResetAndDestroyPushL
 #include <mmf/common/mmfcontrollerpluginresolver.h>
-#include <LiwGenericParam.h>
+#include <liwgenericparam.h>
 
 #include "cpserversession.h"
 #include "cpliwmap.h"

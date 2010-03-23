@@ -16,7 +16,7 @@
 */
 
 
-#include <LiwGenericParam.h>
+#include <liwgenericparam.h>
 
 #include "cpliwmap.h"
 #include "cpclient.h"

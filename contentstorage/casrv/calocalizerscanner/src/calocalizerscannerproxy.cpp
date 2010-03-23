@@ -98,7 +98,7 @@ CCaLocalizerScannerProxy::~CCaLocalizerScannerProxy()
 void CCaLocalizerScannerProxy::PerformL()
     {
     QString locale = QLocale::system().name();
-    QString filename = QString( "Contentstorage_texmap_" ) + locale;
+    QString filename = QString( "contentstorage_" ) + locale;
     if( !LoadTranslator( filename ) )
         {
         //User::Leave(KErrNotFound); TODO what here
@@ -124,10 +124,10 @@ TBool CCaLocalizerScannerProxy::LoadTranslator( QString filename )
     {
     TBool loaded( false );
     // load from rom or testbase 
-    loaded = iTranslator->load( filename, QString( "z:/resource" ) );
+    loaded = iTranslator->load( filename, QString( "z:/resource/qt/translations" ) );
     if( !loaded )
         {
-        loaded = iTranslator->load( filename, QString( "c:/resource" ) );
+        loaded = iTranslator->load( filename, QString( "c:/resource/qt/translations" ) );
         }
 
     return loaded;

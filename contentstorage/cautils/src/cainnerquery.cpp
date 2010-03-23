@@ -16,7 +16,7 @@
  */
 
 #include <badesca.h>
-#include <s32strm.H>
+#include <s32strm.h>
 #include "cadef.h"
 #include "cainnerquery.h"
 

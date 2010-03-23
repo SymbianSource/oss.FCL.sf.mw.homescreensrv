@@ -18,11 +18,12 @@
 #include <e32std.h>
 #include <exception>
 #include <e32base.h>
-#include <BADESCA.H>
+#include <badesca.h>
 #include <AknIconUtils.h>
 #include <fbs.h>
-#include <BITDEV.H>
+#include <bitdev.h>
 #include <QPixmap>
+#include <HbIcon>
 #include <QBitmap>
 #include <QDebug>
 
@@ -315,15 +316,15 @@ void CaObjectAdapter::convertL(const RArray<TInt> &innerEntryIdList,
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-QPixmap CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
+HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 {
-    QPixmap pixmap;
-    TRAPD(leaveCode, pixmap = makeIconL(entry, size));
+    HbIcon icon;
+    TRAPD(leaveCode, icon = makeIconL(entry, size));
 
     USE_QDEBUG_IF(leaveCode) << "CaObjectAdapter::makeIcon leaveCode:"
         << leaveCode;
 
-    return pixmap;
+    return icon;
 }
 
 //----------------------------------------------------------------------------
@@ -401,19 +402,19 @@ CFbsBitmap *CaObjectAdapter::copyBitmapLC(CFbsBitmap *input)
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-QPixmap CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
+HbIcon CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
 {
-    QPixmap pixmap;
+    HbIcon icon;
     CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
     CaObjectAdapter::convertL(entry, *innerEntry);
-    //get the icon (jpg, png, gif ...)
-    if (entry.iconDescription().filename() != "") {
-        pixmap = QPixmap(entry.iconDescription().filename()).
-        scaled(size, Qt::KeepAspectRatioByExpanding);
+    QString filename(entry.iconDescription().filename());
+    if (!filename.isEmpty()) {
+        icon = HbIcon(filename);
     }
     //try to load symbian icon from multi-bitmap (mbm, mbg)
-    if (pixmap.isNull()) {
+    if (icon.isNull() || !(icon.size().isValid())) {
         CAknIcon *aknIcon = CaMenuIconUtility::GetItemIcon(*innerEntry);
+        QPixmap pixmap;
         if (aknIcon) {
             CleanupStack::PushL(aknIcon);
 
@@ -441,11 +442,11 @@ QPixmap CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
             }
             pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
             CleanupStack::PopAndDestroy(aknIcon);
+            icon = HbIcon(QIcon(pixmap));
         }
     }
-
     CleanupStack::PopAndDestroy(innerEntry);
-    return pixmap;
+    return icon;
 }
 
 //----------------------------------------------------------------------------

@@ -111,9 +111,7 @@
 
 
 ; ---- db localizations ------------------------------------------
-"/epoc32/data/z/resource/Contentstorage_texmap_pl_PL.qm" - "c:/resource/Contentstorage_texmap_pl_PL.qm"
-"/epoc32/data/z/resource/Contentstorage_texmap_fr_FR.qm " - "c:/resource/Contentstorage_texmap_fr_FR.qm"
-"/epoc32/data/z/resource/Contentstorage_texmap_en_GB.qm" - "c:/resource/Contentstorage_texmap_en_GB.qm"
+"/epoc32/data/z/resource/qt/translations/contentstorage.qm" - "c:/resource/qt/translations/contentstorage.qm"
 
 ; ---- contentstorage --------------------------------------------
 

@@ -16,10 +16,7 @@
 
 include(.\..\..\..\common.pri)
 
-TRANSLATIONS=Contentstorage_texmap_pl_PL.ts \
-             Contentstorage_texmap_fr_FR.ts \
-             Contentstorage_texmap_en_GB.ts
-
+TRANSLATIONS=contentstorage.ts
 
 symbian: { 
     DEPENDPATH += ./inc \
@@ -62,7 +59,7 @@ symbian: {
     
 }
 
-exportResources(./*.qm, resource)
+exportResources(./*.qm, resource/qt/translations)
 
 
 

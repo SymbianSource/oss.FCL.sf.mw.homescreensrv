@@ -35,7 +35,7 @@ class MCaSessionNorifier;
 class CCaStorageProxy: public CBase
     {
 public:
-    
+
     /**
      * Two-phased constructor.
      */
@@ -50,7 +50,7 @@ public:
      * Destructor.
      */
     ~CCaStorageProxy();
-    
+
     /**
      * Localizes one entry attribute
      *
@@ -63,14 +63,15 @@ public:
      *
      * @param aResultContainer Target for results.
      */
-    IMPORT_C void GetLocalizationsL( RPointerArray<CCaLocalizationEntry>& aResultContainer );
+    IMPORT_C void GetLocalizationsL(
+            RPointerArray<CCaLocalizationEntry>& aResultContainer );
 
     /**
      * Fetches data from storage.
      * @param aQuery Query filter for entries to be fetched.
      * @param aResult Result entry container.
      */
-    IMPORT_C void GetEntriesL( const CCaInnerQuery* aQuery, 
+    IMPORT_C void GetEntriesL( const CCaInnerQuery* aQuery,
             RPointerArray<CCaInnerEntry>& aResultContainer );
 
     /**
@@ -83,7 +84,7 @@ public:
 
     /**
      * Adds or Updates data to storage.
-     * In case when data is added the input aEntry serves 
+     * In case when data is added the input aEntry serves
      * also as an output entry.
      * @param aEntry Entry data.
      * @param aUpdate is entry updated by a client
@@ -98,7 +99,7 @@ public:
 
     /**
      * Organizes entries in storage.
-     * @param aEntryIds Entry ids to be organized 
+     * @param aEntryIds Entry ids to be organized
      * (insert, remove, append, prepend are possible).
      * @param aParams Organize parameters.
      */
@@ -106,12 +107,12 @@ public:
             TCaOperationParams aParams );
 
     /**
-     * Executes touch specific actions on storage. 
+     * Executes touch specific actions on storage.
      * Should be called when e.g. entry is clicked.
      * @param aEntry entry to be touched
      */
     IMPORT_C void TouchL( CCaInnerEntry* aEntry );
-    
+
     /**
      * Get database property on storage.
      *
@@ -119,30 +120,37 @@ public:
      * @param aPropertyValue The value of property.
      */
     IMPORT_C void DbPropertyL( const TDesC& aProperty, TDes& aPropertyValue );
-    
+
     /**
      * Set property action on storage.
      *
      * @param aProperty The property to set.
      * @param aPropertyValue The value of property.
      */
-    IMPORT_C void SetDBPropertyL( const TDesC& aProperty, const TDesC& aPropertyValue );
-    
+    IMPORT_C void SetDBPropertyL( const TDesC& aProperty,
+            const TDesC& aPropertyValue );
+
     /**
      * Organizes data within a group in custom order in storage.
      *
      * @param aEntryIds Ids of entries in custom order.
      * @param aGroupId Group to sort.
      */
-    IMPORT_C void CustomSortL( const RArray<TInt>& aEntryIds, const TInt aGroupId );
-    
+    IMPORT_C void CustomSortL( const RArray<TInt>& aEntryIds,
+            const TInt aGroupId );
+
+    /**
+     * Loads data base from rom.
+     */
+    IMPORT_C void LoadDataBaseFromRomL();
+
     /**
      * Add a session. Ownership not taken, this object only keeps a list of
      * sessions that are dependent on its engine.
      * @param aSession Session.
      */
     void AddSessionL( MCaSessionNorifier* aHandlerNotifier );
-    
+
     /**
      * Remove a session. Safe to call if not added.
      * When no more sessions remain dependent on this object, timed
@@ -173,7 +181,7 @@ private:
     /**
      * Sessions using this engine. Own.
      */
-    RPointerArray<MCaSessionNorifier> iHandlerNotifier; 
+    RPointerArray<MCaSessionNorifier> iHandlerNotifier;
     };
 
 #endif //CASTORAGEPROXY_H

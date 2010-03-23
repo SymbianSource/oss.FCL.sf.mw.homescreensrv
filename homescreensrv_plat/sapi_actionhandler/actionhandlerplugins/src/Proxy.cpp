@@ -17,7 +17,7 @@
 
 
 #include <e32std.h>
-#include <ecom/ImplementationProxy.h>
+#include <ecom/implementationproxy.h>
 #include "ahpapplauncher.h"
 #include "ahtelkeyhandler.h"
 #include "ahhelplauncher.h"

@@ -16,10 +16,10 @@
 */
 
 
-#include <S32MEM.H>
-#include <LiwGenericParam.h>
-#include <EscapeUtils.h>
-#include <BADESCA.h>
+#include <s32mem.h>
+#include <liwgenericparam.h>
+#include <escapeutils.h>
+#include <badesca.h>
 
 #include "cpliwmap.h"
 #include "cpdebug.h"

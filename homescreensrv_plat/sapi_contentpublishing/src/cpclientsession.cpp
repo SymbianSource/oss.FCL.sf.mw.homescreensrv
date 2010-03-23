@@ -16,8 +16,8 @@
 */
 
 
-#include <S32MEM.H>
-#include <LiwCommon.H>
+#include <s32mem.h>
+#include <liwcommon.h>
 
 #include "cpserverdef.h"
 #include "cpliwmap.h"

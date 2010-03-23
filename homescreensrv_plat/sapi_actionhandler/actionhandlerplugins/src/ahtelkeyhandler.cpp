@@ -18,7 +18,7 @@
 
 #include <AiwServiceHandler.h>      // AIW
 #include <aiwdialdata.h>    //include\oem
-#include <LiwVariant.h>
+#include <liwvariant.h>
 
 #include "ahtelkeyhandler.h"
 #include "ahproperties.hrh"

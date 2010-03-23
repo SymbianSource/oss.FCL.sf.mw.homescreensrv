@@ -15,7 +15,7 @@
  *
  */
 
-#include <QIcon>
+#include <HbIcon>
 
 #include "caitemmodel.h"
 #include "caitemmodel_p.h"
@@ -412,7 +412,7 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
     case Qt::DisplayRole:
         return displayRole(modelIndex);
     case Qt::DecorationRole:
-        return QVariant(QIcon(entry(modelIndex)->makeIcon(mSize)));
+        return QVariant(HbIcon(entry(modelIndex)->makeIcon(mSize)));
     case CaItemModel::IdRole:
         return QVariant(entry(modelIndex)->id());
     case CaItemModel::TypeRole:

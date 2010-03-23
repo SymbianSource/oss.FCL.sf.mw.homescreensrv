@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: ou1s60ui#11 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#10.1.1 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 

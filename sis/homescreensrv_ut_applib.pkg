@@ -18,7 +18,7 @@
 &EN
 
 ; SIS header: name, uid, version
-#{"hssrv ut krakow"},(0xEAEAEA01),1,0,0
+#{"hssrv ut applib"},(0xEAEAEA01),1,0,0
 
 ; Localised Vendor name
 %{"Nokia"}

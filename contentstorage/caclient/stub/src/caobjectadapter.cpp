@@ -15,32 +15,31 @@
  *
  */
 
-#include <cadefs.h>
+#include <QDir>
+#include <HbIcon>
+
 
 #include "caobjectadapter.h"
 #include "caentry.h"
 #include "caicondescription.h"
-
+#include <cadefs.h>
 
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-QPixmap CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
+HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 {
-    QPixmap icon;
-    if (!entry.iconDescription().filename().isEmpty()) {
-        icon = QPixmap(entry.iconDescription().filename()).scaled(size);
+    HbIcon icon;
+    QString filename(entry.iconDescription().filename());
+    if(!filename.isEmpty()) {
+        icon = HbIcon(filename);
     }
-    if (icon.isNull()) {
-        if (entry.role() == GroupEntryRole) {
-            icon = QPixmap("./resource/folder.png").scaled(size);
-        }
-        else {
-            icon = QPixmap("./resource/application.png").scaled(size);
-        }
+    if (icon.isNull() || !(icon.size().isValid())) {
+        icon = HbIcon(QDir(".").absoluteFilePath("resource/application.png"));
     }
     return icon;
 }
+
 
 //----------------------------------------------------------------------------
 //

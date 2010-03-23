@@ -15,7 +15,7 @@
  *                the content arsenal server itself
  *
  */
-#include <akniconutils.h>
+#include <AknIconUtils.h>
 #include <avkon.mbg>
 #include <e32property.h>
 #include <AknTaskList.h>
