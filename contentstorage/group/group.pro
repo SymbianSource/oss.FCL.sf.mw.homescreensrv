@@ -32,7 +32,6 @@ BLD_INF_RULES.prj_mmpfiles += "casathandler.mmp" \
     "camenu.mmp" \
     "camenusrv.mmp" \
     "caextendedmenu.mmp" \
-    "castockhandlerplugins.mmp" \
     "../casrv/caappscanner/group/caappscanner.mmp" \
     "../casrv/casatmonitor/group/casatmonitor.mmp" \
     "../casrv/cawidgetscanner/group/cawidgetscanner.mmp" \

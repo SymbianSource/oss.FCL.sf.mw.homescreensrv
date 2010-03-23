@@ -18,7 +18,7 @@
 #ifndef C_CASTORAGE_ENGINE_H
 #define C_CASTORAGE_ENGINE_H
 
-#include <BAUTILS.H>
+#include <bautils.h>
 #include <e32cons.h>
 #include <sqldb.h>
 #include "castorage.h"

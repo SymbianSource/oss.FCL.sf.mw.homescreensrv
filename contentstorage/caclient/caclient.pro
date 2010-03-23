@@ -15,8 +15,12 @@
 #
 
 TEMPLATE = lib
-CONFIG += hb
+CONFIG += hb mobility
 HB = hbcore
+
+MOBILITY = serviceframework
+# temporary solution to solve problems with SF in MW dependency
+qtAddLibrary(QtServiceFramework)
 
 DEFINES += CACLIENT_LIB
 
@@ -49,6 +53,7 @@ LIBS += -lcautils \
         -lfbscli \
         -lbitgdi
 include(caclient_s60.pri)
+include(cahandler.pri)
 }
 
 win32: {

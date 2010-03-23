@@ -64,12 +64,12 @@ EXPORT_C void CCaInnerEntry::ExternalizeL( RWriteStream& aStream ) const
     aStream.WriteInt32L( iId );
     aStream.WriteInt32L( iUid );
     aStream.WriteInt32L( iIcon.iId );
-    aStream.WriteInt32L( iIcon.iBitmapId );
-    aStream.WriteInt32L( iIcon.iMaskId );
-    aStream.WriteInt32L( iIcon.iSkinMajorId );
-    aStream.WriteInt32L( iIcon.iSkinMinorId );
     aStream.WriteUint32L( iIcon.iFileName.Length() );
     aStream.WriteL( iIcon.iFileName, iIcon.iFileName.Length() );
+    aStream.WriteUint32L( iIcon.iSkinId.Length() );
+    aStream.WriteL( iIcon.iSkinId, iIcon.iSkinId.Length() );
+    aStream.WriteUint32L( iIcon.iApplicationId.Length() );
+    aStream.WriteL( iIcon.iApplicationId, iIcon.iApplicationId.Length() );
     aStream.WriteUint32L( iFlags );
     aStream.WriteUint32L( iRole );
     aStream.WriteUint32L( iText.Length() );
@@ -91,12 +91,12 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
     iId = aStream.ReadInt32L();
     iUid = aStream.ReadInt32L();
     iIcon.iId = aStream.ReadInt32L();
-    iIcon.iBitmapId = aStream.ReadInt32L();
-    iIcon.iMaskId = aStream.ReadInt32L();
-    iIcon.iSkinMajorId = aStream.ReadInt32L();
-    iIcon.iSkinMinorId = aStream.ReadInt32L();
     TUint length = aStream.ReadUint32L();
     aStream.ReadL( iIcon.iFileName, length );
+    length = aStream.ReadUint32L();
+    aStream.ReadL( iIcon.iSkinId, length );
+    length = aStream.ReadUint32L();
+    aStream.ReadL( iIcon.iApplicationId, length );
     iFlags = aStream.ReadUint32L();
     iRole = aStream.ReadUint32L();
     length = aStream.ReadUint32L();
@@ -266,15 +266,12 @@ EXPORT_C void CCaInnerEntry::SetEntryTypeNameL( const TDesC& aTypeName )
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CCaInnerEntry::SetIconDataL( TInt aBitmapId, TInt aMaskId,
-        TInt aSkinMajorId, TInt aSkinMinorId, const TDesC& aFilename )
+EXPORT_C void CCaInnerEntry::SetIconDataL(
+        const TDesC& aFilename, const TDesC& aSkinId, const TDesC& aApplicationId )
     {
-    iIcon.iBitmapId = aBitmapId;
-    iIcon.iMaskId = aMaskId;
-    iIcon.iSkinMajorId = aSkinMajorId;
-    iIcon.iSkinMinorId = aSkinMinorId;
-
     iIcon.iFileName.Copy( aFilename );
+    iIcon.iSkinId.Copy( aSkinId );
+    iIcon.iApplicationId.Copy(aApplicationId);
     }
 
 // ---------------------------------------------------------------------------

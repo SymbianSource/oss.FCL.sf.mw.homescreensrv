@@ -231,10 +231,9 @@ void CaSqlQueryCreator::CreateAddIconQueryForNewL( CCaInnerEntry* aEntry,
         {
         // entry's icon data is not in DB
         if( ( aEntry->GetIcon().iFileName.Length() != 0 ) ||
-             ( aEntry->GetIcon().iBitmapId != 0 ) ||
-             ( aEntry->GetIcon().iMaskId != 0 ) ||
-             ( aEntry->GetIcon().iSkinMajorId != 0 ) ||
-             ( aEntry->GetIcon().iSkinMinorId != 0 ) )
+            ( aEntry->GetIcon().iSkinId.Length() != 0 ) ||
+            ( aEntry->GetIcon().iApplicationId.Length() != 0 )
+             )
             {
             // icon is not null, so that insert it to storage
             aQuery->SetQueryL( KSQLInsertToIcon );
@@ -269,13 +268,10 @@ void CaSqlQueryCreator::CreateAddIconQueryForUpdateL(CCaInnerEntry* aEntry,
     CCaInnerEntry::TIconAttributes iconAttributs;
     query->ExecuteL( iconAttributs );
     query->CloseStatement();
-    if( !( !iconAttributs.iFileName.Compare( aEntry->GetIcon().iFileName )
-            && ( iconAttributs.iBitmapId == aEntry->GetIcon().iBitmapId )
-            && ( iconAttributs.iMaskId == aEntry->GetIcon().iMaskId )
-            && ( iconAttributs.iSkinMajorId
-                    == aEntry->GetIcon().iSkinMajorId )
-            && ( iconAttributs.iSkinMinorId
-                    == aEntry->GetIcon().iSkinMinorId ) ) )
+    if( !(     !iconAttributs.iFileName.Compare( aEntry->GetIcon().iFileName )
+            && (!iconAttributs.iSkinId.Compare( aEntry->GetIcon().iSkinId ))
+            && (!iconAttributs.iApplicationId.Compare( aEntry->GetIcon().iApplicationId ))
+                    ) )
         {
         // entry's icon data is updated
         // if icon is used by another entry(s), new icon'll added to DB and
@@ -346,32 +342,18 @@ void CaSqlQueryCreator::CreateUpdateIconQueryL(
         query.Append( KSQLUpdateIconFileName );
         query.Append( KComma );
         }
-    if( aEntry->GetIcon().iBitmapId )
+    if( aEntry->GetIcon().iSkinId.Compare( KNullDesC ) )
         {
-        query.ReAllocL( query.Length() + KSQLUpdateIconBitmapId().Length()
+        query.ReAllocL( query.Length() + KSQLUpdateIconSkinId().Length()
                 + KComma().Length() );
-        query.Append( KSQLUpdateIconBitmapId );
+        query.Append( KSQLUpdateIconSkinId );
         query.Append( KComma );
         }
-    if( aEntry->GetIcon().iMaskId )
+     if( aEntry->GetIcon().iApplicationId.Compare(KNullDesC) )
         {
-        query.ReAllocL( query.Length() + KSQLUpdateIconMaskId().Length()
+        query.ReAllocL( query.Length() + KSQLUpdateIconAppId().Length()
                 + KComma().Length() );
-        query.Append( KSQLUpdateIconMaskId );
-        query.Append( KComma );
-        }
-    if( aEntry->GetIcon().iSkinMajorId )
-        {
-        query.ReAllocL( query.Length() + KSQLUpdateIconSkinMajorId().Length()
-                + KComma().Length() );
-        query.Append( KSQLUpdateIconSkinMajorId );
-        query.Append( KComma );
-        }
-    if( aEntry->GetIcon().iSkinMinorId )
-        {
-        query.ReAllocL( query.Length() + KSQLUpdateIconSkinMinorId().Length()
-                + KComma().Length() );
-        query.Append( KSQLUpdateIconSkinMinorId );
+        query.Append( KSQLUpdateIconAppId );
         }
     if( !query.Right( KComma().Length() ).Compare( KComma ) )
         {
@@ -962,10 +944,9 @@ TBool CaSqlQueryCreator::CreateOrganizeQueryL(
 CaSqlQueryCreator::TIconType CaSqlQueryCreator::CheckIconType( const CCaInnerEntry* aEntry )
     {
     CaSqlQueryCreator::TIconType iconType;
-    if( aEntry->GetIcon().iBitmapId == 0 &&
-        aEntry->GetIcon().iMaskId == 0 &&
-        aEntry->GetIcon().iSkinMajorId == 0 &&
-        aEntry->GetIcon().iSkinMinorId == 0 &&
+    if( 
+        aEntry->GetIcon().iApplicationId.Length() == 0 &&
+        aEntry->GetIcon().iSkinId.Length() == 0 &&
         aEntry->GetIcon().iFileName.Length() == 0 )
         {
         if( aEntry->GetIconId() > 0 )

@@ -23,6 +23,7 @@
 #include "cainnerquery.h"
 #include "caarraycleanup.inl"
 #include "calocalizationentry.h"
+#include "cainternaltypes.h"
 
 // ---------------------------------------------------------------------------
 // CCASqLiteStorage::CCpStorageEngine()
@@ -184,6 +185,30 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
                 CCaSqlQuery::EAttribute );
         CleanupStack::PopAndDestroy( sqlGetAttributesQuery );
         }
+    
+    if( aQuery->GetAttributes().Count() )
+        {
+        for( int i=aResultContainer.Count()-1; i>=0; i--)
+            {
+            for( int j=0; j<aQuery->GetAttributes().Count(); j++ )
+                {
+                const TPtrC attrNameFromQuery( aQuery->GetAttributes()[j]->Name() );
+                const TPtrC attrValueFromQuery( aQuery->GetAttributes()[j]->Value() );
+                
+                TBuf16<KCaMaxAttrValueLen> value;
+                aResultContainer[i]->FindAttribute( attrNameFromQuery, value );
+                                
+                if( value.CompareC( attrValueFromQuery ) )
+                    {
+                    // remove from results
+                    delete aResultContainer[i];
+                    aResultContainer.Remove( i );
+                    break;
+                    }
+                }
+            }
+        }
+    
     //  set entries if proper order if they were fetched by ids
     if( aQuery->GetIds().Count() > 0 )
         {
@@ -221,6 +246,7 @@ void CCaSqLiteStorage::GetLocalizationsL(
 void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
         RArray<TInt>& aResultIdArray )
     {
+    /*
     CCaSqlQuery* sqlGetEntriesIdsQuery = CCaSqlQuery::NewLC( iSqlDb );
     CaSqlQueryCreator::CreateGetEntriesQueryL( aQuery,
             sqlGetEntriesIdsQuery );
@@ -229,6 +255,17 @@ void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
     sqlGetEntriesIdsQuery->ExecuteL( aResultIdArray,
             CCaSqlQuery::EEntryTable );
     CleanupStack::PopAndDestroy( sqlGetEntriesIdsQuery );
+    */
+    RPointerArray<CCaInnerEntry> resultContainer;
+    CleanupResetAndDestroyPushL( resultContainer );
+    GetEntriesL( aQuery, resultContainer );
+    for( TInt i=0; i<resultContainer.Count(); i++ )
+        {
+        int id = resultContainer[i]->GetId();
+        aResultIdArray.AppendL( id );
+        }
+    
+    CleanupStack::PopAndDestroy( &resultContainer );
     }
 
 // ---------------------------------------------------------------------------

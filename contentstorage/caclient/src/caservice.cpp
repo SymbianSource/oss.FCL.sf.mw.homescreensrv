@@ -830,14 +830,13 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
 bool CaService::executeCommand(int entryId, const QString &command) const
 {
     bool result = false;
-
+    
     CaEntry *const temporaryEntry = getEntry(entryId);
-
+    
     if (temporaryEntry != NULL) {
         result = executeCommand(*temporaryEntry, command);
         delete temporaryEntry;
     }
-
     return result;
 }
 
@@ -935,7 +934,7 @@ ErrorCode CaService::lastError() const
  \param servicePublic pointer to public service
  */
 CaServicePrivate::CaServicePrivate(CaService *servicePublic) :
-    m_q(servicePublic), mProxy(new CaClientProxy())
+    m_q(servicePublic), mProxy(new CaClientProxy)
 {
     const ErrorCode connectionResult = mProxy->connect();
 

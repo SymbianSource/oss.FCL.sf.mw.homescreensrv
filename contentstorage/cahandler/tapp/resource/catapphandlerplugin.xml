@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service>
+    <name>catapphandlerplugin</name>
+    <filepath>z:/hsresources/plugins/commandhandler/catapphandlerplugin.qtplugin</filepath>
+    <description>Content Arsenal tapp handler plugin</description>
+    <interface>
+        <name>com.nokia.homescreen.ICommandHandler</name>
+        <version>1.0</version>
+        <description> executes commands on tapps </description>
+		<customproperty key="entryTypeName">application</customproperty>
+        <capabilities></capabilities>
+    </interface>
+</service>

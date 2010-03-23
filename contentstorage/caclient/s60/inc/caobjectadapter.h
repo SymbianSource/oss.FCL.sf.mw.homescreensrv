@@ -158,17 +158,27 @@ public:
     /**
      * @return  uid attribute name
      */
-    static const QString &applicationUidAttributeName();
+    static const QString applicationUidAttributeName();
 
     /**
-     * @return  attribute type name
+     * @return  application entry type name
      */
-    static const QString &applicationEntryName();
+    static const QString applicationEntryTypeName();
 
     /**
-     * @return  widget type name
+     * @return  widget entry type name
      */
-    static const QString &widgetEntryName();
+    static const QString widgetEntryTypeName();
+
+    /**
+     * @return  url entry type name
+     */
+    static const QString urlEntryTypeName();
+
+    /**
+     * @return  template application entry type name
+     */
+    static const QString templateApplicationEntryTypeName();
 
     /**
      * Set entry id.

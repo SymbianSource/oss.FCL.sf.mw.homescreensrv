@@ -35,11 +35,9 @@ public:
         {
         //TODO: maybe it should be C class with RBuf instead of TFileName
         TInt iId;
-        TInt iBitmapId;
-        TInt iMaskId;
-        TInt iSkinMajorId;
-        TInt iSkinMinorId;
         TFileName iFileName;
+        TBuf<KMaxFileName> iSkinId;        
+        TBuf<KMaxUidName> iApplicationId;
         };
 
 public:
@@ -149,14 +147,12 @@ public:
 
     /**
      * Sets icon data.
-     * @param aBitmapId Bitmap id.
-     * @param aMaskId Mask id.
-     * @param aSkinMajorId Skin major id.
-     * @param aSkinMinorId Skin minor id.
      * @param aFilename Filename.
+     * @param aSkinId Skin id.
+     * @param aApplicationId application id.
      */
-    IMPORT_C void SetIconDataL( TInt aBitmapId, TInt aMaskId,
-            TInt aSkinMajorId, TInt aSkinMinorId, const TDesC& aFilename );
+    IMPORT_C void SetIconDataL(             
+            const TDesC& aFilename, const TDesC& aSkinId, const TDesC& aApplicationId );
 
     /**
      * Adds attribute to entry.

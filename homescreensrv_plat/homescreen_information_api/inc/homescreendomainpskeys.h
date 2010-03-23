@@ -19,23 +19,17 @@
 #define HOMESCREEN_DOMAIN_PS_KEYS_H
 
 /**
- * P&S UID for all Home Screen state information keys provided by this API.
- */
-const QUuid KPSUidHsState("0x20022F75");
-
-/**
  * P&S Key path for all Home Screen state information keys provided by this API.
  */
-const QString HsStatePSKeyPath = "/homescreeninformation";
+const char HsStatePSKeyPath[] = "/homescreen";
 
 /**
  * P&S Key sub path to represent the state of the Home Screen. This property is updated when
- * Home screen state is changed. Valid values are defined by the enum EPSHsState
- * and range from 0 to 1.
+ * Home screen state is changed. Valid values are defined by the enum EPSHsState.
  *
  * @see EPSHsState
  */
-const QString HsStatePSKeySubPath = "resources/homescreen/state";
+const char HsStatePSKeySubPath[] = "state";
 
 /**
  * Home screen state.

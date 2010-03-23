@@ -112,11 +112,10 @@ void CaObjectAdapter::convertL(const CaEntry &fromEntry,
         fromEntry.iconDescription();
 
     toEntry.SetIconDataL(
-        static_cast<TInt>(fromIconDescription.bitmapId()),
-        static_cast<TInt>(fromIconDescription.maskId()),
-        static_cast<TInt>(fromIconDescription.skinMajorId()),
-        static_cast<TInt>(fromIconDescription.skinMinorId()),
-        convertToDescriptor(fromIconDescription.filename()));
+        convertToDescriptor(fromIconDescription.filename()),
+        convertToDescriptor(fromIconDescription.skinId()),
+        convertToDescriptor(fromIconDescription.applicationId())
+        );
 
     const QMap<QString, QString> attributesMap = fromEntry.attributes();
 
@@ -167,6 +166,14 @@ void CaObjectAdapter::convertL(const CaQuery &fromQuery,
     Qt::SortOrder sortOrder;
     fromQuery.getSort(sortAttr, sortOrder);
     toQuery.SetSort(CaObjectAdapter::getSortCode(sortAttr, sortOrder));
+    
+    const QMap<QString, QString> attributesMap = fromQuery.attributes();
+
+    foreach(QString key, attributesMap.keys()) {
+            toQuery.AddAttributeL(
+                convertToDescriptor(key),
+                convertToDescriptor(attributesMap.value(key)));
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -189,18 +196,16 @@ void CaObjectAdapter::convert(const CCaInnerEntry &fromEntry,
 
     CaIconDescription iconDescription;
     iconDescription.setId(icon.iId);
-    iconDescription.setBitmapId(icon.iBitmapId);
-    iconDescription.setMaskId(icon.iMaskId);
-    iconDescription.setSkinMajorId(icon.iSkinMajorId);
-    iconDescription.setSkinMinorId(icon.iSkinMinorId);
     iconDescription.setFilename(convertToString(icon.iFileName));
+    iconDescription.setSkinId(convertToString(icon.iSkinId));
+    iconDescription.setApplicationId(convertToString(icon.iApplicationId));
 
     toEntry.setIconDescription(iconDescription);
 
     const RCaEntryAttrArray &attributesArray = fromEntry.GetAttributes();
 
-    if (toEntry.entryTypeName() == applicationEntryName()
-            || toEntry.entryTypeName() == widgetEntryName()) {
+    if (toEntry.entryTypeName() == applicationEntryTypeName()
+            || toEntry.entryTypeName() == widgetEntryTypeName()) {
         toEntry.setAttribute(applicationUidAttributeName(),
                              QString::number(fromEntry.GetUid()));
     }
@@ -356,7 +361,7 @@ ErrorCode CaObjectAdapter::convertErrorCode(int internalErrorCode)
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-const QString &CaObjectAdapter::applicationUidAttributeName()
+const QString CaObjectAdapter::applicationUidAttributeName()
 {
     const static QString name("application:uid");
     return name;
@@ -365,7 +370,7 @@ const QString &CaObjectAdapter::applicationUidAttributeName()
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-const QString &CaObjectAdapter::applicationEntryName()
+const QString CaObjectAdapter::applicationEntryTypeName()
 {
     const static QString name("application");
     return name;
@@ -374,12 +379,29 @@ const QString &CaObjectAdapter::applicationEntryName()
 //----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-const QString &CaObjectAdapter::widgetEntryName()
+const QString CaObjectAdapter::widgetEntryTypeName()
 {
     const static QString name("widget");
     return name;
 }
 
+//----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+const QString CaObjectAdapter::urlEntryTypeName()
+{
+    const static QString name("url");
+    return name;
+}
+
+//----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+const QString CaObjectAdapter::templateApplicationEntryTypeName()
+{
+    const static QString name("templatedApplication");
+    return name;
+}
 // -----------------------------------------------------------------------------
 // copying compressed bitmap
 //----------------------------------------------------------------------------
@@ -405,14 +427,21 @@ CFbsBitmap *CaObjectAdapter::copyBitmapLC(CFbsBitmap *input)
 HbIcon CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
 {
     HbIcon icon;
-    CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
-    CaObjectAdapter::convertL(entry, *innerEntry);
-    QString filename(entry.iconDescription().filename());
-    if (!filename.isEmpty()) {
-        icon = HbIcon(filename);
+    QString skinId(entry.iconDescription().skinId());
+    if (!skinId.isEmpty()) {
+        icon = HbIcon(skinId);
+    }
+    if (icon.isNull() || !(icon.size().isValid())) {
+        QString filename(entry.iconDescription().filename());
+        if (!filename.isEmpty()) {
+            icon = HbIcon(filename);
+        }
     }
     //try to load symbian icon from multi-bitmap (mbm, mbg)
     if (icon.isNull() || !(icon.size().isValid())) {
+        CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
+        CaObjectAdapter::convertL(entry, *innerEntry);
+
         CAknIcon *aknIcon = CaMenuIconUtility::GetItemIcon(*innerEntry);
         QPixmap pixmap;
         if (aknIcon) {
@@ -443,8 +472,8 @@ HbIcon CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
             CleanupStack::PopAndDestroy(aknIcon);
             icon = HbIcon(QIcon(pixmap));
         }
+        CleanupStack::PopAndDestroy(innerEntry);
     }
-    CleanupStack::PopAndDestroy(innerEntry);
     return icon;
 }
 

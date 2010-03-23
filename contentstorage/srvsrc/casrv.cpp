@@ -28,19 +28,6 @@
 // ==================== LOCAL FUNCTIONS ====================
 
 /**
- * Stop the Active Scheduler.
- * @param aPtr Not used.
- * @return KErrNone.
- */
-LOCAL_C TInt StopScheduler( TAny* /*aPtr*/)
-    {
-    // Called by the exit timer, after all clients disconnected (plus a small
-    // delay). Stop the scheduler, this will enable he thread exit.
-    CActiveScheduler::Stop();
-    return KErrNone;
-    }
-
-/**
  * Create a server.
  * @param Pointer to created server (if created) returned here.
  * @return Error code.

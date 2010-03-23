@@ -498,7 +498,7 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
         QSqlQuery query(db);
         query.prepare(
             "SELECT ENTRY_ID, EN_TEXT, EN_DESCRIPTION, EN_TYPE_NAME, EN_FLAGS, EN_ROLE, EN_UID,  \
-                  ICON_ID, IC_BITMAP_ID, IC_MASK_ID, IC_SKINMAJOR_ID, IC_SKINMINOR_ID, IC_FILENAME \
+                  ICON_ID, IC_FILENAME, IC_SKIN_ID, IC_APP_ID \
                   FROM CA_ENTRY LEFT JOIN CA_ICON ON EN_ICON_ID = ICON_ID WHERE ENTRY_ID = ?");
         query.addBindValue(i);
 
@@ -522,16 +522,13 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
             CaIconDescription icon;
             CaObjectAdapter::setId(icon,
                                    query.value(query.record().indexOf("ICON_ID")).toInt());
-            icon.setBitmapId(query.value(query.record().indexOf(
-                                             "IC_BITMAP_ID")).toInt());
-            icon.setMaskId(query.value(query.record().indexOf(
-                                           "IC_MASK_ID")).toInt());
-            icon.setSkinMajorId(query.value(query.record().indexOf(
-                                                "IC_SKINMAJOR_ID")).toInt());
-            icon.setSkinMinorId(query.value(query.record().indexOf(
-                                                "IC_SKINMINOR_ID")).toInt());
+
             icon.setFilename(query.value(query.record().indexOf(
                                              "IC_FILENAME")).toString());
+            icon.setSkinId(query.value(query.record().indexOf(
+                                             "IC_SKIN_ID")).toString());
+            icon.setApplicationId(query.value(query.record().indexOf(
+                                             "IC_APP_ID")).toString());
             entry->setIconDescription(icon);
 
             // attributes
@@ -813,20 +810,16 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
     //set icon information into db
     QSqlQuery query(dbConnection());
     query.prepare(
-        "SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = :IC_FILENAME \
-            AND IC_BITMAP_ID = :IC_BITMAP_ID \
-            AND IC_MASK_ID = :IC_MASK_ID \
-            AND IC_SKINMAJOR_ID = :IC_SKINMAJOR_ID \
-            AND IC_SKINMINOR_ID = :IC_SKINMINOR_ID");
+        "SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = :IC_FILENAME"
+        " AND IC_SKIN_ID = :IC_SKIN_ID"
+        " AND IC_APP_ID = :IC_APP_ID");
     query.bindValue(":IC_FILENAME",
                     entryClone->iconDescription().filename());
-    query.bindValue(":IC_BITMAP_ID",
-                    entryClone->iconDescription().bitmapId());
-    query.bindValue(":IC_MASK_ID", entryClone->iconDescription().maskId());
-    query.bindValue(":IC_SKINMAJOR_ID",
-                    entryClone->iconDescription().skinMajorId());
-    query.bindValue(":IC_SKINMINOR_ID",
-                    entryClone->iconDescription().skinMinorId());
+    query.bindValue(":IC_SKIN_ID",
+                    entryClone->iconDescription().filename());
+    query.bindValue(":IC_APP_ID",
+                    entryClone->iconDescription().filename());
+
 
     bool success = query.exec();
     if (success && query.next()) {
@@ -834,19 +827,17 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
         int iconId = query.value(query.record().indexOf("ICON_ID")).toInt();
         qDebug() << "iconId = " << iconId;
         CaIconDescription iconDescription = entryClone->iconDescription();
-        if (iconId <= 0 && (iconDescription.filename() != ""
-                            || iconDescription.bitmapId() != 0 || iconDescription.maskId() != 0
-                            || iconDescription.skinMajorId() != 0
-                            || iconDescription.skinMinorId() != 0)) {
+        if (iconId <= 0
+            && (!iconDescription.filename().isEmpty()
+                || !iconDescription.skinId().isEmpty()
+                || !iconDescription.applicationId().isEmpty())) {
             query.prepare(
-                "INSERT INTO CA_ICON \
-                           (IC_FILENAME,IC_BITMAP_ID,IC_MASK_ID,IC_SKINMAJOR_ID,IC_SKINMINOR_ID) \
-                            VALUES ( ? , ? , ? , ? , ? )");
+                "INSERT INTO CA_ICON"
+                " (IC_FILENAME, IC_SKIN_ID, IC_APP_ID)"
+                " VALUES ( ? , ? , ? , ? , ? )");
             query.addBindValue(iconDescription.filename());
-            query.addBindValue(iconDescription.bitmapId());
-            query.addBindValue(iconDescription.maskId());
-            query.addBindValue(iconDescription.skinMajorId());
-            query.addBindValue(iconDescription.skinMinorId());
+            query.addBindValue(iconDescription.skinId());
+            query.addBindValue(iconDescription.applicationId());
             success = query.exec();
             qDebug() << query.executedQuery();
             iconId = query.lastInsertId().toInt();

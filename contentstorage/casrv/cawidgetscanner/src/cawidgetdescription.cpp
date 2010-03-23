@@ -472,7 +472,8 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         }
     if ( iIconUri != KNullDesC)
         {
-        entry->SetIconDataL(0, 0, 0, 0, iIconUri);
+        // aSkinId and AppId not used for widgets - KNullDesC
+        entry->SetIconDataL(iIconUri, KNullDesC, KNullDesC);
         }
 
     if( iModificationTime != KNullDesC )

@@ -19,14 +19,16 @@
 #define CACLIENTPROXY_H
 
 #include <QMutex>
+#include <QSharedPointer>
 
 // INCLUDES
 #include "cadef.h"
 #include "caclientsession.h"
 #include "canotifier.h"
+#include "cahandlerproxy.h"
 
 //FORWARD DECLARATIONS
-class CCaHandlerEngine;
+
 class CaClientNotifierProxy;
 class CaEntry;
 class CaQuery;
@@ -215,13 +217,6 @@ private:
     void getEntryIdsL(const CaQuery &query,
                       QList<int> &sourceIdList);
 
-    /**
-     * Method for fetching entries. Symbian specific.
-     * @param entry entry
-     * @param command command.
-     */
-    void executeCommandL(const CaEntry &entry,
-                         const QString &command);
 
     /**
      * Touch.
@@ -240,9 +235,8 @@ private:
     // Own.
     RCaClientSession mSession;
 
-    // Engine handler.
-    // Own.
-    CCaHandlerEngine *mHandler;
+    // Command handler.
+    QSharedPointer<CaHandlerProxy> mCommandHandler;
 
     // Mutex to serialize access to mSessions.
     QMutex mMutex;

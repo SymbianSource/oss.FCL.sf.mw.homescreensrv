@@ -516,25 +516,15 @@ void CCaSqlQuery::BindValuesForGetIconL( const CCaInnerEntry* aEntry )
         BindTextL( iStatement.ParameterIndex( KSQLIcFileName ),
                 aEntry->GetIcon().iFileName );
         }
-    if( iQuery.Find( KSQLIcBitmapId ) != KErrNotFound )
+    if( iQuery.Find( KSQLIcSkinId ) != KErrNotFound )
         {
-        BindIntL( iStatement.ParameterIndex( KSQLIcBitmapId ),
-                aEntry->GetIcon().iBitmapId );
+        BindTextL( iStatement.ParameterIndex( KSQLIcSkinId ),
+                aEntry->GetIcon().iSkinId );
         }
-    if( iQuery.Find(KSQLIcMaskId) != KErrNotFound )
+    if( iQuery.Find( KSQLIcAppId ) != KErrNotFound )
         {
-        BindIntL( iStatement.ParameterIndex( KSQLIcMaskId ),
-                aEntry->GetIcon().iMaskId );
-        }
-    if( iQuery.Find( KSQLIcSkinMajorId ) != KErrNotFound )
-        {
-        BindIntL( iStatement.ParameterIndex( KSQLIcSkinMajorId ),
-                aEntry->GetIcon().iSkinMajorId );
-        }
-    if( iQuery.Find( KSQLIcSkinMinorId ) != KErrNotFound )
-        {
-        BindIntL( iStatement.ParameterIndex( KSQLIcSkinMinorId ),
-                aEntry->GetIcon().iSkinMinorId );
+        BindTextL( iStatement.ParameterIndex( KSQLIcAppId ),
+                aEntry->GetIcon().iApplicationId );
         }
     }
 
@@ -687,15 +677,7 @@ TInt CCaSqlQuery::ExecuteEntryL(
                 KColumnEnFlags ) );
         TInt idIcon = iStatement.ColumnInt( ColumnIndexL( iStatement,
                 KColumnEnIdIcon ) );
-        TInt bitmapId = iStatement.ColumnInt( ColumnIndexL( iStatement,
-                KColumnIcBitmapId ) );
-        TInt maskId = iStatement.ColumnInt( ColumnIndexL( iStatement,
-                KColumnIcMaskId ) );
-        TInt skinMajorId = iStatement.ColumnInt( ColumnIndexL( iStatement,
-                KColumnIcSkinMajorId ) );
-        TInt skinMinorId = iStatement.ColumnInt( ColumnIndexL( iStatement,
-                KColumnIcSkinMinorId ) );
-
+        
         TPtrC text;
         User::LeaveIfError( iStatement. ColumnText( ColumnIndexL(
                 iStatement, KColumnEnText ), text ) );
@@ -706,15 +688,24 @@ TInt CCaSqlQuery::ExecuteEntryL(
         TPtrC typeName;
         User::LeaveIfError( iStatement.ColumnText( 
                 ColumnIndexL(iStatement, KColumnEnTypeName ), typeName) );
+                
         TPtrC iconFilename;
         User::LeaveIfError( iStatement.ColumnText( ColumnIndexL(
                 iStatement, KColumnIcFileName ), iconFilename ) );
 
+        TPtrC iconSkinId;
+        User::LeaveIfError( iStatement.ColumnText( ColumnIndexL(
+                iStatement, KColumnIcSkinId ), iconSkinId ) );
+
+        TPtrC iconApplicationId;
+        User::LeaveIfError( iStatement.ColumnText( ColumnIndexL(
+                iStatement, KColumnIcAppId ), iconApplicationId ) );
+
         CCaInnerEntry* result = CCaInnerEntry::NewLC();
         result->SetId( entryId );
         result->SetRole( role );
-        result->SetIconDataL( bitmapId, maskId, skinMajorId, skinMinorId,
-                iconFilename );
+        result->SetIconDataL(
+                iconFilename, iconSkinId, iconApplicationId );
         result->SetIconId( idIcon );
         result->SetFlags( flags );
         result->SetUid( uid );
@@ -875,14 +866,12 @@ TInt CCaSqlQuery::ExecuteL( CCaInnerEntry::TIconAttributes& aIconAttributes )
         User::LeaveIfError(iStatement.ColumnText(
                 ColumnIndexL( iStatement, KColumnIcFileName),
                 aIconAttributes.iFileName));
-        aIconAttributes.iBitmapId = iStatement.ColumnInt(
-                ColumnIndexL( iStatement, KColumnIcBitmapId ) );
-        aIconAttributes.iMaskId = iStatement.ColumnInt(
-                ColumnIndexL( iStatement, KColumnIcMaskId ) );
-        aIconAttributes.iSkinMajorId = iStatement.ColumnInt(
-                ColumnIndexL( iStatement, KColumnIcSkinMajorId ) );
-        aIconAttributes.iSkinMinorId = iStatement.ColumnInt(
-                ColumnIndexL( iStatement, KColumnIcSkinMinorId ) );
+        User::LeaveIfError(iStatement.ColumnText(
+                ColumnIndexL( iStatement, KColumnIcSkinId),
+                aIconAttributes.iSkinId));       
+        User::LeaveIfError(iStatement.ColumnText(
+                ColumnIndexL( iStatement, KColumnIcAppId),
+                aIconAttributes.iApplicationId));
         columnCount++;
         }
     return columnCount;

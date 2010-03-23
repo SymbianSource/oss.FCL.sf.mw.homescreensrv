@@ -30,6 +30,7 @@ CCaInnerQuery::~CCaInnerQuery()
     {
     delete iEntryTypeNames;
     iIds.Close();
+    iAttributes.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
@@ -81,6 +82,8 @@ EXPORT_C void CCaInnerQuery::ExternalizeL( RWriteStream& aStream ) const
         aStream.WriteL( iEntryTypeNames->MdcaPoint( i ),
                 iEntryTypeNames->MdcaPoint( i ).Length() );
         }
+    iAttributes.ExternalizeL( aStream );
+    aStream.CommitL();
     }
 
 // ---------------------------------------------------------------------------
@@ -114,6 +117,7 @@ EXPORT_C void CCaInnerQuery::InternalizeL( RReadStream& aStream )
         iEntryTypeNames->AppendL( buf );
         CleanupStack::PopAndDestroy( &buf );
         }
+    iAttributes.InternalizeL( aStream );
     }
 
 // ---------------------------------------------------------------------------
@@ -301,4 +305,31 @@ EXPORT_C void CCaInnerQuery::SetCount( TUint aCount )
 EXPORT_C TUint CCaInnerQuery::GetCount() const
     {
     return iCount;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCaInnerQuery::AddAttributeL( const TDesC& aKey,
+        const TDesC& aValue )
+    {
+    // to avoid duplicated attribute
+    if( iAttributes.Exist( aKey ) )
+        {
+        iAttributes.RemoveAttribute( aKey );
+        }
+    CCaEntryAttribute* attr = CCaEntryAttribute::NewLC( aKey );
+    attr->SetValueL( aValue );
+    iAttributes.AppendL( attr );
+    CleanupStack::Pop( attr );
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C const RCaEntryAttrArray& CCaInnerQuery::GetAttributes() const
+    {
+    return iAttributes;
     }

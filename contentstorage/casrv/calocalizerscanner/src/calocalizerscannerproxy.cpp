@@ -175,6 +175,7 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
         	locals[i]->SetLocalizedStringL( locals[i]->GetStringId() );  
         	}
         iStorageProxy->LocalizeEntryL( *( locals[i] ) );
+        delete[] temp;
         }
     CleanupStack::PopAndDestroy( &localizedName );
     CleanupStack::PopAndDestroy( &locals );

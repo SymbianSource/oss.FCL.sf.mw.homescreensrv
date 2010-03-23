@@ -27,19 +27,19 @@
 #include "caobjectadapter.h"
 #include "caentriesarray.h"
 #include "caidsarray.h"
-#include "cahandlerengine.h"
 #include "caarraycleanup.inl"
 
 #include "caentry.h"
 #include "caquery.h"
 #include "cadefs.h"
-
+#include "cahandlerproxy.h"
+#include "caqtsfhandlerloader.h"
 
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
 CaClientProxy::CaClientProxy():
-    mHandler(NULL)
+    mCommandHandler(new CaHandlerProxy(new CaQtSfHandlerLoader()))
 {
 }
 
@@ -49,7 +49,7 @@ CaClientProxy::CaClientProxy():
 CaClientProxy::~CaClientProxy()
 {
     mSession.Close();
-    delete mHandler;
+
 }
 
 //----------------------------------------------------------------------------
@@ -172,7 +172,7 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
 ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
                                         const QString &command)
 {
-    TRAPD(error, executeCommandL(entry, command));
+    TInt error = mCommandHandler->execute(entry, command);
 
     USE_QDEBUG_IF(error) << "CaClientProxy::executeCommand - Error ("
                          << error << ")";
@@ -329,27 +329,6 @@ void CaClientProxy::getEntryIdsL(const CaQuery &query,
     CleanupStack::PopAndDestroy(innerQuery);
 }
 
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientProxy::executeCommandL(const CaEntry &entry,
-                                    const QString &command)
-{
-    CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
-    CaObjectAdapter::convertL(entry, *innerEntry);
-
-    TPtrC16 commandPtr16(
-        reinterpret_cast<const TUint16 *>(command.utf16()));
-    HBufC8 *convertedCommand = CnvUtfConverter::ConvertFromUnicodeToUtf7L(
-                                   commandPtr16, false);
-    CleanupStack::PushL(convertedCommand);
-    if (!mHandler) {
-        mHandler = CCaHandlerEngine::NewL();
-    }
-    mHandler->HandleCommandL(*innerEntry, convertedCommand->Des());
-    CleanupStack::PopAndDestroy(convertedCommand);
-    CleanupStack::PopAndDestroy(innerEntry);
-}
 
 //----------------------------------------------------------------------------
 //

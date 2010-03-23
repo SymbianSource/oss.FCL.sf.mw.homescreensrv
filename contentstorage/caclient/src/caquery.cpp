@@ -232,6 +232,44 @@ void CaQuery::setCount(unsigned int count)
 }
 
 /*!
+ Returns query attributes.
+ \retval map of attributes indexed by their names.
+  */
+QMap<QString, QString> CaQuery::attributes() const
+{
+    return m_d->attributes();
+}
+
+/*!
+ Returns an attribute
+ \param name name of an attribute
+ \retval value of attribute
+ */
+QString CaQuery::attribute(const QString &name) const
+{
+    return m_d->attribute(name);
+}
+
+/*!
+ Sets attribute.
+ \param name name of an attribute.
+ \param value value of an attribute.
+ */
+void CaQuery::setAttribute(const QString &name, const QString &value)
+{
+    m_d->setAttribute(name, value);
+}
+
+/*!
+ Removes attribute.
+ \param name name of an attribute.
+ */
+void CaQuery::removeAttribute(const QString &name)
+{
+    m_d->removeAttribute(name);
+}
+
+/*!
  Clears query (restores the initial state).
  */
 void CaQuery::clear()
@@ -247,7 +285,7 @@ CaQueryPrivate::CaQueryPrivate(CaQuery *queryPublic) :
     m_q(queryPublic), mEntryRoles(ItemEntryRole | GroupEntryRole),
     mParentId(0), mEntryTypeNames(), mFlagsOn(), mFlagsOff(),
     mSortAttribute(DefaultSortAttribute),
-    mSortOrder(Qt::AscendingOrder), mCount(0)
+    mSortOrder(Qt::AscendingOrder), mCount(0), mAttributes()
 {
 }
 
@@ -269,6 +307,7 @@ CaQueryPrivate &CaQueryPrivate::operator=(
     mSortAttribute = queryPrivate.mSortAttribute;
     mSortOrder = queryPrivate.mSortOrder;
     mCount = queryPrivate.mCount;
+    mAttributes = queryPrivate.mAttributes;
 
     return *this;
 }
@@ -419,6 +458,42 @@ unsigned int CaQueryPrivate::count() const
 void CaQueryPrivate::setCount(unsigned int count)
 {
     mCount = count;
+}
+
+/*!
+ \retval map of attributes indexed by their names
+ */
+QMap<QString, QString> CaQueryPrivate::attributes() const
+{
+    return mAttributes;
+}
+
+/*!
+ \param name name of an attribute
+ \retval value of attribute
+ */
+QString CaQueryPrivate::attribute(const QString &name) const
+{
+    return mAttributes.value(name);
+}
+
+/*!
+ Sets attribute.
+ \param name name of an attribute.
+ \param value value of an attribute.
+ */
+void CaQueryPrivate::setAttribute(const QString &name, const QString &value)
+{
+    mAttributes.insert(name, value);
+}
+
+/*!
+ Removes an attribute.
+ \param name name of an attribute.
+ */
+void CaQueryPrivate::removeAttribute(const QString &name)
+{
+    mAttributes.remove(name);
 }
 
 /*!
