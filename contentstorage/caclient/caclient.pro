@@ -51,7 +51,8 @@ LIBS += -lcautils \
         -laknicon \
         -lcharconv \
         -lfbscli \
-        -lbitgdi
+        -lbitgdi \
+        -lxqutils
 include(caclient_s60.pri)
 include(cahandler.pri)
 }

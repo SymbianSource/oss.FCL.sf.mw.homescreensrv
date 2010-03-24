@@ -20,7 +20,7 @@
 
 TARGET          cawidgetscanner.dll
 TARGETTYPE		PLUGIN
-UID				0x10009D8D 0x20028706 // TODO: change to proper uid
+UID				0x10009D8D 0x20028706
 CAPABILITY		CAP_ECOM_PLUGIN
 
 LANG			SC

@@ -214,7 +214,6 @@ void CCaRunningAppMonitor::RunL()
         {
         UpdateRunningAppStorageL();
         }
-    //TODO should we handle any event that will cancel observation?
     }
 
 // -----------------------------------------------------------------------------

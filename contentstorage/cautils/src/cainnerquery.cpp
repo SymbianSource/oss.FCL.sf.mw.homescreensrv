@@ -128,8 +128,7 @@ void CCaInnerQuery::ConstructL()
     {
     iEntryTypeNames = new ( ELeave ) CDesC16ArrayFlat( KDefaultGranularity );
     iParentId = -1;
-    //    TODO Item | Group
-    iRole = CCaInnerQuery::Item | CCaInnerQuery::Group;
+    iRole = Item | Group;
     }
 
 // ---------------------------------------------------------------------------
@@ -194,7 +193,6 @@ EXPORT_C const CDesC16ArrayFlat* CCaInnerQuery::GetEntryTypeNames() const
 //
 EXPORT_C void CCaInnerQuery::SetEntryTypeNames( CDesC16ArrayFlat* aArray )
     {
-    //TODO: Quickt setter for now, probably sth more convinient needed
     ASSERT( aArray );
     delete iEntryTypeNames;
     iEntryTypeNames = aArray;

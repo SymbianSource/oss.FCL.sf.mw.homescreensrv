@@ -18,7 +18,7 @@
 #ifndef CACONSTS_H_
 #define CACONSTS_H_
 
-_LIT( KDbName, "castoragedb" );
+_LIT( KDbName, "castorage.db" );
 _LIT( KCDrive, "c:" );
 _LIT( KZDrive, "z:" );
 _LIT( KDoubleSlash, "\\" );

@@ -24,7 +24,7 @@
 #include <QScopedPointer>
 #include <QString>
 #include <utf.h>
-#include <xqconversions.h>
+#include <XQConversions>
 
 #include "cainnerentry.h"
 #include "cahandler.h"
@@ -36,18 +36,10 @@ class CaS60HandlerAdapter: public CaHandler
 public:
     int execute(const CaEntry &entry, const QString &commandName) {
 
-        TPtrC16 commandNameDesC16(
-            reinterpret_cast<const TUint16 *>(commandName.utf16()));
-
-        QScopedPointer<HBufC8> commandNameDesc8;
-
-        TRAPD(result,
-              commandNameDesc8.reset(CnvUtfConverter::ConvertFromUnicodeToUtf7L(
-                                         commandNameDesC16, false)));
-
+        QScopedPointer<HBufC8> commandNameDesc8(XQConversions::qStringToS60Desc8(commandName));
         QScopedPointer<CCaInnerEntry> innerEntry(NULL);
 
-        TRAP(result,
+        TRAPD(result,
              innerEntry.reset(CCaInnerEntry::NewL());
              CaObjectAdapter::convertL(entry, *innerEntry);
 
@@ -58,5 +50,6 @@ public:
         return result;
     }
 };
+
 
 #endif

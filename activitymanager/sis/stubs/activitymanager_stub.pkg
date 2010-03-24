@@ -1,0 +1,50 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: 
+;
+; ------------------------------------------------------------------------------
+; Taskswitcher stub SIS package file.
+; Used to enable Taskswitcher to be updated from ROM with a SIS package.
+; When you add new files into this stub, please remember to update
+; SIS stub with "makesis -s" command.
+; ------------------------------------------------------------------------------
+;
+;Language - standard language definitions
+&EN
+
+; standard SIS file header
+#{"activitymanager"},(0x200267B4),1,0,0,TYPE=SA
+
+;Localized Vendor Name
+%{"Nokia"}
+
+;Unique Vendor name
+:"Nokia"
+
+;"" - "Z:\sys\bin\activityserviceinstaller.exe"
+"" - "Z:\sys\bin\activityserviceplugin.dll"
+"" - "Z:\resource\qt\plugins\activityserviceplugin.qtplugin"
+
+""    - "Z:\sys\bin\activitylauncher.exe"
+""    - "Z:\resource\apps\activitylauncher.rsc"
+""    - "Z:\private\10003a3f\import\apps\activitylauncher_reg.rsc"
+
+""    - "Z:\sys\bin\hsactivitydbserver.exe"
+""    - "Z:\resource\apps\hsactivitydbserver.rsc"
+""    - "Z:\private\10003a3f\import\apps\hsactivitydbserver_reg.rsc"
+
+""    - "Z:\sys\bin\hsactivitydbclient.dll"
+
+""    - "Z:\sys\bin\hbactivityplugin.dll"
+"" -  "Z:\resource\qt\plugins\hbactivityplugin.qtplugin"

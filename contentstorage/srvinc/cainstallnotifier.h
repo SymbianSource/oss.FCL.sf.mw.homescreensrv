@@ -85,7 +85,7 @@ public:
      * @param aNotifier Reference to notifier interface.
      * @param aNotificationType Notification type.
      */
-    static CCaInstallNotifier* NewL( MCaInstallListener& aListener,
+IMPORT_C static CCaInstallNotifier* NewL( MCaInstallListener& aListener,
             TNotificationType aNotificationType );
 
     /**

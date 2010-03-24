@@ -31,7 +31,6 @@ file=ABI_DIR\BUILD_DIR\caextendedmenu.dll     SHARED_LIB_DIR\caextendedmenu.dll
 file=ABI_DIR\BUILD_DIR\casathandler.dll     SHARED_LIB_DIR\casathandler.dll
 file=ABI_DIR\BUILD_DIR\castorage.dll     SHARED_LIB_DIR\castorage.dll
 file=ABI_DIR\BUILD_DIR\MenuInterface.dll     SHARED_LIB_DIR\MenuInterface.dll
-ECOM_PLUGIN( castockhandlerplugins.dll, castockhandlerplugins.rsc )
 file=ABI_DIR\BUILD_DIR\casrvmanager.dll     SHARED_LIB_DIR\casrvmanager.dll
 ECOM_PLUGIN( casatmonitor.dll, casatmonitor.rsc )
 ECOM_PLUGIN( caappscanner.dll, caappscanner.rsc )
@@ -39,7 +38,7 @@ ECOM_PLUGIN( cawidgetscanner.dll, cawidgetscanner.rsc )
 ECOM_PLUGIN( calocalizerscanner.dll, calocalizerscanner.rsc )
 ECOM_PLUGIN( carunningappmonitor.dll, carunningappmonitor.rsc )
 
-data=ZPRIVATE\20022F90\castoragedb          private\20022F90\castoragedb
+data=ZPRIVATE\20022F90\castorage.db          private\20022F90\castorage.db
 
 // ---- appfoundation --------------------------------------------
 

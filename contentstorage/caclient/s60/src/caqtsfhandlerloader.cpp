@@ -24,7 +24,7 @@
 
 #include "cahandler.h"
 #include "caqtsfhandlerloader.h"
-#include "caobjectadapter.h"
+#include "caclient_defines.h"
 #include "caapphandler.h"
 #include "caurlhandler.h"
 #include "catapphandler.h" 
@@ -59,13 +59,12 @@ CaHandler *CaQtSfHandlerLoader::loadHandler(const QString &entryTypeName,
 
     CaHandler *implementation(0);
 
-    if (entryTypeName == CaObjectAdapter::applicationEntryTypeName()
-        || entryTypeName == CaObjectAdapter::widgetEntryTypeName()) {
+    if (entryTypeName == APPLICATION_ENTRY_TYPE_NAME
+        || entryTypeName == WIDGET_ENTRY_TYPE_NAME) {
         implementation = new CaS60HandlerAdapter<CCaAppHandler>;
-    } else if (entryTypeName == CaObjectAdapter::urlEntryTypeName()) {
+    } else if (entryTypeName == URL_ENTRY_TYPE_NAME) {
         implementation = new CaS60HandlerAdapter<CCaUrlHandler>;
-    } else if (entryTypeName == 
-               CaObjectAdapter::templateApplicationEntryTypeName()) {
+    } else if (entryTypeName == TEMPLATED_APPLICATION_ENTRY_TYPE_NAME) {
         implementation = new CaTappHandler;
     }
 

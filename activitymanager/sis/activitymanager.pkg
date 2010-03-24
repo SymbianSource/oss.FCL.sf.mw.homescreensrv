@@ -1,0 +1,45 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: 
+;
+
+;Language - standard language definitions
+&EN
+
+; standard SIS file header
+#{"activitymanager"},(0x200267B4),1,0,0,TYPE=SA, RU
+
+;Localized Vendor Name
+%{"Nokia"}
+
+;Unique Vendor name
+:"Nokia"
+
+
+;"/epoc32/release/armv5/urel/activityserviceinstaller.exe" - "!:\sys\bin\activityserviceinstaller.exe"
+"/epoc32/release/armv5/urel/activityserviceplugin.dll"-"!:\sys\bin\activityserviceplugin.dll"
+"/epoc32/data/z/resource/qt/plugins/activityserviceplugin.qtplugin"-"!:\resource\qt\plugins\activityserviceplugin.qtplugin"
+
+"/epoc32/release/armv5/urel/activitylauncher.exe"    - "!:\sys\bin\activitylauncher.exe"
+"/epoc32/data/z/resource/apps/activitylauncher.rsc"    - "!:\resource\apps\activitylauncher.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/activitylauncher_reg.rsc"    - "!:\private\10003a3f\import\apps\activitylauncher_reg.rsc"
+
+"/epoc32/release/armv5/urel/hsactivitydbserver.exe"    - "!:\sys\bin\hsactivitydbserver.exe"
+"/epoc32/data/z/resource/apps/hsactivitydbserver.rsc"    - "!:\resource\apps\hsactivitydbserver.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/hsactivitydbserver_reg.rsc"    - "!:\private\10003a3f\import\apps\hsactivitydbserver_reg.rsc"
+
+"/epoc32/release/armv5/urel/hsactivitydbclient.dll"    - "!:\sys\bin\hsactivitydbclient.dll"
+
+"/epoc32/release/armv5/urel/hbactivityplugin.dll"    - "!:\sys\bin\hbactivityplugin.dll"
+"/epoc32/data/z/resource/qt/plugins/hbactivityplugin.qtplugin"-"!:\resource\qt\plugins\hbactivityplugin.qtplugin"

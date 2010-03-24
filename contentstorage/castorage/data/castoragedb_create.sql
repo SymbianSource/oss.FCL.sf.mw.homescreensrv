@@ -211,7 +211,7 @@ SELECT "------------------------------------" AS " ";
 INSERT INTO CA_DB_PROPERTIES ( DB_PROPERTY, DB_VALUE ) 
 VALUES ( 'Version', '00001' );
 INSERT INTO CA_DB_PROPERTIES ( DB_PROPERTY, DB_VALUE ) 
-VALUES ( 'Language', 'en_GB' );
+VALUES ( 'Language', '' );
 INSERT INTO CA_DB_PROPERTIES ( DB_PROPERTY, DB_VALUE ) 
 VALUES ( 'QMfile', 'db_textmap_' );
 

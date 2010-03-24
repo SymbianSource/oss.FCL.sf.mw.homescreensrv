@@ -122,7 +122,7 @@ private:
     void SetUriL( TXmlEngElement & aElement, CCaWidgetDescription * aWidget );
 
     /**
-     * Sets widgets library
+     * Sets widgets library and path created from library
      * @param aElement xml element
      * @param aPackageUid package uid
      * @param aWidget widget to set value

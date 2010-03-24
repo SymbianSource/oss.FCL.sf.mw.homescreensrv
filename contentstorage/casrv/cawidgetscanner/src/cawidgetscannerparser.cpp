@@ -280,7 +280,7 @@ void CCaWidgetScannerParser::SetUriL(
 }
 
 // ----------------------------------------------------------------------------
-//
+//    keep in mind that setLibrary also setsPath
 // ----------------------------------------------------------------------------
 //
 void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
@@ -293,6 +293,10 @@ void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
     if( attributeValue->Compare( KNullDesC ) != 0 )
         {
         HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid );
+
+        //set path for hs to use, trim last 2 chars (doubleslash)
+        aWidget->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
+        
         libraryPath->ReAllocL(
             libraryPath->Length() + attributeValue->Length());
 

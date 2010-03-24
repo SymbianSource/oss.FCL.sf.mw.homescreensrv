@@ -137,7 +137,7 @@
 "/epoc32/release/armv5/urel/casathandler.dll" - "c:/sys/bin/casathandler.dll"
 "/epoc32/release/armv5/urel/castorage.dll" - "c:/sys/bin/castorage.dll"
 "/epoc32/release/armv5/urel/castockhandlerplugins.dll" - "c:/sys/bin/castockhandlerplugins.dll"
-"/epoc32/data/z/private/20022F90/castoragedb" - "c:/private/20022F90/castoragedb"
+"/epoc32/data/z/private/20022F90/castorage.db" - "c:/private/20022F90/castorage.db"
 "/epoc32/data/z/resource/plugins/castockhandlerplugins.rsc"-"c:/resource/plugins/castockhandlerplugins.rsc"
 
 ; ---- appfoundation --------------------------------------------

@@ -664,19 +664,16 @@ TInt CCaSqlQuery::ExecuteEntryL(
     TInt rowCount(0);
     while( iStatement.Next() == KSqlAtRow )
         {
-        TInt entryId = iStatement.
-            ColumnInt( ColumnIndexL( iStatement, KColumnEntryId ) );
-        TInt role = iStatement.
-            ColumnInt( ColumnIndexL( iStatement, KColumnEnRole ) );
-        //        TODO get NULL ???
-        TInt32 uid = 
-        iStatement.ColumnInt( ColumnIndexL( iStatement, KColumnEnUid ) ) 
-        ? iStatement.ColumnInt( ColumnIndexL( iStatement, KColumnEnUid ) )
-        : 0;
-        TUint flags = iStatement.ColumnInt( ColumnIndexL( iStatement,
-                KColumnEnFlags ) );
-        TInt idIcon = iStatement.ColumnInt( ColumnIndexL( iStatement,
-                KColumnEnIdIcon ) );
+        TInt entryId = iStatement.ColumnInt( 
+        		ColumnIndexL( iStatement, KColumnEntryId ) );
+        TInt role = iStatement.ColumnInt( 
+        		ColumnIndexL( iStatement, KColumnEnRole ) );
+        TInt32 uid = iStatement.ColumnInt( 
+        		ColumnIndexL( iStatement, KColumnEnUid ) );
+        TUint flags = iStatement.ColumnInt( 
+        		ColumnIndexL( iStatement, KColumnEnFlags ) );
+        TInt idIcon = iStatement.ColumnInt( 
+        		ColumnIndexL( iStatement, KColumnEnIdIcon ) );
         
         TPtrC text;
         User::LeaveIfError( iStatement. ColumnText( ColumnIndexL(

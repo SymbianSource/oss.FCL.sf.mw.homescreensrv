@@ -36,7 +36,7 @@
 
 const char *DATABASE_CONNECTION_NAME = "CaService";
 const char *DATABASE_TYPE = "QSQLITE";
-const char *DATABASE_NAME = "castoragedb";
+const char *DATABASE_NAME = "castorage.db";
 
 static QSqlDatabase dbConnection()
 {
@@ -605,7 +605,6 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
         whereStatement.append(" AND ").append(QString().setNum(
                 query.entryRoles())) .append(" | EN_ROLE == ").append(
                     QString().setNum(query.entryRoles()));
-    //TODO: by uid???
 
     if (query.entryTypeNames().count()) {
         whereStatement.append(" AND EN_TYPE_NAME IN (");
@@ -617,11 +616,48 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
         whereStatement.append(") ");
     }
 
+    QString whereAttributes;
+    if (query.attributes().count()) {
+        QMap<QString, QString> attributes = query.attributes();
+        QMapIterator<QString, QString> atrIt(attributes);
+        int j = 1;
+        while (atrIt.hasNext()) {
+            atrIt.next();
+
+            // at1.AT_NAME = 'Attribute_Name_1' AND at1.AT_VALUE = 'Attribute_VALUE_1'
+            whereAttributes.append(" AND ").append(
+            " at").append(QString().setNum(j)).append(".AT_NAME = \'").append(
+            atrIt.key()).append("\' ").append(
+            " AND ").append(
+            " at").append(QString().setNum(j)).append(".AT_VALUE = \'").append(
+            atrIt.value()).append("\' ");
+
+            j++;
+        }
+        whereStatement.append(whereAttributes);
+
+    }
+
+    whereStatement.append(" GROUP BY ENTRY_ID ");
+
+    QString leftJoins;
+    if (query.attributes().count()) {
+        for (int j=1; j<=query.attributes().count(); j++) {
+            // LEFT JOIN CA_ATTRIBUTE as at1 ON ENTRY_ID = at1.AT_ENTRY_ID
+            leftJoins.append(
+            " LEFT JOIN CA_ATTRIBUTE as at").append(QString().setNum(j)).append(
+            " ON ENTRY_ID = at").append(QString().setNum(j)).append(" .AT_ENTRY_ID ");
+        }
+    }
+
     QSqlQuery sqlquery(db);
     if (query.parentId() == 0) {
         // sort
-        QString queryString("SELECT ENTRY_ID from CA_ENTRY where 1=1 ");
+        QString queryString("SELECT ENTRY_ID from CA_ENTRY ");
+        queryString.append(leftJoins);
+        queryString.append(" where 1=1 ");
         queryString.append(whereStatement);
+
         modifyQueryForSortOrder(queryString, query, false);
         if (query.count() > 0)
             queryString.append(" LIMIT ").append(query.count());
@@ -636,11 +672,13 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
             }
         }
     } else {
-        QString
-        queryString(
-            "SELECT ENTRY_ID FROM CA_ENTRY \
-        LEFT JOIN CA_GROUP_ENTRY ON GE_ENTRY_ID = ENTRY_ID WHERE GE_GROUP_ID  = ? ");
-        queryString.append(whereStatement);
+
+        QString queryString("SELECT ENTRY_ID FROM CA_ENTRY ");
+        QString queryString2(" LEFT JOIN CA_GROUP_ENTRY ON GE_ENTRY_ID = ENTRY_ID WHERE GE_GROUP_ID  = ? ");
+        queryString2.append(whereStatement);
+        queryString.append(leftJoins);
+        queryString.append(queryString2);
+
         modifyQueryForSortOrder(queryString, query, true);
         if (query.count() > 0)
             queryString.append(" LIMIT ").append(query.count());
@@ -752,9 +790,9 @@ ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
     return error;
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
         const CaQuery &query, bool parent) const
 {
@@ -802,9 +840,9 @@ void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
 
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
 {
     //set icon information into db
@@ -848,9 +886,9 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
     return success;
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 bool CaClientProxy::setEntryInDb(CaEntry *entryClone) const
 {
     QSqlQuery query(dbConnection());
@@ -902,9 +940,9 @@ bool CaClientProxy::setEntryInDb(CaEntry *entryClone) const
     return success;
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 bool CaClientProxy::setAttributesInDb(CaEntry *entryClone) const
 {
     bool success = true;

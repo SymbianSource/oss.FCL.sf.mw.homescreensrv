@@ -19,9 +19,9 @@ TEMPLATE = subdirs
 #Exporting ibys
 BLD_INF_RULES.prj_exports += \
      "$${LITERAL_HASH}ifndef CONTENT_ARSENAL_STORAGE_UT" \
-     "../castorage/data/castoragedb z:/private/20022F90/castoragedb" \
+     "../castorage/data/castorage.db z:/private/20022F90/castorage.db" \
      "$${LITERAL_HASH}else " \
-     "../castorage/data/castoragedb z:/castoragedb" \
+     "../castorage/data/castorage.db z:/castorage.db" \
      "$${LITERAL_HASH}endif" \
      "../data/backup_registration.xml z:/private/20022F90/backup_registration.xml"
 

@@ -27,6 +27,7 @@
 #include "caapphandler.h"
 #include "cainnerentry.h"
 #include "cauninstalloperation.h"
+#include"catasklist.h"
 
 #include "cautils.h"
 #include "cadef.h"
@@ -49,9 +50,9 @@ CCaAppHandler::~CCaAppHandler()
 CCaAppHandler *CCaAppHandler::NewL()
 {
     CCaAppHandler *handler = new(ELeave) CCaAppHandler();
-    CleanupStack::PushL(handler);
+    CleanupStack::PushL( handler );
     handler->ConstructL();
-    CleanupStack::Pop(handler);
+    CleanupStack::Pop( handler );
     return handler;
 }
 
@@ -73,95 +74,113 @@ void CCaAppHandler::ConstructL()
 {
 }
 
-
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaAppHandler::HandleCommandL(CCaInnerEntry &aEntry,
-                                   const TDesC8 &aCommand)
+void CCaAppHandler::HandleCommandL(
+        CCaInnerEntry &aEntry, const TDesC8 &aCommand )
 {
-    if (aCommand == KCaCmdOpen() && aEntry.GetEntryTypeName()
-            == KCaTypeApp()) {
+    if( aCommand == KCaCmdOpen()
+            && aEntry.GetEntryTypeName() == KCaTypeApp() )
+        {
         TInt viewId(-1);
         TBuf<KCaMaxAttrValueLen> viewIdValue;
-        if (aEntry.FindAttribute(KCaAttrView(), viewIdValue)) {
-            if (MenuUtils::GetTUint(viewIdValue, (TUint &) viewId)
-                    != KErrNone) {
-                User::Leave(KErrCorrupt);
+        if( aEntry.FindAttribute( KCaAttrView(), viewIdValue ) )
+            {
+            if( MenuUtils::GetTUint( viewIdValue, (TUint &) viewId )
+                    != KErrNone )
+                {
+                User::Leave( KErrCorrupt );
+                }
             }
+        LaunchApplicationL(
+                TUid::Uid( aEntry.GetUid() ), KNullDesC8(), viewId );
         }
-        LaunchApplicationL(TUid::Uid(aEntry.GetUid()), KNullDesC8(),
-                           viewId);
-    } else if (aCommand == KCaCmdClose() && aEntry.GetEntryTypeName()
-               == KCaTypeApp()) {
-        CloseApplicationL(aEntry);
-    } else if (aCommand == KCaCmdRemove()
-               && (aEntry.GetEntryTypeName() == KCaTypeApp()
-                   || aEntry.GetEntryTypeName() == KCaTypeWidget())) {
-        if (iUninstallOperation && iUninstallOperation->IsActive()) {
-            User::Leave(KErrInUse);
+    else if ( aCommand == KCaCmdClose()
+            && aEntry.GetEntryTypeName() == KCaTypeApp() )
+        {
+        CloseApplicationL( aEntry );
         }
+    else if ( aCommand == KCaCmdRemove()
+               && ( aEntry.GetEntryTypeName() == KCaTypeApp()
+                   || aEntry.GetEntryTypeName() == KCaTypeWidget() ) )
+        {
+        if ( iUninstallOperation && iUninstallOperation->IsActive() )
+            {
+            User::Leave( KErrInUse );
+            }
         delete iUninstallOperation;
         iUninstallOperation = NULL;
-        iUninstallOperation = CCaUninstallOperation::NewL(aEntry);
-    } else {
-        User::Leave(KErrNotSupported);
-    }
+        iUninstallOperation = CCaUninstallOperation::NewL( aEntry );
+        }
+    else
+        {
+        User::Leave( KErrNotSupported );
+        }
 }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaAppHandler::LaunchApplicationL(const TUid aUid,
-                                       const TDesC8 &aParam, TInt aViewId)
+void CCaAppHandler::LaunchApplicationL(
+        const TUid aUid, const TDesC8 &aParam, TInt aViewId )
 {
-    if (aViewId > 0 && iEikEnv) {
-        TUid viewId = TUid::Uid(aViewId);
-        TVwsViewId view(aUid, viewId);
-        iEikEnv->EikAppUi()->ActivateViewL(view);
-    } else {
+    if( aViewId > 0 && iEikEnv )
+        {
+        TUid viewId = TUid::Uid( aViewId );
+        TVwsViewId view( aUid, viewId );
+        iEikEnv->EikAppUi()->ActivateViewL( view );
+        }
+    else
+        {
         RWsSession wsSession;
-        User::LeaveIfError(wsSession.Connect());
-        CleanupClosePushL<RWsSession> (wsSession);
+        User::LeaveIfError( wsSession.Connect() );
+        CleanupClosePushL<RWsSession>( wsSession );
 
-        CAknTaskList *taskList = CAknTaskList::NewL(wsSession);
-        TApaTask task = taskList->FindRootApp(aUid);
-        delete taskList;
+        CCaTaskList* taskList = CCaTaskList::NewLC( wsSession );
+        TApaTask task = taskList->FindRootApp( aUid );
+        CleanupStack::PopAndDestroy( taskList );
 
-        if (task.Exists()) {
+        if( task.Exists() )
+            {
             task.BringToForeground();
-        } else {
+            }
+        else
+            {
             TApaAppInfo appInfo;
             TApaAppCapabilityBuf capabilityBuf;
             RApaLsSession appArcSession;
-            User::LeaveIfError(appArcSession.Connect());
-            CleanupClosePushL<RApaLsSession> (appArcSession);
+            User::LeaveIfError( appArcSession.Connect() );
+            CleanupClosePushL<RApaLsSession>( appArcSession );
 
-            User::LeaveIfError(appArcSession.GetAppInfo(appInfo, aUid));
-            User::LeaveIfError(appArcSession.GetAppCapability(
-                                   capabilityBuf, aUid));
+            User::LeaveIfError( appArcSession.GetAppInfo( appInfo, aUid ) );
+            User::LeaveIfError( appArcSession.GetAppCapability(
+                                   capabilityBuf, aUid ) );
 
             TApaAppCapability &caps = capabilityBuf();
             TFileName appName = appInfo.iFullName;
             CApaCommandLine *cmdLine = CApaCommandLine::NewLC();
-            cmdLine->SetExecutableNameL(appName);
+            cmdLine->SetExecutableNameL( appName );
 
-            if (caps.iLaunchInBackground) {
-                cmdLine->SetCommandL(EApaCommandBackground);
-            } else {
-                cmdLine->SetCommandL(EApaCommandRun);
-            }
+            if( caps.iLaunchInBackground )
+                {
+                cmdLine->SetCommandL( EApaCommandBackground );
+                }
+            else
+                {
+                cmdLine->SetCommandL( EApaCommandRun );
+                }
 
-            cmdLine->SetTailEndL(aParam);
+            cmdLine->SetTailEndL( aParam );
 
-            User::LeaveIfError(appArcSession.StartApp(*cmdLine));
+            User::LeaveIfError( appArcSession.StartApp( *cmdLine ) );
 
-            CleanupStack::PopAndDestroy(cmdLine);
-            CleanupStack::PopAndDestroy(&appArcSession);
+            CleanupStack::PopAndDestroy( cmdLine );
+            CleanupStack::PopAndDestroy( &appArcSession );
         }
-        CleanupStack::PopAndDestroy(&wsSession);
+        CleanupStack::PopAndDestroy( &wsSession );
     }
 }
 
@@ -169,30 +188,33 @@ void CCaAppHandler::LaunchApplicationL(const TUid aUid,
 //
 // ---------------------------------------------------------------------------
 //
-void CCaAppHandler::CloseApplicationL(CCaInnerEntry &aEntry)
+void CCaAppHandler::CloseApplicationL( CCaInnerEntry &aEntry )
 {
     RWsSession wsSession;
-    User::LeaveIfError(wsSession.Connect());
-    CleanupClosePushL<RWsSession> (wsSession);
+    User::LeaveIfError( wsSession.Connect() );
+    CleanupClosePushL<RWsSession>( wsSession );
 
-    if ((aEntry.GetFlags() & ERunning) &&
-            (!(aEntry.GetFlags() & ESystem))) {
+    if( ( aEntry.GetFlags() & ERunning )
+            && !( aEntry.GetFlags() & ESystem ) )
+        {
         RBuf value;
-        CleanupClosePushL(value);
-        value.CreateL(KCaMaxAttrValueLen);
-        if (aEntry.FindAttribute(KCaAttrWindowGroupId, value)) {
-            TInt wgId(KErrNotFound);
-            TLex16 parser(value);
-            if (KErrNone == parser.Val(wgId) && wgId > 0) {
+        CleanupClosePushL( value );
+        value.CreateL( KCaMaxAttrValueLen );
+        if( aEntry.FindAttribute( KCaAttrWindowGroupId, value ) )
+            {
+            TInt wgId( KErrNotFound );
+            TLex16 parser( value );
+            if( KErrNone == parser.Val( wgId ) && wgId > 0 )
+                {
                 TWsEvent event;
                 event.SetTimeNow();
-                event.SetType(KAknShutOrHideApp);
-                wsSession.SendEventToWindowGroup(wgId, event);
+                event.SetType( KAknShutOrHideApp );
+                wsSession.SendEventToWindowGroup( wgId, event );
+                }
             }
-        }
-        CleanupStack::PopAndDestroy(&value);
+        CleanupStack::PopAndDestroy( &value );
     }
 
-    CleanupStack::PopAndDestroy(&wsSession);
+    CleanupStack::PopAndDestroy( &wsSession );
 }
 

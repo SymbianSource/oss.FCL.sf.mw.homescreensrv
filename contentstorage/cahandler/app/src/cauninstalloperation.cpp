@@ -182,6 +182,7 @@ TBool CCaUninstallOperation::GetInstallPkgUidL(const TDesC &aAppFullName,
 //
 void CCaUninstallOperation::RunL()
 {
+    iUninstaller.Close();
 }
 
 // ---------------------------------------------------------------------------

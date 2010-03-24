@@ -24,6 +24,7 @@
 #include "caarraycleanup.inl"
 #include "calocalizationentry.h"
 #include "cainternaltypes.h"
+#include "cadef.h"
 
 // ---------------------------------------------------------------------------
 // CCASqLiteStorage::CCpStorageEngine()
@@ -51,11 +52,24 @@ void CCaSqLiteStorage::ConstructL()
 
     User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDrive, KCDrive,
             KNullDesC ) );
+    
 
     if( iSqlDb.Open( iPrivatePathCDriveDb, &KSqlDbConfig ) )
         {
         //we could not load data base from C-drive lets try Rom
         LoadDataBaseFromRomL();
+        }
+    else
+        {
+        TBuf<KCaMaxAttrNameLen> versionValue;
+        DbPropertyL(KCaDbPropVersion, versionValue);
+        ASSERT(versionValue.Length()>0);
+        if( versionValue.CompareC( KCaDbVersion ) )
+            {
+            // database loaded from C: is obsolete, load from Z:
+            iSqlDb.Close();
+            LoadDataBaseFromRomL();
+            }
         }
     }
 
@@ -75,7 +89,7 @@ void CCaSqLiteStorage::LoadDataBaseFromRomL()
 
     if( !( BaflUtils::FileExists( iRfs, iPrivatePathZDriveDb ) ) )
         {
-        User::Panic( _L("fatal error - castoragedb not exists in ROM"),
+        User::Panic( _L("fatal error - castorage.db not exists in ROM"),
                 KErrNotFound );
         }
     else
@@ -186,29 +200,6 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
         CleanupStack::PopAndDestroy( sqlGetAttributesQuery );
         }
     
-    if( aQuery->GetAttributes().Count() )
-        {
-        for( int i=aResultContainer.Count()-1; i>=0; i--)
-            {
-            for( int j=0; j<aQuery->GetAttributes().Count(); j++ )
-                {
-                const TPtrC attrNameFromQuery( aQuery->GetAttributes()[j]->Name() );
-                const TPtrC attrValueFromQuery( aQuery->GetAttributes()[j]->Value() );
-                
-                TBuf16<KCaMaxAttrValueLen> value;
-                aResultContainer[i]->FindAttribute( attrNameFromQuery, value );
-                                
-                if( value.CompareC( attrValueFromQuery ) )
-                    {
-                    // remove from results
-                    delete aResultContainer[i];
-                    aResultContainer.Remove( i );
-                    break;
-                    }
-                }
-            }
-        }
-    
     //  set entries if proper order if they were fetched by ids
     if( aQuery->GetIds().Count() > 0 )
         {
@@ -246,7 +237,6 @@ void CCaSqLiteStorage::GetLocalizationsL(
 void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
         RArray<TInt>& aResultIdArray )
     {
-    /*
     CCaSqlQuery* sqlGetEntriesIdsQuery = CCaSqlQuery::NewLC( iSqlDb );
     CaSqlQueryCreator::CreateGetEntriesQueryL( aQuery,
             sqlGetEntriesIdsQuery );
@@ -255,17 +245,7 @@ void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
     sqlGetEntriesIdsQuery->ExecuteL( aResultIdArray,
             CCaSqlQuery::EEntryTable );
     CleanupStack::PopAndDestroy( sqlGetEntriesIdsQuery );
-    */
-    RPointerArray<CCaInnerEntry> resultContainer;
-    CleanupResetAndDestroyPushL( resultContainer );
-    GetEntriesL( aQuery, resultContainer );
-    for( TInt i=0; i<resultContainer.Count(); i++ )
-        {
-        int id = resultContainer[i]->GetId();
-        aResultIdArray.AppendL( id );
-        }
-    
-    CleanupStack::PopAndDestroy( &resultContainer );
+
     }
 
 // ---------------------------------------------------------------------------
@@ -836,7 +816,6 @@ void CCaSqLiteStorage::VerifyOrganizeParamsL( const RArray<TInt>& aEntryIds,
         case TCaOperationParams::EAppend:
         default:
             {
-            //            TODO: do nothing when default
             break;
             }
         }

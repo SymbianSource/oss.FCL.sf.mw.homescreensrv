@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.6 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.7 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -21,6 +21,12 @@
 
 #include <e32base.h>
 #include "cainternaltypes.h"
+
+
+// database version
+_LIT( KCaDbVersion, "00001" ); 
+
+
 
 // ---------------------------------------------------------
 //Ca constants
