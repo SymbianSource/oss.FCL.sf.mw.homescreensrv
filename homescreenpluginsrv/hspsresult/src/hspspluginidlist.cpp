@@ -30,7 +30,7 @@
 // might leave.
 // -----------------------------------------------------------------------------
 //
-EXPORT_C ChspsPluginIdList::ChspsPluginIdList( TInt aGranularity ) : CArrayFixFlat( aGranularity )
+EXPORT_C ChspsPluginIdList::ChspsPluginIdList( TInt aGranularity ) : CArrayFixFlat<TInt>( aGranularity )
     {
     }
 
