@@ -1,0 +1,6 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+
+CNWSession.h			CNWSession.h
+NetworkHandlingProxy.h		NetworkHandlingProxy.h
+NWHandlingEngine.h		NWHandlingEngine.h

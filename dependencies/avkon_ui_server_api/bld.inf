@@ -1,0 +1,5 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+
+akncapserverclient.h		akncapserverclient.h
+AknCapServerDefs.h		AknCapServerDefs.h

@@ -1,0 +1,6 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+
+simutils.h		ssm\simutils.h
+startupdomainpskeys.h	ssm\startupdomainpskeys.h
+startupreason.h		ssm\startupreason.h

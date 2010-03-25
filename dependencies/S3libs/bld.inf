@@ -13,3 +13,6 @@ aknphysics.lib			\epoc32\release\winscw\udeb\aknphysics.lib
 hsccproviderclient.lib	\epoc32\release\winscw\udeb\hsccproviderclient.lib
 disknotifyhandler.lib	\epoc32\release\winscw\udeb\disknotifyhandler.lib
 aiwdialdata.lib			\epoc32\release\winscw\udeb\aiwdialdata.lib
+networkhandling.lib		\epoc32\release\winscw\udeb\networkhandling.lib
+akntransitionutils.lib		\epoc32\release\winscw\udeb\akntransitionutils.lib
+ssmcmn.lib			\epoc32\release\winscw\udeb\ssmcmn.lib

@@ -1,0 +1,4 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+
+AknLayoutConfig.h		AknLayoutConfig.h

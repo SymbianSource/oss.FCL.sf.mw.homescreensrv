@@ -35,7 +35,13 @@ SWInstallerInternalPSKeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(SWInstallerInterna
 aknappui.h						aknappui.h
 mifconvdefs.h     MW_LAYER_PLATFORM_EXPORT_PATH(mifconvdefs.h)
 disknotifyhandler.h OS_LAYER_PLATFORM_EXPORT_PATH(disknotifyhandler.h)
+aknsgcc.h		aknsgcc.h
+//etelmm.h		etelmm.h
+ETELMMCS.H		ETELMMCS.H
+startupdomainpskeys.h	startupdomainpskeys.h
 
+
+#include "S3libs/bld.inf"
 
 #include "xcfw/bld.inf"
 // #include "kernel/bld.inf"
@@ -56,8 +62,20 @@ disknotifyhandler.h OS_LAYER_PLATFORM_EXPORT_PATH(disknotifyhandler.h)
 #include "widget_registry_api/group/bld.inf"
 #include "svgt_api/group/bld.inf"
 #include "xml_parser_api/group/bld.inf"
-#include "extended_skins_api/group/bld.inf"
+//#include "extended_skins_api/group/bld.inf"
 #include "physics_api/group/bld.inf"
 // #include "/group/bld.inf"
 // #include "/group/bld.inf"
+#include "avkon_anim_dll_api/bld.inf"
+#include "avkon_staus_api/bld.inf"
+#include "avkon_ui_server_api/bld.inf"
+#include "extended_notifiers_api/bld.inf"
+#include "extended_status_pane/bld.inf"
+#include "extended_ui_framework_definations/bld.inf"
+#include "Layout_config/bld.inf"
+#include "Network_handling_engine/bld.inf"
+#include "transition_effect_utility/bld.inf"
+
+
+
 

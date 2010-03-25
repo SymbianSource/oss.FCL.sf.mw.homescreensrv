@@ -1,0 +1,5 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+
+aknPriv.hrh	aknPriv.hrh
+aknPriv.rh	aknPriv.rh
