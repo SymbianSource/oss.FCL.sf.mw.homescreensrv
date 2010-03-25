@@ -1,0 +1,6 @@
+PRJ_EXPORTS
+
+sysversioninfo.lib		\epoc32\release\winscw\udeb\sysversioninfo.lib
+abclient.lib			\epoc32\release\winscw\udeb\abclient.lib
+featmgr.lib				\epoc32\release\winscw\udeb\featmgr.lib
+liwServiceHandler.lib	\epoc32\release\winscw\udeb\liwServiceHandler.lib

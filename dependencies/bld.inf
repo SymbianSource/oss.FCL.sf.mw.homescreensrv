@@ -3,4 +3,34 @@ platform_paths.hrh             platform_paths.hrh
 defaultcaps.hrh                defaultcaps.hrh
 bldvariant.hrh                 bldvariant.hrh
 
+telinformationpskeys.h			telinformationpskeys.h
+
+liwservicehandler.h				liwservicehandler.h
+liwserviceifmenu.h				liwserviceifmenu.h
+liwserviceifbase.h				liwserviceifbase.h
+liwmenu.h						liwmenu.h
+
+rtsecmgrcommondef.h				rtsecmgrcommondef.h
+
+PSVariables.h					PSVariables.h
+CommonEngineDomainCRKeys.h		CommonEngineDomainCRKeys.h
+settingsinternalcrkeys.h		settingsinternalcrkeys.h
+SATDomainPSKeys.h				SATDomainPSKeys.h
+ScreensaverInternalPSKeys.h		ScreensaverInternalPSKeys.h
+ctsydomainpskeys.h				ctsydomainpskeys.h
+BTSapDomainPSKeys.h				BTSapDomainPSKeys.h
+et_clsvr.h						et_clsvr.h
+etelext.h						etelext.h
+RMmCustomAPI.h					RMmCustomAPI.h
+
 #include "xcfw/bld.inf"
+// #include "kernel/bld.inf"
+#include "activebackupclient/bld.inf"
+#include "extended_version_info_api/bld.inf"
+#include "common_platform_security_definitions/bld.inf"
+#include "SAT/bld.inf"
+#include "liw_generic_parameter_api/bld.inf"
+#include "liw_criteria_api/bld.inf"
+#include "avkon_localised_texts_api/bld.inf"
+#include "rtsecuritymanager_client_api/bld.inf"
+#include "rtsecuritymanager_utility_api/bld.inf"

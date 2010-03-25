@@ -183,6 +183,11 @@
 #ifndef PLATFORM_PATHS_HRH
 #define PLATFORM_PATHS_HRH
 
+
+// This should not be here, but I'm tired of adding this line to every
+// single MMP.
+#include <defaultcaps.hrh>
+
 /**
 **************************************************************************
 * General comments about the exporting of headers macros
