@@ -36,7 +36,7 @@ aknappui.h						aknappui.h
 mifconvdefs.h     MW_LAYER_PLATFORM_EXPORT_PATH(mifconvdefs.h)
 disknotifyhandler.h OS_LAYER_PLATFORM_EXPORT_PATH(disknotifyhandler.h)
 aknsgcc.h		aknsgcc.h
-//etelmm.h		etelmm.h
+etelmm.h		etelmm.h
 ETELMMCS.H		ETELMMCS.H
 startupdomainpskeys.h	startupdomainpskeys.h
 
@@ -75,6 +75,7 @@ startupdomainpskeys.h	startupdomainpskeys.h
 #include "Layout_config/bld.inf"
 #include "Network_handling_engine/bld.inf"
 #include "transition_effect_utility/bld.inf"
+#include "ssm/bld.inf"
 
 
 
