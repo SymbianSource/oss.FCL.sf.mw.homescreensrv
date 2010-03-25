@@ -4,3 +4,6 @@ PRJ_EXPORTS
 simutils.h		ssm\simutils.h
 startupdomainpskeys.h	ssm\startupdomainpskeys.h
 startupreason.h		ssm\startupreason.h
+ssmdomaindefs.h		ssm\ssmdomaindefs.h
+ssmstate.h		ssm\ssmstate.h
+ssmstateawaresession.h	ssm\ssmstateawaresession.h
