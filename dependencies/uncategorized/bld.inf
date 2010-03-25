@@ -1,0 +1,10 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+ccontentmap.h		ccontentmap.h
+cpliwmap.h			cpliwmap.h
+cpserverdef.h		cpserverdef.h
+cpdebug.h			cpdebug.h
+cpglobals.h			cpglobals.h
+aiwdialdata.h		aiwdialdata.h
+AiwCommon.hrh		AiwCommon.hrh
+cpluginvalidator.h	cpluginvalidator.h
