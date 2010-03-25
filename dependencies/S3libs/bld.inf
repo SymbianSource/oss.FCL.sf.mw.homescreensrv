@@ -12,3 +12,4 @@ CdlEngine.lib			\epoc32\release\winscw\udeb\CdlEngine.lib
 aknphysics.lib			\epoc32\release\winscw\udeb\aknphysics.lib
 hsccproviderclient.lib	\epoc32\release\winscw\udeb\hsccproviderclient.lib
 disknotifyhandler.lib	\epoc32\release\winscw\udeb\disknotifyhandler.lib
+aiwdialdata.lib			\epoc32\release\winscw\udeb\aiwdialdata.lib
