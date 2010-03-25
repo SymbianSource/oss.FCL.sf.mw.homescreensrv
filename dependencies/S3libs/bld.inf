@@ -16,3 +16,6 @@ aiwdialdata.lib			\epoc32\release\winscw\udeb\aiwdialdata.lib
 networkhandling.lib		\epoc32\release\winscw\udeb\networkhandling.lib
 akntransitionutils.lib		\epoc32\release\winscw\udeb\akntransitionutils.lib
 ssmcmn.lib			\epoc32\release\winscw\udeb\ssmcmn.lib
+hspswrapper.lib			\epoc32\release\winscw\udeb\hspswrapper.lib
+cpswrapper.lib			\epoc32\release\winscw\udeb\cpswrapper.lib
+hscontentcontrol.lib		\epoc32\release\winscw\udeb\hscontentcontrol.lib
