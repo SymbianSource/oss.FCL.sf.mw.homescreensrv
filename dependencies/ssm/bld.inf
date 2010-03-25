@@ -7,3 +7,4 @@ startupreason.h		ssm\startupreason.h
 ssmdomaindefs.h		ssm\ssmdomaindefs.h
 ssmstate.h		ssm\ssmstate.h
 ssmstateawaresession.h	ssm\ssmstateawaresession.h
+ssmstates.hrh		ssm\ssmstates.hrh

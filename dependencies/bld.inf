@@ -39,7 +39,8 @@ aknsgcc.h		aknsgcc.h
 etelmm.h		etelmm.h
 ETELMMCS.H		ETELMMCS.H
 startupdomainpskeys.h	startupdomainpskeys.h
-
+domaindefs.h		domaindefs.h
+domainpolicy.h		domainpolicy.h
 
 #include "S3libs/bld.inf"
 
