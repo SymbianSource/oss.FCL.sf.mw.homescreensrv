@@ -1,3 +1,4 @@
+#include <platform_paths.hrh>
 PRJ_EXPORTS
 platform_paths.hrh             platform_paths.hrh
 defaultcaps.hrh                defaultcaps.hrh
@@ -23,6 +24,19 @@ et_clsvr.h						et_clsvr.h
 etelext.h						etelext.h
 RMmCustomAPI.h					RMmCustomAPI.h
 
+eikon.hrh						eikon.hrh
+// featmgr.h						featmgr.h
+AknsConstants.h					AknsConstants.h
+AknsConstants.hrh				AknsConstants.hrh
+AknTransEffect.h     MW_LAYER_PLATFORM_EXPORT_PATH(akntranseffect.h)
+AknMarqueeControl.h     MW_LAYER_PLATFORM_EXPORT_PATH(AknMarqueeControl.h)
+AknSkinsInternalCRKeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(AknSkinsInternalCRKeys.h)
+SWInstallerInternalPSKeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(SWInstallerInternalPSKeys.h)
+aknappui.h						aknappui.h
+mifconvdefs.h     MW_LAYER_PLATFORM_EXPORT_PATH(mifconvdefs.h)
+disknotifyhandler.h OS_LAYER_PLATFORM_EXPORT_PATH(disknotifyhandler.h)
+
+
 #include "xcfw/bld.inf"
 // #include "kernel/bld.inf"
 #include "activebackupclient/bld.inf"
@@ -34,3 +48,16 @@ RMmCustomAPI.h					RMmCustomAPI.h
 #include "avkon_localised_texts_api/bld.inf"
 #include "rtsecuritymanager_client_api/bld.inf"
 #include "rtsecuritymanager_utility_api/bld.inf"
+#include "sw_installer_launcher_api/group/bld.inf"
+#include "layout_data_api/group/bld.inf"
+#include "uiresources_cdl_api/group/bld.inf"
+#include "uitools_cdl_api/group/bld.inf"
+#include "aknlayout2/group/bld.inf"
+#include "widget_registry_api/group/bld.inf"
+#include "svgt_api/group/bld.inf"
+#include "xml_parser_api/group/bld.inf"
+#include "extended_skins_api/group/bld.inf"
+#include "physics_api/group/bld.inf"
+// #include "/group/bld.inf"
+// #include "/group/bld.inf"
+

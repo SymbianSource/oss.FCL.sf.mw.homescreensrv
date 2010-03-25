@@ -321,7 +321,6 @@
  /epoc32/include \
  /epoc32/include/platform/mw \
  /epoc32/include/platform \
-/*
  /epoc32/include/app \
  /epoc32/include/platform/app \
  /epoc32/include/platform/loc \
@@ -330,7 +329,6 @@
  /epoc32/include/platform/loc/sc \
  /epoc32/include/platform/mw/loc/sc \
  /epoc32/include/platform/app/loc/sc
- */
 /**
 * This define statements defines the SYSTEMINCLUDE-line, which is intended to be
 * used in the mmp-files that are part of the middleware-layer. It includes all 

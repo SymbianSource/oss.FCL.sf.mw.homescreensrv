@@ -4,3 +4,11 @@ sysversioninfo.lib		\epoc32\release\winscw\udeb\sysversioninfo.lib
 abclient.lib			\epoc32\release\winscw\udeb\abclient.lib
 featmgr.lib				\epoc32\release\winscw\udeb\featmgr.lib
 liwServiceHandler.lib	\epoc32\release\winscw\udeb\liwServiceHandler.lib
+AknLayout2Scalable.lib	\epoc32\release\winscw\udeb\AknLayout2Scalable.lib
+hscontentinfo.lib		\epoc32\release\winscw\udeb\hscontentinfo.lib
+SVGEngine.lib			\epoc32\release\winscw\udeb\SVGEngine.lib
+WidgetRegistryClient.lib	\epoc32\release\winscw\udeb\WidgetRegistryClient.lib
+CdlEngine.lib			\epoc32\release\winscw\udeb\CdlEngine.lib
+aknphysics.lib			\epoc32\release\winscw\udeb\aknphysics.lib
+hsccproviderclient.lib	\epoc32\release\winscw\udeb\hsccproviderclient.lib
+disknotifyhandler.lib	\epoc32\release\winscw\udeb\disknotifyhandler.lib
