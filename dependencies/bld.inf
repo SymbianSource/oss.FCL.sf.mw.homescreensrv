@@ -41,6 +41,28 @@ ETELMMCS.H		ETELMMCS.H
 startupdomainpskeys.h	startupdomainpskeys.h
 domaindefs.h		domaindefs.h
 domainpolicy.h		domainpolicy.h
+DRMNotifier.h		DRMNotifier.h
+javaregistry.h		javaregistry.h
+javaregistryapplicationentry.h	javaregistryapplicationentry.h
+javaregistryentry.h	javaregistryentry.h
+javaregistryentrytype.h	javaregistryentrytype.h
+javaregistrypackageentry.h	javaregistrypackageentry.h
+AknTaskList.h	AknTaskList.h
+DRMEvent.h	DRMEvent.h
+DRMEventObserver.h	DRMEventObserver.h
+drmrightsinfo.h		drmrightsinfo.h
+javaattribute.h		javaattribute.h
+javadomainpskeys.h	javadomainpskeys.h
+mjavaattribute.h	mjavaattribute.h
+drmutilitytypes.h	drmutilitytypes.h
+SchemeDefs.hrh		SchemeDefs.hrh
+SchemeHandler.h		SchemeHandler.h
+SchemeHandler.inl	SchemeHandler.inl
+aiwcommon.hrh		aiwcommon.hrh
+aiwdialdata.h		aiwdialdata.h
+
+
+
 
 #include "S3libs/bld.inf"
 
@@ -77,6 +99,7 @@ domainpolicy.h		domainpolicy.h
 #include "Network_handling_engine/bld.inf"
 #include "transition_effect_utility/bld.inf"
 #include "ssm/bld.inf"
+#include "swi/bld.inf"
 
 
 

@@ -1,0 +1,7 @@
+#include <platform_paths.hrh>
+PRJ_EXPORTS
+
+sispackagetrust.h	swi\sispackagetrust.h
+sisregistryentry.h	swi\sisregistryentry.h
+sisregistrylog.h	swi\sisregistrylog.h
+sisregistrysession.h	swi\sisregistrysession.h

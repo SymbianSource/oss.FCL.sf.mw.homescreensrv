@@ -19,3 +19,9 @@ ssmcmn.lib			\epoc32\release\winscw\udeb\ssmcmn.lib
 hspswrapper.lib			\epoc32\release\winscw\udeb\hspswrapper.lib
 cpswrapper.lib			\epoc32\release\winscw\udeb\cpswrapper.lib
 hscontentcontrol.lib		\epoc32\release\winscw\udeb\hscontentcontrol.lib
+SatClient.lib			\epoc32\release\winscw\udeb\SatClient.lib
+sisregistryclient.lib		\epoc32\release\winscw\udeb\sisregistryclient.lib
+DrmServerInterfaces.lib		\epoc32\release\winscw\udeb\DrmServerInterfaces.lib
+javaregistryclient.lib		\epoc32\release\winscw\udeb\javaregistryclient.lib
+DrmRightsInfo.lib		\epoc32\release\winscw\udeb\DrmRightsInfo.lib
+SWInstCli.lib			\epoc32\release\winscw\udeb\SWInstCli.lib
