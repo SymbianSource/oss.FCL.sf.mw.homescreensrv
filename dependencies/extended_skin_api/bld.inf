@@ -1,0 +1,8 @@
+PRJ_EXPORTS
+AknsItemDef.h			AknsItemDef.h
+AknsSrvClient.h			AknsSrvClient.h
+AknsSrvSkinInformationPkg.h	AknsSrvSkinInformationPkg.h
+AknsSrvChunkLookup.h		AknsSrvChunkLookup.h
+AknsEffectAnim.h		AknsEffectAnim.h
+AknsPkgID.h			AknsPkgID.h
+AknsPkgID.inl			AknsPkgID.inl
