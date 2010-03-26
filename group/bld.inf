@@ -20,6 +20,9 @@
 PRJ_EXPORTS
 ../inc/aisystemuids.hrh              MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
 
+// build dependencies: headers and S^3 libs
+#include "../dependencies/bld.inf"
+
 #include "../xcfw/group/bld.inf"
 #include "../homescreenpluginsrv/group/bld.inf"
 #include "../idlefw/group/bld.inf"

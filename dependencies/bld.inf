@@ -25,7 +25,7 @@ etelext.h						etelext.h
 RMmCustomAPI.h					RMmCustomAPI.h
 
 eikon.hrh						eikon.hrh
-// featmgr.h						featmgr.h
+featmgr.h						featmgr.h
 AknsConstants.h					AknsConstants.h
 AknsConstants.hrh				AknsConstants.hrh
 AknTransEffect.h     MW_LAYER_PLATFORM_EXPORT_PATH(akntranseffect.h)
