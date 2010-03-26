@@ -1,0 +1,20 @@
+/*
+* ============================================================================
+*  Name     : aknlayout.lag
+*  Part of  : Avkon
+*  Copyright (c) 2002 Nokia Corporation
+* ============================================================================
+*/
+
+#if !defined(__aknlayout_LAG__)
+#define __aknlayout_LAG__
+
+class TAknTextLineLayout;
+class TAknWindowLineLayout;
+class TAknMultiLineTextLayout;
+
+// New for backport
+#include "platform/mw/AknLayout.lag"
+
+#define AKN_LAYOUT_WINDOW_screen AknLayout::screen()
+#endif 

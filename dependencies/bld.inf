@@ -61,7 +61,10 @@ SchemeHandler.inl	SchemeHandler.inl
 aiwcommon.hrh		aiwcommon.hrh
 aiwdialdata.h		aiwdialdata.h
 
-
+EikSoftkeyImage.h     MW_LAYER_PLATFORM_EXPORT_PATH(eiksoftkeyimage.h)
+AknStatuspaneUtils.h     MW_LAYER_PLATFORM_EXPORT_PATH(AknStatuspaneUtils.h)
+eikcba.h			eikcba.h
+aknlayout.lag		aknlayout.lag
 
 
 #include "S3libs/bld.inf"

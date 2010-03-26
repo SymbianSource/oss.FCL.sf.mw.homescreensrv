@@ -25,3 +25,4 @@ DrmServerInterfaces.lib		\epoc32\release\winscw\udeb\DrmServerInterfaces.lib
 javaregistryclient.lib		\epoc32\release\winscw\udeb\javaregistryclient.lib
 DrmRightsInfo.lib		\epoc32\release\winscw\udeb\DrmRightsInfo.lib
 SWInstCli.lib			\epoc32\release\winscw\udeb\SWInstCli.lib
+peninputClient.lib		\epoc32\release\winscw\udeb\peninputClient.lib
