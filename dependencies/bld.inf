@@ -60,6 +60,8 @@ SchemeHandler.h		SchemeHandler.h
 SchemeHandler.inl	SchemeHandler.inl
 aiwcommon.hrh		aiwcommon.hrh
 aiwdialdata.h		aiwdialdata.h
+EikSoftkeyImage.h	EikSoftkeyImage.h
+AknStatuspaneUtils.h	AknStatuspaneUtils.h
 
 EikSoftkeyImage.h     MW_LAYER_PLATFORM_EXPORT_PATH(eiksoftkeyimage.h)
 AknStatuspaneUtils.h     MW_LAYER_PLATFORM_EXPORT_PATH(AknStatuspaneUtils.h)
@@ -67,6 +69,7 @@ eikcba.h			eikcba.h
 aknlayout.lag		aknlayout.lag
 
 
+#include "extended_skin_api/bld.inf"
 #include "S3libs/bld.inf"
 
 #include "xcfw/bld.inf"
@@ -104,4 +107,5 @@ aknlayout.lag		aknlayout.lag
 #include "ssm/bld.inf"
 #include "swi/bld.inf"
 #include "mifconv/group/bld.inf"
+#include "hs_content_control_ui/bld.inf"
 
