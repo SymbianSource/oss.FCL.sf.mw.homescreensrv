@@ -103,7 +103,5 @@ aknlayout.lag		aknlayout.lag
 #include "transition_effect_utility/bld.inf"
 #include "ssm/bld.inf"
 #include "swi/bld.inf"
-
-
-
+#include "mifconv/group/bld.inf"
 

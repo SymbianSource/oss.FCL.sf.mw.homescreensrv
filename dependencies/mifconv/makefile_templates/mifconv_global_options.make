@@ -36,7 +36,7 @@ MASK_OPTION_8:=_mask_soft
 		
 # Binary conversion tools:
 SVGTBINENCODE:=$(EPOCROOT)epoc32$/tools$/svgtbinencode
-MIFCONV:=$(EPOCROOT)epoc32$/tools$/mifconv
+MIFCONV:=$(EPOCROOT)epoc32$/tools$/mifconv-s3
 
 # SVG and BMP icon bitmap searching directories, depends on a platform:
 VECTORSOURCEDIR:=$(EPOCROOT)epoc32$/s60$/icons

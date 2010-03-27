@@ -16,21 +16,7 @@
 */
 
 
-PRJ_PLATFORMS
-#ifdef SBSV2
-  TOOLS2
-#else
-  TOOLS
-#endif
-
-
-PRJ_MMPFILES
-#if defined(TOOLS) || defined(TOOLS2)
-  mifconv.mmp
-#endif
-
 PRJ_EXPORTS
-#ifdef SBSV2
   ../makefile_templates/mifconv_global_options.make           +/tools/makefile_templates/s60/mifconv_global_options.make
   ../makefile_templates/mifconv_option_reader_recursive.make  +/tools/makefile_templates/s60/mifconv_option_reader_recursive.make
   ../makefile_templates/mifconv_option_reader.make            +/tools/makefile_templates/s60/mifconv_option_reader.make
@@ -42,5 +28,5 @@ PRJ_EXPORTS
   ../makefile_templates/mifconv.meta                          +/tools/makefile_templates/s60/mifconv.meta
   ../makefile_templates/mifconv.mk                            +/tools/makefile_templates/s60/mifconv.mk
   ../makefile_templates/mifconv.xml                           +/tools/makefile_templates/s60/mifconv.xml
-#endif
+  mifconv-s3.exe		+/tools/mifconv-s3.exe
 
