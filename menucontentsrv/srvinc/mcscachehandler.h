@@ -71,7 +71,7 @@ private:
     
     void RemoveNotExistItems();
 
-    void CMcsCacheHandler::RemoveItemsWithChangedAttributesL();
+    void RemoveItemsWithChangedAttributesL();
 
     
 private:    // data

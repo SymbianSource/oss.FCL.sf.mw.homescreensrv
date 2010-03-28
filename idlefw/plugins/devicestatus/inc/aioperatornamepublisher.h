@@ -89,7 +89,7 @@ private:
      * Check SPN status from PLMNField. Also check if current country and network
      * codes are in PLMNField.
      */
-    void CAiOperatorNamePublisher::CheckServiceProviderDisplayListStatus(
+    void CheckServiceProviderDisplayListStatus(
         TInt aMCC,
         TInt aMNC,
         TBool& aShowSPN,

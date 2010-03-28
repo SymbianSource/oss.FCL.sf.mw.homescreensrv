@@ -110,7 +110,7 @@ public:
     /**
      * Returns notifications array
      */
-    RPointerArray<CLiwDefaultList>& CCPServer::GetNotifications( ); 
+    RPointerArray<CLiwDefaultList>& GetNotifications( ); 
 
 private:
     // From CActive
