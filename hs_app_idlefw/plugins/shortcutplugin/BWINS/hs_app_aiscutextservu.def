@@ -1,0 +1,11 @@
+EXPORTS
+	?Connect@RAiScutExtServ@@QAEHXZ @ 1 NONAME ; int RAiScutExtServ::Connect(void)
+	?IsInShortcuts@RAiScutExtServ@@QBEHAAH@Z @ 2 NONAME ; int RAiScutExtServ::IsInShortcuts(int &) const
+	?IssuePutInShortcuts@RAiScutExtServ@@QAEHXZ @ 3 NONAME ; int RAiScutExtServ::IssuePutInShortcuts(void)
+	?ResetIcon@RAiScutExtServ@@QAEHXZ @ 4 NONAME ; int RAiScutExtServ::ResetIcon(void)
+	?ResetPopupText@RAiScutExtServ@@QAEHXZ @ 5 NONAME ; int RAiScutExtServ::ResetPopupText(void)
+	?UpdateIconL@RAiScutExtServ@@QAEHABVCGulIcon@@@Z @ 6 NONAME ; int RAiScutExtServ::UpdateIconL(class CGulIcon const &)
+	?UpdatePopupTextL@RAiScutExtServ@@QAEHABVMDesC16Array@@@Z @ 7 NONAME ; int RAiScutExtServ::UpdatePopupTextL(class MDesC16Array const &)
+	?Version@RAiScutExtServ@@QBE?AVTVersion@@XZ @ 8 NONAME ; class TVersion RAiScutExtServ::Version(void) const
+	?Connect@RAiScutExtServ@@QAEHABVTDesC16@@@Z @ 9 NONAME ; int RAiScutExtServ::Connect(class TDesC16 const &)
+

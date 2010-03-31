@@ -1,0 +1,20 @@
+EXPORTS
+	?CreateContentItemArrayIteratorL@AiUtility@@YAPAVMAiContentItemIterator@@PBUTAiContentItem@@H@Z @ 1 NONAME ; class MAiContentItemIterator * AiUtility::CreateContentItemArrayIteratorL(struct TAiContentItem const *, int)
+	?CreatePSPropertyObserverL@AiUtility@@YAPAVMAiPSPropertyObserver@@VTCallBack@@VTUid@@H@Z @ 2 NONAME ; class MAiPSPropertyObserver * AiUtility::CreatePSPropertyObserverL(class TCallBack, class TUid, int)
+	?CreatePluginSettingsL@AiUtility@@YAPAVMAiPluginSettings@@XZ @ 3 NONAME ; class MAiPluginSettings * AiUtility::CreatePluginSettingsL(void)
+	?CreateStrParserL@AiUtility@@YAPAVMAiStrParser@@XZ @ 4 NONAME ; class MAiStrParser * AiUtility::CreateStrParserL(void)
+	?CopyToBufferL@AiUtility@@YAPAVHBufC16@@PAV2@ABVTDesC16@@@Z @ 5 NONAME ; class HBufC16 * AiUtility::CopyToBufferL(class HBufC16 *, class TDesC16 const &)
+	?CopyToBufferL@AiUtility@@YAPAVHBufC16@@PAV2@ABVTDesC8@@@Z @ 6 NONAME ; class HBufC16 * AiUtility::CopyToBufferL(class HBufC16 *, class TDesC8 const &)
+	?CopyToBufferL@AiUtility@@YAPAVHBufC8@@PAV2@ABVTDesC16@@@Z @ 7 NONAME ; class HBufC8 * AiUtility::CopyToBufferL(class HBufC8 *, class TDesC16 const &)
+	?CopyToBufferL@AiUtility@@YAPAVHBufC8@@PAV2@ABVTDesC8@@@Z @ 8 NONAME ; class HBufC8 * AiUtility::CopyToBufferL(class HBufC8 *, class TDesC8 const &)
+	?EnsureBufMaxLengthL@AiUtility@@YA?AVTPtr16@@AAPAVHBufC16@@H@Z @ 9 NONAME ; class TPtr16 AiUtility::EnsureBufMaxLengthL(class HBufC16 * &, int)
+	?ParseInt@AiUtility@@YAHAAJABVTDesC8@@@Z @ 10 NONAME ; int AiUtility::ParseInt(long &, class TDesC8 const &)
+	?CreatePluginToolL@AiUtility@@YAPAVMAiPluginTool@@XZ @ 11 NONAME ; class MAiPluginTool * AiUtility::CreatePluginToolL(void)
+	?ClearPriority@CContentPriorityMap@AiUtility@@QAEXABVTDesC8@@@Z @ 12 NONAME ; void AiUtility::CContentPriorityMap::ClearPriority(class TDesC8 const &)
+	?CurrentPriority@CContentPriorityMap@AiUtility@@QBEHABVTDesC8@@@Z @ 13 NONAME ; int AiUtility::CContentPriorityMap::CurrentPriority(class TDesC8 const &) const
+	?NewL@CContentPriorityMap@AiUtility@@SAPAV12@XZ @ 14 NONAME ; class AiUtility::CContentPriorityMap * AiUtility::CContentPriorityMap::NewL(void)
+	?OverrideContent@CContentPriorityMap@AiUtility@@QBEHABVTDesC8@@H@Z @ 15 NONAME ; int AiUtility::CContentPriorityMap::OverrideContent(class TDesC8 const &, int) const
+	?Reset@CContentPriorityMap@AiUtility@@QAEXXZ @ 16 NONAME ; void AiUtility::CContentPriorityMap::Reset(void)
+	?SetCurrentPriority@CContentPriorityMap@AiUtility@@QAEHABVTDesC8@@H@Z @ 17 NONAME ; int AiUtility::CContentPriorityMap::SetCurrentPriority(class TDesC8 const &, int)
+	?ParseInt@AiUtility@@YAHAAJABVTDesC16@@@Z @ 18 NONAME ; int AiUtility::ParseInt(long &, class TDesC16 const &)
+

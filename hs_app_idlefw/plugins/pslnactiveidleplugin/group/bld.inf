@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This file provides the information required for building
+*                PslnActiveIdlePlugin.
+*
+*/
+
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+#include <platform_paths.hrh>
+../loc/hs_app_pslnactiveidle3plugin.loc             MW_LAYER_LOC_EXPORT_PATH(hs_app_pslnactiveidle3plugin.loc)
+
+//../rom/hs_app_pslnactiveidleplugin_resources.iby   LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(hs_app_pslnactiveidleplugin_resources.iby)
+//../rom/hs_app_pslnactiveidleplugin.iby             CORE_MW_LAYER_IBY_EXPORT_PATH(hs_app_pslnactiveidleplugin.iby)
+
+		
+
+
+PRJ_MMPFILES
+pslnactiveidleplugin.mmp
+
+PRJ_EXTENSIONS
+START EXTENSION s60/mifconv
+OPTION TARGETFILE pslnactiveidleplugin.mif
+OPTION HEADERFILE pslnactiveidleplugin.mbg
+OPTION SOURCES \
+        -c8,8 qgn_prop_psln_ai_sub
+END
+
+PRJ_TESTMMPFILES
+
+// End of File.

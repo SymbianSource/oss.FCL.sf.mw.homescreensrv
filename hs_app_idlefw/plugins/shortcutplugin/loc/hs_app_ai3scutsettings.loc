@@ -1,0 +1,2125 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project aiscutsettings
+*
+*/
+
+
+//d:Localized name of the plugin
+//d:
+//l:list_set_graphic_pane_t1
+//w:
+//r:3.2
+//
+#define qtn_ai_set_cont_apps "Shortcuts"
+
+// d: Text in title pane
+// l: title_pane_t2/opt9
+// w:
+// r: 3.2
+//
+#define qtn_set_title_pers_shortcuts "Shortcuts"
+
+// d: Text of a list item in personalisation view's folder list
+// d: Item opens Shortcuts folder
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_pers_shortcuts "Shortcuts"
+
+// d: Application cannot be opened during Backup
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_ai_scut_operation_disabled "Application cannot be opened during backup"
+
+// d: Shortcuts Item caption
+// d: Active Idle Shortcut Settings View
+// d: %N order number of the shortcut item
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_ai_set_myt_linkn "%N. Shortcut item"
+
+// d: Prompt text for type new URL data query
+// d: Active Idle Shortcut Settings View
+// l: popup_query_data_window
+// w:
+// r: 3.2
+//
+#define qtn_ai_shorts_type_url "Type URL"
+
+// d: Prompt text for edit URL data query
+// d: Active Idle Shortcut Settings View
+// l: popup_query_data_window
+// w:
+// r: 3.2
+//
+#define qtn_ai_shorts_edit_url "Edit URL"
+
+// d: Prompt text for change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: heading_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_sc_set_change_prompt "Change to:"
+
+// d: Application shortcut type choice item in change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_sc_set_change_apps "Application"
+
+// d: Bookmark shortcut type choice item in change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_sc_set_change_bookmark "Bookmark"
+
+// d: URL shortcut type choice item in change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_sc_set_change_url "Web address"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: User selects this item when she wants Scroll keys or Selection key
+// d: have no effect is Idle state.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_skeys_no_effect "No effect"
+
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Left idle softkey setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_left_idle_softkey "Left idle softkey"
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Right idle softkey setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_right_idle_softkey "Right idle softkey"
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Right Scroll key setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_right_scroll "Right Scroll key"
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Left Scroll key setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_left_scroll "Left Scroll key"
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Down Scroll key setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_down_scroll "Down Scroll key"
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Up Scroll key setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_up_scroll "Up Scroll key"
+
+// d: Title of a list item shortcut setting view's setting list
+// d: Item opens Selection key setting page
+// l: list_setting_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_selec_key "Selection key"
+
+
+// d: Text for fixed item information note
+// d: Shown when user tries to change fixed shortcut in settings
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_ai_set_app_note_fixed "Fixed item. Can't be changed"
+
+// d: Text for empty listbox item
+// d: Shown when there are no modifiable shortcuts in settings
+// l: main_list_empty_pane
+// w:
+// r: 3.2
+//
+#define qtn_ai_sc_set_all_fixed "(No editable shortcuts available in this Idle theme.)"
+
+// =====================================================================
+// App titles
+// =====================================================================
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_about_grid               "About"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_about_list               "About product"
+
+// d: Focused application name on idle shortcut plugin tooltip.
+// l: popup_ai_links_title_window_t1
+// w:
+// r: 5.0
+//
+#define qtn_app_caption_string           "Application Manager"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_am_gs                    "App. manage"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_am_skey                  "AppMngr"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_am                   "AppMngr"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.1
+//
+#define qtn_apps_menu_gs                  "Menu"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_apps_menu_skey                "Menu"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_menu                 "Menu"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_blid_grid                "Navigator"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_blid_list                "Navigator"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.0
+//
+#define qtn_apps_blid_gs                  "Navigator"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_blid_skey                "Navigator"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_blid                 "Navigator"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_bluetooth_grid           "Bluetooth"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_bluetooth_list           "Bluetooth"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_bluetooth_gs             "Bluetooth"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_bluetooth_skey           "Bluetooth"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_bluetooth            "Bluetooth"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_browserng_grid           "Web"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_browserng_list           "Web"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.1
+//
+#define qtn_apps_services_gs_new          "WAP services"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_apps_services_skey_new        "Services"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_services_new         "Services"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_oper_url             "%U"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_calculator_grid          "Calculator"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_calculator_list          "Calculator"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_calculator_gs            "Calculator"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_calculator_skey          "Calculat."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_calculator           "Calculat."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_calendar_grid            "Calendar"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_calendar_list            "Calendar"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_calendar_gs              "Calendar"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_calendar_skey            "Calendar"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_calendar             "Calendar"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_ccor_grid                "Camcorder"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_ccor_list                "Camcorder"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_ccor_gs                  "Camcorder"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_ccor_skey                "Camcorder"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_ccor                 "Camcorder"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_dict_grid                "Dictionary"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_dict_list                "Dictionary"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_dict_gs                  "Dictionary"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_dict_skey                "Dictionary"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_dict                 "Dictionary"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_clock_grid               "Clock"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_clock_list               "Clock"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_clock_gs                 "Clock"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_clock_skey               "Clock"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_clock                "Clock"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_cmon_grid                "Conn. Manager"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_cmon_list                "Conn. Manager"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_cmon_gs                  "Conn. manager"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_cmon_skey                "Conn. m."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_cmon                 "Conn. m."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_cnv_app_caption_short         "Converter"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_cnv_app_caption               "Converter"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_converter_gs             "Converter"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_converter_skey           "Convert."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_converter            "Convert."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_dm_grid                  "Device Manager"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_dm_list                  "Device Manager"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.6
+//
+#define qtn_apps_dm_gs                    "Device manager"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.6
+//
+#define qtn_apps_dm_skey                  "Dev. mgr."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_dm                   "Dev. mgr."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_drm_grid                 "Rights Mgr"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_drm_list                 "Rights Manager"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_drm_gs                   "Rights manager"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_drm_skey                 "DRM Mgr"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_drm                  "DRM Mgr"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_fax_modem_grid           "Modem"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_fax_modem_list           "Modem"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_fax_modem_gs             "Modem"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_fax_modem_skey           "Modem"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_fax_modem            "Modem"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_fmgr_grid                "File manager"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_fmgr_list                "File manager"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_fmgr_gs                  "File manager"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_fmgr_skey                "File manager"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_fmgr                 "File Manager"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_radio_grid               "Radio"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_radio_list               "Radio"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_radio_gs                 "Radio"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.7
+//
+#define qtn_apps_radio_skey               "Radio"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_radio                "Radio"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.7
+//
+#define qtn_fmtx_idle_sk                   "FM Tx sk"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_fmtx_idle_msk                  "FM Tx msk"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_settings_grid            "Settings"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_settings_list            "Settings"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_settings_gs              "Settings"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_settings_skey            "Settings"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_gs                   "Settings"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_apps_controlpanel_grid        "Control Panel"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_apps_controlpanel_list        "Control Panel"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_apps_controlpanel_gs          "Control Panel"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 5.0
+//
+#define qtn_apps_controlpanel_skey        "Control Panel"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 5.0
+//
+#define qtn_msk_idle_controlpanel         "Control Panel"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_help_grid                "Help"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_help_list                "Help"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_help_gs                  "Help"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_help_skey                "Help"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_help                 "Help"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_infrared_grid            "Infrared"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_infrared_list            "Infrared"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_infrared_gs              "Infrared"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_infrared_skey            "Infrared"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_infrared             "Infrared"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_instant_grid             "Chat"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_instant_list             "Chat"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_instant_gs               "Chat"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_instant_skey             "Chat"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_instant              "Chat"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_udict_grid               "User dict."
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_udict_list               "User dictionary"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.0
+//
+#define qtn_apps_udict_gs                 "User dictionary"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_udict_skey               "User dict."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_udict                "User dict."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_lm_grid                  "Landmarks"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_lm_list                  "Landmarks"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.0
+//
+#define qtn_apps_lm_gs                    "Landmarks"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_lm_skey                  "Landmarks"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_lm                   "Landmarks"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_logs_grid                "Log"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_logs_list                "Log"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_logs_gs                  "Log"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_logs_skey                "Log"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_logs                 "Log"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mg_grid                  "Gallery"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mg_list                  "Gallery"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_mg_gs                    "Gallery"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_mg_skey                  "Gallery"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mg                   "Gallery"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mp_grid                  "Media Player"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mp_list                  "Media Player"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_mp_gs                    "Media Player"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_mp_skey                  "Media Player"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mp                   "Media Player"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_memc_appl_grid           "Memory"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_memc_appl_list           "Memory card"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_mmc_gs                   "Memory Card"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_mmc_skey                 "Memory c..."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mmc                  "Memory c..."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_messaging_grid           "Messages"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_messaging_list           "Messages"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_messaging_gs             "Messages"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_messaging_skey           "Messag."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_messaging            "Messag."
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_set_idle_skey_new_message     "New message"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// d: User is prompted to write SMS, MMS or Email if the softkey is pressed.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_idle_skey_new_message         "New msg."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_new_message          "New msg."
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special New Message shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_skey_new_msg         "New message"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// d: User is prompted to new message if the softkey is pressed.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_idle_skey_new_msg             "New message"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_new_msg              "New message"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_set_idle_skeys_sms_editor     "New SMS"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_sms_skey                 "New SMS"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_sms                  "New SMS"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_set_idle_skeys_mms_editor     "New MMS"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_mms_skey                 "New MMS"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mms                  "New MMS"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special Select message type shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_skey_select_msg_type "Select msg type"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// d: User is prompted to Select message if the softkey is pressed.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_idle_skey_select_msg          "Select msg"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_select_msg           "Select msg"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special New Email shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_set_idle_skeys_email_editor   "New Email"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_email_skey               "New Email"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_email                "New Email"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special New MMS Postcard shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mmspostcard_gs           "New MMS postcard"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_mmspostcard_skey         "New MMS postcard"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mmspostcard          "New MMS postcard"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special New SyncML mail shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_syncml_mail_gs           "New SyncML mail"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_syncml_mail_skey         "New SyncML mail"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_syncml_mail          "New SyncML mail"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special New Audio message shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_audio_msg_gs             "New audio message"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1u
+//
+#define qtn_apps_audio_msg_skey           "New audio msg"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_audio_msg            "New audio msg"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mplayer_grid             "Music player"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mplayer_list             "Music player"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.0
+//
+#define qtn_apps_mplayer_gs               "Music player"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_mplayer_skey             "Music"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mplayer              "Music"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_notepad_grid             "Notepad"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_notepad_list             "Notepad"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_notepad_gs               "Notepad"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_notepad_skey             "Notepad"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_notepad              "Notepad"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_notepad_newnote_gs       "New note"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_notepad_newnote_skey     "New note"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_notepad_newnote      "New note"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_skins_grid               "Skins"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_skins_list               "Skins"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_skins_gs                 "Skins"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_skins_skey               "Skins"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_skins                "Skins"
+
+// d: Text of a list item in shortcut setting view's application list.
+// d: Caption for the special Change Theme shortcut
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_idle_skin_gs             "Idle theme"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_idle_skin_skey           "Idle theme"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_skin                 "Idle theme"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_phone_grid               "Telephone"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_phone_list               "Telephone"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_phonebook_grid           "Contacts"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_phonebook_list           "Contacts"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_phonebook_gs             "Contacts"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_phonebook_skey           "Contacts"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_phonebook            "Contacts"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mode_grid                "Profiles"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_mode_list                "Profiles"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_mode_gs                  "Profiles"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_mode_skey                "Profiles"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_mode                 "Profiles"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_ptt_grid                 "PTT"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_ptt_list                 "Pust to talk"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_ptt_gs                   "Push to talk"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_ptt_skey                 "PTT"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_ptt                  "PTT"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_search_grid              "Search"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_search_list              "Search"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_search_gs                "Search"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.2
+//
+#define qtn_apps_search_skey              "Search"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_search               "Search"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_simapps_grid             "SIM services"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_simapps_list             "SIM services"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_sd_grid                  "Speed dial"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_sd_list                  "Speed dial"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_sd_gs                    "Speed dial"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_sd_skey                  "Sp. dials"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_sd                   "Sp. dials"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_usb_grid                 "USB"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_usb_list                 "USB"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.0
+//
+#define qtn_apps_usb_gs                   "USB"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_usb_skey                 "USB"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_usb                  "USB"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_vc_grid                  "Voice Commands"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_vc_list                  "Voice Commands"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_vc_gs                    "Voice Commands"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_vc_skey                  "Voice Commands"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_vc                   "Voice Commands"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_smsvo_grid               "Voice mail"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_smsvo_list               "Voice mailbox"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_smsvo_gs                 "Voice mailbox"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_smsvo_skey               "Voice m."
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_smsvo                "Voice m."
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_voip_grid                "Voice over IP"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_voip_list                "Voice over IP"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 3.0
+//
+#define qtn_apps_voip_gs                  "Voice over IP"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.0
+//
+#define qtn_apps_voip_skey                "Voice over IP"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_voip                 "Voice over IP"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_vorec_app_menu_grid           "Recorder"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_vorec_app_menu_list           "Recorder"
+
+// d: Text of a list item in shortcut setting view's application list.
+// l: list_set_graphic_pane_t1
+// w:
+// r: 2.8
+//
+#define qtn_apps_recorder_gs              "Recorder"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 2.8
+//
+#define qtn_apps_recorder_skey            "Recorder"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 3.2
+//
+#define qtn_msk_idle_recorder             "Recorder"
+
+// d: Application name in the App Shell grid.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_sml_grid                 "Sync"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1_cp2
+// w:
+// r: 3.2
+//
+#define qtn_apps_sml_list                 "Sync"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_apps_video_grid               "Vid.Services"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_apps_operatormenu_skey        "Oper. menu"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_apps_fplayer_skey             "Flash Player"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 3.1
+//
+#define qtn_apps_exchangemail_skey        "Exh. mail"
+
+// d: Application name in the App Shell list.
+// l: list_single_large_graphic_pane_t1
+// w:
+// r: 5.0
+//
+#define qtn_apps_connectivity_list             "Connectivity"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as Left or Right idle softkey.
+// l: control_pane_t1/opt7
+// w:
+// r: 5.0
+//
+#define qtn_apps_connectivity_skey             "Connectivity"
+
+// d: User can personalize idle softkeys to be other application from general settings.
+// d: The text is shown as middle softkey.
+// l: control_pane_t3/opt7
+// w:
+// r: 5.0
+//
+#define qtn_msk_idle_connectivity              "Connectivity"
+
+
+// End of File.

@@ -1,0 +1,100 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project definition file for project ShortcutPlugin settings
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+#include <data_caging_paths.hrh>
+
+#include <platform/mw/aiscutuids.hrh>
+
+//#include "../../../inc/common/debug.h"
+//#define AI_ENABLE_RD_LOGGING
+#define AI_RD_LOG_TO_DEBUG_OUTPUT
+
+//MACRO MY_DEBUG
+
+TARGET                  hs_app_aiscutsettings.dll
+TARGETTYPE              PLUGIN
+UID                     0x10009D8D AI_UID_ECOM_DLL_SETTINGS_SCUTPLUGIN
+
+CAPABILITY              CAP_ECOM_PLUGIN
+VENDORID                VID_DEFAULT
+
+SOURCEPATH              ../src
+SOURCE                  hs_app_caiscutsettings.cpp
+SOURCE                  hs_app_caiscutsettingsimplementationtable.cpp
+SOURCE                  hs_app_caiscutsettingscontainer.cpp
+SOURCE                  hs_app_caiscutsettingsmodel.cpp
+SOURCE                  hs_app_caiscutsettingsitem.cpp
+SOURCE                  hs_app_caiscutsettingsapplist.cpp
+SOURCE                  hs_app_caiscutsettingsbkmlist.cpp
+
+SOURCE                  hs_app_taiscutparser.cpp
+SOURCE                  hs_app_aidefaultshortcut.cpp
+SOURCE                  hs_app_aiscutappuidparser.cpp
+SOURCE                  hs_app_aiscutrepositorywatcher.cpp
+
+START RESOURCE          hs_app_aiscutsettings.rss
+TARGET                  hs_app_aiscutsettings.rsc
+END
+
+START RESOURCE          hs_app_aiscutsettingsres.rss
+HEADER
+TARGET                  hs_app_aiscutsettingsres.rsc
+TARGETPATH              RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+USERINCLUDE       ../../../inc/common
+USERINCLUDE             ../inc
+USERINCLUDE       ../../../inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY                 euser.lib
+LIBRARY                 ecom.lib
+LIBRARY                 avkon.lib
+LIBRARY                 bafl.lib
+LIBRARY                 cone.lib
+LIBRARY                 efsrv.lib
+LIBRARY                 eikcoctl.lib
+LIBRARY                 eikcore.lib
+LIBRARY                 cdlengine.lib
+LIBRARY                 centralrepository.lib
+LIBRARY                 cenrepnotifhandler.lib  // CCenRepNotifyHandler
+LIBRARY                 gsframework.lib         // For base classes
+LIBRARY                 gslistbox.lib           // For CGSListBoxItemTextArray
+LIBRARY                 gsecomplugin.lib
+LIBRARY                 commonengine.lib        // For RConeResourceLoader
+LIBRARY                 inetprotutil.lib        // For TUriParser
+LIBRARY                 apgrfx.lib              // For RApaLsSession
+LIBRARY                 apparc.lib              // For TApaAppInfo
+LIBRARY                 msgs.lib                // For Message Server
+LIBRARY                 platformenv.lib         // For PathInfo
+LIBRARY                 hlplch.lib              // for HlpLauncher
+LIBRARY                 featmgr.lib             // For feature manager
+LIBRARY                 favouritesengine.lib
+LIBRARY                 javaregistryclient.lib  // For JavaRegistry
+#ifdef __WEB_WIDGETS
+LIBRARY                 widgetregistryclient.lib
+#endif
+
+// Debugging dependencies
+LIBRARY           flogger.lib
+
+// End of File.

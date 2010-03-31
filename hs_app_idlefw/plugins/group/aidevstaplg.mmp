@@ -1,0 +1,89 @@
+/*
+* Copyright (c) 2002-2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+#include        <platform_paths.hrh>
+#include        <data_caging_paths.hrh>
+
+TARGET          hs_app_aidevstaplg.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D 0x102750F7
+VENDORID        VID_DEFAULT
+CAPABILITY      CAP_ECOM_PLUGIN
+
+SOURCEPATH      ../devicestatus/src
+SOURCE          hs_app_aidevicestatusplugin.cpp
+SOURCE          hs_app_aidevicestatuspluginengine.cpp
+SOURCE          hs_app_aimulticontentobserver.cpp
+SOURCE          hs_app_aiprofilepublisher.cpp
+SOURCE          hs_app_aidatepublisher.cpp
+SOURCE          hs_app_aipublisherfactory.cpp
+SOURCE          hs_app_ainetworkinfolistener.cpp
+SOURCE          hs_app_aioperatornamepublisher.cpp
+SOURCE          hs_app_aibtsappublisher.cpp
+SOURCE          hs_app_aisimregpublisher.cpp
+SOURCE          hs_app_aimcnpublisher.cpp
+SOURCE          hs_app_aicugpublisher.cpp
+SOURCE		      hs_app_aicugmcnpublisher.cpp
+SOURCE          hs_app_aivhzpublisher.cpp
+SOURCE          hs_app_aipublishprioritizer.cpp 
+SOURCE          hs_app_aicontentobserveroptimizer.cpp 
+SOURCE          hs_app_aioperatorlogopublisher.cpp
+SOURCE          hs_app_ainwspublisher.cpp
+
+START RESOURCE  hs_app_aidevstaplg.rss
+TARGET          hs_app_aidevstaplg.rsc
+END
+
+START RESOURCE  hs_app_aidevstaplgres.rss
+HEADER
+TARGET          hs_app_aidevstaplgres.rsc
+TARGETPATH      APP_RESOURCE_DIR
+LANGUAGE_IDS
+END
+
+USERINCLUDE     .
+
+USERINCLUDE     ../devicestatus/inc
+USERINCLUDE     ../devicestatus/loc
+USERINCLUDE     ../../inc/common
+USERINCLUDE     ../../cenrep
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         avkon.lib
+LIBRARY         sssettings.lib
+LIBRARY         profileeng.lib
+LIBRARY         networkhandling.lib
+LIBRARY         phoneclient.lib
+LIBRARY         fbscli.lib
+LIBRARY         cone.lib
+LIBRARY         commonengine.lib 
+LIBRARY         featmgr.lib
+LIBRARY         centralrepository.lib
+LIBRARY         cenrepnotifhandler.lib
+LIBRARY         egul.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         gdi.lib
+LIBRARY         bitgdi.lib
+LIBRARY         hs_app_aiutils.lib
+LIBRARY         flogger.lib
+LIBRARY         bafl.lib
+

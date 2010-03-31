@@ -1,0 +1,60 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  This is project specification for idle window server plug-
+*                in. The plug-in provides service for routing of numeric key
+*                events to Phone application and activation of key lock.
+*
+*/
+
+#include <platform_paths.hrh>
+
+TARGET          hs_app_aiwsplugin.dll
+TARGETTYPE      ANI
+UID             0x10003B22 0x10207206
+CAPABILITY CAP_GENERAL_DLL
+VENDORID VID_DEFAULT
+
+USERINCLUDE     ../wsplugin/inc
+USERINCLUDE     ../../inc/common
+APP_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../wsplugin/src
+SOURCE			hs_app_aiwspluginanimdll.cpp
+SOURCE			hs_app_aiwspluginanim.cpp
+SOURCE          hs_app_modifierkeytracker.cpp
+SOURCE          hs_app_keylockhandler.cpp
+SOURCE          hs_app_keylockstates.cpp
+SOURCE          hs_app_keypadsettings.cpp
+SOURCE          hs_app_numerickeyhandler.cpp
+SOURCE          hs_app_logslaunchhandler.cpp
+SOURCE          hs_app_sindlaunchhandler.cpp
+SOURCE          hs_app_keyhandlertimer.cpp
+SOURCE          hs_app_panic.cpp
+
+
+LIBRARY         euser.lib
+LIBRARY         cone.lib
+LIBRARY			ws32.lib
+LIBRARY			apgrfx.lib
+LIBRARY			centralrepository.lib
+LIBRARY			flogger.lib
+
+LIBRARY			featmgr.lib
+LIBRARY         cenrepnotifhandler.lib
+LIBRARY         ptiengine.lib
+LIBRARY         keylockpolicyapi.lib
+
+LIBRARY			hs_app_aiutils.lib
+
+// End of File
