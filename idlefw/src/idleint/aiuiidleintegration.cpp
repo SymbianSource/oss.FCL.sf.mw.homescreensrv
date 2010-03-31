@@ -17,12 +17,14 @@
 
 
 // System includes
+#include <startupdomainpskeys.h>
 #include <coeaui.h>
 #include <eikenv.h>
 #include <AknIncallBubbleNotify.h>
 #include <aknsoundsystem.h>
 #include <AknDef.h>
 #include <ctsydomainpskeys.h>
+#include <apgtask.h>
 
 // User includes
 #include <aisystemuids.hrh>
@@ -65,7 +67,9 @@ CAiUiIdleIntegrationImpl::~CAiUiIdleIntegrationImpl()
     
     delete iIncallBubble;
     
-    Release( iCallStatusObserver );
+    Release( iCallStatusObserver );       
+    
+    Release( iUiStartupStateObserver );
     }
 
 // ----------------------------------------------------------------------------
@@ -119,8 +123,13 @@ void CAiUiIdleIntegrationImpl::ConstructL(
                                        KPSUidCtsyCallInformation, 
                                        KCTsyCallState );  
     
-    ActivateUI();
-           
+    iUiStartupStateObserver = AiUtility::CreatePSPropertyObserverL(                           
+                                TCallBack( HandleUiStartupStateChange, this ),            
+                                           KPSUidStartup, 
+                                           KPSStartupUiPhase );        
+    
+    HandleUiStartupStateChange( this );
+                 
     __TIME_ENDMARK( "CAiUiIdleIntegrationImpl::ConstructL, done", time );
     }
 
@@ -130,11 +139,22 @@ void CAiUiIdleIntegrationImpl::ConstructL(
 //
 void CAiUiIdleIntegrationImpl::ActivateUI()
     {   
-    __TICK( "CAiUiIdleIntegrationImpl::ActivateUI - HandleActivateUI" );
+    __TICK( "CAiUiIdleIntegrationImpl::ActivateUI" );
+    
+    Release( iUiStartupStateObserver );
+    iUiStartupStateObserver = NULL;
     
     iAiFwEventHandler->HandleActivateUI();
     
-    __PRINTS( "CAiUiIdleIntegrationImpl::ActivateUI - HandleActivateUI done" );    
+    RWsSession& wsSession( iEikEnv.WsSession() );
+    
+    TApaTaskList taskList( wsSession );
+    
+    TApaTask task( taskList.FindApp( TUid::Uid( AI_UID3_AIFW_EXE ) ) );
+    
+    task.BringToForeground(); 
+        
+    __PRINTS( "*** CAiUiIdleIntegrationImpl::ActivateUI - done" );    
     }
 
 // ----------------------------------------------------------------------------
@@ -148,6 +168,8 @@ void CAiUiIdleIntegrationImpl::HandleWsEventL( const TWsEvent& aEvent,
     
     if ( type == KAknFullOrPartialForegroundGained )
         {
+        __PRINTS( "*** CAiUiIdleIntegrationImpl::HandleWsEventL - Foreground" );
+        
         if ( !iForeground )
             {
             iForeground = ETrue;
@@ -157,6 +179,8 @@ void CAiUiIdleIntegrationImpl::HandleWsEventL( const TWsEvent& aEvent,
         }
     else if ( type == KAknFullOrPartialForegroundLost )
         {
+        __PRINTS( "*** CAiUiIdleIntegrationImpl::HandleWsEventL - Background" );
+    
         if ( iForeground )
             {
             iForeground = EFalse;
@@ -243,21 +267,21 @@ EXPORT_C CAiUiIdleIntegration* CAiUiIdleIntegration::NewL( CEikonEnv& aEikEnv,
 TInt CAiUiIdleIntegrationImpl::HandleCallEvent( TAny* aPtr )
 	{
 	__ASSERT_DEBUG( aPtr, 
-	        AiFwPanic::Panic( AiFwPanic::EAiFwPanic_NullPointerReference ) );
+        AiFwPanic::Panic( AiFwPanic::EAiFwPanic_NullPointerReference ) );
     
 	CAiUiIdleIntegrationImpl* self = 
-        static_cast<CAiUiIdleIntegrationImpl*>( aPtr );
+        static_cast< CAiUiIdleIntegrationImpl* >( aPtr );
         
 	TInt callStatus( EPSCTsyCallStateNone );
 	
 	TInt err( self->iCallStatusObserver->Get( callStatus ) );
 	
-	if( err == KErrNone )
+	if ( err == KErrNone )
 		{
 		// Call ongoing => show bubble if not showing already
 		TBool allowed = EFalse;
 		
-		if( !self->iIncallBubbleAllowed &&
+		if ( !self->iIncallBubbleAllowed &&
 		     self->iForeground &&
 		    ( callStatus > EPSCTsyCallStateNone ) )
 			{
@@ -265,22 +289,21 @@ TInt CAiUiIdleIntegrationImpl::HandleCallEvent( TAny* aPtr )
     		
 			TRAP( err, 
                 self->iIncallBubble->SetIncallBubbleAllowedInIdleL( allowed ) );
-			        
-    		
-			if( err == KErrNone )
+			            		
+			if ( err == KErrNone )
     		    {
     			self->iIncallBubbleAllowed = allowed;
     		    }
 			}
 		// No call ongoing => hide if bubble is visible			
-		else if( self->iIncallBubbleAllowed && callStatus <= EPSCTsyCallStateNone )
+		else if ( self->iIncallBubbleAllowed && callStatus <= EPSCTsyCallStateNone )
 			{
 			allowed = EFalse;
 			
     		TRAP( err, 
                 self->iIncallBubble->SetIncallBubbleAllowedInIdleL( allowed ) );
     		
-    		if( err == KErrNone )
+    		if ( err == KErrNone )
     		    {
     			self->iIncallBubbleAllowed = allowed;
     		    }
@@ -290,5 +313,33 @@ TInt CAiUiIdleIntegrationImpl::HandleCallEvent( TAny* aPtr )
 	return err;
 	}
 
-// End of file.
+// ----------------------------------------------------------------------------
+// CAiUiIdleIntegrationImpl::HandleUiStartupStateChange()
+// ----------------------------------------------------------------------------
+//
+TInt CAiUiIdleIntegrationImpl::HandleUiStartupStateChange( TAny *aPtr )
+    {
+    __ASSERT_DEBUG( aPtr, 
+        AiFwPanic::Panic( AiFwPanic::EAiFwPanic_NullPointerReference ) );
+    
+    CAiUiIdleIntegrationImpl* self = 
+        static_cast< CAiUiIdleIntegrationImpl* >( aPtr );
 
+    if ( !self->iUiStartupPhaseOk )
+        {
+        TInt state( 0 );
+        
+        self->iUiStartupStateObserver->Get( state );
+        
+        if ( state == EStartupUiPhaseAllDone )
+            {
+            self->iUiStartupPhaseOk = ETrue;
+            
+            self->ActivateUI();                        
+            }
+        }
+    
+    return KErrNone;
+    }
+
+// End of file

@@ -161,6 +161,29 @@ void RCPServerClient::ExecuteActionL( const CCPLiwMap& aMap, TUint aOptions )
 //
 // -----------------------------------------------------------------------------
 //
+void RCPServerClient::ExecuteMultipleActionsL(
+        const CLiwGenericParamList& aList, TUint aOptions)
+    {
+    CP_DEBUG( _L8("RCPServerClient::ExecuteMultipleActionsL()") );
+    TIpcArgs args;
+    TInt size = aList.Size();
+    HBufC8* datadesc = HBufC8::NewLC( size );
+    TPtr8 ptr = datadesc->Des();
+    RDesWriteStream datastrm( ptr );
+    CleanupClosePushL(datastrm);
+    aList.ExternalizeL(datastrm);
+    datastrm.CommitL();
+    args.Set( KDescriptorPosition, &*datadesc );
+    args.Set( KOptionsPosition, static_cast<TInt>( aOptions ) );
+    User::LeaveIfError(SendReceive(ECpServerExecuteMultipleActions, args));
+    CleanupStack::PopAndDestroy(&datastrm);
+    CleanupStack::PopAndDestroy(datadesc);
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void RCPServerClient::DeleteL( const CCPLiwMap& aMap )
     {
     CP_DEBUG( _L8("RCPServerClient::DeleteL()") );

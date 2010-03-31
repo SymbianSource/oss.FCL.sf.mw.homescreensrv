@@ -96,6 +96,7 @@ void CCPClient::GetListL( const CLiwGenericParamList& aInParamList,
     CLiwGenericParamList& aOutParamList )
     {
     CP_DEBUG( _L8("CCPClient::GetListL()") );
+    CP_EXTENDED_DEBUG( "GetListL()" , aInParamList );
     CheckMapL( aInParamList, KFilter );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList );
     inMapForServer->PushL( );
@@ -113,6 +114,7 @@ void CCPClient::AddL( const CLiwGenericParamList& aInParamList,
                       TUint aCmdOptions )
     {
     CP_DEBUG( _L8("CCPClient::AddL()") );
+    CP_EXTENDED_DEBUG( "Add()" , aInParamList );
     CheckMapL( aInParamList, KItem );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList ) ;
     inMapForServer->PushL( );
@@ -128,6 +130,7 @@ void CCPClient::AddL( const CLiwGenericParamList& aInParamList,
 void CCPClient::DeleteL( const CLiwGenericParamList& aInParamList )
     {
     CP_DEBUG( _L8("CCPClient::DeleteL()") );
+    CP_EXTENDED_DEBUG( "Delete()" , aInParamList );
     CheckMapL( aInParamList, KData );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList );
     inMapForServer->PushL( );
@@ -144,6 +147,7 @@ void CCPClient::RegisterObserverL( MLiwNotifyCallback* aObserver,
     const CLiwGenericParamList& aInParamList, TInt32 aTransactionId )
     {
     CP_DEBUG( _L8("CCPClient::RegisterObserverL()") );
+    CP_EXTENDED_DEBUG( "RegisterObserver()" , aInParamList );
     CheckMapL( aInParamList, KFilter );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList );
     inMapForServer->PushL( );
@@ -163,6 +167,7 @@ void CCPClient::RegisterObserverL( MLiwNotifyCallback* aObserver,
 void CCPClient::UnregisterObserversL( const CLiwGenericParamList& aInParamList )
     {
     CP_DEBUG( _L8("CCPClient::UnregisterObservers()") );
+    CP_EXTENDED_DEBUG( "UnregisterObservers()" , aInParamList );
     if ( !iActiveNotifier )
         {
         User::Leave( KErrNotFound );
@@ -198,13 +203,27 @@ void CCPClient::UnregisterObserversL( const CLiwGenericParamList& aInParamList )
 void CCPClient::ExecuteActionL( const CLiwGenericParamList& aInParamList,
         TUint aCmdOptions)
     {
-    CP_DEBUG( _L8("CCPClient::RegisterObserverL()") );
+    CP_DEBUG( _L8("CCPClient::ExecuteActionL()") );
+    CP_EXTENDED_DEBUG( "ExecuteAction()" , aInParamList );
     CheckMapL( aInParamList, KFilter );
     CCPLiwMap* inMapForServer = CCPLiwMap::NewL( aInParamList );
     inMapForServer->PushL( );
     inMapForServer->IsValidForActionL( );
     iServerClient.ExecuteActionL( *inMapForServer, aCmdOptions );
     CleanupStack::PopAndDestroy( inMapForServer );
+    }
+
+// -----------------------------------------------------------------------------
+// 
+// -----------------------------------------------------------------------------
+//    
+void CCPClient::ExecuteMultipleActionsL(
+        const CLiwGenericParamList& aInParamList, TUint aCmdOptions)
+    {
+    CP_DEBUG( _L8("CCPClient::ExecuteMultipleActionsL()") );
+    CP_EXTENDED_DEBUG( "ExecuteMultipleActionsL()" , aInParamList );
+    CheckMultiExecuteInputParamsL(aInParamList);
+    iServerClient.ExecuteMultipleActionsL( aInParamList, aCmdOptions );
     }
 
 // -----------------------------------------------------------------------------
@@ -223,5 +242,22 @@ void CCPClient::CheckMapL( const CLiwGenericParamList& aInParamList,
             {
             User::Leave( KErrBadName );
             }
+        }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// --------------- --------------------------------------------------------------
+//
+void CCPClient::CheckMultiExecuteInputParamsL(
+        const CLiwGenericParamList& aList)
+    {
+    const TLiwGenericParam* param = NULL;
+    TInt pos(0);
+    param = aList.FindFirst(pos, KFilters);
+    User::LeaveIfError(pos); //leaves if not found
+    if (param->Value().TypeId() != LIW::EVariantTypeList)
+        {
+        User::Leave(KErrBadName);
         }
     }

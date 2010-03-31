@@ -233,7 +233,32 @@ void CAiPluginFactory::DestroyPlugin( const THsPublisherInfo& aPublisherInfo )
     
     __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done ***" );
     }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::DestroyPlugin()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::DestroyPlugin( const TUid& aUid )
+    {
+    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Start ***" );
+    
+    CHsContentPublisher* plugin( PluginByUid( aUid ) );
+    
+    while ( plugin )
+        {
+        iPublishers.Remove( iPublishers.Find( plugin ) );
         
+        __PRINT( __DBG_FORMAT( 
+            "CAiPluginFactory::DestroyPlugin: name: %S" ), &plugin->PublisherInfo().Name() ); 
+
+        delete plugin;
+        plugin = NULL;            
+        }
+    
+    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done ***" );
+    }
+
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::CreatePluginL()
 //
@@ -253,6 +278,8 @@ void CAiPluginFactory::CreatePluginL(
     plugin = CHsContentPublisher::NewL( aPublisherInfo ) );            
     
     CleanupStack::PushL( plugin );
+    
+    plugin->SetProperty( CHsContentPublisher::ECpsCmdBuffer, iCommandBuffer );
     
     __TIME( "FW: Subscribe content observers",    
     SubscribeContentObserversL( *plugin, aPublisherInfo ) );             
@@ -390,58 +417,13 @@ RPointerArray< CHsContentPublisher >& CAiPluginFactory::Publishers() const
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::ResolvePluginsToUpgradeL()
+// CAiPluginFactory::SetCommandBuffer()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::ResolvePluginsToUpgradeL( 
-    RArray< THsPublisherInfo >& aArray )
+void CAiPluginFactory::SetCommandBuffer( MAiCpsCommandBuffer* aCommandBuffer )
     {
-    RImplInfoPtrArray ecomPlugins;
-    CleanupResetAndDestroyPushL( ecomPlugins );
-        
-    REComSession::ListImplementationsL( 
-        KInterfaceUidHsContentPlugin, ecomPlugins );
-    
-    for ( TInt i = 0; i < ecomPlugins.Count(); i++ )
-        {
-        CImplementationInformation* newInformation( ecomPlugins[i] );
-                 
-        for( TInt j = 0; j < iEComPlugins.Count(); j++ )
-            {            
-            CImplementationInformation* oldInformation( iEComPlugins[j] );
-                                                                 
-            if( newInformation->ImplementationUid() == oldInformation->ImplementationUid() )
-                {
-                if( newInformation->Version() != oldInformation->Version() )
-                    {                        
-                    for ( TInt k = 0; k < iPublishers.Count(); k++ )
-                        {
-                        const THsPublisherInfo& info( 
-                            iPublishers[k]->PublisherInfo() );
-                                                
-                        if ( info.Uid() == newInformation->ImplementationUid() )
-                            {                            
-                            __PRINT( __DBG_FORMAT( "\t[I]\t Plug-in to update uid=%x name=%S namespace=%S, version update %d to %d"), 
-                                info.Uid(), &(info.Name()), &(info.Namespace()), oldInformation->Version(), newInformation->Version()  );
-                            
-                            aArray.Append( info );
-                            }
-                        }
-                                                         
-                    break;
-                    }
-                }                
-            }
-        }
-    
-    CleanupStack::PopAndDestroy( &ecomPlugins );
-           
-    // Update ecom plugin array
-    iEComPlugins.ResetAndDestroy();
-    
-    REComSession::ListImplementationsL( 
-        KInterfaceUidHsContentPlugin, iEComPlugins );
+    iCommandBuffer = aCommandBuffer;
     }
 
 // End of file

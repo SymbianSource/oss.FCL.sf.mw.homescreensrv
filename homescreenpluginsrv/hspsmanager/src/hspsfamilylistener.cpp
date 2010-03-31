@@ -19,7 +19,6 @@
 #include "hspsfamilylistener.h"
 #include "hsps_builds_cfg.hrh"
 #include "hspsmanifest.h"
-#include <featmgr.h>
 
 
 _LIT8(KTch, "_tch");
@@ -35,9 +34,9 @@ const TInt KMaxFamilyLength( 20 );
 //
 ChspsFamilyListener* ChspsFamilyListener::NewL( MhspsFamilyObserver& aObserver )
     {
-    ChspsFamilyListener* self = new(ELeave) ChspsFamilyListener( aObserver );
+    ChspsFamilyListener* self = new(ELeave) ChspsFamilyListener( );
     CleanupStack::PushL( self );
-    self->ConstructL();
+    self->ConstructL( aObserver );
     CleanupStack::Pop( self );
     return self;
     }
@@ -46,41 +45,77 @@ ChspsFamilyListener* ChspsFamilyListener::NewL( MhspsFamilyObserver& aObserver )
 // ChspsFamilyListener::ChspsFamilyListener
 // -----------------------------------------------------------------------------
 //
-ChspsFamilyListener::ChspsFamilyListener( MhspsFamilyObserver& aObserver ) 
-    : CActive( EPriorityStandard ), iObserver( aObserver), iActiveFamily( EhspsFamilyUnknown )    
+ChspsFamilyListener::ChspsFamilyListener() 
     {
-    CActiveScheduler::Add(this);
     }
 
 // -----------------------------------------------------------------------------
 // ChspsFamilyListener::ConstructL
 // -----------------------------------------------------------------------------
 //
-void ChspsFamilyListener::ConstructL()
+void ChspsFamilyListener::ConstructL( MhspsFamilyObserver& aObserver )
     {    
-    User::LeaveIfError( iWsSession.Connect() );
-    
+
+    // ChspsFamily::ConstructL ChspsFamily's second phase constructor call 
+    ChspsFamily::ConstructL();
+
+    iFamilyListenerActive = ChspsFamilyListenerActive::NewL( *this, aObserver );
+
     // A group needs to be instansiated so that we're able to receive events 
-    iWindowGroup = RWindowGroup( iWsSession );
+    iWindowGroup = RWindowGroup( WsSession() );
     User::LeaveIfError( iWindowGroup.Construct(2,ETrue) ); // '2' is a meaningless handle
     
     // Enables for EEventScreenDeviceChanged events
     iWindowGroup.EnableScreenChangeEvents(); 
-            
-    iScreenDevice = new (ELeave) CWsScreenDevice( iWsSession );
-    User::LeaveIfError( iScreenDevice->Construct() );  
     
     // Start the listener
-    Queue();    
+    iFamilyListenerActive->Queue();    
     }
 
+
+
+
+
+ChspsFamilyListenerActive* ChspsFamilyListenerActive::NewL( 
+    ChspsFamilyListener& aListener,
+    MhspsFamilyObserver& aObserver )
+    {
+    ChspsFamilyListenerActive* self = new( ELeave ) ChspsFamilyListenerActive( 
+            aListener,
+            aObserver );
+    CleanupStack::PushL( self );
+    self->ConstructL();
+    CleanupStack::Pop( self );
+    return self;
+    }
+        
+ChspsFamilyListenerActive::~ChspsFamilyListenerActive()
+	{
+    Cancel();
+	}
+
+void ChspsFamilyListenerActive::ConstructL()
+	{
+	}
+
+ChspsFamilyListenerActive::ChspsFamilyListenerActive( 
+		ChspsFamilyListener& aListener,
+		MhspsFamilyObserver& aObserver )
+    :CActive( EPriorityStandard ), 
+    iListener( aListener),
+    iObserver( aObserver )
+	{
+    CActiveScheduler::Add(this);
+	}
+
+
 // ------------------------------------------------------------------------------
-// ChspsFamilyListener::Queue
+// ChspsFamilyListenerActive::Queue
 // ------------------------------------------------------------------------------
-void ChspsFamilyListener::Queue()
+void ChspsFamilyListenerActive::Queue()
     {
     ASSERT ( !IsActive() );
-    iWsSession.EventReady( &iStatus );
+    iListener.WsSession().EventReady( &iStatus );
     SetActive();
     }
 
@@ -89,139 +124,31 @@ void ChspsFamilyListener::Queue()
 // ------------------------------------------------------------------------------
 ChspsFamilyListener::~ChspsFamilyListener()
     {
-    Cancel();
-    if ( iFeatureManagerLoaded )
+    if ( iFamilyListenerActive )
         {
-        FeatureManager::UnInitializeLib();
+        delete iFamilyListenerActive;
         }
-    delete iScreenDevice;
     iWindowGroup.Close();
-    iWsSession.Close();    
     }
 
-// -----------------------------------------------------------------------------
-// ChspsFileChangeListener::GetFamilyString 
-// -----------------------------------------------------------------------------
-void ChspsFamilyListener::GetFamilyString(        
-        TDes8& aFamily )
-    {                     
-    // Append input with a prefix based on the active screen resolution    
-    TPixelsTwipsAndRotation sizeAndRotation;
-    iScreenDevice->GetDefaultScreenSizeAndRotation( sizeAndRotation );
-    TSize resolution( sizeAndRotation.iPixelSize );  
-    if( resolution.iWidth > resolution.iHeight )
-        {
-        TInt temp = resolution.iHeight;
-        resolution.iHeight = resolution.iWidth;
-        resolution.iWidth = temp;        
-        }          
-    switch( resolution.iHeight )
-        {
-        case 320:
-            {
-            if ( resolution.iWidth == 240 )
-                {
-                aFamily.Append( KFamilyQvga );
-                }
-            }
-            break;
-        case 640:
-            {
-            if( resolution.iWidth == 360 )
-                {
-                aFamily.Append( KFamilyQhd );
-                }
-            else if( resolution.iWidth == 480 )
-                {
-                aFamily.Append( KFamilyVga );
-                }            
-            }
-            break;
-        
-        default:
-            break;
-        }    
-    if( aFamily.Length() > 0 )
-        {                     
-//        // Append input with a suffix based on the touch support
-//        if ( !iFeatureManagerLoaded )
-//            {
-//            FeatureManager::InitializeLibL();
-//            iFeatureManagerLoaded = ETrue;
-//            }
-//        if ( FeatureManager::FeatureSupported( KFeatureIdPenSupport ) )
-//            {
-            aFamily.Append( KTch );
-//            }                
-        }
-    }
+
+
 
 // -----------------------------------------------------------------------------
-// ChspsFileChangeListener::GetFamilyType 
+// ChspsFamilyListener::RunL 
 // -----------------------------------------------------------------------------
-ThspsFamily ChspsFamilyListener::GetFamilyType( 
-        const TDesC8& aFamilyString )
-    {
-    ThspsFamily family( EhspsFamilyUnknown );
-    
-    if( aFamilyString == KFamilyQvga )
-       {
-       family = EhspsFamilyQvga;
-       }
-    else if( aFamilyString == KFamilyQvga2 )
-       {
-       family = EhspsFamilyQvga2;
-       }
-    else if( aFamilyString == KFamilyVga )
-       {
-       family = EhspsFamilyVga;            
-       }
-    else if( aFamilyString == KFamilyVga3 )
-       {
-       family = EhspsFamilyVga3;
-       }
-    else if( aFamilyString == KFamilyQhd )
-       {
-       family = EhspsFamilyQhd;
-       }
-    else if( aFamilyString == KFamilyQhd_tch )
-       {
-       family = EhspsFamilyQhd_tch;
-       }
-   else if( aFamilyString == KFamilyVga_tch )
-       {
-       family = EhspsFamilyVga_tch;
-       }    
-   
-    return family;     
-    }
-
-// -----------------------------------------------------------------------------
-// ChspsFileChangeListener::GetFamilyType
-// -----------------------------------------------------------------------------
-ThspsFamily ChspsFamilyListener::GetFamilyType()
-    {
-    TBuf8<KMaxFamilyLength> familyString;
-    GetFamilyString( familyString );   
-    return GetFamilyType( familyString );
-    }
-
-// -----------------------------------------------------------------------------
-// ChspsFileChangeListener::RunL 
-// -----------------------------------------------------------------------------
-void ChspsFamilyListener::RunL()
+void ChspsFamilyListenerActive::RunL()
     {
     TWsEvent wsEvent;
-    iWsSession.GetEvent(wsEvent);                                   
+    iListener.WsSession().GetEvent(wsEvent);
     switch( wsEvent.Type() )
         {
         case EEventScreenDeviceChanged:
             {                    
-            ThspsFamily newFamily = GetFamilyType();
+            ThspsFamily newFamily = iListener.GetFamilyType();
             if ( newFamily > EhspsFamilyUnknown )
                 {                
                 iObserver.HandleFamilyChangeL( newFamily );
-                iActiveFamily = newFamily;
                 }
             break;
             }
@@ -236,15 +163,15 @@ void ChspsFamilyListener::RunL()
 // ChspsFileChangeListener::DoCancel
 // -----------------------------------------------------------------------------
 //
-void ChspsFamilyListener::DoCancel()
+void ChspsFamilyListenerActive::DoCancel()
     {
-    iWsSession.EventReadyCancel();
+    iListener.WsSession().EventReadyCancel();
     }
  
 // -----------------------------------------------------------------------------
 // ChspsFileChangeListener::RunError
 // -----------------------------------------------------------------------------
-TInt ChspsFamilyListener::RunError(TInt /*aError*/)
+TInt ChspsFamilyListenerActive::RunError(TInt /*aError*/)
     {
     return KErrNone;
     }

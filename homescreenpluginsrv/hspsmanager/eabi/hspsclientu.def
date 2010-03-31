@@ -1,7 +1,7 @@
 EXPORTS
 	_ZN11ChspsClient13GethspsResultER11ChspsResult @ 1 NONAME
 	_ZN11ChspsClient13hspsAddPluginEiiiiRi @ 2 NONAME
-	_ZN11ChspsClient14hspsGetHeadersERK8ChspsODTR13CArrayPtrFlatIS0_E @ 3 NONAME
+	_ZN11ChspsClient14hspsGetHeadersERK8ChspsODTiR13CArrayPtrFlatIS0_E @ 3 NONAME
 	_ZN11ChspsClient16hspsInstallThemeERK7TDesC16R5TDes8 @ 4 NONAME
 	_ZN11ChspsClient16hspsInstallThemeERK7TDesC16R8ChspsODT @ 5 NONAME
 	_ZN11ChspsClient16hspsMovePluginsLEiiRK13CArrayFixFlatIiE @ 6 NONAME
@@ -14,7 +14,7 @@ EXPORTS
 	_ZN11ChspsClient17hspsReinstallConfEii @ 13 NONAME
 	_ZN11ChspsClient17hspsReplacePluginEiii @ 14 NONAME
 	_ZN11ChspsClient18hspsGetListHeadersERK6TDesC8R12CArrayPtrSegI6HBufC8E @ 15 NONAME
-	_ZN11ChspsClient18hspsGetListHeadersERK8ChspsODTR13CArrayPtrFlatIS0_E @ 16 NONAME
+	_ZN11ChspsClient18hspsGetListHeadersERK8ChspsODTiR13CArrayPtrFlatIS0_E @ 16 NONAME
 	_ZN11ChspsClient18hspsRestoreDefaultERK8ChspsODTRS0_ @ 17 NONAME
 	_ZN11ChspsClient18hspsSetActiveThemeERK6TDesC8R5TDes8 @ 18 NONAME
 	_ZN11ChspsClient18hspsSetActiveThemeERK8ChspsODTRS0_ @ 19 NONAME
@@ -25,32 +25,32 @@ EXPORTS
 	_ZN11ChspsClient22hspsCancelInstallThemeEv @ 24 NONAME
 	_ZN11ChspsClient24hspsCancelGetListHeadersEv @ 25 NONAME
 	_ZN11ChspsClient24hspsRestoreActiveAppConfEii @ 26 NONAME
-	_ZN11ChspsClient4NewLER35MhspsThemeManagementServiceObserver @ 27 NONAME
-	_ZN11ChspsClient5NewLCER35MhspsThemeManagementServiceObserver @ 28 NONAME
-	_ZN11ChspsClient9SetLogBusEPv @ 29 NONAME
-	_ZTI11ChspsClient @ 30 NONAME
-	_ZTV11ChspsClient @ 31 NONAME
-	_ZThn28_N11ChspsClient16hspsInstallThemeERK7TDesC16R5TDes8 @ 32 NONAME
-	_ZThn28_N11ChspsClient16hspsInstallThemeERK7TDesC16R8ChspsODT @ 33 NONAME
-	_ZThn28_N11ChspsClient21hspsInstallNextPhaseLER5TDes8 @ 34 NONAME
-	_ZThn28_N11ChspsClient21hspsInstallNextPhaseLER8ChspsODT @ 35 NONAME
-	_ZThn28_N11ChspsClient22hspsCancelInstallThemeEv @ 36 NONAME
-	_ZThn32_N11ChspsClient13hspsAddPluginEiiiiRi @ 37 NONAME
-	_ZThn32_N11ChspsClient16hspsMovePluginsLEiiRK13CArrayFixFlatIiE @ 38 NONAME
-	_ZThn32_N11ChspsClient16hspsRemovePluginEii @ 39 NONAME
-	_ZThn32_N11ChspsClient16hspsRemoveThemeLERK8ChspsODT @ 40 NONAME
-	_ZThn32_N11ChspsClient16hspsSetConfStateEii23ThspsConfigurationState26ThspsConfStateChangeFilter @ 41 NONAME
-	_ZThn32_N11ChspsClient17hspsGetNextHeaderEv @ 42 NONAME
-	_ZThn32_N11ChspsClient17hspsPluginUpdateLERK8ChspsODT @ 43 NONAME
-	_ZThn32_N11ChspsClient17hspsReplacePluginEiii @ 44 NONAME
-	_ZThn32_N11ChspsClient18hspsGetListHeadersERK6TDesC8R12CArrayPtrSegI6HBufC8E @ 45 NONAME
-	_ZThn32_N11ChspsClient18hspsGetListHeadersERK8ChspsODTR13CArrayPtrFlatIS0_E @ 46 NONAME
-	_ZThn32_N11ChspsClient18hspsRestoreDefaultERK8ChspsODTRS0_ @ 47 NONAME
-	_ZThn32_N11ChspsClient18hspsSetActiveThemeERK6TDesC8R5TDes8 @ 48 NONAME
-	_ZThn32_N11ChspsClient18hspsSetActiveThemeERK8ChspsODTRS0_ @ 49 NONAME
-	_ZThn32_N11ChspsClient19hspsSetActivePluginEii @ 50 NONAME
-	_ZThn32_N11ChspsClient21hspsSetPluginSettingsERK8ChspsODTiR16ChspsDomDocumenti @ 51 NONAME
-	_ZThn32_N11ChspsClient24hspsCancelGetListHeadersEv @ 52 NONAME
-	_ZThn32_N11ChspsClient24hspsRestoreActiveAppConfEii @ 53 NONAME
-	_ZN11ChspsClient25hspsRestoreConfigurationsEii @ 54 NONAME
+	_ZN11ChspsClient25hspsRestoreConfigurationsEii @ 27 NONAME
+	_ZN11ChspsClient4NewLER35MhspsThemeManagementServiceObserver @ 28 NONAME
+	_ZN11ChspsClient5NewLCER35MhspsThemeManagementServiceObserver @ 29 NONAME
+	_ZN11ChspsClient9SetLogBusEPv @ 30 NONAME
+	_ZTI11ChspsClient @ 31 NONAME
+	_ZTV11ChspsClient @ 32 NONAME
+	_ZThn28_N11ChspsClient16hspsInstallThemeERK7TDesC16R5TDes8 @ 33 NONAME
+	_ZThn28_N11ChspsClient16hspsInstallThemeERK7TDesC16R8ChspsODT @ 34 NONAME
+	_ZThn28_N11ChspsClient21hspsInstallNextPhaseLER5TDes8 @ 35 NONAME
+	_ZThn28_N11ChspsClient21hspsInstallNextPhaseLER8ChspsODT @ 36 NONAME
+	_ZThn28_N11ChspsClient22hspsCancelInstallThemeEv @ 37 NONAME
+	_ZThn32_N11ChspsClient13hspsAddPluginEiiiiRi @ 38 NONAME
+	_ZThn32_N11ChspsClient16hspsMovePluginsLEiiRK13CArrayFixFlatIiE @ 39 NONAME
+	_ZThn32_N11ChspsClient16hspsRemovePluginEii @ 40 NONAME
+	_ZThn32_N11ChspsClient16hspsRemoveThemeLERK8ChspsODT @ 41 NONAME
+	_ZThn32_N11ChspsClient16hspsSetConfStateEii23ThspsConfigurationState26ThspsConfStateChangeFilter @ 42 NONAME
+	_ZThn32_N11ChspsClient17hspsGetNextHeaderEv @ 43 NONAME
+	_ZThn32_N11ChspsClient17hspsPluginUpdateLERK8ChspsODT @ 44 NONAME
+	_ZThn32_N11ChspsClient17hspsReplacePluginEiii @ 45 NONAME
+	_ZThn32_N11ChspsClient18hspsGetListHeadersERK6TDesC8R12CArrayPtrSegI6HBufC8E @ 46 NONAME
+	_ZThn32_N11ChspsClient18hspsGetListHeadersERK8ChspsODTiR13CArrayPtrFlatIS0_E @ 47 NONAME
+	_ZThn32_N11ChspsClient18hspsRestoreDefaultERK8ChspsODTRS0_ @ 48 NONAME
+	_ZThn32_N11ChspsClient18hspsSetActiveThemeERK6TDesC8R5TDes8 @ 49 NONAME
+	_ZThn32_N11ChspsClient18hspsSetActiveThemeERK8ChspsODTRS0_ @ 50 NONAME
+	_ZThn32_N11ChspsClient19hspsSetActivePluginEii @ 51 NONAME
+	_ZThn32_N11ChspsClient21hspsSetPluginSettingsERK8ChspsODTiR16ChspsDomDocumenti @ 52 NONAME
+	_ZThn32_N11ChspsClient24hspsCancelGetListHeadersEv @ 53 NONAME
+	_ZThn32_N11ChspsClient24hspsRestoreActiveAppConfEii @ 54 NONAME
 

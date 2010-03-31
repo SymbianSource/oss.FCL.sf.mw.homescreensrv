@@ -215,26 +215,35 @@ void CAiProfileEngine::UpdateProfileNamesL()
         TInt generalProfileIndex( 
             profileNamesArray->FindById( KGeneralProfileId ) );
         
-		swapProfileName = 
-            profileNamesArray->MdcaPoint( generalProfileIndex ).AllocLC() ;		        
+        if( generalProfileIndex > KErrNotFound )
+            {
+            swapProfileName = 
+                profileNamesArray->MdcaPoint( generalProfileIndex ).AllocLC() ; 
+            }
     	}
     else
         {
         TInt silentProfileIndex( 
             profileNamesArray->FindById( KSilentProfileId ) );	
 		
-        swapProfileName = 
-            profileNamesArray->MdcaPoint( silentProfileIndex ).AllocLC() ;                
+        if( silentProfileIndex > KErrNotFound )
+            {
+            swapProfileName = 
+                profileNamesArray->MdcaPoint( silentProfileIndex ).AllocLC() ;  
+            }
         }
     
-    TPtrC swapProfileNamePtr( *swapProfileName );
-	   
-	HBufC* activateProfileString( StringLoader::LoadLC( 
-        R_AI_PERS_PROF_TOGGLE, swapProfileNamePtr ) );    	
-    
-    SetSwapProfileNameL( *activateProfileString );
+    if( swapProfileName )
+        { 
+        HBufC* activateProfileString( StringLoader::LoadLC( 
+            R_AI_PERS_PROF_TOGGLE, swapProfileName->Des() ) );      
+        
+        SetSwapProfileNameL( *activateProfileString );
+        
+        CleanupStack::PopAndDestroy( 2 ); // swapProfileName, activateProfileString
+        }
 
-    CleanupStack::PopAndDestroy( 5 ); //profile, profileName, // profileNamesArray, swapProfileName, activateProfileString           
+    CleanupStack::PopAndDestroy( 3 ); //profile, profileName, profileNamesArray,           
 	}
 
 // ----------------------------------------------------------------------------

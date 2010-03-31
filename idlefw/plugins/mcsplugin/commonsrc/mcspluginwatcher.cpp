@@ -79,15 +79,6 @@ void CMCSPluginWatcher::WatchNotify( MMCSPluginWatcherObserver* aObserver )
     SetActive();
     }
 
-void CMCSPluginWatcher::StopAndWatch( CMenuOperation* aOperation, 
-                                      CActiveSchedulerWait* aWaitScheduler )
-    {
-    __ASSERT_DEBUG( KRequestPending == iStatus.Int(), User::Invariant() );
-    iWaitScheduler = aWaitScheduler;
-    iOperation = aOperation;
-    SetActive();
-    }
-
 // ---------------------------------------------------------------------------
 // Inherited from CActive class 
 // ---------------------------------------------------------------------------
@@ -100,11 +91,7 @@ void CMCSPluginWatcher::RunL()
         {
         iObserver->HandleNotifyL();
         }
-    if ( iWaitScheduler && iWaitScheduler->IsStarted() )
-        {
-        Cancel();
-        iWaitScheduler->AsyncStop();
-        }
+    
     //CActiveScheduler::Stop();
     }
 

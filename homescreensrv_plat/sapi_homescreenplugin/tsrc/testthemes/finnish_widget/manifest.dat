@@ -1,5 +1,9 @@
 <?xml version="1.0"?>
-<package version="0.3">
+<package version="2.0">
+  
+  <!-- Set both two families for unit tests -->
+  <family>qhd_tch</family>
+  <family>vga_tch</family>
   
   <!-- application|view|widget|template -->
   <type>widget</type>
@@ -19,6 +23,8 @@
 	<fullname>&amp;qtn_2000B132_configuration_name;</fullname>
 	<shortname>FinnishWidget</shortname>
 	<version>1.0</version>
+	
+	<filelogo>mif(dummy.mif 1 2)</filelogo>
 	
 	<!-- Configuration -->
 	<filexml>widgetconfiguration.xml</filexml>	

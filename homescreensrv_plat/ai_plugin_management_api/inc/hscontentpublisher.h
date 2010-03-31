@@ -165,7 +165,12 @@ public:
          * Provides access to localized plugin name if supported. HBufC*
          * @see EPublisherResources
          */    
-        EPluginName
+        EPluginName,
+
+        /**
+         * Provides access to CPS command buffer.
+         */    
+        ECpsCmdBuffer        
         };
 
 public:

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -81,13 +81,6 @@ public:
      * @since S60 v9.1
      */
     void HandleHelpCommandL();
-
-    /**
-     * Dialog showing changed
-     *
-     * @since S60 v3.2
-      */
-    TBool IsChangeDialogShowing();
 
     /**
      * Close change dialog
@@ -199,7 +192,7 @@ private:
     /**
      * Checks if there is a need to update the middle softkey label.
      */
-    void CheckMiddleSoftkeyLabelL();
+    void CheckMiddleSoftkeyLabel();
 
     // From MFavouritesDbObserver
     /**

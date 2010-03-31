@@ -57,7 +57,7 @@ SOURCE		  hspstoolsdllmain.cpp hspslogbusfile.cpp hspslogbus.cpp hspslogbusrdebu
 
 nostrictdef
 
-LIBRARY		 euser.lib flogger.lib hspsdomdocument.lib liwservicehandler.lib estor.lib efsrv.lib hspsodt.lib charconv.lib hspsresource.lib
+LIBRARY    euser.lib flogger.lib hspsdomdocument.lib liwservicehandler.lib estor.lib efsrv.lib hspsodt.lib charconv.lib hspsresource.lib
 
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE

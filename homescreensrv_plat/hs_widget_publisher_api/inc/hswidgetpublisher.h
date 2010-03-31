@@ -203,7 +203,8 @@ public:
     /**
      * Method publishes the provided widget. 
      * Widget needs to be published in order for the content 
-     * to be seen by the HS.
+     * to be seen by the HS. For correct behaviour during publishing, events received
+	 * from HS must be handled appropriately.
      *
      * @code
      * HsWidgetPublisher* hsPublisher = new HsWidgetPublisher( dataObserver );

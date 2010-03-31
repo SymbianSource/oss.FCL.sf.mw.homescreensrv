@@ -47,6 +47,7 @@
 #include "mt_hsps_getplugins_5.h"
 #include "mt_hsps_getplugins_6.h"
 #include "mt_hsps_getplugins_7.h"
+#include "mt_hsps_getplugins_8.h"
 // get plugin list
 #include "mt_hsps_getpluginlist_1.h"
 #include "mt_hsps_getpluginlist_2.h"
@@ -129,6 +130,7 @@ _LIT( KMinimalResourceFile1, "c:\\private\\20000fb1\\2456\\270513751\\536916225\
 _LIT( KMinimalResourceFile2, "c:\\private\\20000fb1\\2456\\270513751\\536916225\\1.0\\sources\\viewnavigationrules.xml"  );
 _LIT( KMinimalResourceFile3, "c:\\private\\20000fb1\\2456\\270513751\\536916225\\1.0\\sources\\resource.file"  );
 _LIT( KMinimalResourceFile4, "c:\\private\\20000fb1\\2456\\270513751\\536916225\\1.0\\sources\\picture.jpeg"  );
+_LIT( KFinnishMifLogo, "c:\\private\\20000fb1\\2456\\270513751\\536916274\\1.0\\sources\\dummy.mif"  );
 
 // ======== LOCAL FUNCTIONS ====================================================
 
@@ -816,8 +818,38 @@ void MT_CHSPSConfigurationIf::GetPlugins_7_L()
         ( TUint8* )getplugins_7_ts_1_input,
         ( TUint8* )getplugins_7_ts_1_output );
     EUNIT_PRINT( _L8( "Test step passed" ) );    
-    }
-
+    }    
+    
+//------------------------------------------------------------------------------
+// Test case: GetPlugins(8)
+//------------------------------------------------------------------------------
+void MT_CHSPSConfigurationIf::GetPlugins_8_L()
+    {
+    // Pre conditions
+    // Set active configuration to Minimal configuration
+    EUNIT_PRINT( _L8( "Pre conditions: Set Active configuration Operator" ) );
+    SetActiveConfigurationL( KHSPSTestAppUid, KHSPSActiveConfOperator );
+    // Attach to HSPS 
+    EUNIT_PRINT( _L8( "Pre conditions: Attach to HSPS service IConfiguration interface" ) );
+    AttachServiceL( KHSPS, KHSPSConfigurationIf, KHSPSTestAppUid );
+    
+    // Test step 1: fetch widget plugins and copy logos files 
+    EUNIT_PRINT( _L8( "Test step 1" ) );
+    RunTestStepSyncL(
+        ( TUint8* )getplugins_8_ts_1_method,
+        ( TUint8* )getplugins_8_ts_1_input,
+        ( TUint8* )getplugins_8_ts_1_output );
+            
+    EUNIT_PRINT( _L8( "post condition check for resource file copy" ) );
+    ResetResources();
+    // Check that the logo file was copied
+    AddResourceL( KFinnishMifLogo, 4608 );
+    CheckResourcesL();             
+    EUNIT_PRINT( _L8( "post condition check for resource copy passed" ) );        
+    
+    EUNIT_PRINT( _L8( "Test step passed" ) );    
+    }        
+    
 //------------------------------------------------------------------------------
 // Test case: GetPluginList(1)
 //------------------------------------------------------------------------------
@@ -2651,11 +2683,20 @@ void MT_CHSPSConfigurationIf::SisxInstallation_1_L()
         CFileMan::EOverWrite ) );
             
     // Wait until configuration is installed
-    User::After( 5000000 );
+    User::After( 8000000 );
     
     // Make sure "InstalledWidget" is installed
     if ( !BaflUtils::FileExists( iFileserver, _L( "c:\\private\\200159c0\\themes\\2456\\270513751\\536916275\\1.0\\InstallWidgetConf.o0000" ) ) )
         {
+        // Installation failed - remove imports to be able to re-run the test again
+        // The ChspsThemeServer::HandleConfigurationImportsL does handle newly
+        // added files only
+        User::LeaveIfError( fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) ) );
+        fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133.dat" ),
+            0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+        User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
+        
+        // Leave - the test was not successfull
         User::Leave( KErrGeneral );
         }
     
@@ -2673,7 +2714,7 @@ void MT_CHSPSConfigurationIf::SisxInstallation_1_L()
     User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
     // Removing of *.dat file causes configuration uninstallation
     // Wait until configuration is uninstalled
-    User::After( 5000000 );
+    User::After( 8000000 );
 
     // Make sure "InstalledWidget" is uninstalled
     if ( BaflUtils::FileExists( iFileserver, _L( "c:\\private\\200159c0\\themes\\2456\\270513751\\536916275\\1.0\\InstallWidgetConf.o0000" ) ) )
@@ -3171,6 +3212,13 @@ EUNIT_BEGIN_TEST_TABLE(
         "FUNCTIONALITY",
         SetupL, GetPlugins_7_L, Teardown )
 
+    EUNIT_TEST(
+        "GetPlugins(8)",
+        "IConfiguration",
+        "GetPlugins",
+        "FUNCTIONALITY",
+        SetupL, GetPlugins_8_L, Teardown )
+        
     EUNIT_TEST(
         "GetPluginList(1)",
         "IConfiguration",

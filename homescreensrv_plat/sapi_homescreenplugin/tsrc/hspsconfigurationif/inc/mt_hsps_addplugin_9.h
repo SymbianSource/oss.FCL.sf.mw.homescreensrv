@@ -510,7 +510,117 @@ const TUint8 addplugin_9_ts_2_output[] = {
 //   - Version 1.0
 //   - Item count (LE)
 10,
-2,0,0,0,
+3,0,0,0,
+// - pluginConf::resources
+//   - Version 1.0
+//   - List item starts
+10,
+0,0,0,0,
+// - object[0]
+//   - Version 1.0
+//   - Variant value type, EVariantTypeMap
+10,
+8,
+// - object[0] map
+//   - Version 1.0
+//   - Item count (LE)
+10,
+4,0,0,0,
+// - object[0]::name
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+4,0,0,0,
+18,
+'n','a','m','e',
+// - object[0]::name
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+9,0,0,0,
+38,
+'d','u','m','m','y','.','m','i','f',
+// - object[0]::path
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+4,0,0,0,
+18,
+'p','a','t','h',
+// - object[0]::path
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+37,0,0,0,
+150,
+'2','4','5','6','\\','2','7','0','5','1','3','7','5','1','\\','5','3','6','9','1','6','2','7','4','\\','1','.','0','\\','s','o','u','r','c','e','s','\\',
+// - object[0]::mediatype
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+9,0,0,0,
+38,
+'m','e','d','i','a','t','y','p','e',
+// - object[0]::mediatype
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+0,0,0,0,
+2,
+// - Object[0]::tag
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+3,0,0,0,
+14,
+'t','a','g',
+// - Object[0]::tag
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+4,0,0,0,
+18,
+'l','o','g','o',
 // - pluginConf::resources
 //   - Version 1.0
 //   - List item starts

@@ -67,20 +67,20 @@ public:
         TAiFwDestroyReason aReason ) = 0;
     
     /**
-     * Notifies to update content publishers after Ecom registry change.
+     * Notifies to reload previously released plugins
      * 
      * @since S60 5.2
      */    
-    virtual void NotifyUpdatePlugins() = 0;
+    virtual void NotifyReloadPlugins() = 0;
     
     /**
-     * Queries whether online state is in use
-     * by any of the currently loaded plugin.
+     * Notifies that defined ECom plugins should be released to enable
+     * plugin upgrade
      * 
      * @since S60 5.2
-     * @return ETrue if online/offline state needed, EFalse otherwise
      */
-    virtual TBool OnlineStateInUse() const = 0;    
+    virtual void NotifyReleasePlugins( const RArray<TUid>& aUidList ) = 0;
+    
     };
     
 #endif // _AISTATEOBSERVER_H

@@ -118,6 +118,16 @@ public:
     void ExecuteActionL( const CCPLiwMap& aMap, TUint aOptions = 0 );
 
     /**
+     * Pass ExecuteMultipleActionsL request to the server
+     *
+     * @since S60 v 5.0
+     * @param aList const reference to the input list
+     * @param aOptions Command options.
+     */
+    void ExecuteMultipleActionsL( const CLiwGenericParamList& aList,
+            TUint aOptions = 0 );
+    
+    /**
      * Pass GetChangeInfoData request to server
      * @param aBuf reference to the input list
      * @return error code

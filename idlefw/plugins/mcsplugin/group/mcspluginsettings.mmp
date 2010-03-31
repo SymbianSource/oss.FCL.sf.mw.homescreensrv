@@ -58,36 +58,27 @@ END
 APP_LAYER_SYSTEMINCLUDE
 MW_LAYER_SYSTEMINCLUDE
 
-LIBRARY                 euser.lib
-LIBRARY                 ecom.lib
-LIBRARY                 avkon.lib
-LIBRARY                 bafl.lib
-LIBRARY                 cone.lib
-LIBRARY                 efsrv.lib
-LIBRARY                 eikcoctl.lib
-LIBRARY                 eikcore.lib
-LIBRARY                 cdlengine.lib
-//LIBRARY                 centralrepository.lib
-LIBRARY                 cenrepnotifhandler.lib  // CCenRepNotifyHandler
-LIBRARY                 gsframework.lib         // For base classes
-LIBRARY                 gslistbox.lib           // For CGSListBoxItemTextArray
-LIBRARY                 gsecomplugin.lib
-LIBRARY                 commonengine.lib        // For RConeResourceLoader
-LIBRARY                 inetprotutil.lib        // For TUriParser
-//LIBRARY                 apgrfx.lib              // For RApaLsSession
-//LIBRARY                 apparc.lib              // For TApaAppInfo
-LIBRARY                 msgs.lib                // For Message Server
-LIBRARY                 platformenv.lib         // For PathInfo
-LIBRARY                 hlplch.lib              // for HlpLauncher
-LIBRARY                 featmgr.lib             // For feature manager
-LIBRARY                 favouritesengine.lib
-//LIBRARY                 javaregistryclient.lib  // For JavaRegistry
-#ifdef __WEB_WIDGETS
-//LIBRARY                 widgetregistryclient.lib
-#endif
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         avkon.lib
+LIBRARY         bafl.lib
+LIBRARY         cone.lib
+LIBRARY         efsrv.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikcore.lib
+LIBRARY         cdlengine.lib
+LIBRARY         cenrepnotifhandler.lib  // CCenRepNotifyHandler
+LIBRARY         gsframework.lib         // For base classes
+LIBRARY         gslistbox.lib           // For CGSListBoxItemTextArray
+LIBRARY         gsecomplugin.lib
+LIBRARY         commonengine.lib        // For RConeResourceLoader
+LIBRARY         inetprotutil.lib        // For TUriParser
+LIBRARY         msgs.lib                // For Message Server
+LIBRARY         platformenv.lib         // For PathInfo
+LIBRARY         hlplch.lib              // for HlpLauncher
+LIBRARY         featmgr.lib             // For feature manager
+LIBRARY         favouritesengine.lib
 
-// Debugging dependencies
-//LIBRARY           flogger.lib
 LIBRARY         mcsmenu.lib
 LIBRARY         hspluginsettings.lib
 LIBRARY         aiutils.lib

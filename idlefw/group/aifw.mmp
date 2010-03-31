@@ -34,6 +34,8 @@ SOURCE          aiuicontrollermanager.cpp
 SOURCE          aistatemanager.cpp
 SOURCE          aistateprovider.cpp
 SOURCE          aiecomobserver.cpp
+SOURCE          aicpscommandbuffer.cpp
+SOURCE          aicpsexecuteparam.cpp
 
 // Active Idle Framework shared sources
 SOURCEPATH      ../src/common
@@ -53,6 +55,8 @@ LIBRARY         centralrepository.lib
 LIBRARY         apparc.lib apgrfx.lib
 LIBRARY         ws32.lib cone.lib commonengine.lib
 LIBRARY         cenrepnotifhandler.lib
+LIBRARY      	liwServiceHandler.lib
+LIBRARY         swiutils.lib
 
 // S60 Dependencies
 LIBRARY         avkon.lib
@@ -70,3 +74,4 @@ LIBRARY         aiidleint.lib
 LIBRARY         flogger.lib
 
 DEFFILE         aifwu.def
+

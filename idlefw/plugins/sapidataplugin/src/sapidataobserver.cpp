@@ -19,7 +19,7 @@
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <liwgenericparam.h>
-#include <S32MEM.H>
+#include <s32mem.h>
 #include "sapidata.h"
 #include "sapidataobserver.h"
 #include "sapidatapluginconst.h"

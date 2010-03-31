@@ -21,6 +21,7 @@
 
 #include <e32base.h>
 #include "cpstorage.h"
+#include "cpactiondatacache.h"
 
 // FORWARD DECLARATIONS
 #ifdef CONTENT_PUBLISHER_DEBUG
@@ -84,12 +85,14 @@ public:
     /**
      * Fetches action from database
      * @param aInParamList filter and sorting criteria
+     * @param aEnableCache flag indicating if action data should be cached
      * @param aOutParamList results
      * @param aNotificationList change info list (for notifications)
      * @return KErrNotFound if data was not found
      */
-    TInt GetActionL( const CCPLiwMap& aMa,
-        CLiwGenericParamList& aOutParamList, 
+    TInt GetActionsL( const CCPLiwMap& aMap,
+        TBool aEnableCache,
+        CLiwGenericParamList& aOutParamList,
         CLiwDefaultList* aNotificationList = NULL );
 
     /**
@@ -183,7 +186,7 @@ private:
     void FillActionParamListL(
     		CLiwGenericParamList & aOutParamList, 
     		const TLiwGenericParam* aParam,
-			RBuf8 & aActionTrigger);
+    		const CLiwDefaultList* aActionTriggers);
 
      /**
      * Creates map for GetList request - publisher, content_type
@@ -211,6 +214,7 @@ private:
     */
     void BuildChangeInfoL( 
     		const CCPLiwMap* aMap, 
+    		const CLiwDefaultList* aActionTriggers,
     		const TLiwGenericParam* aParam,	
     		CLiwDefaultList* aChangeInfoList );
     /**
@@ -221,6 +225,7 @@ private:
     */
     void BuildDefaultChangeInfoL( 
     		const CCPLiwMap* aMap, 
+    		const CLiwDefaultList* aActionTriggers,
     		CLiwDefaultList* aChangeInfoList );
     /**
     * Builds change info list when query to database returned nothing
@@ -250,6 +255,13 @@ private:
     void CopyActionTrigger16L( const CLiwMap* aInMap, 
     		CLiwDefaultMap* aOutMap );
 
+    /**
+    * Converts variant type from TDesC8 to TDesC
+    * @param aVariant variant to convert
+    */     
+    void CopyActionTrigger16L( const TLiwVariant& aVariant, 
+            CLiwDefaultMap* aOutMap );
+
 private:
     // data
 
@@ -265,6 +277,13 @@ private:
      */
     RPointerArray<CCPNotificationHandler> iNotificationsArray;
 
+    /*
+     * Action data cache
+     * Own.
+     */
+    CCPActionDataCache* iActionDataCache;
+
+    
 #ifdef CONTENT_PUBLISHER_DEBUG
     CCPDebug* iDebug;
 #endif

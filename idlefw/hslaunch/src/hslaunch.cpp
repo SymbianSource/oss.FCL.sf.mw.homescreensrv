@@ -16,6 +16,7 @@
  */
 
 #include <e32property.h>
+#include <e32debug.h>
 #include "hslaunch.h"
 
 // ========================= DECLARATIONS ==================================
@@ -260,36 +261,36 @@ TInt CHsLaunch::RunError( TInt aError )
 // -----------------------------------------------------------------------------
 //
 void CHsLaunch::ProcessEnded( const TExitType& aExitType,
-                              const TInt /*aExitReason*/,
+                              const TInt aExitReason,
                               const TExitCategoryName& /*aExitCategory*/ )
     {    
-    // Only respond to panic. EExitTerminate and EExitKill are ignored.
-    if( aExitType != EExitPanic )
-        {
-        return;
-        }
-    
     TInt crashCount = 0;
     TInt error = RProperty::Get( KPSCategoryUid,
                                  KPSCrashCountKey,
                                  crashCount );
     
-    if( error == KErrNone )
+    // increment crash count in cenrep if the process has panic'd or killed with
+    // an error code
+    if( aExitType == EExitPanic ||
+        ( aExitType == EExitKill && aExitReason != KErrNone ) )
         {
-        crashCount++;
-        error = RProperty::Set( KPSCategoryUid,
-                                KPSCrashCountKey,
-                                crashCount );
-        }
-    
-    if( error == KErrNone )
-        {
-        User::After( KSleepOnRetry ); 
-        Activate();
-        }
-    else
-        {    
-        ShutdownApp( error );
+        if( error == KErrNone )
+            {
+            crashCount++;
+            error = RProperty::Set( KPSCategoryUid,
+                                    KPSCrashCountKey,
+                                    crashCount );                          
+            }
+        
+        if( error == KErrNone )
+            {      
+            User::After( KSleepOnRetry ); 
+            Activate();
+            }
+        else
+            {           
+            ShutdownApp( error );
+            }
         }
     }
 

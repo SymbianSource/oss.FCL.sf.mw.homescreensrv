@@ -312,12 +312,8 @@ TBool CCPNotificationHandler::SendChangeInfoListL(
                     {
                     listOfMatchingMaps->AppendL( variant );
                     }
-                else 
-                    {
-                    variant.Reset();
-                    }
                 }
-			CleanupStack::Pop( &variant );
+            CleanupStack::PopAndDestroy( &variant );
 			}
 		if ( listOfMatchingMaps->Count( ) )
 			{

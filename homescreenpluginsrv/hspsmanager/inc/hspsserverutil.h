@@ -462,13 +462,13 @@ class hspsServerUtil
             const TDesC8& aAttrValue );        
         
         /**
-         * Retrieves a filename from a file declaration.
-         * @since S60 5.1
+         * Retrieves filename from a logo declaration.
+         * @since S60 5.2
          * @param aFileDeclaration "SKIN():MIF()", "MIF()", "UID()" or "file.ext" string
          * @param aFilename Referred file name or NULL
  		 * @return True if a file was referred from the declaration
          */
-        static TBool hspsServerUtil::IsFile(
+        static TBool hspsServerUtil::IsLogoFile(
                 const TDesC& aFileDeclaration,
                 TFileName& aFilename );
 
@@ -542,7 +542,28 @@ class hspsServerUtil
 	             const TDesC& aPath,
 	             const TDesC& aFilename,         
 	             TFileName& aDrivePathName );
-	    
+
+      /**
+       * Resolves icon path information from the provided logo declaration.
+       * Example:
+       *    Decl.   = "mif(536999050\270513751\268475903\1.0\sources\icon.mif)"
+       *    Source  = "c\private\200159c0\themes\536999050\270513751\268475903\1.0\sources\icon.mif"
+       *    Target  = "c\private\102750f0\536999050\270513751\268475903\1.0\sources\icon.mif"
+       *    Up.decl = "mif(c\private\102750f0\536999050\270513751\268475903\1.0\sources\icon.mif)"	        
+       * @since S60 5.2
+       * @param aLogoDeclaration Skin():mif(), mif(), uid(), icon.mif declaration
+       * @param aAppUid      Identifies the private directory where the logo file is copied to
+       * @param aTargetPath  Empty or location of the target file
+       * @param aSourcePath  Empty or location of the source file 
+       * @param aUpdatedDeclaration Empty or declaration which points to the target location
+       */
+	    static void hspsServerUtil::PopulateLogoPathsL(
+	            const TDesC& aLogoDeclaration,
+                const TUint aAppUid,
+                RBuf& aTargetPath,
+                RBuf& aSourcePath,
+                RBuf& aUpdatedDeclaration );
+
 	private:
         /**
          * Internal method. Do not call directly!

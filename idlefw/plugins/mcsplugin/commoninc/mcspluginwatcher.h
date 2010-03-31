@@ -86,15 +86,6 @@ class CMCSPluginWatcher: public CActive
         void WatchNotify( MMCSPluginWatcherObserver* aObserver );
         
         /**
-         * StopAndWatch
-         * 
-         * @param aOperation
-         * @param aWaitScheduler
-         */
-        void StopAndWatch( CMenuOperation* aOperation, 
-                           CActiveSchedulerWait* aWaitScheduler );
-        
-        /**
          * GetStatus 
          */
         TInt GetStatus();
@@ -130,12 +121,6 @@ class CMCSPluginWatcher: public CActive
          * Owned
          */
         CMenuOperation* iOperation; 
-        
-        /**
-         * Wait scheduler
-         * Not owned
-         */
-        CActiveSchedulerWait* iWaitScheduler;
 
         /** 
          * Observer reference

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,31 +15,28 @@
 *
 */
 
-
 // System includes
 #include <gulicon.h>
-#include <AknsItemID.h>
 #include <gslauncher.h>
-#include <mcsmenuitem.h>
 #include <mcsmenufilter.h>
 #include <mcsmenuoperation.h>
 #include <mcsmenuiconutility.h>
-#include <activefavouritesdbnotifier.h>
-#include <favouritesitemlist.h>
 #include <bautils.h>
 #include <StringLoader.h>
 #include <aknnotedialog.h>
-#include <AknsConstants.h>
-#include <avkon.rsg>
 #include <mcspluginres.rsg>
-#include <apgtask.h>
 #include <apgcli.h> 
 #include <apacmdln.h>
 #include <gfxtranseffect/gfxtranseffect.h>      
 #include <akntranseffect.h>
+#include <schemehandler.h>
+#include <viewcli.h>                // For CVwsSessionWrapper
+#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
+#include <viewclipartner.h>
+#endif
+#include <aisystemuids.hrh>
 
 // User includes
-#include <aisystemuids.hrh>
 #include "mcspluginengine.h"
 #include "mcsplugin.h"
 #include "mcsplugindata.h"
@@ -52,21 +49,29 @@ _LIT( KMif,          "mif" );
 _LIT( KResourceDrive, "Z:" );
 _LIT( KResourceFile, "mcspluginres.rsc" );
 _LIT( KResPath, "\\resource\\" );
-_LIT( KMenuAttrRefcount, "ref_count" );
 _LIT( KMMApplication, "mm://" );
 _LIT( KHideExit2, "&exit=hide" );
 _LIT( KSetFocusString, "!setfocus?applicationgroup_name=" );
 _LIT( KApplicationGroupName, "applicationgroup_name" );
 _LIT( KIcon, "icon" );
 _LIT( KMenuAttrUndefUid, "0x99999991" );
+_LIT( KMenuIconFile, "aimcsplugin.mif" );
+_LIT( KMenuBookmarkIconId, "16386" );
+_LIT( KMenuBookmarkMaskId, "16387" );
+_LIT( KMenuMailboxIconId, "16388" );
+_LIT( KMenuMailboxMaskId, "16389" );
+_LIT( KMenuTypeMailbox, "menu:mailbox" );
+_LIT( KPrefix, "0x" );
 
 const TUid KHomescreenUid = { AI_UID3_AIFW_COMMON };
 const TUid KMMUid = { 0x101F4CD2 };
+const TUid KMCSCmailUidValue = { 0x2001E277 };
+const TUid KMCSCmailMailboxViewIdValue = { 0x2 };
+const TUid KBrowserUid = { 0x10008D39 };
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
 // NextIdToken
-//
 // ----------------------------------------------------------------------------
 //
 static TPtrC NextIdToken( TLex& aLexer )
@@ -81,6 +86,65 @@ static TPtrC NextIdToken( TLex& aLexer )
    
    return aLexer.MarkedToken();
    }
+
+// ----------------------------------------------------------------------------
+// Shows note dailog, with the given resource.
+// ----------------------------------------------------------------------------
+//
+static void ShowNoteDlgL( TInt aResource )
+    {
+    HBufC* temp = StringLoader::LoadLC( aResource );
+    
+    CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
+    CAknNoteDialog::EConfirmationTone,
+    CAknNoteDialog::ENoTimeout );
+    CleanupStack::PushL( dialog );
+    dialog->SetTextL( temp->Des() );
+    dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
+    CleanupStack::Pop( dialog );
+    CleanupStack::PopAndDestroy( temp );
+    }
+
+// ----------------------------------------------------------------------------
+// Parses uid in Hexadecimal format from the given string.
+// ----------------------------------------------------------------------------
+//
+TUid ParseHexUidFromString(const TDesC& aUidString )
+    {
+    TUid uid( KNullUid ); 
+    const TInt pos( aUidString.FindF( KPrefix ) );
+    
+    if ( pos != KErrNotFound )
+        {
+        TLex lex( aUidString.Mid( pos + KPrefix().Length() ) );
+        
+        // Hex parsing needs unsigned int
+        TUint32 value( 0 );
+        const TInt parseResult( lex.Val( value, EHex ) );
+        
+        if ( parseResult == KErrNone )
+            {
+            TInt32 value32( value );
+            uid.iUid = value32;   
+            }
+        }
+    return uid;
+    }
+
+// ----------------------------------------------------------------------------
+// Start transition effect. User has launched the application with the given uid.
+// ----------------------------------------------------------------------------
+//
+void StartEffect( TUid aUid )
+    {
+    //start a full screen effect
+    GfxTransEffect::BeginFullScreen( 
+        AknTransEffect::EApplicationStart,
+        TRect(), 
+        AknTransEffect::EParameterType, 
+        AknTransEffect::GfxTransParam( aUid,
+        AknTransEffect::TParameter::EActivateExplicitContinue ));
+    }
 
 // ============================ MEMBER FUNCTIONS ===============================
 // ----------------------------------------------------------------------------
@@ -136,7 +200,6 @@ void CMCSPluginEngine::ConstructL()
     filter->HaveAttributeL( KMenuAttrUid, KMenuAttrUndefUid );
     iUndefinedItemHeader = FindMenuItemL( *filter );
     CleanupStack::PopAndDestroy( filter );
-    filter = NULL;
     iUndefinedItem = CMenuItem::OpenL( iMenu, iUndefinedItemHeader );    
     }
 
@@ -152,17 +215,11 @@ CMCSPluginEngine::~CMCSPluginEngine()
     delete iPluginData;
     
     iMenu.Close();
-    //iWatcher->Cancel();
     delete iWatcher;
-    
 
     CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );
 
-    if ( iUndefinedItem )
-        {
-        delete iUndefinedItem;
-        iUndefinedItem = NULL;
-        }
+    delete iUndefinedItem;
     }
 
 // ---------------------------------------------------------------------------
@@ -183,9 +240,7 @@ void CMCSPluginEngine::InitL()
         iNotifyWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::ENotify );
         
         iNotifier.Notify( 0,
-            RMenuNotifier::EItemsAddedRemoved |
-            RMenuNotifier::EItemsReordered |
-            RMenuNotifier::EItemAttributeChanged,
+            RMenuNotifier::EItemsAddedRemoved,
             iNotifyWatcher->iStatus );
         iNotifyWatcher->WatchNotify( this );
         }
@@ -218,7 +273,7 @@ void CMCSPluginEngine::StopObserving()
 //
 // ---------------------------------------------------------------------------
 //
-TMCSData& CMCSPluginEngine::MenuDataL( const TInt& aIndex )
+CMCSData& CMCSPluginEngine::MenuDataL( const TInt& aIndex )
     {
     return iPluginData->DataItemL( aIndex );
     }
@@ -263,9 +318,62 @@ TMenuItem CMCSPluginEngine::FindMenuItemL( CMenuFilter& aFilter )
 // Returns the actual menu item for the given header.
 // ---------------------------------------------------------------------------
 //
-CMenuItem* CMCSPluginEngine::FetchMenuItemL( const TMenuItem& aMenuItem )
+CMenuItem* CMCSPluginEngine::FetchMenuItemL( CMCSData& aData )
     {
-    return CMenuItem::OpenL( iMenu, aMenuItem );
+    if( aData.MenuItem().Type() == KMenuTypeUrl )
+        {
+        return CreateBkmItemL( aData );
+        }
+    else if( aData.MenuItem().Type() == KMenuTypeMailbox )
+        {
+        return CreateMailboxItemL( aData);
+        }
+    else
+        {
+        CMenuItem* item = NULL;
+        TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() ) );
+        return item;
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+CMenuItem* CMCSPluginEngine::CreateBkmItemL( CMCSData& aData )
+    {
+    CMenuItem* item( NULL );
+    if( aData.MenuItem().Id() != KErrNotFound )
+        {        
+        item = CMenuItem::CreateL( iMenu, KMenuTypeUrl, 0, 0 );
+        CleanupStack::PushL( item );
+        item->SetAttributeL( KMenuAttrLongName, aData.Name() );
+        item->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
+        item->SetAttributeL( KMenuAttrIconId, KMenuBookmarkIconId );
+        item->SetAttributeL( KMenuAttrMaskId, KMenuBookmarkMaskId );
+        CleanupStack::Pop( item );
+        }
+    return item;
+    }
+    
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+CMenuItem* CMCSPluginEngine::CreateMailboxItemL( CMCSData& aData )
+    {
+    CMenuItem* item( NULL );
+    if( aData.MenuItem().Id() != KErrNotFound )
+        {   
+        item = CMenuItem::CreateL( iMenu, KMenuTypeMailbox, 0, 0 );
+        CleanupStack::PushL( item );
+        item->SetAttributeL( KMenuAttrLongName, aData.Name() );
+        item->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
+        item->SetAttributeL( KMenuAttrIconId, KMenuMailboxIconId );
+        item->SetAttributeL( KMenuAttrMaskId, KMenuMailboxMaskId );
+        CleanupStack::Pop( item );
+        }
+    return item;
     }
 
 // ---------------------------------------------------------------------------
@@ -283,14 +391,7 @@ CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem* aMenuItem,
     // check if item exists in MCS
     if ( aMenuItem )
         { 
-        TInt id = aMenuItem->Id();
-
-        // because the flags might have changed, we have
-        // to get a fresh copy of menu item from Menu Server
-        CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
-        TUint32 flags = mi->Flags();
-        delete mi;
-
+        TUint32 flags = aMenuItem->Flags();
         TUint32 isHidden = flags & TMenuItem::EHidden;
         TUint32 isMissing = flags & TMenuItem::EMissing;
 
@@ -358,14 +459,7 @@ TPtrC CMCSPluginEngine::ItemTextL( CMenuItem* aMenuItem, const TDesC& aAttr )
     // check if item exists in MCS
     if ( aMenuItem )
         {
-        TInt id = aMenuItem->Id();
-
-        // because the flags might have changed, we have
-        // to get a fresh copy of the menu item from Menu Server
-        CMenuItem* mi = CMenuItem::OpenL( iMenu, id );
-        TUint32 flags = mi->Flags();
-        delete mi;
-
+        TUint32 flags = aMenuItem->Flags();
         TUint32 isHidden = flags & TMenuItem::EHidden;
         TUint32 isMissing = flags & TMenuItem::EMissing;
 
@@ -407,51 +501,172 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
     {
     if ( iBackupRestore )
         {
-        HBufC* temp = StringLoader::LoadLC( R_MCS_DISABLE_OPEN_ITEM );
+        ShowNoteDlgL( R_MCS_DISABLE_OPEN_ITEM ); 
+        return;
+        }
 
-        CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
-            CAknNoteDialog::EConfirmationTone,
-            CAknNoteDialog::ENoTimeout );
-        CleanupStack::PushL( dialog );
-        dialog->SetTextL( temp->Des() );
-        dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
-        CleanupStack::Pop( dialog );
-        CleanupStack::PopAndDestroy( temp );        
+    CMCSData& dataItem( iPluginData->DataItemL( aIndex ) );
+    // run item based on its type
+    TPtrC type( dataItem.MenuItem().Type());
+
+    // run folder
+    if ( type == KMenuTypeFolder )
+        {
+        LaunchFolderItemL( dataItem );
+        }
+    else if( type == KMenuTypeUrl )
+        {
+        LaunchBookmarkItemL( dataItem );
+        }
+    else if( type == KMenuTypeMailbox )
+        {
+        LaunchMailboxItemL( dataItem );
+        }
+    else
+        {
+        LaunchMCSItemL( dataItem );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginEngine::LaunchFolderItemL( CMCSData& aData )
+    {
+    CMenuItem* item = NULL;
+    TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() ) );
+    
+    // item does not exist at all in MCS
+    if ( item == NULL )
+        {
+        ShowNoteDlgL( R_MCS_DISABLE_OPEN_ITEM_MISSING );
         return;
         }
     
+    CleanupStack::PushL( item );
+    
+    StartEffect( KMMUid );
+    
+    // message for MM application
+    HBufC8* message; 
+
+    // prepare message for launching folder
+    TBool hasApplicationGroupName( EFalse );
+    
+    TPtrC applicationGroupName( item->GetAttributeL(
+        KApplicationGroupName, hasApplicationGroupName ) );
+                                                      
+    if ( !hasApplicationGroupName )
+        {
+        return;
+        }
+    
+    message = HBufC8::NewLC( KMMApplication().Length() + 
+                             KSetFocusString().Length() +
+                             applicationGroupName.Length() + 
+                             KHideExit2().Length() );
+
+    message->Des().Copy( KMMApplication );
+    message->Des().Append( KSetFocusString );
+    message->Des().Append( applicationGroupName );
+    message->Des().Append( KHideExit2 );
+
+    // find MM application
+    TApaTaskList taskList( CCoeEnv::Static()->WsSession() );
+    TApaTask task( taskList.FindApp( KMMUid ) );
+
+    if ( task.Exists() )
+        {
+        // MM is already running in background - send APA Message
+        task.SendMessage( 
+            TUid::Uid( KUidApaMessageSwitchOpenFileValue ), *message );
+        }
+    else
+        { 
+        // MM not running yet - use Command Line Tail
+        RApaLsSession appArcSession;
+        CleanupClosePushL( appArcSession );
+        
+        User::LeaveIfError( appArcSession.Connect() );
+        
+        TApaAppInfo appInfo;
+        TInt err( appArcSession.GetAppInfo( appInfo, KMMUid ) );
+        
+        if ( err == KErrNone )
+            {
+            CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
+            cmdLine->SetExecutableNameL( appInfo.iFullName );
+            cmdLine->SetCommandL( EApaCommandRun );
+            cmdLine->SetTailEndL( *message );
+            appArcSession.StartApp( *cmdLine );
+            CleanupStack::PopAndDestroy( cmdLine );
+            }
+        CleanupStack::PopAndDestroy( &appArcSession ); 
+        }
+    CleanupStack::PopAndDestroy( message );
+    CleanupStack::PopAndDestroy( item );
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginEngine::LaunchBookmarkItemL( CMCSData& aData )
+    {
+    StartEffect( KBrowserUid );
+    
+    CSchemeHandler* urlHandler = CSchemeHandler::NewL( aData.Value());    
+    CleanupStack::PushL( urlHandler );
+    urlHandler->HandleUrlStandaloneL();
+    CleanupStack::PopAndDestroy( urlHandler );
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginEngine::LaunchMailboxItemL( CMCSData& aData )
+    {
+    TInt id( aData.MenuItem().Id());
+    if ( id == KErrNotFound )
+        {
+        ShowNoteDlgL( R_MCS_DISABLE_OPEN_ITEM_MISSING );
+        return;
+        }
+    
+    StartEffect( KMCSCmailUidValue );
+    
+    TUid uId = TUid::Uid( id );
+    const TVwsViewId viewId( KMCSCmailUidValue, KMCSCmailMailboxViewIdValue );
+    CVwsSessionWrapper* vwsSession = CVwsSessionWrapper::NewL();
+    vwsSession->CreateActivateViewEvent( viewId, uId, KNullDesC8() );
+    delete vwsSession;
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginEngine::LaunchMCSItemL( CMCSData& aData )
+    {
     if( iWatcher->IsActive())
         {
         return;
         }
-
-    TMCSData& dataItem( iPluginData->DataItemL( aIndex ) );
-    
     CMenuItem* item = NULL;
-    TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, dataItem.MenuItem().Id() ) );
+    TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() ) );
 
     // item does not exist at all in MCS
     if ( item == NULL )
         {
-        HBufC* temp = StringLoader::LoadLC( R_MCS_DISABLE_OPEN_ITEM_MISSING );
-
-        CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
-            CAknNoteDialog::EConfirmationTone,
-            CAknNoteDialog::ENoTimeout );
-        CleanupStack::PushL( dialog );
-        dialog->SetTextL( temp->Des() );
-        dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
-        CleanupStack::Pop( dialog );
-        CleanupStack::PopAndDestroy( temp );
-        temp = NULL;
-
+        ShowNoteDlgL( R_MCS_DISABLE_OPEN_ITEM_MISSING );
         return;
         }
 
     CleanupStack::PushL( item );
-
+    
     TBool attrExists = ETrue;
-
     TPtrC uid = item->GetAttributeL( KMenuAttrUid, attrExists );
 
     // trying to run hidden or missing application (e.g. unistalled app 
@@ -463,136 +678,19 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
     if ( ( attrExists && uid == KMenuAttrUndefUid ) || isHidden || isMissing )
         {
         CleanupStack::PopAndDestroy( item );
-
-        HBufC* temp = StringLoader::LoadLC( R_MCS_DISABLE_OPEN_ITEM_MISSING );
-
-        CAknNoteDialog* dialog = new (ELeave) CAknNoteDialog(
-            CAknNoteDialog::EConfirmationTone,
-            CAknNoteDialog::ENoTimeout );
-        CleanupStack::PushL( dialog );
-        dialog->SetTextL( temp->Des() );
-        dialog->ExecuteDlgLD( R_MCS_DISABLE_OPEN_ITEM_DLG );
-        CleanupStack::Pop( dialog );
-        CleanupStack::PopAndDestroy( temp );
-        temp = NULL;
-
+        ShowNoteDlgL( R_MCS_DISABLE_OPEN_ITEM_MISSING );
         return;
         }
-
-    // run item based on its type
-    TPtrC type( item->Type() );
-
-    // run folder
-    if ( type == KMenuTypeFolder )
-        {
-        // message for MM application
-        HBufC8* message; 
-
-        // prepare message for launching folder
-        TBool hasApplicationGroupName( EFalse );
-        
-        TPtrC applicationGroupName( item->GetAttributeL(  
-            KApplicationGroupName, hasApplicationGroupName ) );
-                                                          
-        if ( !hasApplicationGroupName )
-            {
-            CleanupStack::PopAndDestroy( item );
-            return;
-            }
-        
-        message = HBufC8::NewLC( KMMApplication().Length() + 
-                                 KSetFocusString().Length() +
-                                 applicationGroupName.Length() + 
-                                 KHideExit2().Length() );
-
-        message->Des().Copy( KMMApplication );
-        message->Des().Append( KSetFocusString );
-        message->Des().Append( applicationGroupName );
-        message->Des().Append( KHideExit2 );
-
-        // find MM application
-        TApaTaskList taskList( CCoeEnv::Static()->WsSession() );
-        TApaTask task( taskList.FindApp( KMMUid ) );
-
-        if ( task.Exists() )
-            {
-            // MM is already running in background - send APA Message
-            task.SendMessage( 
-                TUid::Uid( KUidApaMessageSwitchOpenFileValue ), *message );
-            }
-        else
-            { 
-            // MM not running yet - use Command Line Tail
-            RApaLsSession appArcSession;
-            CleanupClosePushL( appArcSession );
-            
-            User::LeaveIfError( appArcSession.Connect() );
-            
-            TApaAppInfo appInfo;
-            TInt err( appArcSession.GetAppInfo( appInfo, KMMUid ) );
-            
-            if ( err == KErrNone )
-                {
-                CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
-                cmdLine->SetExecutableNameL( appInfo.iFullName );
-                cmdLine->SetCommandL( EApaCommandRun );
-                cmdLine->SetTailEndL( *message );
-                appArcSession.StartApp( *cmdLine );
-                CleanupStack::PopAndDestroy( cmdLine );
-                }
-            
-            CleanupStack::PopAndDestroy( &appArcSession ); 
-            }
-        
-        CleanupStack::PopAndDestroy( message );
-        }
-    else
-        {
-        TBool exists( EFalse );
-        
-        TPtrC desc( item->GetAttributeL( KMenuAttrUid, exists ) );
-        
-        if ( exists )
-            {      
-            _LIT( KPrefix, "0x" );
-            
-            const TInt pos( desc.FindF( KPrefix ) );
-            
-            if ( pos != KErrNotFound )
-                {
-                TLex lex( desc.Mid( pos + KPrefix().Length() ) );
-                
-                // Hex parsing needs unsigned int
-                TUint32 value( 0 );
-                const TInt parseResult( lex.Val( value, EHex ) );
-                
-                if ( parseResult == KErrNone )
-                    {
-                    TUid uid( KNullUid );  
-                    TInt32 value32( value );
-                    uid.iUid = value32;   
-                    
-                    if ( uid != KNullUid )
-                        {
-                        //start a full screen effect
-                        GfxTransEffect::BeginFullScreen( 
-                            AknTransEffect::EApplicationStart,
-                            TRect(), 
-                            AknTransEffect::EParameterType, 
-                            AknTransEffect::GfxTransParam( uid,
-                            AknTransEffect::TParameter::EActivateExplicitContinue ) );
-                        }
-                    }
-                }
-            }
-
-        // run application/shortcut/bookmark
-        CMenuOperation* operation( item->HandleCommandL(
-            KMenuCmdOpen, KNullDesC8, iWatcher->iStatus ) );
-        
-        iWatcher->Watch( operation );  
+    
+    if ( attrExists )
+        {      
+        StartEffect( ParseHexUidFromString( uid ));
         }
     
+    // run application/shortcut
+    CMenuOperation* operation( item->HandleCommandL(
+        KMenuCmdOpen, KNullDesC8, iWatcher->iStatus ) );
+    iWatcher->Watch( operation );
     CleanupStack::PopAndDestroy( item );
     }
 
@@ -607,23 +705,16 @@ void CMCSPluginEngine::HandleNotifyL()
     
     for ( TInt i = 0; i < count; i++ )
         {
-        TMCSData& data( iPluginData->DataItemL( i ) );
+        CMCSData& data( iPluginData->DataItemL( i ) );
         data.SetDirty( ETrue );
         }
-
     // Notification must be activated again
     iNotifyWatcher->Cancel();
-    
     iNotifier.Notify( 0,
-        RMenuNotifier::EItemsAddedRemoved |
-        RMenuNotifier::EItemsReordered |
-        RMenuNotifier::EItemAttributeChanged,
+        RMenuNotifier::EItemsAddedRemoved,
         iNotifyWatcher->iStatus );
 
     iNotifyWatcher->WatchNotify( this );
-    
-    // Publish changed data
-    iPlugin.PublishL();
     }
 
 // ---------------------------------------------------------------------------
@@ -632,14 +723,18 @@ void CMCSPluginEngine::HandleNotifyL()
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginEngine::HandleSessionEventL( TMsvSessionEvent aEvent, 
-    TAny* /*aArg1*/, TAny* /*aArg2*/, TAny* /*aArg3*/)
+    TAny* aArg1, TAny* /*aArg2*/, TAny* /*aArg3*/)
     {
     switch ( aEvent )
         {
         case EMsvEntriesDeleted:
-        // fall-through intended here
-        case EMsvEntriesChanged:
             {
+            CMsvEntrySelection* sel = static_cast<CMsvEntrySelection*>( aArg1 );
+            TInt count( sel->Count());
+            for( TInt i = 0; i < count; i++ )
+                {
+                iPluginData->RemoveDataL( sel->At( i ) );
+                }
             }
             break;
         default:
@@ -667,9 +762,7 @@ void CMCSPluginEngine::ShowSettingsL()
     TUid uid = {AI_UID_ECOM_IMPLEMENTATION_SETTINGS_MCSPLUGIN};
     
     CGSLauncher* launcher = CGSLauncher::NewLC();
-    
     launcher->LaunchGSViewL ( uid, KHomescreenUid, iInstanceUid );
-                                                        
     CleanupStack::PopAndDestroy( launcher );
     }
 
@@ -682,12 +775,10 @@ TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath,
     CMenuItem& aMenuItem )
    {
    TInt pos( aPath.Locate( ':' ) );
-   
    if ( pos == KErrNotFound )
        {
        pos = aPath.Length();
        }
-   
    TPtrC skin( aPath.Left( pos ) );
    TInt sf( skin.FindF( KSkin ) );
    
@@ -697,7 +788,6 @@ TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath,
        }
    
    TPtrC temp( skin.Mid( sf + KSkin().Length() ) );
-   
    TLex input( temp );   
    input.SkipSpace();
    
@@ -705,23 +795,17 @@ TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath,
        {
        input.Inc();
        }
-   
    TPtrC majorId( NextIdToken( input ) );
    TPtrC minorId( NextIdToken( input ) );
    
    aMenuItem.SetAttributeL( KMenuAttrIconSkinMajorId, majorId );
    aMenuItem.SetAttributeL( KMenuAttrIconSkinMinorId, minorId );
-      
-   //TPtrC mif = aPath.Mid( pos + 1 );
-   //TInt mf = mif.FindF( KMif );
    
    if ( aPath.Length() > pos && 
       ( aPath.Mid( pos + 1 ).FindF( KMif ) != KErrNotFound ) )
        {
        TPtrC mif( aPath.Mid( pos + 1 ) );
        TInt mf( mif.FindF( KMif ) );
-       
-       //TPtrC temp1 = mif.Mid( mf+ KMif().Length());
        
        TLex input1( mif.Mid( mf + KMif().Length() ) );
        input1.SkipSpace();
@@ -743,124 +827,4 @@ TBool CMCSPluginEngine::ConstructMenuItemForIconL( const TDesC& aPath,
    return ETrue;
    }
 
-// ---------------------------------------------------------------------------
-// CMCSPluginEngine::CleanMCSItemsL
-// Called during plugin desctruction
-// Decrements reference counters of all run-time generated items
-// and deletes those which have reference counter == 0
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginEngine::CleanMCSItemsL()
-    {
-    iNotifier.Close();
-    delete iNotifyWatcher;
-    iNotifyWatcher = NULL;
-
-    const TInt count( iPluginData->DataCount() );
-    
-    for( TInt i = 0; i < count; i++ )
-        {
-        TMCSData& data( iPluginData->DataItemL(i) );
-        
-        CMenuItem* menuItem = CMenuItem::OpenL( iMenu, data.MenuItem().Id() );        
-        
-        if ( !menuItem )
-            {
-            continue;
-            }
-        
-        CleanupStack::PushL( menuItem );
-        
-        // check if ref_count attribute exists
-        TBool exists( EFalse );
-        
-        TPtrC param( menuItem->GetAttributeL( KMenuAttrRefcount, exists ) );
-        
-        if( exists )
-            {                
-            const TInt references( UpdateMenuItemsRefCountL( menuItem, -1 ) );
-            
-            // Create a nested loop inside CActiveScheduler.
-            CActiveSchedulerWait* wait = 
-                new ( ELeave ) CActiveSchedulerWait;
-            CleanupStack::PushL( wait );
-            
-            if( references > 0 )
-                {
-                // if counter is still > 0, update its value in MCS 
-                CMenuOperation* op = menuItem->SaveL( iWatcher->iStatus );
-                iWatcher->StopAndWatch( op, wait );
-                
-                // Start the nested scheduler loop.
-                wait->Start();
-                }
-            else
-                {                     
-                 // counter reached 0 -> item is not referenced by any shortcut
-                 // so remove it from MCS
-                 if( !iWatcher->IsActive() )
-                     {
-                     CMenuOperation* op = 
-                         iMenu.RemoveL( menuItem->Id(), iWatcher->iStatus );
-                     iWatcher->StopAndWatch( op, wait );
-                     
-                      // Start the nested scheduler loop.
-                     wait->Start();
-                     }
-                }
-            
-            CleanupStack::PopAndDestroy( wait );
-            wait = NULL;
-            }
-        
-        CleanupStack::PopAndDestroy( menuItem );
-        menuItem = NULL;
-        }
-    }
-
-
-// ---------------------------------------------------------------------------
-// CMCSPluginEngine::UpdateMenuItemsRefCountL
-// Adds a given constant to a value of reference counter  
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginEngine::UpdateMenuItemsRefCountL( CMenuItem* aItem, 
-    const TInt aValueToAdd )
-    {
-    TBool exists( EFalse );
-    CleanupStack::PushL( aItem ); 
-    TPtrC param( aItem->GetAttributeL( KMenuAttrRefcount, exists ) );
-    CleanupStack::Pop( aItem );
-    
-    if ( exists )
-        {
-        TInt references;
-        TLex16 lextmp( param );
-        lextmp.Val( references );
-        references += aValueToAdd;
-        TBuf<128> buf;
-        buf.NumUC( references );
-
-        // set new ref_count
-        CleanupStack::PushL( aItem ); 
-        aItem->SetAttributeL( KMenuAttrRefcount, buf);
-        CleanupStack::Pop( aItem );
-    
-        // return new ref_count
-        return references;
-        }
-    
-    return -1;
-    }
-
-// ---------------------------------------------------------------------------
-// Creates bookmark menu item if it does not exist
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginEngine::CreateRuntimeMenuItemsL()
-    {
-    iPluginData->CreateRuntimeMenuItemsL();
-    }
-
 // End of file
-

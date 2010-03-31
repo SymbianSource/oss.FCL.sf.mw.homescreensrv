@@ -380,7 +380,7 @@ ThspsServiceCompletedMessage ChspsInstallationHandler::hspsInstallTheme(
         if( iLogBus )
             {
             iLogBus->LogText( _L( "ChspsInstallationHandler::hspsInstallTheme(): - Installation failed with error code %d" ),
-                    errorCode );
+                    err );
             }
 #endif       
         }
@@ -802,13 +802,24 @@ void ChspsInstallationHandler::CheckHeaderL()
     
         User::Leave( KErrNotSupported );     
         }
-    else
+
+    ChspsFamily* family = iThemeServer.Family();
+    if ( !family )
         {
-        // Store package version
-        iOdt->SetPackageVersionL( *iPackageVersion );
+        User::Leave( KErrNotSupported );
         }
 
-    // Set the resolution family
+    ThspsFamily familyType = family->GetFamilyType();
+    if ( familyType == EhspsFamilyUnknown )
+        {
+        User::Leave( KErrNotSupported );
+        }
+#if !defined(WINSCW) && !defined(__WINS__)
+    if ( !( familyType & iFamilyMask ) )
+        {
+        User::Leave( KErrNotSupported );
+        }
+#endif // !defined(WINSCW) && !defined(__WINS__)
     iOdt->SetFamily( iFamilyMask );    
             
     // Store root, provider and theme uid
@@ -1675,7 +1686,11 @@ void ChspsInstallationHandler::ActivateThemeL()
                     iPackageVersion = HBufC::NewL( KMaxFileName );
                     iPackageVersion->Des().Copy( aAttributes[argIndex].Value().DesC() );
                     // Is manifest supported by this parser?
-                    iPackageVerSupported = ETrue; //TODO temporarily enable till 0.3 to 1.0 changes have been integrated ( iPackageVersion->Des().Compare(KhspsSupportedManifestVersion) == 0);                     
+                    iPackageVerSupported = EFalse;
+                    if ( iPackageVersion->Des().Compare( KhspsSupportedManifestVersion ) == 0 )
+                        {
+                        iPackageVerSupported = ETrue;
+                        }
                     break;
                     }
                 }
@@ -1754,10 +1769,8 @@ void ChspsInstallationHandler::OnEndElementL( const RTagInfo& aElement, TInt /*a
     
     if ( localName == KFamily )
         {
-#if defined(WINSCW) || defined(__WINS__)        
         const TPtrC8 familyPtr( iContent->Des() );        
-        iFamilyMask |= ChspsFamilyListener::GetFamilyType( familyPtr );
-#endif // defined(WINSCW)        
+        iFamilyMask |= ChspsFamily::GetFamilyType( familyPtr );
         }    
     else if ( localName == KConfigurationType )
         {
@@ -2580,7 +2593,7 @@ void ChspsInstallationHandler::ParseIconDeclarationL(
     
     // check whether skin/mif/uid declarations were used
     TFileName filename;    
-    if ( hspsServerUtil::IsFile( resultPtr, filename ) )
+    if ( hspsServerUtil::IsLogoFile( resultPtr, filename ) )
         {                                                                              
         // check whether the file reference is valid
         TPath fullname;

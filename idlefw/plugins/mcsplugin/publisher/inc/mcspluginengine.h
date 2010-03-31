@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -22,8 +22,8 @@
 // System includes
 #include <e32base.h>
 #include <mcsmenu.h>
-#include <mcsmenunotifier.h>
 #include <mcsmenuitem.h>
+#include <mcsmenunotifier.h>
 #include <msvapi.h>
 
 // User includes
@@ -32,8 +32,9 @@
 // Forward declarations
 class CGulIcon;
 class CMCSPluginData;
-class TMCSData;
+class CMCSData;
 class CMCSPlugin;
+
 
 /**
  * @ingroup group_mcsplugin
@@ -84,19 +85,12 @@ public:
     // new functions
     
     /**
-    * Called during plugin desctruction
-    * Decrements reference counters of all run-time generated items
-    * and deletes those which have reference counter == 0
-    */
-    void CleanMCSItemsL();
-    
-    /**
      * Gets the menu data.
      * 
      * @param aIndex
      * @return TMCSData&
      */
-    TMCSData& MenuDataL( const TInt& aIndex );
+    CMCSData& MenuDataL( const TInt& aIndex );
 
     /** Gets the menu item count
      * 
@@ -118,8 +112,8 @@ public:
      * @param aMenuItem
      * @return CMenuItem*
      */
-    CMenuItem* FetchMenuItemL( const TMenuItem& aMenuItem );
-
+    CMenuItem* FetchMenuItemL( CMCSData& aData);
+    
     /**
      * Returns icon for given menu item and given attribute
      * 
@@ -156,23 +150,6 @@ public:
      * ShowSettingsL
      */
     void ShowSettingsL();
-    
-    /**
-    * Helper method. Adds a given constant to a value of reference counter
-    *
-    * @param aItem A Menu Item to update
-    * @param aValueToAdd A constant to add 
-    * @return The actual value of updated reference count
-    */
-    TInt UpdateMenuItemsRefCountL( 
-        CMenuItem* aItem, const TInt aValueToAdd );
-
-    /**
-     * CreateRuntimeMenuItemsL
-     * @param void
-     * @return void
-     */
-    void CreateRuntimeMenuItemsL();
 
 private:
     // from MMCSPluginWatcherObserver
@@ -221,6 +198,24 @@ private:
     TBool ConstructMenuItemForIconL( 
         const TDesC& aPath, CMenuItem& aMenuItem );
 
+    /**
+     * Creates bookmark specific MCS menu item.
+     */
+    CMenuItem* CreateBkmItemL( CMCSData& aData );
+    
+    /**
+     * Creates mailbox specific MCS menu item.
+     */
+    CMenuItem* CreateMailboxItemL( CMCSData& aData );
+    
+    void LaunchFolderItemL( CMCSData& aData );
+    
+    void LaunchBookmarkItemL( CMCSData& aData );
+    
+    void LaunchMailboxItemL( CMCSData& aData );
+    
+    void LaunchMCSItemL( CMCSData& aData );
+
 private:
     // data
     
@@ -253,4 +248,3 @@ private:
 #endif // CMCSPLUGINENGINE_H
 
 // End of file
-

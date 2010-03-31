@@ -29,6 +29,7 @@
 // Forward declarations
 class CAiUiControllerManager;
 class CAiStateManager;
+class MAiCpsCommandBuffer;
 class CHsContentPublisher;
 class THsPublisherInfo;
 
@@ -77,7 +78,16 @@ public:
      */
     void DestroyPlugin( 
         const THsPublisherInfo& aPublisherInfo );		    
-                         
+
+    /**
+     * Destroy plugin
+     *
+     * @since S60 5.2
+     * @param aUid Implementation UID of a plugin to destroy.
+     */
+    void DestroyPlugin( 
+        const TUid& aUid );           
+
     /**
      * Finds plugin by publisher info.
      *
@@ -105,7 +115,15 @@ public:
      * @return Pointer to plugin, NULL if not found. Factory keeps plugin's ownership.
      */                
     CHsContentPublisher* PluginByName( const TDesC& aName ) const;
-            
+      
+    /**
+     * Sets cps command buffer
+     * 
+     * @since S60 5.2
+     * @param aCommanddBuffer Command buffer
+     */
+    void SetCommandBuffer( MAiCpsCommandBuffer* aCommanddBuffer );
+    
 private:	
     // private constructors
 
@@ -134,15 +152,14 @@ private:
         const THsPublisherInfo& aPublisherInfo );		                           
     
     RPointerArray< CHsContentPublisher >& Publishers() const;
-    
-    void ResolvePluginsToUpgradeL( 
-        RArray< THsPublisherInfo >& aArray );
-    
+        
 private:     
     // data	
 
     /** UI Controller Manager, Not owned */
     CAiUiControllerManager& iUiControllerManager;
+    /** Cps command buffer, Not owned */
+    MAiCpsCommandBuffer* iCommandBuffer;
     /** Array of loaded data plugins, Owned */
     mutable RPointerArray< CHsContentPublisher > iPublishers;
     /** Ecom implementation info, Owned */

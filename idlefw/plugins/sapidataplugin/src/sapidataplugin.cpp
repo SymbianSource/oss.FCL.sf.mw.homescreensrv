@@ -34,6 +34,7 @@
 #include <aipspropertyobserver.h>
 #include <aipluginsettings.h>
 #include <activeidle2domainpskeys.h>
+#include <debug.h>
 
 #include "sapidatapluginconst.h"
 #include "sapidatapluginuids.hrh"
@@ -78,7 +79,7 @@ CSapiDataPlugin* CSapiDataPlugin::NewL()
 // ---------------------------------------------------------------------------
 //
 CSapiDataPlugin::CSapiDataPlugin()
-    : iNetworkStatus( EUnknown ), iPluginState( ENone ) 
+    : iNetworkStatus( EUnknown ), iPluginState( ENone )
     {
     }
     
@@ -101,16 +102,9 @@ void CSapiDataPlugin::ConstructL()
 CSapiDataPlugin::~CSapiDataPlugin()
     {
     // deactivate the publishers
-    if ( iData )
-        {
-        TRAP_IGNORE( iData->ChangePublisherStatusL( KDeActive ));
-        
-        delete iData;
-        }
-    
+    delete iData;
     iObservers.Close();
     Release( iContent );
-
     iDataArray.ResetAndDestroy();
 
     if ( iContentModel )
@@ -124,7 +118,6 @@ CSapiDataPlugin::~CSapiDataPlugin()
         }
     
     iIconArray.Reset();
-    
     iRfs.Close();
     }
 
@@ -152,9 +145,8 @@ void CSapiDataPlugin::PublishL()
 		// Release memory of the published text
         iDataArray.ResetAndDestroy();
         // Release memory of the published icons
-        iIconArray.Reset();
-        
-        }    
+        iIconArray.Reset();        
+        }        
     }
 
 // ---------------------------------------------------------------------------
@@ -359,13 +351,18 @@ const TDesC& CSapiDataPlugin::GetTypeL(TDesC& aObjectId )
 	}
 
 // ---------------------------------------------------------------------------
-//Refresh a specific image of text in the widget
+//Refresh a specific image or text in the widget
 // ---------------------------------------------------------------------------
 //
 void CSapiDataPlugin::RefreshL( TDesC& aContentType,
                                 TDesC& aOperation,
                                 CLiwDefaultMap* aDataMap )
-    {    
+    {
+    __PRINTS("*** CSapiDataPlugin::RefreshL ***");
+    
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x, content type: %S, operation: %S" ),          
+        &PublisherInfo().Name(), PublisherInfo().Uid().iUid, &aContentType, &aOperation ); 
+        
     const TInt observerCount( iObservers.Count() );    
     const TInt transactionId = reinterpret_cast<TInt>( this );
     
@@ -398,6 +395,8 @@ void CSapiDataPlugin::RefreshL( TDesC& aContentType,
         iDataArray.ResetAndDestroy();
         iIconArray.Reset();
         }
+    
+    __PRINTS("*** CSapiDataPlugin::RefreshL - done ***");
     }
 
 // ---------------------------------------------------------------------------
@@ -454,6 +453,11 @@ void CSapiDataPlugin::Stop( TStopReason aReason )
     else if( aReason == EPluginShutdown )
         {
         TRAP_IGNORE( iData->ChangePublisherStatusL( KPluginShutdown ));
+        }
+
+    if ( iData )
+        {
+        TRAP_IGNORE( iData->ChangePublisherStatusL( KDeActive ));
         }
     }
 
@@ -632,6 +636,18 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     aSettings.ResetAndDestroy();    
     }
 
+// ----------------------------------------------------------------------------
+// CSapiDataPlugin::SetProperty
+//
+// ----------------------------------------------------------------------------
+//
+void CSapiDataPlugin::SetProperty( TProperty aProperty, TAny* aAny )
+    {
+    if (aProperty == ECpsCmdBuffer )
+        {
+        iData->SetCommandBuffer( aAny );
+        }
+    }
 // ----------------------------------------------------------------------------
 // CSapiDataPlugin::GetProperty
 //

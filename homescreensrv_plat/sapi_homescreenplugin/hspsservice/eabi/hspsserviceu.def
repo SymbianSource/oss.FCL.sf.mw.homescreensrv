@@ -13,17 +13,17 @@ EXPORTS
 	_ZN27CHspsPersonalisationService13GetPluginOdtLEiR6TDesC8P8ChspsODT @ 12 NONAME
 	_ZN27CHspsPersonalisationService13RemovePluginLEiR6TDesC8 @ 13 NONAME
 	_ZN27CHspsPersonalisationService13SetConfStateLEiR6TDesC8S1_S1_ @ 14 NONAME
-	_ZN27CHspsPersonalisationService14GetPluginListLER6TDesC8S1_mR13CArrayPtrFlatI8ChspsODTE @ 15 NONAME
+	_ZN27CHspsPersonalisationService14GetPluginListLER6TDesC8S1_miR13CArrayPtrFlatI8ChspsODTE @ 15 NONAME
 	_ZN27CHspsPersonalisationService14ReplacePluginLEiRK6TDesC8S2_ @ 16 NONAME
 	_ZN27CHspsPersonalisationService15GetAppConfListLEimR13CArrayPtrFlatI8ChspsODTE @ 17 NONAME
 	_ZN27CHspsPersonalisationService16SetActivePluginLEiR6TDesC8 @ 18 NONAME
 	_ZN27CHspsPersonalisationService17SetActiveAppConfLEiR6TDesC8 @ 19 NONAME
 	_ZN27CHspsPersonalisationService18SetPluginSettingsLEiR6TDesC8R16ChspsDomDocumenti @ 20 NONAME
 	_ZN27CHspsPersonalisationService21RestoreActiveAppConfLEiR6TDesC8 @ 21 NONAME
-	_ZN27CHspsPersonalisationService4NewLEv @ 22 NONAME
-	_ZTI25CHspsConfigurationService @ 23 NONAME
-	_ZTI27CHspsPersonalisationService @ 24 NONAME
-	_ZTV25CHspsConfigurationService @ 25 NONAME
-	_ZTV27CHspsPersonalisationService @ 26 NONAME
-	_ZN27CHspsPersonalisationService22RestoreConfigurationsLEii @ 27 NONAME
+	_ZN27CHspsPersonalisationService22RestoreConfigurationsLEii @ 22 NONAME
+	_ZN27CHspsPersonalisationService4NewLEv @ 23 NONAME
+	_ZTI25CHspsConfigurationService @ 24 NONAME
+	_ZTI27CHspsPersonalisationService @ 25 NONAME
+	_ZTV25CHspsConfigurationService @ 26 NONAME
+	_ZTV27CHspsPersonalisationService @ 27 NONAME
 

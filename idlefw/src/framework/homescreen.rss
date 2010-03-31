@@ -60,3 +60,24 @@ RESOURCE LOCALISABLE_APP_INFO r_homescreen_localisable_app_info
 #endif // __SCALABLE_ICONS
         };
     }
+
+RESOURCE DIALOG r_homescreen_wait_dialog
+    {
+    flags = EAknWaitNoteFlags;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items =
+        {
+        DLG_LINE
+            {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+                {
+                layout = EWaitLayout;
+                singular_label = qtn_hs_backup_use_prevented;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+                };
+            }
+        };
+    }
+

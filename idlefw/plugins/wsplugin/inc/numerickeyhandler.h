@@ -84,6 +84,12 @@ private:
     void SetQwertyMode( TInt aValue );
     
     void SetInputLanguage( TInt aValue );
+    
+    TBool AllowAlphaNumericMode() const;
+
+    TBool VoIPSupported() const;
+    
+    TBool EasyDialingEnabled() const;
 
 // from base class MCenRepNotifyHandlerCallback
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,32 +15,19 @@
 *
 */
 
-
-#include <StringLoader.h>
-#include <activefavouritesdbnotifier.h> // For CActiveFavouritesDbNotifier
+#include <favouritesitemlist.h>
 #include <aistrcnv.h>
 #include <mcsmenufilter.h>
 #include <mcsmenuitem.h>
-#include <mcsmenuoperation.h>
-#include <mcspluginsettingsres.rsg>
 
 #include "mcspluginsettingsmodel.h"
-#include "mcspluginsettingsapplist.h"
 #include "mcspluginsettingsbkmlist.h"
-#include "mcspluginwatcher.h"
-#include "debug.h"
 
 _LIT( KMyMenuData, "matrixmenudata" );
 _LIT( KMenuUrl, "menu:url" );
-_LIT( KMenuIconFile, "aimcsplugin.mif" );
-_LIT( KMenuIconId, "16386" );
-_LIT( KMenuMaskId, "16387" );
 _LIT( KUrl, "url" );
 _LIT8( KUid, "uid" );
-_LIT( KMenuAttrRefcount, "ref_count" );
-_LIT( KInitialRefCount, "1" );
-_LIT( KMCSFolder, "mcsplugin_folder" );
-
+_LIT( KMenuAttrParameter, "param" );
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -51,7 +38,6 @@ _LIT( KMCSFolder, "mcsplugin_folder" );
 //
 CMCSPluginSettingsBkmList::CMCSPluginSettingsBkmList()
     {
-    iMCSPluginFolderId = 0;
     }
 
 // ---------------------------------------------------------------------------
@@ -64,10 +50,6 @@ void CMCSPluginSettingsBkmList::ConstructL()
     User::LeaveIfError(iBookmarkDb.Open(iBookmarkSess, KBrowserBookmarks));
     iMenu.OpenL( KMyMenuData );
     GetBookmarkListL();
-
-    iSaveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
-    iUpdateWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
-    iRemoveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
     }
 
 // ---------------------------------------------------------------------------
@@ -94,9 +76,6 @@ CMCSPluginSettingsBkmList::~CMCSPluginSettingsBkmList()
     iBookmarkDb.Close();
     iBookmarkSess.Close();
     iMenu.Close();
-    delete iSaveWatcher;
-    delete iUpdateWatcher;
-    delete iRemoveWatcher;
     }
 
 // ---------------------------------------------------------------------------
@@ -132,7 +111,7 @@ TPtrC CMCSPluginSettingsBkmList::MdcaPoint(TInt aIndex) const
 TSettingItem CMCSPluginSettingsBkmList::FindItemL( RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
     {
     TInt index( KErrNotFound );
-    TSettingItem settingItem = { KErrNotFound, EBookmark };
+    TSettingItem settingItem = { KErrNotFound, EBookmark, EFalse };
     for( TInt i= 0; i < aProperties.Count(); i++ )
         {
         if( aProperties[i]->Name() == KUid )
@@ -218,17 +197,8 @@ void CMCSPluginSettingsBkmList::GetBookmarksFromMCSL()
         TPtrC uid = menuItem->GetAttributeL( KMenuAttrUid, exists );
         TPtrC name = menuItem->GetAttributeL( KMenuAttrLongName, exists );
         TPtrC url = menuItem->GetAttributeL( KUrl, exists );
-
-        // Check if bookmark is already present in Bookmark list.
-        // This may happen in case of Favourite Bookmarks that were
-        // previously added to MCS.
-        // If it is, do not add it to Bookmark list anymore.
-        
-        TBool isRuntimeGenerated = EFalse;
-        menuItem->GetAttributeL( KMenuAttrRefcount, isRuntimeGenerated );
-
-        // if is not runtime generated and url exists, add it
-        if ( !isRuntimeGenerated && exists )
+        // if exists, add it
+        if ( exists )
             {
             AddBookmarkL( uid, name, url, EMCSBookmark );
             }
@@ -251,63 +221,14 @@ CMenuItem& CMCSPluginSettingsBkmList::ItemL( TInt aIndex )
     CMenuItem* menuItem( NULL );
     CBkmListItem* listItem = iListItems[aIndex];
     if ( listItem->iType == EFavBookmark )
-        {    
-        TPtrC uid = *listItem->iUid;
-        TPtrC name = *listItem->iCaption;
-        TPtrC  url = *listItem->iUrl;
-        menuItem = CreateMenuItemL( uid, name, url );
+        {
+        menuItem = CreateMenuItemL( *listItem->iUid, *listItem->iCaption, *listItem->iUrl );
         }
     else
         {
         menuItem = MCSMenuItemL( *listItem->iUid, *listItem->iCaption, *listItem->iUrl );
         }
     return *menuItem;
-    }
-
-// ---------------------------------------------------------------------------
-// Removes the menu item from MCS if it was created in runtime i.e. type is EFavBookmark.
-// Favourite bookmarks have ref_count attribute, which is decremented everytime
-// the bookmark is removed from some shortcut. When this counter reaches 0,
-// its MenuItem is removed from MCS.
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginSettingsBkmList::RemoveMenuItemL( TInt aIndex )
-    {
-
-    if ( aIndex < 0 || aIndex > iListItems.Count() - 1 )
-        {
-        return;
-        }
-
-    CBkmListItem* listItem = iListItems[aIndex];
-    if( listItem->iType == EFavBookmark )
-        {
-        CMenuItem* menuItem = MCSMenuItemL( *listItem->iUid, *listItem->iCaption, *listItem->iUrl );
-        if ( !menuItem )
-            {
-            return;
-            }
-        // decrement ref_count attribute 
-        TInt newRefCount = UpdateMenuItemsRefCountL( menuItem, -1 );
-        if ( newRefCount > 0 )
-            {
-            CleanupStack::PushL( menuItem ); 
-            CMenuOperation* op = menuItem->SaveL( iUpdateWatcher->iStatus );
-            CleanupStack::Pop( menuItem );
-            iUpdateWatcher->Watch( op );
-            }
-        else if ( newRefCount == 0 )
-            {
-            // counter reached 0 -> item is not referenced by any shortcut
-            // so remove it from MCS
-            if ( iRemoveWatcher->IsActive() )
-                {
-                return;
-                }
-            CMenuOperation* op = iMenu.RemoveL( menuItem->Id(), iRemoveWatcher->iStatus );
-            iRemoveWatcher->Watch( op );
-            }
-        }
     }
 
 // ---------------------------------------------------------------------------
@@ -320,46 +241,15 @@ CMenuItem* CMCSPluginSettingsBkmList::CreateMenuItemL( const TDesC& aUid,
                                                        const TDesC& aName,
                                                        const TDesC& aUrl )
     {
-    // try to search item in MCS
-    CMenuItem* item = MCSMenuItemL( aUid, aName, aUrl );
-    
-    if ( item == NULL )
-        {
-        // Item does not exist in MCS yet. 
-        // We will add a new one with reference counter set to 1.
-        CMenuItem* newItem = CMenuItem::CreateL( iMenu, 
-                                                 KMenuTypeUrl, 
-                                                 GetMCSPluginFolderIdL(), 0 );
-        CleanupStack::PushL( newItem );
-
-        newItem->SetAttributeL( KMenuAttrUid, aUid );
-        newItem->SetAttributeL( KMenuAttrLongName, aName );
-        newItem->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
-        newItem->SetAttributeL( KMenuAttrIconId, KMenuIconId );
-        newItem->SetAttributeL( KMenuAttrMaskId, KMenuMaskId );
-        newItem->SetAttributeL( KMenuAttrRefcount, KInitialRefCount );
-        newItem->SetAttributeL( KUrl , aUrl );
-        
-        CMenuOperation* op = newItem->SaveL( iSaveWatcher->iStatus );
-        iSaveWatcher->Watch( op );
-        iMenuItems.AppendL( newItem );
-        CleanupStack::Pop( newItem );
-        return newItem;
-        }
-    else
-        {
-        // Item already exists in MCS
-        // If it has reference counter, increment it before returning.
-        TInt newRefCount = UpdateMenuItemsRefCountL( item, 1 );
-        if ( newRefCount > -1 )
-            {
-            CleanupStack::PushL( item );
-            CMenuOperation* op = item->SaveL( iSaveWatcher->iStatus );
-            CleanupStack::Pop( item );
-            iSaveWatcher->Watch( op );
-            }
-        }
-    return item;
+    CMenuItem* newItem = CMenuItem::CreateL( iMenu, KMenuTypeUrl, 0, 0 );
+    CleanupStack::PushL( newItem );
+    newItem->SetAttributeL( KMenuAttrUid, aUid );
+    newItem->SetAttributeL( KMenuAttrLongName, aName );
+    newItem->SetAttributeL( KMenuAttrView, aUrl );
+    newItem->SetAttributeL( KMenuAttrParameter, aName );
+    iMenuItems.AppendL( newItem );
+    CleanupStack::Pop( newItem );
+    return newItem;
     }
 
 // ---------------------------------------------------------------------------
@@ -413,15 +303,6 @@ void CMCSPluginSettingsBkmList::AddBookmarkL( const TDesC&  aUid,
     TLinearOrder<CBkmListItem> sortMethod(CBkmListItem::CompareCaption);
     User::LeaveIfError(iListItems.InsertInOrderAllowRepeats(listItem, sortMethod));
     CleanupStack::Pop(listItem);
-    }
-
-// ---------------------------------------------------------------------------
-// Updates the bookmark list.
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginSettingsBkmList::UpdateBkmListL()
-    {
-    GetBookmarkListL();
     }
 
 // ---------------------------------------------------------------------------
@@ -486,70 +367,5 @@ TPtrC CMCSPluginSettingsBkmList::CBkmListItem::Caption() const
     return TPtrC(*iCaption);
 }
 
-// ---------------------------------------------------------------------------
-// Gets MCS Plugin folder ID. This hidden folder in matrixmenudata.xml is used 
-// for storing run-time generated menuitems
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginSettingsBkmList::GetMCSPluginFolderIdL()
-    {
-    if ( iMCSPluginFolderId == 0 )
-        {
-        CMenuItem* item( NULL );
-        CMenuFilter* filter = CMenuFilter::NewL();
-        CleanupStack::PushL( filter );
-        filter->SetType( KMenuTypeFolder );
-        filter->HaveAttributeL( KMenuAttrLongName, KMCSFolder );
-        const TInt rootId = iMenu.RootFolderL();
-        RArray<TMenuItem> itemArray;
-        CleanupClosePushL( itemArray );
-        iMenu.GetItemsL( itemArray, rootId, filter, ETrue );
-        if ( itemArray.Count() > 0 )
-            {
-            item = CMenuItem::OpenL( iMenu, itemArray[0] );
-            iMCSPluginFolderId = item->Id();
-            }
-        else 
-            {
-            iMCSPluginFolderId = iMenu.RootFolderL();
-            }
-        CleanupStack::PopAndDestroy( &itemArray );
-        CleanupStack::PopAndDestroy( filter ); 
-        delete item; 
-        }
-    return iMCSPluginFolderId;
-    }
-
-// ---------------------------------------------------------------------------
-// Helper method for updating ref_count attribute of run-time generated 
-// menuitems
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginSettingsBkmList::UpdateMenuItemsRefCountL( CMenuItem* aItem, 
-                                                          TInt aValueToAdd )
-    {
-    
-    TBool exists = EFalse;
-    CleanupStack::PushL( aItem ); 
-    TPtrC param = aItem->GetAttributeL( KMenuAttrRefcount, exists );
-    CleanupStack::Pop( aItem );
-    if ( exists )
-        {
-        TInt references;
-        TLex16 lextmp( param );
-        lextmp.Val( references );
-        references += aValueToAdd;
-        TBuf<128> buf;
-        buf.NumUC( references );
-
-        // set new ref_count
-        CleanupStack::PushL( aItem ); 
-        aItem->SetAttributeL( KMenuAttrRefcount, buf );
-        CleanupStack::Pop( aItem );
-        // return new ref_count
-        return references;
-        }
-    return -1;
-    }
 
 // End of File.

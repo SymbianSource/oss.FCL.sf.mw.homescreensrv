@@ -20,6 +20,11 @@
 #include <centralrepository.h>
 #include <avkondomainpskeys.h>
 #include <e32property.h>
+#include <ProEngFactory.h>
+#include <MProfileEngine.h>
+#include <MProfile.h>
+#include <MProfilename.h>
+#include <MProEngNotifyHandler.h>
 
 #include <aidevstaplgres.rsg>
 #include "aioperatornamepublisher.h"
@@ -36,6 +41,7 @@ const TInt KCleanOperationDelay = 2 * 1000000;
 const TInt KBitShiftByFour = 4;
 const TInt KIsDigitLowLimit = 0;
 const TInt KIsDigitHighLimit = 10;
+const TInt KOfflineProfileId =  5;
 
 LOCAL_C void AppendDigit( TDes& aCode, TInt aValue )
     {
@@ -75,6 +81,9 @@ void CAiOperatorNamePublisher::ConstructL()
     {
     iListener = CAiNetworkInfoListener::InstanceL();
     iPeriodic = CPeriodic::NewL( CActive::EPriorityStandard );
+    iProfileEngine = CreateProfileEngineL();
+    iProfileNotifier = ProEngFactory::NewNotifyHandlerL();
+    iProfileNotifier->RequestProfileActivationNotificationsL( *this );
     }
 
 
@@ -99,6 +108,15 @@ CAiOperatorNamePublisher::~CAiOperatorNamePublisher()
         {
         iPeriodic->Cancel();
         delete iPeriodic;
+        }
+    if ( iProfileNotifier )
+        {
+        iProfileNotifier->CancelAll();
+        delete iProfileNotifier;
+        }
+    if( iProfileEngine )
+        {
+        iProfileEngine->Release();
         }
     }
 
@@ -125,10 +143,13 @@ void CAiOperatorNamePublisher::HandleNetworkInfoChange(
         }
     else
         {
-        TRAP_IGNORE (
-            iPrioritizer->TryToCleanL( *iBroadcaster,
-                                    EAiDeviceStatusContentNetworkIdentity,
-                                    iPriority ));
+        if ( iProfileEngine->ActiveProfileId() != KOfflineProfileId )
+            {
+            TRAP_IGNORE (
+                iPrioritizer->TryToCleanL( *iBroadcaster,
+                                        EAiDeviceStatusContentNetworkIdentity,
+                                        iPriority ));
+            }
         }    
     }
 
@@ -150,6 +171,19 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
 
     if ( iSuspended )
         {
+        return;
+        }
+    
+    if ( iProfileEngine->ActiveProfileId() == KOfflineProfileId )
+        {
+        MProfile* profile = iProfileEngine->ActiveProfileLC();
+        const MProfileName& name = profile->ProfileName();
+        iPrioritizer->TryToPublishL( *iBroadcaster,
+                                      EAiDeviceStatusContentNetworkIdentity,
+                                      name.Name(),
+                                      iPriority );
+        iSuccess = ETrue;
+        CleanupStack::PopAndDestroy();//profile
         return;
         }
     
@@ -731,4 +765,9 @@ TBool CAiOperatorNamePublisher::IsKeyLockEnabled()
         	return EFalse;
        	}
   	}
+
+void CAiOperatorNamePublisher::HandleProfileActivatedL( TInt /*aProfileId*/ )
+    {
+    RefreshL( EFalse );
+    }
 

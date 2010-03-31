@@ -67,15 +67,7 @@ public:
      * @param aState State to change
      */
     virtual void ChangePluginState( TAiFwState aState ) = 0;
-    
-    /**
-     * Queries whether online state is in use
-     * by any of the currently loaded plugin.
-     * 
-     * @since S60 5.2
-     * @return ETrue if online/offline state needed, EFalse otherwise
-     */
-    virtual TBool OnlineStateInUse() const = 0;
+
     };
 
 #endif // M_AIFWSTATEHANDLER_H

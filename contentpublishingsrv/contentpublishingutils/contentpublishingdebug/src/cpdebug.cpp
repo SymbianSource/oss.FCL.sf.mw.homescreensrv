@@ -37,7 +37,7 @@ void CCPDebug::ConstructL( const TDesC& aFile )
     iData->iFileName = aFile;
     Dll::SetTls( iData );
     User::LeaveIfError( iData->iFs.Connect( ) );
-    EnableLogging( ETrue );
+    EnableLogging( EFalse );
     }
 
 // ---------------------------------------------------------------------------
@@ -159,6 +159,25 @@ EXPORT_C void CCPDebug::Printf(TRefByValue<const TDesC8> aFormat, ...)
 
 // ---------------------------------------------------------------------------
 // 
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCPDebug::ExtendedPrint( const char* aStringParam,
+                                       const CLiwGenericParamList& aInParamList )
+    {
+    RDebug::Printf( "CPS Client::Request %s Parameters: \n", aStringParam );
+    for ( TInt i = 0; i < aInParamList.Count( ); i++ )
+        {
+        TLiwGenericParam tempParam;
+        tempParam.PushL();
+        TRAP_IGNORE( aInParamList.AtL(i ,tempParam) );
+        Dump( tempParam.Value() );
+        CleanupStack::Pop(&tempParam);
+        tempParam.Reset();
+        }
+    }
+
+// ---------------------------------------------------------------------------
+//
 // ---------------------------------------------------------------------------
 //
 EXPORT_C DebugData* CCPDebug::Data()

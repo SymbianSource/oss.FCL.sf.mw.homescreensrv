@@ -22,6 +22,7 @@
 // System includes
 #include <e32base.h>
 #include <babitflags.h>
+#include <AknProgressDialog.h> // for MProgressDialogCallback
 
 // User includes
 #include <aifwdefs.h>
@@ -29,8 +30,10 @@
 
 // Forward declarations
 class CAiPluginFactory;
+class CAiCpsCommandBuffer;
 class CHsContentPublisher;
 class THsPublisherInfo;
+class CAknWaitDialog;
 
 /**
  * State Manager
@@ -40,7 +43,8 @@ class THsPublisherInfo;
  * @since S60 5.0
  */
 NONSHARABLE_CLASS( CAiStateManager ) : public CBase,
-    public MAiStateObserver
+    public MAiStateObserver,
+    public MProgressDialogCallback
     {
 private:
     // Data types
@@ -113,13 +117,14 @@ private:
     /**
      * @see MAiStateObserver
      */        
-    void NotifyUpdatePlugins();
+    void NotifyReloadPlugins();
     
+
     /**
      * @see MAiStateObserver
      */            
-    TBool OnlineStateInUse() const;
-            
+    void NotifyReleasePlugins( const RArray<TUid>& aUidList );
+
 private:
     // new functions
         
@@ -187,19 +192,53 @@ private:
      * @since S60 5.2
      */
     void DestroyPlugins();
-                           
+              
+    /**
+     * Starts wait dialog with progress bar.
+     */
+    void StartWaitDialogL();
+
+    /**
+     * Stops wait dialog with progress bar.
+     */
+    void StopWaitDialogL();
+
+    /**
+     * Callback method from MProgressDialogCallback interface.
+     * Gets called when a dialog is dismissed.
+     * @param aButtonId Id of the pushed button.
+     */
+    void DialogDismissedL( TInt aButtonId );
+                          
+    /**
+     * Flushes cps command buffer
+     * 
+     * @since S60 5.2
+     */
+    void FlushCommandBuffer();
+    
 private:
     // data
     
     /** Plugin Factory, Not owned */
     CAiPluginFactory& iFactory;
+    /** CPS Command buffer, Owned */
+    CAiCpsCommandBuffer* iCommandBuffer;
     /** Current state */
     TState iCurrentState;    
     /** Flags */
     TBitFlags32 iFlags;
     /** Halted flag */
     TBool iHalt;
-    
+    /**
+     * Own.
+     * Pointer to wait dialog.
+     */ 
+    CAknWaitDialog* iWaitDialog;
+   
+    /** List of plugins which should be reloaded */
+    RArray<THsPublisherInfo> iReloadPlugins;
+
 private:
     // friend classes
     

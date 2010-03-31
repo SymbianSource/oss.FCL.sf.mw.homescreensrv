@@ -59,6 +59,8 @@ _LIT8( KAdd, "Add" );
 _LIT8( KDelete, "Delete" );
 _LIT8( KRequestNotification, "RequestNotification" );
 _LIT8( KExecuteAction, "ExecuteAction" );
+_LIT8( KExecuteMultipleActions, "ExecuteMultipleActions" );
+
 _LIT8( KCmdCancel, "Cancel" );
 _LIT8( KActivate, "Activate" );
 _LIT8( KActivateTrigger, "activate" );
@@ -69,6 +71,7 @@ _LIT8( KType, "type" );
 _LIT8( KAction, "action" );
 _LIT8( KItem, "item" );
 _LIT8( KFilter, "filter" );
+_LIT8( KFilters, "filters" );
 _LIT8( KData, "data" );
 _LIT8( KSortOrder, "sort_order" );
 _LIT8( KItemId, "item_id" );

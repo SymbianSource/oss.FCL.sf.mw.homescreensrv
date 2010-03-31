@@ -33,6 +33,7 @@ class CLiwServiceHandler;
 class CSapiDataObserver;
 class CSapiDataPlugin;
 class MAiContentObserver;
+class MAiCpsCommandBuffer;
 
 /**
  *  @ingroup group_sapidataplugin
@@ -150,7 +151,15 @@ public:
     * @param aStatus new status of the publisher
     * @return void
     */
-    void ChangePublisherStatusL(const TDesC& aStatus);
+    void ChangePublisherStatusL(const TDesC8& aStatus);
+    
+    /**
+    * Change the publisher status with list of actions
+    *
+    * @param aActionsList new list of status for the publisher
+    * @return void
+    */
+    void ChangePublisherStatusL(CLiwDefaultList* aActionsList);
     
     /**
     * Triggers active event with KNoNotification option.
@@ -183,7 +192,7 @@ public:
      * 
      * @param aStartupReason A reason
      */
-    void SetStartupReasonL(const TDesC& aStartupReason);
+    void SetStartupReasonL(const TDesC8& aStartupReason);
     
     /**
 	* Execute the command to get the data from CPS
@@ -349,9 +358,18 @@ public:
 	*/
     void SetUpdateNeeded(TBool aStatus);
     
+    /**
+    * Sets property value.
+    *
+    * @since S60 5.2
+    * @param aAny - contains pointer to command buffer.
+    */
+    void SetCommandBuffer(TAny* aAny);
+    
 private:   
     // data
-    
+    /** CPS Command Buffer Interface, Not Owned */
+    MAiCpsCommandBuffer* iCpsExecute;
     /** Subscriber interface, owned */    
     MLiwInterface* iInterface;      
     /** Data Observer to CPS content registry, owned */    
@@ -373,7 +391,7 @@ private:
 	/** content id, owned */
 	HBufC* iContentId;
 	/** Startup reason, owned */
-	HBufC* iStartupReason;
+	HBufC8* iStartupReason;
     /** Reference of the sapi data plugin, not owned */    
     CSapiDataPlugin* iPlugin;    
     /** Menu item names, owned */    
@@ -387,3 +405,4 @@ private:
 #endif // SAPIDATA_H
 
 // End of file
+

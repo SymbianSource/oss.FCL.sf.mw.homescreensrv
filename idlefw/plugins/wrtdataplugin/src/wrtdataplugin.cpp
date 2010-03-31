@@ -34,6 +34,7 @@
 #include <aipspropertyobserver.h>
 #include <aipluginsettings.h>
 #include <activeidle2domainpskeys.h>
+#include <debug.h>
 
 #include "wrtdatapluginconst.h"
 #include "wrtdatapluginuids.hrh"
@@ -443,11 +444,16 @@ void CWrtDataPlugin::GetTypeL(TDesC16& aObjectId, TDes16& aType )
     }
 
 // ---------------------------------------------------------------------------
-//Refresh a specific image of text in the widget
+//Refresh a specific image or text in the widget
 // ---------------------------------------------------------------------------
 //
 void CWrtDataPlugin::RefreshL( TDesC16& aOperation, CLiwDefaultMap* aDataMap )
     {
+    __PRINTS("*** CWrtDataPlugin::RefreshL ***");
+    
+    __PRINT( __DBG_FORMAT( "* Publisher name: %S, uid: 0x%x, operation: %S" ),          
+        &PublisherInfo().Name(), PublisherInfo().Uid().iUid, &aOperation ); 
+    
     TInt observers( iObservers.Count() );        
     TInt transactionId = reinterpret_cast<TInt>( this );
     
@@ -476,6 +482,8 @@ void CWrtDataPlugin::RefreshL( TDesC16& aOperation, CLiwDefaultMap* aDataMap )
         // Release memory of the published icons
         iIconArray.Reset();
         }
+    
+    __PRINTS("*** CWrtDataPlugin::RefreshL - done ***");        
     }
 
 // ---------------------------------------------------------------------------

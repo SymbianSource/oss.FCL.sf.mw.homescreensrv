@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  
-*  Version     : %version: ou1s60ui#5.1.8 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: sa1spcx1#5.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -21,6 +21,8 @@
 
 #include <data_caging_paths.hrh>
 #include "../inc/menuuid.hrh"
+
+EPOCHEAPSIZE  4000 3000000
 
 TARGET          mcsmenuserver.exe
 TARGETTYPE      exe
@@ -42,6 +44,5 @@ MW_LAYER_SYSTEMINCLUDE
 LIBRARY         euser.lib
 LIBRARY         mcsmenu.lib
 LIBRARY         mcsmenuutils.lib
-LIBRARY         MemMan.lib
 
 

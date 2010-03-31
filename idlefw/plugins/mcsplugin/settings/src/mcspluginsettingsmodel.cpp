@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -18,21 +18,17 @@
 #include <eikenv.h>
 #include <itemmap.h>
 #include <mhomescreensettingsif.h>
-
 #include <aistrcnv.h>
 #include <StringLoader.h>
 #include <uri16.h>
 #include <mcspluginsettingsres.rsg>
+#include <mcsmenuitem.h>
 
-
-#include "mcspluginsettings.h"
 #include "mcspluginsettingsmodel.h"
+#include "mcspluginsettingsapplist.h"
+#include "mcspluginsettingsbkmlist.h"
 #include "mcspluginsettingscontainer.h"
 
-
-#include "debug.h"
-
-#include <mcsmenuitem.h>
 
 /**
  * Line format for the settings list box
@@ -51,6 +47,8 @@ _LIT8( KProperValueFolder, "folder" );
 _LIT8( KProperValueSuite, "suite" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
+_LIT8( KProperValueMailbox, "mailbox" );
+_LIT( KMenuTypeMailbox, "menu:mailbox" );
 
 using namespace HSPluginSettingsIf;
 
@@ -147,7 +145,7 @@ CMCSPluginSettingsModel::~CMCSPluginSettingsModel()
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginSettingsModel::ConstructL()
-{
+    {
     CHomescreenSettings::InitializeL( KAppUid );
     
     iPluginSettings = CHomescreenSettings::Instance();
@@ -155,63 +153,24 @@ void CMCSPluginSettingsModel::ConstructL()
         {
         User::Leave( KErrUnknown );
         }
-    
-    iAppList = CMCSPluginSettingsAppList::NewL();
-    iAppList->StartL();
-    iBkmList = CMCSPluginSettingsBkmList::NewL();
-}
-
-
-// ---------------------------------------------------------------------------
-// Gets the latest settings from HSPS and updates
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginSettingsModel::UpdateSettingsL( const TDesC8& aPluginId )
-    {
-    if( !iPlugin.Activated() )
-        {
-        return;
-        }
-    
-    if( iPluginId )
-        {
-        delete iPluginId;
-        iPluginId = NULL;
-        }
-    iPluginId = aPluginId.AllocL();    
-    
-    iSettings.Reset();
-    RPointerArray<CItemMap> settingItems;
-    CleanupClosePushL( settingItems );
-
-    iPluginSettings->GetSettingsL( *iPluginId, settingItems );
-
-    TInt count = settingItems.Count();
-    for ( TInt i = 0; i < count; i++ )
-        {
-        CItemMap* itemMap = settingItems[i];
-        RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
-        properties = itemMap->Properties();
-        TSettingItem item = ItemL( properties );
-        iSettings.AppendL( item );
-        }
-    CleanupStack::Pop( &settingItems );
-    settingItems.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
 // Gets the latest settings from HSPS and updates
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginSettingsModel::UpdateSettingModelL( const TDesC8& aPluginId )
+void CMCSPluginSettingsModel::UpdateSettingsL()
     {
-    if( iPluginId )
+    if( !iPluginId )
         {
-        delete iPluginId;
-        iPluginId = NULL;
+        return;
         }
-    iPluginId = aPluginId.AllocL();
     
+    if (iContainer)
+        {
+        iContainer->CloseChangeDialog();
+        }
+
     iSettings.Reset();
     RPointerArray<CItemMap> settingItems;
     CleanupClosePushL( settingItems );
@@ -229,6 +188,11 @@ void CMCSPluginSettingsModel::UpdateSettingModelL( const TDesC8& aPluginId )
         }
     CleanupStack::Pop( &settingItems );
     settingItems.ResetAndDestroy();
+    
+    if (iContainer)
+        {
+        iContainer->ResetCurrentListL(0);
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -241,7 +205,7 @@ TSettingItem CMCSPluginSettingsModel::ItemL(
     TSettingItem setting = { KErrNotFound, EApplication , EFalse };
 
     TSettingType type = SettingTypeL( aProperties );
-    if ( type == EApplication )
+    if ( type == EApplication || type == EMailbox )
         {
         setting = iAppList->FindItemL( aProperties );
         }
@@ -308,7 +272,6 @@ TBool CMCSPluginSettingsModel::SettingLockedL(
     return EFalse;
     }
 
-
 // ---------------------------------------------------------------------------
 // Saves menuitem to HSPS to the given shortcut index
 // ---------------------------------------------------------------------------
@@ -346,6 +309,10 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                 else if ( type == KMenuTypeSuite )
                     {
                     properties[ i ]->SetValueL( KProperValueSuite );
+                    }
+                else if( type == KMenuTypeMailbox )
+                    {
+                    properties[ i ]->SetValueL( KProperValueMailbox );
                     }
                 else
                     {
@@ -448,23 +415,12 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
 // Updates settings container.
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginSettingsModel::UpdateSettingsContainerL( const TDesC8& aPluginId )
-{
-    if (iContainer)
+void CMCSPluginSettingsModel::SetPluginIdL( const TDesC8& aPluginId )
     {
-        if (iContainer->IsChangeDialogShowing())
-        {
-            iContainer->CloseChangeDialog();
-        }
+    delete iPluginId;
+    iPluginId = NULL;
+    iPluginId = aPluginId.AllocL();    
     }
-
-    UpdateSettingsL( aPluginId );
-
-    if (iContainer)
-    {
-        iContainer->ResetCurrentListL(0);
-    }
-}
 
 // ---------------------------------------------------------------------------
 // From MDesCArray
@@ -491,11 +447,11 @@ TPtrC CMCSPluginSettingsModel::MdcaPoint( TInt aIndex ) const
     if ( iSettings[aIndex].type == EApplication )
         {
         // first, we need to check if the item is missing 
-        // (application unistaled or mmc card removed)
+        // (application uninstalled or mmc card removed)
         // If it is, we return "Undefined" application name instead
         if ( iSettings[ aIndex ].id == KErrNotFound )
             {
-            const TDesC& caption = iAppList->iUndefinedText->Des();
+            const TDesC& caption = iAppList->UndefinedText();
             TPtrC line; 
             TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
             return line; 
@@ -557,35 +513,19 @@ TBool CMCSPluginSettingsModel::ReplaceItemL( const TInt& aSettingIndex,
     {
     if (aSettingIndex >= 0 && aSettingIndex < iSettings.Count())
         {
-        TSettingItem oldItem = iSettings[ aSettingIndex ];
         iSettings[ aSettingIndex ].id = aId;
         iSettings[ aSettingIndex ].type = aType;
 
         if ( aType == EApplication )
             {
-            CMenuItem& item = iAppList->ItemL( aId );
-            SaveSettingsL( aSettingIndex, item );
+            CMenuItem* item = iAppList->ItemL( aId );
+            SaveSettingsL( aSettingIndex, *item );
             }
          else
             {
             CMenuItem& item = iBkmList->ItemL( aId );
             SaveSettingsL( aSettingIndex, item );
             }
-        
-        // Old setting type is bookmark. Remove bookmark item from MCS 
-        // if it was created in runtime.
-        if ( oldItem.type == EBookmark )
-            {
-                iBkmList->RemoveMenuItemL( oldItem.id );
-            }
-
-        // Old setting type is application.
-        // Remove app item from MCS if it was created in runtime (mailbox).
-        if ( oldItem.type == EApplication )
-            {
-                iAppList->RemoveMenuItemL( oldItem.id );
-            }
-
         return ETrue;
         }
     return EFalse;
@@ -623,9 +563,13 @@ CMCSPluginSettingsBkmList* CMCSPluginSettingsModel::BkmList()
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginSettingsModel::UpdateAppListL()
-{
+    {
+    if( !iAppList )
+        {
+        iAppList = CMCSPluginSettingsAppList::NewL();
+        }
     iAppList->StartL();
-}
+    }
 
 // ---------------------------------------------------------------------------
 // Updates bookmark list

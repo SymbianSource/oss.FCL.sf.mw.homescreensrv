@@ -23,6 +23,7 @@
 #include <e32base.h>
 #ifdef CONTENT_PUBLISHER_DEBUG
 #include <f32file.h>
+#include <liwgenericparam.h>
 
 _LIT(KCPDebugDirName, "contentpublisher" );
 _LIT(KCPDebugFileName, "c:\\contentpublisher.txt" );
@@ -62,6 +63,14 @@ public:
      */
     IMPORT_C static void Printf(TRefByValue<const TDesC8> aFormat, ...);
 
+    /**
+     * Print debug text to RDebug
+     *
+     */
+    IMPORT_C static void ExtendedPrint( const char* aStringParam,
+                                        const CLiwGenericParamList& aInParamList );
+
+
 private:
 
     CCPDebug();
@@ -84,7 +93,7 @@ private: // data
     };
 
 #define CP_DEBUG(s)    CCPDebug::Printf(s)
-
+#define CP_EXTENDED_DEBUG(s,p) CCPDebug::ExtendedPrint(s,p)
 /**
  * Thread local storage space. Writable static data is not supported in
  * Symbian, so static data is stored in this struct.
@@ -100,7 +109,8 @@ struct DebugData
 
 #else
 
-#define CP_DEBUG(s) 
+#define CP_DEBUG(s)
+#define CP_EXTENDED_DEBUG(s,p)
 
 #endif
 

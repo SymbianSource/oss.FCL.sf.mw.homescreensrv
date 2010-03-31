@@ -52,6 +52,7 @@ SOURCE          hspsrominstaller.cpp
 SOURCE          hspsbrobserver.cpp
 SOURCE          hspsbrhandler.cpp
 SOURCE          hspsinstaller.cpp
+SOURCE          hspsfamily.cpp
 #if defined(WINSCW) || defined(__WINS__) 
 SOURCE          hspsfamilylistener.cpp
 #endif
@@ -82,16 +83,13 @@ LIBRARY     hspsdomdocument.lib
 LIBRARY     hspsdefinitionengineinterface.lib
 LIBRARY     ecom.lib // definition engine
 LIBRARY     MemMan.lib
+LIBRARY     ws32.lib    // RWsSession
 
 #ifdef _hsps_DEBUG_
 LIBRARY     flogger.lib
 #endif // _hsps_DEBUG_
 LIBRARY     sysversioninfo.lib
 LIBRARY     abclient.lib
-#if defined(WINSCW) || defined(__WINS__)
-LIBRARY     ws32.lib	// RWsSession
-LIBRARY     featmgr.lib // FeatureManager
-#endif // defined(WINSCW)
 
 LANG      SC
 

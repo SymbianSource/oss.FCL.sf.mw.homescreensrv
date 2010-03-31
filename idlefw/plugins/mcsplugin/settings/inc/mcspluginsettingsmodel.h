@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -22,18 +22,16 @@
 // External includes
 #include <e32base.h>
 #include <bamdesca.h>               // For MDesCArray
-#include <badesca.h>
 #include <hspluginsettings.h>
 #include <propertymap.h>
 
-// Internal includes
-#include "mcspluginsettingsapplist.h"
-#include "mcspluginsettingsbkmlist.h"
-
 // Forward declaration
 class CCoeEnv;
-class CMCSPluginSettingsContainer;
+class CMenuItem;
+class CMCSPluginSettingsAppList;
+class CMCSPluginSettingsBkmList;
 class CMCSPluginSettings;
+class CMCSPluginSettingsContainer;
 class HSPluginSettingsIf::CItemMap;
 
 /**
@@ -42,7 +40,8 @@ class HSPluginSettingsIf::CItemMap;
 enum TSettingType
     {
     EApplication,
-    EBookmark
+    EBookmark,
+    EMailbox
     };
 
 /**
@@ -165,14 +164,12 @@ public:
      * 
      * @param aPluginId
      */
-    void UpdateSettingsContainerL( const TDesC8& aPluginId );
-
+    void SetPluginIdL( const TDesC8& aPluginId );
+    
     /**
-       * Update settings model
-       * 
-       * @param aPluginId
-       */
-    void UpdateSettingModelL( const TDesC8& aPluginId );
+     * Read settings from HSPS and update settings list
+     */
+    void UpdateSettingsL();
 
 private:
 
@@ -190,7 +187,7 @@ private:
     void ConstructL();
 
     /**
-     * ListBoxLineL
+     * ListBoxLine for list
      * 
      * @param aCaption
      * @param aIndex
@@ -199,7 +196,7 @@ private:
     TPtrC ListBoxLineL( const TDesC& aCaption, TInt aIndex ) const;
 
     /**
-     * ItemL
+     * Returns setting item based on properties.
      * 
      * @param aProperties
      * @return TSettingItem
@@ -225,15 +222,10 @@ private:
     TBool SettingLockedL( 
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
 
-    /**
-     * Update settings
-     * 
-     * @param aPluginId
-     */
-    void UpdateSettingsL( const TDesC8& aPluginId );
+    
 
     /**
-     * Save settings
+     * Save settings into HSPS
      * 
      * @param aIndex
      * @param aMenuItem
@@ -248,13 +240,20 @@ private: // data
      */
     RArray<TSettingItem> iSettings;
 
-    // Homescreen settings API. NOT OWNED!
+    /**
+    * Homescreen settings API. Not owned.
+    */
     HSPluginSettingsIf::CHomescreenSettings* iPluginSettings;
 
+    /**
+     * HSPS settings id.
+     */
     HBufC8* iPluginId;
 
-    // Stores the text which is drawn by listbox
-    // Listbox takes only reference
+    /**
+     * Stores the text which is drawn by listbox
+     * Listbox takes only reference, own.
+     */
     mutable HBufC* iListBoxLine;
 
     /**

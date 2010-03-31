@@ -24,6 +24,10 @@
 #include <centralrepository.h>
 #include <w32adll.h>
 
+#include <easydialingcrkeys.h>
+#include <spsettings.h>
+#include <featmgr.h>
+
 #include <PtiEngine.h>
 #include <activeidle2domainpskeys.h>
 #include <AvkonInternalCRKeys.h>
@@ -153,11 +157,11 @@ TBool CNumericKeyHandler::OfferRawEvent(const TRawEvent& aRawEvent)
 TBool CNumericKeyHandler::CheckPostToTarget(const TRawEvent& aRawEvent ) const
     {
     const TInt scanCode = aRawEvent.ScanCode();
+    const TUint modifiers = iUiState->Modifiers();
 
     if ( iQwertyMode ) 
         {
-        // Don't pass the check if shift is pressed.
-		const TUint modifiers = iUiState->Modifiers();
+        // Don't pass the check if shift is pressed.		
         if(( modifiers & EModifierShift ) == 0 )
             {
             TInt numericKeysCount = iNumericKeys.Count();
@@ -190,7 +194,15 @@ TBool CNumericKeyHandler::CheckPostToTarget(const TRawEvent& aRawEvent ) const
                 }
             }
         }
-    return EFalse;
+    
+    // Homescreen should open dialer also with alpha characters, if dialer is in 
+    // mode that accepts alpha characters into number entry (ou1cimx1#299396)    
+    
+    const TInt  KPhoneKeyStart = 33;
+    const TInt  KPhoneKeyEnd   = 127;
+    
+    return ( ( AllowAlphaNumericMode() ) && ( ( scanCode >= KPhoneKeyStart &&
+             scanCode <= KPhoneKeyEnd ) || modifiers & EModifierSpecial ) );
     }
 
 
@@ -296,15 +308,73 @@ void CNumericKeyHandler::SetInputLanguage( TInt aValue )
     iInputLanguage = aValue;
     }
 
+/**
+ * Check alpha numeric mode.
+ */
+TBool CNumericKeyHandler::AllowAlphaNumericMode() const
+    {
+    return ( EasyDialingEnabled() || VoIPSupported() );
+    }
+
+/**
+ * Check if voip supported.
+ */
+TBool CNumericKeyHandler::VoIPSupported() const
+    {
+    TBool voipSupported( EFalse );
+    CSPSettings* serviceProviderSettings( NULL );
+
+    TRAP_IGNORE( serviceProviderSettings = CSPSettings::NewL() );   
+
+    if ( serviceProviderSettings )
+        {
+        voipSupported = serviceProviderSettings->IsFeatureSupported( 
+                ESupportInternetCallFeature );
+        
+        delete serviceProviderSettings;
+        }
+
+    return voipSupported;
+    }
+
+/**
+ * Check if easy dialing enabled.
+ */
+TBool CNumericKeyHandler::EasyDialingEnabled() const
+    {
+    TBool easyDialingEnabled( EFalse );
+    if ( FeatureManager::FeatureSupported( 
+            KFeatureIdProductIncludesHomeScreenEasyDialing ) )
+        {
+        CRepository* cenrep( NULL );
+        TInt easyDialingSetting;
+
+        TRAP_IGNORE( cenrep = CRepository::NewL( KCRUidEasyDialSettings ) );
+
+        if ( cenrep )
+            {
+            TInt err = cenrep->Get( KEasyDialing, easyDialingSetting );
+            if ( !err && easyDialingSetting )
+                {
+                easyDialingEnabled = ETrue;
+                }
+
+            delete cenrep;        
+            }
+        }
+
+    return easyDialingEnabled;
+    }
+
 void CNumericKeyHandler::HandleNotifyGeneric(TUint32 aKey)
-	{
-	if( aKey == KAknFepInputTxtLang )
-		{
-		TInt newValue = iInputLanguage;
-		iInputLanguageRepository->Get( KAknFepInputTxtLang, newValue );
-		HandleInputLanguageChanged( newValue );
-		}
-	}
+    {
+    if( aKey == KAknFepInputTxtLang )
+        {
+        TInt newValue = iInputLanguage;
+        iInputLanguageRepository->Get( KAknFepInputTxtLang, newValue );
+        HandleInputLanguageChanged( newValue );
+        }
+    }
     
 void CNumericKeyHandler::HandleNotifyError
         (TUint32 /*aKey*/, TInt /*aError*/, CCenRepNotifyHandler* /*aHandler*/)

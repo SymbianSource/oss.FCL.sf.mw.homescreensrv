@@ -33,7 +33,6 @@
 #include "cpactionhandlerthread.h"
 #include "cpnotificationhandler.h"
 
-
 using namespace LIW;
 
 // ================= MEMBER FUNCTIONS =======================
@@ -183,6 +182,9 @@ void CCPServerSession::DispatchMessageL( const RMessage2& aMessage, TBool& aPani
         case ECpServerExecuteAction:
             ExecuteActionL( aMessage );
             break;
+        case ECpServerExecuteMultipleActions:
+            ExecuteMultipleActionsL( aMessage );
+            break;
         default:
             iServer->PanicClient( aMessage, ECPServerBadRequest );
             aPanicedClient = ETrue;
@@ -282,26 +284,68 @@ void CCPServerSession::RemoveDataL( const RMessage2& aMessage )
 //
 void CCPServerSession::ExecuteActionL( const RMessage2& aMessage )
     {
-    TInt error(KErrNone);
     CP_DEBUG( _L8("CCPServerSession::ExecuteActionSizeL()" ) );
-
     TUint options = static_cast<TUint>( aMessage.Int2() ); // 2 == KOptionsPosition
-
     CCPLiwMap* map = UnpackFromClientLC( aMessage );
-    CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC( );
+    ExecuteActionL( map, EFalse, options );
+    CleanupStack::PopAndDestroy( map );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// --------------- --------------------------------------------------------------
+//
+void CCPServerSession::ExecuteActionL(const CCPLiwMap* aMap,
+        TBool aEnableCache, TUint aOptions)
+    {
+    CP_DEBUG( _L8("CCPServerSession::ExecuteActionSizeL()" ) );
+    TInt error(KErrNone);
+    CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC();
     CLiwDefaultList* list = CLiwDefaultList::NewLC();
-    error = iDataManager->GetActionL( *map, *paramList, list );
+    error = iDataManager->GetActionsL(*aMap, aEnableCache, *paramList, list );
     //we notify apart from action execution result. So in fact
     //notification means there was an attempt to execute action
-    if ( !( options & KDisableNotification ) )
+    if (!(aOptions & KDisableNotification))
         {
-        iDataManager->HandleChangeL( list );
+        iDataManager->HandleChangeL(list);
         }
-    User::LeaveIfError( error );
-    ExecuteL( *paramList );    
-    CleanupStack::PopAndDestroy( list );
-    CleanupStack::PopAndDestroy( paramList );
-    CleanupStack::PopAndDestroy( map );
+    User::LeaveIfError(error);
+    ExecuteL(*paramList);
+    CleanupStack::PopAndDestroy(list);
+    CleanupStack::PopAndDestroy(paramList);
+    }
+
+// -----------------------------------------------------------------------------
+// CCPServerSession::ExecuteMultipleActionsL
+// --------------- --------------------------------------------------------------
+//
+void CCPServerSession::ExecuteMultipleActionsL(const RMessage2& aMessage)
+    {
+    CP_DEBUG( _L8("CCPServerSession::ExecuteMultipleActionsL()" ) );
+    
+    CLiwGenericParamList* genericList = UnpackForMultiExecuteLC(aMessage);
+    TUint options = static_cast<TUint> (aMessage.Int2()); // 2 == KOptionsPosition
+
+    const TLiwGenericParam* param = NULL;
+    TInt pos(0);
+    param = genericList->FindFirst(pos, KFilters);
+    const CLiwList* maps = param->Value().AsList();
+    CLiwDefaultList* cpMaps = CheckValidityLC(maps);
+    
+    //execute actions
+    for (TInt i = 0; i < cpMaps->Count(); i++)
+        {
+        TLiwVariant mapVariant;
+        mapVariant.PushL();
+        cpMaps->AtL(i, mapVariant);
+        const CCPLiwMap* map =
+                static_cast<const CCPLiwMap*> (mapVariant.AsMap());
+        ExecuteActionL(map, ETrue, options);
+        CleanupStack::PopAndDestroy(&mapVariant);
+        }
+
+    CleanupStack::PopAndDestroy(cpMaps);
+    CleanupStack::PopAndDestroy(genericList);
     }
 
 // -----------------------------------------------------------------------------
@@ -488,7 +532,7 @@ void CCPServerSession::GetAndExecuteActionL( CCPLiwMap* aMap,
         aMap->InsertL( KActionTrigger, TLiwVariant( KActivateTrigger ) ); 
         }
     CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC();
-    iDataManager->GetActionL( *aMap, *paramList, aNotificationList );
+    iDataManager->GetActionsL( *aMap, EFalse, *paramList, aNotificationList );
     iActionHandlerThread->ExecuteL( *paramList );    
     CleanupStack::PopAndDestroy( paramList );
     }
@@ -504,4 +548,51 @@ TBool CCPServerSession::GetServerLock( const RMessage2& aMessage )
 			&& iServer->GetLock() ); 
 			
 	}
+
+// -----------------------------------------------------------------------------
+//
+// --------------- --------------------------------------------------------------
+//
+CLiwGenericParamList* CCPServerSession::UnpackForMultiExecuteLC(
+        const RMessage2& aMessage)
+    {
+    TInt deslen = aMessage.GetDesLengthL(KDescriptorPosition);
+    HBufC8* buffer = HBufC8::NewLC(deslen);
+    TPtr8 tempDes = buffer->Des();
+    aMessage.Read(KDescriptorPosition, tempDes);
+    RDesReadStream datastrm(*buffer);
+    CleanupClosePushL(datastrm);
+    CLiwGenericParamList* genericList = CLiwGenericParamList::NewL(datastrm);
+    CleanupStack::PopAndDestroy(&datastrm);
+    CleanupStack::PopAndDestroy(buffer);
+    CleanupStack::PushL(genericList);
+    return genericList;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// --------------- --------------------------------------------------------------
+//
+CLiwDefaultList* CCPServerSession::CheckValidityLC(const CLiwList* aMaps)
+    {
+    CLiwDefaultList* cpMaps = CLiwDefaultList::NewLC();
+    for (TInt i = 0; i < aMaps->Count(); i++)
+        {
+        TLiwVariant mapVariant;
+        mapVariant.PushL();
+        aMaps->AtL(i, mapVariant);
+        if (mapVariant.TypeId() != LIW::EVariantTypeMap)
+            {
+            User::Leave(KErrBadName);
+            }
+        CCPLiwMap* map = CCPLiwMap::NewL(*mapVariant.AsMap());
+        map->PushL();
+        map->IsValidForActionL();
+        cpMaps->AppendL(TLiwVariant(map));
+        CleanupStack::PopAndDestroy(map);
+        CleanupStack::PopAndDestroy(&mapVariant);
+        }
+    return cpMaps;
+    }
+
 // End of File

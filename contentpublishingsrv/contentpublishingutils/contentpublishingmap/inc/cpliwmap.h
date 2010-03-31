@@ -24,6 +24,7 @@
 
 class RDesReadStream;
 class CCPSecurityPolicy;
+class TLiwGenericParam;
 
 // CLASS DECLARATION
 /**
@@ -73,6 +74,11 @@ public:
      */    
     IMPORT_C static CCPLiwMap* NewL( const CLiwGenericParamList& aList );
 
+    /**
+     * Two-phased constructor.
+     */    
+    IMPORT_C static CCPLiwMap* NewL( const CLiwMap& aMap );
+    
     /**
      * Used by client to serialize this object 
      *
@@ -133,7 +139,16 @@ public:
     IMPORT_C TBool GetProperty( const TDesC8& aProperty,
     		TInt32& aResult ) const;
 
-    
+
+    /**
+     * Return list of action triggers from main map
+     * Note that these are not triggers from action map
+     *
+     * @return list of action triggers, NULL if main map 
+     * doesn't have action trigger
+     */
+    IMPORT_C CLiwDefaultList* GetActionTriggersLC( ) const;
+
     /**
      * Setter for security policy 
      *
@@ -379,6 +394,18 @@ protected:
     void SetL( const CLiwGenericParamList& aInParamList );
 
     /**
+     * Sets all parameters according to provided list
+     * @param aMap map with parameters
+     */
+    void SetL( const CLiwMap& aMap );
+
+    /**
+     * Extracts a param and appends it to the internal list
+     * @param aParam a param to extract
+     */
+    void ExtractParamL(const TLiwGenericParam& aParam);
+    
+    /**
      * Check Get properties
      *
      * @return logical sum of TCPProperties of the object
@@ -438,7 +465,6 @@ protected:
      *
      */
     TBool PropertyExists( const TDesC8& aProperty ) const;
-
     
     /**
      * Fetches entries from database
@@ -607,6 +633,14 @@ protected:
      * Perform the second phase construction of a CCPLiwMap object.
      */       
     void ConstructL();
+    
+    /**
+     * Checks a type a map 
+     * @param aVariant variant containing a map type
+     * @return ETrue if a type is Publisher and EFalse if Content
+     * in other cases method leaves
+     */  
+    static TBool IsTypePublisherL(const TLiwVariant& aVariant);
 
 protected:
     // data

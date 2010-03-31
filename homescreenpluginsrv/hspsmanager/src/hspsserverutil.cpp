@@ -1660,10 +1660,10 @@ ChspsDomNode* hspsServerUtil::GetParentNode(
     }
 
 // -----------------------------------------------------------------------------
-// hspsServerUtil::IsFile
+// hspsServerUtil::IsLogoFile
 // -----------------------------------------------------------------------------
 //
-TBool hspsServerUtil::IsFile(
+TBool hspsServerUtil::IsLogoFile(
         const TDesC& aFileDeclaration,
         TFileName& aFilename )        
     {
@@ -1891,6 +1891,57 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
               
      return err;
      }
+     
+// -----------------------------------------------------------------------------
+// hspsServerUtil::ResolveLogoPathL
+// -----------------------------------------------------------------------------
+void hspsServerUtil::PopulateLogoPathsL(
+        const TDesC& aLogoDeclaration,
+        const TUint aAppUid,
+        RBuf& aTargetPath,
+        RBuf& aSourcePath,
+        RBuf& aUpdatedDeclaration)
+    {        
+    // Process widget types only 
+    if ( aLogoDeclaration.Length() && aAppUid > 0 )
+        {                          
+        // Get possible file name from the optional logo declaration
+        // and if found, populate the paths and update the declaration 
+        TFileName filename;
+        if( IsLogoFile( aLogoDeclaration, filename ) )
+            {      
+            // Get client's private directory                
+            _LIT( KClientPrivatePath, "c:\\private\\%X\\");
+            TPath clientPath;            
+            clientPath.Format( KClientPrivatePath, aAppUid );
+                                    
+            // Updated logo declaration
+            TInt offset = aLogoDeclaration.FindF( filename );                       
+            __ASSERT_DEBUG( offset != KErrNotFound, User::Leave( KErrCorrupt ) );            
+            if( aLogoDeclaration.Length() + aLogoDeclaration.Mid( offset ).Length() < KMaxFileName )
+                {
+                aUpdatedDeclaration.Copy( aLogoDeclaration );
+                aUpdatedDeclaration.Insert( offset, clientPath );
+                                                               
+                // Set path and name of the target file            
+                if( clientPath.Length() + filename.Length() < KMaxFileName )
+                    {
+                    aTargetPath.Copy( clientPath );
+                    aTargetPath.Append( filename );
+                    
+                    // Set name of the source file
+                    _LIT( KServerPrivateFolder, "c:\\private\\200159c0\\themes\\" );
+                    if( KServerPrivateFolder().Length() + filename.Length() < KMaxFileName )
+                        {                       
+                        aSourcePath.Copy( KServerPrivateFolder );
+                        aSourcePath.Append( filename );                        
+                        }
+                    }
+                }
+                        
+            }
+        }
+    }     
 
 // -----------------------------------------------------------------------------
 // hspsServerUtil::hspsServerUtil
