@@ -1,0 +1,3 @@
+EXPORTS
+	?NewL@CAiPluginSettings@@SAPAV1@XZ @ 1 NONAME ; class CAiPluginSettings * CAiPluginSettings::NewL(void)
+	

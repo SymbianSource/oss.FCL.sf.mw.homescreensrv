@@ -1,0 +1,82 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project specification file.
+*
+*/
+
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>    // For RESOURCE_FILES_DIR
+#include "../inc/hs_app_pslnactiveidlepluginuids.h"
+
+//MACRO MY_DEBUG
+
+TARGET          hs_app_pslnactiveidleplugin.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D KPslnActiveIdlePluginDllUID3
+
+CAPABILITY      CAP_ECOM_PLUGIN
+VENDORID        VID_DEFAULT
+
+SOURCEPATH      ../src
+SOURCE          hs_app_pslnactiveidlepluginimplementationtable.cpp
+SOURCE          hs_app_pslnactiveidleplugincontainer.cpp
+SOURCE          hs_app_pslnactiveidlepluginengine.cpp
+SOURCE          hs_app_pslnactiveidleplugin.cpp
+SOURCE          hs_app_gsactiveidleplugincontainer.cpp
+SOURCE          hs_app_gsactiveidleplugin.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../loc
+USERINCLUDE     ../data // For *.rh
+
+MW_LAYER_SYSTEMINCLUDE
+SYSTEMINCLUDE   /epoc32/include/ecom
+
+SOURCEPATH      ../data
+
+START RESOURCE  hs_app_pslnactiveidleplugin.rss
+TARGET          hs_app_pslnactiveidleplugin.rsc
+END
+
+START RESOURCE  hs_app_pslnactiveidlepluginrsc.rss
+DEPENDS pslncommon.rsg
+HEADER
+TARGETPATH      RESOURCE_FILES_DIR
+LANGUAGE_IDS
+END
+
+LIBRARY         apgrfx.lib
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         efsrv.lib
+LIBRARY         avkon.lib
+LIBRARY         bafl.lib
+LIBRARY         cone.lib
+LIBRARY         eikcoctl.lib
+LIBRARY         eikcore.lib
+LIBRARY         centralrepository.lib
+
+LIBRARY         commonengine.lib    // For RConeResourceLoader
+LIBRARY         aknskins.lib        // For enhanced skinning
+LIBRARY         aknnotify.lib       // Global note
+LIBRARY         featmgr.lib         // For feature manager
+
+LIBRARY         pslnframework.lib   // For Psln FW base classes
+LIBRARY         xn3odt.lib           // For XUIKON
+
+LIBRARY         gsframework.lib     // For GS FW base classes
+LIBRARY         gsecomplugin.lib
+
+// End of File.

@@ -1,0 +1,28 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#ifndef __MCSPLUGINHELPS_VARIANT_IBY__
+#define __MCSPLUGINHELPS_VARIANT_IBY__
+
+#if defined(FF_S60_HELPS_IN_USE)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x20022FDC\contents.zip, RESOURCE_FILES_DIR\xhtml\%02d\0x20022FDC\contents.zip)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x20022FDC\index.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x20022FDC\index.xml)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x20022FDC\keywords.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x20022FDC\keywords.xml)
+    data=LOCALISE(DATAZ_\resource\xhtml\%02d\0x20022FDC\meta.xml, RESOURCE_FILES_DIR\xhtml\%02d\0x20022FDC\meta.xml)
+#endif
+
+#endif

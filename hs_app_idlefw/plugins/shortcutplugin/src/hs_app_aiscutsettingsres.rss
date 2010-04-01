@@ -1,0 +1,443 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for Shortcut plug-in settings
+*
+*/
+
+
+#include <eikon.rh>
+#include <avkon.rsg>
+#include <avkon.rh>
+#include <avkon.mbg>
+#include <eikcore.rsg>
+#include <eikon.rsg>
+#include <appinfo.rh>
+#include <avkon.loc>
+#include <data_caging_paths_strings.hrh>
+#include <gscommon.rh>
+#include <gs.loc>
+
+#include <hs_app_ai3scutsettings.loc>
+
+#include "hs_app_aiscutsettings.hrh"
+
+
+NAME SCSE
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf="SCSE"; }
+
+//----------------------------------------------------
+// EIK_APP_INFO
+// Contains application information.
+//----------------------------------------------------
+//
+RESOURCE EIK_APP_INFO
+{
+}
+
+//----------------------------------------------------
+// r_scutsettings_menubar
+//
+//----------------------------------------------------
+//
+RESOURCE MENU_BAR r_scutsettings_menubar
+{
+    titles =
+    {
+        MENU_TITLE { menu_pane = r_scutsettings_menupane; }
+    };
+}
+
+//----------------------------------------------------
+// r_scutsettings_menupane
+// Options menu.
+//----------------------------------------------------
+//
+RESOURCE MENU_PANE r_scutsettings_menupane
+{
+    items =
+    {
+        MENU_ITEM
+        {
+            command = EAiScutSettingsCmdChange;
+            txt     = qtn_options_change;
+        }
+
+#ifdef __SERIES60_HELP
+        ,
+        MENU_ITEM
+        {
+            command = EAknCmdHelp;
+            txt     = qtn_options_help;
+        }
+#endif  // __SERIES60_HELP
+        ,
+        MENU_ITEM
+        {
+            command = EAknCmdExit;
+            txt     = qtn_options_exit;
+        }
+    };
+}
+
+//----------------------------------------------------
+// r_scut_settings_view
+// Settings views.
+//----------------------------------------------------
+//
+RESOURCE AVKON_VIEW r_scut_settings_view
+{
+    menubar = r_scutsettings_menubar;
+    //cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
+    cba = r_scut_softkeys_options_back_change;
+}
+
+//----------------------------------------------------
+// r_setting_listbox
+// Common listbox editor resource for setting pages.
+//----------------------------------------------------
+//
+RESOURCE LISTBOX r_setting_listbox
+{
+    flags = EEikListBoxMultipleSelection;
+}
+
+//----------------------------------------------------
+// r_scut_settings_applist_page
+// Selection key idle softkey setting page.
+//----------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_scut_settings_applist_page
+{
+    number = EAknSettingPageNoOrdinalDisplayed;
+    //    label = qtn_set_idle_selec_key;
+    // note: default cba resource is ok_cancel_select
+    //softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL;
+    type = EAknSetListBox;
+    editor_resource_id = r_setting_listbox;
+}
+
+//----------------------------------------------------------
+// r_scut_type_url_page
+// Setting page editing an url.
+//----------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_scut_type_url_page
+{
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    number= EAknSettingPageNoOrdinalDisplayed;
+    label= qtn_ai_shorts_type_url;
+    type = EEikCtEdwin;
+    editor_resource_id = r_scut_url_editor;
+}
+
+//----------------------------------------------------------
+// r_scut_edit_url_page
+// Setting page editing an url.
+//----------------------------------------------------------
+//
+RESOURCE AVKON_SETTING_PAGE r_scut_edit_url_page
+{
+    softkey_resource = R_AVKON_SOFTKEYS_OK_CANCEL__OK;
+    number= EAknSettingPageNoOrdinalDisplayed;
+    label= qtn_ai_shorts_edit_url;
+    type = EEikCtEdwin;
+    editor_resource_id = r_scut_url_editor;
+}
+
+//----------------------------------------------------------
+// r_scut_url_editor
+// URL editor.
+//----------------------------------------------------------
+//
+RESOURCE EDWIN r_scut_url_editor
+{
+    width = 10;
+    lines = 2;
+    maxlength = 1000;
+    numeric_keymap = EAknEditorCalculatorNumberModeKeymap;
+    allowed_input_modes = EAknEditorTextInputMode | EAknEditorNumericInputMode;
+    default_input_mode = EAknEditorTextInputMode;
+    special_character_table = R_AVKON_URL_SPECIAL_CHARACTER_TABLE_DIALOG;
+    default_case = EAknEditorLowerCase;
+    flags = EEikEdwinAutoSelection | EAknEditorLowerCase | EEikEdwinNoLineOrParaBreaks;
+    avkon_flags = EAknEditorFlagNoT9 | EAknEditorFlagLatinInputModesOnly;
+}
+
+//----------------------------------------------------
+// r_scut_change_to_page
+// "Change To" setting page.
+//----------------------------------------------------
+//
+RESOURCE ARRAY r_scut_change_to_page_lbx
+{
+    items =
+    {
+        LBUF { txt = qtn_sc_set_change_apps;     },
+        LBUF { txt = qtn_sc_set_change_bookmark; }
+        
+        // Only this menu option disabled.
+        // The implementation of url functionality still exists in code, 
+        // even though this option has been decided to remove due to better
+        // usability. Affects lots of code if removed entirely.
+        /*,
+        LBUF { txt = qtn_sc_set_change_url;    }*/
+    };
+}
+
+//----------------------------------------------------
+// r_scut_listquery_change_to_page
+// "Change To" setting page.
+//----------------------------------------------------
+//
+RESOURCE AVKON_LIST_QUERY r_scut_listquery_change_to_page
+{
+    softkeys=R_AVKON_SOFTKEYS_SELECT_CANCEL;
+    items =
+    {
+        AVKON_LIST_QUERY_DLG_LINE
+        {
+            control = AVKON_LIST_QUERY_CONTROL
+            {
+                listtype = EAknCtSinglePopupMenuListBox;
+                heading = qtn_sc_set_change_prompt;
+                listbox = AVKON_LIST_QUERY_LIST
+                {
+                    // array of items will be defined dynamically
+                };
+            };
+        }
+    };
+}
+
+//----------------------------------------------------------
+// r_scut_wait_note
+//
+//----------------------------------------------------------
+//
+RESOURCE DIALOG r_scut_wait_note
+{
+    flags = EAknWaitNoteFlags | EEikDialogFlagWait;
+    buttons = R_AVKON_SOFTKEYS_EMPTY;
+    items=
+    {
+        DLG_LINE
+        {
+            type = EAknCtNote;
+            id = EGeneralNote;
+            control= AVKON_NOTE
+            {
+                layout = EWaitLayout;
+                singular_label = qtn_gen_note_opening;
+                animation = R_QGN_GRAF_WAIT_BAR_ANIM;
+            };
+        }
+    };
+}
+
+//----------------------------------------------------
+// r_scut_settings_view_caption
+// View caption for plug-in. max 256
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_view_caption
+{
+    buf = qtn_set_pers_shortcuts;
+}
+
+//----------------------------------------------------
+// r_scut_settings_view_title
+// View title.
+//----------------------------------------------------
+//
+RESOURCE TITLE_PANE r_scut_settings_view_title
+{
+    txt = qtn_set_title_pers_shortcuts;
+}
+
+//----------------------------------------------------
+//  r_ai_settings_txt_fixed_item
+//  Text used in information note when attempting
+//  to change a read-only shortcut
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_txt_fixed_item
+{
+    buf = qtn_ai_set_app_note_fixed;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_txt_all_fixed
+//  Text for empty listbox item
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_txt_all_fixed
+{
+    buf = qtn_ai_sc_set_all_fixed;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_txt_linkn
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_txt_linkn
+{
+    buf = qtn_ai_set_myt_linkn;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_softkey_left
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_softkey_left
+{
+    buf = qtn_set_left_idle_softkey;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_softkey_right
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_softkey_right
+{
+    buf = qtn_set_right_idle_softkey;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_scroll_left
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_scroll_left
+{
+    buf = qtn_set_idle_left_scroll;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_scroll_right
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_scroll_right
+{
+    buf = qtn_set_idle_right_scroll;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_scroll_up
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_scroll_up
+{
+    buf = qtn_set_idle_up_scroll;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_scroll_down
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_scroll_down
+{
+    buf = qtn_set_idle_down_scroll;
+}
+
+//----------------------------------------------------
+//  r_scut_settings_selection_key
+//
+//----------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_selection_key
+{
+    buf = qtn_set_idle_selec_key;
+}
+
+// -----------------------------------------------------------------------------
+//  r_scut_settings_no_effect
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_scut_settings_no_effect
+{
+    buf = qtn_set_idle_skeys_no_effect;
+}
+
+// -----------------------------------------------------------------------------
+//  r_scut_msk_edit
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_scut_msk_edit
+{
+    buf = qtn_msk_edit;
+}
+
+// -----------------------------------------------------------------------------
+//  r_scut_msk_change
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_scut_msk_change
+{
+    buf = qtn_msk_change;
+}
+
+/*
+//----------------------------------------------------
+//  r_scut_settings_key_press
+//
+//----------------------------------------------------
+//
+//RESOURCE TBUF r_scut_settings_key_press
+//    {
+//    buf = qtn_ai_shorts_key_press;
+//    }
+
+*/
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA r_scut_softkeys_options_back_change
+{
+    buttons =
+    {
+        CBA_BUTTON {id = EAknSoftkeyOptions;       txt = text_softkey_option; },
+        CBA_BUTTON {id = EAknSoftkeyBack;          txt = text_softkey_back;   },
+        CBA_BUTTON {id = EAiScutSettingsCmdChange; txt = qtn_msk_change;      }
+    };
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE CBA r_scut_softkeys_options_exit_change
+{
+    buttons =
+    {
+        CBA_BUTTON {id = EAknSoftkeyOptions;       txt = text_softkey_option; },
+        CBA_BUTTON {id = EAknSoftkeyExit;          txt = text_softkey_exit;   },
+        CBA_BUTTON {id = EAiScutSettingsCmdChange; txt = qtn_msk_change;      }
+    };
+}
+
+// End of File.
