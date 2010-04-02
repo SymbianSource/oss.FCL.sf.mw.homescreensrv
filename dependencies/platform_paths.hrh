@@ -187,6 +187,10 @@
 // This should not be here, but I'm tired of adding this line to every
 // single MMP.
 #include <defaultcaps.hrh>
+// This should also not be here, but raptor won't work unless
+// LANGUAGE_IDS is defined.
+// remove this for the final build.
+#define LANGUAGE_IDS LANG sc 01
 
 /**
 **************************************************************************
