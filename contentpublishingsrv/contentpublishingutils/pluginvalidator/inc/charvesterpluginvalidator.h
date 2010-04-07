@@ -29,7 +29,8 @@ class CBlacklistHandler;
 
 //CONSTS
 //PubSub Category AI plug-in registry API
-const TUid KPSUidActiveIdle2 =  {0x102750F0}; // ActiveIdle2 SID
+// changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+const TUid KPSUidActiveIdle2 =  {0xEDFF45C4}; // ActiveIdle2 SID
 // Indicates that all the CPS Harvester plugins have been updated
 const TUint KActiveIdleCpsPluginsUpdated = 0x0000000C;
 enum EPSActiveIdleCpsPluginsUpdated

@@ -176,7 +176,8 @@ void MT_CHSPSConfigurationIf::ResetClientFolderL()
     {
     // Remove all resource files from the test client's private folder (files are 
     // copied back when an application configuration is fecthed)
-    _LIT( KClientFolder, "c:\\private\\102750f0\\");
+	// changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+    _LIT( KClientFolder, "c:\\private\\EDFF45C4\\");
     TFileName folderPath;
     folderPath.Copy( KClientFolder );    
     if( BaflUtils::FolderExists( iFileserver, folderPath ) )
@@ -191,7 +192,8 @@ void MT_CHSPSConfigurationIf::ResetClientFolderL()
             }
         
         folderPath.Copy( KClientFolder );
-        folderPath.Append( _L("271012080\\") );
+		// changed from 0x102750F0 = 271012080 to 0xEDFF45C4 = 3992929732 for standalone app
+        folderPath.Append( _L("3992929732\\") );
         if( BaflUtils::FolderExists( iFileserver, folderPath ) )
             {
             User::LeaveIfError( fileMan->RmDir( folderPath ) );

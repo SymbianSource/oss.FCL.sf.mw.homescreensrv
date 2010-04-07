@@ -40,7 +40,7 @@ class MAiUiFrameworkObserver;
 /**
  *  Plugin state manager implementation.
  *
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( CAiPluginStateManager ) : public CBase,

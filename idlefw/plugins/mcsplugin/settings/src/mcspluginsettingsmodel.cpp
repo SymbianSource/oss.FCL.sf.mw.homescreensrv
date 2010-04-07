@@ -41,7 +41,8 @@ _LIT(KSettingListboxLineFormat, " \t%S\t\t%S");
 _LIT( KMenuAttrParam, "param");
 _LIT( KMenuAttrLocked, "locked");
 _LIT8( KTrue, "true" );
-_LIT8( KAppUid, "271012080" );
+// changed from 0x102750F0 = 271012080 to 0xEDFF45C4 = 3992929732 for standalone app
+_LIT8( KAppUid, "3992929732" );
 _LIT8( KProperNameType, "type" );
 _LIT8( KProperNameParam, "param" );
 _LIT8( KProperNameUid, "uid" );

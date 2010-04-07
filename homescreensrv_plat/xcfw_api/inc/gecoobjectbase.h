@@ -29,7 +29,7 @@
 *  Generic Content Object Base Class
 *  Base class that all content objects derive from. 
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class CGECOObjectBase :     public CBase

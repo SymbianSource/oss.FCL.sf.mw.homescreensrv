@@ -28,7 +28,7 @@
  * 
  *  Publish and subscribe key observer
  * 
- *	@lib aiutils.lib
+ *	@lib aiutils_hs_hs.lib
  *  @since S60 3.2
  */
  

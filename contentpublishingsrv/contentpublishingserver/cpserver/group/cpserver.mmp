@@ -48,7 +48,7 @@ LIBRARY			liwservicehandler.lib
 LIBRARY         eikcore.lib
 LIBRARY         cone.lib
 LIBRARY 		estor.lib
-LIBRARY 		cputils.lib
+LIBRARY 		cputils_hs.lib
 LIBRARY         cpstorage.lib
 LIBRARY		    inetprotutil.lib
 #ifdef CONTENT_PUBLISHER_DEBUG

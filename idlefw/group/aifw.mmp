@@ -19,7 +19,7 @@
 #include        <data_caging_paths.hrh>
 #include        <platform/mw/aisystemuids.hrh>
 
-TARGET          aifw.dll
+TARGET          aifw_hs.dll
 TARGETTYPE      dll
 UID             0x1000008D AI_UID3_AIFW_DLL
 VENDORID        VID_DEFAULT
@@ -74,7 +74,7 @@ LIBRARY         hwrmlightclient.lib
 LIBRARY         networkhandling.lib
 
 // Active Idle internal dependencies
-LIBRARY     aiutils.lib aiidleint.lib
+LIBRARY     aiutils_hs.lib aiidleint_hs.lib
 
 // Debugging dependencies
 LIBRARY    flogger.lib

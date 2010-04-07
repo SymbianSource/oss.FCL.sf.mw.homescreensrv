@@ -40,7 +40,7 @@ class CImplementationInformation;
  * 
  *  Content plugin manager class for Active idle framework.
  *
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( CAiContentPluginManager ) : public CBase

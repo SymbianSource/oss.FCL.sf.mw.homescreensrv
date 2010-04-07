@@ -30,7 +30,7 @@
  * Active Idle framework. It is also a bridge between MAiUiFrameworkObserver
  * and Active Idle system state manager.
  *
- *  @lib aifw.lib
+ *  @lib aifw_hs.lib
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( CAiUiFrameworkObserverImpl )

@@ -29,7 +29,7 @@ class MAiStateManager;
 /**
  *  description
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
  

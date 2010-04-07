@@ -148,7 +148,8 @@ const TUint KActiveIdleExtHS_PluginConfChange = 0x00000503;
 /**
 * PubSub Category AI plug-in registry API
 */
-const TUid KPSUidActiveIdle2 =  {0x102750F0}; // ActiveIdle2 SID
+// changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+const TUid KPSUidActiveIdle2 =  {0xEDFF45C4}; // ActiveIdle2 SID
 
 /**
 *

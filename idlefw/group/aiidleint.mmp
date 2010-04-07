@@ -20,7 +20,7 @@
 #include        <data_caging_paths.hrh>
 #include        <platform/mw/aisystemuids.hrh>
 
-TARGET          aiidleint.dll
+TARGET          aiidleint_hs.dll
 TARGETTYPE      dll
 UID             0x1000008D AI_UID3_AIFW_DLL
 VENDORID        VID_DEFAULT
@@ -48,4 +48,4 @@ LIBRARY         ws32.lib
 LIBRARY         cone.lib eikcore.lib
 LIBRARY         avkon.lib aknnotify.lib
 
-LIBRARY         aiutils.lib
+LIBRARY         aiutils_hs.lib

@@ -21,7 +21,7 @@
 
 file=ABI_DIR\BUILD_DIR\cpserver.exe						SHARED_LIB_DIR\cpserver.exe
 file=ABI_DIR\BUILD_DIR\cpstorage.dll					SHARED_LIB_DIR\cpstorage.dll
-file=ABI_DIR\BUILD_DIR\cputils.dll						SHARED_LIB_DIR\cputils.dll
+file=ABI_DIR\BUILD_DIR\cputils_hs.dll						SHARED_LIB_DIR\cputils_hs.dll
 file=ABI_DIR\BUILD_DIR\contentharvesterclient.dll		SHARED_LIB_DIR\contentharvesterclient.dll
 file=ABI_DIR\BUILD_DIR\contentharvester.exe				SHARED_LIB_DIR\contentharvester.exe
 file=ABI_DIR\BUILD_DIR\pluginvalidator.dll				SHARED_LIB_DIR\pluginvalidator.dll

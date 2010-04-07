@@ -83,7 +83,7 @@ LIBRARY         aknlayout2scalable.lib
 LIBRARY         cdlengine.lib
 LIBRARY         gdi.lib
 LIBRARY         bitgdi.lib
-LIBRARY         aiutils.lib
+LIBRARY         aiutils_hs.lib
 LIBRARY         flogger.lib
 LIBRARY         bafl.lib
 

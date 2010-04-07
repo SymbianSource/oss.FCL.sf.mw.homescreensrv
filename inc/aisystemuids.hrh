@@ -77,7 +77,9 @@
 /**
  * Common UID3 for Active Idle framework components.
  */
-#define AI_UID3_AIFW_COMMON 0x102750F0
+// new UID for new aifw_hs.dll
+// #define AI_UID3_AIFW_COMMON 0x102750F0
+#define AI_UID3_AIFW_COMMON 0xEDFF45C4
 
 /**
  * Uid3 for AI framework dll.

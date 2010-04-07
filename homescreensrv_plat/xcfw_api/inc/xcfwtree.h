@@ -39,7 +39,7 @@ typedef RPointerArray<CXCFWNode> RInternalNodeArray;
 *  XCFW Tree interface
 *  Provides access to tree functions
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class MXCFWTree
@@ -153,7 +153,7 @@ class MXCFWTree
 /**
 *  CXCFWTree implements MXCFWTree interface. It owns the actual tree nodes.
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class CXCFWTree : public CBase, public MXCFWTree

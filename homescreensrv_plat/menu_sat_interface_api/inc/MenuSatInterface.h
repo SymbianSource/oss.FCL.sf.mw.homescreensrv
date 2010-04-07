@@ -30,7 +30,7 @@
 /**
 *  Interface for accessing application shell externally.
 *
-*  @lib MenuInterface.dll
+*  @lib MenuInterface_hs_hs.dll
 *  @since Series 60 3.1
 */
 class CMenuSATInterface : public CBase

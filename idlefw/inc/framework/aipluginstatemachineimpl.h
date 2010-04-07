@@ -32,7 +32,7 @@ class MAiPluginState;
 /**
  * Plugin state machine implementation.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( CAiPluginStateMachine ) : public CBase,

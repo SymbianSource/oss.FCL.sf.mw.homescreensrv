@@ -24,7 +24,8 @@
 
 using namespace HSPluginSettingsIf;
 
-_LIT8( KAppUid, "271012080" );
+// changed from 0x102750F0 = 271012080 to 0xEDFF45C4 = 3992929732 for standalone app
+_LIT8( KAppUid, "3992929732" );
 _LIT( KMenuAttrParam, "param" );
 _LIT( KMenuAttrLocked, "locked" );
 _LIT8( KProperNameType, "type" );

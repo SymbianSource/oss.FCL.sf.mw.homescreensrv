@@ -55,6 +55,6 @@ LIBRARY         cenrepnotifhandler.lib
 LIBRARY         ptiengine.lib
 LIBRARY         keylockpolicyapi.lib
 
-LIBRARY			aiutils.lib
+LIBRARY			aiutils_hs.lib
 
 // End of File

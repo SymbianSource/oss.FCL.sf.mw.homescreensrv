@@ -31,7 +31,7 @@
 *  Default implementation for CGECOObjectBase
 *  Implements basic descriptor type arrays for storing object attributes.
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class CGECODefaultObject: public CGECOObjectBase, public MGECOAttributeProvider

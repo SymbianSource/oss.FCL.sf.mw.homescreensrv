@@ -44,7 +44,7 @@ const TInt KErrDTDLoadFailed = -32350;
 /**
 * Engine observer interface. Engine user must implement this interface
 *
-* @lib XCFW.lib
+* @lib XCFW_hs_hs.lib
 * @since Series 60 3.1
 */
 class MXCFWEngineObserver
@@ -84,7 +84,7 @@ class MXCFWEngineObserver
 *  Responsible for internalizing / externalizing XML files
 *  to and from a XCFW tree 
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class CXCFWEngine: public CActive,

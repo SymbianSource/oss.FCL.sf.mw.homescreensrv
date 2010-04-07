@@ -30,7 +30,7 @@
 * this class is needed only because GMXML would otherwise turn any & character
 * it finds into a &amp; entity.
 *
-* @lib XCFW.lib
+* @lib XCFW_hs_hs.lib
 * @since Series 60 3.1
 */
 class CXCFWEntityConverter: public CMDXMLEntityConverter

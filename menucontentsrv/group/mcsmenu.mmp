@@ -126,5 +126,5 @@ LIBRARY         bafl.lib
 LIBRARY         WidgetRegistryClient.lib
 LIBRARY         featmgr.lib 
 LIBRARY         liwServiceHandler.lib
-LIBRARY         xcfw.lib
+LIBRARY         XCFW_hs.lib
 

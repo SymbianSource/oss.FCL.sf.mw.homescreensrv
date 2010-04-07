@@ -94,7 +94,7 @@ enum TAiIdleSubState
  * 
  * Plugin state resource interface.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 class MAiPluginStateResources
@@ -128,7 +128,7 @@ protected:
 /**
  * Plugin state machine interface.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 class MAiPluginStateMachine : public MAiPluginStateResources

@@ -20,14 +20,14 @@
 #define ACTIVEIDLE3_IBY
 
 // Active Idle application and registration file
-S60_APP_EXE( ailaunch )
-S60_APP_EXE( homescreen )
+S60_APP_EXE( ailaunch_hs )
+S60_APP_EXE( homescreen_hs )
 S60_APP_AIF_RSC( homescreen )
 S60_APP_AIF_ICONS( homescreen )
 
-file=ABI_DIR\BUILD_DIR\aiutils.dll    SHARED_LIB_DIR\aiutils.dll
-file=ABI_DIR\BUILD_DIR\aiidleint.dll  SHARED_LIB_DIR\aiidleint.dll
-file=ABI_DIR\BUILD_DIR\aifw.dll       SHARED_LIB_DIR\aifw.dll
+file=ABI_DIR\BUILD_DIR\aiutils_hs.dll    SHARED_LIB_DIR\aiutils_hs.dll
+file=ABI_DIR\BUILD_DIR\aiidleint_hs.dll  SHARED_LIB_DIR\aiidleint_hs.dll
+file=ABI_DIR\BUILD_DIR\aifw_hs.dll       SHARED_LIB_DIR\aifw_hs.dll
 
 // Content publishing plug-ins
 ECOM_PLUGIN( aidevstaplg.dll, aidevstaplg.rsc )

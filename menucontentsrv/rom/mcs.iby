@@ -29,7 +29,7 @@ file=ABI_DIR\BUILD_DIR\mcssathandler.dll  SHARED_LIB_DIR\mcssathandler.dll
 #ifndef APPSHELL_IBY
 #define APPSHELL_IBY
  
-file=ABI_DIR\BUILD_DIR\menuinterface.dll  SHARED_LIB_DIR\menuinterface.dll
+file=ABI_DIR\BUILD_DIR\MenuInterface_hs.dll  SHARED_LIB_DIR\MenuInterface_hs.dll
  
 #endif //APPSHELL_IBY
 

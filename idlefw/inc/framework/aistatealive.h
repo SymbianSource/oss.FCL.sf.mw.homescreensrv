@@ -27,7 +27,7 @@
  * 
  * Alive active state
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( TAiStateAliveActive ) : public MAiPluginState
@@ -52,7 +52,7 @@ public: // from MAiPluginState
 /**
  * Alive inactive state
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( TAiStateAliveInactive ) : public MAiPluginState
@@ -76,7 +76,7 @@ public: // from MAiPluginState
 /**
  * Alive incall state
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( TAiStateAliveIncall ) : public MAiPluginState
@@ -100,7 +100,7 @@ public: // from MAiPluginState
 /**
  * Alive switch state
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( TAiStateAlive ) : public MAiPluginState,

@@ -19,9 +19,11 @@
 #include        <data_caging_paths.hrh>
 //#include        <platform/mw/aisystemuids.hrh>
 
-TARGET          aiutils.dll
+// new UID
+// UID             0x1000008D 0x10281865
+TARGET          aiutils_hs.dll
 TARGETTYPE      dll
-UID             0x1000008D 0x10281865
+UID             0x1000008D 0xEC55106C
 VENDORID        VID_DEFAULT
 CAPABILITY      CAP_GENERAL_DLL
 

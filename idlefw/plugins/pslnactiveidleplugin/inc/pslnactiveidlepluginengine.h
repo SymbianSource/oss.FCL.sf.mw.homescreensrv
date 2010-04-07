@@ -22,7 +22,8 @@
 #include <mpslnfwappthemeobserver.h>
 
 // UID of Active Idle.
-const TUid KUidActiveIdle = { 0x102750F0 };
+// changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+const TUid KUidActiveIdle = { 0xEDFF45C4 };
 
 
 class CPslnFWAppThemeHandler;

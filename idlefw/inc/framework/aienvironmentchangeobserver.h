@@ -31,7 +31,7 @@ class CEnvironmentChangeNotifier;
  * 
  *  System enviroment change observer.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( CAiEnvironmentChangeObserver ) : public CBase,

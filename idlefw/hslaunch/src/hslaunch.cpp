@@ -19,10 +19,11 @@
 #include "hslaunch.h"
 
 // ========================= DECLARATIONS ==================================
-_LIT( KHsExeName, "homescreen.exe" );
+_LIT( KHsExeName, "homescreen_hs.exe" );
 _LIT( KHsProcessName, "Home screen" );
 const TInt KSleepOnRetry = 250000; // 250ms
-const TUid KPSCategoryUid = TUid::Uid( 0x200286E3 );
+// changed from 0x200286E3 to 0xEF5A047A for standalone app
+const TUid KPSCategoryUid = TUid::Uid( 0xEF5A047A );
 const TInt KPSCrashCountKey = 1;
 _LIT_SECURITY_POLICY_C1( KPSReadPolicy, ECapabilityReadDeviceData );
 _LIT_SECURITY_POLICY_C1( KPSWritePolicy, ECapabilityWriteDeviceData );

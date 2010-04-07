@@ -5,7 +5,7 @@
   <type>c++</type>
   <subsystem>xcfw</subsystem>
   <libs>
-    <lib name="XCFW.lib" />
+    <lib name="XCFW_hs.lib" />
   </libs>
   <release category="domain"/>
   <attributes>

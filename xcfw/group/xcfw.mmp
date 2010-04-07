@@ -19,9 +19,11 @@
 #include <platform_paths.hrh>
 #include <defaultcaps.hrh>
 
-TARGET          XCFW.dll
+TARGET          XCFW_hs.dll
 TARGETTYPE      DLL
-UID             0x1000008d 0x10210EA0
+// new UID
+// UID             0x1000008d 0x10210EA0
+UID             0x1000008d 0xEB12332F
 
 CAPABILITY      CAP_GENERAL_DLL
 VENDORID        VID_DEFAULT

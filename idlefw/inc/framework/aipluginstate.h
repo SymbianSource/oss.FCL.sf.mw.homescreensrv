@@ -24,7 +24,7 @@
 /**
  * Plugin state interface.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 class MAiPluginState

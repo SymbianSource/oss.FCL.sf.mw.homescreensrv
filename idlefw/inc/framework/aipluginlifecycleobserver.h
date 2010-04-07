@@ -40,7 +40,7 @@ namespace
 /**
  *  Plugin lifecycle observer base class.
  *
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 class MAiPluginLifecycleObserver

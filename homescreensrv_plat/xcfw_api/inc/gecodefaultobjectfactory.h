@@ -30,7 +30,7 @@
 /**
 * Generic content object factory. All object factories derive from this class.
 *
-* @lib XCFW.lib
+* @lib XCFW_hs_hs.lib
 * @since Series 60 3.1
 */
 class CGECODefaultObjectFactory: public CGECOObjectFactoryBase

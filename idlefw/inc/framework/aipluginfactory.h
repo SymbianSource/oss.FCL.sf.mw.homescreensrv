@@ -41,7 +41,7 @@ class MAiPluginLifecycleObserver;
  * 
  *  Content plugin factory class for Active idle framework.
  *
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( CAiPluginFactory ) : public CBase

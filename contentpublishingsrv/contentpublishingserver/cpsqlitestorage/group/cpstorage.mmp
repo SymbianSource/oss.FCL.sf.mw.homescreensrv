@@ -39,7 +39,7 @@ LIBRARY       euser.lib
 LIBRARY       estor.lib
 LIBRARY       sqldb.lib
 LIBRARY       efsrv.lib
-LIBRARY       cputils.lib
+LIBRARY       cputils_hs.lib
 LIBRARY		  liwservicehandler.lib
 LIBRARY       centralrepository.lib
 

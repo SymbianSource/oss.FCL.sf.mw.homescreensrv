@@ -18,9 +18,11 @@
 // To get the MW_LAYER_SYSTEMINCLUDE-definition
 #include <platform_paths.hrh>
 
-TARGET          MenuInterface.dll
+TARGET          MenuInterface_hs.dll
 TARGETTYPE      DLL
-UID             0x1000008D 0x10210EAB
+// new UID
+// UID             0x1000008D 0x10210EAB
+UID             0x1000008D 0xEEE24485
 TARGETPATH      /system/libs
 
 CAPABILITY		CAP_GENERAL_DLL

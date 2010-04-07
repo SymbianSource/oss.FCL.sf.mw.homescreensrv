@@ -26,7 +26,7 @@
  * 
  * Suspended state
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
 NONSHARABLE_CLASS( TAiStateSuspended ) : public MAiPluginState

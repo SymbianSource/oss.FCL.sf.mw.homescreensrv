@@ -27,7 +27,7 @@ namespace AiUtility {
 /**
  *  Content priority map for UI controllers.
  *
- *  @lib aiutils.lib
+ *  @lib aiutils_hs_hs.lib
  *  @since S60 3.2
  */
 class CContentPriorityMap : public CBase

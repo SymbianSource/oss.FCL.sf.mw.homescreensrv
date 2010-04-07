@@ -17,14 +17,17 @@
 
 #include <platform_paths.hrh>
 
-TARGET ailaunch.exe
+TARGET ailaunch_hs.exe
 
 targettype exe
 
-UID             0x1000008d 0x200286E3
+//new UID
+// UID             0x1000008d 0x200286E3
+UID             0x1000008d 0xEF5A047A
 CAPABILITY      ReadDeviceData WriteDeviceData
 VENDORID        VID_DEFAULT
-SECUREID        0x200286E3
+// SECUREID        0x200286E3
+SECUREID        0xEF5A047A
 
 EPOCHEAPSIZE	0x1000 0x100000   // 4KB - 1 MB
 EPOCSTACKSIZE	0x5000

@@ -25,7 +25,7 @@
  *  Map which contains ids and serialized data stored by 
  * 	Content Publisher
  *
- *  @lib cputils.dll
+ *  @lib cputils_hs_hs.dll
  *  @since S60 v5.0
  */
 NONSHARABLE_CLASS( CContentMap ): public CCPLiwMap

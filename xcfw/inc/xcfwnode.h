@@ -31,7 +31,7 @@
 *  Node interface for setting data and relative nodes
 *  This interface is not exported, CXCFWTree is the only user. 
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class CXCFWNode : public CBase, public MXCFWNode

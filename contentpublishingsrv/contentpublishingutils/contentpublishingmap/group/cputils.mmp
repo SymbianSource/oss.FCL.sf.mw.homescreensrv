@@ -18,10 +18,12 @@
 // To get the MW_LAYER_SYSTEMINCLUDE-definition
 #include <platform_paths.hrh>
 
-TARGET          cputils.dll
+TARGET          cputils_hs.dll
 TARGETTYPE      dll
 
-UID             0x1000008D 0x20016B7F
+// new UID for cputils_hs.dll
+// UID             0x1000008D 0x20016B7F
+UID             0x1000008D 0xE3E7134E
  
 CAPABILITY      CAP_GENERAL_DLL
 VENDORID 		VID_DEFAULT

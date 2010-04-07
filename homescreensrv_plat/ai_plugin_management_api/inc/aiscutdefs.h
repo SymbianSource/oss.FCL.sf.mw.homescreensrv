@@ -28,7 +28,8 @@
 // =============================================================================
 
 // Active Idle UID.
-const TUid KScutActiveIdleUid       = { 0x102750F0 };
+// changed from 0x102750F0 to 0xEDFF45C4 for standalone app
+const TUid KScutActiveIdleUid       = { 0xEDFF45C4 };
 
 // Shortcut Settings DLL UID.
 const TUid KScutSettingsDllUid      = { AI_UID_ECOM_DLL_SETTINGS_SCUTPLUGIN };

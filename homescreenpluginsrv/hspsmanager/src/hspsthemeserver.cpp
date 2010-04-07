@@ -79,7 +79,8 @@ _LIT( KUpgradePluginWild, "upgrade_plugin_*.dat" );
 _LIT( KDummyVersionInfo, "dummyversioninfo" );
 
 const TUint KAppId_hspsAS =  270486738; //  0x101F4CD2 from S60 3.1 Xuikon AppShell in 3.1 product.
-const TUint KAppId_hspsAI =  271012080 ; // 0x102750F0 support for Xuikon-based ActiveIdle 
+// changed from 0x102750F0 = 271012080 to 0xEDFF45C4 = 3992929732 for standalone app
+const TUint KAppId_hspsAI =  3992929732 ; // 0xEDFF45C4 support for Xuikon-based ActiveIdle 
 const TUint KAppId_LE =    270551469 ; // 0x102049AD LayoutTest
 
 const TInt KAppIdAny = -1; // All applications

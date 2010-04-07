@@ -5,7 +5,7 @@
   <type>c++</type>
   <subsystem>activeidle</subsystem>
   <libs>
-    <lib name="aifw.lib" />
+    <lib name="aifw_hs.lib" />
   </libs>
   <release category="domain"/>
   <attributes>

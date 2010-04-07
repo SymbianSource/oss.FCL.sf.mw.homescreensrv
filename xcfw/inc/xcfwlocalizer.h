@@ -36,7 +36,7 @@ class RFs;
 * and their corresponding text values loaded from a DTD file. Used for content 
 * localization purposes in XCFW.
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class CXCFWLocalizer :  public CBase //CMDXMLEntityConverter

@@ -44,7 +44,7 @@ LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
 LIBRARY         liwservicehandler.lib 
 LIBRARY         ecom.lib
-LIBRARY         aiutils.lib
+LIBRARY         aiutils_hs.lib
 LIBRARY         cone.lib
 LIBRARY         avkon.lib
 LIBRARY         fbscli.lib

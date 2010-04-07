@@ -54,7 +54,7 @@ LIBRARY         euser.lib
 LIBRARY	        estor.lib
 LIBRARY         efsrv.lib
 LIBRARY		liwservicehandler.lib
-LIBRARY		cputils.lib
+LIBRARY		cputils_hs.lib
 
 #ifdef CONTENT_PUBLISHER_DEBUG
 LIBRARY			cpdebug.lib

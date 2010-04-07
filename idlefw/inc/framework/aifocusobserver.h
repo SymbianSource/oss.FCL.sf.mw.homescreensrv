@@ -33,7 +33,7 @@ class MAiPSPropertyObserver;
  * 
  *  Focus change observer. Using telephony idle visiblity PS.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
  

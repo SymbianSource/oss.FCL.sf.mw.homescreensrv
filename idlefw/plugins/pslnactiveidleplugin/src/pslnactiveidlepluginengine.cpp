@@ -617,7 +617,7 @@ TInt CPslnActiveIdlePluginEngine::RestartAifw()
 {
     if (!IsAiRunning())
     {
-        _LIT(KAiExeName, "z:\\sys\\bin\\ailaunch.exe");
+        _LIT(KAiExeName, "z:\\sys\\bin\\ailaunch_hs.exe");
         RProcess process;
         TInt ret = process.Create(KAiExeName, KNullDesC);
         process.Resume();

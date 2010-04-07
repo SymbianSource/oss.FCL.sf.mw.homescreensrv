@@ -19,7 +19,7 @@
 #include        <platform/mw/aisystemuids.hrh>
 #include        <data_caging_paths.hrh>
 
-TARGET          homescreen.exe
+TARGET          homescreen_hs.exe
 TARGETTYPE      exe
 UID             0x100039CE AI_UID3_AIFW_EXE
 SECUREID        AI_SID_AIFW_EXE
@@ -51,7 +51,7 @@ MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
 LIBRARY         apparc.lib
-LIBRARY         aifw.lib
+LIBRARY         aifw_hs.lib
 LIBRARY         eikcore.lib
 LIBRARY         ecom.lib
 LIBRARY         flogger.lib

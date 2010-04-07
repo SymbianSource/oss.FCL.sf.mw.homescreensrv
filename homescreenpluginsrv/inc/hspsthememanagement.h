@@ -155,7 +155,8 @@ const TUid KSecureId_hsps =    	{0x200159C6};	// HSPS configuration installer (T
 const TUid KSecureId_LE =    	{0x102049AD};
 const TUid KSecureId_XTA =   	{0x1020747D}; 	// Xuikon Test Automation
 const TUid KSecureId_XKON =  	{0x102049AF}; 	// Xuikon Demo
-const TUid KSecureId_hspsAI =  	{0x102750F0}; 	// 271012080 support for Xuikon-based ActiveIdle 
+// changed from 0x102750F0 = 271012080 to 0xEDFF45C4 = 3992929732 for standalone app
+const TUid KSecureId_hspsAI =  	{0xEDFF45C4}; 	// 3992929732 support for Xuikon-based ActiveIdle 
 const TUid KSecureId_GS =    	{0x100058EC}; 	// S60 3.1 GS-application(General Settings).
 const TUid KSecureId_HUIMenu = 	{0x102828BD}; 
 const TUid KSecureId_EUnit = 	{0x20000FB1};

@@ -5,7 +5,7 @@
   <type>c++</type>
   <collection>menucontentsrv</collection>
   <libs>
-    <lib name="MenuInterface.lib" />
+    <lib name="MenuInterface_hs.lib" />
   </libs>
   <release category="platform"/>
   <attributes>

@@ -115,7 +115,7 @@ LIBRARY                 charconv.lib            // CnvUtfConverter
 LIBRARY                 avkon.lib
 LIBRARY                 aknnotify.lib
 LIBRARY                 featmgr.lib
-LIBRARY                 aiutils.lib
+LIBRARY                 aiutils_hs.lib
 LIBRARY                 fbscli.lib
 LIBRARY                 aknicon.lib
 LIBRARY                 favouritesengine.lib

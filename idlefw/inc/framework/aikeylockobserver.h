@@ -30,7 +30,7 @@ class MAiPSPropertyObserver;
  * 
  *  Keylock status change observer.
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
  

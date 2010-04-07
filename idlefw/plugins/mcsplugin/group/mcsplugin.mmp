@@ -58,7 +58,7 @@ LIBRARY         mcsextendedmenu.lib
 LIBRARY         egul.lib
 LIBRARY         cone.lib
 LIBRARY         ecom.lib
-LIBRARY         aiutils.lib
+LIBRARY         aiutils_hs.lib
 LIBRARY         aknskins.lib
 LIBRARY         aknicon.lib
 LIBRARY         mcsmenuutils.lib

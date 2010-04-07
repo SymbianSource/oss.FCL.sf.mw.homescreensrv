@@ -29,7 +29,7 @@ class CCPSecurityPolicy;
 /**
  *  Base Map class for Publisher Registry and Content
  *
- *  @lib cputils.dll
+ *  @lib cputils_hs_hs.dll
  *  @since S60 v5.0
  */
 class CCPLiwMap : public CLiwMap

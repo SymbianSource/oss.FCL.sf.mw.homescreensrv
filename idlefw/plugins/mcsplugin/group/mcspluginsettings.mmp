@@ -90,6 +90,6 @@ LIBRARY                 favouritesengine.lib
 //LIBRARY           flogger.lib
 LIBRARY         mcsmenu.lib
 LIBRARY         hspluginsettings.lib
-LIBRARY         aiutils.lib
+LIBRARY         aiutils_hs.lib
 
 // End of File.

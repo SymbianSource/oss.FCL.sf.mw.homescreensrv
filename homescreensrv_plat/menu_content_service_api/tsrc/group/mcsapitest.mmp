@@ -56,7 +56,7 @@ LIBRARY         fbscli.lib
 LIBRARY     	swinstcli.lib
 LIBRARY         aknicon.lib
 ///Sat
-LIBRARY         menuinterface.lib
+LIBRARY         MenuInterface_hs.lib
 LIBRARY			mcsmenuutils.lib
 
 LANG			SC

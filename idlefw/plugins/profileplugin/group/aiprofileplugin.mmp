@@ -49,7 +49,7 @@ END
 LIBRARY         euser.lib
 LIBRARY         cone.lib
 LIBRARY         ecom.lib
-LIBRARY         aiutils.lib
+LIBRARY         aiutils_hs.lib
 LIBRARY         sssettings.lib
 LIBRARY         profileeng.lib
 LIBRARY         bafl.lib

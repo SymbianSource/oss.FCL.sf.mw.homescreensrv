@@ -28,7 +28,7 @@
 *  to allow generic access to attribute names/values/localisation reference ids
 *  and possible object text data in string format.
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class MGECOAttributeProvider

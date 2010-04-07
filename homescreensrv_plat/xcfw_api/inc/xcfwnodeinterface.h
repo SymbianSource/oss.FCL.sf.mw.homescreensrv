@@ -31,7 +31,7 @@ class CGECOObjectBase;
 *
 *  Node interface for accessing data and relative nodes
 *
-*  @lib XCFW.lib
+*  @lib XCFW_hs_hs.lib
 *  @since Series 60 3.1
 */
 class MXCFWNode

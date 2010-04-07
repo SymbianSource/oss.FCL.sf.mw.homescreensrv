@@ -5,7 +5,7 @@
   <type>c++</type>
   <subsystem>activeidle</subsystem>
   <libs>
-    <lib name="aiutils.lib" />
+    <lib name="aiutils_hs.lib" />
   </libs>
   <release category="domain"/>
   <attributes>

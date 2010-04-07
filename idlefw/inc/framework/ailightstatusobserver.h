@@ -31,7 +31,7 @@ class MAiStateManager;
  * 
  *  Publish and subscribe key observer
  * 
- *  @lib aifw
+ *  @lib aifw_hs
  *  @since S60 3.2
  */
  

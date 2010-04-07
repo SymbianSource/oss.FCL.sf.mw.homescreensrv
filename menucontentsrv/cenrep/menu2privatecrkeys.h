@@ -30,7 +30,7 @@ const TUint32 KMenuShowSatUI = 0x00000002;
 const TUint32 KMenuSatUIName = 0x00000003;
 const TUint32 KMenuSatUIIconId = 0x00000004;
 
-//deprecated (no support anymore through MenuInterface.lib)
+//deprecated (no support anymore through MenuInterface_hs.lib)
 const TUint32 KMenuUpdateData = 0x00000001;
 const TUint32 KMenuLVFlags = 0x00000005;
 const TUint32 KMenuIconPositionUpdate = 0x00000006;
