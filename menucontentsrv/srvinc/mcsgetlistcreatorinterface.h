@@ -206,4 +206,4 @@ protected:
 	CMcsGetAttrStrategy* iSuiteGetter;  ///< Get strategy for suite. Own.
 	CMcsGetAttrStrategy* iNormalGetter; ///< Get strategy for not suite. Own.
     };
-#endif __MCSGETLISTCREATORINTERFACE_H__
+#endif // __MCSGETLISTCREATORINTERFACE_H__

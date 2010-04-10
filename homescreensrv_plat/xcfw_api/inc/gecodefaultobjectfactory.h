@@ -37,8 +37,8 @@ class CGECODefaultObjectFactory: public CGECOObjectFactoryBase
     {
     public: //constructors and destructor
         /**
-        /* Two-phased constructor
-        */
+         * Two-phased constructor
+         */
         IMPORT_C static CGECODefaultObjectFactory* NewL();
 
         //destructor
