@@ -1,0 +1,44 @@
+/*
+* Copyright (c) 2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   Common GS menu commands and other common constants.
+*
+*/
+
+
+#ifndef GSCOMMON_HRH
+#define GSCOMMON_HRH
+
+// Common GS menu commands. Start from 500 so everything below 500 is free for
+// use for plugins. The values are based on the assumption that Avkon process
+// commands constants start from 4000 and CBA constants start from 3000 so 
+// these will not be overwritten.
+//
+enum TGSMenuCommands
+    {
+    EGSCmdAppChange = 500,
+    EGSCmdAppEdit,
+    EGSCmdAppHelp,
+    EGSCmdAppNew,
+    EGSCmdAppOpen,
+    EGSMSKCmdAppChange
+    };
+
+enum TGSListBoxItemVisibility
+    {
+    EGSListBoxItemTypeIsAlwaysVisible = 0,
+    EGSListBoxItemTypeIsDynamic
+    };
+
+#endif // GSCOMMON_HRH
+//End of File

@@ -1,0 +1,91 @@
+/*
+* Copyright (c) 2003-2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+
+
+#ifndef GENERALSETTINGSVARIANT_HRH
+#define GENERALSETTINGSVARIANT_HRH
+
+/** 
+* EGSConfigOTAAutoUpdate is on/off setting for Automatic update of service.
+* When it is set on in TGeneralSettingsLocalVariantFlags OTA is enabled.
+*/
+#define EGSConfigOTAAutoUpdate 0x00000001
+
+/** 
+* EGSConfigAutoRedial is on/off setting for Automatic redial.
+* When it is set on in TGeneralSettingsLocalVariantFlags 
+* automatic redial is enabled.
+*/
+#define EGSConfigAutoRedial 0x00000002
+
+/** 
+* EGSConfig2G3GNetworkIcon is on/off setting for 2G/3G network icon display.
+* When it is set ON in KGeneralSettingsLVFlags 
+* display of 2G/3G icon in network selection list is enabled.
+* Used in GSM/WCDMA builds ONLY.
+*/
+#define EGSConfig2G3GNetworkIcon 0x00000004
+
+/**
+* EGSConfigPowerSaveLed is on/off setting for Power Save LED mode setting.
+* When it is set ON in KGeneralSettingsLVFlags
+* Power Save LED mode item is displayed in the Display settings.
+*/
+#define EGSConfigPowerSaveLed 0x00000008
+
+/**
+* EGSConfigRestrictedSendCallerId is on/off setting for Restricted Send 
+* Caller ID setting.
+* When it is set ON in KGeneralSettingsLVFlags
+* Send Caller ID "Set by network" mode item is hidden in the Call settings.
+*/
+#define EGSConfigRestrictedSendCallerId 0x00000010
+
+/**
+* EGSConfigSecureSendCallerId is on/off setting for Secure Send Caller ID 
+* setting.
+* When it is set ON in KGeneralSettingsLVFlags
+* Send Caller ID mode item can only be changed in the Call settings
+* if a valid security code is entered.
+*/
+#define EGSConfigSecureSendCallerId 0x00000020
+
+/**
+* EGSConfigNoAutoToAutoNetworkSearch is on/off setting for Network search when 
+* the network selection setting is Automatic and the user selects Automatic
+* again. This contradicts the Telefonica request that this should be disabled.
+* 
+* If this value is set, auto-to-auto net search is disabled == Telefonica.
+*
+* Default: Automatic to Automatic Network search is enabled = 0.
+*/
+#define EGSConfigNoAutoToAutoNetworkSearch 0x00000040
+
+/**
+* EGSConfigOperatorIdle is on/off setting for enabling Operator Idle when 
+* this is been supported by the operator. 
+* If this value is set, The user can use the Operator Idle
+* instead of Active Idle.
+* This feature is Operator Specific
+*/
+#define EGSConfigOperatorIdle 0x00000080
+
+
+#endif // GENERALSETTINGSVARIANT_HRH
+
+// End of File

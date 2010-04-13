@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<api id="12d79fdf49c0dc289e8341bfc1ae458d" dataversion="2.0">
+  <name>Settings Framework API</name>
+  <description>Loads device settings plug-ins. Provides extensions &amp; utilities for plugins.</description>
+  <type>c++</type>
+  <collection>gssettingsuis</collection>
+  <libs>
+    <lib name="GSFramework.lib" />
+  </libs>
+  <release category="platform"/>
+  <attributes>
+     <!-- This indicates wether the api provedes separate html documentation -->
+     <!-- or is the additional documentation generated from headers. -->
+     <!-- If you are unsuere then the value is "no" -->
+     <htmldocprovided>no</htmldocprovided>
+     <adaptation>no</adaptation>
+  </attributes>
+</api>

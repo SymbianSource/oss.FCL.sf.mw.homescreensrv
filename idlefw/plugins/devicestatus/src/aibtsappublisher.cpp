@@ -22,6 +22,9 @@
 #include <BTSapDomainPSKeys.h>
 #include <StringLoader.h>
 #include <featmgr.h>
+
+#include <publicruntimeids.hrh>
+
 #include "aibtsappublisher.h"
 #include "aiprioritizer.h"
 #include "ainwidpriorities.h"

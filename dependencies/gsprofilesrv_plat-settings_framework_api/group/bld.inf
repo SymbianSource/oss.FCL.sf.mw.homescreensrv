@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2006-2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:   File that exports the files belonging to
+:                Settings Framework API
+*
+*/
+
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+
+../inc/GSCommon.rh     MW_LAYER_PLATFORM_EXPORT_PATH(gscommon.rh)
+../inc/GSSettingId.h     MW_LAYER_PLATFORM_EXPORT_PATH(gssettingid.h)
+../inc/GSChildViewManager.h     MW_LAYER_PLATFORM_EXPORT_PATH(gschildviewmanager.h)
+../inc/MGSSettingPSObserver.h     MW_LAYER_PLATFORM_EXPORT_PATH(mgssettingpsobserver.h)
+../inc/GSBaseView.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsbaseview.h)
+../loc/gs.loc     MW_LAYER_LOC_EXPORT_PATH(gs.loc)
+../inc/GSPrivatePluginProviderIds.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsprivatepluginproviderids.h)
+../inc/GSTabbedViewOwner.h     MW_LAYER_PLATFORM_EXPORT_PATH(gstabbedviewowner.h)
+../inc/GeneralSettingsVariant.hrh     MW_LAYER_PLATFORM_EXPORT_PATH(generalsettingsvariant.hrh)
+../inc/GSBaseContainer.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsbasecontainer.h)
+../inc/GSParentPlugin.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsparentplugin.h)
+../inc/GSTabHelper.h     MW_LAYER_PLATFORM_EXPORT_PATH(gstabhelper.h)
+../inc/GSPluginLoader.h     MW_LAYER_PLATFORM_EXPORT_PATH(gspluginloader.h)
+../inc/GSMainView.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsmainview.h)
+../inc/GSCommon.hrh     MW_LAYER_PLATFORM_EXPORT_PATH(gscommon.hrh)
+../inc/GSTabbedView.h     MW_LAYER_PLATFORM_EXPORT_PATH(gstabbedview.h)
+../inc/GSParentContainer.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsparentcontainer.h)
+../inc/GSPubSubsListener.h     MW_LAYER_PLATFORM_EXPORT_PATH(gspubsubslistener.h)
+../inc/MGSWatchDog.h     MW_LAYER_PLATFORM_EXPORT_PATH(mgswatchdog.h)

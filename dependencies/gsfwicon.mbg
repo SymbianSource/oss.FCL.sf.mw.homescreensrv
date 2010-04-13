@@ -1,0 +1,10 @@
+
+/* This file has been generated, DO NOT MODIFY. */
+enum TMifGsfwicon
+	{
+	EMbmGsfwiconQgn_prop_set_default_sub = 16384,
+	EMbmGsfwiconQgn_prop_set_default_sub_mask = 16385,
+	EMbmGsfwiconQgn_prop_set_device_tab4 = 16386,
+	EMbmGsfwiconQgn_prop_set_device_tab4_mask = 16387,
+	EMbmGsfwiconLastElement
+	};

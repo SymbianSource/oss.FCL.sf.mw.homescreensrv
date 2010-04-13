@@ -32,6 +32,8 @@
 #include <mcspluginsettingsres.rsg>
 #include <aisystemuids.hrh>
 
+#include <publicruntimeids.hrh>
+
 #include "mcspluginsettings.hrh"
 #include "mcspluginsettings.h"
 #include "mcspluginsettingscontainer.h"

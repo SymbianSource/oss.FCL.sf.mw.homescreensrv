@@ -28,3 +28,11 @@ SWInstCli.lib			\epoc32\release\winscw\udeb\SWInstCli.lib
 fbscli.lib			\epoc32\release\winscw\udeb\fbscli.lib
 peninputClient.lib		\epoc32\release\winscw\udeb\peninputclient.lib
 scppnwdl.lib			\epoc32\release\winscw\udeb\scppnwdl.lib
+sssettings.lib			\epoc32\release\winscw\udeb\sssettings.lib
+ProfileEng.lib			\epoc32\release\winscw\udeb\ProfileEng.lib
+phoneclient.lib			\epoc32\release\winscw\udeb\phoneclient.lib
+keylockpolicyapi.lib	\epoc32\release\winscw\udeb\keylockpolicyapi.lib
+gslauncher.lib			\epoc32\release\winscw\udeb\gslauncher.lib
+gsframework.lib			\epoc32\release\winscw\udeb\gsframework.lib
+gslistbox.lib			\epoc32\release\winscw\udeb\gslistbox.lib
+gsecomplugin.lib		\epoc32\release\winscw\udeb\gsecomplugin.lib

@@ -75,6 +75,25 @@ aknlayout.lag		aknlayout.lag
 //AknsPkgID.h		AknsPkgID.h
 //AknsPkgID.inl		AknsPkgID.inl
 
+PUAcodes.hrh     MW_LAYER_PLATFORM_EXPORT_PATH(PUAcodes.hrh)
+publicruntimeids.hrh  publicruntimeids.hrh
+
+PhCltTypes.h     MW_LAYER_PLATFORM_EXPORT_PATH(PhCltTypes.h)
+RPhCltServer.h     MW_LAYER_PLATFORM_EXPORT_PATH(RPhCltServer.h)
+CPhCltImageHandler.h     MW_LAYER_PLATFORM_EXPORT_PATH(CPhCltImageHandler.h)
+CPhCltBaseImageParams.h     MW_LAYER_PLATFORM_EXPORT_PATH(CPhCltBaseImageParams.h)
+CPhCltImageParams.h     MW_LAYER_PLATFORM_EXPORT_PATH(CPhCltImageParams.h)
+PhoneClientServerDomainPStypes.h     MW_LAYER_PLATFORM_EXPORT_PATH(PhoneClientServerDomainPStypes.h)
+PhoneClientServerDomainPSkeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(PhoneClientServerDomainPSkeys.h)
+keylockpolicyapi.h MW_LAYER_PLATFORM_EXPORT_PATH(keylockpolicyapi.h)
+AvkonInternalCRKeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(AvkonInternalCRKeys.h)
+AknFepInternalCRKeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(AknFepInternalCRKeys.h)
+GSLauncher.h     MW_LAYER_PLATFORM_EXPORT_PATH(gslauncher.h)
+GSPluginInterface.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsplugininterface.h)
+GSFWViewUIDs.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsfwviewuids.h)
+GSListBox.h     MW_LAYER_PLATFORM_EXPORT_PATH(gslistbox.h)
+gsframeworkrsc.rsg	gsframeworkrsc.rsg
+gsfwicon.mbg		gsfwicon.mbg
 
 #include "extended_skin_api/bld.inf"
 #include "S3libs/bld.inf"
@@ -100,8 +119,7 @@ aknlayout.lag		aknlayout.lag
 #include "xml_parser_api/group/bld.inf"
 //#include "extended_skins_api/group/bld.inf"
 #include "physics_api/group/bld.inf"
-// #include "/group/bld.inf"
-// #include "/group/bld.inf"
+
 #include "avkon_anim_dll_api/bld.inf"
 #include "avkon_staus_api/bld.inf"
 #include "avkon_ui_server_api/bld.inf"
@@ -116,3 +134,9 @@ aknlayout.lag		aknlayout.lag
 #include "mifconv/group/bld.inf"
 #include "hs_content_control_ui/bld.inf"
 
+#include "gsprofilesrv_plat-settings_framework_api/group/bld.inf"
+#include "gsprofilesrv_plat-profiles_engine_api/group/bld.inf"
+#include "phonesrv_plat-ss_settings_api/group/bld.inf"
+#include "logs_ui_command_line_api/group/bld.inf"
+// #include "/group/bld.inf"
+// #include "/group/bld.inf"
