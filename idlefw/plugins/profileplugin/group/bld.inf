@@ -16,7 +16,7 @@
 */
 
 
-#ifdef RD_CUSTOMIZABLE_AI
+//#ifdef RD_CUSTOMIZABLE_AI
 
 PRJ_PLATFORMS
 DEFAULT
@@ -31,6 +31,6 @@ PRJ_EXPORTS
 PRJ_MMPFILES
 aiprofileplugin.mmp
 
-#endif // RD_CUSTOMIZABLE_AI
+//#endif // RD_CUSTOMIZABLE_AI
 
 // End of File.

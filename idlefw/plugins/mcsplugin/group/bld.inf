@@ -16,7 +16,7 @@
 */
 
 
-#ifdef RD_CUSTOMIZABLE_AI
+//#ifdef RD_CUSTOMIZABLE_AI
 #include <platform_paths.hrh>
 
 
@@ -43,6 +43,7 @@ PRJ_EXTENSIONS
 START EXTENSION s60/mifconv
 OPTION TARGETFILE aimcsplugin.mif
 OPTION HEADERFILE aimcsplugin.mbg
+OPTION SOURCEDIR .
 OPTION SOURCES -c8,8 qgn_prop_ai_shortcut -c8,8 qgn_menu_url \
                -c8,8 qgn_menu_mce_sel_mes -c8,8 qgn_menu_mce_syncmail \
                -c8,8 qgn_menu_am -c8,8 qgn_prop_cp_conn_shortcut \
@@ -55,6 +56,6 @@ mcsplugin.mmp
 mcspluginsettings.mmp
 mcspluginhandler.mmp
 
-#endif // RD_CUSTOMIZABLE_AI
+//#endif // RD_CUSTOMIZABLE_AI
 
 // End of File.

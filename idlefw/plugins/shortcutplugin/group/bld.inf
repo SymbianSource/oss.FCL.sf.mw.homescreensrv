@@ -43,6 +43,7 @@ PRJ_EXTENSIONS
 START EXTENSION s60/mifconv
 OPTION TARGETFILE aiscutplugin.mif
 OPTION HEADERFILE aiscutplugin.mbg
+OPTION SOURCEDIR .
 OPTION SOURCES -c8,8 qgn_prop_ai_shortcut -c8,8 qgn_menu_url \
                -c8,8 qgn_menu_mce_sel_mes -c8,8 qgn_menu_mce_syncmail \
                -c8,8 qgn_menu_am -c8,8 qgn_prop_cp_conn_shortcut \

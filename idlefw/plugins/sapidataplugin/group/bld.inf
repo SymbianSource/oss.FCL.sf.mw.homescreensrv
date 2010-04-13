@@ -16,7 +16,7 @@
 */
 
 
-#ifdef RD_CUSTOMIZABLE_AI
+//#ifdef RD_CUSTOMIZABLE_AI
 
 #include <platform_paths.hrh>
 
@@ -34,6 +34,6 @@ sapidataplugin.mmp
 //#include "../internal/testpublisher/group/bld.inf"
 //#include "../internal/templatedwidget/group/bld.inf"
 
-#endif // RD_CUSTOMIZABLE_AI
+//#endif // RD_CUSTOMIZABLE_AI
 
 // End of File.

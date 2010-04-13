@@ -43,7 +43,7 @@ RESOURCE APP_REGISTRATION_INFO
     
 #ifdef RD_BOOT_CUSTOMIZABLE_AI
     // When Active Idle starts in boot, hide the app icon from Application Shell
-    hidden = KAppIsHidden;
+    // hidden = KAppIsHidden;
 #endif    
     }
 

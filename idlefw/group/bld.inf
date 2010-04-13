@@ -51,7 +51,7 @@ PRJ_TESTEXPORTS
 //
 
 // hslaunch
-#include "../hslaunch/group/bld.inf"
+//#include "../hslaunch/group/bld.inf"
 
 // Plug-ins
 #include "../plugins/group/bld.inf"

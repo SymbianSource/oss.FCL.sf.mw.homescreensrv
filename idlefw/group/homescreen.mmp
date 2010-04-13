@@ -19,7 +19,7 @@
 #include        <platform/mw/aisystemuids.hrh>
 #include        <data_caging_paths.hrh>
 
-TARGET          homescreen_hs.exe
+TARGET          homescreen.exe
 TARGETTYPE      exe
 UID             0x100039CE AI_UID3_AIFW_EXE
 SECUREID        AI_SID_AIFW_EXE
