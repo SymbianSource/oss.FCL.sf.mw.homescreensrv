@@ -138,6 +138,7 @@ CCcSrv::~CCcSrv()
     {
     iSessions.Close();
     iProviders.Close();
+    iObservers.Close();
     }
 
 // -----------------------------------------------------------------------------
@@ -185,6 +186,37 @@ void CCcSrv::AddSessionL( CCcSrvSession* aSession )
 //
 void CCcSrv::DropSession( CCcSrvSession* aSession )
     {
+    // Remove possible provider
+    for ( TUint32 i = 0; i < iProviders.Count(); i++ )
+        {
+        if ( iProviders[ i ].iSession->Id() == aSession->Id() )
+            {
+            iProviders.Remove( i );
+            break;
+            }
+        }
+    // Unregister possible observations and remove observer
+    for ( TUint32 i = 0; i < iObservers.Count(); )
+        {
+        if ( iObservers[ i ].iObserver == aSession->Id() )
+            {
+            for ( TUint32 j = 0; j < iProviders.Count(); j++ )
+                {
+                if ( iObservers[ i ].iProviderId == iProviders[ j ].iId )
+                    {
+                    TRAP_IGNORE( iProviders[ j ].iSession->
+                        UnregisterObserverSessionL( aSession->Id() ) );
+                    }
+                }
+            iObservers.Remove( i );
+            }
+        else
+            {
+            // Get next observer
+            i++;
+            }
+        }
+    // Remove session
     for ( TUint32 i = 0; i < iSessions.Count(); i++ )
         {
         if ( iSessions[ i ]->Id() == aSession->Id() )
@@ -193,22 +225,7 @@ void CCcSrv::DropSession( CCcSrvSession* aSession )
             break;
             }
         }
-    // Unregister possible observations
-    for ( TUint32 i = 0; i < iProviders.Count(); i++ )
-        {
-        TRAP_IGNORE( iProviders[ i ].iSession->
-            UnregisterObserverSessionL( aSession->Id() ) );
-        }
     
-    // Remove possible provider
-    for ( TUint32 i = 0; i < iProviders.Count(); i++ )
-        {
-        if ( iProviders[ i ].iId == aSession->Id() )
-            {
-            iProviders.Remove( i );
-            break;
-            }
-        }
     if ( iSessions.Count() == 0 )
         {
         // Last session dropped -> stop server
@@ -236,6 +253,15 @@ void CCcSrv::RegisterProviderL(
     provider.iSession = aSession;
     iProviders.Append( provider );
     
+    // Register possible active observers
+    for ( TUint32 i = 0; i < iObservers.Count(); i++ )
+        {
+        if ( iObservers[ i ].iProviderId == aProvider )
+            {
+            provider.iSession->RegisterObserverSessionL( iObservers[ i ].iObserver );
+            }
+        }
+    
     }
 
 // -----------------------------------------------------------------------------
@@ -246,19 +272,18 @@ void CCcSrv::RegisterObserverL(
     TUint32 aProvider,
     CCcSrvSession* aSession )
     {
-    TBool found( EFalse );
-    for ( TUint32 i = 0; i < iProviders.Count() && !found; i++ )
+    for ( TUint32 i = 0; i < iProviders.Count(); i++ )
         {
         if ( iProviders[ i ].iId == aProvider )
             {
-            iProviders[ i ].iSession->RegisterObserverSessionL( aSession->Id() );   
-            found = ETrue;
+            iProviders[ i ].iSession->RegisterObserverSessionL( aSession->Id() );
+            break;
             }
         }
-    if ( !found )
-        {
-        User::Leave( KErrNotFound );
-        }
+    CCcSrv::TCcObserver observer;
+    observer.iProviderId = aProvider;
+    observer.iObserver = aSession->Id();
+    iObservers.Append( observer );
     }
 
 // -----------------------------------------------------------------------------

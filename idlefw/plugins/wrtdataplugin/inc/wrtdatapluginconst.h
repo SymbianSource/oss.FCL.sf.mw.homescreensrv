@@ -73,13 +73,12 @@ _LIT( KOperationDelete, "delete" );
 _LIT( KOperationExecute, "execute" );
 _LIT( KAddUpdateDelete, "add:update:delete" );
 
-_LIT( KDeActive, "deactive");
-_LIT( KActive, "active");
-_LIT( KSuspend , "suspend");
-_LIT( KResume, "resume");
-_LIT( KOnLine, "online");
-_LIT( KOffLine, "offline");
-_LIT( KInActive, "inactive");
+_LIT8( KDeActive, "deactive");
+_LIT8( KActive, "active");
+_LIT8( KSuspend , "suspend");
+_LIT8( KResume, "resume");
+_LIT8( KOnLine, "online");
+_LIT8( KOffLine, "offline");
 
 // reserved extension for retrieving mask handle 
 _LIT8( KImageMask, "image1_mask");

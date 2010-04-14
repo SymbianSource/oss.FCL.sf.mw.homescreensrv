@@ -30,12 +30,6 @@
 
 #include "aistatemanager.h"
 
-#include <homescreen.rsg>
-
-_LIT( KResourceDrive, "Z:" );
-_LIT( KResourceFile, "homescreen.rsc" );
-_LIT( KResourcePath, "\\resource\\apps\\" );
-
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
 // StartReason
@@ -120,10 +114,6 @@ CAiStateManager* CAiStateManager::NewLC( CAiPluginFactory& aFactory )
 //
 CAiStateManager::~CAiStateManager()
     {  
-    if( iWaitDialog )
-        {
-        delete iWaitDialog;
-        }
     delete iCommandBuffer;
 	iReloadPlugins.Close();
     }
@@ -442,15 +432,6 @@ void CAiStateManager::ProcessBackupRestore( TBool aStart )
     
     iHalt = aStart;
 
-    if ( aStart )
-        {
-        TRAP_IGNORE( StartWaitDialogL() );    
-        }
-    else
-        {
-        TRAP_IGNORE( StopWaitDialogL() );
-        }
-    
     RPointerArray< CHsContentPublisher >& plugins( iFactory.Publishers() );
             
     for( TInt i = 0; i < plugins.Count(); i++ )
@@ -647,61 +628,6 @@ void CAiStateManager::NotifyReleasePlugins( const RArray<TUid>& aUidList )
             }
         }        
     __PRINTS( "CAiStateManager::NotifyReleasePlugins: return void" );    
-    }
-
-// ----------------------------------------------------------------------------
-// CAiStateManager::StartWaitDialogL()
-// 
-// ----------------------------------------------------------------------------
-//
-void CAiStateManager::StartWaitDialogL()
-    {
-    RConeResourceLoader resourceLoader( *CCoeEnv::Static() );
-    TFullName fileName( KResourceDrive );
-    fileName.Append( KResourcePath );
-    fileName.Append( KResourceFile );
-        
-    // Get language of resource file.
-    BaflUtils::NearestLanguageFile( CCoeEnv::Static()->FsSession(), fileName );
-
-    // Open resource file.
-    resourceLoader.OpenL( fileName );
-    
-    if( iWaitDialog )
-        {
-        delete iWaitDialog;
-        iWaitDialog = NULL;
-        }
-     
-    // For the wait dialog
-    iWaitDialog = new (ELeave) CAknWaitDialog(
-        REINTERPRET_CAST( CEikDialog**, &iWaitDialog ) );
-    iWaitDialog->SetCallback( this );
-    iWaitDialog->ExecuteLD( R_HOMESCREEN_WAIT_DIALOG );
-    resourceLoader.Close();
-    }
-
-// ----------------------------------------------------------------------------
-// CAiStateManager::StopWaitDialogL()
-// 
-// ----------------------------------------------------------------------------
-//
-void CAiStateManager::StopWaitDialogL()
-    {
-    if( iWaitDialog )
-        {
-        iWaitDialog->ProcessFinishedL(); 
-        }
-    }
-
-// ----------------------------------------------------------------------------
-// CAiStateManager::DialogDismissedL()
-// 
-// ----------------------------------------------------------------------------
-//
-void CAiStateManager::DialogDismissedL(TInt /*aButtonId*/)
-    {
-    // No implementation required.
     }
 
 // End of file

@@ -340,7 +340,7 @@ void CCPServerSession::ExecuteMultipleActionsL(const RMessage2& aMessage)
         cpMaps->AtL(i, mapVariant);
         const CCPLiwMap* map =
                 static_cast<const CCPLiwMap*> (mapVariant.AsMap());
-        ExecuteActionL(map, ETrue, options);
+        TRAP_IGNORE(ExecuteActionL(map, ETrue, options));
         CleanupStack::PopAndDestroy(&mapVariant);
         }
 

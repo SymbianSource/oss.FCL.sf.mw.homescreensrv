@@ -23,6 +23,8 @@
 #include <eikenv.h>
 #include <eikappui.h>
 #include <liwvariant.h>
+#include <gfxtranseffect/gfxtranseffect.h>      
+#include <akntranseffect.h>
 
 #include "ahproperties.hrh"
 #include "ahpapplauncher.h"
@@ -110,6 +112,13 @@ TInt CAHAppLauncher::ExecuteCommmandLineL( const CLiwMap* aMap )
         TApaTask task = taskList.FindApp( appUid );
         if ( task.Exists( ) )
             {
+            GfxTransEffect::BeginFullScreen( 
+                AknTransEffect::EApplicationStart,
+                TRect(), 
+                AknTransEffect::EParameterType, 
+                AknTransEffect::GfxTransParam( appUid,
+                AknTransEffect::TParameter::EActivateExplicitContinue ));
+            
             errCode = KErrNone;
             task.BringToForeground();
             }

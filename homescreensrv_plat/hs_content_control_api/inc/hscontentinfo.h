@@ -333,6 +333,23 @@ public:
     IMPORT_C TBool IsWrt() const;
 
     /**
+     * Sets whether an application confguration or a view is full
+     * 
+     * @since S60 5.0
+     * @param aIsFull, ETrue if application configuration or a view is full
+     */    
+    IMPORT_C void SetIsFull( TBool aIsFull );
+    
+    /**
+     * Returns whether an application configuration or a view is full
+     * 
+     * @since S60 5.0
+     * @return ETrue if application configuration or view is full, 
+     *         EFalse otherwise
+     */    
+    IMPORT_C TBool IsFull() const;
+
+    /**
      * Marshals Content Info data to a descriptor
      * 
      * @since S60 5.0
@@ -407,6 +424,11 @@ private: // Data
      * Flag to indicate whether this is a WRT widget
      */
     TBool iIsWrt;
+
+    /**
+     * Flag to indicate wheter an application configuration or a view is full
+     */
+    TBool iIsFull;
     };
 
 #endif // HSCONTENTINFO_H

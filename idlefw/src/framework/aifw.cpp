@@ -32,7 +32,6 @@
 
 #include <activeidle2domaincrkeys.h>
 #include <activeidle2domainpskeys.h>
-#include <activeidle2internalpskeys.h>
 #include <aipspropertyobserver.h>
 #include <aisystemuids.hrh>
 
@@ -155,9 +154,6 @@ CAiFw::~CAiFw()
 
     delete iNotifyHandlerESS;
     iNotifyHandlerESS = NULL;
-   
-    Release( iIdleRestartObserver );
-    iIdleRestartObserver = NULL;
         
     delete iWsPluginManager;
     iWsPluginManager = NULL;
@@ -243,10 +239,6 @@ void CAiFw::AppEnvReadyL()
          CCenRepNotifyHandler::EIntKey, KAIExternalStatusScreen );
                                                      
     iNotifyHandlerESS->StartListeningL();
-
-    iIdleRestartObserver = AiUtility::CreatePSPropertyObserverL(
-        TCallBack( HandleRestartEvent, this ), 
-        KPSUidAiInformation, KActiveIdleRestartAI2 );
     
     __PRINTS( "*** CAiFw::AppEnvReadyL - done" );
     }
@@ -341,9 +333,6 @@ void CAiFw::HandleUiShutdown( CAiUiController& aUiController )
 
         delete iWsPluginManager;
         iWsPluginManager = NULL;
-        
-        Release( iIdleRestartObserver );
-        iIdleRestartObserver = NULL;
         
         iStateProvider->Stop();
         }
@@ -495,30 +484,6 @@ void CAiFw::SwapUiControllerL( TBool aToExtHS )
        
     // Restart
     iUiControllerManager->ExitMainController();
-    }
-
-// ----------------------------------------------------------------------------
-// CAiFw::HandleRestartEvent()
-//
-// ----------------------------------------------------------------------------
-//
-TInt CAiFw::HandleRestartEvent( TAny* aSelf )
-    {
-    CAiFw* self = static_cast<CAiFw*>( aSelf );
-    
-    TInt value( 0 );
-    
-    if ( self->iIdleRestartObserver )
-        {
-        TInt err( self->iIdleRestartObserver->Get( value ) );
-
-        if ( err == KErrNone && value == KActiveIdleRestartCode )
-            {
-            self->iUiControllerManager->ExitMainController();
-            }
-        }
-    
-    return KErrNone;
     }
 
 // ----------------------------------------------------------------------------

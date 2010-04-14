@@ -1042,7 +1042,7 @@ TInt ChspsMaintenanceHandler::HandlePluginReferencesL(
                     CleanupStack::PushL( pluginIter );                                
                     ChspsDomNode* pluginNode =  pluginIter->First();                              
                     TBool steppingtoConfNode(EFalse);                     
-                    while(pluginNode && !steppingtoConfNode)
+                    while( pluginNode && !steppingtoConfNode )
                         {
                         const TDesC8& pluginNodeName = pluginNode->Name();
                          
@@ -1057,10 +1057,18 @@ TInt ChspsMaintenanceHandler::HandlePluginReferencesL(
                         }
                     CleanupStack::PopAndDestroy( pluginIter );
                     
-                    // Copy the plugin configuration to the main document.
-                    ChspsDomNode* rootCopy = pluginNode->CloneL( node->StringPool());
-                    rootCopy->SetParent( node );
-                    node->AddChildL( rootCopy );
+                    if ( pluginNode )
+                        {
+                        // Copy the plugin configuration to the main document.
+                        ChspsDomNode* rootCopy = pluginNode->CloneL( node->StringPool());
+                        rootCopy->SetParent( node );
+                        node->AddChildL( rootCopy );
+                        }
+                    else
+                        {
+                        // configuration is corrupted
+                        User::Leave( KErrCorrupt );
+                        }
                     }
                
                 CleanupStack::PopAndDestroy( pluginOdt );

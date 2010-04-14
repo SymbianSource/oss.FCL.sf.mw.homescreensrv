@@ -491,11 +491,11 @@ void CCPDataManager::BuildChangeInfoL( const CCPLiwMap* aMap,
 		CLiwDefaultList* aChangeInfoList )
 	{
 	TLiwVariant resultVar = aParam->Value();
+    resultVar.PushL();
 	if ( resultVar.TypeId() == EVariantTypeMap )
         {
         for ( TInt i = 0; i<aActionTriggers->Count(); i++ )
             {
-            resultVar.PushL();
             CLiwDefaultMap* changeInfoMap = CLiwDefaultMap::NewLC(); 
         
             CopyVariantL(KId, resultVar.AsMap(), changeInfoMap );
@@ -516,9 +516,9 @@ void CCPDataManager::BuildChangeInfoL( const CCPLiwMap* aMap,
         
             aChangeInfoList->AppendL( TLiwVariant( changeInfoMap ) );
             CleanupStack::PopAndDestroy( changeInfoMap );
-            CleanupStack::PopAndDestroy( &resultVar );
             }
         }
+    CleanupStack::PopAndDestroy( &resultVar );
 	}
 
 

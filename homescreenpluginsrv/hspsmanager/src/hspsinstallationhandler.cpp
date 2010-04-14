@@ -58,7 +58,7 @@ _LIT8(KhspsDefinitionEngine, "hspsdefinitionengine");
 _LIT(KPathDelim, "\\");
 _LIT(KPrivateInstall, "\\private\\200159c0\\install\\");
 _LIT(KHsps, "\\hsps\\" );
-_LIT(KXuikon, "xuikon\\" );
+_LIT(KXuikon, "xuikon" );
 
 const TInt KMaxMediaTypeLength = 100;
 
@@ -462,7 +462,7 @@ void ChspsInstallationHandler::DoInstallThemeL(
         }                
         
     // Check the parsed input        
-    ValidateL();                    
+    FinalizeParsingL();                    
     }
 
 // -----------------------------------------------------------------------------
@@ -482,7 +482,8 @@ TFileName ChspsInstallationHandler::GetInterfacePath()
         {
         pathParser.PopDir(); // pop "hsps" folder 
         path.Copy( pathParser.FullName() );
-        path.Append( KXuikon );        
+        path.Append( KXuikon );
+        path.Append( KPathDelim );
         }
     return path;
     }
@@ -491,7 +492,7 @@ TFileName ChspsInstallationHandler::GetInterfacePath()
 // ChspsInstallationHandler::ValidateL() 
 // -----------------------------------------------------------------------------
 //
-void ChspsInstallationHandler::ValidateL()
+void ChspsInstallationHandler::FinalizeParsingL()
     {               
     // Check resources
     TFileName interfacePath( GetInterfacePath() );       
@@ -2273,105 +2274,114 @@ void ChspsInstallationHandler::AddLocalizedResourcesDTDV2L(
     CleanupStack::PopAndDestroy( dtdPath );
     }
 
+// -----------------------------------------------------------------------------
+// ChspsInstallationHandler::AddInterfaceResourcesV2L
+// -----------------------------------------------------------------------------
+//
 void ChspsInstallationHandler::AddInterfaceResourcesV2L(
         const TDesC& aPath )
-    {                      
-    // Find all locale specific subfolders
-    TFindFile fileFinder( iFsSession );
-    _LIT( KFilter, "*" );
-    CDir* fileList( NULL );    
-    fileFinder.FindWildByDir( KFilter, aPath, fileList );
-    if ( fileList )
-        {
-        CleanupStack::PushL( fileList );
-        TFileName localePath;
-        for( TInt i = 0; i < fileList->Count(); i++ )       
-            {
-            const TEntry& entry = (*fileList)[i];                        
-            if ( entry.IsDir() )
-                {
-                TInt languageIndex = 0;
-                TLex lex( entry.iName );
-                TInt error = lex.Val( languageIndex );    
-                                
-                // See enumarations from e32lang.h
-                if( !error && languageIndex >= ELangTest )
-                    {               
-                    // If we found the first language specification          
-                    if ( !iDefaultSpecificationSet )
-                        {
-                        // Assume this is the default language shown incase 
-                        // there is no locale for the active UI language
-                        iDefaultSpecification = (TLanguage)languageIndex;
-                        iDefaultSpecificationSet = ETrue;
-                        }
-                                        
-                    // Setup a path to the subdirectory 
-                    localePath.Copy( aPath );
-                    localePath.Append( entry.iName );
-                    localePath.Append( KPathDelim );
-                    
-                    // Find localized resources 
-                    AddLocalizedResourcesV2L( 
-                        localePath,
-                        (TLanguage)languageIndex );
-                    }                                       
-                }
-                        
-            }        
-        CleanupStack::PopAndDestroy( fileList );
-        fileList = NULL;
-        }        
+    {                                          
+    RArray<TInt> driveArray;
+    CleanupClosePushL( driveArray );
     
-    // If no DTD files were found 
-    if ( iDefaultSpecification != ELangTest || !iDefaultSpecificationSet )
-        {        
-        // Halt installation, test language was not found
-        User::Leave( KErrNotFound );
-        }
-    }    
-    
-void ChspsInstallationHandler::AddLocalizedResourcesV2L(
-        const TDesC& aPath,
-        const TLanguage aLanguage )
-    {
-    TFindFile fileFinder( iFsSession );
-    _LIT( KFilter, "*" );
-    CDir* fileList( NULL );    
-    fileFinder.FindWildByDir( KFilter, aPath, fileList );
-    if ( fileList )
-        {
-        CleanupStack::PushL( fileList );
+    // Set search order for eclipsing, only the ROM and UDA drives should be scanned
+    driveArray.Append( EDriveC );
+    driveArray.Append( EDriveZ );
         
-        TFileName localePath;
-        ChspsResource* resource = NULL;
-        for( TInt i = 0; i < fileList->Count(); i++ )       
+    // Find all unique locale entries under the Xuikon folders in either drive
+    RPointerArray<HBufC> locales;    
+    CleanupClosePushL( locales );              
+    hspsServerUtil::FindFilesRecursivelyL(
+            iFsSession,
+            driveArray,
+            aPath,            
+            locales,
+            EFalse );
+        
+    // Find all file entries under the Xuikon folders in either drive
+    RPointerArray<HBufC> folders;    
+    CleanupClosePushL( folders );    
+    hspsServerUtil::FindFilesRecursivelyL(
+            iFsSession,
+            driveArray,
+            aPath,
+            folders,
+            ETrue );
+           
+    // Loop language folders
+    for(TInt localeIndex=0; localeIndex < locales.Count(); localeIndex++ )
+        {                    
+        TParsePtrC localeParser( locales[ localeIndex ]->Des() );
+        TPath localePath = localeParser.Path();
+        
+        TPath tempPath = locales[ localeIndex ]->Des();        
+        if( tempPath.Right( KPathDelim().Length() ).Compare( KPathDelim() ) == 0 )
             {
-            const TEntry& entry = (*fileList)[i];                        
-            if ( !entry.IsDir() )
-                {    
-                TParsePtrC parserPtr( entry.iName );
-                TFileName modName = hspsServerUtil::GetFixedOdtName( entry.iName );
+            tempPath.Delete( tempPath.Length() - KPathDelim().Length(), KPathDelim().Length() );
+            }        
+        TParsePtrC tempParser( tempPath );
+        TFileName localeName = tempParser.Name();                        
+        TInt languageIndex = 0;
+        TLex lex( localeName );
+        if( lex.Val( languageIndex ) != KErrNone )
+            {
+            continue;
+            }
+        if( languageIndex < ELangTest ) 
+            {
+            User::Leave( KErrIllegalInstallation );
+            }
                 
-                TBool addingOk = EFalse;                
-                for( TInt resourceIndex=0; resourceIndex < iTempLocalizedResourceList->Count(); resourceIndex++ )
-                    {                                                                                                                           
-                    resource = iTempLocalizedResourceList->At( resourceIndex );
-                    if( modName.CompareF( resource->FileName() ) == 0 )
+        // If we found the first language specification          
+        if ( !iDefaultSpecificationSet )
+            {
+            // Assume this is the default language shown when device language is not supported
+            iDefaultSpecification = (TLanguage)languageIndex;
+            iDefaultSpecificationSet = ETrue;
+            }
+                       
+        // Loop file resources which should be found from either drive
+        ChspsResource* resource = NULL;
+        for( TInt resourceIndex=0; resourceIndex < iTempLocalizedResourceList->Count(); resourceIndex++ )
+            {              
+            resource = iTempLocalizedResourceList->At( resourceIndex );              
+            TFileName file;
+            
+            for( TInt folderIndex=0; folderIndex < folders.Count(); folderIndex++ )
+                {
+                TParsePtrC folderParser( folders[ folderIndex ]->Des() );
+                TPath folderPath = folderParser.Path();
+                TFileName name = folderParser.Name();
+                
+                if( localePath.CompareF( folderPath ) == 0 )                                                    
+                    {
+                    TFileName fixedName = hspsServerUtil::GetFixedOdtName( folderParser.NameAndExt() );
+                    if( fixedName.CompareF( resource->FileName() ) == 0  )
                         {
-                        addingOk = ETrue;     
+                        file = folders[ folderIndex ]->Des();                        
+                        break;           
+                        }
+                    }                                    
+                }
+            
+            if( file.Length() )
+                {                
+                TBool duplicate = EFalse;
+                for( TInt i=0; i< iResourceList->Count(); i++ )
+                    {
+                    ChspsResource* r = iResourceList->At(i);
+                    if( r->Language() == languageIndex 
+                            && r->FileName().CompareF( file ) == 0 )
+                        {
+                        duplicate = ETrue;
                         break;
                         }
                     }
-                if ( addingOk )
-                    {                                
-                    HBufC* resourcePath = HBufC::NewLC( aPath.Length() + entry.iName.Length() );
-                    resourcePath->Des().Copy( aPath );
-                    resourcePath->Des().Append( entry.iName );
-                                
+                if( !duplicate )
+                    {
+                    
                     TPtrC8 mimeType;
-                    TPtrC8 tag;
-                                                                        
+                    TPtrC8 tag;                                                               
                     HBufC8* tagBuf8 = NULL;                    
                     if ( resource->Tags().Length() )
                         {
@@ -2379,12 +2389,12 @@ void ChspsInstallationHandler::AddLocalizedResourcesV2L(
                         tagBuf8->Des().Copy( resource->Tags() );
                         tag.Set( tagBuf8->Des() );
                         }
-                    
+                                
                     // Add localized files into the resource array                    
                     AddResourceL(
                         *iResourceList,
-                        *resourcePath,
-                        aLanguage,
+                        file,
+                        (TLanguage)languageIndex,
                         EResourceOther,
                         mimeType,
                         tag );
@@ -2393,16 +2403,24 @@ void ChspsInstallationHandler::AddLocalizedResourcesV2L(
                         {
                         CleanupStack::PopAndDestroy( tagBuf8 );
                         }
-                    CleanupStack::PopAndDestroy( resourcePath );
-                    }                                
+                    
+                    }
                 }
             }
-        
-        CleanupStack::PopAndDestroy( fileList );
-        fileList = NULL;
-        }
-    }
 
+        }     
+            
+    folders.ResetAndDestroy();
+    locales.ResetAndDestroy();
+    CleanupStack::PopAndDestroy( 3, &driveArray );  // driveArray, locales, folders, 
+     
+    if ( iDefaultSpecification != ELangTest || !iDefaultSpecificationSet )
+        {        
+        // Halt installation, test language was not found
+        User::Leave( KErrNotFound );
+        }    
+    }    
+    
 // -----------------------------------------------------------------------------
 // Finds locale specific subdirectories and resources and appends those
 // into the resource array 

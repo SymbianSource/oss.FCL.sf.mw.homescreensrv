@@ -68,10 +68,6 @@ enum EPSActiveIdlePopupState
 
 const TUint KActiveIdleActOnSendKey = 0x00000004; // Contains 0 if we are to ignore the send or > 0 if we need to react to it
 
-const TUint KActiveIdleTouchToolbarWidth = 0x00000005;
-
-const TUint KActiveIdleTouchToolbarHeight = 0x00000006;
-
 const TUint KActiveIdleSimRegFailedReceived = 0x00000007; // Contains 1 if we have received sim reg failed message, 0 if not.
 
 enum EPSActiveIdleSimRegReceiveStatus
@@ -84,33 +80,6 @@ enum EPSActiveIdleSimRegReceiveStatus
     // The key is managed by windows server plug-in to determine whether to enable keylock handling
     EPSSimRegFailedMessageReceived
 };
-
-const TUint KActiveIdleThemeSupportsXsp = 0x00000008;   // Contains one value from following enumeration
-
-enum EPSActiveIdleThemeSupportsXsp
-{
-    // Value indicates that xSP feature is not supported in currently active theme
-    EPSAiXspNotSupported,
-
-    // Value indicates that the current theme supports the xSP feature
-    EPSAiXspIsSupported
-};
-
-const TUint KActiveIdleLaunch = 0x00000009; // Contains information if shortcut launching is ongoing or not
-
-enum EPSActiveIdleIdleLaunch
-{
-
-	// Value indicates that no shortcut is in launching state and new launch tapping can be handled
-	EPSAiLaunchNotActive = 0,
-	
-	// Value indicates that active idle shortcut is launching
-	EPSAiLaunchIsActive	
-};
-
-
-// Indicates that Active Idle 2 should be restarted.
-const TUint KActiveIdleRestartAI2 = 0x0000000B;
 
 // Indicates that all the CPS Harvester plugins have been updated
 const TUint KActiveIdleCpsPluginsUpdated = 0x0000000C;
@@ -150,21 +119,6 @@ const TUint KActiveIdleExtHS_PluginConfChange = 0x00000503;
 */
 const TUid KPSUidActiveIdle2 =  {0x102750F0}; // ActiveIdle2 SID
 
-/**
-*
-* First iterate Active plugin UID range to find all
-* active plugin UID's. Use that UID as a key to find the plugins name
-* from the name range.
-*
-*/
-
-/**
-* Active plugin count
-*
-* Possible integer values:
-* 0x000000000 - 0xFFFFFFFF : Active plugin count
-*/
-const TUint KAIActivePluginCount = 0x00000000;
 
 /**
 * Active plugin UID range
@@ -174,14 +128,5 @@ const TUint KAIActivePluginCount = 0x00000000;
 */
 const TUint KAIActivePluginRangeStart = 0x00000001;
 const TUint KAIActivePluginRangeEnd   = 0x0FFFFFFF;
-
-/**
-* Active plugin name range
-*
-* Possible string values:
-* Plugin name
-*/
-const TUint KAIPluginNameRangeStart = 0x10000000;
-const TUint KAIPluginNameRangeEnd   = 0xFFFFFFFF;
 
 #endif // ACTIVEIDLE2_DOMAIN_PS_KEYS_H

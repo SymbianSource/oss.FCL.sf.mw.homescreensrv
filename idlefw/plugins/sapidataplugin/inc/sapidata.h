@@ -132,16 +132,6 @@ private:
     */
     void ConstructL(CSapiDataPlugin* aPlugin);
 
-    // new functions
-
-    /**
-    * Gets the menu item from the publisher
-    *
-    * @param none
-    * @return void
-    */
-    void GetMenuItemsL();
-    
 public:
     // new functions
     
@@ -152,14 +142,6 @@ public:
     * @return void
     */
     void ChangePublisherStatusL(const TDesC8& aStatus);
-    
-    /**
-    * Change the publisher status with list of actions
-    *
-    * @param aActionsList new list of status for the publisher
-    * @return void
-    */
-    void ChangePublisherStatusL(CLiwDefaultList* aActionsList);
     
     /**
     * Triggers active event with KNoNotification option.
@@ -365,6 +347,25 @@ public:
     * @param aAny - contains pointer to command buffer.
     */
     void SetCommandBuffer(TAny* aAny);
+
+private:
+    // new functions
+
+    /**
+    * Gets the menu item from the publisher
+    *
+    * @param none
+    * @return void
+    */
+    void GetMenuItemsL();
+    
+    /**
+    * Change the publisher status with list of actions
+    *
+    * @param aActionsList new list of status for the publisher
+    * @return void
+    */
+    void ChangePublisherStatusL(CLiwDefaultList* aActionsList);
     
 private:   
     // data

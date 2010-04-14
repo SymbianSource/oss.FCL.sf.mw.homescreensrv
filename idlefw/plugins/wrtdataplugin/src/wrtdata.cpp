@@ -24,6 +24,7 @@
 #include <apgcli.h>
 #include <apgicnfl.h> 
 #include <bautils.h> 
+#include <aicpscommandbuffer.h>
 
 #include "wrtdata.h"
 #include "wrtdatapluginconst.h"
@@ -77,12 +78,12 @@ CWrtData::~CWrtData()
     	}
     if(iObserver)
         {
-        TRAP_IGNORE(iObserver->ReleaseL() );
         delete iObserver;
         iObserver = NULL;
         }
     if( iInterface )
          {
+         // This will also release all the registered observers
          iInterface->Close();
          iInterface = NULL;
          }
@@ -100,6 +101,7 @@ CWrtData::~CWrtData()
     iMenuItems.ResetAndDestroy();
     iMenuTriggers.ResetAndDestroy();
     // not owned
+    iCpsExecute = NULL;
     iPlugin = NULL;
     }
 
@@ -232,24 +234,28 @@ void CWrtData::RegisterL()
 void CWrtData::UpdatePublisherStatusL()
     {
      // Resent the plugin status to publisher
-     ActivateL();
+    CLiwDefaultList* actions= CLiwDefaultList::NewLC();
+    actions->AppendL( TLiwVariant( KActive ));
      if ( iPlugin->IsActive() )
          {
-         ResumeL();
+         actions->AppendL( TLiwVariant( KResume ) );
          }
      else
          {
-         SuspendL();
+         actions->AppendL( TLiwVariant( KSuspend ));
          }
       // forward the network status if it uses.
     if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOnline )
         {
-        OnLineL();
+        actions->AppendL( TLiwVariant( KOnLine ));
         }
     else if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOffline )
         {
-        OffLineL();
+        actions->AppendL( TLiwVariant(  KOffLine));
         }
+
+    ReSendNotificationL( actions );
+    CleanupStack::PopAndDestroy( actions );
     }
 
 // ---------------------------------------------------------------------------
@@ -454,60 +460,6 @@ TBool CWrtData::IsPluginActive()
     }
 
 // ---------------------------------------------------------------------------
-// CWrtData::ActivateL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ActivateL()
-    {
-    ChangePublisherStatusL( KActive );
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::ResumeL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::ResumeL()
-    {
-    ChangePublisherStatusL( KResume );
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::SuspendL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::SuspendL()
-    {
-    ChangePublisherStatusL( KSuspend );
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::DeActivateL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::DeActivateL()
-    {
-    ChangePublisherStatusL( KDeActive );
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::OnLineL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::OnLineL()
-    {
-    ChangePublisherStatusL( KOnLine );
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::offLineL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::OffLineL()
-    {
-    ChangePublisherStatusL( KOffLine );
-    }
-
-// ---------------------------------------------------------------------------
 // CWrtData::CreateFilterL
 // ---------------------------------------------------------------------------
 //
@@ -579,44 +531,21 @@ void CWrtData::ExecuteCommandL(CLiwDefaultMap* aInFilter, CLiwDefaultMap* aOutDa
     }
 
 // ---------------------------------------------------------------------------
-// CWrtData::PublisherStatusL
+// NotifyPublisherL
 // ---------------------------------------------------------------------------
 //
-void CWrtData::ChangePublisherStatusL(const TDesC& aStatus)
+void CWrtData::NotifyPublisherL(const TDesC8& aStatus)
     {
-    if( iContentId == NULL )
-       {
-       return;
-       }
-   HBufC8* triggerName = HBufC8::NewLC(KWRTContentNameMaxLength);
-   triggerName->Des().Copy(aStatus);
-   
-   CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-   CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-       
-   TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
-   inParamList->AppendL( type );
-              
-   CLiwDefaultMap* filter = CreateFilterLC();
-   filter->InsertL(KActionTrigger, TLiwVariant(triggerName->Des()) );
-   
-   TLiwGenericParam item( KFilter, TLiwVariant( filter ));
-   inParamList->AppendL( item );
-   
-   if(iInterface)
-       {
-       iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
-       }
-   else
-       {
-       User::Leave( KErrNotSupported );
-       }
-   CleanupStack::PopAndDestroy( filter );
-   
-   inParamList->Reset();
-   outParamList->Reset();
-   CleanupStack::PopAndDestroy( triggerName );
-   }
+    if( iCpsExecute == NULL )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    
+    CLiwDefaultMap* filter = CreateFilterLC();
+    // Add execute command triggers. Idle framework will execute 
+    iCpsExecute->AddCommand( iPluginId, KPubData, filter, aStatus );
+    CleanupStack::PopAndDestroy( filter );
+    }
 
 // ---------------------------------------------------------------------------
 // CWrtData::GetMenuItemsL
@@ -785,4 +714,47 @@ void CWrtData::CreateIconFromUidL(TInt& aHandle, TInt& aMaskHandle, const TUid& 
     CleanupStack::PopAndDestroy( sizeArray );
     CleanupStack::PopAndDestroy( &lsSession );
     }
+
+
+// ---------------------------------------------------------------------------
+// ReSendNotificationL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::ReSendNotificationL(CLiwDefaultList* aActionsList)
+    {
+    if( iInterface == NULL )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    
+    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
+
+    TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
+    inParamList->AppendL( type );
+     
+    CLiwDefaultMap* filter = CreateFilterLC();
+    // add list of action triggers to execute
+    filter->InsertL(KActionTrigger, TLiwVariant(aActionsList) );
+    
+    TLiwGenericParam item( KFilter, TLiwVariant( filter ));
+    inParamList->AppendL( item );
+    iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
+    CleanupStack::PopAndDestroy( filter );
+    outParamList->Reset();
+    inParamList->Reset();
+
+    }
+
+// ---------------------------------------------------------------------------
+// SetCommandBuffer
+// ---------------------------------------------------------------------------
+//
+void CWrtData::SetCommandBuffer(TAny* aAny, const TDesC8& aNameSpace )
+    {
+    iPluginId.Copy(aNameSpace);
+    iCpsExecute = reinterpret_cast <MAiCpsCommandBuffer* > ( aAny );
+    }
+
+// End of file
 

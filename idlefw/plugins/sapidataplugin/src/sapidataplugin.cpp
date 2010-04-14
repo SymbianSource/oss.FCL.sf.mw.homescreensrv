@@ -433,6 +433,9 @@ void CSapiDataPlugin::Start( TStartReason aReason )
         TRAP_IGNORE( PublishL() );
         TRAP_IGNORE( iData->SetStartupReasonL( KPluginStartup));
         }
+
+    // Listen for publisher registration to resend the events 
+    TRAP_IGNORE( iData->RegisterPublisherObserverL() );
     }
 
 // ----------------------------------------------------------------------------
@@ -616,17 +619,15 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         iData->ConfigureL( configurationItemsArr );
         
         iPluginState = ESuspend;
+
+        // Listen the publisher content update
+        iData->RegisterContentObserverL();
         
         // Activate the publisher
         iData->ChangePublisherStatusL( KActive );
-        // Register for notifications
-        iData->RegisterPublisherObserverL();
         // Execute the active trigger 
         iData->TriggerActiveL();
-        // There must be at least 1 milli second delay 
-        // to register the second observer as both are using the 
-        // same MLiwInterface object
-        iData->RegisterContentObserverL();
+        
         }
     
     contentItemsArr.Reset();

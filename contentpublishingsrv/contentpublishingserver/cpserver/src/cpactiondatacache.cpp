@@ -80,7 +80,10 @@ CCPActionDataCache::CCPActionDataCache()
 //
 CCPActionDataCache::~CCPActionDataCache()
     {
-    iInternalList->Close();
+    if (iInternalList)
+        {
+        iInternalList->Close();
+        }
     }
 
 // ---------------------------------------------------------------------------

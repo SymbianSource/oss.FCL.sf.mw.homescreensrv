@@ -156,6 +156,16 @@ private: // Data
         };
     RArray<TCcProvider> iProviders;
     
+    /**
+     * Observer list
+     */
+    struct TCcObserver
+        {
+        TUint32 iProviderId;
+        TUint32 iObserver;
+        };
+    RArray<TCcObserver> iObservers;
+    
     };
 
 

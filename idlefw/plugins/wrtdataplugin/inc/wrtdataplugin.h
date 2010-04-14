@@ -139,6 +139,11 @@ public:
     
     /**
      * @see CHsContentPublisher
+     */
+    void SetProperty( TProperty aProperty, TAny* aAny );
+    
+    /**
+     * @see CHsContentPublisher
      */    
     TAny* GetProperty( TProperty aProperty );
     

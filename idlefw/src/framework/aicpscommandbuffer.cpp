@@ -31,7 +31,8 @@
 _LIT8( KCPSConfigurationIf, "IContentPublishing" );
 _LIT8( KCPS, "Service.ContentPublishing" );
 _LIT8( KExecuteAction, "ExecuteAction" );
-
+_LIT8( KExecuteMultipleActions, "ExecuteMultipleActions" );
+_LIT8( KFilters, "filters" );
 // ======== LOCAL FUNCTIONS ========
 
 // ======== MEMBER FUNCTIONS ========
@@ -235,17 +236,27 @@ void CAiCpsCommandBuffer::DoFlushL()
 	   
     if(iCpsInterface)
         {
+		  __PRINTS( "CAiCpsCommandBuffer::DoFlush : Execute" );
         TInt pluginCount = iPlugins.Count();
+        CLiwDefaultList* pluginCmdList = CLiwDefaultList::NewLC();
+        
         for (TInt i=0; i < pluginCount; i++ )
             {
-            CLiwGenericParamList* inParamList  = iPlugins[i]->InParamListLC();
-            CLiwGenericParamList* outParamList  = CLiwGenericParamList::NewLC();
-            __PRINTS( "CAiCpsCommandBuffer::DoFlush : Execute" );
-            iCpsInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
-            
-            CleanupStack::PopAndDestroy( outParamList );
-            CleanupStack::PopAndDestroy( inParamList );
+            CLiwDefaultMap* inParamMap = iPlugins[i]->InParamMapLC();
+            pluginCmdList->AppendL( inParamMap );
+            CleanupStack::PopAndDestroy( inParamMap );            
             }
+        CLiwGenericParamList* inParamList  = CLiwGenericParamList::NewLC();
+        CLiwGenericParamList* outParamList  = CLiwGenericParamList::NewLC();
+        
+         TLiwGenericParam item( KFilters, TLiwVariant ( pluginCmdList));
+         inParamList->AppendL( item ); 
+      
+        iCpsInterface->ExecuteCmdL( KExecuteMultipleActions, *inParamList, *outParamList);
+       
+        CleanupStack::PopAndDestroy( outParamList );
+        CleanupStack::PopAndDestroy( inParamList );
+        CleanupStack::PopAndDestroy( pluginCmdList );
         }
     else
        {

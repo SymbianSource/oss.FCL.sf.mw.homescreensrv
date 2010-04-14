@@ -80,13 +80,13 @@ public:
     const TDesC& PluginId() const;
     
     /**
-    * Returns the input parameter list for Execute command
-    * it will leave the CLiwGenericParamList object in the stack
+    * Returns the input parameter map for Execute command
+    * it will leave the CLiwDefaultMap object in the stack
     * 
     * @since S60 5.2
-    * @return generic parameter list 
+    * @return in param map 
     */    
-    CLiwGenericParamList* InParamListLC();
+    CLiwDefaultMap* InParamMapLC();
    
     /**
     * Adds a actions to the action list  

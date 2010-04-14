@@ -2778,44 +2778,8 @@ void ChspsThemeServer::InstallWidgetsL()
 	iRomInstaller->SetLogBus( iLogBus );
 #endif
 		
-	RPointerArray<HBufC> pluginFolders;
-    CleanupClosePushL( pluginFolders );				
-	        
-    // Find UDA and ROM widgets to be installed     
-    iRomInstaller->FindInstallationFilesL( pluginFolders );
-            
-	// Install the manifest files    
-    for( TInt index=0; index < pluginFolders.Count(); index++ )
-        {         
-        TPtrC namePtr( pluginFolders[index]->Des() );                               
-#ifdef HSPS_LOG_ACTIVE            
-        iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - installing configuration: %S" ), &namePtr );
-#endif      
-                
-        // Synchronous method
-        ThspsServiceCompletedMessage ret = iRomInstaller->InstallThemeL( namePtr  );
-        if ( ret != EhspsInstallThemeSuccess )
-            {
-#ifdef HSPS_LOG_ACTIVE            
-            iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - installation failed: %S" ), &namePtr );
-#endif                  
-//            User::Leave( KErrAbort );
-            }
-        }
-    
-    if ( pluginFolders.Count() == 0 )
-        {
-#ifdef HSPS_LOG_ACTIVE            
-        iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - mandatory plugins were not found!" ) );
-#endif                                  
-        // Mandatory plugins were missing 
-        User::Leave( KErrCorrupt );
-        }
-        
-    pluginFolders.ResetAndDestroy();
-    CleanupStack::PopAndDestroy( 1, &pluginFolders );
-		
-	// The ROM installer is not needed anymore and therefore it can be released
+	iRomInstaller->InstallL();
+			
 	delete iRomInstaller;
 	iRomInstaller = 0;
 	

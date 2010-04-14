@@ -105,18 +105,14 @@ const TDesC& CAiCpsExecuteParam::PluginId() const
     }
 
 // ---------------------------------------------------------------------------
-// CAiCpsExecuteParam::InParamListLC
+// CAiCpsExecuteParam::InParamMapLC
 //
 // ---------------------------------------------------------------------------
 //  
-CLiwGenericParamList* CAiCpsExecuteParam::InParamListLC() 
+CLiwDefaultMap* CAiCpsExecuteParam::InParamMapLC() 
     {
-    CLiwGenericParamList* paramList = CLiwGenericParamList::NewLC();
-    
-    TLiwGenericParam pluginId( KPluginId, TLiwVariant( iPluginId ) );
-    paramList->AppendL( pluginId );
-    TLiwGenericParam type( KType, TLiwVariant( iRegistryType ) );
-    paramList->AppendL( type );
+    CLiwDefaultMap* inParamMap = CLiwDefaultMap::NewLC();
+    inParamMap->InsertL( KType, TLiwVariant( *iRegistryType ));
     
     CLiwDefaultMap* filter = CLiwDefaultMap::NewLC();
     filter->InsertL( KPublisherId, TLiwVariant(iPublisher ));
@@ -129,12 +125,11 @@ CLiwGenericParamList* CAiCpsExecuteParam::InParamListLC()
         actionsToLaunch->AppendL( TLiwVariant( *iActions[i]));
         }
     filter->InsertL(KActionTrigger, TLiwVariant(actionsToLaunch) );
-    
-    TLiwGenericParam item( KFilter, TLiwVariant( filter ));
-    paramList->AppendL( item );
+    inParamMap->InsertL( KFilter, TLiwVariant( filter ));
+
     CleanupStack::PopAndDestroy( actionsToLaunch );
     CleanupStack::PopAndDestroy( filter );
-    return paramList;
+    return inParamMap;
     }
 
 // ---------------------------------------------------------------------------

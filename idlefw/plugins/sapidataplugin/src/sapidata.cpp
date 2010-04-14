@@ -122,18 +122,17 @@ CSapiData::~CSapiData()
 	
 	if(iPubObserver)
 		{
-		TRAP_IGNORE(iPubObserver->ReleaseL() );
 		delete iPubObserver;
 		iPubObserver = NULL;
 		}
     if(iContentObserver)
         {
-        TRAP_IGNORE(iContentObserver->ReleaseL() );
         delete iContentObserver;
         iContentObserver = NULL;
         }
     if( iInterface )
          {
+         // This will also release all the registered observers
          iInterface->Close();
          iInterface = NULL;
          }
@@ -674,7 +673,7 @@ void CSapiData::RegisterPublisherObserverL()
     if ( iItemCount > 0)
     	{
 		CLiwDefaultMap* pubRegFilter = CreateFilterLC( KAll(), KAll() );
-		pubRegFilter->InsertL( KOperation, TLiwVariant( KUpdate ) );
+		pubRegFilter->InsertL( KOperation, TLiwVariant( KAddUpdate ) );
 		iPubObserver->RegisterL( pubRegFilter, KPubData() );
 		CleanupStack::PopAndDestroy( pubRegFilter );
 		}
@@ -757,8 +756,6 @@ void CSapiData::ChangePublisherStatusL(CLiwDefaultList* aActionsList)
     CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
     CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
     
-    TLiwGenericParam pluginId( KPluginId, TLiwVariant( iContentId ) );
-    inParamList->AppendL( pluginId );
     TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
     inParamList->AppendL( type );
      

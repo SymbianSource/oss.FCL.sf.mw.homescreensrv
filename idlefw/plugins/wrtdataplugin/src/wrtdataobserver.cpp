@@ -65,7 +65,6 @@ CWrtDataObserver::CWrtDataObserver ()
 //
 CWrtDataObserver ::~CWrtDataObserver ()
     {
-    TRAP_IGNORE( ReleaseL());
     iInterface = NULL;
     iData = NULL;
     }
@@ -186,29 +185,5 @@ void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
     CleanupStack::PopAndDestroy( inParamList ); 
     }
 
-// ---------------------------------------------------------------------------
-// CWrtDataObserver ::ReleaseL
-// Sing off to notification
-// ---------------------------------------------------------------------------
-//
-void CWrtDataObserver ::ReleaseL()
-    {
-    if( iInterface )
-        {
-        CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( inParamList );
-        CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( outParamList );
-        
-        TInt err(KErrNone);
-        TRAP(err, iInterface->ExecuteCmdL( 
-                KRequestNotification,
-                *inParamList,
-                *outParamList,
-                KLiwOptCancel,
-                this ));
-        
-        CleanupStack::PopAndDestroy( outParamList );
-        CleanupStack::PopAndDestroy( inParamList );
-        }
-    }
+// End of file
+

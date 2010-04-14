@@ -48,7 +48,6 @@ _LIT( KCpData,         "cp_data");
 _LIT( KPubData,        "publisher" );
 _LIT( KCpData_PubData, "cp_data:publisher");
 
-_LIT8( KPluginId, "plugin_id");
 _LIT8( KFilter,        "filter" );
 _LIT8( KDataMap,       "data_map");
 _LIT8( KActionTrigger, "action_trigger" );
@@ -76,7 +75,7 @@ _LIT( KOperationUpdate, "update" );
 _LIT( KOperationDelete, "delete" );
 _LIT( KOperationExecute, "execute" );
 _LIT( KAddUpdateDelete, "add:update:delete" );
-_LIT( KUpdate, "update" );
+_LIT( KAddUpdate, "add:update" );
 
 _LIT(KWidget, "hswidget");
 _LIT8( KDeActive, "deactive");
@@ -91,7 +90,7 @@ _LIT8( KPageShutdown, "pageshutdown");
 _LIT8( KPluginShutdown, "pluginshutdown");
 _LIT8( KOnLine, "online");
 _LIT8( KOffLine, "offline");
-_LIT8( KInActive, "inactive");
+
 
 // reserved extension for retrieving mask handle 
 _LIT8( KMask, "_mask");

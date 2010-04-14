@@ -23,7 +23,7 @@
 #include <ProEngFactory.h>
 #include <MProfileEngine.h>
 #include <MProfile.h>
-#include <MProfilename.h>
+#include <MProfileName.h>
 #include <MProEngNotifyHandler.h>
 
 #include <aidevstaplgres.rsg>

@@ -89,33 +89,6 @@ namespace
             KTelephonyInformationReadPolicy,
             KTelephonyInformationWritePolicy );
         }
-
-    TInt DefineIdleAI2RestartPS()
-        {
-        return RProperty::Define( 
-        	KPSUidAiInformation,
-            KActiveIdleRestartAI2,
-          	RProperty::EInt,
-            KTelephonyInformationReadPolicy,
-            KTelephonyInformationWritePolicy );
-        }
-	TInt SetIdleAI2RestartPS()
-        {
-        return RProperty::Set( 
-        	KPSUidAiInformation, 
-            KActiveIdleRestartAI2, 
-            0 );
-        }
-        
-      TInt DefineIdleLaunchPS()
-      	{
-      	return RProperty::Define( 
-        	KPSUidAiInformation,
-        	KActiveIdleLaunch,
-        	RProperty::EInt,
-        	ECapabilityReadDeviceData,
-        	ECapabilityWriteDeviceData );
-      	}
       
       TInt DefineIdleSendNumKeysToPhonePS()
           {
@@ -166,8 +139,6 @@ void CAiIdleAppRegisterImpl::RegisterL()
     
     DefineIdleSimRegFailedReceivedPS();
     
-    DefineIdleLaunchPS();
-    
     // Set the default value to 1 so the send key press is reacted
     SetIdleSendKeyPS();
     
@@ -176,10 +147,6 @@ void CAiIdleAppRegisterImpl::RegisterL()
     
     // Define idle state key
     DefineIdleStatePS();
-    
-    DefineIdleAI2RestartPS();
-    
-    SetIdleAI2RestartPS();
     
     DefineIdleSendNumKeysToPhonePS();
     

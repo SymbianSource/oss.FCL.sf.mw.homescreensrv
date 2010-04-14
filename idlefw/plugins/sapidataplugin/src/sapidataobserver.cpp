@@ -68,30 +68,6 @@ void CSapiDataObserver::RegisterL( CLiwDefaultMap* aFilter, const TDesC& aRegist
     }
 
 // ---------------------------------------------------------------------------
-// Sing off to notification
-// ---------------------------------------------------------------------------
-//
-void CSapiDataObserver ::ReleaseL()
-    {
-    if( iInterface )
-        {
-        CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( inParamList );
-        CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( outParamList );
-        
-        TRAP_IGNORE( iInterface->ExecuteCmdL( KRequestNotification,
-                *inParamList,
-                *outParamList,
-                KLiwOptCancel,
-                this ));
-        
-        CleanupStack::PopAndDestroy( outParamList );
-        CleanupStack::PopAndDestroy( inParamList );
-        }
-    }
-
-// ---------------------------------------------------------------------------
 // Factory method construction
 // ---------------------------------------------------------------------------
 //

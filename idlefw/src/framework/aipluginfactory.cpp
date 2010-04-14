@@ -143,34 +143,43 @@ void CAiPluginFactory::ConstructL()
 // ----------------------------------------------------------------------------
 //
 TInt CAiPluginFactory::CreatePlugin( 
-    const THsPublisherInfo& aPublisherInfo )                             
-    {                                            
+    const THsPublisherInfo& aPublisherInfo )
+    {
     __PRINTS( "*** CAiPluginFactory::CreatePlugin: Start ***" );
-                                    
+
     if ( IsRecyclable( aPublisherInfo ) )
         {
         CHsContentPublisher* plugin( PluginByUid( aPublisherInfo.Uid() ) );
-        
+
         if ( plugin )
             {
+            if ( aPublisherInfo.Namespace() == KNullDesC8 )
+                {
+                // No namespace available
+                __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                               Failed to Load Plug-in: KErrNotSupported ***" );
+                return KErrNotSupported;
+                }
+
             // Plugin already exists, update its namespace
             THsPublisherInfo& info( 
                 const_cast< THsPublisherInfo& >( plugin->PublisherInfo() ) );
-            
+
             info.iNamespace.Copy( aPublisherInfo.Namespace() );
-            
-            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Plugin recycled ***" );
-            
+
+            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                           Plugin recycled ***" );
+
             return KErrNone;
             }
         }
-            
+
     TBool implFound( EFalse );
-    
+
     for( TInt i = 0; i < iEComPlugins.Count(); i++ )
         {
         CImplementationInformation* information( iEComPlugins[i] );
-                                                                 
+
         if( information->ImplementationUid().iUid == aPublisherInfo.Uid().iUid )
             {
             implFound = ETrue;
@@ -181,29 +190,31 @@ TInt CAiPluginFactory::CreatePlugin(
     if( aPublisherInfo.Namespace() == KNullDesC8 || !implFound )
         {
         // No namespace available or no ecom implementation available
-        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Failed to Load Plug-in: KErrNotSupported ***" );
+        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                       Failed to Load Plug-in: KErrNotSupported ***" );
         
         return KErrNotSupported;
         }
            
     CHsContentPublisher* plugin( PluginByInfo( aPublisherInfo ) );
-    
+
     if( plugin )
-        {                             
-        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Failed to Load Plug-in: KErrAlreadyExists ***" );
+        {
+        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                       Failed to Load Plug-in: KErrAlreadyExists ***" );
         
         return KErrAlreadyExists;
         }
-    
+
     TInt err( KErrNone );
-    
+
     TRAP( err, CreatePluginL( aPublisherInfo ) );
     
     __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Load Plug-in ***" );
-    
-    return err;    
+
+    return err;
     }
-        
+
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::DestroyPlugin()
 //

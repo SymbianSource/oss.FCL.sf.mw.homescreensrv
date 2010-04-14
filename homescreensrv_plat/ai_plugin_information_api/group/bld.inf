@@ -25,4 +25,3 @@ DEFAULT
 PRJ_EXPORTS
 
 ../inc/activeidle2domainpskeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(activeidle2domainpskeys.h)
-../inc/activeidle2internalpskeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(activeidle2internalpskeys.h)

@@ -148,7 +148,7 @@ void CWrtDataPlugin::Stop( TStopReason aReason )
     if( aReason == EPluginShutdown ||
         aReason == ESystemShutdown )
         {
-        TRAP_IGNORE(iData->DeActivateL());
+        TRAP_IGNORE(iData->NotifyPublisherL( KDeActive ));
         }
     }
 
@@ -163,7 +163,7 @@ void CWrtDataPlugin::Resume( TResumeReason aReason )
         {
         iPluginState = EResume;
 
-        TRAP_IGNORE( iData->ResumeL() );        
+        TRAP_IGNORE( iData->NotifyPublisherL( KResume ));        
         }    
     }
 
@@ -178,7 +178,7 @@ void CWrtDataPlugin::Suspend( TSuspendReason aReason )
         {
         iPluginState = ESuspend;
         
-        TRAP_IGNORE ( iData->SuspendL() );        
+        TRAP_IGNORE ( iData->NotifyPublisherL( KSuspend ));        
         }        
     }
 
@@ -189,12 +189,8 @@ void CWrtDataPlugin::Suspend( TSuspendReason aReason )
 //
 void CWrtDataPlugin::SetOnline()
     {    
-    if ( iNetworkStatus != EOnline )
-        {
-        iNetworkStatus = EOnline;
-        
-        TRAP_IGNORE( iData->OnLineL() );            
-        }    
+    iNetworkStatus = EOnline;
+    TRAP_IGNORE( iData->NotifyPublisherL( KOnLine ));            
     }
 
 // ----------------------------------------------------------------------------
@@ -204,12 +200,8 @@ void CWrtDataPlugin::SetOnline()
 //
 void CWrtDataPlugin::SetOffline()
     {
-    if ( iNetworkStatus != EOffline )
-        {
-        iNetworkStatus = EOffline;
-        
-        TRAP_IGNORE( iData->OffLineL() );            
-        }    
+    iNetworkStatus = EOffline;
+    TRAP_IGNORE( iData->NotifyPublisherL( KOffLine ));            
     }
 
 // ----------------------------------------------------------------------------
@@ -316,7 +308,7 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         iData->RegisterL();
         
         // Activate the publisher 
-        iData->ActivateL();
+        iData->NotifyPublisherL( KActive );
         }
     
     settingItemsArr.Reset();
@@ -325,6 +317,19 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     
        // We own the array so destroy it
     aSettings.ResetAndDestroy();
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::SetProperty
+//
+// ----------------------------------------------------------------------------
+//
+void CWrtDataPlugin::SetProperty( TProperty aProperty, TAny* aAny )
+    {
+    if (aProperty == ECpsCmdBuffer )
+        {   
+        iData->SetCommandBuffer( aAny, PublisherInfo().Namespace() );
+        }
     }
 
 // ----------------------------------------------------------------------------
