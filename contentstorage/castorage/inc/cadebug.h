@@ -46,14 +46,14 @@ _LIT(KDebugFileName, "castorage.txt");
 #endif
 
 /**
- * TODO
- *
- * @param aData
+ * Prints given descriptor to debug log file.
+ * @param aData descriptor with data.
  */
 static void DoOutput( TDesC8& aData );
 
 /**
- * TODO
+ * Prints given descriptor to debug log file.
+ * @param aFmt descriptor with data.
  */
 static void DebugStringNarrowL( const char* aFmt, ... )
     {
@@ -71,7 +71,8 @@ static void DebugStringNarrowL( const char* aFmt, ... )
     }
 
 /**
- * TODO
+ * Prints given descriptor to debug log file.
+ * @param aFmt descriptor with data.
  */
 static void DebugStringWideL( const char* aFmt, ... )
     {
@@ -93,7 +94,8 @@ static void DebugStringWideL( const char* aFmt, ... )
     }
 
 /**
- * TODO
+ * Prints given time containinf descriptor to log file.
+ * @param aBuf descriptor with time information.
  */
 static void DebugBufferL( const TDesC8& aBuf )
     {
@@ -101,7 +103,8 @@ static void DebugBufferL( const TDesC8& aBuf )
     }
 
 /**
- * TODO
+ * Prints given time containinf descriptor to log file.
+ * @param aBuf descriptor with time information.
  */
 static void DebugBufferL( const TDesC& aBuf )
     {
@@ -109,7 +112,8 @@ static void DebugBufferL( const TDesC& aBuf )
     }
 
 /**
- * TODO
+ * Prints given time to log file.
+ * @param aTime time to print.
  */
 static void DebugTimeL( const TTime& aTime )
     {
@@ -123,7 +127,8 @@ static void DebugTimeL( const TTime& aTime )
     }
 
 /**
- * TODO
+ * Prints given descriptor to debug log file.
+ * @param aData descriptor with data.
  */
 static void DoOutput( TDesC8& aData )
     {
@@ -135,7 +140,8 @@ static void DoOutput( TDesC8& aData )
 #ifdef _KQTI_MENU_TRACE_PERFORMANCE
 
 /**
- * TODO
+ * Prints given descriptor to preformance log file.
+ * @param aData descriptor with data.
  */
 static void DoOutputPerf(TDesC8& aData)
     {
@@ -146,7 +152,8 @@ static void DoOutputPerf(TDesC8& aData)
     }
 
 /**
- * TODO
+ * Formats string for performance debug output.
+ * @param aFmt string for debug output.
  */
 static void DebugStringNarrowPerfL( const char* aFmt, ... )
     {

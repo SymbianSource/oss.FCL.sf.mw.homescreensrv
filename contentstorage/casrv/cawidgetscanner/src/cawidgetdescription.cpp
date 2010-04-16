@@ -74,6 +74,9 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     //library
     iLibrary.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetLibrary, iLibrary );
+    //path
+    iPath.CreateL( KCaMaxAttrValueLen );
+    aEntry->FindAttribute( KAttrWidgetPath, iPath );
     //uri
     iUri.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetUri, iUri );
@@ -146,6 +149,7 @@ CCaWidgetDescription::~CCaWidgetDescription()
     iUri.Close();
     iIconUri.Close();
     iLibrary.Close();
+    iPath.Close();
     iModificationTime.Close();
     }
 
@@ -335,7 +339,23 @@ TPtrC CCaWidgetDescription::GetLibrary( ) const
     {
     return iLibrary;
     }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetPath( ) const
+    {
+    return iPath;
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetPathL( const TDesC& aPath )
+    {
+	iPath.Close();
+	iPath.CreateL(aPath);
+    }
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -421,14 +441,12 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         {
         entry->SetFlags( EVisible );
         }
-
     if ( iPackageUid )
         {
         TBuf<KMaxUidName> uidDesc;
         uidDesc.AppendNum( iPackageUid,EHex );
         entry->AddAttributeL( KCaPackageUid, uidDesc );
         }
-
     if ( iEntryId != KNoId )
         {
         entry->SetId( iEntryId );
@@ -449,7 +467,10 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
             entry->SetFlags( entry->GetFlags() & ~ERemovable );
             }
         }
-
+    if ( iPath != KNullDesC )
+        {
+        entry->AddAttributeL(KAttrWidgetPath, iPath);
+        }
     if ( iTitle != KNullDesC )
         {
         entry->SetTextL(iTitle);
@@ -472,7 +493,8 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         }
     if ( iIconUri != KNullDesC)
         {
-        entry->SetIconDataL(0, 0, 0, 0, iIconUri);
+        // aSkinId and AppId not used for widgets - KNullDesC
+        entry->SetIconDataL(iIconUri, KNullDesC, KNullDesC);
         }
 
     if( iModificationTime != KNullDesC )

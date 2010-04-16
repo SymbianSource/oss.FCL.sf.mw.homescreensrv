@@ -706,17 +706,19 @@ void CaItemModelPrivate::updateItemData(int id)
     mEntries.updateEntry(id);
 
     QList<int> ids = mService->getEntryIds(mQuery);
-    if (mEntries.indexOf(id) >= 0 && ids.indexOf(id)
-            == mEntries.indexOf(id)) {
+    if (mEntries.indexOf(id) >= 0 
+           && ids.indexOf(id) == mEntries.indexOf(id)) {
         emit m_q->dataChanged(index(mEntries.indexOf(id)), index(
                                   mEntries.indexOf(id)));
+    } else if (ids.indexOf(id) < 0){
+        removeItem(id);
+    } else if (mEntries.indexOf(id) < 0){
+        addItem(id);  
+    } else if (mParentEntry && id == mParentEntry->id()) {
+        updateParentEntry();
+        m_q->reset();
     } else {
-        if (mParentEntry && id == mParentEntry->id()) {
-            updateParentEntry();
-            m_q->reset();
-        } else {
-            updateLayout();
-        }
+        updateModel();
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateItemData");
 }
@@ -751,11 +753,25 @@ void CaItemModelPrivate::handleAddItems(QList<int> &itemsList)
     int entriesCount = mEntries.count();
     if (entriesCount) {
         int lastRow = itemsList.indexOf(mEntries[entriesCount - 1]);
-        if (itemsList.count() == entriesCount && lastRow == (entriesCount
-                - 1)) {
+        if (itemsList.count() == entriesCount) {
             //count is same and last item is in same position
             //so we update whole model
-            updateModel();
+            bool orderChanged(false);
+            while (entriesCount) {
+                if (itemsList.indexOf(mEntries[entriesCount - 1]) 
+                        != (entriesCount - 1)) {
+                    orderChanged = true;
+                    break;
+                }
+                entriesCount--;
+            }
+            if (orderChanged) {
+                updateLayout();
+            }
+            else {
+                updateModel();
+            }
+            
         } else if ((itemsList.count() - entriesCount) == 1 && lastRow
                    == entriesCount) {
             //just one item added - collection
@@ -773,15 +789,15 @@ void CaItemModelPrivate::handleAddItems(QList<int> &itemsList)
                 i++;
             }
         } else {
-            //some items were inserted or reordered,
-            //so we update layout and emit signal with row number
+            //some items were inserted
+            //so we update model and emit signal with row number
             //of first moved/added item
             //signal is needed to scroll a view to proper position after
             //some items were added
-            updateLayout();
+            updateModel();
             emit m_q->scrollTo(lastRow + 1,
                                QAbstractItemView::PositionAtTop);
-        }
+        } 
     } else {
         updateModel();
     }
@@ -815,9 +831,8 @@ void CaItemModelPrivate::removeItem(int id)
         mEntries.remove(id);
         m_q->endRemoveRows();
     } else {
-        updateLayout();
+        updateModel();
     }
-    
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::removeItem");
 }
 
@@ -843,13 +858,45 @@ void CaItemModelPrivate::removeItems(const QList<int> &itemsList)
 
 /*!
  Layout update
+ NOTE: this method should be called only if the entries get rearranged
+ and do not change their contents!
  */
 void CaItemModelPrivate::updateLayout()
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateLayout");
     m_q->layoutAboutToBeChanged();
+
+    // get the ID list from before the update
+    QList<int> oldOrderedIdList = mEntries.orderedIdList();
+
+    // do the update, the entries should only get rearranged
     mEntries.updateEntries(mQuery);
-    updateParentEntry();
+
+    // get the new ID list after the entries got rearranged
+    QList<int> newOrderedIdList = mEntries.orderedIdList();
+    // this list will contain the new position indices
+    QList<int> newPositionsList;
+    int entry;
+    foreach (entry, oldOrderedIdList) {
+        newPositionsList << newOrderedIdList.indexOf(entry);
+    }
+
+    // now check which items in the previous persistent index list changed
+    // their positions, make new indices for them and store in the new
+    // persistent index list
+    QModelIndexList oldPersistentIndexList = m_q->persistentIndexList();
+    QModelIndexList newPersistentIndexList;
+    QModelIndex index;
+    foreach (index, oldPersistentIndexList) {
+        newPersistentIndexList <<
+            m_q->createIndex(
+                newPositionsList.at(index.row()),
+                0,
+                index.internalPointer());
+    }
+
+    m_q->changePersistentIndexList(oldPersistentIndexList, newPersistentIndexList);
+
     m_q->layoutChanged();
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateLayout");
 }

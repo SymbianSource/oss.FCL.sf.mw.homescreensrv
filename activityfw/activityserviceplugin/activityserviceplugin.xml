@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<service>
+    <name>ActivityService</name>
+    <filepath>activityserviceplugin</filepath>
+    <description>Activities service</description>
+    <interface>
+        <name>com.nokia.qt.activities.ActivityClient</name>
+        <version>1.0</version>
+        <description>Implementation of ActivityClient</description>
+    </interface>
+    <interface>
+        <name>com.nokia.qt.activities.ActivityManager</name>
+        <version>1.0</version>
+        <description>Implementation of ActivityManager</description>
+    </interface>
+</service>

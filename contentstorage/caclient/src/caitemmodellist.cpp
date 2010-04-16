@@ -170,3 +170,12 @@ const int &CaItemModelList::operator[](int row) const
 {
     return mOrderedList[row];
 }
+
+/*!
+ Returns on ordered list of entry IDs
+ \retval Copy of the internal ID list
+ */
+QList<int> CaItemModelList::orderedIdList()
+{
+    return mOrderedList;
+}

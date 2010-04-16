@@ -127,76 +127,41 @@ void CaIconDescription::setFilename(const QString &filename)
     m_d->setFileName(filename);
 }
 
+
 /*!
- Returns bitmap id.
- \retval bitmap id.
+ Returns skin id.
+ \retval skin id.
  */
-int CaIconDescription::bitmapId() const
+QString CaIconDescription::skinId() const
 {
-    return m_d->bitmapId();
+    return m_d->skinId();
 }
 
 /*!
- Sets bitmap id
- \param bitmap id
+ Sets skin id
+ \param skin id
  */
-void CaIconDescription::setBitmapId(int id)
+void CaIconDescription::setSkinId(const QString &skinId)
 {
-    m_d->setBitmapId(id);
+    m_d->setSkinId(skinId);
 }
 
 /*!
- Returns icon mask id
- \retval icon mask id
+ Returns icon application id.
+ \retval icon application id.
  */
-int CaIconDescription::maskId() const
+QString CaIconDescription::applicationId() const
 {
-    return m_d->maskId();
+    return m_d->applicationId();
 }
 
 /*!
- Sets icon mask id
- \param icon mask id
+ Sets icon application id.
+ \param QString with icon application id.
  */
-void CaIconDescription::setMaskId(int id)
+void CaIconDescription::setApplicationId(const QString &applicationId)
 {
-    m_d->setMaskId(id);
-}
-
-/*!
- Returns skin major id
- \retval skin major id
- */
-int CaIconDescription::skinMajorId() const
-{
-    return m_d->skinMajorId();
-}
-
-/*!
- Sets skin major id
- \param skin major id
- */
-void CaIconDescription::setSkinMajorId(int id)
-{
-    m_d->setSkinMajorId(id);
-}
-
-/*!
- Returns skin minor id
- \retval skin minor id
- */
-int CaIconDescription::skinMinorId() const
-{
-    return m_d->skinMinorId();
-}
-
-/*!
- Sets skin minor id
- \param skin minor id
- */
-void CaIconDescription::setSkinMinorId(int id)
-{
-    m_d->setSkinMinorId(id);
+    m_d->setApplicationId(applicationId);
 }
 
 /*!
@@ -214,8 +179,8 @@ void CaIconDescription::setId(int id)
  */
 CaIconDescriptionPrivate::CaIconDescriptionPrivate(
     CaIconDescription *iconDescriptionPublic) :
-    m_q(iconDescriptionPublic), mBitmapId(0), mMaskId(0), mSkinMajorId(0),
-    mSkinMinorId(0)
+    m_q(iconDescriptionPublic), mId(0), mFilename(), mSkinId(), 
+    mApplicationId(0)
 {
 }
 
@@ -257,73 +222,38 @@ void CaIconDescriptionPrivate::setFileName(const QString &fileName)
  Returns bitmap id.
  \retval bitmap id.
  */
-int CaIconDescriptionPrivate::bitmapId() const
+QString CaIconDescriptionPrivate::skinId() const
 {
-    return mBitmapId;
+    return mSkinId;
 }
 
 /*!
- Sets bitmap id.
- \param bitmap id.
+ Sets skin id.
+ \param skinId skin id.
  */
-void CaIconDescriptionPrivate::setBitmapId(int bitmapId)
+void CaIconDescriptionPrivate::setSkinId(const QString &skinId)
 {
-    mBitmapId = bitmapId;
+    mSkinId = skinId;
 }
 
 /*!
- Returns icon mask id.
- \retval icon mask id.
+ Returns icon application id.
+ \retval icon application id.
  */
-int CaIconDescriptionPrivate::maskId() const
+QString CaIconDescriptionPrivate::applicationId() const
 {
-    return mMaskId;
+    return mApplicationId;
 }
 
 /*!
- Sets icon mask id.
- \param maskId icon mask id.
+ Sets icon application id.
+ \param applicationId icon application id.
  */
-void CaIconDescriptionPrivate::setMaskId(int maskId)
+void CaIconDescriptionPrivate::setApplicationId(const QString &applicationId)
 {
-    mMaskId = maskId;
+    mApplicationId = applicationId;
 }
 
-/*!
- Returns skin major id.
- \retval skin major id.
- */
-int CaIconDescriptionPrivate::skinMajorId() const
-{
-    return mSkinMajorId;
-}
-
-/*!
- Sets skin major id.
- \param id skin major id.
- */
-void CaIconDescriptionPrivate::setSkinMajorId(int id)
-{
-    mSkinMajorId = id;
-}
-
-/*!
- Returns skin minor id.
- \retval skin minor id.
- */
-int CaIconDescriptionPrivate::skinMinorId() const
-{
-    return mSkinMinorId;
-}
-
-/*!
- Sets skin minor id.
- \param skin minor id.
- */
-void CaIconDescriptionPrivate::setSkinMinorId(int id)
-{
-    mSkinMinorId = id;
-}
 
 /*!
  Sets icon id.

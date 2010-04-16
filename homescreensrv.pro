@@ -23,6 +23,7 @@ SUBDIRS  += appfoundation \
             homescreensrv_plat \
             screensavermodel \
             bagetmodel \
+            activityfw \
             tsrc
 
 CONFIG += ordered

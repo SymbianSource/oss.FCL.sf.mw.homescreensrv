@@ -37,16 +37,11 @@ public:
     QString filename() const;
     void setFileName(const QString &fileName);
 
-    int bitmapId() const;
-    void setBitmapId(int bitmapId);
+    QString skinId() const;
+    void setSkinId(const QString &skinId);
 
-    int maskId() const;
-    void setMaskId(int maskId);
-
-    int skinMajorId() const;
-    void setSkinMajorId(int id);
-    int skinMinorId() const;
-    void setSkinMinorId(int id);
+    QString applicationId() const;
+    void setApplicationId(const QString &applicationId);
 
 private:
 
@@ -68,22 +63,12 @@ private:
     /*!
      *
      */
-    int mBitmapId;
+    QString mSkinId;
 
     /*!
      *
      */
-    int mMaskId;
-
-    /*!
-     *
-     */
-    int mSkinMajorId;
-
-    /*!
-     *
-     */
-    int mSkinMinorId;
+    QString mApplicationId;
 
 };
 

@@ -86,6 +86,36 @@ win32 {
                 $$PWD/homescreensrv_plat/homescreen_information_api/inc
 }
 
+plugin: !isEmpty(PLUGIN_SUBDIR): DESTDIR = $$OUTPUT_DIR/$$PLUGIN_SUBDIR
+
+win32: plugin { # copy manifiers
+    manifest.path = $$DESTDIR
+    manifest.files = ./resource/*.manifest ./resource/*.xml
+    manifest.CONFIG += no_build
+
+    INSTALLS += manifest
+    PRE_TARGETDEPS += install_manifest
+
+}
+
+symbian: plugin { # copy qtstub and manifest
+
+    pluginstub.sources = $${TARGET}.dll
+    pluginstub.path = $$PLUGIN_SUBDIR
+
+    DEPLOYMENT += pluginstub
+
+    qtplugins.path = $$PLUGIN_SUBDIR
+    qtplugins.sources += qmakepluginstubs/$${TARGET}.qtplugin
+
+    message(Remove "contains(MOBILITY, serviceframework)" after the QtSF refactorig is done!)
+        
+    !contains(MOBILITY, serviceframework):qtplugins.sources += resource/$${TARGET}.manifest
+    contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.xml z:$$qtplugins.path/$${TARGET}.xml"
+    
+    for(qtplugin, qtplugins.sources):BLD_INF_RULES.prj_exports += "./$$qtplugin z:$$qtplugins.path/$$basename(qtplugin)"
+}
+
 defineTest(exportResources) {
 symbian {
     for(subdirs, 1) {

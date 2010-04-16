@@ -49,6 +49,7 @@ public:
     void insert(int row, int id);
     void remove(int id);
     const int &operator[](int row) const;
+    QList<int> orderedIdList();
 
 private:
 

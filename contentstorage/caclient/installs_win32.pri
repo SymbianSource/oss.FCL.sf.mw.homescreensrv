@@ -16,7 +16,7 @@
 
 # take path from common.pri
 cadb.path = $$DESTDIR
-cadb.files = ./../castorage/data/castoragedb 
+cadb.files = ./../castorage/data/castorage.db 
 cadb.CONFIG += no_build
 
 INSTALLS += cadb

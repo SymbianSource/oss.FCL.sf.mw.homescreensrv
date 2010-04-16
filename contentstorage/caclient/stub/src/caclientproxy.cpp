@@ -36,7 +36,7 @@
 
 const char *DATABASE_CONNECTION_NAME = "CaService";
 const char *DATABASE_TYPE = "QSQLITE";
-const char *DATABASE_NAME = "castoragedb";
+const char *DATABASE_NAME = "castorage.db";
 
 static QSqlDatabase dbConnection()
 {
@@ -498,7 +498,7 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
         QSqlQuery query(db);
         query.prepare(
             "SELECT ENTRY_ID, EN_TEXT, EN_DESCRIPTION, EN_TYPE_NAME, EN_FLAGS, EN_ROLE, EN_UID,  \
-                  ICON_ID, IC_BITMAP_ID, IC_MASK_ID, IC_SKINMAJOR_ID, IC_SKINMINOR_ID, IC_FILENAME \
+                  ICON_ID, IC_FILENAME, IC_SKIN_ID, IC_APP_ID \
                   FROM CA_ENTRY LEFT JOIN CA_ICON ON EN_ICON_ID = ICON_ID WHERE ENTRY_ID = ?");
         query.addBindValue(i);
 
@@ -522,16 +522,13 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
             CaIconDescription icon;
             CaObjectAdapter::setId(icon,
                                    query.value(query.record().indexOf("ICON_ID")).toInt());
-            icon.setBitmapId(query.value(query.record().indexOf(
-                                             "IC_BITMAP_ID")).toInt());
-            icon.setMaskId(query.value(query.record().indexOf(
-                                           "IC_MASK_ID")).toInt());
-            icon.setSkinMajorId(query.value(query.record().indexOf(
-                                                "IC_SKINMAJOR_ID")).toInt());
-            icon.setSkinMinorId(query.value(query.record().indexOf(
-                                                "IC_SKINMINOR_ID")).toInt());
+
             icon.setFilename(query.value(query.record().indexOf(
                                              "IC_FILENAME")).toString());
+            icon.setSkinId(query.value(query.record().indexOf(
+                                             "IC_SKIN_ID")).toString());
+            icon.setApplicationId(query.value(query.record().indexOf(
+                                             "IC_APP_ID")).toString());
             entry->setIconDescription(icon);
 
             // attributes
@@ -608,7 +605,6 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
         whereStatement.append(" AND ").append(QString().setNum(
                 query.entryRoles())) .append(" | EN_ROLE == ").append(
                     QString().setNum(query.entryRoles()));
-    //TODO: by uid???
 
     if (query.entryTypeNames().count()) {
         whereStatement.append(" AND EN_TYPE_NAME IN (");
@@ -620,11 +616,48 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
         whereStatement.append(") ");
     }
 
+    QString whereAttributes;
+    if (query.attributes().count()) {
+        QMap<QString, QString> attributes = query.attributes();
+        QMapIterator<QString, QString> atrIt(attributes);
+        int j = 1;
+        while (atrIt.hasNext()) {
+            atrIt.next();
+
+            // at1.AT_NAME = 'Attribute_Name_1' AND at1.AT_VALUE = 'Attribute_VALUE_1'
+            whereAttributes.append(" AND ").append(
+            " at").append(QString().setNum(j)).append(".AT_NAME = \'").append(
+            atrIt.key()).append("\' ").append(
+            " AND ").append(
+            " at").append(QString().setNum(j)).append(".AT_VALUE = \'").append(
+            atrIt.value()).append("\' ");
+
+            j++;
+        }
+        whereStatement.append(whereAttributes);
+
+    }
+
+    whereStatement.append(" GROUP BY ENTRY_ID ");
+
+    QString leftJoins;
+    if (query.attributes().count()) {
+        for (int j=1; j<=query.attributes().count(); j++) {
+            // LEFT JOIN CA_ATTRIBUTE as at1 ON ENTRY_ID = at1.AT_ENTRY_ID
+            leftJoins.append(
+            " LEFT JOIN CA_ATTRIBUTE as at").append(QString().setNum(j)).append(
+            " ON ENTRY_ID = at").append(QString().setNum(j)).append(" .AT_ENTRY_ID ");
+        }
+    }
+
     QSqlQuery sqlquery(db);
     if (query.parentId() == 0) {
         // sort
-        QString queryString("SELECT ENTRY_ID from CA_ENTRY where 1=1 ");
+        QString queryString("SELECT ENTRY_ID from CA_ENTRY ");
+        queryString.append(leftJoins);
+        queryString.append(" where 1=1 ");
         queryString.append(whereStatement);
+
         modifyQueryForSortOrder(queryString, query, false);
         if (query.count() > 0)
             queryString.append(" LIMIT ").append(query.count());
@@ -639,11 +672,13 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
             }
         }
     } else {
-        QString
-        queryString(
-            "SELECT ENTRY_ID FROM CA_ENTRY \
-        LEFT JOIN CA_GROUP_ENTRY ON GE_ENTRY_ID = ENTRY_ID WHERE GE_GROUP_ID  = ? ");
-        queryString.append(whereStatement);
+
+        QString queryString("SELECT ENTRY_ID FROM CA_ENTRY ");
+        QString queryString2(" LEFT JOIN CA_GROUP_ENTRY ON GE_ENTRY_ID = ENTRY_ID WHERE GE_GROUP_ID  = ? ");
+        queryString2.append(whereStatement);
+        queryString.append(leftJoins);
+        queryString.append(queryString2);
+
         modifyQueryForSortOrder(queryString, query, true);
         if (query.count() > 0)
             queryString.append(" LIMIT ").append(query.count());
@@ -755,9 +790,9 @@ ErrorCode CaClientProxy::customSort(const QList<int> &entryIdList,
     return error;
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
         const CaQuery &query, bool parent) const
 {
@@ -805,28 +840,24 @@ void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
 
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
 {
     //set icon information into db
     QSqlQuery query(dbConnection());
     query.prepare(
-        "SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = :IC_FILENAME \
-            AND IC_BITMAP_ID = :IC_BITMAP_ID \
-            AND IC_MASK_ID = :IC_MASK_ID \
-            AND IC_SKINMAJOR_ID = :IC_SKINMAJOR_ID \
-            AND IC_SKINMINOR_ID = :IC_SKINMINOR_ID");
+        "SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = :IC_FILENAME"
+        " AND IC_SKIN_ID = :IC_SKIN_ID"
+        " AND IC_APP_ID = :IC_APP_ID");
     query.bindValue(":IC_FILENAME",
                     entryClone->iconDescription().filename());
-    query.bindValue(":IC_BITMAP_ID",
-                    entryClone->iconDescription().bitmapId());
-    query.bindValue(":IC_MASK_ID", entryClone->iconDescription().maskId());
-    query.bindValue(":IC_SKINMAJOR_ID",
-                    entryClone->iconDescription().skinMajorId());
-    query.bindValue(":IC_SKINMINOR_ID",
-                    entryClone->iconDescription().skinMinorId());
+    query.bindValue(":IC_SKIN_ID",
+                    entryClone->iconDescription().filename());
+    query.bindValue(":IC_APP_ID",
+                    entryClone->iconDescription().filename());
+
 
     bool success = query.exec();
     if (success && query.next()) {
@@ -834,19 +865,17 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
         int iconId = query.value(query.record().indexOf("ICON_ID")).toInt();
         qDebug() << "iconId = " << iconId;
         CaIconDescription iconDescription = entryClone->iconDescription();
-        if (iconId <= 0 && (iconDescription.filename() != ""
-                            || iconDescription.bitmapId() != 0 || iconDescription.maskId() != 0
-                            || iconDescription.skinMajorId() != 0
-                            || iconDescription.skinMinorId() != 0)) {
+        if (iconId <= 0
+            && (!iconDescription.filename().isEmpty()
+                || !iconDescription.skinId().isEmpty()
+                || !iconDescription.applicationId().isEmpty())) {
             query.prepare(
-                "INSERT INTO CA_ICON \
-                           (IC_FILENAME,IC_BITMAP_ID,IC_MASK_ID,IC_SKINMAJOR_ID,IC_SKINMINOR_ID) \
-                            VALUES ( ? , ? , ? , ? , ? )");
+                "INSERT INTO CA_ICON"
+                " (IC_FILENAME, IC_SKIN_ID, IC_APP_ID)"
+                " VALUES ( ? , ? , ? , ? , ? )");
             query.addBindValue(iconDescription.filename());
-            query.addBindValue(iconDescription.bitmapId());
-            query.addBindValue(iconDescription.maskId());
-            query.addBindValue(iconDescription.skinMajorId());
-            query.addBindValue(iconDescription.skinMinorId());
+            query.addBindValue(iconDescription.skinId());
+            query.addBindValue(iconDescription.applicationId());
             success = query.exec();
             qDebug() << query.executedQuery();
             iconId = query.lastInsertId().toInt();
@@ -857,9 +886,9 @@ bool CaClientProxy::setIconInDb(CaEntry *entryClone) const
     return success;
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 bool CaClientProxy::setEntryInDb(CaEntry *entryClone) const
 {
     QSqlQuery query(dbConnection());
@@ -911,9 +940,9 @@ bool CaClientProxy::setEntryInDb(CaEntry *entryClone) const
     return success;
 }
 
-/*!
- //TODO:
- */
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
 bool CaClientProxy::setAttributesInDb(CaEntry *entryClone) const
 {
     bool success = true;

@@ -231,10 +231,9 @@ void CaSqlQueryCreator::CreateAddIconQueryForNewL( CCaInnerEntry* aEntry,
         {
         // entry's icon data is not in DB
         if( ( aEntry->GetIcon().iFileName.Length() != 0 ) ||
-             ( aEntry->GetIcon().iBitmapId != 0 ) ||
-             ( aEntry->GetIcon().iMaskId != 0 ) ||
-             ( aEntry->GetIcon().iSkinMajorId != 0 ) ||
-             ( aEntry->GetIcon().iSkinMinorId != 0 ) )
+            ( aEntry->GetIcon().iSkinId.Length() != 0 ) ||
+            ( aEntry->GetIcon().iApplicationId.Length() != 0 )
+             )
             {
             // icon is not null, so that insert it to storage
             aQuery->SetQueryL( KSQLInsertToIcon );
@@ -269,13 +268,10 @@ void CaSqlQueryCreator::CreateAddIconQueryForUpdateL(CCaInnerEntry* aEntry,
     CCaInnerEntry::TIconAttributes iconAttributs;
     query->ExecuteL( iconAttributs );
     query->CloseStatement();
-    if( !( !iconAttributs.iFileName.Compare( aEntry->GetIcon().iFileName )
-            && ( iconAttributs.iBitmapId == aEntry->GetIcon().iBitmapId )
-            && ( iconAttributs.iMaskId == aEntry->GetIcon().iMaskId )
-            && ( iconAttributs.iSkinMajorId
-                    == aEntry->GetIcon().iSkinMajorId )
-            && ( iconAttributs.iSkinMinorId
-                    == aEntry->GetIcon().iSkinMinorId ) ) )
+    if( !(     !iconAttributs.iFileName.Compare( aEntry->GetIcon().iFileName )
+            && (!iconAttributs.iSkinId.Compare( aEntry->GetIcon().iSkinId ))
+            && (!iconAttributs.iApplicationId.Compare( aEntry->GetIcon().iApplicationId ))
+                    ) )
         {
         // entry's icon data is updated
         // if icon is used by another entry(s), new icon'll added to DB and
@@ -346,32 +342,18 @@ void CaSqlQueryCreator::CreateUpdateIconQueryL(
         query.Append( KSQLUpdateIconFileName );
         query.Append( KComma );
         }
-    if( aEntry->GetIcon().iBitmapId )
+    if( aEntry->GetIcon().iSkinId.Compare( KNullDesC ) )
         {
-        query.ReAllocL( query.Length() + KSQLUpdateIconBitmapId().Length()
+        query.ReAllocL( query.Length() + KSQLUpdateIconSkinId().Length()
                 + KComma().Length() );
-        query.Append( KSQLUpdateIconBitmapId );
+        query.Append( KSQLUpdateIconSkinId );
         query.Append( KComma );
         }
-    if( aEntry->GetIcon().iMaskId )
+     if( aEntry->GetIcon().iApplicationId.Compare(KNullDesC) )
         {
-        query.ReAllocL( query.Length() + KSQLUpdateIconMaskId().Length()
+        query.ReAllocL( query.Length() + KSQLUpdateIconAppId().Length()
                 + KComma().Length() );
-        query.Append( KSQLUpdateIconMaskId );
-        query.Append( KComma );
-        }
-    if( aEntry->GetIcon().iSkinMajorId )
-        {
-        query.ReAllocL( query.Length() + KSQLUpdateIconSkinMajorId().Length()
-                + KComma().Length() );
-        query.Append( KSQLUpdateIconSkinMajorId );
-        query.Append( KComma );
-        }
-    if( aEntry->GetIcon().iSkinMinorId )
-        {
-        query.ReAllocL( query.Length() + KSQLUpdateIconSkinMinorId().Length()
-                + KComma().Length() );
-        query.Append( KSQLUpdateIconSkinMinorId );
+        query.Append( KSQLUpdateIconAppId );
         }
     if( !query.Right( KComma().Length() ).Compare( KComma ) )
         {
@@ -686,26 +668,115 @@ void CaSqlQueryCreator::CreateGetEntriesQueryByQueryL(
                 &typeNameWhereStatement );
         CleanupStack::PopAndDestroy( &typeNameWhereStatement );
         }
+    
+    if( aQuery->GetAttributes().Count() )
+        {
+        RBuf whereAttributes;
+        whereAttributes.CleanupClosePushL();
+        whereAttributes.CreateL( KEmpty );
+        
+        for( TInt j=1; j <= aQuery->GetAttributes().Count(); j++ )
+            {
+            // at1.AT_NAME = 'Attribute_Name_1' AND at1.AT_VALUE = 'Attribute_VALUE_1'
+            TPtrC atrName( aQuery->GetAttributes().operator [](j-1)->Name() );
+            TPtrC atrValue( aQuery->GetAttributes().operator [](j-1)->Value() );
+
+            whereAttributes.ReAllocL( whereAttributes.Length() + 2 * KAnd().Length() + 
+                    4 * KSingleQuotes().Length() +
+                    2 * KMaxIntNumLength + 
+                    2 * KAt().Length() + 2 * KDot().Length() + 2 * KEqual().Length() +
+                    KColumnAttrName().Length() + KColumnAttrValue().Length() +
+                    atrName.Length() + atrValue.Length() );
+            
+            whereAttributes.Append( KAnd );
+            
+            whereAttributes.Append( KAt );
+            whereAttributes.AppendNum( j );
+            whereAttributes.Append( KDot );
+            whereAttributes.Append( KColumnAttrName );
+            whereAttributes.Append( KEqual );
+            whereAttributes.Append( KSingleQuotes );
+            whereAttributes.Append( atrName );
+            whereAttributes.Append( KSingleQuotes );
+            
+            whereAttributes.Append( KAnd );
+            
+            whereAttributes.Append( KAt );
+            whereAttributes.AppendNum( j );
+            whereAttributes.Append( KDot );
+            whereAttributes.Append( KColumnAttrValue );
+            whereAttributes.Append( KEqual );
+            whereAttributes.Append( KSingleQuotes );
+            whereAttributes.Append( atrValue );
+            whereAttributes.Append( KSingleQuotes );
+            
+            }
+        
+        whereStatement.ReAllocL( whereStatement.Length() + whereAttributes.Length() );
+        whereStatement.Append( whereAttributes );
+        
+        CleanupStack::PopAndDestroy( &whereAttributes );
+        }
+
+    RBuf leftJoins;
+    leftJoins.CleanupClosePushL();
+    leftJoins.CreateL( KEmpty );
+    if( aQuery->GetAttributes().Count() )
+        {
+        for( TInt j=1; j <= aQuery->GetAttributes().Count(); j++ )
+            {
+            // LEFT JOIN CA_ATTRIBUTE as at1 ON ENTRY_ID = at1.AT_ENTRY_ID
+            leftJoins.ReAllocL( leftJoins.Length() + 
+                    KLeftJoinCaAttrubute1().Length() + KMaxIntNumLength +
+                    KLeftJoinCaAttrubute2().Length() + KMaxIntNumLength +
+                    KLeftJoinCaAttrubute3().Length()
+                    );
+            
+            leftJoins.Append( KLeftJoinCaAttrubute1 );
+            leftJoins.AppendNum( j );
+            leftJoins.Append( KLeftJoinCaAttrubute2 );
+            leftJoins.AppendNum( j );
+            leftJoins.Append( KLeftJoinCaAttrubute3 );
+            }
+        }
+    
+    
+    whereStatement.ReAllocL( whereStatement.Length() + 
+            KGroupBy().Length() + KColumnEntryId().Length() );
+    whereStatement.Append( KGroupBy );
+    whereStatement.Append( KColumnEntryId );
 
     TInt groupId = aQuery->GetParentId();
     RBuf query;
     query.CleanupClosePushL();
     if( groupId > 0 )
         {
-        query.CreateL( KSQLGetListByParentId().Length()
-                + whereStatement.Length() - 2 );
-        query.AppendFormat( KSQLGetListByParentId, &whereStatement );
+        RBuf getListByParentId2withWhere;
+        getListByParentId2withWhere.CleanupClosePushL();
+        getListByParentId2withWhere.CreateL( KSQLGetListByParentId2().Length() + whereStatement.Length() );
+        getListByParentId2withWhere.AppendFormat( KSQLGetListByParentId2, &whereStatement );
+        
+        query.ReAllocL( KSQLGetListByParentId1().Length() +  leftJoins.Length() +
+                getListByParentId2withWhere.Length() );
+        query.Append( KSQLGetListByParentId1 );
+        query.Append( leftJoins );
+        query.Append( getListByParentId2withWhere );
+        CleanupStack::PopAndDestroy( &getListByParentId2withWhere );
         }
     else
         {
-        query.CreateL( KSQLGetList().Length() );
-        query.Append( KSQLGetList );
+        query.CreateL( KSQLGetList1().Length() );
+        query.Append( KSQLGetList1 );
+        query.ReAllocL( query.Length() + leftJoins.Length() + KSQLGetList2().Length() );
+        query.Append( leftJoins );
+        query.Append( KSQLGetList2 );
         if( whereStatement.Length() >= KAnd().Length() )
             {
             TPtrC ptrWhereStatement( whereStatement.Right(
                     whereStatement.Length() - KAnd().Length() ) );
-            query.ReAllocL( KSQLGetList().Length() + KWhere().Length()
+            query.ReAllocL( query.Length() +  KWhere().Length()
                     + ptrWhereStatement.Length() );
+
             query.Append( KWhere );
             query.Append( ptrWhereStatement );
             }
@@ -725,6 +796,7 @@ void CaSqlQueryCreator::CreateGetEntriesQueryByQueryL(
 
     aSqlQuery->SetQueryL( query );
     CleanupStack::PopAndDestroy( &query );
+    CleanupStack::PopAndDestroy( &leftJoins );
     CleanupStack::PopAndDestroy( &whereStatement );
     }
 
@@ -962,10 +1034,9 @@ TBool CaSqlQueryCreator::CreateOrganizeQueryL(
 CaSqlQueryCreator::TIconType CaSqlQueryCreator::CheckIconType( const CCaInnerEntry* aEntry )
     {
     CaSqlQueryCreator::TIconType iconType;
-    if( aEntry->GetIcon().iBitmapId == 0 &&
-        aEntry->GetIcon().iMaskId == 0 &&
-        aEntry->GetIcon().iSkinMajorId == 0 &&
-        aEntry->GetIcon().iSkinMinorId == 0 &&
+    if( 
+        aEntry->GetIcon().iApplicationId.Length() == 0 &&
+        aEntry->GetIcon().iSkinId.Length() == 0 &&
         aEntry->GetIcon().iFileName.Length() == 0 )
         {
         if( aEntry->GetIconId() > 0 )

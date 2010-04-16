@@ -24,6 +24,7 @@
 #include <driveinfo.h>
 
 // CONSTANTS
+_LIT(KAttrWidgetPath, "widget:path");
 _LIT(KAttrWidgetLibrary, "widget:library");
 _LIT(KAttrWidgetUri, "widget:uri");
 _LIT(KSlash, "/");

@@ -272,7 +272,7 @@ void CCaWidgetStorageHandler::SetMissingFlagL(
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
     entry->SetFlags( entry->GetFlags() | EMissing );
-    if(aWidget->IsUsed())
+    if( aWidget->IsUsed() )
         {
         entry->SetFlags( entry->GetFlags() | EUsed );
         }

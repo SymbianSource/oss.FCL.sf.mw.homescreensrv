@@ -99,10 +99,7 @@ void CCaLocalizerScannerProxy::PerformL()
     {
     QString locale = QLocale::system().name();
     QString filename = QString( "contentstorage_" ) + locale;
-    if( !LoadTranslator( filename ) )
-        {
-        //User::Leave(KErrNotFound); TODO what here
-        }
+    LoadTranslator( filename );
     TPtrC ptrLocale( reinterpret_cast<const TText*>( locale.constData() ) );
     TBuf<KCaMaxAttrNameLen> propertyValue;
     // trap is here to assure deletion of qtranslator in case code leaves
@@ -175,6 +172,7 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
         	locals[i]->SetLocalizedStringL( locals[i]->GetStringId() );  
         	}
         iStorageProxy->LocalizeEntryL( *( locals[i] ) );
+        delete[] temp;
         }
     CleanupStack::PopAndDestroy( &localizedName );
     CleanupStack::PopAndDestroy( &locals );

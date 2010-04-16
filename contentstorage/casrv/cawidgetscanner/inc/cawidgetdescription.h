@@ -108,6 +108,18 @@ public:
     void SetLibraryL( const TDesC& aLibrary );
 
     /*
+     * Path setter
+     * @param aLibrary widget library
+     */
+    void SetPathL( const TDesC& aPath );
+    
+    /*
+     * Path getter
+     * @return widget library
+     */
+    TPtrC GetPath( ) const;
+    
+    /*
      * Missing flag setter
      * @param aMissing flag
      */
@@ -264,7 +276,11 @@ private:
      */
     RBuf iIconUri;
 
-
+    /*
+     * Widget library. Own
+     */
+    RBuf iPath;
+    
     /*
      * Widget library. Own
      */

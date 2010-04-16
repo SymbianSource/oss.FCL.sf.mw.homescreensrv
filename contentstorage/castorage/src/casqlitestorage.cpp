@@ -23,6 +23,8 @@
 #include "cainnerquery.h"
 #include "caarraycleanup.inl"
 #include "calocalizationentry.h"
+#include "cainternaltypes.h"
+#include "cadef.h"
 
 // ---------------------------------------------------------------------------
 // CCASqLiteStorage::CCpStorageEngine()
@@ -50,11 +52,24 @@ void CCaSqLiteStorage::ConstructL()
 
     User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDrive, KCDrive,
             KNullDesC ) );
+    
 
     if( iSqlDb.Open( iPrivatePathCDriveDb, &KSqlDbConfig ) )
         {
         //we could not load data base from C-drive lets try Rom
         LoadDataBaseFromRomL();
+        }
+    else
+        {
+        TBuf<KCaMaxAttrNameLen> versionValue;
+        DbPropertyL(KCaDbPropVersion, versionValue);
+        ASSERT(versionValue.Length()>0);
+        if( versionValue.CompareC( KCaDbVersion ) )
+            {
+            // database loaded from C: is obsolete, load from Z:
+            iSqlDb.Close();
+            LoadDataBaseFromRomL();
+            }
         }
     }
 
@@ -74,7 +89,7 @@ void CCaSqLiteStorage::LoadDataBaseFromRomL()
 
     if( !( BaflUtils::FileExists( iRfs, iPrivatePathZDriveDb ) ) )
         {
-        User::Panic( _L("fatal error - castoragedb not exists in ROM"),
+        User::Panic( _L("fatal error - castorage.db not exists in ROM"),
                 KErrNotFound );
         }
     else
@@ -184,6 +199,7 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
                 CCaSqlQuery::EAttribute );
         CleanupStack::PopAndDestroy( sqlGetAttributesQuery );
         }
+    
     //  set entries if proper order if they were fetched by ids
     if( aQuery->GetIds().Count() > 0 )
         {
@@ -229,6 +245,7 @@ void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
     sqlGetEntriesIdsQuery->ExecuteL( aResultIdArray,
             CCaSqlQuery::EEntryTable );
     CleanupStack::PopAndDestroy( sqlGetEntriesIdsQuery );
+
     }
 
 // ---------------------------------------------------------------------------
@@ -799,7 +816,6 @@ void CCaSqLiteStorage::VerifyOrganizeParamsL( const RArray<TInt>& aEntryIds,
         case TCaOperationParams::EAppend:
         default:
             {
-            //            TODO: do nothing when default
             break;
             }
         }

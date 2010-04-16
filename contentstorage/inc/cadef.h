@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.4 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.7 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -21,6 +21,12 @@
 
 #include <e32base.h>
 #include "cainternaltypes.h"
+
+
+// database version
+_LIT( KCaDbVersion, "00001" ); 
+
+
 
 // ---------------------------------------------------------
 //Ca constants
@@ -62,6 +68,7 @@ _LIT( KCaAttrWindowGroupId, "window_group_id" );
 _LIT( KCaTypeCollectionDownload, "collection::downloaded" );
 _LIT( KCaPackageUid,"packageuid");
 _LIT( KCaAttrInstallationTime, "installationTime");
+_LIT( KCaTypeTemplatedApp, "templatedApplication" );
 
 const TInt KGranularityOne = 1;
 const TInt KUidChars = 10;
@@ -88,7 +95,7 @@ const TUid KHsAppUid =
     {
     0x20022F35
     };
-
+    
 const TInt KCenRepBufferSize = 255;
 //
 // Attributes commonly used for all items.

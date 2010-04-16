@@ -28,34 +28,8 @@
 #include "camenuiconutility.h"
 #include "caarraycleanup.inl"
 #include "casathandler.h"
-// Constants
-_LIT( KMifIconPath, "\\resource\\apps\\" );
-const TUint32 KMifIconPathLenght = 18;
 
 // ================= LOCAL FUNCTIONS ========================
-
-
-// ---------------------------------------------------------
-// ParseIconFilePathL
-// ---------------------------------------------------------
-//
-
-LOCAL_C void ParseIconFilePathL( const TDesC& aIconFilePath,
-        RBuf& aIconFilePathBuf )
-    {
-    TParsePtrC fileParsePtrC( aIconFilePath );
-    if( !fileParsePtrC.PathPresent() )
-        {
-        aIconFilePathBuf.CreateL( KMifIconPathLenght
-                + aIconFilePath.Length() );
-        aIconFilePathBuf.Append( KMifIconPath );
-        }
-    else
-        {
-        aIconFilePathBuf.CreateL( aIconFilePath.Length() );
-        }
-    aIconFilePathBuf.Append( aIconFilePath );
-    }
 
 // ---------------------------------------------------------
 // LoadSkinL
@@ -119,32 +93,6 @@ LOCAL_C CAknIcon* GetAppSkinL( TUid& aAppUid )
     return icon;
     }
 
-// ---------------------------------------------------------
-// GetIconL
-// ---------------------------------------------------------
-//
-LOCAL_C CAknIcon* GetIconL( TFileName aFilename, int aBitmapId, int aMaskId )
-    {
-    CAknIcon* icon = NULL;
-    if( aFilename.Length() > 0 && aBitmapId >= 0 && aMaskId >= 0 )
-        {
-        CFbsBitmap* bitmap( 0 );
-        CFbsBitmap* mask( 0 );
-
-        RBuf pathBuf;
-        pathBuf.CleanupClosePushL();
-        ParseIconFilePathL( aFilename, pathBuf );
-
-        AknIconUtils::CreateIconLC( bitmap, mask, pathBuf, aBitmapId,
-                aMaskId );
-        icon = CAknIcon::NewL();
-        icon->SetBitmap( bitmap );
-        icon->SetMask( mask );
-        CleanupStack::Pop( 2 );
-        CleanupStack::PopAndDestroy( &pathBuf );
-        }
-    return icon;
-    }
 
 // ---------------------------------------------------------
 // GetDefaultSkinL
@@ -191,6 +139,20 @@ LOCAL_C CAknIcon* GetDefaultSkinL( const CCaInnerEntry &aItem )
         icon = GetSkinL( KAknsIIDQgnIndiBrowserTbFeeds.iMajor,
                 KAknsIIDQgnIndiBrowserTbFeeds.iMinor );
         }
+    else if( aItem.GetEntryTypeName().Compare( KCaTypeTemplatedApp ) == KErrNone )
+        {
+        TInt uid;
+        TLex lex (aItem.GetIcon().iApplicationId);
+        lex.Val(uid);
+        TUid appUid( TUid::Uid( uid ) );
+        icon = GetAppSkinL( appUid );
+        if( !icon )
+            {
+            icon = GetSkinL( KAknsIIDQgnMenuUnknownLst.iMajor,
+                    KAknsIIDQgnMenuUnknownLst.iMinor );
+            }
+        }
+    
     return icon;
     }
 
@@ -205,20 +167,6 @@ EXPORT_C CAknIcon* CaMenuIconUtility::GetItemIcon(
     {
     CAknIcon* icon = NULL;
     CCaInnerEntry::TIconAttributes iconAttributes( aEntry.GetIcon() );
-    // Try to get the skin of the item
-    TRAP_IGNORE(icon = GetSkinL( iconAttributes.iSkinMajorId,
-                iconAttributes.iSkinMinorId ) );
-    if( !icon )
-        {
-        // Try to get the icon of the item (skin failed)
-        TRAP_IGNORE( icon = GetIconL( iconAttributes.iFileName,
-                            iconAttributes.iBitmapId,
-                            iconAttributes.iMaskId ) );
-        if( !icon )
-            {
-            // Return a default (skin and icon failed)
-            TRAP_IGNORE( icon = GetDefaultSkinL( aEntry ) );
-            }
-        }
+    TRAP_IGNORE( icon = GetDefaultSkinL( aEntry ) );
     return icon;
     }

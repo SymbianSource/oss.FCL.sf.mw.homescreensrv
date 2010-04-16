@@ -35,8 +35,6 @@ const TInt KInputPosition1 = 0;
 const TInt KInputPosition2 = 1;
 const TInt KOutputPosition = 2;
 
-//TODO: move to another location so that server have access to it
-// Opcodes used in message passing between client and server
 enum TCaServerRequests
     {
     EContentArsenalGetList_GetSize = 100,

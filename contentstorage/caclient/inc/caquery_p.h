@@ -57,6 +57,11 @@ public:
     unsigned int count() const;
     void setCount(unsigned int count);
 
+    QMap<QString, QString> attributes() const;
+    QString attribute(const QString &name) const;
+    void setAttribute(const QString &name, const QString &value);
+    void removeAttribute(const QString &name);
+    
     void clear();
 
 private:
@@ -81,6 +86,8 @@ private:
     Qt::SortOrder mSortOrder;
 
     unsigned int mCount;
+
+    QMap<QString, QString> mAttributes;
 };
 
 #endif //CAQUERY_PRIVATE_H

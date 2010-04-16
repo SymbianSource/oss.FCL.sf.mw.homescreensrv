@@ -1,19 +1,3 @@
 EXPORTS
-	_ZN10CCaHandler12SupportsTypeERK7TDesC16 @ 1 NONAME
-	_ZN10CCaHandler14BaseConstructLEv @ 2 NONAME
-	_ZN10CCaHandler14HandleCommandLER13CCaInnerEntryRK6TDesC8 @ 3 NONAME
-	_ZN10CCaHandlerC1Ev @ 4 NONAME
-	_ZN10CCaHandlerC2Ev @ 5 NONAME
-	_ZN10CCaHandlerD0Ev @ 6 NONAME
-	_ZN10CCaHandlerD1Ev @ 7 NONAME
-	_ZN10CCaHandlerD2Ev @ 8 NONAME
-	_ZN16CCaHandlerEngine14HandleCommandLER13CCaInnerEntryRK6TDesC8 @ 9 NONAME
-	_ZN16CCaHandlerEngine4NewLEv @ 10 NONAME
-	_ZN16CCaHandlerEngine5NewLCEv @ 11 NONAME
-	_ZN16CCaHandlerEngineD0Ev @ 12 NONAME
-	_ZN16CCaHandlerEngineD1Ev @ 13 NONAME
-	_ZN16CCaHandlerEngineD2Ev @ 14 NONAME
-	_ZN17CaMenuIconUtility11GetItemIconERK13CCaInnerEntry @ 15 NONAME
-	_ZTI10CCaHandler @ 16 NONAME
-	_ZTV10CCaHandler @ 17 NONAME
+	_ZN17CaMenuIconUtility11GetItemIconERK13CCaInnerEntry @ 1 NONAME
 

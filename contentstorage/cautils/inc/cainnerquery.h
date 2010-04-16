@@ -19,6 +19,7 @@
 #define __CCAINNERQUERY_H__
 
 #include <e32base.h>
+#include "caentryattribute.h"
 
 //FORWARD DECLARATIONS
 class CDesC16ArrayFlat;
@@ -189,6 +190,20 @@ public:
      * @return The maximum amount of entries to be fetched.
      */
     IMPORT_C TUint GetCount() const;
+    
+    /**
+      * Adds attribute to query.
+      * @param aKey Attribute key.
+      * @param aValue Attribute value.
+      */
+     IMPORT_C void AddAttributeL( const TDesC& aKey, const TDesC& aValue );
+     
+     /**
+       * Get attributes array
+       * @return attributes array
+       */
+     IMPORT_C const RCaEntryAttrArray& GetAttributes() const;
+
 
 private:
 
@@ -249,6 +264,11 @@ private:
      * Number of entries to fetch
      */
     TUint iCount;
+    
+    /*
+     * Attributes array. Own
+     */
+    RCaEntryAttrArray iAttributes;
 
     };
 

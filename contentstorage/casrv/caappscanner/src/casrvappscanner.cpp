@@ -751,10 +751,10 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
         attrVal.CreateL( KCaMaxAttrValueLen );
         aEntry->FindAttribute( KCaAttrLongName, attrVal );
         if( attrVal.Compare( info.iCaption ) != KErrNone
-                || aEntry->GetText().Compare( info.iShortCaption )
+                || aEntry->GetText().Compare( info.iCaption )
                         != KErrNone )
             {
-            aEntry->SetTextL( info.iShortCaption );
+            aEntry->SetTextL( info.iCaption );
             aEntry->AddAttributeL( KCaAttrLongName, info.iCaption );
             changed = ETrue;
             }

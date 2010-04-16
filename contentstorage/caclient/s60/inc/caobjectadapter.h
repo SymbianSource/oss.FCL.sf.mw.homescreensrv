@@ -38,6 +38,7 @@ class CCaInnerNotifierFilter;
 class HbIcon;
 class CFbsBitmap;
 
+
 /**
  *  CaObjectAdapter
  *
@@ -73,22 +74,6 @@ public:
     static void convertL(
         const CaQuery &fromQuery,
         CCaInnerQuery &toQuery);
-
-    /**
-     * Wraps a QString internal buffer into TPtrC object.
-     * The returned object is valid until QString internal buffer changes
-     * or the object is destroyed.
-     * @param string QString.
-     * @return descriptor.
-     */
-    static const TPtrC convertToDescriptor(const QString &string);
-
-    /**
-     * Converts descriptor to QString.
-     * @param des descriptor.
-     * @return QString.
-     */
-    static QString convertToString(const TDesC &des);
 
     /**
      * Converts inner entry table to QList of pointers to entries.
@@ -154,21 +139,6 @@ public:
     static void convertL(
         const CaNotifierFilter &from,
         CCaInnerNotifierFilter &to);
-
-    /**
-     * @return  uid attribute name
-     */
-    static const QString &applicationUidAttributeName();
-
-    /**
-     * @return  attribute type name
-     */
-    static const QString &applicationEntryName();
-
-    /**
-     * @return  widget type name
-     */
-    static const QString &widgetEntryName();
 
     /**
      * Set entry id.
