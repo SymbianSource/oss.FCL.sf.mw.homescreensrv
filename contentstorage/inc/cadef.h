@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.7 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.12 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -57,11 +57,14 @@ enum TEntryFlag
     EMissing = 64
     };
 // Ca - Application
+
+_LIT( KCaTypeMenuCollections, "menucollections" );
 _LIT( KCaTypeFolder, "folder" );
 _LIT( KCaTypeCollection, "collection" );
 _LIT( KCaTypeApp, "application" );
 _LIT( KCaTypeWidget, "widget" );
 _LIT( KCaTypeUrl, "url" );
+_LIT( KCaTypePackage, "package" );
 _LIT( KCaAttrView, "view" ); ///< View.
 _LIT( KCaAttrUrl, "url" );
 _LIT( KCaAttrWindowGroupId, "window_group_id" );
@@ -69,6 +72,20 @@ _LIT( KCaTypeCollectionDownload, "collection::downloaded" );
 _LIT( KCaPackageUid,"packageuid");
 _LIT( KCaAttrInstallationTime, "installationTime");
 _LIT( KCaTypeTemplatedApp, "templatedApplication" );
+_LIT( KCaAttrAppType, "apptype");
+_LIT( KCaAttrAppTypeValueJava, "java");
+_LIT( KCaAttrAppTypeValueCWRT, "cwrt");
+_LIT( KCaAttrAppTypeValueNative, "native");
+_LIT( KCaAttrComponentId, "component_id" );
+_LIT( KCaAttrAppSettingsPlugin, "app_settings_plugin");
+// app settings plugin for java apps
+_LIT( KCaAttrJavaAppSettingsPluginValue,
+        "/resource/qt/plugins/appsettings/javaapplicationsettingsview.qtplugin");
+_LIT( KCaAttrAppWidgetUri, "widget:uri");
+_LIT( KCaAttrAppWidgetUriCWRTValue, "wrtwidgetuiplugin");
+_LIT( KCaAttrAppWidgetParamWebAppId, "widgetparam:webAppId");
+
+_LIT( KCaAppGroupName, "appgroup_name" );
 
 const TInt KGranularityOne = 1;
 const TInt KUidChars = 10;
@@ -95,7 +112,17 @@ const TUid KHsAppUid =
     {
     0x20022F35
     };
-    
+
+const TUid KMidletApplicationTypeUid = 
+    {
+    0x10210E26        
+    };
+
+const TUid KCWRTApplicationTypeUid = 
+    {
+    0x200267DC       
+    };
+
 const TInt KCenRepBufferSize = 255;
 //
 // Attributes commonly used for all items.

@@ -100,7 +100,7 @@ public:
     /**
      * Handle Install Event.
      * @since S60 v5.0
-     * @param aUid installed uid.
+     * @param aUid installed/uninstalled app uid.
      */
     void HandleInstallNotifyL( TInt aUid );
 
@@ -157,12 +157,39 @@ private:
      * @result id of download collection
      */
     TInt GetCollectionDownloadIdL();
+    
+    /**
+     * Gets collectionId of all collection
+     * @result id of all collection
+     */
+    TInt GetAllCollectionIdL();
 
     /**
      * Adds application entry to downloaded collection
      * @param aEntryId application entry id.
      */
     void AddEntryToDownloadedCollectionL( TInt aEntryId );
+    
+    /**
+     * Add application entry to predefined collection
+     * @param aEntry application entry.
+     * @param aUpdate is entry updated by a client
+     */
+    void AddEntryToPredefinedCollectionL( CCaInnerEntry* aEntry,
+            TBool aUpdate = EFalse );
+    
+    /**
+     * Create predefined collection
+     * @param aGroupName group name.
+     * @result id of new created collection
+     */
+    TInt CreatePredefinedCollectionL( const TDesC& aGroupName );
+    
+    /**
+     * Add collection to all collection.
+     * @param aCollectionId collection id to add.
+     */
+    void AddCollectionToAllCollectionL( TInt aCollectionId );
 
     /**
      * Removes application entry from downloaded collection
@@ -210,7 +237,7 @@ private:
      * @param aUid uid applications
      * @return ETrue if app is in rom
      */
-    TBool IsInRom( TInt aUid );
+    TBool IsInRomL( TInt aUid );
 
     /**
      * Get applications from AppArc
@@ -238,9 +265,9 @@ private:
      * contains applications
      */
     void RemoveSatAppL( RPointerArray<CCaInnerEntry>& aArray );
-    
+
     /**
-     * Ensure that HsApplicaiton is not visible: Add HsApplication 
+     * Ensure that HsApplicaiton is not visible: Add HsApplication
      * as hidden to CaStorage or remove HsApplication entry
      * from array (found in CaStorage).
      * @param aArray RPointerArray with CCaInnerEntries
@@ -298,7 +325,7 @@ private:
      * Removes app from storage.
      * @param aAppEntry app to remove.
      */
-    void CCaSrvAppScanner::RemoveAppL( CCaInnerEntry* aAppEntry );
+    void RemoveAppL( CCaInnerEntry* aAppEntry );
 
     /**
      * Adds flag objects(only one flag at time).
@@ -333,7 +360,7 @@ private:
      * @param aDefaultDrive drive type.
      * @return ETrue if app is installed on given drive type.
      */
-    TBool IsAppInDrive( const TUid aUid,
+    TBool IsAppInDriveL( const TUid aUid,
             const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
 
     /**
@@ -341,14 +368,14 @@ private:
      * @param aUid app uid.
      * @return ETrue if app is installed on MMC.
      */
-    TBool IsInMmc( const TUid aUid ) const;
+    TBool IsInMmcL( const TUid aUid ) const;
 
     /**
      * Check if application is installed on mass storage.
      * @param aUid app uid.
      * @return ETrue if app is installed on mass storage.
      */
-    TBool IsInMassStorage( const TUid aUid ) const;
+    TBool IsInMassStorageL( const TUid aUid ) const;
 
     /**
      * Check if drive's status is EDriveInUse.
@@ -383,6 +410,17 @@ private:
      * Notifys storage abaut updated apps
      */
     void InstallationNotifyL();
+    
+    /**
+     * Make not empty collections with not hidden apps visible.
+     */
+    void MakeNotEmptyCollectionsVisibleL();
+    
+    /**
+     * Make collection visible if has visible entry.
+     * @param aEntry application entry
+     */
+    void MakeCollectionVisibleIfHasVisibleEntryL( CCaInnerEntry* aEntry );
 
 private:
     // data
@@ -398,6 +436,7 @@ private:
     RArray<TInt> iInstalledPackages;
 
     TInt iCollectionDownloadId;
+    TInt iAllCollectionId;
 CA_STORAGE_TEST_FRIEND_CLASS    (T_casrvAppScaner)
 
     };

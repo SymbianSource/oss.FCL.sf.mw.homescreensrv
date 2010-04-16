@@ -19,10 +19,12 @@
 #include "cahandler.h"
 #include "cahandlerproxy.h"
 #include "cahandlerloader.h"
+#include "cainnerentry.h"
+#include "caobjectadapter.h"
 
 /*!
     \class CaHandlerProxy
-    \ingroup 
+    \ingroup
     \brief Forwards execute request to an implemenation provided by specific handler loader.
 
     \sa CaHandlerLoader
@@ -60,9 +62,15 @@ TInt CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName)
     TInt result = KErrNotFound;
 
     if (handler != NULL) {
-        result = handler->execute(entry, commandName);
+        QScopedPointer<CCaInnerEntry> innerEntry(NULL);
+        TRAP(result,
+            innerEntry.reset(CCaInnerEntry::NewL());
+            CaObjectAdapter::convertL(entry, *innerEntry);
+            )
+        if (result == KErrNone) {
+            result = handler->execute(*innerEntry, commandName);
+        }
     }
-
     return result;
 }
 

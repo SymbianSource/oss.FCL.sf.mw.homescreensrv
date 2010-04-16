@@ -44,6 +44,13 @@ SOURCES   += s60/src/main.cpp \
              s60/src/hsactivityserver_p.cpp \
 			 s60/src/hsactivitysession_p.cpp
 
+LIBS += -lcone -lavkon -leikcore -leiksrv -lapparc -lws32 -lapgrfx
+             
 TARGET.CAPABILITY = ALL -TCB
+
+myrssrules = \
+"hidden = KAppIsHidden;"
+RSS_RULES += myrssrules
+    
 }
 

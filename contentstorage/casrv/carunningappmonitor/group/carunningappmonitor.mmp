@@ -39,7 +39,6 @@ USERINCLUDE     ../../casrvmgr/inc
 USERINCLUDE     ../../../inc
 USERINCLUDE     ../../../srvinc
 USERINCLUDE     ../../../cautils/inc
-USERINCLUDE     ../../../domain/menu_content_service_api/inc
 
 APP_LAYER_SYSTEMINCLUDE
 

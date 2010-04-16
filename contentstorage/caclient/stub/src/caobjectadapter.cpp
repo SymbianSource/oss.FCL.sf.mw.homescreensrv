@@ -33,9 +33,10 @@ HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
     QString filename(entry.iconDescription().filename());
     if (!filename.isEmpty()) {
         icon = HbIcon(filename);
+        //icon.addBadge( Qt::AlignTop | Qt::AlignRight,  HbIcon("qtg_small_hs_widget"));
     }
     if (icon.isNull() || !(icon.size().isValid())) {
-        icon = HbIcon(QDir(".").absoluteFilePath("resource/application.png"));
+        icon = HbIcon("qtg_large_application");
     }
     return icon;
 }

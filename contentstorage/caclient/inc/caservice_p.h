@@ -35,11 +35,11 @@ public:
     explicit CaServicePrivate(CaService *servicePublic);
     ~CaServicePrivate();
 
-    QList<CaEntry *> getEntries(const QList<int> &entryIdList) const;
-    QList<CaEntry *> getEntries(const CaQuery &query) const;
+    QList< QSharedPointer<CaEntry> > getEntries(const QList<int> &entryIdList) const;
+    QList< QSharedPointer<CaEntry> > getEntries(const CaQuery &query) const;
     QList<int> getEntryIds(const CaQuery &query) const;
 
-    CaEntry *createEntry(const CaEntry &entry);
+    QSharedPointer<CaEntry> createEntry(const CaEntry &entry);
 
     bool removeEntries(const QList<int> &entryIdList);
 

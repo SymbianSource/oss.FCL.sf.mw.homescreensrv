@@ -22,16 +22,16 @@
 #include <casrvplugin.h>
 #include <f32file.h>
 #include "cawidgetdescription.h"
-#include "cawidgetmmcwatcher.h"
+#include "cammcwatcher.h"
 
 class TPluginParams;
 class CCaWidgetScannerParser;
 class CCaWidgetScannerInstallNotifier;
 class CCaWidgetStorageHandler;
 
-class CCaWidgetScannerPlugin : public CCaSrvPlugin, MWidgetMmcWatcherCallback
+class CCaWidgetScannerPlugin : public CCaSrvPlugin, MMmcWatcherCallback
     {
-    
+
 public:
     // Constructors and destructor
 
@@ -45,7 +45,7 @@ public:
      * C++ destructor
      */
     ~CCaWidgetScannerPlugin();
-    
+
     /**
      * SynchronizeL
      */
@@ -53,12 +53,12 @@ public:
 
 private:
 //from MWidgetMmcWatcherCallback
-    
+
     /**
      * MmcChangeL is called when the MMC is removed or inserted.
      */
     void MmcChangeL();
-    
+
 private:
 
     /**
@@ -72,7 +72,7 @@ private:
     void ConstructL( TPluginParams* aPluginParams );
 
 private:
-   
+
     /**
      * File session. Own
      */
@@ -92,12 +92,12 @@ private:
      * Content Storage Handler. Own.
      */
     CCaWidgetStorageHandler* iStorageHandler;
-    
+
     /**
      * Mmc watcher. Own.
      */
-    CCaWidgetMmcWatcher* iMmcWatcher;
-    
+    CCaMmcWatcher* iMmcWatcher;
+
     };
 
 #endif      // C_CAWIDGETSCANNERPLUGIN_H

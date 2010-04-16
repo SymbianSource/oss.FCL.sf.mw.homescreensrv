@@ -19,8 +19,6 @@ CONFIG += hb mobility
 HB = hbcore
 
 MOBILITY = serviceframework
-# temporary solution to solve problems with SF in MW dependency
-qtAddLibrary(QtServiceFramework)
 
 DEFINES += CACLIENT_LIB
 
@@ -44,17 +42,20 @@ INCLUDEPATH += \
              ../extinc \
              ../inc
 
-LIBS += -lcautils \
-        -lcaextendedmenu \
+LIBS += -lavkon \
+        -lcautils \
         -lestor \
         -lbafl \
         -laknicon \
         -lcharconv \
         -lfbscli \
         -lbitgdi \
-        -lxqutils
+        -lxqutils \
+        -lsif \
+        -lscrclient \
+        -laknicon
+
 include(caclient_s60.pri)
-include(cahandler.pri)
 }
 
 win32: {

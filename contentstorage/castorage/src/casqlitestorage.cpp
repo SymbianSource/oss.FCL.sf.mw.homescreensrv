@@ -500,12 +500,12 @@ void CCaSqLiteStorage::ExecuteAddL( CCaInnerEntry* aEntry,
             {
             //check if icon exists - just update
             CCaSqlQuery* query = CCaSqlQuery::NewLC( iSqlDb );
-            query->SetQueryL( KSQLGetIconId );
+            CaSqlQueryCreator::CreateFindIconQueryL(aEntry, query);
             query->SetTableType( CCaSqlQuery::EIconTable );
             query->PrepareL();
             query->BindValuesForGetIconL( aEntry );
-            CCaInnerEntry::TIconAttributes iconAttributes;
-            TInt countIcons = query->ExecuteL( iconAttributes );
+            TInt idIcon( 0 );
+            query->ExecuteL( idIcon );
             CleanupStack::PopAndDestroy( query );
 
             aSqlQuery[i]->PrepareL();
@@ -513,11 +513,10 @@ void CCaSqLiteStorage::ExecuteAddL( CCaInnerEntry* aEntry,
             TInt tmpId( 0 );
             TRAPD( err, tmpId = aSqlQuery[i]->ExecuteL() );
             aSqlQuery[i]->CloseStatement();
-            if( !countIcons && !aEntry->GetIconId() )
+            if( !idIcon && !aEntry->GetIconId() )
                 { // new icon added
                 aEntry->SetIconId( tmpId );
                 }
-
             if( err == KSqlErrConstraint )
                 {
                 // ignore, this means that the icon cannot be removed

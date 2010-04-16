@@ -23,6 +23,8 @@
 #include <e32property.h>
 #include "castorage_global.h"
 
+class CNotifierStrategy;
+
 /**
  * Interface for updating after installer events.
  *
@@ -37,7 +39,7 @@ public:
      * Pure virtual method.
      * @param aEvent event type.
      */
-    virtual void HandleInstallNotifyL( TInt aEvent ) = 0;
+    virtual void HandleInstallNotifyL(TInt aEvent) = 0;
     };
 
 /**
@@ -45,43 +47,24 @@ public:
  *
  *  @since S60 v5.0
  */
-NONSHARABLE_CLASS( CCaInstallNotifier ): public CActive
+NONSHARABLE_CLASS( CCaInstallNotifier ) : public CActive
     {
 
 public:
-
-    /**
-     * Enum defining the operation type.
-     */
-    enum TInstOp
-        {
-        EInstOpNone = 0x00000000,
-        EInstOpInstall = 0x00000001,
-        EInstOpUninstall = 0x00000002,
-        EInstOpRestore = 0x00000004
-        };
-
-    /**
-     * Enum defining the operation status.
-     */
-    enum TInstOpStatus
-        {
-        EInstOpStatusNone = 0x00000000,
-        EInstOpStatusSuccess = 0x00000100,
-        EInstOpStatusAborted = 0x00000200
-        };
 
     /**
      * Enum defining notification type.
      */
     enum TNotificationType
         {
-        ENoNotification = 0x00000000,
-        ESisInstallNotification = KUidSwiLatestInstallation, ///< installation notification
+        ENoNotification,            ///< No notification.
+        ESisInstallNotification,    ///< System installation notification.
+        EJavaInstallNotification,   ///< Java instalation and uninstallation notification.
+        EUsifUninstallNotification, ///< Usif's uninstalation notification.
         };
 
     /**
-     * Creates an instance of CCaInstallNotifier implementation.
+     * Creates an instance of CCaInstallNotifier.
      * @param aNotifier Reference to notifier interface.
      * @param aNotificationType Notification type.
      */
@@ -99,14 +82,13 @@ private:
      * Constructor.
      * @param aNotifier Reference to notifier interface.
      */
-    CCaInstallNotifier( MCaInstallListener& aListener,
-            TNotificationType aNotificationType );
+    CCaInstallNotifier( MCaInstallListener& aListener );
 
     /**
      * Symbian 2nd phase constructor.
      * @param aNotificationType Notification type.
      */
-    void ConstructL();
+    void ConstructL( TNotificationType aNotificationType );
 
     /**
      * From CActive.
@@ -138,9 +120,9 @@ private:
     MCaInstallListener& iListener;
 
     /*
-     * Notification type.
+     * Notification strategy.
      */
-    TInt iRPropertyKey;
+    CNotifierStrategy* iNotifierStrategy;
 
     };
 

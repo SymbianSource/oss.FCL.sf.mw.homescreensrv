@@ -52,3 +52,4 @@ LIBRARY     scrclient.lib
 LIBRARY     cautils.lib
 LIBRARY     camenu.lib
 LIBRARY     bafl.lib
+LIBRARY     efsrv.lib

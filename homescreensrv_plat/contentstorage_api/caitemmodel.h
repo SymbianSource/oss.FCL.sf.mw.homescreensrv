@@ -47,8 +47,8 @@ public:
         ParentIdRole,
         TypeRole,
         FlagsRole,
-        TextRole//contains title represented as QString,
-                //convinient for operations such as search
+        TextRole,//contains title represented as QString,
+        FullTextRole //'title description' convinient for operations such as search
     };
 
     // Function declarations
@@ -75,7 +75,7 @@ public:
     void setParentId(int parentId);
     void setFlagsOn(const EntryFlags &onFlags);
     void setFlagsOff(const EntryFlags &offFlags);
-    CaEntry* entry(const QModelIndex &index) const;
+    QSharedPointer<CaEntry> entry(const QModelIndex &index) const;
 
     signals:
 

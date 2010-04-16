@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -32,23 +32,23 @@ public:
      * Constructor
      * @param storage - reference to initialized activity storage
      */
-    HsActivityServer(HsActivityDbClientInterface& storage);
-    
+    HsActivityServer(HsActivityDbClientInterface &storage);
+
     /**
      * Destructor
      */
     ~HsActivityServer();
-    
+
     /**
      * Function establish server and initialize listening proces
-     * @return true on succees, false otherwise 
+     * @return true on succees, false otherwise
      */
     bool start();
 private:
     /**
      * Private server implementation
      */
-    HsActivityServerPrivate* d_ptr;
+    HsActivityServerPrivate *d_ptr;
 };
 
 #endif //HSACTIVITYSERVER_H

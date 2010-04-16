@@ -24,6 +24,8 @@
 #include <usif/scr/scr.h>
 
 #include "casrvplugin.h"
+#include "cainstallnotifier.h"
+#include "cammcwatcher.h"
 
 class CCaStorageProxy;
 class CCaInnerEntry;
@@ -33,45 +35,166 @@ using namespace Usif;
 /*
  An implementation of the CCaSrvPlugin interface for the Reference Installer.
 
- The CaSrvManager loads and uses this plug-in when the MIME type of a package is 'binary/sif-refpkg'.
+ The CaSrvManager loads and uses this plug-in when the MIME type of a package
+ is 'binary/sif-refpkg'.
  */
-NONSHARABLE_CLASS(CCaUsifScanner): public CCaSrvPlugin
+NONSHARABLE_CLASS(CCaUsifScanner): public CCaSrvPlugin,
+        public MCaInstallListener, public MMmcWatcherCallback
     {
 public:
+
+    /**
+     * Two-phased constructor.
+     * @param aPLuginParam plugin param consist of storage, storage utils.
+     * @retval New object.
+     */
     static CCaUsifScanner* NewL( TPluginParams* aPluginParams );
+
+    /**
+     * Destructor.
+     */
     ~CCaUsifScanner();
 
-    void InstallL( const TDesC& aFileName );
+    /**
+     * Installs application.
+     * @param aFileName File name to be installed.
+     */
+    //    void InstallL( const TDesC& aFileName );
+
+public:
+    // from MCaInstallListener
+
+    /**
+     * Handle Install/Uninstall Event.
+     * @since S60 v5.0
+     * @param aUid installed uid.
+     */
+    void HandleInstallNotifyL( TInt aUid );
+
+    /**
+     * MmcChangeL is called when the MMC is removed or inserted.
+     */
+    void MmcChangeL();
 
 private:
+
+    /**
+     * Constructor
+     * @param aStorageProxy Storage handler.
+     */
     CCaUsifScanner( CCaStorageProxy& aStorageProxy );
+
+    /**
+     * Second phased constructor.
+     */
     void ConstructL();
+
+    /**
+     * Copy constructor.
+     */
     CCaUsifScanner( const CCaUsifScanner & );
+
+    /**
+     * Operator "=". Assigns new object.
+     *
+     */
     CCaUsifScanner& operator =( const CCaUsifScanner & );
 
-    void AddCollectionUsifL();
-    TInt GetCollectionUsifIdL();
-
+    /**
+     * Creates AppLib's entry from Usif's entry
+     * @param aEntry Usif entry obtained from Sif database.
+     * @param aCaEntry AppLib entry to be filled from Usif entry.
+     */
     void CreateCaEntryFromEntryL( const CComponentEntry* aEntry,
             CCaInnerEntry* aCaEntry );
 
-    void AddNativeAppsL();
+    /**
+     * Adds package to database. Scans Sif db and adds entries to AppLib db.
+     */
+    void AddPackageL();
 
-    void GetCaAppEntriesL( RPointerArray<CCaInnerEntry>& aArray );
+    /**
+     * Updates package in the database.
+     */
+    void UpdatePackagesL();
 
-    TInt AppExist( RPointerArray<CCaInnerEntry>& aArray,
-            CCaInnerEntry* aEntry );
+    /**
+     * Gets entries from AppLib story.
+     * @param aArray Array of entries to be obtained from db.
+     */
+    void GetCaPackageEntriesL( RPointerArray<CCaInnerEntry>& aArray );
+
+    /**
+     * Gets entries from Usif story.
+     * @param aArray Array of entries to be obtained from db.
+     */
+    void GetUsifPackageEntriesL( RPointerArray<CComponentEntry>& aArray );
+
+    /**
+     *  Checks if entry exists in AppLib db.
+     *  @param aArray Array of entries from AppLib db.
+     *  @param aEntry Entry data to be checked if exists.
+     *  @retval Returns array index if exists, otherwise KErrNotFound.
+     */
+    TInt PackageExistL( RPointerArray<CCaInnerEntry>& aArray,
+            const CComponentEntry* aEntry );
+
+    /**
+     *  Finds deleted entries from Usif. Updates aCaArray.
+     *  @param aCaArray Entries from AppLib db.
+     *  @param aUsifArray Entries from Usif db.
+     */
+    void FindDeletedEntriesL( RPointerArray<CCaInnerEntry>& aCaArray,
+            const RPointerArray<CComponentEntry>& aUsifArray );
+
+    /**
+     * Removes entries from db.
+     * @param aCaArray Entries to be removed.
+     */
+    void RemoveEntriesFromDbL( RPointerArray<CCaInnerEntry>& aCaArray );
+
+    /**
+     * Update usif list.
+     */
+    void UpdateUsifListL();
 
 private:
-    /*
+    /**
      * not own
+     * Storage proxy.
      */
     CCaStorageProxy& iStorageProxy;
 
-    /*
-     * Usif Collection id. Temporary solution.
+    /**
+     * Install notifier. Own.
      */
-    TInt iCollectionUsifId;
+    CCaInstallNotifier *iSystemInstallNotifier;
+
+    /**
+     * Uninstall notifier. Own.
+     */
+    CCaInstallNotifier *iUsifUninstallNotifier;
+
+    /**
+     * Install and uninstall notifier. Own.
+     */
+    CCaInstallNotifier *iJavaInstallNotifier;
+
+    /**
+     * File session. Own
+     */
+    RFs iFs;
+
+    /**
+     * Mmc watcher. Own.
+     */
+    CCaMmcWatcher* iMmcWatcher;
+
+    /**
+     * Software component registry. Own.
+     */
+    RSoftwareComponentRegistry iSoftwareRegistry;
+
     };
 
 #endif // CAUSIFSCANNER_H

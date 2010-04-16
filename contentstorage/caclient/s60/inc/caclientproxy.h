@@ -108,7 +108,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const QList<int> &entryIdList, QList<CaEntry *> &sourceList);
+    ErrorCode getData(const QList<int> &entryIdList, QList< QSharedPointer<CaEntry> > &sourceList);
 
     /**
      * Method for fetching entries.
@@ -117,7 +117,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const CaQuery &query, QList<CaEntry *> &sourceList);
+    ErrorCode getData(const CaQuery &query, QList< QSharedPointer<CaEntry> > &sourceList);
 
     /**
      * Method for fetching entries.
@@ -199,7 +199,7 @@ private:
      * @param sourceList list of entries.
      */
     void getDataL(const QList<int> &entryIdList,
-                  QList<CaEntry *> &sourceList);
+            QList< QSharedPointer<CaEntry> > &sourceList);
 
     /**
      * Method for fetching entries. Symbian specific.
@@ -207,7 +207,7 @@ private:
      * @param sourceList list of entries.
      */
     void getDataL(const CaQuery &query,
-                  QList<CaEntry *> &sourceList);
+            QList< QSharedPointer<CaEntry> > &sourceList);
 
     /**
      * Method for fetching entries. Symbian specific.

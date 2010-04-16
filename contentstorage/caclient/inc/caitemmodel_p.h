@@ -55,7 +55,7 @@ public:
     void setIconSize(const QSize &size);
     QSize getIconSize() const;
     QModelIndex root();
-    CaEntry *entry(const QModelIndex &modelIndex) const;
+    QSharedPointer<CaEntry> entry(const QModelIndex &modelIndex) const;
     void setSecondLineVisibility(bool secondLineVisibility);
     bool secondLineVisibility() const;
     QVariant displayRole(const QModelIndex &modelIndex) const;
@@ -75,7 +75,8 @@ private:
     void updateParentEntry();
     void updateItemData(int id);
     void addItem(int id);
-    void handleAddItems(QList<int> &itemsList);
+    void addItemBlock(const QList<int> &itemsList);
+    void handleAddItems(const QList<int> &itemsList);
     int itemRow(int id);
     void removeItem(int id);
     void removeItems(const QList<int> &itemsList);
@@ -94,7 +95,7 @@ private:
     // data
 
     CaItemModel *const m_q;
-    CaEntry *mParentEntry;//own
+    QSharedPointer<CaEntry> mParentEntry;
     CaQuery mQuery;
     QSharedPointer<CaService> mService;
     CaItemModelList mEntries;

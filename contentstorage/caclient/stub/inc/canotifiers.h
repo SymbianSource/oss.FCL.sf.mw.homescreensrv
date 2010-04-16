@@ -38,6 +38,8 @@ public:
 
     static void Notify(int groupId);
 
+    static void NotifyTouched(int id);
+
     static void Notify(const CaEntry &targetEntry,
                        ChangeType changeType,
                        QList<int> &parentIds);

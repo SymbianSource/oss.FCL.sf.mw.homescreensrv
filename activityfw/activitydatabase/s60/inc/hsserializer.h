@@ -11,30 +11,40 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef HSSERIALIZER_H
 #define HSSERIALIZER_H
 #include <qvariant.h>
+#include <qpixmap.h>
+/**
+ * Operator serialize QPixmap to RBuf8
+ */
+RBuf8 &operator <<(RBuf8 &dst, const QPixmap &src);
+
+/**
+ * Operator deserialize TDesc8 to QPixmap
+ */
+QPixmap &operator <<(QPixmap &dst, const TDesC8 &src);
 
 /**
  * Operator serialize VarinatHash to RBuf8
  */
-RBuf8& operator <<(RBuf8& dst, const QVariantHash& src);
+RBuf8 &operator <<(RBuf8 &dst, const QVariantHash &src);
 
 /**
  * Operator deserialize RBuf8 to VarinatHash
  */
-QVariantHash& operator <<(QVariantHash& dst, const TDesC8& src);
+QVariantHash &operator <<(QVariantHash &dst, const TDesC8 &src);
 
 /**
  * Operator serialize QList<QVariantHash> to RBuf8
  */
-RBuf8& operator <<(RBuf8& dst, const QList<QVariantHash>& src);
+RBuf8 &operator <<(RBuf8 &dst, const QList<QVariantHash>& src);
 
 /**
  * Operator deserialize RBuf8 to QList<QVariantHash>
  */
-QList<QVariantHash>& operator <<(QList<QVariantHash>& dst, const TDesC8& src); 
+QList<QVariantHash>& operator <<(QList<QVariantHash>& dst, const TDesC8 &src);
 #endif

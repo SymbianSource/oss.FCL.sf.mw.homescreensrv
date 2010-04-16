@@ -18,11 +18,15 @@
 #include <qservicemanager.h>
 #include <qservicefilter.h>
 #include <qserviceinterfacedescriptor.h>
-
+#include <XQConversions>
 #include <xqappmgr.h>
 
 #include "caentry.h"
 #include "catapphandler.h"
+#include "cainnerentry.h"
+#include "caclient_defines.h"
+
+_LIT(hsitemLaunchUri, "item:launchuri");
 
 QTM_USE_NAMESPACE
 
@@ -57,11 +61,15 @@ CaTappHandler::~CaTappHandler()
  \param command Description of the command.
  \return Error code described in QSERVICEMANAGER.H
  */
-int CaTappHandler::execute(const CaEntry& entry, const QString& command)
+int CaTappHandler::execute(CCaInnerEntry& innerEntry, const QString& command)
 {
     int error = 0; // this returns Error enum from QSERVICEMANAGER.H
     if (command == caCmdOpen) {
-        QUrl url(entry.attribute(hsitemLaunchUri)); // f.e. QUrl url ("application://101F7AE7?");       
+        TPtrC attribute;
+        innerEntry.FindAttribute(hsitemLaunchUri, attribute);
+
+        // e.g. QUrl url ("application://101F7AE7?");
+        QUrl url(QString::fromUtf16(attribute.Ptr(), attribute.Length()));
         QScopedPointer<XQAiwRequest> request(mAiwMgr->create(url, true));
         if (!request.isNull()) {
             bool res = request->send();

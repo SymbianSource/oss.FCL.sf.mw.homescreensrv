@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYDATASTORAGE_H
@@ -20,23 +20,23 @@
 #include <QVariant>
 #include <QString>
 
-class ActivityDataStorage 
+class ActivityDataStorage
 {
-  
+
 public:
     ActivityDataStorage();
     ~ActivityDataStorage();
-  
+
 public:
     bool addActivity(const QString &activityId, const QVariant &data);
     bool removeActivity(const QString &activityId);
     bool updateActivity(const QString &activityId, const QVariant &data);
     QVariant activityData(const QString &activityId) const;
-  
+
 private:
     bool checkTables();
     void recreateTables();
-    
+
 };
 
 #endif // ACTIVITYDATASTORAGE_H

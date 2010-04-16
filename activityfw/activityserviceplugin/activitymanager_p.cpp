@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #include "activitymanager_p.h"
@@ -40,7 +40,7 @@ QList<QVariantHash> ActivityManagerPrivate::activitiesList()
 }
 
 void ActivityManagerPrivate::launchActivity(const QString &uri)
-{ 
+{
     // @todo use the same parser as in HbApplicationPrivate (if possible)
     QRegExp uriMatcher("^appto://(.+)\\?activityname=(.+)$");
     if (uriMatcher.indexIn(uri) != -1) {
@@ -48,15 +48,14 @@ void ActivityManagerPrivate::launchActivity(const QString &uri)
         Q_ASSERT(list.count() == 3);
         launchActivity(list.at(1).toInt(), list.at(2));
     } else {
-        qWarning("Activity URI parsing error");    
+        qWarning("Activity URI parsing error");
     }
 }
 
 void ActivityManagerPrivate::launchActivity(int applicationId, const QString &activityId)
-{ 
-
+{
     ApplicationLauncher applicationLauncher;
-    if(applicationLauncher.isRunning(applicationId)) {
+    if (applicationLauncher.isRunning(applicationId)) {
         QVariantHash activity;
         activity.insert(ActivityApplicationKeyword, applicationId);
         activity.insert(ActivityActivityKeyword, activityId);
@@ -68,7 +67,7 @@ void ActivityManagerPrivate::launchActivity(int applicationId, const QString &ac
 }
 
 void ActivityManagerPrivate::removeActivity(int applicationId, const QString &activityId)
-{ 
+{
     QVariantHash activity;
     activity.insert(ActivityApplicationKeyword, applicationId);
     activity.insert(ActivityActivityKeyword, activityId);
@@ -80,4 +79,11 @@ void ActivityManagerPrivate::removeApplicationActivities(int applicationId)
     QVariantHash activity;
     activity.insert(ActivityApplicationKeyword, applicationId);
     mServerClient->removeApplicationActivities(activity);
+}
+
+void ActivityManagerPrivate::getThumbnail(const QString &thumbnailId, void *userData)
+{
+    QPixmap ico;
+    mServerClient->getThumbnail(ico, thumbnailId);
+    emit q_ptr->thumbnailReady(ico, userData);
 }

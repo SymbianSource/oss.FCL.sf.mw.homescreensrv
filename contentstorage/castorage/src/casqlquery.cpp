@@ -509,22 +509,22 @@ void CCaSqlQuery::BindValuesForGetIconL( const CCaInnerEntry* aEntry )
     if( iQuery.Find( KSQLIconId ) != KErrNotFound )
         {
         BindIntL(iStatement.ParameterIndex( KSQLIconId ),
-                aEntry->GetIcon().iId );
+                aEntry->Icon()->Id() );
         }
     if( iQuery.Find( KSQLIcFileName ) != KErrNotFound )
         {
         BindTextL( iStatement.ParameterIndex( KSQLIcFileName ),
-                aEntry->GetIcon().iFileName );
+                aEntry->Icon()->FileName() );
         }
     if( iQuery.Find( KSQLIcSkinId ) != KErrNotFound )
         {
         BindTextL( iStatement.ParameterIndex( KSQLIcSkinId ),
-                aEntry->GetIcon().iSkinId );
+                aEntry->Icon()->SkinId() );
         }
     if( iQuery.Find( KSQLIcAppId ) != KErrNotFound )
         {
         BindTextL( iStatement.ParameterIndex( KSQLIcAppId ),
-                aEntry->GetIcon().iApplicationId );
+                aEntry->Icon()->ApplicationId() );
         }
     }
 
@@ -853,24 +853,36 @@ TInt CCaSqlQuery::ExecuteL( RArray<TInt>& aResultIdArray,
 //
 // ---------------------------------------------------------------------------
 //
-TInt CCaSqlQuery::ExecuteL( CCaInnerEntry::TIconAttributes& aIconAttributes )
+TInt CCaSqlQuery::ExecuteL( CCaInnerIconDescription* aInnerIconDescription )
     {
     TInt columnCount( 0 );
+    
+   RBuf description;
+   description.CleanupClosePushL();
+   description.CreateL(KMaxFileName);
+    
     while( iStatement.Next() == KSqlAtRow )
         {
-        aIconAttributes.iId = iStatement.ColumnInt(
-                ColumnIndexL( iStatement, KColumnIconId ) );
+        aInnerIconDescription->SetId( iStatement.ColumnInt(
+                ColumnIndexL( iStatement, KColumnIconId ) ) );
         User::LeaveIfError(iStatement.ColumnText(
                 ColumnIndexL( iStatement, KColumnIcFileName),
-                aIconAttributes.iFileName));
+                description));
+        aInnerIconDescription->SetFileNameL(description);
+        
         User::LeaveIfError(iStatement.ColumnText(
                 ColumnIndexL( iStatement, KColumnIcSkinId),
-                aIconAttributes.iSkinId));       
+                description));
+        aInnerIconDescription->SetSkinIdL(description);
+        
         User::LeaveIfError(iStatement.ColumnText(
                 ColumnIndexL( iStatement, KColumnIcAppId),
-                aIconAttributes.iApplicationId));
+                description));
+        aInnerIconDescription->SetApplicationIdL(description);
+        
         columnCount++;
         }
+    CleanupStack::PopAndDestroy(&description);
     return columnCount;
     }
 

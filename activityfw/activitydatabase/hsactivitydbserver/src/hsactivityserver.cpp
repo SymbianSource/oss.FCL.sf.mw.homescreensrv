@@ -21,8 +21,8 @@
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityServer::HsActivityServer(HsActivityDbClientInterface& storage)
-:
+HsActivityServer::HsActivityServer(HsActivityDbClientInterface &storage)
+    :
     d_ptr(new HsActivityServerPrivate(storage))
 {
 }

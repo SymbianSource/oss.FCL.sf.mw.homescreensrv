@@ -20,15 +20,22 @@
 #include "hsactivityserver.h"
 #include "hsactivitystorage.h"
 
-
+#ifdef Q_OS_SYMBIAN
+#include <coemain.h>
+#include <coedef.h>
+#endif
 
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_SYMBIAN
+    CCoeEnv::Static()->RootWin().SetOrdinalPosition(0, ECoeWinPriorityNeverAtFront);
+#endif
+
     QCoreApplication app(argc, argv);
     HsActivityStorage storage;
     HsActivityServer server(storage);
     int retVal(KErrGeneral);
-    if( server.start() ){
+    if (server.start()) {
         retVal = app.exec();
     }
     return retVal;

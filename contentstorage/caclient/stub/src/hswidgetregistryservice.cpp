@@ -22,7 +22,6 @@
 #include "hswidgetregistryservice.h"
 #include "hswidgetregistryservice_p.h"
 #include "hswidgetprovidermanifest.h"
-#include "servicefinder.h"
 
 const char POSTERURI[] = "homescreen.nokia.com/widget/poster/";
 const char POSTERWIDGETNAME[] = "name";

@@ -47,7 +47,7 @@ public:
      * @param aAttrExists ETrue if attribute exist.
      * @param aAttrVal attribute value.
      */
-    TBool IsNative( const CCaInnerEntry& aEntry );
+    TBool IsNativeL( const CCaInnerEntry& aEntry );
 
 private:
 
@@ -61,7 +61,7 @@ private:
      * @param aAppUid applications uid
      * @param aIsNative ETrue if apppication is native
      */
-    void IsNative( TUid aAppUid, TBool& aIsNative );
+    void IsNativeL( TUid aAppUid, TBool& aIsNative );
 
 private:
     // Data

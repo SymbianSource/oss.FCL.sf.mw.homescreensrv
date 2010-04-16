@@ -19,14 +19,13 @@
 #include "hsactivityglobals.h"
 #include "hsserializer.h"
 #include <qglobal.h>
-
-const char ActivityPrimaryKeyFormat [] = "%1:%2";
+#include <qpixmap.h>
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-HsActivitySessionPrivate::HsActivitySessionPrivate(HsActivityDbClientInterface& storage)
-: mStorage(storage), mAppId(KErrNotFound)
+HsActivitySessionPrivate::HsActivitySessionPrivate(HsActivityDbClientInterface &storage)
+    : mStorage(storage), mAppId(KErrNotFound)
 {
 }
 
@@ -36,34 +35,56 @@ HsActivitySessionPrivate::HsActivitySessionPrivate(HsActivityDbClientInterface& 
 //
 HsActivitySessionPrivate::~HsActivitySessionPrivate()
 {
-	 CancelNotify();
-     mData.Close();
+    CancelNotify();
+    mData.Close();
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::ServiceL(const RMessage2& message)
+void HsActivitySessionPrivate::ServiceL(const RMessage2 &message)
 {
     mActivity.clear();
     mResult.clear();
     mName.clear();
-    
-    int errNo(KErrNone);
-    switch(message.Function()) {
-    case AddActivity: HandleAddActivityL(message); break;
-    case UpdateActivity: HandleUpdateActivityL(message); break;
-    case RemoveActivity: HandleRemoveActivityL(message); break;
-    case RemoveApplicationActivities: HandleRemoveApplicationActivitiesL(message); break;
-    case Activities: HandleActivitiesL(message);break;
-    case ApplicationActivities: HandleApplicationActivitiesL(message);break;
-    case LaunchActivity: HandleLaunchActivityL(message);break;
-    case WaitActivity: HandleWaitActivityL(message);return; //!!!!! This message shouldn't be compleated !!!!!
-    case GetData: HandleGetDataL(message); break;
-    case CancelWait: HandleCancelWaitActivity(message); break;
-    default:
-        message.Panic(KErr400, CServer2::EBadMessageNumber);
+
+    switch (message.Function()) {
+        case AddActivity:
+            HandleAddActivityL(message);
+            break;
+        case UpdateActivity:
+            HandleUpdateActivityL(message);
+            break;
+        case RemoveActivity:
+            HandleRemoveActivityL(message);
+            break;
+        case RemoveApplicationActivities:
+            HandleRemoveApplicationActivitiesL(message);
+            break;
+        case Activities:
+            HandleActivitiesL(message);
+            break;
+        case ApplicationActivities:
+            HandleApplicationActivitiesL(message);
+            break;
+        case LaunchActivity:
+            HandleLaunchActivityL(message);
+            break;
+        case WaitActivity:
+            HandleWaitActivityL(message);
+            return; //!!!!! This message shouldn't be compleated !!!!!
+        case GetThumbnail:
+            HandleGetThumbnailL(message);
+            break;
+        case GetData:
+            HandleGetDataL(message);
+            break;
+        case CancelWait:
+            HandleCancelWaitActivity(message);
+            break;
+        default:
+            message.Panic(KErr400, CServer2::EBadMessageNumber);
     }
     message.Complete(KErrNone);
 }
@@ -81,7 +102,7 @@ void HsActivitySessionPrivate::ServiceError(const RMessage2 &message, TInt error
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleAddActivityL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleAddActivityL(const RMessage2 &message)
 {
     ReadDataL(message);
     LeaveIfNotZero(mStorage.addActivity(mActivity));
@@ -91,7 +112,7 @@ void HsActivitySessionPrivate::HandleAddActivityL(const RMessage2& message)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleUpdateActivityL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleUpdateActivityL(const RMessage2 &message)
 {
     ReadDataL(message);
     LeaveIfNotZero(mStorage.updateActivity(mActivity));
@@ -101,7 +122,7 @@ void HsActivitySessionPrivate::HandleUpdateActivityL(const RMessage2& message)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleRemoveActivityL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleRemoveActivityL(const RMessage2 &message)
 {
     ReadDataL(message);
     LeaveIfNotZero(mStorage.removeActivity(mActivity));
@@ -111,7 +132,7 @@ void HsActivitySessionPrivate::HandleRemoveActivityL(const RMessage2& message)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleRemoveApplicationActivitiesL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleRemoveApplicationActivitiesL(const RMessage2 &message)
 {
     ReadDataL(message);
     LeaveIfNotZero(mStorage.removeApplicationActivities(mActivity));
@@ -121,7 +142,7 @@ void HsActivitySessionPrivate::HandleRemoveApplicationActivitiesL(const RMessage
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleActivitiesL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleActivitiesL(const RMessage2 &message)
 {
     int errNo(KErrNone);
     QT_TRYCATCH_LEAVING(errNo = mStorage.activities(mResult));
@@ -135,7 +156,7 @@ void HsActivitySessionPrivate::HandleActivitiesL(const RMessage2& message)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleApplicationActivitiesL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleApplicationActivitiesL(const RMessage2 &message)
 {
     int errNo(KErrNone);
     ReadDataL(message);
@@ -150,7 +171,7 @@ void HsActivitySessionPrivate::HandleApplicationActivitiesL(const RMessage2& mes
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleLaunchActivityL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleLaunchActivityL(const RMessage2 &message)
 {
     ReadDataL(message);
     LaunchActivityL();
@@ -160,7 +181,7 @@ void HsActivitySessionPrivate::HandleLaunchActivityL(const RMessage2& message)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleWaitActivityL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleWaitActivityL(const RMessage2 &message)
 {
     ReadDataL(message);
     WaitActivityL(message);
@@ -170,16 +191,26 @@ void HsActivitySessionPrivate::HandleWaitActivityL(const RMessage2& message)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleCancelWaitActivity(const RMessage2& /*message*/)
-	{
-	CancelNotify();
-	}
+void HsActivitySessionPrivate::HandleGetThumbnailL(const RMessage2 &message)
+{
+    ReadDataL(message);
+    GetThumbnailL(message);
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::HandleGetDataL(const RMessage2& message)
+void HsActivitySessionPrivate::HandleCancelWaitActivity(const RMessage2& /*message*/)
+{
+    CancelNotify();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivitySessionPrivate::HandleGetDataL(const RMessage2 &message)
 {
     message.WriteL(0, mData);
 }
@@ -190,25 +221,25 @@ void HsActivitySessionPrivate::HandleGetDataL(const RMessage2& message)
 //
 void HsActivitySessionPrivate::LaunchActivityL()
 {
-    CServer2* const server(const_cast<CServer2*>(Server()));
-    if(mActivity.end() == mActivity.find(ActivityApplicationKeyword) || 
-       mActivity.end() == mActivity.find(ActivityActivityKeyword)) {
+    CServer2 *const server(const_cast<CServer2 *>(Server()));
+    if (mActivity.end() == mActivity.find(ActivityApplicationKeyword) ||
+            mActivity.end() == mActivity.find(ActivityActivityKeyword)) {
         User::Leave(KErrCorrupt);
     }
-    static_cast<HsActivityServerPrivate*>
-        (server)->notifyL(mActivity.find(ActivityApplicationKeyword).value().toInt(), 
-                         mActivity.find(ActivityActivityKeyword).value().toString());
+    static_cast<HsActivityServerPrivate *>
+    (server)->notifyL(mActivity.find(ActivityApplicationKeyword).value().toInt(),
+                      mActivity.find(ActivityActivityKeyword).value().toString());
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::LaunchActivityL(const RMessage2 &message, 
-                                               const QString &name )
+void HsActivitySessionPrivate::LaunchActivityL(const RMessage2 &message,
+        const QString &name)
 {
-    if (mData.MaxSize() < name.toAscii().length()){
-        mData.ReAlloc( name.toAscii().length());
+    if (mData.MaxSize() < name.toAscii().length()) {
+        mData.ReAlloc(name.toAscii().length());
     }
     mData.Copy(reinterpret_cast<const TUint8*>(name.toAscii().data()),
                                                name.toAscii().length());
@@ -220,15 +251,29 @@ void HsActivitySessionPrivate::LaunchActivityL(const RMessage2 &message,
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::WaitActivityL(const RMessage2& msg)
+void HsActivitySessionPrivate::WaitActivityL(const RMessage2 &msg)
 {
-    CServer2* const server(const_cast<CServer2*>(Server()));
-    if(mActivity.end() == mActivity.find(ActivityApplicationKeyword)) {
+    CServer2 *const server(const_cast<CServer2 *>(Server()));
+    if (mActivity.end() == mActivity.find(ActivityApplicationKeyword)) {
         User::Leave(KErrCorrupt);
     }
     mAppId = mActivity.find(ActivityApplicationKeyword).value().toInt();
-    static_cast<HsActivityServerPrivate*>
-        (server)->waitNotification(mAppId, msg);
+    static_cast<HsActivityServerPrivate *>
+    (server)->waitNotification(mAppId, msg);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivitySessionPrivate::GetThumbnailL(const RMessage2 &message)
+{
+    if (mActivity.constEnd() == mActivity.constFind(ActivityScreenshotKeyword)) {
+        User::Leave(KErrGeneral);
+    }
+    mData << QPixmap(mActivity.constFind(ActivityScreenshotKeyword).value().toString());
+    TPckgC<int> dataSize(mData.Size());
+    message.WriteL(1, dataSize);
 }
 
 // -----------------------------------------------------------------------------
@@ -236,36 +281,35 @@ void HsActivitySessionPrivate::WaitActivityL(const RMessage2& msg)
 // -----------------------------------------------------------------------------
 //
 void HsActivitySessionPrivate::CancelNotify()
-	{
-	if ( mAppId != KErrNotFound )
-	    {
-	    CServer2* const server(const_cast<CServer2*>(Server()));
-	    static_cast<HsActivityServerPrivate*>(server)->cancelNotify(mAppId);
-	    mAppId = KErrNotFound;
-	    }
-	}
+{
+    if (mAppId != KErrNotFound) {
+        CServer2 *const server(const_cast<CServer2 *>(Server()));
+        static_cast<HsActivityServerPrivate *>(server)->cancelNotify(mAppId);
+        mAppId = KErrNotFound;
+    }
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::CancelNotify(RMessage2& message)
-	{
-	message.Complete(KErrCancel);
-	}
+void HsActivitySessionPrivate::CancelNotify(RMessage2 &message)
+{
+    message.Complete(KErrCancel);
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivitySessionPrivate::ReadDataL(const RMessage2& src)
+void HsActivitySessionPrivate::ReadDataL(const RMessage2 &src)
 {
     int srcLength = src.GetDesLength(0);
     User::LeaveIfError(srcLength);
     RBuf8 buffer;
     CleanupClosePushL(buffer);
     buffer.CreateL(srcLength);
-    src.ReadL( 0, buffer, 0);
+    src.ReadL(0, buffer, 0);
     if (buffer.Length() != srcLength) {
         User::Leave(KErrCorrupt);
     }

@@ -20,6 +20,7 @@ symbian:{
 SUBDIRS  += cautils
 SUBDIRS  += group
 SUBDIRS  += casrv/calocalizerscanner
+SUBDIRS  += cahandler
 }
 SUBDIRS  += caclient
 CONFIG  += ordered

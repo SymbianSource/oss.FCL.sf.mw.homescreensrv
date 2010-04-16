@@ -21,4 +21,6 @@ EXPORTS
 	_ZNK14CCaSrvEngUtils13GetApaAppInfoE4TUidR11TApaAppInfo @ 20 NONAME
 	_ZTI15CCaStorageProxy @ 21 NONAME
 	_ZTV15CCaStorageProxy @ 22 NONAME
+	_ZN13CCaMmcWatcher4NewLER3RFsP19MMmcWatcherCallback @ 23 NONAME
+	_ZN13CCaMmcWatcher5NewLCER3RFsP19MMmcWatcherCallback @ 24 NONAME
 

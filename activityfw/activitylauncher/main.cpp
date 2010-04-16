@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -24,12 +24,12 @@
 
 int main(int argc, char *argv[])
 {
-    HbApplication app(argc, argv); 
+    HbApplication app(argc, argv);
 
     HbMainWindow mainWindow;
     ActivityLauncherView mainView;
     mainWindow.addView(&mainView);
     mainWindow.show();
 
-    return app.exec(); 
+    return app.exec();
 }

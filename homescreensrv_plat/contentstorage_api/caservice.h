@@ -44,17 +44,17 @@ public:
 
     static QSharedPointer<CaService> instance();
 
-    CaEntry * getEntry(int entryId) const;
-    QList<CaEntry *> getEntries(const QList<int> &entryIdList) const;
-    QList<CaEntry *> getEntries(const CaQuery &query) const;
+    QSharedPointer<CaEntry> getEntry(int entryId) const;
+    QList< QSharedPointer<CaEntry> > getEntries(const QList<int> &entryIdList) const;
+    QList< QSharedPointer<CaEntry> > getEntries(const CaQuery &query) const;
     QList<int> getEntryIds(const CaQuery &query) const;
 
-    CaEntry *createEntry(const CaEntry &entry) const;
+    QSharedPointer<CaEntry> createEntry(const CaEntry &entry) const;
 
     bool removeEntry(int entryId) const;
     bool removeEntry(const CaEntry &entry) const;
     bool removeEntries(const QList<int> &entryIdList) const;
-    bool removeEntries(const QList<CaEntry *> &entryList) const;
+    bool removeEntries(const QList< QSharedPointer<CaEntry> > &entryList) const;
 
     bool updateEntry(const CaEntry &entry) const;
     bool touch(const CaEntry &entry) const;
@@ -66,7 +66,7 @@ public:
     bool insertEntriesIntoGroup(int groupId, const QList<int> &entryIdList,
         int beforeEntryId) const;
     bool insertEntriesIntoGroup(const CaEntry &group,
-        const QList<CaEntry *> &entryList, int beforeEntryId) const;
+        const QList< QSharedPointer<CaEntry> > &entryList, int beforeEntryId) const;
 
     bool removeEntryFromGroup(int groupId, int entryId) const;
     bool removeEntryFromGroup(const CaEntry &group,
@@ -74,7 +74,7 @@ public:
     bool removeEntriesFromGroup(int groupId,
         const QList<int> &entryIdList) const;
     bool removeEntriesFromGroup(const CaEntry &group,
-        const QList<CaEntry *> &entryList) const;
+        const QList< QSharedPointer<CaEntry> > &entryList) const;
 
     bool appendEntryToGroup(int groupId, int entryId) const;
     bool appendEntryToGroup(const CaEntry &group,
@@ -82,7 +82,7 @@ public:
     bool appendEntriesToGroup(int groupId,
         const QList<int> &entryIdList) const;
     bool appendEntriesToGroup(const CaEntry &group,
-        const QList<CaEntry *> &entryList) const;
+        const QList< QSharedPointer<CaEntry> > &entryList) const;
 
     bool prependEntryToGroup(int groupId, int entryId) const;
     bool prependEntryToGroup(const CaEntry &group,
@@ -90,7 +90,7 @@ public:
     bool prependEntriesToGroup(int groupId,
         const QList<int> &entryIdList) const;
     bool prependEntriesToGroup(const CaEntry &group,
-        const QList<CaEntry *> &entryList) const;
+        const QList< QSharedPointer<CaEntry> > &entryList) const;
 
     bool executeCommand(int entryId, const QString &command = 
         caCmdOpen) const;

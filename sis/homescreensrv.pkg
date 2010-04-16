@@ -130,6 +130,8 @@
 "/epoc32/data/z/resource/plugins/cawidgetscanner.rsc"-"c:/resource/plugins/cawidgetscanner.rsc"
 "/epoc32/release/armv5/urel/calocalizerscanner.dll" - "c:/sys/bin/calocalizerscanner.dll"
 "/epoc32/data/z/resource/plugins/calocalizerscanner.rsc"-"c:/resource/plugins/calocalizerscanner.rsc"
+"/epoc32/release/armv5/urel/causifscanner.dll" - "c:/sys/bin/causifscanner.dll"
+"/epoc32/data/z/resource/plugins/causifscanner.rsc"-"c:/resource/plugins/causifscanner.rsc"
 
 
 "/epoc32/release/armv5/urel/camenuserver.exe" - "c:/sys/bin/camenuserver.exe"
@@ -142,9 +144,6 @@
 
 ; ---- appfoundation --------------------------------------------
 
-; -------- servicemodel
-"/epoc32/release/armv5/urel/hsservicemodel.dll" - "c:/sys/bin/hsservicemodel.dll"
-
 ; -------- statemodel
 "/epoc32/release/armv5/urel/statemodel.dll" - "c:/sys/bin/statemodel.dll"
 
@@ -156,6 +155,3 @@
 
 ; ---- screensavermodel --------------------------------------------
 "/epoc32/release/armv5/urel/screensavermodel.dll" - "c:/sys/bin/screensavermodel.dll"
-
-; ---- bagetmodel --------------------------------------------
-"/epoc32/release/armv5/urel/bagetmodel.dll" - "c:/sys/bin/bagetmodel.dll"

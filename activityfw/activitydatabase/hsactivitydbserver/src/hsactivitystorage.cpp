@@ -22,8 +22,8 @@
 // -----------------------------------------------------------------------------
 //
 HsActivityStorage::HsActivityStorage()
-:
-d_ptr(new HsActivityStoragePrivate())
+    :
+    d_ptr(new HsActivityStoragePrivate())
 {
 }
 
@@ -40,7 +40,7 @@ HsActivityStorage::~HsActivityStorage()
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStorage::addActivity(const QVariantHash& activity)
+int HsActivityStorage::addActivity(const QVariantHash &activity)
 {
     return d_ptr->addActivity(activity);
 }
@@ -49,7 +49,7 @@ int HsActivityStorage::addActivity(const QVariantHash& activity)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStorage::updateActivity(const QVariantHash& activity)
+int HsActivityStorage::updateActivity(const QVariantHash &activity)
 {
     return d_ptr->updateActivity(activity);
 }
@@ -58,7 +58,7 @@ int HsActivityStorage::updateActivity(const QVariantHash& activity)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStorage::removeActivity(const QVariantHash& activity)
+int HsActivityStorage::removeActivity(const QVariantHash &activity)
 {
     return d_ptr->removeActivity(activity);
 }
@@ -67,7 +67,7 @@ int HsActivityStorage::removeActivity(const QVariantHash& activity)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStorage::removeApplicationActivities(const QVariantHash& activity)
+int HsActivityStorage::removeApplicationActivities(const QVariantHash &activity)
 {
     return d_ptr->removeApplicationActivities(activity);
 }
@@ -77,7 +77,7 @@ int HsActivityStorage::removeApplicationActivities(const QVariantHash& activity)
 // -----------------------------------------------------------------------------
 //
 int HsActivityStorage::activities(QList<QVariantHash>& result)
-{   
+{
     return d_ptr->activities(result);
 }
 
@@ -85,7 +85,7 @@ int HsActivityStorage::activities(QList<QVariantHash>& result)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStorage::applicationActivities(QList<QVariantHash>& result, 
+int HsActivityStorage::applicationActivities(QList<QVariantHash>& result,
                                              const QVariantHash &activity)
 {
     return d_ptr->applicationActivities(result, activity);

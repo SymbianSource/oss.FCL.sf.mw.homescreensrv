@@ -18,6 +18,7 @@
 #include <apgcli.h>
 #include <swi/sisregistrysession.h>
 #include <swi/sisregistryentry.h>
+
 #include "cautils.h"
 #include "cadef.h"
 #include "cainnerentry.h"
@@ -69,7 +70,6 @@ CCaUninstallOperation::CCaUninstallOperation(CCaInnerEntry &aEntry,
 //
 void CCaUninstallOperation::ConstructL(CCaInnerEntry &aEntry)
 {
-    TBuf<KCaMaxAttrValueLen> uidAttr;
     TUint uid = aEntry.GetUid();
 
     TUid packageUid = KNullUid;
@@ -112,11 +112,15 @@ void CCaUninstallOperation::AppInfoL(const TUid &aAppUid,
     CleanupClosePushL(apaLsSession);
     User::LeaveIfError(apaLsSession.GetAllApps());
 
-    TApaAppInfo appInfo;
-    User::LeaveIfError(apaLsSession.GetAppInfo(appInfo, aAppUid));
-    if (!GetInstallPkgUidL(appInfo.iFullName, aPackageUid)) {
+    // TApaAppInfo size is greater then 1024 bytes
+    // so its instances should not be created on the stack.
+    TApaAppInfo* appInfo = new(ELeave) TApaAppInfo();
+    CleanupStack::PushL(appInfo);
+    User::LeaveIfError(apaLsSession.GetAppInfo(*appInfo, aAppUid));
+    if (!GetInstallPkgUidL(appInfo->iFullName, aPackageUid)) {
         aPackageUid = aAppUid;
     }
+    CleanupStack::PopAndDestroy(appInfo);
     aMimeType.Set(KAppMimeType);
 
     CleanupStack::PopAndDestroy(&apaLsSession);

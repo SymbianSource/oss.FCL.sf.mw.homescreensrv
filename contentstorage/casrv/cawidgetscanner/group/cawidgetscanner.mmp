@@ -39,7 +39,6 @@ SOURCE          cawidgetscannerinstallnotifier.cpp
 SOURCE          cawidgetscannerparser.cpp
 SOURCE          cawidgetdescription.cpp
 SOURCE          cawidgetstoragehandler.cpp
-SOURCE          cawidgetmmcwatcher.cpp
 SOURCE          widgetscannerutils.cpp
 
 USERINCLUDE     ../inc

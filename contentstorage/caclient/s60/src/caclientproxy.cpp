@@ -128,7 +128,7 @@ ErrorCode CaClientProxy::removeEntriesFromGroup(int groupId,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
-                                 QList<CaEntry *> &sourceList)
+        QList< QSharedPointer<CaEntry> > &sourceList)
 {
     TRAPD(error, getDataL(entryIdList, sourceList));
 
@@ -142,7 +142,7 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const CaQuery &query,
-                                 QList<CaEntry *> &sourceList)
+        QList< QSharedPointer<CaEntry> > &sourceList)
 {
     TRAPD(error, getDataL(query, sourceList));
 
@@ -281,7 +281,7 @@ void CaClientProxy::removeEntriesFromGroupL(int groupId,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::getDataL(const QList<int> &entryIdList,
-                             QList<CaEntry *> &sourceList)
+        QList< QSharedPointer<CaEntry> > &sourceList)
 {
     CCaInnerQuery *query = CCaInnerQuery::NewLC();
     RArray<TInt> array;
@@ -301,7 +301,7 @@ void CaClientProxy::getDataL(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 void CaClientProxy::getDataL(const CaQuery &query,
-                             QList<CaEntry *> &sourceList)
+        QList< QSharedPointer<CaEntry> > &sourceList)
 {
     CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
     CaObjectAdapter::convertL(query, *innerQuery);

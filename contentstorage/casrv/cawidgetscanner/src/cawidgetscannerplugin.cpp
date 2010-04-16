@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
  *
 */
 
@@ -48,7 +48,7 @@ ImplementationGroupProxy( TInt& aTableCount )
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
-// CCaWidgetScannerPlugin ::CCaWidgetScannerPlugin 
+// CCaWidgetScannerPlugin ::CCaWidgetScannerPlugin
 // C++ default constructor can NOT contain any code, that
 // might leave.
 // -----------------------------------------------------------------------------
@@ -65,11 +65,11 @@ CCaWidgetScannerPlugin::CCaWidgetScannerPlugin()
 void CCaWidgetScannerPlugin::ConstructL( TPluginParams* aPluginParams )
     {
     User::LeaveIfError( iFs.Connect() );
-    iMmcWatcher = CCaWidgetMmcWatcher::NewL( iFs, this );
+    iMmcWatcher = CCaMmcWatcher::NewL( iFs, this );
     iInstallNotifier = CCaWidgetScannerInstallNotifier::NewL( this,
         KUidSystemCategory, KSAUidSoftwareInstallKeyValue );
     iParser = CCaWidgetScannerParser::NewL( iFs );
-    iStorageHandler = CCaWidgetStorageHandler::NewL( 
+    iStorageHandler = CCaWidgetStorageHandler::NewL(
             aPluginParams->storageProxy, iFs );
     SynchronizeL();
     }
@@ -79,7 +79,7 @@ void CCaWidgetScannerPlugin::ConstructL( TPluginParams* aPluginParams )
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewL( 
+CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewL(
         TPluginParams* aPluginParams )
     {
     CCaWidgetScannerPlugin * self = NewLC( aPluginParams );
@@ -92,7 +92,7 @@ CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewL(
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewLC( 
+CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewLC(
         TPluginParams* aPluginParams )
     {
     CCaWidgetScannerPlugin * self = new( ELeave ) CCaWidgetScannerPlugin ( );
@@ -115,18 +115,18 @@ CCaWidgetScannerPlugin::~CCaWidgetScannerPlugin ()
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
 void CCaWidgetScannerPlugin::SynchronizeL()
     {
     iStorageHandler->SynchronizeL( iParser->WidgetsScanL() );
     }
-  
+
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetScannerPlugin::MmcChangeL()
     {
     SynchronizeL();

@@ -209,6 +209,72 @@ void CaSqlQueryCreator::CreateUpdateQueryEntryL(
     aQuery->SetQueryL( query );
     CleanupStack::PopAndDestroy( &query );
     }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CaSqlQueryCreator::CreateFindIconQueryL( CCaInnerEntry* aEntry,
+        CCaSqlQuery* aQuery)
+    {
+    RBuf iconQuery;
+    iconQuery.CleanupClosePushL();
+    iconQuery.CreateL( KSQLGetIconIdWhere );
+
+    if( aEntry->Icon()->FileName().Compare( KNullDesC ) )
+        {
+        iconQuery.ReAllocL( iconQuery.Length() + KSQLUpdateIconFileName().Length()
+                + KAnd().Length() );
+        iconQuery.Append( KSQLUpdateIconFileName );
+        iconQuery.Append( KAnd );
+        }
+    else
+        { 
+        iconQuery.ReAllocL( iconQuery.Length() + KSQLEmptyIconFileName().Length()
+                + KAnd().Length() );
+        iconQuery.Append( KSQLEmptyIconFileName );
+        iconQuery.Append( KAnd );
+        }
+
+    if( aEntry->Icon()->SkinId().Compare( KNullDesC ) )
+        {
+        iconQuery.ReAllocL( iconQuery.Length() + KSQLUpdateIconSkinId().Length()
+                + KAnd().Length() );
+        iconQuery.Append( KSQLUpdateIconSkinId );
+        iconQuery.Append( KAnd );
+        }
+    else
+        {
+        iconQuery.ReAllocL( iconQuery.Length() + KSQLEmptyIconSkinId().Length()
+                + KAnd().Length() );
+        iconQuery.Append( KSQLEmptyIconSkinId );
+        iconQuery.Append( KAnd );
+        }
+
+    if( aEntry->Icon()->ApplicationId().Compare( KNullDesC ) )
+        {
+        iconQuery.ReAllocL( iconQuery.Length() + KSQLUpdateIconAppId().Length()
+                + KAnd().Length() );
+        iconQuery.Append( KSQLUpdateIconAppId );
+        iconQuery.Append( KAnd );
+        }
+    else
+        {
+        iconQuery.ReAllocL( iconQuery.Length() + KSQLEmptyIconAppId().Length()
+                + KAnd().Length() );
+        iconQuery.Append( KSQLEmptyIconAppId );
+        iconQuery.Append( KAnd );
+        }
+
+    if (!iconQuery.Right(KAnd().Length()).Compare(KAnd))
+        {    
+        iconQuery.Delete( iconQuery.Length() - KAnd().Length(), KAnd().Length() );
+        }
+    
+    aQuery->SetQueryL( iconQuery );
+    CleanupStack::PopAndDestroy( &iconQuery );
+    }
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -218,9 +284,9 @@ void CaSqlQueryCreator::CreateAddIconQueryForNewL( CCaInnerEntry* aEntry,
     {
     DEBUG( ("_CA_:CASqlQueryCreator::CreateAddIconQueryForNewL") );
     CCaSqlQuery* query = CCaSqlQuery::NewLC( aSqlDb );
-    query->SetQueryL( KSQLGetIconId );
-    query->SetTableType( CCaSqlQuery::EIconTable );
 
+    CreateFindIconQueryL(aEntry, query);
+    query->SetTableType( CCaSqlQuery::EIconTable );
     query->PrepareL();
     query->BindValuesForGetIconL( aEntry );
     TInt idIcon( 0 );
@@ -230,9 +296,9 @@ void CaSqlQueryCreator::CreateAddIconQueryForNewL( CCaInnerEntry* aEntry,
     if( idIcon == 0 )  
         {
         // entry's icon data is not in DB
-        if( ( aEntry->GetIcon().iFileName.Length() != 0 ) ||
-            ( aEntry->GetIcon().iSkinId.Length() != 0 ) ||
-            ( aEntry->GetIcon().iApplicationId.Length() != 0 )
+        if( ( aEntry->Icon()->FileName().Length() != 0 ) ||
+            ( aEntry->Icon()->SkinId().Length() != 0 ) ||
+            ( aEntry->Icon()->ApplicationId().Length() != 0 )
              )
             {
             // icon is not null, so that insert it to storage
@@ -251,6 +317,7 @@ void CaSqlQueryCreator::CreateAddIconQueryForNewL( CCaInnerEntry* aEntry,
         aQuery->SetTableType( CCaSqlQuery::ENoTableType );
         }
     }
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -265,12 +332,14 @@ void CaSqlQueryCreator::CreateAddIconQueryForUpdateL(CCaInnerEntry* aEntry,
 
     query->PrepareL();
     query->BindValuesForGetEntriesL( aEntry );
-    CCaInnerEntry::TIconAttributes iconAttributs;
-    query->ExecuteL( iconAttributs );
+    
+    CCaInnerIconDescription* innerIcon = CCaInnerIconDescription::NewLC();
+    
+    query->ExecuteL( innerIcon );
     query->CloseStatement();
-    if( !(     !iconAttributs.iFileName.Compare( aEntry->GetIcon().iFileName )
-            && (!iconAttributs.iSkinId.Compare( aEntry->GetIcon().iSkinId ))
-            && (!iconAttributs.iApplicationId.Compare( aEntry->GetIcon().iApplicationId ))
+    if( !(     !innerIcon->FileName().Compare( aEntry->Icon()->FileName() )
+            && (!innerIcon->SkinId().Compare( aEntry->Icon()->SkinId() ))
+            && (!innerIcon->ApplicationId().Compare( aEntry->Icon()->ApplicationId() ))
                     ) )
         {
         // entry's icon data is updated
@@ -299,8 +368,11 @@ void CaSqlQueryCreator::CreateAddIconQueryForUpdateL(CCaInnerEntry* aEntry,
 
         CleanupStack::PopAndDestroy( &innerEntries );
         }
+    CleanupStack::PopAndDestroy( innerIcon );
+    
     CleanupStack::PopAndDestroy( query );
     }
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -323,6 +395,7 @@ void CaSqlQueryCreator::CreateAddIconQueryL( CCaInnerEntry* aEntry,
         CreateAddIconQueryForUpdateL( aEntry, aQuery, aSqlDb );
         }
     }
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -335,21 +408,21 @@ void CaSqlQueryCreator::CreateUpdateIconQueryL(
     query.CleanupClosePushL();
     query.CreateL( KSQLUpdateIcon().Length() );
     query.Append( KSQLUpdateIcon );
-    if( aEntry->GetIcon().iFileName.Compare( KNullDesC ) )
+    if( aEntry->Icon()->FileName().Compare( KNullDesC ) )
         {
         query.ReAllocL( query.Length() + KSQLUpdateIconFileName().Length()
                 + KComma().Length() );
         query.Append( KSQLUpdateIconFileName );
         query.Append( KComma );
         }
-    if( aEntry->GetIcon().iSkinId.Compare( KNullDesC ) )
+    if( aEntry->Icon()->SkinId().Compare( KNullDesC ) )
         {
         query.ReAllocL( query.Length() + KSQLUpdateIconSkinId().Length()
                 + KComma().Length() );
         query.Append( KSQLUpdateIconSkinId );
         query.Append( KComma );
         }
-     if( aEntry->GetIcon().iApplicationId.Compare(KNullDesC) )
+     if( aEntry->Icon()->ApplicationId().Compare(KNullDesC) )
         {
         query.ReAllocL( query.Length() + KSQLUpdateIconAppId().Length()
                 + KComma().Length() );
@@ -357,8 +430,7 @@ void CaSqlQueryCreator::CreateUpdateIconQueryL(
         }
     if( !query.Right( KComma().Length() ).Compare( KComma ) )
         {
-        query.Assign( query.Mid( query.Length() - 
-                KComma().Length()).AllocL() );
+        query.Delete( query.Length() - KComma().Length(), KComma().Length() );
         }
     // add WHERE expr
     query.ReAllocL( query.Length() + KSQLUpdateIconWhere().Length() );
@@ -1035,9 +1107,9 @@ CaSqlQueryCreator::TIconType CaSqlQueryCreator::CheckIconType( const CCaInnerEnt
     {
     CaSqlQueryCreator::TIconType iconType;
     if( 
-        aEntry->GetIcon().iApplicationId.Length() == 0 &&
-        aEntry->GetIcon().iSkinId.Length() == 0 &&
-        aEntry->GetIcon().iFileName.Length() == 0 )
+        aEntry->Icon()->ApplicationId().Length() == 0 &&
+        aEntry->Icon()->SkinId().Length() == 0 &&
+        aEntry->Icon()->FileName().Length() == 0 )
         {
         if( aEntry->GetIconId() > 0 )
             {

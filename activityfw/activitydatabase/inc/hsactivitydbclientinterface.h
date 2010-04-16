@@ -21,8 +21,7 @@
 /**
  * Enumerate supported functions
  */
-enum ClientFunctions 
-{
+enum ClientFunctions {
     AddActivity =0,
     UpdateActivity,
     RemoveActivity,
@@ -32,72 +31,74 @@ enum ClientFunctions
     ApplicationActivities,
     WaitActivity,
     LaunchActivity,
+    GetThumbnail,
     GetData,
     CancelWait
 };
 
 const char ActivityApplicationKeyword [] = ":ApplicationId";
 const char ActivityActivityKeyword [] = ":ActivityName";
+const char ActivityScreenshotKeyword [] = "screenshot";
 
 class HsActivityDbClientInterface
 {
 public:
-    
+
     /**
      * Function save provided avtivity in activity storage
      * @param activity - activity to store
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
     virtual int addActivity(const QVariantHash &activity) =0;
-    
+
     /**
      * Function update exiting activity
      * @param activity - filtering rules
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
     virtual int updateActivity(const QVariantHash &activity) =0;
-    
+
     /**
      * Function delete activity
      * @param activity - filtering rules
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
     virtual int removeActivity(const QVariantHash &activity) =0;
-    
+
     /**
      * Function delete activity for application
      * @param activity - filtering rules
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
     virtual int removeApplicationActivities(const QVariantHash &activity) =0;
-    
+
     /**
      * Function return list of all activity
      * @param result - destination list
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
     virtual int activities(QList<QVariantHash>& result) =0;
-    
+
     /**
      * Function return list of all activity
      * @param result - destination list,
      * @param activity - filtering rules
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
-    virtual int applicationActivities(QList<QVariantHash>& result, 
+    virtual int applicationActivities(QList<QVariantHash>& result,
                                       const QVariantHash &activity) =0;
-    
+
     /**
      * Function subscribe to activity
      * @param  activity - filtering rules
-     * @return 0 on succees, error code otherwise 
+     * @return 0 on succees, error code otherwise
      */
     virtual int waitActivity(const QVariantHash &activity)=0;
-    
+
     /**
      * Function launch application activity
-     * @param activity - filtering rules 
-     * @return 0 on succees, error code otherwise 
+     * @param activity - filtering rules
+     * @return 0 on succees, error code otherwise
      */
     virtual int launchActivity(const QVariantHash &activity)=0;
 };

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYMANAGER_H
@@ -20,13 +20,14 @@
 #include <QObject>
 #include <QVariant>
 #include <QList>
+#include <QPixmap>
 
 class ActivityManagerPrivate;
 
 class ActivityManager : public QObject
 {
 
-Q_OBJECT
+    Q_OBJECT
 
 public:
     ActivityManager(QObject *parent = 0);
@@ -34,16 +35,19 @@ public:
 
 public slots:
     QList<QVariantHash> activitiesList();
-    void launchActivity(const QString &uri);  
-    void launchActivity(int applicationId, const QString &activityId);  
-    void removeActivity(int applicationId, const QString &activityId);  
-    void removeApplicationActivities(int applicationId);  
-    
+    void launchActivity(const QString &uri);
+    void launchActivity(int applicationId, const QString &activityId);
+    void removeActivity(int applicationId, const QString &activityId);
+    void removeApplicationActivities(int applicationId);
+    void getThumbnail(const QString &thumbnailId, void * =0);
+
+signals:
+    void thumbnailReady(QPixmap, void *);
+
 private:
     ActivityManagerPrivate *d_ptr;
-    
+
     friend class ActivityManagerPrivate;
-    
 };
 
 #endif // ACTIVITYMANAGER_H

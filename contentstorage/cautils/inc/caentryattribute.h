@@ -131,6 +131,15 @@ public:
      */
     IMPORT_C TBool Find( const TDesC& aName, TDes& aAttrVal );
 
+    /**
+     * Find attribute by name.
+     * @param aId Id.
+     * @param aName Name.
+     * @param aAttr Attribute value.
+     * @return TBool, ETrue if attribute was found
+     */
+    IMPORT_C TBool Find( const TDesC& aName, TPtrC& aAttrVal );
+
     /*
      * Check if attribute exists
      * @param aId Id

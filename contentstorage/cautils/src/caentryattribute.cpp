@@ -124,6 +124,23 @@ EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TDes& aAttrVal )
     }
 
 // ---------------------------------------------------------
+// RMenuSrvAttrArray::Find
+// ---------------------------------------------------------
+//
+EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TPtrC& aAttrVal )
+    {
+    for( TInt i = 0; i < Count(); i++ )
+        {
+        if( aName.Compare( operator[]( i )->Name() ) == KErrNone )
+            {
+            aAttrVal.Set( operator[]( i )->Value() );
+            return ETrue;
+            }
+        }
+    return EFalse;
+    }
+
+// ---------------------------------------------------------
 // RCaEntryAttrArray::Exist
 // ---------------------------------------------------------
 //

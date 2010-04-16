@@ -16,14 +16,14 @@
  */
 
 #include "cainstallnotifier.h"
+#include "cainstallstrategy.h"
 
 EXPORT_C CCaInstallNotifier* CCaInstallNotifier::NewL(
         MCaInstallListener& aListener, TNotificationType aNotificationType )
     {
-    CCaInstallNotifier* self = new ( ELeave ) CCaInstallNotifier(
-            aListener, aNotificationType );
+    CCaInstallNotifier* self = new ( ELeave ) CCaInstallNotifier( aListener );
     CleanupStack::PushL( self );
-    self->ConstructL();
+    self->ConstructL( aNotificationType );
     CleanupStack::Pop( self );
     return self;
     }
@@ -32,21 +32,34 @@ CCaInstallNotifier::~CCaInstallNotifier()
     {
     Cancel();
     iProperty.Close();
+    delete iNotifierStrategy;
     }
 
-CCaInstallNotifier::CCaInstallNotifier( MCaInstallListener& aListener,
-        TNotificationType aNotificationType ) :
+CCaInstallNotifier::CCaInstallNotifier( MCaInstallListener& aListener ) :
     CActive( EPriorityNormal ), iListener( aListener )
     {
-    iRPropertyKey = aNotificationType;
-    iProperty.Attach( KUidSystemCategory, iRPropertyKey );
     CActiveScheduler::Add( this );
-    iProperty.Subscribe( iStatus );
     SetActive();
     }
 
-void CCaInstallNotifier::ConstructL()
+void CCaInstallNotifier::ConstructL( TNotificationType aNotificationType )
     {
+    switch( aNotificationType )
+		{
+        case ESisInstallNotification:
+        	iNotifierStrategy = CCaSwiInstallStrategy::NewL( iProperty );
+            break;
+        case EUsifUninstallNotification:
+        	iNotifierStrategy = CCaUsifUninstallStrategy::NewL( iProperty );
+            break;
+        case EJavaInstallNotification:
+        	iNotifierStrategy = CCaJavaInstallStrategy::NewL( iProperty );
+            break;
+        default:
+        	User::Leave( KErrNotSupported );
+            break;
+		}
+    iProperty.Subscribe( iStatus );
     }
 
 void CCaInstallNotifier::DoCancel()
@@ -58,13 +71,7 @@ void CCaInstallNotifier::RunL()
     {
     SetActive();
     iProperty.Subscribe( iStatus );
-    TInt appUid;
-    User::LeaveIfError( iProperty.Get( KUidSystemCategory, iRPropertyKey,
-            appUid ) );
-    if( appUid )
-        {
-        iListener.HandleInstallNotifyL( appUid );
-        }
+    iNotifierStrategy->NotifyListenerL( iProperty, iListener );
     }
 
 TInt CCaInstallNotifier::RunError( TInt /*aError*/)
@@ -72,3 +79,4 @@ TInt CCaInstallNotifier::RunError( TInt /*aError*/)
     // No need to do anything
     return KErrNone;
     }
+

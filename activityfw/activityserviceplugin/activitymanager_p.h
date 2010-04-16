@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYMANAGER_P_H
@@ -28,7 +28,7 @@ class HsActivityDbClient;
 class ActivityManagerPrivate : public QObject
 {
 
-Q_OBJECT
+    Q_OBJECT
 
 public:
     ActivityManagerPrivate(ActivityManager *q);
@@ -36,16 +36,15 @@ public:
 
 public slots:
     QList<QVariantHash> activitiesList();
-    void launchActivity(const QString &uri);  
-    void launchActivity(int applicationId, const QString &activityId);  
-    void removeActivity(int applicationId, const QString &activityId);  
-    void removeApplicationActivities(int applicationId);  
+    void launchActivity(const QString &uri);
+    void launchActivity(int applicationId, const QString &activityId);
+    void removeActivity(int applicationId, const QString &activityId);
+    void removeApplicationActivities(int applicationId);
+    void getThumbnail(const QString &thumbnailId, void *);
 
 private:
     ActivityManager *q_ptr;
     HsActivityDbClient *mServerClient;
-    
-    
 };
 
 #endif // ACTIVITYMANAGER_P_H

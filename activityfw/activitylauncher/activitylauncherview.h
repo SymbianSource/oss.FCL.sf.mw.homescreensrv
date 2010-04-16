@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYLAUNCHERVIEW_H
@@ -22,7 +22,7 @@
 
 class HbLabel;
 class QStandardItemModel;
-    
+
 class ActivityLauncherView : public HbView
 {
     Q_OBJECT
@@ -32,20 +32,20 @@ public:
     ~ActivityLauncherView();
 
 private slots:
-	void itemPressed(const QModelIndex& index);
+    void itemPressed(const QModelIndex &index);
 
 protected:
-    bool eventFilter(QObject* obj, QEvent* event);
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private:
     void getActivitiesList();
 
 private:
-    QStandardItemModel* mModel;
+    QStandardItemModel *mModel;
     QList<QVariantHash> mCurrentActivities;
-    HbLabel* mStatusLabel;
-    
-    QObject* mActivityManager;
+    HbLabel *mStatusLabel;
+
+    QObject *mActivityManager;
 };
 
 #endif // ACTIVITYLAUNCHERVIEW_H

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #include "activitylauncherview.h"
@@ -35,25 +35,25 @@ ActivityLauncherView::ActivityLauncherView(QGraphicsItem *parent) : HbView(paren
 {
     QServiceManager serviceManager;
     mActivityManager = serviceManager.loadInterface("com.nokia.qt.activities.ActivityManager");
-    
+
     if (!mActivityManager) {
         qFatal("Cannot initialize critical com.nokia.qt.activities.ActivityManager service");
     }
 
     // create UI
     setTitle(tr("Activity launcher"));
-    QGraphicsLinearLayout* layout = new QGraphicsLinearLayout(Qt::Vertical);
-    QGraphicsLinearLayout* statusLayout = new QGraphicsLinearLayout(Qt::Horizontal);
+    QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
+    QGraphicsLinearLayout *statusLayout = new QGraphicsLinearLayout(Qt::Horizontal);
     mStatusLabel = new HbLabel(this);
     mStatusLabel->setAlignment(Qt::AlignLeft);
     statusLayout->setMaximumHeight(15);
 
-    HbLabel* statusHeader = new HbLabel("Status: ");
+    HbLabel *statusHeader = new HbLabel("Status: ");
     statusHeader->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
     statusLayout->addItem(statusHeader);
     statusLayout->addItem(mStatusLabel);
 
-    HbGridView* activities = new HbGridView();
+    HbGridView *activities = new HbGridView();
     connect(activities, SIGNAL(activated(QModelIndex)), this, SLOT(itemPressed(QModelIndex)));
     activities->setRowCount(1);
     activities->setColumnCount(1);
@@ -73,7 +73,7 @@ ActivityLauncherView::ActivityLauncherView(QGraphicsItem *parent) : HbView(paren
 
 ActivityLauncherView::~ActivityLauncherView()
 {
-	delete mActivityManager;
+    delete mActivityManager;
 }
 
 void ActivityLauncherView::getActivitiesList()
@@ -84,13 +84,13 @@ void ActivityLauncherView::getActivitiesList()
     mModel->clear();
 
     foreach(const QVariantHash& activityEntry, mCurrentActivities) {
-        QStandardItem* newItem = new QStandardItem(QIcon(activityEntry.value("screenshot").value<QPixmap>()), QString("%1").arg(activityEntry.value(ActivityActivityKeyword).toInt()));
+        QStandardItem *newItem = new QStandardItem(QIcon(activityEntry.value("screenshot").value<QPixmap>()), QString("%1").arg(activityEntry.value(ActivityActivityKeyword).toInt()));
         mModel->invisibleRootItem()->appendRow(newItem);
     }
     mStatusLabel->setPlainText(QString("Ready (%1 activities)").arg(mCurrentActivities.count()));
 }
 
-bool ActivityLauncherView::eventFilter(QObject* obj, QEvent* event)
+bool ActivityLauncherView::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::ApplicationActivate) {
         getActivitiesList();
@@ -98,7 +98,7 @@ bool ActivityLauncherView::eventFilter(QObject* obj, QEvent* event)
     return QObject::eventFilter(obj, event);
 }
 
-void ActivityLauncherView::itemPressed(const QModelIndex& index)
+void ActivityLauncherView::itemPressed(const QModelIndex &index)
 {
     QVariantHash activity = mCurrentActivities.at(index.row());
     int applicationId = activity.value(ActivityApplicationKeyword).toInt();

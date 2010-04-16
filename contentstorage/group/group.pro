@@ -31,11 +31,11 @@ BLD_INF_RULES.prj_mmpfiles += "casathandler.mmp" \
     "../casrv/casrvmgr/group/casrvmanager.mmp" \
     "camenu.mmp" \
     "camenusrv.mmp" \
-    "caextendedmenu.mmp" \
     "../casrv/caappscanner/group/caappscanner.mmp" \
     "../casrv/casatmonitor/group/casatmonitor.mmp" \
     "../casrv/cawidgetscanner/group/cawidgetscanner.mmp" \
-    "../casrv/carunningappmonitor/group/carunningappmonitor.mmp"
+    "../casrv/carunningappmonitor/group/carunningappmonitor.mmp" \
+    "../casrv/causifscanner/group/causifscanner.mmp" \
     
 tests_krakow {
         BLD_INF_RULES.prj_mmpfiles += \

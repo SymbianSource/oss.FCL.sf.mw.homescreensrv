@@ -57,8 +57,7 @@ void CCaWidgetDescription::ConstructL( )
 void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     {
     iEntryId = aEntry->GetId();
-    iDescription.CreateL(aEntry->GetDescription().Length());
-    iDescription = aEntry->GetDescription();
+    iDescription.CreateL( aEntry->GetDescription() );
     //package uid
     TBuf<KMaxUidName> uidDesc;
     aEntry->FindAttribute( KCaPackageUid, uidDesc );
@@ -67,10 +66,8 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
         TLex uidLex(uidDesc);
         User::LeaveIfError( uidLex.Val( iPackageUid, EHex ));
         }
-    iTitle.CreateL(aEntry->GetText().Length());
-    iTitle = aEntry->GetText();
-    iIconUri.CreateL(aEntry->GetIcon().iFileName.Length());
-    iIconUri = aEntry->GetIcon().iFileName;
+    iTitle.CreateL( aEntry->GetText() );
+    iIconUri.CreateL( aEntry->Icon()->FileName() );
     //library
     iLibrary.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetLibrary, iLibrary );

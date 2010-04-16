@@ -77,7 +77,7 @@ TInt CAHAppLauncher::ExecuteTypeLaunchL( const CLiwMap* aMap )
     TInt errCode(KErrArgument);
     RBuf launchMethod;
     CleanupClosePushL( launchMethod );
-    
+
     if ( !ExtractDesL( aMap, launchMethod, KLaunchMethod ) )
         {
         if ( !launchMethod.CompareF( KLaunchMethodValueCmdLine ) )
@@ -90,8 +90,8 @@ TInt CAHAppLauncher::ExecuteTypeLaunchL( const CLiwMap* aMap )
             errCode = ExecuteApaMessageL( aMap );
             }
         }
-        
-    CleanupStack::PopAndDestroy( &launchMethod );       
+
+    CleanupStack::PopAndDestroy( &launchMethod );
     return errCode;
     }
 
@@ -133,19 +133,19 @@ TInt CAHAppLauncher::ExecuteCommmandLineL( const CLiwMap* aMap )
 // ---------------------------------------------------------------------------
 // Executes provided apa message action
 // ---------------------------------------------------------------------------
-// 
+//
 TInt CAHAppLauncher::ExecuteApaMessageL( const CLiwMap* aMap )
     {
     TInt errCode(KErrArgument);
     TUid appUid= TUid::Null( );
     if ( !ExtractUidL( aMap, appUid, KApplicationUid ) )
         {
-        TApaTaskList taskList( iEnv->WsSession() );       
+        TApaTaskList taskList( iEnv->WsSession() );
         TApaTask task = taskList.FindApp( appUid );
         if ( task.Exists( ) )
             {
             TUid messageUid= TUid::Null( );
-            
+
             RBuf8 additionalData;
             CleanupClosePushL( additionalData );
             if ( !ExtractUidL( aMap, messageUid, KMessageUid )
@@ -153,7 +153,7 @@ TInt CAHAppLauncher::ExecuteApaMessageL( const CLiwMap* aMap )
                 {
                 errCode = task.SendMessage( messageUid, additionalData );
                 }
-            CleanupStack::PopAndDestroy( &additionalData );    
+            CleanupStack::PopAndDestroy( &additionalData );
             }
         else
             { // app not yet running
@@ -170,7 +170,7 @@ TInt CAHAppLauncher::ExecuteApaMessageL( const CLiwMap* aMap )
                     errCode = StartAppL( aMap );
                     }
                 }
-            CleanupStack::PopAndDestroy( &launchMethod );     
+            CleanupStack::PopAndDestroy( &launchMethod );
             }
         }
     return errCode;
@@ -179,14 +179,14 @@ TInt CAHAppLauncher::ExecuteApaMessageL( const CLiwMap* aMap )
 // ---------------------------------------------------------------------------
 // Start document
 // ---------------------------------------------------------------------------
-// 
+//
 TInt CAHAppLauncher::StartDocumentL( const CLiwMap* aMap )
     {
     TInt errCode(KErrArgument);
     TUid appUid= TUid::Null( );
     RBuf documentNameValue;
     CleanupClosePushL( documentNameValue );
-    if ( !ExtractUidL( aMap, appUid, KApplicationUid ) 
+    if ( !ExtractUidL( aMap, appUid, KApplicationUid )
         && !ExtractDesL( aMap, documentNameValue, KDocumentName ) )
         {
         RApaLsSession appArcSession;
@@ -202,7 +202,7 @@ TInt CAHAppLauncher::StartDocumentL( const CLiwMap* aMap )
 // ---------------------------------------------------------------------------
 // Starts application
 // ---------------------------------------------------------------------------
-// 
+//
 TInt CAHAppLauncher::StartAppL( const CLiwMap* aMap )
     {
     TInt errCode(KErrArgument);
@@ -294,7 +294,7 @@ TInt CAHAppLauncher::ExecuteActionL( const CLiwMap* aMap )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CAHAppLauncher::ExtractDesL( const CLiwMap* aMap,
@@ -306,17 +306,23 @@ TInt CAHAppLauncher::ExtractDesL( const CLiwMap* aMap,
     TPtrC tempString( KNullDesC );
     if ( aMap->FindL( aMapName, variant ) )
         {
-        variant.Get( tempString );
-        aString.ReAllocL( tempString.Length( ) );
-        aString.Append( tempString );
-        errCode = KErrNone;
+        if ( variant.Get( tempString ) )
+            {
+            aString.ReAllocL( tempString.Length( ) );
+            aString.Append( tempString );
+            errCode = KErrNone;
+            }
+        else
+            {
+            errCode = KErrCorrupt;
+            }
         }
-    CleanupStack::PopAndDestroy( &variant );    
+    CleanupStack::PopAndDestroy( &variant );
     return errCode;
     }
-    
+
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CAHAppLauncher::ExtractDes8L( const CLiwMap* aMap,
@@ -328,17 +334,23 @@ TInt CAHAppLauncher::ExtractDes8L( const CLiwMap* aMap,
     TPtrC8 tempString( KNullDesC8 );
     if ( aMap->FindL( aMapName, variant ) )
         {
-        variant.Get( tempString );
-        aString.ReAllocL( tempString.Length( ) );
-        aString.Append( tempString );
-        errCode = KErrNone;
+        if ( variant.Get( tempString ) )
+            {
+            aString.ReAllocL( tempString.Length( ) );
+            aString.Append( tempString );
+            errCode = KErrNone;
+            }
+        else
+            {
+            errCode = KErrCorrupt;
+            }
         }
-    CleanupStack::PopAndDestroy( &variant );    
+    CleanupStack::PopAndDestroy( &variant );
     return errCode;
-    }    
+    }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CAHAppLauncher::ExtractUidL( const CLiwMap* aMap, TUid& aUid,
@@ -351,16 +363,22 @@ TInt CAHAppLauncher::ExtractUidL( const CLiwMap* aMap, TUid& aUid,
     variant.PushL( );
     if ( aMap->FindL( aMapName, variant ) )
         {
-        variant.Get( temp );
-        aUid = TUid::Uid( temp );
-        errCode = KErrNone;
+        if ( variant.Get( temp ) )
+            {
+            aUid = TUid::Uid( temp );
+            errCode = KErrNone;
+            }
+        else
+            {
+            errCode = KErrCorrupt;
+            }
         }
     CleanupStack::PopAndDestroy( &variant );
     return errCode;
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CAHAppLauncher::ExtractViewIdL( const CLiwMap* aMap, TVwsViewId& aViewId )
@@ -370,13 +388,25 @@ TInt CAHAppLauncher::ExtractViewIdL( const CLiwMap* aMap, TVwsViewId& aViewId )
     TLiwVariant variant;
     if ( aMap->FindL( KViewId, variant ) )
         {
-        variant.Get( aViewId.iViewUid.iUid );
-        variant.Reset( );
-        if ( aMap->FindL( KViewAppUid, variant ) )
+        if ( variant.Get( aViewId.iViewUid.iUid ) )
             {
-            variant.Get( aViewId.iAppUid.iUid );
             variant.Reset( );
-            errCode = KErrNone;
+            if ( aMap->FindL( KViewAppUid, variant ) )
+                {
+                if ( variant.Get( aViewId.iAppUid.iUid ) )
+                    {
+                    variant.Reset( );
+                    errCode = KErrNone;
+                    }
+                else
+                    {
+                    errCode = KErrCorrupt;
+                    }
+                }
+            }
+        else
+            {
+            errCode = KErrCorrupt;
             }
         }
 
@@ -384,7 +414,7 @@ TInt CAHAppLauncher::ExtractViewIdL( const CLiwMap* aMap, TVwsViewId& aViewId )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TApaCommand CAHAppLauncher::GetCommandL( const CLiwMap* aMap )
@@ -403,4 +433,4 @@ TApaCommand CAHAppLauncher::GetCommandL( const CLiwMap* aMap )
     return command;
     }
 
-// End of file   
+// End of file

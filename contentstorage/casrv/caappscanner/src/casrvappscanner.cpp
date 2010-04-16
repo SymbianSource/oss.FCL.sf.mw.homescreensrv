@@ -20,6 +20,7 @@
 #include <swi/sisregistrysession.h>
 #include <swi/sisregistryentry.h>
 #include <swi/sisregistrypackage.h>
+#include <WidgetRegistryClient.h>
 
 #include "cadef.h"
 #include "casrvappscanner.h"
@@ -31,6 +32,8 @@
 #include "cainnerentry.h"
 #include "caarraycleanup.inl"
 #include "castorageproxy.h"
+
+
 
 // ==================== LOCAL FUNCTIONS ====================
 
@@ -135,6 +138,7 @@ void CCaSrvAppScanner::ConstructL()
     User::LeaveIfError( iApaLsSession.GetAllApps() ); // This is async.
     iApaLsSession.RegisterListPopulationCompleteObserver( iStatus );
     iCollectionDownloadId = 0;
+    iAllCollectionId = 0;
     SetActive();
     }
 
@@ -148,6 +152,7 @@ void CCaSrvAppScanner::RunL()
     // AppArc app scan complete, we have the app list.
     UpdateApplicationEntriesL();
     InstallationNotifyL();
+    MakeNotEmptyCollectionsVisibleL();
     }
 
 // ---------------------------------------------------------
@@ -221,7 +226,7 @@ void CCaSrvAppScanner::UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId )
     toUpdate = HandleMissingFlagUpdate( aEntry ) || toUpdate;
     toUpdate = HandleLockDeleteFlagUpdateL( aEntry ) || toUpdate;
     toUpdate = SetApaAppInfoL( aEntry ) || toUpdate;
-       
+
     if( iInstalledPackages.Find( aEntry->GetUid() ) != KErrNotFound )
         {
         AddEntryToDownloadedCollectionL( aEntry->GetId() );
@@ -232,6 +237,7 @@ void CCaSrvAppScanner::UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId )
         //update app in storage
         iCaStorageProxy.AddL( aEntry );
         RemoveFromInstalledPackages( aEntry->GetUid() );
+        AddEntryToPredefinedCollectionL( aEntry, ETrue );
         }
     }
 // ---------------------------------------------------------
@@ -275,14 +281,14 @@ TBool CCaSrvAppScanner::HandleMmcAttrUpdateL(
         CCaInnerEntry* aItem, TUint aMmcId )
     {
     TBool toUpdate( ETrue );
-    if( IsInMmc( TUid::Uid( aItem->GetUid() ) ) )
+    if( IsInMmcL( TUid::Uid( aItem->GetUid() ) ) )
         {
         //app is instaled on mmc - KCaAttrMmcId attribute update
         TBuf<KUidChars> uidString;
         uidString.Format( KHexFormat, aMmcId );
         aItem->AddAttributeL( KCaAttrMmcId, uidString );
         }
-    else if ( IsInMassStorage( TUid::Uid( aItem->GetUid() ) ) )
+    else if ( IsInMassStorageL( TUid::Uid( aItem->GetUid() ) ) )
         {
         //its app installed on mass storage, we need to leave it
         //in case of connecting usb in mass storage mode
@@ -362,7 +368,7 @@ TBool CCaSrvAppScanner::HandleLockDeleteFlagUpdateL( CCaInnerEntry* aItem )
     {
     TBool toChange( EFalse );
     TBool isVisible = ( ( aItem->GetFlags() & EVisible ) != 0 );
-    if( isVisible && IsInRom( aItem->GetUid() ) )
+    if( isVisible && IsInRomL( aItem->GetUid() ) )
         {
         if( ( aItem->GetFlags() & ERemovable ) != 0 )
             {
@@ -441,21 +447,21 @@ void CCaSrvAppScanner::HandleHsAppEntryL( RPointerArray<CCaInnerEntry>& aArray )
     appEntry->SetUid( KHsAppUid.iUid );
     TInt index = aArray.Find(
             appEntry, TIdentityRelation<CCaInnerEntry>( UidMatch ) );
-    
+
     if ( index != KErrNotFound )
         { // hs app already in storage - ensure it is hidden and remove from resultArray
         if ( ( aArray[index]->GetFlags() & EVisible ) != 0 )
             {
             aArray[index]->SetFlags( aArray[index]->GetFlags() & ~EVisible);
             iCaStorageProxy.AddL( aArray[index] );
-            }        
+            }
         delete aArray[index];
-        aArray.Remove( index );        
+        aArray.Remove( index );
         }
     else
         { // if not found add as not visible to the storage
         appEntry->SetEntryTypeNameL( KCaTypeApp );
-        appEntry->SetFlags( 0 ); 
+        appEntry->SetFlags( 0 );
         appEntry->SetRole( EItemEntryRole );
         SetApaAppInfoL( appEntry );
         iCaStorageProxy.AddL( appEntry );
@@ -470,23 +476,25 @@ void CCaSrvAppScanner::HandleHsAppEntryL( RPointerArray<CCaInnerEntry>& aArray )
 //
 void CCaSrvAppScanner::GetApaItemsL( RArray<TCaAppAtributes>& aArray )
     {
-    TApaAppInfo appInfo;
+    TApaAppInfo* appInfo = new(ELeave) TApaAppInfo();
+    CleanupStack::PushL(appInfo);
     TApaAppCapabilityBuf appCap;
 
     User::LeaveIfError( iApaLsSession.GetAllApps( 0 ) );
     // for every application get uid, hidden and missing attribute
     // and add to aArray.
-    while( KErrNone == iApaLsSession.GetNextApp( appInfo ) )
+    while( KErrNone == iApaLsSession.GetNextApp( *appInfo ) )
         {
         User::LeaveIfError( iApaLsSession.GetAppCapability(
-                appCap, appInfo.iUid ) );
+                appCap, appInfo->iUid ) );
         // "Hidden" status according to AppArc.
         if( !appCap().iAppIsHidden )
             {
-            TCaAppAtributes appAtributes( appInfo.iUid.iUid );
+            TCaAppAtributes appAtributes( appInfo->iUid.iUid );
             aArray.AppendL( appAtributes );
             }
         }
+    CleanupStack::PopAndDestroy(appInfo);
     }
 
 // ---------------------------------------------------------
@@ -531,6 +539,36 @@ TInt CCaSrvAppScanner::GetCollectionDownloadIdL()
         CleanupStack::PopAndDestroy( &resultArray );
         }
     return iCollectionDownloadId;
+    }
+
+// ---------------------------------------------------------
+// CCaSrvAppScanner::GetAllCollectionIdL
+// ---------------------------------------------------------
+//
+TInt CCaSrvAppScanner::GetAllCollectionIdL()
+    {
+    if( iAllCollectionId == 0 )
+        {
+        CCaInnerQuery *getAllCollectionIdQuery = CCaInnerQuery::NewLC();
+        CDesC16ArrayFlat *typenameArray = new(ELeave) CDesC16ArrayFlat(
+                KDefaultGranularity );
+        CleanupStack::PushL( typenameArray );
+        typenameArray->AppendL( KCaTypeMenuCollections );
+        getAllCollectionIdQuery->SetEntryTypeNames( typenameArray );
+        CleanupStack::Pop( typenameArray );
+        
+        RArray<TInt> idArray;
+        CleanupClosePushL( idArray );
+        iCaStorageProxy.GetEntriesIdsL( getAllCollectionIdQuery,
+                idArray );
+        if( idArray.Count() )
+            {
+            iAllCollectionId = idArray[0];
+            }
+        CleanupStack::PopAndDestroy( &idArray );
+        CleanupStack::PopAndDestroy( getAllCollectionIdQuery );
+        }
+    return iAllCollectionId;
     }
 
 // ---------------------------------------------------------
@@ -652,7 +690,7 @@ void CCaSrvAppScanner::NotifyL( TInt aAppUid )
 void CCaSrvAppScanner::AddEntryToDownloadedCollectionL( TInt aEntryId )
     {
     TCaOperationParams params = { TCaOperationParams::EPrepend, GetCollectionDownloadIdL(), 0 // not used
-    		};
+            };
 
     RArray<TInt> entryIds;
     CleanupClosePushL( entryIds );
@@ -663,13 +701,124 @@ void CCaSrvAppScanner::AddEntryToDownloadedCollectionL( TInt aEntryId )
     }
 
 // ---------------------------------------------------------
+// CCaSrvAppScanner::AddEntryToPredefinedCollectionL
+// ---------------------------------------------------------
+//
+void CCaSrvAppScanner::AddEntryToPredefinedCollectionL(
+        CCaInnerEntry* aEntry, TBool aUpdate )
+    {
+    TApaAppCapabilityBuf capability;
+    User::LeaveIfError( iApaLsSession.GetAppCapability( capability,
+            TUid::Uid( aEntry->GetUid() ) ) );
+
+    if( capability().iGroupName.Length() )
+        {
+        // appgroup_name is defined for this app. Find or create folder.
+        CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
+        innerQuery->SetRole( CCaInnerQuery::Group );          
+        innerQuery->AddAttributeL( KCaAppGroupName,
+                capability().iGroupName );
+        
+        // get entries by attributes
+        RPointerArray<CCaInnerEntry> resultArrayItems;
+        CleanupResetAndDestroyPushL( resultArrayItems );
+        iCaStorageProxy.GetEntriesL( innerQuery, resultArrayItems );
+
+        RArray<TInt> entryIds;
+        CleanupClosePushL( entryIds );
+        TInt entryId = aEntry->GetId();
+        entryIds.AppendL( entryId );
+        TCaOperationParams organizeParams;
+        organizeParams.iBeforeEntryId = 0;
+        
+        if( resultArrayItems.Count() )
+            {
+            // collection with appgroup_name exist - add entry 
+            // to this collection
+            organizeParams.iGroupId = resultArrayItems[0]->GetId();
+            }
+        else
+            {
+            // create new collection
+            TInt predefinedCollectionId = CreatePredefinedCollectionL(
+                    capability().iGroupName );
+            
+            organizeParams.iGroupId = predefinedCollectionId;
+
+            // add new collection to all collection   
+            AddCollectionToAllCollectionL( predefinedCollectionId );
+            
+            if( aUpdate )
+                {
+                organizeParams.iOperationType = TCaOperationParams::EAppend;
+                iCaStorageProxy.OrganizeL( entryIds, organizeParams );
+                }
+            }
+        
+        if( !aUpdate )
+            {
+            organizeParams.iOperationType = TCaOperationParams::EAppend;
+            iCaStorageProxy.OrganizeL( entryIds, organizeParams );
+            }
+        
+        CleanupStack::PopAndDestroy( &entryIds );
+        CleanupStack::PopAndDestroy( &resultArrayItems );
+        CleanupStack::PopAndDestroy( innerQuery );
+        } 
+    }
+
+// ---------------------------------------------------------
+// CCaSrvAppScanner::CreatePredefinedCollectionL
+// ---------------------------------------------------------
+//
+TInt CCaSrvAppScanner::CreatePredefinedCollectionL( const TDesC& aGroupName )
+    {
+    CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
+    innerEntry->SetTextL( aGroupName );
+    innerEntry->SetEntryTypeNameL( KCaTypeCollection );
+    innerEntry->SetRole( CCaInnerQuery::Group );
+    innerEntry->AddAttributeL( KCaAppGroupName, aGroupName );
+    innerEntry->SetFlags( EVisible );
+    innerEntry->SetFlags( innerEntry->GetFlags() | ERemovable );
+    _LIT( KCollectionIconFileName, "qtg_large_applications_user");
+    innerEntry->SetIconDataL( KCollectionIconFileName,
+            KNullDesC, KNullDesC );
+    iCaStorageProxy.AddL( innerEntry );
+    // Get new collection Id
+    TInt newCollectionId = innerEntry->GetId();
+    CleanupStack::PopAndDestroy( innerEntry );
+    
+    return newCollectionId;
+    }
+
+// ---------------------------------------------------------
+// CCaSrvAppScanner::AddCollectionToAllCollectionL
+// ---------------------------------------------------------
+//
+void CCaSrvAppScanner::AddCollectionToAllCollectionL( TInt aCollectionId )
+    {
+    RArray<TInt> entryIds;
+    CleanupClosePushL( entryIds );
+    entryIds.AppendL( aCollectionId );
+    
+    TCaOperationParams organizeParams;
+    organizeParams.iBeforeEntryId = 0;
+    organizeParams.iOperationType = TCaOperationParams::EAppend;
+    organizeParams.iGroupId = GetAllCollectionIdL();
+    iCaStorageProxy.OrganizeL( entryIds, organizeParams );
+    CleanupStack::PopAndDestroy( &entryIds );
+    }
+
+
+
+// ---------------------------------------------------------
 // CCaSrvAppScanner::RemoveToDownloadedCollectionL
 // ---------------------------------------------------------
 //
 void CCaSrvAppScanner::RemoveEntryFromDownloadedL( TInt aEntryId )
     {
     TCaOperationParams params = { TCaOperationParams::ERemove, GetCollectionDownloadIdL(), 0 // not used
-    		};
+            };
 
     RArray<TInt> entryIds;
     CleanupClosePushL( entryIds );
@@ -713,6 +862,9 @@ void CCaSrvAppScanner::AddAppEntryL( TUint aUid, TUint aCurrentMmcId )
     HandleMmcAttrUpdateL( appEntry, aCurrentMmcId );
 
     iCaStorageProxy.AddL( appEntry );
+    
+    AddEntryToPredefinedCollectionL( appEntry );
+    
     if( iInstalledPackages.Find( aUid ) != KErrNotFound )
         {
         AddEntryToDownloadedCollectionL( appEntry->GetId() );
@@ -759,6 +911,29 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
             changed = ETrue;
             }
         CleanupStack::PopAndDestroy( &attrVal );
+        // check if its java app and add attr for entrys
+        TUid appTypeUid;
+        if( KErrNone == iApaLsSession.GetAppType( appTypeUid, info.iUid ) )
+            {
+            if( appTypeUid == KMidletApplicationTypeUid )
+                {
+                aEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueJava );
+                aEntry->AddAttributeL( KCaAttrAppSettingsPlugin, KCaAttrJavaAppSettingsPluginValue );
+                }
+            else if (appTypeUid == KCWRTApplicationTypeUid) 
+                {
+                aEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueCWRT );
+                aEntry->AddAttributeL( KCaAttrAppWidgetUri, KCaAttrAppWidgetUriCWRTValue );
+                // web id should be taken from SCR when supported
+                RWidgetRegistryClientSession wrtSession;
+                CleanupClosePushL(wrtSession);
+                User::LeaveIfError( wrtSession.Connect());
+                TFileName bundleId;
+                wrtSession.GetWidgetBundleId(info.iUid, bundleId);
+                aEntry->AddAttributeL( KCaAttrAppWidgetParamWebAppId, bundleId );
+                CleanupStack::PopAndDestroy(&wrtSession);
+                }
+            }
         }
     return changed;
     }
@@ -794,12 +969,13 @@ void CCaSrvAppScanner::HandleMissingItemsL(
                 }
             else
                 {
-                RemoveAppL( aCaEntries[i] );
+                //RemoveAppL( aCaEntries[i] );
+                AddObjectFlagL( aCaEntries[i], EMissing );
                 }
             }
         else
             {
-            RemoveAppL( aCaEntries[i] );
+            AddObjectFlagL( aCaEntries[i], EMissing );
             }
         CleanupStack::PopAndDestroy( &attrVal );
         }
@@ -898,48 +1074,49 @@ TBool CCaSrvAppScanner::IsFileInDrive(
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::IsAppInDrive
+// CCaSrvAppScanner::IsAppInDriveL
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::IsAppInDrive(
+TBool CCaSrvAppScanner::IsAppInDriveL(
         const TUid aUid,
         const DriveInfo::TDefaultDrives& aDefaultDrive ) const
     {
     TBool ret( EFalse );
-    TApaAppInfo info;
-    TInt err = iApaLsSession.GetAppInfo( info, aUid );
-    if( !err && IsFileInDrive( info.iFullName, aDefaultDrive ) )
+    TApaAppInfo* appInfo = new( ELeave ) TApaAppInfo();
+    TInt err = iApaLsSession.GetAppInfo( *appInfo, aUid );
+    if( !err && IsFileInDrive( appInfo->iFullName, aDefaultDrive ) )
         {
         ret = ETrue;
         }
+    delete appInfo;
     return ret;
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::IsInMmc
+// CCaSrvAppScanner::IsInMmcL
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::IsInMmc( const TUid aUid ) const
+TBool CCaSrvAppScanner::IsInMmcL( const TUid aUid ) const
     {
-    return IsAppInDrive( aUid, DriveInfo::EDefaultRemovableMassStorage );
+    return IsAppInDriveL( aUid, DriveInfo::EDefaultRemovableMassStorage );
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::IsInMassStorage
+// CCaSrvAppScanner::IsInMassStorageL
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::IsInMassStorage( const TUid aUid ) const
+TBool CCaSrvAppScanner::IsInMassStorageL( const TUid aUid ) const
     {
-    return IsAppInDrive( aUid, DriveInfo::EDefaultMassStorage );
+    return IsAppInDriveL( aUid, DriveInfo::EDefaultMassStorage );
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::IsInRom
+// CCaSrvAppScanner::IsInRomL
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::IsInRom( TInt aUid )
+TBool CCaSrvAppScanner::IsInRomL( TInt aUid )
     {
-    return IsAppInDrive( TUid::Uid( aUid ), DriveInfo::EDefaultRom );
+    return IsAppInDriveL( TUid::Uid( aUid ), DriveInfo::EDefaultRom );
     }
 
 // ---------------------------------------------------------
@@ -964,6 +1141,54 @@ TBool CCaSrvAppScanner::IsDriveInUse(
         }
 
     return inUse;
+    }
+
+void CCaSrvAppScanner::MakeNotEmptyCollectionsVisibleL()
+    {
+    RPointerArray<CCaInnerEntry> resultArray;
+    CleanupResetAndDestroyPushL( resultArray );
+    CCaInnerQuery* hiddenCollectionsQuery = CCaInnerQuery::NewLC();
+    CDesC16ArrayFlat* entryType = new ( ELeave ) CDesC16ArrayFlat(
+            KGranularityOne );
+    CleanupStack::PushL( entryType );
+    entryType->AppendL( KCaTypeCollection );
+    hiddenCollectionsQuery->SetEntryTypeNames( entryType );
+    hiddenCollectionsQuery->SetFlagsOff( EVisible );
+    iCaStorageProxy.GetEntriesL( hiddenCollectionsQuery, resultArray );
+    CleanupStack::Pop( entryType );
+    CleanupStack::PopAndDestroy( hiddenCollectionsQuery );
+    if( resultArray.Count() )
+        {
+        for( TInt i=0; i<resultArray.Count(); i++ )
+            {
+            // for any not visible collection
+            MakeCollectionVisibleIfHasVisibleEntryL( resultArray[i] );
+            }
+        }
+    CleanupStack::PopAndDestroy( &resultArray );
+   }
+
+void CCaSrvAppScanner::MakeCollectionVisibleIfHasVisibleEntryL(
+        CCaInnerEntry* aEntry )
+    {
+    RPointerArray<CCaInnerEntry> resultEntriesArray;
+    CleanupResetAndDestroyPushL( resultEntriesArray );
+    CCaInnerQuery* visibleEntriesQuery = CCaInnerQuery::NewLC();
+    visibleEntriesQuery->SetParentId( aEntry->GetId() );
+    visibleEntriesQuery->SetFlagsOn( EVisible );
+    visibleEntriesQuery->SetFlagsOff( EMissing );
+    iCaStorageProxy.GetEntriesL( visibleEntriesQuery, resultEntriesArray );
+    if( resultEntriesArray.Count() )
+        {
+        // set collection visible if hidden
+        if( HandleHiddenFlagUpdateL( aEntry ) )
+            {
+            // update here this collection
+            iCaStorageProxy.AddL( aEntry, ETrue );
+            }
+        }
+    CleanupStack::PopAndDestroy( visibleEntriesQuery );
+    CleanupStack::PopAndDestroy( &resultEntriesArray );
     }
 
 // ==================== MEMBER FUNCTIONS ====================

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYCLIENT_P_H
@@ -26,11 +26,10 @@ class ActivityClient;
 class ActivityDataStorage;
 class ActivityServerClient;
 class HsActivityDbClient;
-
-class ActivityClientPrivate : public QObject 
+class ActivityClientPrivate : public QObject
 {
 
-Q_OBJECT
+    Q_OBJECT
 
 public:
     ActivityClientPrivate(ActivityClient *q);
@@ -43,12 +42,16 @@ public:
     QList<QVariantHash> activities() const;
     QVariant activityData(const QString &activityId) const;
     bool waitActivity();
-    
-    
+    QVariantHash parseCommandLine(const QStringList &commandLineParams) const;
+
 private:
-    ActivityClient* q_ptr;   
-    ActivityDataStorage* mDataStorage;
-    HsActivityDbClient* mServerClient;
+    void registerThumbnail(const QString &, QVariantHash&);
+    QString thumbnailName(const QString &) const;
+
+private:
+    ActivityDataStorage *mDataStorage;
+    HsActivityDbClient *mServerClient;
+    bool isconnected;
 };
 
 #endif // ACTIVITYCLIENT_P_H

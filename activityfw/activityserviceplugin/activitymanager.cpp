@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -26,27 +26,32 @@ ActivityManager::~ActivityManager()
 {
 }
 
-QList<QVariantHash> ActivityManager::activitiesList() 
-{ 
-    return d_ptr->activitiesList(); 
+QList<QVariantHash> ActivityManager::activitiesList()
+{
+    return d_ptr->activitiesList();
 }
 
 void ActivityManager::launchActivity(const QString &uri)
-{ 
-    d_ptr->launchActivity(uri); 
+{
+    d_ptr->launchActivity(uri);
 }
 
 void ActivityManager::launchActivity(int applicationId, const QString &activityId)
-{ 
+{
     d_ptr->launchActivity(applicationId, activityId);
 }
 
 void ActivityManager::removeActivity(int applicationId, const QString &activityId)
-{ 
+{
     d_ptr->removeActivity(applicationId, activityId);
 }
 
 void ActivityManager::removeApplicationActivities(int applicationId)
-{ 
+{
     d_ptr->removeApplicationActivities(applicationId);
+}
+
+void ActivityManager::getThumbnail(const QString &thumbnailId, void *userData)
+{
+   d_ptr->getThumbnail(thumbnailId, userData);
 }

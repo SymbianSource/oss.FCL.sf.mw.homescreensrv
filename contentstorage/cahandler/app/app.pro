@@ -39,7 +39,6 @@ symbian: {
     -lecom \
     -lswinstcli \
     -lcautils \
-    -lcaclient \
     -lapgrfx \
     -lws32 \
     -lapparc \
@@ -47,8 +46,9 @@ symbian: {
     -leikcore \
     -lcone \
     -lefsrv \
+    -lsif \
+    -lscrclient \
     -lxqutils
-    
 
     exists($${EPOCROOT}epoc32/include/mw/XQSettingsManager):LIBS += -lxqsettingsmanager
 }

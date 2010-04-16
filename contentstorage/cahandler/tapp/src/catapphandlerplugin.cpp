@@ -15,15 +15,8 @@
  *
  */
 
-/*#include <qserviceinterfacedescriptor.h>
- #include <qabstractsecuritysession.h>
- #include <qservicecontext.h>
- */
-
 #include "catapphandlerplugin.h"
 #include "catapphandler.h"
-
-#include <cadefs.h>
 
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP

@@ -382,7 +382,7 @@ void CaItemModel::setFlagsOff(const EntryFlags &offFlags)
  \endcode
 
  */
-CaEntry *CaItemModel::entry(const QModelIndex &index) const
+QSharedPointer<CaEntry> CaItemModel::entry(const QModelIndex &index) const
 {
     return m_d->entry(index);
 }
@@ -394,7 +394,7 @@ CaEntry *CaItemModel::entry(const QModelIndex &index) const
  */
 CaItemModelPrivate::CaItemModelPrivate(const CaQuery &query,
                                        CaItemModel *itemModelPublic) :
-    QObject(), m_q(itemModelPublic), mParentEntry(0), mQuery(query),
+    QObject(), m_q(itemModelPublic), mParentEntry(), mQuery(query),
     mService(CaService::instance()), mEntries(mService), mNotifier(NULL),
     mSize(defaultIconSize), mSecondLineVisibility(true)
 {
@@ -408,7 +408,6 @@ CaItemModelPrivate::CaItemModelPrivate(const CaQuery &query,
 CaItemModelPrivate::~CaItemModelPrivate()
 {
     mEntries.clear();
-    delete mParentEntry;
     delete mNotifier;
 }
 
@@ -465,6 +464,10 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
             break;
         case CaItemModel::TextRole:
             variant = QVariant(entry(modelIndex)->text());
+            break;
+        case CaItemModel::FullTextRole:
+            variant = QVariant(entry(modelIndex)->text() + QString(" ")
+                + entry(modelIndex)->description());
             break;
         default:
             variant = QVariant(QVariant::Invalid);
@@ -550,7 +553,7 @@ QModelIndex CaItemModelPrivate::root()
  \param modelIndex index of entry in model
  \retval pointer to an entry
  */
-CaEntry *CaItemModelPrivate::entry(const QModelIndex &modelIndex) const
+QSharedPointer<CaEntry> CaItemModelPrivate::entry(const QModelIndex &modelIndex) const
 {
     if (modelIndex.column() == 1) {
         return mParentEntry;
@@ -687,7 +690,6 @@ void CaItemModelPrivate::updateParentEntry()
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateParentEntry");
 
     if (mQuery.parentId()) {
-        delete mParentEntry;
         mParentEntry = mService->getEntry(mQuery.parentId());
     }
 
@@ -706,14 +708,14 @@ void CaItemModelPrivate::updateItemData(int id)
     mEntries.updateEntry(id);
 
     QList<int> ids = mService->getEntryIds(mQuery);
-    if (mEntries.indexOf(id) >= 0 
+    if (mEntries.indexOf(id) >= 0
            && ids.indexOf(id) == mEntries.indexOf(id)) {
         emit m_q->dataChanged(index(mEntries.indexOf(id)), index(
                                   mEntries.indexOf(id)));
     } else if (ids.indexOf(id) < 0){
         removeItem(id);
     } else if (mEntries.indexOf(id) < 0){
-        addItem(id);  
+        addItem(id);
     } else if (mParentEntry && id == mParentEntry->id()) {
         updateParentEntry();
         m_q->reset();
@@ -743,63 +745,63 @@ void CaItemModelPrivate::addItem(int id)
 }
 
 /*!
+ Adds new item block to model
+ Use in cases when inserting / appending an adjacent block of items
+ \param itemsList list of adjacent items
+ */
+void CaItemModelPrivate::addItemBlock(const QList<int> &itemsList)
+{
+    CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::addItemBlock");
+    if (!itemsList.isEmpty()) {
+        int firstRow = itemRow(itemsList.first());
+        int lastRow = itemRow(itemsList.last());
+        m_q->beginInsertRows(QModelIndex(), firstRow, lastRow);
+        for (int i = 0; i < itemsList.count(); ++i) {
+            mEntries.insert(firstRow + i, itemsList.at(i));
+        }
+        m_q->endInsertRows();
+        emit m_q->scrollTo(firstRow, QAbstractItemView::PositionAtTop);
+    }
+    CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::addItemBlock");
+}
+
+/*!
  Adds new items to model
  \param itemsList current items list
  */
-void CaItemModelPrivate::handleAddItems(QList<int> &itemsList)
+void CaItemModelPrivate::handleAddItems(const QList<int> &itemsList)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::handleAddItems");
-
-    int entriesCount = mEntries.count();
-    if (entriesCount) {
-        int lastRow = itemsList.indexOf(mEntries[entriesCount - 1]);
-        if (itemsList.count() == entriesCount) {
-            //count is same and last item is in same position
-            //so we update whole model
-            bool orderChanged(false);
-            while (entriesCount) {
-                if (itemsList.indexOf(mEntries[entriesCount - 1]) 
-                        != (entriesCount - 1)) {
-                    orderChanged = true;
-                    break;
-                }
-                entriesCount--;
-            }
-            if (orderChanged) {
+    const int oldItemCount(mEntries.count());
+    if (oldItemCount) {
+        const int newItemCount(itemsList.count());
+        if (newItemCount == oldItemCount) {
+            // count is the same - check if item order changed
+            if (itemsList == mEntries.orderedIdList()) {
+                // assume that if the order has not changed
+                // it had to be the secondary lines
+                updateModel();
+            } else {
                 updateLayout();
             }
-            else {
-                updateModel();
-            }
-            
-        } else if ((itemsList.count() - entriesCount) == 1 && lastRow
-                   == entriesCount) {
-            //just one item added - collection
+        } else {
             int i = 0;
-            for (i = 0; i < entriesCount; i++) {
-                if (itemsList[i] != mEntries[i]) {
-                    addItem(itemsList[i]);
-                    updateLayout();
-                    emit m_q->scrollTo(i,
-                                       QAbstractItemView::PositionAtTop);
+            QList<int> oldList = mEntries.orderedIdList();
+            //we loop through items to find first added
+            while (i < oldList.count()) {
+                if (oldList[i] != itemsList[i]) {
+                    oldList.takeAt(i);
+                } else {
+                    ++i;
                 }
             }
-            while (i < itemsList.count()) {
-                addItem(itemsList[i]);
-                i++;
-            }
-        } else {
-            //some items were inserted
-            //so we update model and emit signal with row number
-            //of first moved/added item
-            //signal is needed to scroll a view to proper position after
-            //some items were added
             updateModel();
-            emit m_q->scrollTo(lastRow + 1,
-                               QAbstractItemView::PositionAtTop);
-        } 
+            //i is the index of first added item
+            emit m_q->scrollTo(i, QAbstractItemView::PositionAtTop);
+        }
     } else {
-        updateModel();
+        // items added to an empty list - add all as a single block
+        addItemBlock(itemsList);
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::handleAddItems");
 }
@@ -890,12 +892,10 @@ void CaItemModelPrivate::updateLayout()
     foreach (index, oldPersistentIndexList) {
         newPersistentIndexList <<
             m_q->createIndex(
-                newPositionsList.at(index.row()),
-                0,
-                index.internalPointer());
+                newPositionsList.at(index.row()), 0, index.internalPointer());
     }
-
-    m_q->changePersistentIndexList(oldPersistentIndexList, newPersistentIndexList);
+    m_q->changePersistentIndexList(
+        oldPersistentIndexList, newPersistentIndexList);
 
     m_q->layoutChanged();
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateLayout");

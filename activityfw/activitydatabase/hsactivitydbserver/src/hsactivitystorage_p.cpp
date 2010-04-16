@@ -37,12 +37,12 @@ HsActivityStoragePrivate::HsActivityStoragePrivate()
         settings.setValue(ActivityStorageProperty, ActivityDefaultStorage);
     }
     QString databaseFile = settings.value(ActivityStorageProperty).toString();
-    
+
     if (QSqlDatabase::contains(ActivityStorageName)) {
         mConn = QSqlDatabase::database(ActivityStorageName);
-    } else {   
+    } else {
         mConn = QSqlDatabase::addDatabase(ActivityStorageDriver, ActivityStorageName);
-        mConn.setDatabaseName(databaseFile);    
+        mConn.setDatabaseName(databaseFile);
         if (!mConn.open()) {
             qWarning(qPrintable(mConn.lastError().text()));
             return;
@@ -72,13 +72,13 @@ int HsActivityStoragePrivate::addActivity(const QVariantHash &activity)
     QByteArray streamedData;
     QDataStream stream(&streamedData, QIODevice::WriteOnly);
     stream << activity;
-    
+
     //insert data
     QSqlQuery query(mConn);
     query.prepare(ActivitySelectActivityQuery);
     bind(query, activity);
     exec(query);
-    if(query.next()) {
+    if (query.next()) {
         return KErrGeneral;
     }
     query.prepare(ActivityInsertActivityQuery);
@@ -99,7 +99,7 @@ int HsActivityStoragePrivate::updateActivity(const QVariantHash &activity)
     QByteArray streamedData;
     QDataStream stream(&streamedData, QIODevice::WriteOnly);
     stream << activity;
-    
+
     // update
     QSqlQuery query(mConn);
     query.prepare(ActivityUpdateActivityQuery);
@@ -131,8 +131,8 @@ int HsActivityStoragePrivate::removeApplicationActivities(const QVariantHash &ac
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStoragePrivate::requestedActivityName(QString& result, 
-                                                    const QVariantHash &activity)
+int HsActivityStoragePrivate::requestedActivityName(QString &result,
+        const QVariantHash &activity)
 {
     QSqlQuery query(mConn);
     query.prepare(ActivitySelectActiveQuery);
@@ -159,8 +159,8 @@ int HsActivityStoragePrivate::activities(QList<QVariantHash>& result)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStoragePrivate::applicationActivities(QList<QVariantHash> & result, 
-                                                    const QVariantHash & condition)
+int HsActivityStoragePrivate::applicationActivities(QList<QVariantHash> & result,
+        const QVariantHash &condition)
 {
     return activities(result, ActivityApplicationActivitiesQuery, condition);
 }
@@ -188,7 +188,7 @@ int HsActivityStoragePrivate::launchActivity(const QVariantHash &)
 //
 bool HsActivityStoragePrivate::checkTables()
 {
-    return (QStringList("Activities") == mConn.tables()); 
+    return (QStringList("Activities") == mConn.tables());
 }
 
 // -----------------------------------------------------------------------------
@@ -202,34 +202,34 @@ void HsActivityStoragePrivate::recreateTables()
         qErrnoWarning(qPrintable(mConn.lastError().text()));
         return;
     }
-    
+
     // drop any existing tables
     QSqlQuery query(mConn);
-    foreach (const QString &tableName, mConn.tables()) {
+    foreach(const QString &tableName, mConn.tables()) {
         query.prepare(ActivityDropQuery);
         query.bindValue(ActivityTableKeyword, tableName);
         exec(query);
     }
-    
+
     // create new table
     query.prepare(ActivityCreateQuery);
     exec(query);
-    
+
     //finish sql transaction
     if (!mConn.commit()) {
         qErrnoWarning(qPrintable(mConn.lastError().text()));
-    }  
+    }
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStoragePrivate::getSqlErrorCode(const QSqlQuery& query)
+int HsActivityStoragePrivate::getSqlErrorCode(const QSqlQuery &query)
 {
     const QSqlError err(query.lastError());
     const QString errStr(err.text());
-    
+
     if (QSqlError ::NoError == err.type()) {
         return 0;
     } else {
@@ -242,7 +242,7 @@ int HsActivityStoragePrivate::getSqlErrorCode(const QSqlQuery& query)
 //
 // -----------------------------------------------------------------------------
 //
-bool HsActivityStoragePrivate::exec(QSqlQuery& query)
+bool HsActivityStoragePrivate::exec(QSqlQuery &query)
 {
     const bool retVal = query.exec();
     qErrnoWarning(qPrintable(query.lastQuery()));
@@ -256,30 +256,30 @@ bool HsActivityStoragePrivate::exec(QSqlQuery& query)
 //
 // -----------------------------------------------------------------------------
 //
-bool HsActivityStoragePrivate::exec(const QString &queryStr, const QVariantHash& params)
+bool HsActivityStoragePrivate::exec(const QString &queryStr, const QVariantHash &params)
 {
     QSqlQuery query(mConn);
     query.prepare(queryStr);
     bind(query, params);
     query.exec();
     return getSqlErrorCode(query);
-    
+
 }
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityStoragePrivate::bind( QSqlQuery& query, 
-                                   const QVariantHash &activity,
-                                   const QVariantHash &additionalData)
+void HsActivityStoragePrivate::bind(QSqlQuery &query,
+                                    const QVariantHash &activity,
+                                    const QVariantHash &additionalData)
 {
     const QChar tag(' ');
-    QString queryString( query.lastQuery() );
+    QString queryString(query.lastQuery());
     QVariantHash::const_iterator iter;
     int offset(0);
     QStringList tokens;
-    
-    //explode SQL query to tokens 
+
+    //explode SQL query to tokens
     do {
         offset = queryString.indexOf(tag, 0);
         if (0 < offset) {
@@ -292,24 +292,24 @@ void HsActivityStoragePrivate::bind( QSqlQuery& query,
             break;
         }
     } while (true);
-    
+
     //current Sql driver doesnt support proper query formating.
     //reuest filtering data has to be binded in right order.
     QStringList::iterator token = tokens.begin();
     //iterate all tokens
     for (; token != tokens.end(); token = tokens.erase(token)) {
         //iterate all provided data and chcek if it match pattern
-        for ( iter = activity.constBegin();
-             iter != activity.constEnd(); 
-             ++iter ) {
-             if( (*token).contains(iter.key()) ){
+        for (iter = activity.constBegin();
+                iter != activity.constEnd();
+                ++iter) {
+            if ((*token).contains(iter.key())) {
                 query.bindValue(iter.key(), iter.value());
                 break;
             }
         }
-        for (iter = additionalData.constBegin(); 
-            iter != additionalData.constEnd(); 
-            ++iter) {
+        for (iter = additionalData.constBegin();
+                iter != additionalData.constEnd();
+                ++iter) {
             if ((*token).contains(iter.key())) {
                 query.bindValue(iter.key(), iter.value());
                 break;
@@ -322,12 +322,12 @@ void HsActivityStoragePrivate::bind( QSqlQuery& query,
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityStoragePrivate::activities(QList<QVariantHash> &results, 
-                                         const QString &queryStr,
-                                         const QVariantHash &conditions)
+int HsActivityStoragePrivate::activities(QList<QVariantHash> &results,
+        const QString &queryStr,
+        const QVariantHash &conditions)
 {
     results.clear();
-    
+
     QSqlQuery query(mConn);
     query.prepare(queryStr);
     bind(query, conditions);
