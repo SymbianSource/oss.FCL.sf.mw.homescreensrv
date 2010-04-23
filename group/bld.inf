@@ -15,11 +15,6 @@
 *
 */
 
-#include <platform_paths.hrh>
-
-PRJ_EXPORTS
-../inc/aisystemuids.hrh              MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
-
 #include "../xcfw/group/bld.inf"
 #include "../homescreenpluginsrv/group/bld.inf"
 #include "../idlefw/group/bld.inf"
