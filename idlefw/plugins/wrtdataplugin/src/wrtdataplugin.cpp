@@ -47,6 +47,8 @@ const TImplementationProxy KImplementationTable[] =
     IMPLEMENTATION_PROXY_ENTRY( KImplUidDataPlugin, CWrtDataPlugin::NewL ) 
     };
 
+const TInt KTryAgainDelay( 3000000 ); // 3 sec
+
 // ======== MEMBER FUNCTIONS ========
 // ---------------------------------------------------------------------------
 // ImplementationGroupProxy
@@ -105,6 +107,12 @@ void CWrtDataPlugin::ConstructL()
 //
 CWrtDataPlugin::~CWrtDataPlugin()
     {
+    if ( iTimer )
+        {
+        iTimer->Cancel();
+        delete iTimer;
+        }
+
     delete iData;
     iObservers.Close();
     Release( iContent );
@@ -133,8 +141,8 @@ void CWrtDataPlugin::Start( TStartReason aReason )
     if( aReason == ESystemStartup || 
         aReason == EPluginStartup )
         {
-        // publish the initial data
-        TRAP_IGNORE( PublishL());
+        // Publish the initial data
+        TRAP_IGNORE( PublishInitialDataL() );
         }
     }
 
@@ -230,8 +238,6 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     
     RAiSettingsItemArray contentItemsArr;
     RAiSettingsItemArray configurationItemsArr;
-    RAiSettingsItemArray settingItemsArr;
-    
     TInt count( aSettings.Count() );
     
     for ( TInt i = 0; i < count; i++ )
@@ -245,10 +251,6 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         else if( setting->AiPluginItemType() == EAiPluginConfigurationItem )
             {
             configurationItemsArr.Append( setting );
-            }
-        else 
-            {
-            settingItemsArr.Append( setting );
             }
         }
     
@@ -311,11 +313,9 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         iData->NotifyPublisherL( KActive );
         }
     
-    settingItemsArr.Reset();
     contentItemsArr.Reset();
     configurationItemsArr.Reset();
-    
-       // We own the array so destroy it
+    // We own the array so destroy it
     aSettings.ResetAndDestroy();
     }
 
@@ -356,16 +356,6 @@ void CWrtDataPlugin::HandleEvent( const TDesC& aEventName,
     const TDesC& aParam )
     {
     TRAP_IGNORE( iData->ExecuteActionL( aEventName , aParam ) );    
-    }
-
-// ----------------------------------------------------------------------------
-// CWrtDataPlugin::HasMenuItem
-//
-// ----------------------------------------------------------------------------
-//
-TBool CWrtDataPlugin::HasMenuItem( const TDesC& aMenuItem )
-    {
-    return iData->HasMenuItem ( aMenuItem );
     }
 
 // ----------------------------------------------------------------------------
@@ -679,13 +669,16 @@ void CWrtDataPlugin::ShowLoadingIcon(MAiContentObserver* aObserver)
 void CWrtDataPlugin::HideLoadingIcon(MAiContentObserver* aObserver)
     {
     aObserver->SetProperty( *this, KElement , KDisplay , KHide );
+
+    // Do not try to publish initial data anymore
+    StopTimer();
     }
 
 // ---------------------------------------------------------------------------
 // Publishes widget's texts and images
 // ---------------------------------------------------------------------------
 //
-void CWrtDataPlugin::PublishL()
+void CWrtDataPlugin::PublishInitialDataL()
     {
     TInt observers( iObservers.Count() );        
     TInt transactionId = reinterpret_cast<TInt>( this );
@@ -693,12 +686,16 @@ void CWrtDataPlugin::PublishL()
     for ( int i = 0; i < observers; i++ )
         {
         MAiContentObserver* observer = iObservers[i];
-                
+
+        CleanupStack::PushL( TCleanupItem( CancelTransaction, observer ) );
+
         if ( observer->StartTransaction( transactionId ) == KErrNone )           
             {// Publish default data
-            iData->PublishDefaultImageL(observer);
+            iData->PublishInitialDataL(observer);
             observer->Commit( transactionId );
             }
+
+		CleanupStack::Pop( observer );
 
         // Release memory of the published text
         iDataArray.ResetAndDestroy();
@@ -786,5 +783,120 @@ TBool CWrtDataPlugin::ResolveSkinIdAndMifId( const TDesC& aPath, TAknsItemID& aI
        }
    return (error == KErrNone );
    }
+
+// ---------------------------------------------------------------------------
+// Cleanup callback for cancelling a transactions in case of leave
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::CancelTransaction( TAny* aObserver )
+    {
+    if ( aObserver )
+        {
+        MAiContentObserver* obs = reinterpret_cast< MAiContentObserver*>( aObserver );
+        TInt transactionId = reinterpret_cast<TInt>( aObserver );
+        obs->CancelTransaction( transactionId );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Create and start republish timer
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::StartTimer()
+    {
+    TRAP_IGNORE(
+        if ( !iTimer )
+            {
+            iTimer = CPeriodic::NewL( CActive::EPriorityStandard );
+            }
+        
+        if ( !iTimer->IsActive() )
+            {
+            TTimeIntervalMicroSeconds32 delay( KTryAgainDelay );
+            iTimer->Start( delay, delay, TCallBack( Timeout, this ) );
+            }
+        );
+    }
+
+// ---------------------------------------------------------------------------
+// Cancel republish timer
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::CancelTimer()
+    {
+    if ( iTimer )
+        {
+        iTimer->Cancel();
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Stop and delete republish timer
+// ---------------------------------------------------------------------------
+//
+void CWrtDataPlugin::StopTimer()
+    {
+    if ( iTimer )
+        {
+        iTimer->Cancel();
+        delete iTimer;
+        iTimer = NULL;
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Initial data republish callback
+// ---------------------------------------------------------------------------
+//
+TInt CWrtDataPlugin::Timeout( TAny* aPtr )
+    {
+    CWrtDataPlugin* self = static_cast<CWrtDataPlugin*>( aPtr );
+
+    // Cancel timer before publishing
+    self->CancelTimer();
+
+    TInt observers( self->iObservers.Count() );        
+    TInt transactionId = reinterpret_cast<TInt>( self );
+    TBool success( ETrue );
+
+    // Publish for each observer
+    for ( int i = 0; i < observers; i++ )
+        {
+        MAiContentObserver* observer = self->iObservers[i];
+
+        if ( observer->StartTransaction( transactionId ) == KErrNone )           
+            {
+            // Publish default image
+            TRAPD( err, self->iData->PublishDefaultImageL( observer ) );
+            if ( KErrNone != err )
+                {
+                observer->CancelTransaction( transactionId );
+                success = EFalse;
+                }
+            else
+                {
+                // 
+                observer->Commit( transactionId );
+                }
+            }
+        }
+
+    // Start timer again if there is error in publishing
+    if ( !success )
+        {
+        self->StartTimer();
+        }
+    else
+        {
+        self->StopTimer();
+        }
+
+    // Release memory of the published icons
+    self->iIconArray.Reset();
+
+    return KErrNone;
+    }
+
+
 
 // End of file

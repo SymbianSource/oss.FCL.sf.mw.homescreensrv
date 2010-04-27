@@ -85,14 +85,6 @@ public :
     * @return void
     */
     void ConfigureL(RAiSettingsItemArray& aConfigurations);
- 
-    /**
-    * Checks is this menu item is supported by the publisher
-    * 
-    * @param aMenuItem  menu item name.
-    * @return  boolean (ETrue/EFalse) 
-    */
-    TBool HasMenuItem(const TDesC16& aMenuItem );
 
     /**
     * Register to CPS for all (add/delete/update/execute) action
@@ -109,7 +101,15 @@ public :
     * @return void
     */
     void UpdatePublisherStatusL();     
-          
+
+    /**
+    * Publish initial data for all the items in the widget
+    *     
+    * @param aObserver to publish data
+    * @return void
+    */
+    void PublishInitialDataL( MAiContentObserver* aObserver );
+
     /**
     * Publish updated data for all the items in the widget
     *     
@@ -193,14 +193,6 @@ private:
             CLiwDefaultMap* aOutDataMap, const TDesC16& aRegistry );
    
     /**
-    * Gets the menu item from the publisher
-    *
-    * @param none
-    * @return void
-    */
-    void GetMenuItemsL();
-    
-    /**
     * Gets the widgent name and uid 
     *
     * @param aName  - widget name
@@ -241,22 +233,18 @@ private :
     TBuf<KHsPublisherNamespaceMaxLength> iPluginId;
     /** CPS Command Buffer Interface, Not Owned */
     MAiCpsCommandBuffer* iCpsExecute;
-    /** Subscriber interface, owned */    
-    MLiwInterface* iInterface;     
+    /** Subscriber interface, Not owned */    
+    MLiwInterface* iInterface;  
+    /** Service handler, Not owned */    
+    CLiwServiceHandler* iServiceHandler;    
     /** Data Observer to CPS, owned */
     CWrtDataObserver* iObserver;   
-    /** Service handler, owned */    
-    CLiwServiceHandler* iServiceHandler;
-    /** Command name in configuration Array, owned */
-    HBufC8* iCommandName;      
     /** Reference of the wrt data plugin, not owned */    
     CWrtDataPlugin* iPlugin;    
-    /** Menu item names, owned */    
-    RPointerArray<HBufC16> iMenuItems;     
-    /** Trigger names for the menu items, owned */    
-    RPointerArray<HBufC8> iMenuTriggers;    
     /** Content id, owned */
     HBufC* iContentId;
+    /** Widget's UID */
+    TUid iAppUid;
     };
 
 #endif /*WRTDATA_H*/

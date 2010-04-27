@@ -51,6 +51,7 @@ CWrtData* CWrtData::NewL(CWrtDataPlugin* aPlugin)
 // ---------------------------------------------------------------------------
 //
 CWrtData::CWrtData()
+    : iAppUid( KNullUid )
     {
     }
     
@@ -61,7 +62,6 @@ CWrtData::CWrtData()
 void CWrtData::ConstructL(CWrtDataPlugin* aPlugin)
     { 
      iPlugin = aPlugin;
-     iCommandName = HBufC8::NewL( KWRTContentValueMaxLength );
     }
     
 // ---------------------------------------------------------------------------
@@ -71,36 +71,19 @@ void CWrtData::ConstructL(CWrtDataPlugin* aPlugin)
 //
 CWrtData::~CWrtData()
     {
-    if( iCommandName )
-    	{
-    	delete iCommandName;
-    	iCommandName = NULL;
-    	}
     if(iObserver)
-        {
+        {      
         delete iObserver;
         iObserver = NULL;
         }
-    if( iInterface )
-         {
-         // This will also release all the registered observers
-         iInterface->Close();
-         iInterface = NULL;
-         }
-    if( iServiceHandler )
-         {
-         iServiceHandler->Reset();
-         delete iServiceHandler;
-         iServiceHandler = NULL;
-         }
     if ( iContentId )
     	{
     	delete iContentId;
     	iContentId = NULL;
     	}
-    iMenuItems.ResetAndDestroy();
-    iMenuTriggers.ResetAndDestroy();
     // not owned
+    iInterface = NULL;
+    iServiceHandler = NULL;
     iCpsExecute = NULL;
     iPlugin = NULL;
     }
@@ -111,108 +94,22 @@ CWrtData::~CWrtData()
 //
 void CWrtData::ConfigureL(RAiSettingsItemArray& aConfigurations )
     {
-    HBufC8* serviceName = HBufC8::NewLC( KWRTContentValueMaxLength );
-    HBufC8* interfaceName = HBufC8::NewLC( KWRTContentValueMaxLength );
-    
-    // Interface name 
-    RCriteriaArray criteriaArray;
-    
     TInt count = aConfigurations.Count();
-   
-    for(TInt i = 0;i<count;i++)
+    for(TInt i = 0; i<count; i++ )
        {
        MAiPluginConfigurationItem& confItem = ( aConfigurations[i] )->AiPluginConfigurationItem();
        // if owner is plugin then it (key,value) is for plugin configurations items
-       if(confItem.Owner() == KPlugin())
+       if(confItem.Owner() == KPlugin() && confItem.Name() == KPubData())
            {
-           if(confItem.Name() ==  KService())
-               {
-               serviceName->Des().Copy(confItem.Value());
-               }
-           else if( confItem.Name() == KInterface() )
-                 {
-                 interfaceName->Des().Copy(confItem.Value());
-                 }
-           else if( confItem.Name() == KCommand() )
-                 {
-                 iCommandName->Des().Copy(confItem.Value());
-                 }
-           else if( confItem.Name() == KMenuItem16() )
-                 {
-                 iMenuItems.AppendL( confItem.Value().AllocL() );
-                 }
-           else if( confItem.Name() == KPubData() )
-				  {
-				  iContentId = confItem.Value().AllocL();
-				  }
-           }
+           iContentId = confItem.Value().AllocL();
+		   }
        }
-    
-    if( !( serviceName->Des().Length() >= 0 && interfaceName->Des().Length() >= 0  
-            && iCommandName->Des().Length() >= 0 ) )
+    if( iContentId->Des().Length() == 0 ) 
         {
         // No service to offer without plugin configurations 
         User::Leave( KErrNotSupported );
         }
-    
-    iServiceHandler = CLiwServiceHandler::NewL(); 
-
-    // for convenience keep pointers to Service Handler param lists 
-    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-
-    CLiwCriteriaItem* criteriaItem = CLiwCriteriaItem::NewLC( KLiwCmdAsStr, *interfaceName , *serviceName );
-    criteriaItem->SetServiceClass( TUid::Uid( KLiwClassBase ) );
-    criteriaArray.AppendL( criteriaItem );
-
-
-    // attach Liw criteria
-     iServiceHandler->AttachL( criteriaArray );
-     iServiceHandler->ExecuteServiceCmdL( *criteriaItem, *inParamList, *outParamList );
-
-     CleanupStack::PopAndDestroy(criteriaItem);
-     criteriaArray.Reset();
-
-    // extract CPS interface from output params
-    TInt pos( 0 );
-    outParamList->FindFirst( pos, *interfaceName );
-    if( pos != KErrNotFound )
-        {
-        //iInterface is MLiwInterface*
-        iInterface = (*outParamList)[pos].Value().AsInterface(); 
-        User::LeaveIfNull( iInterface );
-        }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
-    inParamList->Reset();
-    outParamList->Reset();
-    CleanupStack::PopAndDestroy( interfaceName );
-    CleanupStack::PopAndDestroy( serviceName );
-
-	//Gets the menu items from the publisher registry    
-    GetMenuItemsL();
- 
     iObserver = CWrtDataObserver::NewL( iInterface, this );   
-    }
-
-// ---------------------------------------------------------------------------
-// CWrtData::HasMenuItem
-// ---------------------------------------------------------------------------
-//
-TBool CWrtData::HasMenuItem(const TDesC16& aMenuItem )
-    {
-    TBool found = EFalse;
-    for (TInt i = 0; i < iMenuItems.Count(); i++ )
-        {
-        if( aMenuItem == iMenuItems[i] )
-            {
-            found =  ETrue;
-            break;
-            }
-        }
-    return found;
     }
 
 // ---------------------------------------------------------------------------
@@ -259,69 +156,54 @@ void CWrtData::UpdatePublisherStatusL()
     }
 
 // ---------------------------------------------------------------------------
+// CWrtData::PublishInitialDataL
+// ---------------------------------------------------------------------------
+//
+void CWrtData::PublishInitialDataL( MAiContentObserver* aObserver )
+    {
+    // Show loading animation
+    iPlugin->ShowLoadingIcon( aObserver );
+
+    TBuf<KWRTContentValueMaxLength> appName;
+    TBuf<KWRTAppUidLenth> appUidStr;
+    GetWidgetNameAndUidL( appName, appUidStr );
+
+    // Publish widget's name
+    if ( appName.Length() > 0 )
+       {
+       iPlugin->PublishTextL( aObserver, CWrtDataPlugin::EDefaultText, appName );
+       }
+
+    // Publish widget's apparc image. This might fail if there is application
+    // list population ongoing in AppFW and then we have to try again later
+    if ( ResolveUid ( appUidStr, iAppUid ) )
+        {
+        TRAPD( err, PublishDefaultImageL( aObserver ) );
+        if ( KErrNone != err )
+            {
+            iPlugin->StartTimer();
+            }
+        }
+    }
+
+// ---------------------------------------------------------------------------
 // CWrtData::PublishDefaultImageL
 // ---------------------------------------------------------------------------
 //
 void CWrtData::PublishDefaultImageL( MAiContentObserver* aObserver )
     {
-    TBuf<KWRTAppUidLenth> appUidStr;
-    TBuf<KWRTContentValueMaxLength> appName;
-    GetWidgetNameAndUidL( appName, appUidStr );
-    
-    TUid appUid;
-    if ( ResolveUid (appUidStr, appUid ) )
-        {
-#ifdef WRT_PREDEFINED_IMAGE         
-        RFs rfs;
-        User::LeaveIfError( rfs.Connect() );
-
-        TFileName privatePath;
-        rfs.PrivatePath(privatePath);
-        privatePath.Insert(0,KDrive);
-        privatePath.Append( KImgFolder );
-      
-        appUidStr.Copy( appUid.Name());
-        appUidStr.Delete(0,1);
-        appUidStr.Delete( appUidStr.Length() -1, 1);
-        privatePath.Append (appUidStr );
-        privatePath.Append ( KJPEG );
-        if ( BaflUtils::FileExists(rfs,privatePath) )
-            {
-            // Publish predefined jpeg image
-            iPlugin->PublishImageL( aObserver, CWrtDataPlugin::EImage1,privatePath);
-            }
-        else
-            {
-            privatePath.Delete( privatePath.Length() - 4 , 4);
-            privatePath.Append( KPNG );
-            if ( BaflUtils::FileExists(rfs,privatePath) )
-               {
-               // Publish predefined image
-               iPlugin->PublishImageL( aObserver, CWrtDataPlugin::EImage1,privatePath);
-               }
-            else
-                {
-#endif                 
-                TInt handle = KErrNotFound;
-                TInt mask = KErrNotFound;
-                CreateIconFromUidL( handle, mask, appUid );
-                // Publish widget apparc image
-                iPlugin->PublishImageL( aObserver, CWrtDataPlugin::EDefaultImage,handle,mask);
-                if ( appName.Length() > 0)
-                   {
-                   // Publish Widget Name
-                   iPlugin->PublishTextL( aObserver, CWrtDataPlugin::EDefaultText, appName);
-                   }
-#ifdef WRT_PREDEFINED_IMAGE                
-                }
-            }
-        rfs.Close();
-#endif        
-        }
-    
-    // Show loading animation
-    iPlugin->ShowLoadingIcon(aObserver);
+    // Publish widget's apparc image
+    TInt handle = KErrNotFound;
+    TInt mask = KErrNotFound;
+    // create icon from application UID
+    CreateIconFromUidL( handle, mask, iAppUid );
+    // Publish apparc image 
+    iPlugin->PublishImageL( aObserver,
+                                CWrtDataPlugin::EDefaultImage,
+                                handle,
+                                mask );
     }
+
 
 // ---------------------------------------------------------------------------
 // CWrtData::PublishL
@@ -388,7 +270,9 @@ void CWrtData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
   
    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-   CLiwDefaultMap* filter = NULL;
+
+   // use the first item configuration to create the filter
+   CLiwDefaultMap* filter  = CreateFilterLC();
 
    triggerName->Des().Copy(aTrigger);
    if ( aObjectId == KPubData )
@@ -399,37 +283,10 @@ void CWrtData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
        TLiwGenericParam cptype( KType, TLiwVariant( KPubData ) );
        inParamList->AppendL( cptype );
        cptype.Reset();
-       // use the first item configuration to create the filter
-       filter = CreateFilterLC();
        }
    else
        {
-       if ( aObjectId == KMenuItem16 )
-           {
-           TInt pos = KErrNotFound;
-           for (TInt i = 0; i < iMenuItems.Count(); i++)
-               {
-               if ( aTrigger == iMenuItems[i] )
-                   {
-                   pos = i;
-                   break;
-                   }
-               }
-           if( pos == KErrNotFound )
-               {
-               // No such menu items
-               CleanupStack::PopAndDestroy( triggerName );
-               return; 
-               }
-              triggerName->Des().Copy( iMenuTriggers[pos]->Des() );
-              filter = CreateFilterLC();
-           }
-       else
-           {
-           //Create filter criteria for requested entries in form of LIW map:
-           filter = CreateFilterLC();
-           }
-       //append type to inparam list
+        //append type to inparam list
        TLiwGenericParam cptype( KType, TLiwVariant( KCpData ) );
        inParamList->AppendL( cptype );
        cptype.Reset();
@@ -441,13 +298,11 @@ void CWrtData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
     inParamList->AppendL( item );
     iInterface->ExecuteCmdL( KExecuteAction,  *inParamList, *outParamList );
     
+    item.Reset();
     CleanupStack::PopAndDestroy( filter );
     CleanupStack::PopAndDestroy( triggerName );
-    item.Reset();
-
+    outParamList->Reset();
     inParamList->Reset();
-    outParamList->Reset();  
-    
     }
 
 // ---------------------------------------------------------------------------
@@ -491,7 +346,7 @@ void CWrtData::ExecuteCommandL(CLiwDefaultMap* aInFilter, CLiwDefaultMap* aOutDa
     // execute service.It is assumed that iInterface is already initiatedd
     if(iInterface)
         {
-        iInterface->ExecuteCmdL( *iCommandName, *inParamList, *outParamList);
+        iInterface->ExecuteCmdL( KGetList, *inParamList, *outParamList);
         }
     else
         {
@@ -546,56 +401,6 @@ void CWrtData::NotifyPublisherL(const TDesC8& aStatus)
     iCpsExecute->AddCommand( iPluginId, KPubData, filter, aStatus );
     CleanupStack::PopAndDestroy( filter );
     }
-
-// ---------------------------------------------------------------------------
-// CWrtData::GetMenuItemsL
-// ---------------------------------------------------------------------------
-//
-void CWrtData::GetMenuItemsL()
-	{
-	if(iInterface)
-		{
-		CLiwDefaultMap *outDataMap = CLiwDefaultMap::NewLC();
-		CLiwDefaultMap* filter = CreateFilterLC( );
-		//append filter to input param
-        ExecuteCommandL( filter, outDataMap, KPubData  );
-		CleanupStack::PopAndDestroy( filter );
-		
-		TLiwVariant variant;
-		TInt pos = outDataMap->FindL( KMenuItems, variant ) ;
-		
-		if ( pos  )
-			{
-			CLiwDefaultMap *menuMap = CLiwDefaultMap::NewLC();
-			variant.Get( *menuMap );
-			for ( TInt i = 0; i < menuMap->Count(); i++)
-				{
-				menuMap->FindL(menuMap->AtL(i), variant );
-				HBufC8* value = HBufC8::NewL( KWRTContentValueMaxLength );
-				CleanupStack::PushL( value );
-				TPtr8 valPtr = value->Des();
-				variant.Get( valPtr);
-				if ( valPtr.Length() > 0 )
-					{
-					iMenuTriggers.AppendL( value );
-					CleanupStack::Pop( value );
-					HBufC16* triggerName = HBufC16::NewLC( KWRTContentNameMaxLength );
-				    triggerName->Des().Copy( menuMap->AtL(i) );
-					iMenuItems.AppendL( triggerName );
-					CleanupStack::Pop( triggerName );
-					}
-				else
-					{
-					CleanupStack::PopAndDestroy( value );	
-					}
-				variant.Reset();
-				}
-			CleanupStack::PopAndDestroy( menuMap );
-			}
-		variant.Reset();
-		CleanupStack::PopAndDestroy( outDataMap );
-		}
-	}
 
 // ---------------------------------------------------------------------------
 // CWrtData::GetWidgetNameAndUidL
@@ -670,14 +475,14 @@ TBool CWrtData::ResolveUid(const TDesC& aUidDes, TUid& aUid )
                 }
             }
         }
-    return (error == KErrNone );
+    return ( error == KErrNone );
     }
 
 // ---------------------------------------------------------------------------
 // CWrtData::CreateIconFromUidL
 // ---------------------------------------------------------------------------
 //
-void CWrtData::CreateIconFromUidL(TInt& aHandle, TInt& aMaskHandle, const TUid& aAppUid ) 
+void CWrtData::CreateIconFromUidL( TInt& aHandle, TInt& aMaskHandle, const TUid& aAppUid ) 
     {
     RApaLsSession lsSession;
     User::LeaveIfError( lsSession.Connect() );
@@ -685,32 +490,30 @@ void CWrtData::CreateIconFromUidL(TInt& aHandle, TInt& aMaskHandle, const TUid& 
     
     CArrayFixFlat<TSize>* sizeArray = new(ELeave) CArrayFixFlat<TSize>( 5 );
     CleanupStack::PushL( sizeArray );
-    if ( KErrNone == lsSession.GetAppIconSizes(aAppUid, *sizeArray) )
-        {
-        if ( sizeArray->Count() ) 
-            {
-            // There are other icon sizes
-            TInt idx = 0;
-            TInt size( sizeArray->At(idx).iWidth * sizeArray->At(idx).iHeight );
-            for ( TInt i = 1; i < sizeArray->Count(); i++ ) 
-                {
-                if ( ( sizeArray->At(i).iWidth * sizeArray->At(i).iHeight ) > size )
-                    {
-                    idx = i;
-                    size =  sizeArray->At(idx).iWidth * sizeArray->At(idx).iHeight;
-                    }
-                }
 
-            CApaMaskedBitmap* appBitMap = CApaMaskedBitmap::NewLC();
-            if ( KErrNone == lsSession.GetAppIcon( aAppUid, sizeArray->At(idx),
-                    *appBitMap ) )
+    User::LeaveIfError( lsSession.GetAppIconSizes( aAppUid, *sizeArray ) );
+
+    if ( sizeArray->Count() ) 
+        {
+        // There are other icon sizes
+        TInt idx = 0;
+        TInt size( sizeArray->At(idx).iWidth * sizeArray->At(idx).iHeight );
+        for ( TInt i = 1; i < sizeArray->Count(); i++ ) 
+            {
+            if ( ( sizeArray->At(i).iWidth * sizeArray->At(i).iHeight ) > size )
                 {
-                aHandle = appBitMap->Handle();
-                aMaskHandle = appBitMap->Mask()->Handle();
+                idx = i;
+                size =  sizeArray->At(idx).iWidth * sizeArray->At(idx).iHeight;
                 }
-            CleanupStack::PopAndDestroy( appBitMap );
             }
+
+        CApaMaskedBitmap* appBitMap = CApaMaskedBitmap::NewLC();
+        User::LeaveIfError( lsSession.GetAppIcon( aAppUid, sizeArray->At(idx), *appBitMap ) );
+        aHandle = appBitMap->Handle();
+        aMaskHandle = appBitMap->Mask()->Handle();
+        CleanupStack::PopAndDestroy( appBitMap );
         }
+
     CleanupStack::PopAndDestroy( sizeArray );
     CleanupStack::PopAndDestroy( &lsSession );
     }
@@ -754,6 +557,11 @@ void CWrtData::SetCommandBuffer(TAny* aAny, const TDesC8& aNameSpace )
     {
     iPluginId.Copy(aNameSpace);
     iCpsExecute = reinterpret_cast <MAiCpsCommandBuffer* > ( aAny );
+    if ( iCpsExecute )
+        {
+        iInterface = iCpsExecute->CpsInterface();
+        iServiceHandler = iCpsExecute->ServiceHandler();
+        }
     }
 
 // End of file

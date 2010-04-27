@@ -45,11 +45,27 @@ _LIT( KMenuTypeMailbox, "menu:mailbox" );
 
 // ======== LOCAL FUNCTIONS ========
 
-static void ItemMapArrayCleanupFunc( TAny* aPointerArray )
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroy()
+// ----------------------------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroy( TAny* aObj )
     {
-    RPointerArray<CItemMap>* p = static_cast<RPointerArray<CItemMap>*>( aPointerArray ); 
-    p->ResetAndDestroy();
-    p->Close();
+    if( aObj )
+        {
+        static_cast<T*>( aObj )->ResetAndDestroy();
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroyPushL
+// ----------------------------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroyPushL(T& aArray)
+    {
+    CleanupStack::PushL( TCleanupItem( &CleanupResetAndDestroy<T>, &aArray ) );
     }
 
 // ======== MEMBER FUNCTIONS ========
@@ -211,8 +227,8 @@ CMCSPluginData::~CMCSPluginData()
 void CMCSPluginData::UpdateDataL()
     {
     RPointerArray<CItemMap> settings;
-    TCleanupItem settingsCleanupItem( ItemMapArrayCleanupFunc, &settings );
-    CleanupStack::PushL( settingsCleanupItem );
+    CleanupResetAndDestroyPushL( settings );
+
     iPluginSettings->GetSettingsL( iInstanceUid, settings );
     TInt count = settings.Count();
     TBool wasEmpty = !iData.Count();
@@ -249,7 +265,9 @@ void CMCSPluginData::UpdateDataL()
                 }
             }
         }
-    CleanupStack::PopAndDestroy(); // settingsCleanupItem 
+
+    // Cleanup.
+    CleanupStack::PopAndDestroy(); // settings
     }
 
 // ---------------------------------------------------------------------------
@@ -471,7 +489,8 @@ CMCSData& CMCSPluginData::DataItemL( TInt aIndex )
 void CMCSPluginData::SaveUndefinedItemL( const TInt& aIndex )
     {
     RPointerArray<CItemMap> settingItems;
-    CleanupClosePushL( settingItems );
+    CleanupResetAndDestroyPushL( settingItems );
+    
     iPluginSettings->GetSettingsL( iInstanceUid, settingItems );
     if ( aIndex >= 0 && aIndex < settingItems.Count() )
         {
@@ -504,9 +523,7 @@ void CMCSPluginData::SaveUndefinedItemL( const TInt& aIndex )
         }
     // ETrue tells that modified settings are stored also to plugin reference
     iPluginSettings->SetSettingsL( iInstanceUid, settingItems, ETrue );
-    CleanupStack::Pop( &settingItems );
-    settingItems.ResetAndDestroy();
-
+    CleanupStack::PopAndDestroy(); // settingItems
     }
 
 // End of file

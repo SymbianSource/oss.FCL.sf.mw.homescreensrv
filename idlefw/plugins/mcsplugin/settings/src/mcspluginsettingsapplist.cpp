@@ -146,10 +146,11 @@ TPtrC CMCSPluginSettingsAppList::MdcaPoint( TInt aIndex ) const
     CMenuItem* item = iListItems[ aIndex ];
 
     TBool attrExists;
-    TPtrC itm;
+    TPtrC itm( KNullDesC );
     TRAP_IGNORE( 
         itm.Set( item->GetAttributeL( KMenuAttrLongName, attrExists ) );
         )
+
     return itm;
     }
 
@@ -195,14 +196,13 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
         {
         if( aProperties[j]->Name() == KType )
             {
-
             if ( aProperties[j]->Value() == KProperValueFolder )
                 {
                 isFolder = ETrue;
                 }
             break;
             }
-        }   
+        }
 
     TBool itemFound( EFalse );
     
@@ -211,7 +211,6 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
         {
         TBool match( ETrue );
         CMenuItem* item = iListItems[ i ];
-
         for ( TInt j = 0; j < aProperties.Count() && match; j++ )
             {
             // type and locked properties skipped

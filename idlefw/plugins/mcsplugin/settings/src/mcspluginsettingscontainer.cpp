@@ -296,7 +296,6 @@ void CMCSPluginSettingsContainer::HandleSessionEventL(
     case EMsvEntriesChanged:
         {
         iModel->UpdateAppListL();
-        iModel->UpdateSettingsL();
         }
         break;
     default:

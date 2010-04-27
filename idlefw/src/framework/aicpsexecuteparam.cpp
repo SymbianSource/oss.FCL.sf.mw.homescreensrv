@@ -147,18 +147,27 @@ void CAiCpsExecuteParam::SetFilterL(CLiwDefaultMap* aMap)
     iContentId = NULL;
     
     TLiwVariant variant;
+    variant.PushL();
+
     if ( aMap->FindL(KPublisherId, variant ))
         {
         iPublisher = variant.AsDes().AllocL();
         }
+    
+    variant.Reset();
     if ( aMap->FindL(KContentType, variant ))
         {
         iContentType= variant.AsDes().AllocL();
         }
+    
+    variant.Reset();
     if ( aMap->FindL(KContentId, variant ))
         {
         iContentId= variant.AsDes().AllocL();
         }
+    
+    variant.Reset();
+    CleanupStack::PopAndDestroy( &variant );
     }
 
 // ---------------------------------------------------------------------------

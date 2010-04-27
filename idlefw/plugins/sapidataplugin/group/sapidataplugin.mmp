@@ -54,9 +54,12 @@ LIBRARY			aknskins.lib
 LIBRARY			charconv.lib 
 LIBRARY			estor.lib
 
-// End of File
-SOURCEPATH ../src
+// Debugging dependencies
+LIBRARY         flogger.lib
 
+SOURCEPATH ../src
 SOURCE sapidataplugin.cpp
 SOURCE sapidata.cpp 
 SOURCE sapidataobserver.cpp
+
+// End of File

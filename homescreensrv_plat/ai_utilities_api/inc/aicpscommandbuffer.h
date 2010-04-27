@@ -25,7 +25,9 @@
 // User includes
 
 // Forward declarations
+class MLiwInterface;
 class CLiwDefaultMap;
+class CLiwServiceHandler;
 
 /**
  * AI Cps command buffer interface
@@ -49,8 +51,24 @@ public:
     */
     virtual void AddCommand( const TDesC& aPluginId,
             const TDesC& aType, CLiwDefaultMap* aFilter,
-            const TDesC8& aAction) = 0;
-    
+            const TDesC8& aAction ) = 0;
+            
+    /**
+     * Gets Service Handler 
+     *
+     * @since S60 5.2
+     * @return Service handler
+     */                 
+    virtual CLiwServiceHandler* ServiceHandler() const = 0;            
+
+    /**
+     * Gets IContentPublishing Interface
+     *
+     * @since S60 5.2
+     * @return Interface
+     */                     
+    virtual MLiwInterface* CpsInterface() const = 0;
+       
 protected:
     // destructor
 

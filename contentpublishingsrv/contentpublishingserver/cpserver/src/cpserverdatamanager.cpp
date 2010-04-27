@@ -331,11 +331,13 @@ void CCPDataManager::RemoveObserver(
     {
     CP_DEBUG( _L8("CCPDataManager::RemoveObserver()") );
     TInt index = iNotificationsArray.Find( aNotificationHandler );
-    __ASSERT_DEBUG( index >= 0 , User::Panic( _L("cpserver"), 0 ) );
-    iNotificationsArray.Remove( index );
-    if ( iNotificationsArray.Count( ) == 0 )
+    if (index != KErrNotFound)
         {
-        iStorage->SetCallback( 0 );
+        iNotificationsArray.Remove( index );
+        if ( iNotificationsArray.Count( ) == 0 )
+            {
+            iStorage->SetCallback( 0 );
+            }
         }
     }
 

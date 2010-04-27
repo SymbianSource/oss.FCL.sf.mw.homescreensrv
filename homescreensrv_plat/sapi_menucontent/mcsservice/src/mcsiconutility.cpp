@@ -22,7 +22,7 @@
 #include <mcsmenu.h>
 #include <mcsmenuitem.h>
 #include <mcsmenuutils.h>
-#include <SATDomainPSKeys.h>
+#include <satdomainpskeys.h>
 #include <e32property.h>
 #include <apgcli.h>
 #include <AknInternalIconUtils.h>

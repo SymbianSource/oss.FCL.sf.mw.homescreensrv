@@ -61,8 +61,6 @@ _LIT8( KPublisherId, "publisher" );
 _LIT8( KContentType, "content_type" );
 _LIT8( KContentId,   "content_id" );
 _LIT8( KResults,      "results");
-_LIT8( KMenuItems,     "menuitems");
-_LIT( KMenuItem16,     "menuitem");
 _LIT( KAll, "all");
 _LIT8( KOperation, "operation" );
 _LIT8( KFLAG,      "flag");

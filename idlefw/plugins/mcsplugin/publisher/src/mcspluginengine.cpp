@@ -387,7 +387,7 @@ CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem* aMenuItem,
     {
     
     CMenuItem* menuItem;
-
+  
     // check if item exists in MCS
     if ( aMenuItem )
         { 
@@ -708,6 +708,9 @@ void CMCSPluginEngine::HandleNotifyL()
         CMCSData& data( iPluginData->DataItemL( i ) );
         data.SetDirty( ETrue );
         }
+    
+    iPlugin.PublishL();
+    
     // Notification must be activated again
     iNotifyWatcher->Cancel();
     iNotifier.Notify( 0,

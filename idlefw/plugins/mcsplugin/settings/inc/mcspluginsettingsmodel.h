@@ -152,12 +152,12 @@ public:
     /**
      * Update application list
      */
-    void UpdateAppListL();
+    void UpdateAppListL( TBool aUpdateSettings = ETrue );
 
     /**
      * Update bookmark list
      */
-    void UpdateBkmListL();
+    void UpdateBkmListL( TBool aUpdateSettings = ETrue );
 
     /**
      * Update settings container

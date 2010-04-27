@@ -10,6 +10,7 @@
 * Nokia Corporation - initial contribution.
 *
 * Contributors:
+* Leo Zheng - GCC-E compilation error fix (2098)
 *
 * Description:  Class ChspsPluginIdList is a HSPS utility class for passing
 * 				 plugin ids from a client process to the server process.
@@ -30,7 +31,7 @@
 // might leave.
 // -----------------------------------------------------------------------------
 //
-EXPORT_C ChspsPluginIdList::ChspsPluginIdList( TInt aGranularity ) : CArrayFixFlat( aGranularity )
+EXPORT_C ChspsPluginIdList::ChspsPluginIdList( TInt aGranularity ) : CArrayFixFlat<TInt>( aGranularity )
     {
     }
 

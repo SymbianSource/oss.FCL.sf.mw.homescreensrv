@@ -371,24 +371,20 @@ private:
     // data
     /** CPS Command Buffer Interface, Not Owned */
     MAiCpsCommandBuffer* iCpsExecute;
-    /** Subscriber interface, owned */    
-    MLiwInterface* iInterface;      
+    /** Subscriber interface, Not owned */    
+    MLiwInterface* iInterface;
+    /** Service handler, Not owned */    
+    CLiwServiceHandler* iServiceHandler; 
     /** Data Observer to CPS content registry, owned */    
     CSapiDataObserver* iContentObserver;    
     /** Data Observer to CPS publisher registry, owned */    
     CSapiDataObserver* iPubObserver;
-    /** Service handler, owned */    
-    CLiwServiceHandler* iServiceHandler;    
     /** Array of configurations, owned */    
     RPointerArray<CContentItem> iItemList;
     /** Number of configurations */ 
     TInt iItemCount;    
-    /** Command name in configuration Array, owned */
-    HBufC8* iCommandName;
 	/** publisher id, owned */
 	HBufC* iPublisher;
-	/** content type, owned */
-	HBufC* iContentType;
 	/** content id, owned */
 	HBufC* iContentId;
 	/** Startup reason, owned */
@@ -401,6 +397,8 @@ private:
     RPointerArray<HBufC8> iMenuTriggers;    
     /** Store the status of update needed on resume */
     TBool iUpdateNeeded;
+    // Is Menu item read.
+    TBool iGetMenuItems;
     };
 
 #endif // SAPIDATA_H

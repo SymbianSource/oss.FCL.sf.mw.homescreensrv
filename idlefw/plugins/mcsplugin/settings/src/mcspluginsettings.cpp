@@ -190,9 +190,10 @@ void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustom
         }
         cba->DrawDeferred();
     }
-    iModel->UpdateAppListL();
-    iModel->UpdateBkmListL();
+
     iModel->SetPluginIdL( aCustomMessage );
+    iModel->UpdateAppListL( EFalse );
+    iModel->UpdateBkmListL( EFalse );
     iModel->UpdateSettingsL();
     CGSBaseView::DoActivateL( aPrevViewId, aCustomMessageId, aCustomMessage );
     }

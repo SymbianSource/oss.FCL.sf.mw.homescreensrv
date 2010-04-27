@@ -95,7 +95,7 @@ public:
      * @param aIndex Setting item to find
      * @return MCS menu item
      */
-    CMenuItem& ItemL( TInt aIndex );
+    CMenuItem* ItemL( TInt aIndex );
 
     /**
      * Returns target bookmark data from the given index

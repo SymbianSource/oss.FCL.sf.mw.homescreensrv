@@ -93,7 +93,12 @@ public: // From MHsContentController
      * See from API documentation
      */
     TInt ViewListL( CHsContentInfoArray& aArray );
-    
+
+    /**
+     * See from API documentation
+     */
+    TInt ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray );
+
     /**
      * See from API documentation
      */

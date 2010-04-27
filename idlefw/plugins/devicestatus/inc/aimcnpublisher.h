@@ -21,10 +21,10 @@
 
 // System includes
 #include <e32base.h>
+#include <aidevicestatuscontentmodel.h>
 
 // User includes
 #include "aidevicestatuspublisher.h"
-#include "aidevicestatuscontentmodel.h"
 #include "ainetworkinfoobserver.h"
 
 // Forward declarations

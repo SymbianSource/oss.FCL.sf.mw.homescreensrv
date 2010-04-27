@@ -21,12 +21,12 @@
 
 // System includes
 #include <e32base.h>
+#include <aidevicestatuscontentmodel.h>
 #include <RSSSettings.h>
 #include <MSSSettingsObserver.h>
 
 // User includes
 #include "aidevicestatuspublisher.h"
-#include "aidevicestatuscontentmodel.h"
 
 // Forward declarations
 class MAiDeviceStatusContentObserver;

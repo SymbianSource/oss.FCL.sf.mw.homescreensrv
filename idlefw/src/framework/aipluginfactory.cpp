@@ -25,7 +25,7 @@
 #include <hspublisherinfo.h>
 #include <aicontentobserver.h>
 #include <aiuicontroller.h>
-
+#include "caicpscommandbuffer.h"
 #include "aiuicontrollermanager.h"
 #include "aipluginfactory.h"
 #include "debug.h"
@@ -290,7 +290,11 @@ void CAiPluginFactory::CreatePluginL(
     
     CleanupStack::PushL( plugin );
     
-    plugin->SetProperty( CHsContentPublisher::ECpsCmdBuffer, iCommandBuffer );
+    // Ensure interface is available
+    iCommandBuffer->GetCPSInterfaceL();
+    
+    plugin->SetProperty( CHsContentPublisher::ECpsCmdBuffer, 
+        static_cast< MAiCpsCommandBuffer* >( iCommandBuffer ) );
     
     __TIME( "FW: Subscribe content observers",    
     SubscribeContentObserversL( *plugin, aPublisherInfo ) );             
@@ -432,7 +436,7 @@ RPointerArray< CHsContentPublisher >& CAiPluginFactory::Publishers() const
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::SetCommandBuffer( MAiCpsCommandBuffer* aCommandBuffer )
+void CAiPluginFactory::SetCommandBuffer( CAiCpsCommandBuffer* aCommandBuffer )
     {
     iCommandBuffer = aCommandBuffer;
     }

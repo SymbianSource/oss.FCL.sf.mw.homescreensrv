@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  The API supports requesting raw bitmaps
-*  Version     :  %version: 11 % << Don't touch! Updated by Synergy at check-out.
+*  Version     :  %version: ou1s60ui#12 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -24,7 +24,7 @@
 #include <mcsmenu.h>
 #include <mcsmenuitem.h>
 #include <mcsmenuutils.h>
-#include <SATDomainPSKeys.h>
+#include <satdomainpskeys.h>
 #include <e32property.h>
 #include <apgcli.h>
 #include <AknInternalIconUtils.h>

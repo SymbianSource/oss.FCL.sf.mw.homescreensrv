@@ -23,12 +23,12 @@
 #include <bautils.h>
 #include <aiutility.h>
 #include <featmgr.h>
+#include <aidevicestatuscontentmodel.h>
 
 // User includes
 #include "aidevicestatusplugin.h"
 #include "aidevicestatuspluginengine.h"
 #include "aipublishprioritizer.h"
-#include "aidevicestatuscontentmodel.h"
 #include "aimulticontentobserver.h"
 #include "aipluginsettings.h"
 #include "ainetworkinfolistener.h"

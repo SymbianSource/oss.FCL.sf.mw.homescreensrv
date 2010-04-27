@@ -53,9 +53,13 @@ LIBRARY         aknskins.lib
 LIBRARY         estor.lib
 LIBRARY         apgrfx.lib 
 
-// End of File
-SOURCEPATH ../src
+// Debugging dependencies
+LIBRARY         flogger.lib
 
+SOURCEPATH ../src
 SOURCE wrtdataplugin.cpp
 SOURCE wrtdata.cpp 
 SOURCE wrtdataobserver.cpp
+
+// End of File
+

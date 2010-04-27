@@ -383,6 +383,7 @@ void CCPServerSession::RegisterObserverL( const RMessage2& aMessage )
             iServer->PanicClient( aMessage, ECPServerBadRequest );
             User::Leave( KErrGeneral );
             }
+        isRegister = ETrue;
         if ( !iNotificationHandler )
             {
             iNotificationHandler = CCPNotificationHandler::NewL(
@@ -390,7 +391,6 @@ void CCPServerSession::RegisterObserverL( const RMessage2& aMessage )
             iDataManager->AddObserverL( iNotificationHandler );
             }
         iNotificationHandler->SaveMessageL( aMessage );
-        isRegister = ETrue;
         }
     else
         {
@@ -432,7 +432,7 @@ void CCPServerSession::RemoveObserverL( const RMessage2& aMessage )
 void CCPServerSession::UnregisterObserverL()
     {
     CP_DEBUG( _L8("CCPServerSession::UnregisterObserverL()" ) );
-    if ( isRegister )
+    if ( isRegister && iNotificationHandler )
         {
         //remove notification handler from an array of sessions in data manager
         iDataManager->RemoveObserver( iNotificationHandler );
@@ -457,10 +457,10 @@ void CCPServerSession::GetChangeInfoDataL( const RMessage2& aMessage )
     CP_DEBUG( _L8("CCPServerSession::GetChangeInfoData()" ) );
     if( iNotificationHandler )
         {
-        isRegister = EFalse;
         ExternalizeAndWriteToClientL( aMessage,
             iNotificationHandler->GetPointerToChangeInfoList( ) );
         iNotificationHandler->Reset( );
+        isRegister = EFalse;
         }
     }
 

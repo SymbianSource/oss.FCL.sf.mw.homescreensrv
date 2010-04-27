@@ -181,7 +181,6 @@ void CMCSPluginSettingsBkmList::GetBookmarksFromFavouritesL()
 //
 void CMCSPluginSettingsBkmList::GetBookmarksFromMCSL()
     {
-    TBool exists( EFalse );
     CMenuFilter* filter = CMenuFilter::NewL();
     CleanupStack::PushL( filter );
     filter->SetType( KMenuUrl );
@@ -192,17 +191,20 @@ void CMCSPluginSettingsBkmList::GetBookmarksFromMCSL()
     TInt count( itemArray.Count() );
     for ( TInt i = 0; i < count; i++ )
         {
+        TBool uidExists( EFalse );
+        TBool nameExists( EFalse );
+        TBool urlExists( EFalse );
         CMenuItem* menuItem = CMenuItem::OpenL( iMenu, itemArray[i] );
         CleanupStack::PushL( menuItem );
-        TPtrC uid = menuItem->GetAttributeL( KMenuAttrUid, exists );
-        TPtrC name = menuItem->GetAttributeL( KMenuAttrLongName, exists );
-        TPtrC url = menuItem->GetAttributeL( KUrl, exists );
-        // if exists, add it
-        if ( exists )
+        TPtrC uid = menuItem->GetAttributeL( KMenuAttrUid, uidExists );
+        TPtrC name = menuItem->GetAttributeL( KMenuAttrLongName, nameExists );
+        TPtrC url = menuItem->GetAttributeL( KUrl, urlExists );
+        // if all attrib exists, add it ( url ignored )
+        if ( uidExists && uid.Length() > 0 && 
+            nameExists && name.Length() > 0 )
             {
             AddBookmarkL( uid, name, url, EMCSBookmark );
             }
-
         CleanupStack::PopAndDestroy( menuItem );
         }
 
@@ -216,7 +218,7 @@ void CMCSPluginSettingsBkmList::GetBookmarksFromMCSL()
 // If predefined bookmark was selected, MCS menu item is retrieved
 // ---------------------------------------------------------------------------
 //
-CMenuItem& CMCSPluginSettingsBkmList::ItemL( TInt aIndex )
+CMenuItem* CMCSPluginSettingsBkmList::ItemL( TInt aIndex )
     {
     CMenuItem* menuItem( NULL );
     CBkmListItem* listItem = iListItems[aIndex];
@@ -228,7 +230,7 @@ CMenuItem& CMCSPluginSettingsBkmList::ItemL( TInt aIndex )
         {
         menuItem = MCSMenuItemL( *listItem->iUid, *listItem->iCaption, *listItem->iUrl );
         }
-    return *menuItem;
+    return menuItem;
     }
 
 // ---------------------------------------------------------------------------
@@ -275,9 +277,12 @@ CMenuItem* CMCSPluginSettingsBkmList::MCSMenuItemL( const TDesC& aUid,
     if( itemArray.Count() > 0 )
         {
         item = CMenuItem::OpenL( iMenu, itemArray[0] );
-        CleanupStack::PushL( item );
-        iMenuItems.AppendL( item );
-        CleanupStack::Pop( item );
+        if ( item )
+            {
+            CleanupStack::PushL( item );
+            iMenuItems.AppendL( item );
+            CleanupStack::Pop( item );
+            }
         }
     CleanupStack::PopAndDestroy( &itemArray );
     CleanupStack::PopAndDestroy( filter );
@@ -300,6 +305,11 @@ void CMCSPluginSettingsBkmList::AddBookmarkL( const TDesC&  aUid,
         {
         listItem->iUrl = aUrl.AllocL();
         }
+    else
+        {
+        listItem->iUrl = KNullDesC().AllocL();
+        }
+
     TLinearOrder<CBkmListItem> sortMethod(CBkmListItem::CompareCaption);
     User::LeaveIfError(iListItems.InsertInOrderAllowRepeats(listItem, sortMethod));
     CleanupStack::Pop(listItem);

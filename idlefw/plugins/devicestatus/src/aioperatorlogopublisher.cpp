@@ -35,9 +35,9 @@
 #include <AknStatuspaneUtils.h>
 #include <AknUtils.h>
 #include <aipspropertyobserver.h>
+#include <aidevicestatuscontentmodel.h>
 #include "aioperatorlogopublisher.h"
 #include "ainetworkinfolistener.h"
-#include "aidevicestatuscontentmodel.h"
 #include "aiprioritizer.h"
 #include "ainwidpriorities.h"
 #include "debug.h"

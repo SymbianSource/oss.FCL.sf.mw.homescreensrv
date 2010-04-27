@@ -20,6 +20,7 @@
 #include <centralrepository.h>
 #include <avkondomainpskeys.h>
 #include <e32property.h>
+#include <aidevicestatuscontentmodel.h>
 #include <ProEngFactory.h>
 #include <MProfileEngine.h>
 #include <MProfile.h>
@@ -29,7 +30,6 @@
 #include <aidevstaplgres.rsg>
 #include "aioperatornamepublisher.h"
 #include "ainetworkinfolistener.h"
-#include "aidevicestatuscontentmodel.h"
 #include "aiprioritizer.h"
 #include "ainwidpriorities.h"
 #include "activeidle2domaincrkeys.h"

@@ -333,6 +333,7 @@ EXPORT_C CLiwDefaultList* CCPLiwMap::GetActionTriggersLC( ) const
             for (TInt i = 0; i < count; i++)
                 {
                 TLiwVariant trigger;
+                trigger.PushL();
                 sourceList->AtL(i,trigger);
                 if (trigger.TypeId() == EVariantTypeDesC8)
                     {
@@ -347,6 +348,7 @@ EXPORT_C CLiwDefaultList* CCPLiwMap::GetActionTriggersLC( ) const
                     list->AppendL(TLiwVariant(desc8));
                     CleanupStack::PopAndDestroy( &desc8 );
                     }
+                CleanupStack::PopAndDestroy(&trigger);
                 }
             }
         }

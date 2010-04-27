@@ -29,7 +29,7 @@
 // Forward declarations
 class CAiUiControllerManager;
 class CAiStateManager;
-class MAiCpsCommandBuffer;
+class CAiCpsCommandBuffer;
 class CHsContentPublisher;
 class THsPublisherInfo;
 
@@ -122,7 +122,7 @@ public:
      * @since S60 5.2
      * @param aCommanddBuffer Command buffer
      */
-    void SetCommandBuffer( MAiCpsCommandBuffer* aCommanddBuffer );
+    void SetCommandBuffer( CAiCpsCommandBuffer* aCommanddBuffer );
     
 private:	
     // private constructors
@@ -159,7 +159,7 @@ private:
     /** UI Controller Manager, Not owned */
     CAiUiControllerManager& iUiControllerManager;
     /** Cps command buffer, Not owned */
-    MAiCpsCommandBuffer* iCommandBuffer;
+    CAiCpsCommandBuffer* iCommandBuffer;
     /** Array of loaded data plugins, Owned */
     mutable RPointerArray< CHsContentPublisher > iPublishers;
     /** Ecom implementation info, Owned */

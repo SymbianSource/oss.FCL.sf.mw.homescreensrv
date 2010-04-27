@@ -52,6 +52,33 @@ _LIT( KMenuTypeMailbox, "menu:mailbox" );
 
 using namespace HSPluginSettingsIf;
 
+// ======== LOCAL FUNCTIONS ========
+
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroy()
+// ----------------------------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroy( TAny* aObj )
+    {
+    if( aObj )
+        {
+        static_cast<T*>( aObj )->ResetAndDestroy();
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroyPushL
+// ----------------------------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroyPushL(T& aArray)
+    {
+    CleanupStack::PushL( TCleanupItem( &CleanupResetAndDestroy<T>, &aArray ) );
+    }
+
+// ======== MEMBER FUNCTIONS ========
+
 // -----------------------------------------------------------------------------
 // Creates a formatted listbox line.
 // -----------------------------------------------------------------------------
@@ -161,6 +188,7 @@ void CMCSPluginSettingsModel::ConstructL()
 //
 void CMCSPluginSettingsModel::UpdateSettingsL()
     {
+    iSettings.Reset();
     if( !iPluginId )
         {
         return;
@@ -170,15 +198,13 @@ void CMCSPluginSettingsModel::UpdateSettingsL()
         {
         iContainer->CloseChangeDialog();
         }
-
-    iSettings.Reset();
+    
     RPointerArray<CItemMap> settingItems;
-    CleanupClosePushL( settingItems );
+    CleanupResetAndDestroyPushL( settingItems );
 
     iPluginSettings->GetSettingsL( *iPluginId, settingItems );
 
-    TInt count = settingItems.Count();
-    for ( TInt i = 0; i < count; i++ )
+    for ( TInt i = 0; i < settingItems.Count(); i++ )
         {
         CItemMap* itemMap = settingItems[i];
         RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
@@ -186,8 +212,8 @@ void CMCSPluginSettingsModel::UpdateSettingsL()
         TSettingItem item = ItemL( properties );
         iSettings.AppendL( item );
         }
-    CleanupStack::Pop( &settingItems );
-    settingItems.ResetAndDestroy();
+    
+    CleanupStack::PopAndDestroy(); // settingItems
     
     if (iContainer)
         {
@@ -283,16 +309,51 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
         {
         return;
         }
-    
-    RPointerArray<CItemMap> settingItems;
-    CleanupClosePushL( settingItems );
+
+    RPointerArray<CItemMap> settingItems;    
+    CleanupResetAndDestroyPushL( settingItems );
     iPluginSettings->GetSettingsL( *iPluginId, settingItems );
+
     if ( aIndex >= 0 && aIndex < settingItems.Count() )
         {
         TBool exists( EFalse );
         CItemMap* itemMap = settingItems[ aIndex ];
         RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
         properties = itemMap->Properties();
+        
+        const TInt KGranularity = 6;
+        CDesC8Array* propertiesList = new ( ELeave ) CDesC8ArrayFlat( KGranularity );
+        CleanupStack::PushL( propertiesList );
+        propertiesList->AppendL( KProperNameType );
+        propertiesList->AppendL( KProperNameParam );
+        propertiesList->AppendL( KProperNameUid );
+        propertiesList->AppendL( KProperNameView );
+        // skip KProperNameLocked property, attribute may be missing. results into
+		// leave with -1 when saving settings 
+        
+        // add missing properties
+        for ( TInt i=0; i<propertiesList->Count(); i++ )
+            {
+            TBool found( EFalse );
+            const TPtrC8 namePtr = propertiesList->MdcaPoint( i );
+            for ( TInt j=0; j<properties.Count() && !found; j++ )
+                {
+                found = ( (namePtr == properties[ j ]->Name() ) ? ETrue : EFalse );
+                }
+            if ( !found )
+                {
+                CPropertyMap* property = CPropertyMap::NewLC();
+                property->SetNameL( namePtr );
+                property->SetValueL( KNullDesC8 );
+                itemMap->AddPropertyMapL( property );
+                CleanupStack::Pop( property );
+                
+                // get updated list
+                properties = itemMap->Properties();
+                }
+            }
+        CleanupStack::PopAndDestroy( propertiesList );
+
         for ( TInt i = 0; i < properties.Count(); i++ )
             {
             if ( properties[ i ]->Name() == KProperNameType )
@@ -322,7 +383,7 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
             else if ( properties[ i ]->Name() == KProperNameUid )
                 {
                 TPtrC uid = aMenuItem.GetAttributeL( KMenuAttrUid, exists );
-                if ( exists )
+                if ( exists && uid.Length() > 0 )
                     {
                     HBufC8* uid8( NULL );
                     uid8 = AiUtility::CopyToBufferL( uid8, uid );
@@ -338,7 +399,7 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
             else if ( properties[ i ]->Name() == KProperNameView )
                 {
                 TPtrC view = aMenuItem.GetAttributeL( KMenuAttrView, exists );
-                if( exists )
+                if( exists && view.Length() > 0 )
                     {
                     HBufC8* view8( NULL );
                     view8 = AiUtility::CopyToBufferL( view8, view );
@@ -364,7 +425,7 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                     isFolder = ETrue;
                     }
 
-                if ( exists || isFolder )
+                if ( (exists && param.Length() > 0) || (isFolder) )
                     {
                     // the folder id is stored 
                     // in param attribute in HSPS
@@ -389,7 +450,7 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
             else if ( properties[ i ]->Name() == KProperNameLocked )
                 {
                 TPtrC locked = aMenuItem.GetAttributeL( KMenuAttrLocked, exists );
-                if ( exists )
+                if ( exists && locked.Length() > 0 )
                     {
                     HBufC8* locked8( NULL );
                     locked8 = AiUtility::CopyToBufferL( locked8, locked );
@@ -404,11 +465,10 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
                 }
             }
         }
-    // ETrue tells that modified settings are stored also to plugin reference
-    iPluginSettings->SetSettingsL( *iPluginId, settingItems, ETrue );
-    CleanupStack::Pop( &settingItems );
-    settingItems.ResetAndDestroy();
 
+    // ETrue tells that modified settings are stored also to plugin reference
+    User::LeaveIfError( iPluginSettings->SetSettingsL( *iPluginId, settingItems, ETrue ) );
+    CleanupStack::PopAndDestroy(); // settingItems
     }
 
 // ---------------------------------------------------------------------------
@@ -438,12 +498,14 @@ TInt CMCSPluginSettingsModel::MdcaCount() const
 // ---------------------------------------------------------------------------
 //
 TPtrC CMCSPluginSettingsModel::MdcaPoint( TInt aIndex ) const
-{
-    if (aIndex < 0 || aIndex >= iSettings.Count())
     {
+    if (aIndex < 0 || aIndex >= iSettings.Count())
+        {
         TPtrC ret(KNullDesC);
         return ret;
-    }
+        }
+    
+    TPtrC line( KNullDesC ); 
     if ( iSettings[aIndex].type == EApplication )
         {
         // first, we need to check if the item is missing 
@@ -452,26 +514,22 @@ TPtrC CMCSPluginSettingsModel::MdcaPoint( TInt aIndex ) const
         if ( iSettings[ aIndex ].id == KErrNotFound )
             {
             const TDesC& caption = iAppList->UndefinedText();
-            TPtrC line; 
             TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
-            return line; 
             }
         else
             {
             const TDesC& caption = iAppList->MdcaPoint( iSettings[ aIndex ].id );
-            TPtrC line; 
             TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
-            return line; 
             }
         }
     else
         {
         const TDesC& caption = iBkmList->MdcaPoint( iSettings[aIndex].id );
-        TPtrC line;
         TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
-        return line;
         }
-}
+
+    return line;
+    }
 
 // ---------------------------------------------------------------------------
 // Returns a setting ID for the given index.
@@ -511,24 +569,28 @@ TBool CMCSPluginSettingsModel::ReplaceItemL( const TInt& aSettingIndex,
                                              TInt aId,
                                              TSettingType aType )
     {
+    TBool replaced( EFalse );
     if (aSettingIndex >= 0 && aSettingIndex < iSettings.Count())
         {
-        iSettings[ aSettingIndex ].id = aId;
-        iSettings[ aSettingIndex ].type = aType;
-
+        CMenuItem* item( NULL );
         if ( aType == EApplication )
             {
-            CMenuItem* item = iAppList->ItemL( aId );
-            SaveSettingsL( aSettingIndex, *item );
+            item = iAppList->ItemL( aId );
             }
          else
             {
-            CMenuItem& item = iBkmList->ItemL( aId );
-            SaveSettingsL( aSettingIndex, item );
+            item = iBkmList->ItemL( aId );
             }
-        return ETrue;
+        
+        if ( item )
+            {
+            SaveSettingsL( aSettingIndex, *item );
+            iSettings[ aSettingIndex ].id = aId;
+            iSettings[ aSettingIndex ].type = aType;
+            replaced = ETrue;
+            }
         }
-    return EFalse;
+    return replaced;
     }
 
 // ---------------------------------------------------------------------------
@@ -562,24 +624,32 @@ CMCSPluginSettingsBkmList* CMCSPluginSettingsModel::BkmList()
 // Updates application list
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginSettingsModel::UpdateAppListL()
+void CMCSPluginSettingsModel::UpdateAppListL( TBool aUpdateSettings )
     {
     if( !iAppList )
         {
         iAppList = CMCSPluginSettingsAppList::NewL();
         }
     iAppList->StartL();
+    if ( aUpdateSettings )
+        {
+        UpdateSettingsL();
+        }
     }
 
 // ---------------------------------------------------------------------------
 // Updates bookmark list
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginSettingsModel::UpdateBkmListL()
-{
+void CMCSPluginSettingsModel::UpdateBkmListL( TBool aUpdateSettings )
+    {
     delete iBkmList;
     iBkmList = NULL;
     iBkmList = CMCSPluginSettingsBkmList::NewL();
-}
+    if ( aUpdateSettings )
+        {
+        UpdateSettingsL();
+        }
+    }
 
 // End of File.

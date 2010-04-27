@@ -86,6 +86,15 @@ public:
     virtual TInt ViewListL( CHsContentInfoArray& aArray ) = 0;
 
     /**
+     * Returns the list of available Home screen views included in an
+     * application configuration
+     * @param aInfo Content info defining the application configuration
+     * @param aArray List of views
+     * @return KErrNone on success, any of system wide error codes
+     */
+    virtual TInt ViewListL( CHsContentInfo& aInfo, CHsContentInfoArray& aArray ) = 0;
+
+    /**
      * Returns the list of available Home screen application configurations
      * @param aArray List of application configurations
      * @return KErrNone on success, any of system wide error codes

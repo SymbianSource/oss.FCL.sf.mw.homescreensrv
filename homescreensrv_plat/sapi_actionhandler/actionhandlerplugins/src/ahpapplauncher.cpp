@@ -23,8 +23,6 @@
 #include <eikenv.h>
 #include <eikappui.h>
 #include <liwvariant.h>
-#include <gfxtranseffect/gfxtranseffect.h>      
-#include <akntranseffect.h>
 
 #include "ahproperties.hrh"
 #include "ahpapplauncher.h"
@@ -108,45 +106,29 @@ TInt CAHAppLauncher::ExecuteCommmandLineL( const CLiwMap* aMap )
 
     if ( !ExtractUidL( aMap, appUid, KApplicationUid ) )
         {
-        TApaTaskList taskList( iEnv->WsSession() );       
-        TApaTask task = taskList.FindApp( appUid );
-        if ( task.Exists( ) )
+        // app not yet running
+        RApaLsSession appSession;
+        CleanupClosePushL( appSession );
+        User::LeaveIfError( appSession.Connect( ) );
+
+        CApaCommandLine* cmd = CApaCommandLine::NewLC( );
+        cmd->SetCommandL( GetCommandL( aMap ) );
+        RBuf documentNameValue;
+        CleanupClosePushL( documentNameValue );
+        if( !ExtractDesL( aMap, documentNameValue, KDocumentName ) )
             {
-            GfxTransEffect::BeginFullScreen( 
-                AknTransEffect::EApplicationStart,
-                TRect(), 
-                AknTransEffect::EParameterType, 
-                AknTransEffect::GfxTransParam( appUid,
-                AknTransEffect::TParameter::EActivateExplicitContinue ));
-            
-            errCode = KErrNone;
-            task.BringToForeground();
+            cmd->SetDocumentNameL( documentNameValue );
             }
-        else
-            {
-            // app not yet running
-            RApaLsSession appSession;
-            CleanupClosePushL( appSession );
-            User::LeaveIfError( appSession.Connect( ) );
-    
-            CApaCommandLine* cmd = CApaCommandLine::NewLC( );
-            cmd->SetCommandL( GetCommandL( aMap ) );
-            RBuf documentNameValue;
-            CleanupClosePushL( documentNameValue );
-            if( !ExtractDesL( aMap, documentNameValue, KDocumentName ) )
-                {
-                cmd->SetDocumentNameL( documentNameValue );
-                }
-            TApaAppInfo appInfo;
-            appSession.GetAppInfo( appInfo, appUid );
-            cmd->SetExecutableNameL( appInfo.iFullName );
-            errCode = appSession.StartApp( *cmd );
-    
-            CleanupStack::PopAndDestroy( &documentNameValue );
-            CleanupStack::PopAndDestroy( cmd );
-            CleanupStack::PopAndDestroy( &appSession );
-            }
+        TApaAppInfo appInfo;
+        appSession.GetAppInfo( appInfo, appUid );
+        cmd->SetExecutableNameL( appInfo.iFullName );
+        errCode = appSession.StartApp( *cmd );
+
+        CleanupStack::PopAndDestroy( &documentNameValue );
+        CleanupStack::PopAndDestroy( cmd );
+        CleanupStack::PopAndDestroy( &appSession );
         }
+
     return errCode;
     }
 

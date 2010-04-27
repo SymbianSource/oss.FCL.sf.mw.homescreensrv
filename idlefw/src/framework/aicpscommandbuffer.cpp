@@ -17,15 +17,14 @@
 
 
 // System includes
-
-// User includes
-#include <debug.h>
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <liwgenericparam.h>
 
+// User includes
 #include "caicpscommandbuffer.h"
 #include "aicpsexecuteparam.h"
+#include <debug.h>
 
 // Constants
 _LIT8( KCPSConfigurationIf, "IContentPublishing" );
@@ -33,6 +32,7 @@ _LIT8( KCPS, "Service.ContentPublishing" );
 _LIT8( KExecuteAction, "ExecuteAction" );
 _LIT8( KExecuteMultipleActions, "ExecuteMultipleActions" );
 _LIT8( KFilters, "filters" );
+
 // ======== LOCAL FUNCTIONS ========
 
 // ======== MEMBER FUNCTIONS ========
@@ -88,26 +88,38 @@ CAiCpsCommandBuffer::~CAiCpsCommandBuffer()
     {
     // Flush any pending commands
     Flush();
+    
     if ( iCpsInterface )
        {
        // Close interface
        iCpsInterface->Close();
        }
     
-    if ( iServiceHandler && iCpsService )
-       {
-       // Detach services from the handler
-       RCriteriaArray interestList;
-    
-       TRAP_IGNORE( interestList.AppendL( iCpsService );
-                    iServiceHandler->DetachL( interestList ); );
-    
-       interestList.Reset();
-       }
+    TRAP_IGNORE( DetachL() );
     
     delete iCpsService;
-    delete iServiceHandler;
-    
+    delete iServiceHandler;    
+    }
+
+// ---------------------------------------------------------------------------
+// CAiCpsCommandBuffer::DetachL
+//
+// ---------------------------------------------------------------------------
+//
+void CAiCpsCommandBuffer::DetachL()
+    {
+    if ( iServiceHandler && iCpsService )
+        {                   
+        // Detach services from the handler       
+        RCriteriaArray list;
+        CleanupClosePushL( list );
+     
+        list.AppendL( iCpsService );
+       
+        iServiceHandler->DetachL( list );    
+        
+        CleanupStack::PopAndDestroy( &list );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -117,23 +129,31 @@ CAiCpsCommandBuffer::~CAiCpsCommandBuffer()
 //
 void CAiCpsCommandBuffer::GetCPSInterfaceL()
     {
-    iServiceHandler = CLiwServiceHandler::NewL();
+    if ( iCpsInterface )
+        {
+        return;
+        }
     
     RCriteriaArray interestList;
+    CleanupClosePushL( interestList );
     
-    // Attach to CPS:
-    iCpsService = CLiwCriteriaItem::NewL( 1, KCPSConfigurationIf, KCPS );
-    iCpsService->SetServiceClass( TUid::Uid( KLiwClassBase ) );
+    CLiwServiceHandler* serviceHandler = CLiwServiceHandler::NewL();
+    CleanupStack::PushL( serviceHandler );
+          
+    // Attach to CPS:    
+    CLiwCriteriaItem* cpsService = CLiwCriteriaItem::NewL( 1, KCPSConfigurationIf, KCPS );
+    CleanupStack::PushL( cpsService );
     
-    interestList.AppendL( iCpsService );
-    iServiceHandler->AttachL( interestList );
-    interestList.Reset();
+    cpsService->SetServiceClass( TUid::Uid( KLiwClassBase ) );
     
-    CLiwGenericParamList& inParamList( iServiceHandler->InParamListL() );
-    CLiwGenericParamList& outParamList( iServiceHandler->OutParamListL() );
+    interestList.AppendL( cpsService );
+    serviceHandler->AttachL( interestList );
+
+    CLiwGenericParamList& inParamList( serviceHandler->InParamListL() );
+    CLiwGenericParamList& outParamList( serviceHandler->OutParamListL() );
     
-    iServiceHandler->ExecuteServiceCmdL(
-          *iCpsService,
+    serviceHandler->ExecuteServiceCmdL(
+          *cpsService,
           inParamList,
           outParamList );
     
@@ -142,17 +162,25 @@ void CAiCpsCommandBuffer::GetCPSInterfaceL()
     outParamList.FindFirst( pos, KCPSConfigurationIf );
     
     if ( pos != KErrNotFound )
-      {
-      iCpsInterface = (outParamList)[pos].Value().AsInterface();
-      inParamList.Reset();
-      outParamList.Reset();
-      }
+        {
+        iCpsInterface = (outParamList)[pos].Value().AsInterface();
+        inParamList.Reset();
+        outParamList.Reset();
+        }
     else
-      {
-      inParamList.Reset();
-      outParamList.Reset();
-      User::Leave( KErrNotFound );
-      }
+        {
+        inParamList.Reset();
+        outParamList.Reset();
+        User::Leave( KErrNotFound );
+        }
+    
+    CleanupStack::Pop( cpsService );   
+    iCpsService = cpsService;
+    
+    CleanupStack::Pop( serviceHandler );    
+    iServiceHandler = serviceHandler;
+    
+    CleanupStack::PopAndDestroy( &interestList );
     }
 
 // ---------------------------------------------------------------------------
@@ -172,16 +200,37 @@ void CAiCpsCommandBuffer::AddCommand(  const TDesC& aPluginId,
     }
 
 // ---------------------------------------------------------------------------
+// CAiCpsCommandBuffer::ServiceHandler
+//
+// ---------------------------------------------------------------------------
+//
+CLiwServiceHandler* CAiCpsCommandBuffer::ServiceHandler() const
+    {
+    return iServiceHandler;
+    }
+
+// ---------------------------------------------------------------------------
+// CAiCpsCommandBuffer::CpsInterface
+//
+// ---------------------------------------------------------------------------
+//
+MLiwInterface* CAiCpsCommandBuffer::CpsInterface() const
+    {
+    return iCpsInterface;
+    }
+
+// ---------------------------------------------------------------------------
 // CAiCpsCommandBuffer::DoAddCommandL
 //
 // ---------------------------------------------------------------------------
 //
 void CAiCpsCommandBuffer::DoAddCommandL( const TDesC& aPluginId,
-        const TDesC& aType, CLiwDefaultMap* aFilter,
-        const TDesC8& aAction )
+    const TDesC& aType, CLiwDefaultMap* aFilter,
+    const TDesC8& aAction )
     {
-    TInt found = KErrNotFound;
-    for (TInt i=0; i< iPlugins.Count(); i++)
+    TInt found( KErrNotFound );
+    
+    for ( TInt i = 0; i < iPlugins.Count(); i++ )
         {
         if ( aPluginId == iPlugins[i]->PluginId() )
             {
@@ -203,8 +252,7 @@ void CAiCpsCommandBuffer::DoAddCommandL( const TDesC& aPluginId,
         param->AddActionL( aAction );
         iPlugins.AppendL( param );
         CleanupStack::Pop( param );
-        }
-    
+        }    
     }
 
 // ---------------------------------------------------------------------------
@@ -215,10 +263,12 @@ void CAiCpsCommandBuffer::DoAddCommandL( const TDesC& aPluginId,
 void CAiCpsCommandBuffer::Flush()
     {
     __PRINTS( "CAiCpsCommandBuffer::Flush, start" );
+
     if ( iPlugins.Count() > 0 )
         {
         TRAP_IGNORE( DoFlushL() );
         }
+    
     __PRINTS( "CAiCpsCommandBuffer::Flush - done" );
     }
 
@@ -229,40 +279,38 @@ void CAiCpsCommandBuffer::Flush()
 //
 void CAiCpsCommandBuffer::DoFlushL()
     {
-    if ( !iCpsInterface   )
+    if ( !iCpsInterface )
        {
        GetCPSInterfaceL();
        }
 	   
-    if(iCpsInterface)
+    if ( iCpsInterface )
         {
-		  __PRINTS( "CAiCpsCommandBuffer::DoFlush : Execute" );
-        TInt pluginCount = iPlugins.Count();
+		__PRINTS( "CAiCpsCommandBuffer::DoFlush : Execute" );
+        
+        TInt pluginCount( iPlugins.Count() );
+        
         CLiwDefaultList* pluginCmdList = CLiwDefaultList::NewLC();
         
-        for (TInt i=0; i < pluginCount; i++ )
+        for ( TInt i = 0; i < pluginCount; i++ )
             {
             CLiwDefaultMap* inParamMap = iPlugins[i]->InParamMapLC();
             pluginCmdList->AppendL( inParamMap );
             CleanupStack::PopAndDestroy( inParamMap );            
             }
+        
         CLiwGenericParamList* inParamList  = CLiwGenericParamList::NewLC();
         CLiwGenericParamList* outParamList  = CLiwGenericParamList::NewLC();
         
-         TLiwGenericParam item( KFilters, TLiwVariant ( pluginCmdList));
-         inParamList->AppendL( item ); 
+        TLiwGenericParam item( KFilters, TLiwVariant ( pluginCmdList ) );
+        inParamList->AppendL( item ); 
       
         iCpsInterface->ExecuteCmdL( KExecuteMultipleActions, *inParamList, *outParamList);
        
-        CleanupStack::PopAndDestroy( outParamList );
-        CleanupStack::PopAndDestroy( inParamList );
-        CleanupStack::PopAndDestroy( pluginCmdList );
-        }
-    else
-       {
-       User::Leave( KErrNotSupported );
-       }
-    iPlugins.ResetAndDestroy();
+        CleanupStack::PopAndDestroy( 3, pluginCmdList ); // outparamList, inParamList
+        
+        iPlugins.ResetAndDestroy();
+        }    
     }
 
 // End of file

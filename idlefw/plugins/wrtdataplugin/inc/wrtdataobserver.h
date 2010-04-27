@@ -107,6 +107,12 @@ public:
     * @return void.
     */
     void RegisterL( CLiwDefaultMap* aFilter );
+
+    /**
+    * Cancel all the registered notifications. 
+    * @return void.
+    */
+    void ReleaseL();
         
 private:
     // data 

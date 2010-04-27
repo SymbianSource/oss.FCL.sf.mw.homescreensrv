@@ -20,11 +20,11 @@
 #define C_AIPROFILEPUBLISHER_H
 
 #include <e32base.h>
+#include <aidevicestatuscontentmodel.h>
 #include <RSSSettings.h>
 #include <MSSSettingsObserver.h>
 #include <MProfileChangeObserver.h>
 #include "aidevicestatuspublisher.h"
-#include "aidevicestatuscontentmodel.h"
 
 class MProfileEngine;
 class MAiDeviceStatusContentObserver;

@@ -4278,12 +4278,16 @@ void ChspsMaintenanceHandler::GetHeaderListL(
         {
         ChspsODT* header = iHeaderListCache.At( i );
         
+        // Header clone is needed because it prevents modifying list cache
+        ChspsODT* clone = header->CloneL();
+        CleanupStack::PushL( clone ); 
+        
         // Check whether the header matches the search criteria (family etc)
-        if ( FilterHeader( aSearchMask, *header ) )
+        if ( FilterHeader( aSearchMask, *clone ) )
             {
         
             // Update file paths into the existing logo declarations
-            if( header->LogoFile().Length() &&
+            if( clone->LogoFile().Length() &&
                 iMaintainLogoResources &&
                 ( header->ConfigurationType() == EhspsWidgetConfiguration ||
                   header->ConfigurationType() == EhspsTemplateConfiguration ) )
@@ -4299,11 +4303,11 @@ void ChspsMaintenanceHandler::GetHeaderListL(
                 
                 RBuf newDeclaration;
                 CleanupClosePushL( newDeclaration );
-                newDeclaration.CreateL( header->LogoFile().Length() + KMaxFileName );
+                newDeclaration.CreateL( clone->LogoFile().Length() + KMaxFileName );
                 
                 // Find location of the logo file and location where it shold be copied                
                 hspsServerUtil::PopulateLogoPathsL(
-                    header->LogoFile(),
+                    clone->LogoFile(),
                     iSecureId,
                     targetFile,
                     sourceFile,
@@ -4314,7 +4318,7 @@ void ChspsMaintenanceHandler::GetHeaderListL(
                         && newDeclaration.Length() )
                     {
                     // Update private path information to the logo declaration                
-                    header->SetLogoFileL( newDeclaration );
+                    clone->SetLogoFileL( newDeclaration );
                                         
                     hspsServerUtil::CopyResourceFileL(
                         iServerSession->FileSystem(),
@@ -4327,7 +4331,7 @@ void ChspsMaintenanceHandler::GetHeaderListL(
                 }      
         
             // Convert the header to a descriptor
-            HBufC8* data = header->MarshalHeaderL();            
+            HBufC8* data = clone->MarshalHeaderL();            
             if ( data )
                 {
                 // Append to the search results
@@ -4336,6 +4340,7 @@ void ChspsMaintenanceHandler::GetHeaderListL(
                 CleanupStack::Pop( data );
                 }
             }
+        CleanupStack::PopAndDestroy( clone );
         }          
     }
 

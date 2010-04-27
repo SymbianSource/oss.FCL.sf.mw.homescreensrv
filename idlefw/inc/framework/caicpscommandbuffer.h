@@ -79,6 +79,13 @@ public:
      */
     void Flush();
     
+    /**
+    * Gets the CPS interface 
+    *
+    * @since S60 5.2
+    */
+    void GetCPSInterfaceL();
+    
 private:
     // from MAiCpsCommandBuffer
 
@@ -86,16 +93,27 @@ private:
      * @see MAiCpsCommandBuffer
      */    
     void AddCommand( const TDesC& aPluginId, const TDesC& aType, 
-            CLiwDefaultMap* aFilter, const TDesC8& aAction);
+        CLiwDefaultMap* aFilter, const TDesC8& aAction);
+
+    /**
+     * @see MAiCpsCommandBuffer
+     */        
+    CLiwServiceHandler* ServiceHandler() const;            
+    
+    /**
+     * @see MAiCpsCommandBuffer
+     */        
+    MLiwInterface* CpsInterface() const;
     
 private:
     // new functions
+    
     /**
-    * Gets the CPS interface 
+    * Detach the CPS interface 
     *
     * @since S60 5.2
-    */
-    void GetCPSInterfaceL();
+    */    
+    void DetachL();
     
     /**
     * Adds a CPS command execute commnad for a spcific Plugin

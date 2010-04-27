@@ -204,8 +204,10 @@ void CCPActiveNotifier::RunL()
         iSizeDes = NULL;
         CleanupStack::PopAndDestroy(&outbuf);
         }
-    RegisterAgainL();
-
+    if (KErrNoMemory!=iStatus.Int())
+        {
+        RegisterAgainL();
+        }
     NotifyObserversL(error, eventParamList);
     CleanupStack::PopAndDestroy(eventParamList);
     }
@@ -292,9 +294,12 @@ void CCPActiveNotifier::DoCancel()
 //
 // ----------------------------------------------------------------------------
 //
-TInt CCPActiveNotifier::RunError( TInt /*aError*/)
+TInt CCPActiveNotifier::RunError( TInt aError )
     {
-    TRAP_IGNORE( RegisterAgainL( ) );
+    if (KErrNoMemory!=aError)
+        {
+        TRAP_IGNORE( RegisterAgainL( ) );
+        }
     return KErrNone;
     }
 // ----------------------------------------------------------------------------

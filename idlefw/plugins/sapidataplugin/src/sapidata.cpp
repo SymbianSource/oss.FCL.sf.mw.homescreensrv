@@ -105,6 +105,7 @@ void CSapiData::ConstructL(CSapiDataPlugin* aPlugin)
     { 
      iPlugin = aPlugin;
 	 iUpdateNeeded = EFalse;
+	 iGetMenuItems = ETrue;
     }
     
 // ---------------------------------------------------------------------------
@@ -114,9 +115,7 @@ void CSapiData::ConstructL(CSapiDataPlugin* aPlugin)
 //
 CSapiData::~CSapiData()
     {
-    delete iCommandName;
 	delete iPublisher;
-	delete iContentType;
 	delete iContentId;
 	delete iStartupReason;
 	
@@ -130,24 +129,15 @@ CSapiData::~CSapiData()
         delete iContentObserver;
         iContentObserver = NULL;
         }
-    if( iInterface )
-         {
-         // This will also release all the registered observers
-         iInterface->Close();
-         iInterface = NULL;
-         }
-    if( iServiceHandler )
-         {
-         iServiceHandler->Reset();
-         delete iServiceHandler;
-         iServiceHandler = NULL;
-         }
-    iCpsExecute = NULL;
     iMenuItems.ResetAndDestroy();
     iMenuTriggers.ResetAndDestroy();
     iItemList.ResetAndDestroy();
     // not owned
     iPlugin = NULL;
+    iInterface = NULL;
+    iServiceHandler = NULL;
+    iCpsExecute = NULL;
+    
     }
 
 // ---------------------------------------------------------------------------
@@ -156,30 +146,13 @@ CSapiData::~CSapiData()
 //
 void CSapiData::ConfigureL(RAiSettingsItemArray& aConfigurations )
     {
-    HBufC8* serviceName = NULL;
-    HBufC8* interfaceName = NULL;
-
     TInt count = aConfigurations.Count();
-    
     for(TInt i = 0;i<count;i++)
        {
        MAiPluginConfigurationItem& confItem = ( aConfigurations[i] )->AiPluginConfigurationItem();
-       // if owner is plugin then it (key,value) is for plugin configurations items
        if(confItem.Owner() == KPlugin())
            {
-           if(confItem.Name() ==  KService())
-               {
-               serviceName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(confItem.Value());
-               }
-           else if( confItem.Name() == KInterface() )
-                 {
-                 interfaceName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(confItem.Value());
-                 }
-           else if( confItem.Name() == KCommand() )
-                 {
-                 iCommandName  = CnvUtfConverter::ConvertFromUnicodeToUtf8L(confItem.Value());
-                 }
-           else if( confItem.Name()  == KPublisher16() ) 
+           if( confItem.Name()  == KPublisher16() ) 
 				  {
 				  iPublisher = confItem.Value().AllocL();
 				  }
@@ -199,54 +172,12 @@ void CSapiData::ConfigureL(RAiSettingsItemArray& aConfigurations )
            CleanupStack::PopAndDestroy(objectId);
            }
        }
-    
     iItemCount = iItemList.Count();  
-    
-    if( !serviceName || !interfaceName || !iCommandName  
-    		|| !iContentId || !iPublisher || !iItemCount )
+    if( iPublisher->Des().Length() == 0 ) 
         {
         // No service to offer without plugin configurations 
         User::Leave( KErrNotSupported );
         }
-    iServiceHandler = CLiwServiceHandler::NewL(); 
-
-    // for convenience keep pointers to Service Handler param lists 
-    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-
-    CLiwCriteriaItem* criteriaItem = CLiwCriteriaItem::NewLC( KLiwCmdAsStr, *interfaceName , *serviceName );
-    criteriaItem->SetServiceClass( TUid::Uid( KLiwClassBase ) );
-    // Interface name 
-    RCriteriaArray criteriaArray;
-    criteriaArray.AppendL( criteriaItem );
-    // attach Liw criteria
-    iServiceHandler->AttachL( criteriaArray );
-    iServiceHandler->ExecuteServiceCmdL( *criteriaItem, *inParamList, *outParamList );
-
-    CleanupStack::PopAndDestroy(criteriaItem);
-    criteriaArray.Reset();
-
-    // extract CPS interface from output params
-    TInt pos( 0 );
-    outParamList->FindFirst( pos, *interfaceName );
-    if( pos != KErrNotFound )
-        {
-        //iInterface is MLiwInterface*
-        iInterface = (*outParamList)[pos].Value().AsInterface(); 
-        User::LeaveIfNull( iInterface );
-        }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
-    inParamList->Reset();
-    outParamList->Reset();
-    delete interfaceName;
-    delete serviceName;
-
-	//Gets the menu items from the publisher registry    
-    GetMenuItemsL();
- 
     iContentObserver = CSapiDataObserver::NewL( iInterface, this );   
     iPubObserver = CSapiDataObserver::NewL( iInterface, this );
     }
@@ -440,6 +371,13 @@ void CSapiData::RemoveL( MAiContentObserver* aObserver, TDesC& aContentType  )
 //
 TBool CSapiData::HasMenuItem(const TDesC& aMenuItem )
 	{
+    if ( iGetMenuItems )
+        {
+        //Gets the menu items from the publisher registry
+        TRAP_IGNORE( GetMenuItemsL() );
+        iGetMenuItems = EFalse;
+        }
+    
 	TBool found = EFalse;
 	for (TInt i = 0; i < iMenuItems.Count(); i++ )
 		{
@@ -582,7 +520,7 @@ void CSapiData::ExecuteCommandL(const TDesC& aRegistry, CLiwDefaultMap* aInFilte
     inParamList->AppendL( item );
     
     // execute service.It is assumed that iInterface is already initiated
-    iInterface->ExecuteCmdL( *iCommandName, *inParamList, *aOutParamList);
+    iInterface->ExecuteCmdL( KGetList, *inParamList, *aOutParamList);
     type.Reset();
     item.Reset();
     inParamList->Reset();
@@ -765,6 +703,7 @@ void CSapiData::ChangePublisherStatusL(CLiwDefaultList* aActionsList)
     
     TLiwGenericParam item( KFilter, TLiwVariant( filter ));
     inParamList->AppendL( item );
+
     iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
     CleanupStack::PopAndDestroy( filter );
     outParamList->Reset();
@@ -934,6 +873,11 @@ void CSapiData::SetUpdateNeeded(TBool aStatus)
 void CSapiData::SetCommandBuffer(TAny* aAny)
     {
     iCpsExecute = reinterpret_cast <MAiCpsCommandBuffer* > ( aAny );
+    if ( iCpsExecute )
+        {
+        iInterface = iCpsExecute->CpsInterface();
+        iServiceHandler = iCpsExecute->ServiceHandler();
+        }
     }
 
 // End of file

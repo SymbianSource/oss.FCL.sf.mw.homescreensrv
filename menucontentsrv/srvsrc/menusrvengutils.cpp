@@ -21,7 +21,7 @@
 #include <javaregistryentry.h>
 #include <drmrightsinfo.h>
 #include <e32property.h>
-#include <SATDomainPSKeys.h>
+#include <satdomainpskeys.h>
 #include <AknTaskList.h> 
 #include <mmf/common/mmfcontrollerpluginresolver.h>
 #include <widgetregistryclient.h>

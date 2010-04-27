@@ -18,7 +18,7 @@
 
 #include "aipublishprioritizer.h"
 #include "ainwidpriorities.h"
-#include "aidevicestatuscontentmodel.h"
+#include <aidevicestatuscontentmodel.h>
 #include <aicontentrequest.h>
 
 #include "aipublisherbroadcaster.h"

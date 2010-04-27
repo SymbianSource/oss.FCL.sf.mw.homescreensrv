@@ -22,10 +22,10 @@
 // System includes
 #include <e32base.h>
 #include <coemain.h>
+#include <aidevicestatuscontentmodel.h>
 
 // User includes
 #include "aidevicestatuspublisher.h"
-#include "aidevicestatuscontentmodel.h"
 
 // Forward declarations
 class MAiDeviceStatusContentObserver;

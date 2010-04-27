@@ -468,7 +468,7 @@ class hspsServerUtil
          * @param aFilename Referred file name or NULL
  		 * @return True if a file was referred from the declaration
          */
-        static TBool hspsServerUtil::IsLogoFile(
+        static TBool IsLogoFile(
                 const TDesC& aFileDeclaration,
                 TFileName& aFilename );
 
