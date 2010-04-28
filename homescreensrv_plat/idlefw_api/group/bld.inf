@@ -30,3 +30,5 @@ PRJ_EXPORTS
 ../inc/aiuiidleintegration.h     MW_LAYER_PLATFORM_EXPORT_PATH(aiuiidleintegration.h)
 ../inc/debug.h                   MW_LAYER_PLATFORM_EXPORT_PATH(debug.h) // needed?
 ../inc/aifwdefs.h                MW_LAYER_PLATFORM_EXPORT_PATH(aifwdefs.h)
+
+../../../inc/aisystemuids.hrh              MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
