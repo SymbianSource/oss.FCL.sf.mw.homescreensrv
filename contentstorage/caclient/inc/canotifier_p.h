@@ -21,6 +21,7 @@
 class CaClientNotifierProxy;
 class CaNotifier;
 class CaNotifierFilter;
+class CaObserver;
 
 class CaNotifierPrivate
 {
@@ -33,7 +34,8 @@ public:
         GroupContentChangedNotifierType
     };
 
-    CaNotifierPrivate(const CaNotifierFilter &notifierFilter);
+    CaNotifierPrivate(const CaNotifierFilter &notifierFilter, 
+            CaClientNotifierProxy *notifierProxy);
     ~CaNotifierPrivate();
 
     int registerNotifier(NotifierType notifierType);
@@ -41,24 +43,14 @@ public:
 
     void makeConnect();
 
-    void makeDisconnect();
-
 private:
 
-    /*!
-     * Points to the CaNotifier instance that uses
-     * this private implementation.
-     */
     const CaNotifier *m_q;
 
-    /*!
-     * Own.
-     */
     const CaNotifierFilter *mNotifierFilter;
 
-    /*!
-     * Own.
-     */
+    const CaObserver *mObserver;
+
     CaClientNotifierProxy *mNotifierProxy;
 
     friend class CaNotifier;

@@ -58,17 +58,12 @@ public:
     /**
      * Sends request for getting change information.
      */
-    void GetChangeInfoAndNotifyObserverL() const;
+    void GetChangeInfoL() const;
 
-private:
     /**
      * Notify observer.
-     * @param aEntry pointer to inner entry.
-     * @param aChangeType change type.
      */
-    void NotifyObserver(
-            CCaInnerEntry* aEntry,
-            TChangeType aChangeType ) const;
+    void NotifyObserver() const;
 
 private:
     /**
@@ -95,6 +90,16 @@ private:
      * Own.
      */
     TPckgBuf<TInt>* iMessageSize;
+
+    /**
+     * Own.
+     */
+    mutable CCaInnerEntry* iChangedEntry;
+    
+    /**
+     * Own.
+     */
+    mutable TChangeType iChangedEntryType;
     };
 
 #endif /* CACLIENTSUBSESSION_H_ */

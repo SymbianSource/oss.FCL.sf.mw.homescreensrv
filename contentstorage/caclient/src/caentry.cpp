@@ -30,38 +30,44 @@
 // ======== MEMBER FUNCTIONS ========
 
 /*!
- *   \class CaEntry
- *
- *   \brief This abstract class describes particular entry.
- *
- *   To create instance of CaEntry object, you have to use service's object's
- *   createEntry() method.
- *
- *   \example
- *   \code
- *   QSharedPointer<CaService> service = CaService::instance();
- *   // default you create item (ItemEntryRole)
- *   CaEntry entry;
- *   // to create CaEntry invoking setText() and setEntryTypeName() methods
- *   is obligatoried
- *   entry.setText("Text");
- *   entry.setEntryTypeName("TypeName");
- *   CaEntry * resultEntry = service->createEntry(entry);
- *   ...
- *   delete resultEntry;
- *   ...
- *
- *   // if you want create group, you should use entry role parametr
- *   CaEntry entryGroup(GroupEntryRole);
- *   ...
- *   resultEntry = service->createEntry(entryGroup);
- *
- *   \endcode
+ \class CaEntry
+ \brief This abstract class describes particular entry.
+ To create instance of CaEntry object, you have to use service's object's
+ createEntry() method.
+ \example
+ \code
+ QSharedPointer<CaService> service = CaService::instance();
+ // default you create item (ItemEntryRole)
+ CaEntry entry;
+ // to create CaEntry invoking setText() and setEntryTypeName() methods
+ is obligatoried
+ entry.setText("Text");
+ entry.setEntryTypeName("TypeName");
+ CaEntry * resultEntry = service->createEntry(entry);
+ ...
+ delete resultEntry;
+ ...
+ // if you want create group, you should use entry role parametr
+ CaEntry entryGroup(GroupEntryRole);
+ ...
+ resultEntry = service->createEntry(entryGroup);
+ \endcode
  */
 
 /*!
- *   Constructor.
- *   \param entryRole entry's role.
+ \var CaEntryPrivate::m_q
+ Points to the CaEntry instance that uses
+ this private implementation.
+ */
+
+/*!
+ \var CaEntryPrivate::mId
+ Id.
+ */
+
+/*!
+ Constructor.
+ \param entryRole entry's role.
  */
 CaEntry::CaEntry(EntryRole entryRole) :
     m_d(new CaEntryPrivate(this))
@@ -70,13 +76,12 @@ CaEntry::CaEntry(EntryRole entryRole) :
 }
 
 /*!
- *   Copy constructor.
- *   \param entry const reference to CaEntry.
- *
- *   \code
- *   ...
- *   CaEntry * copyEntry( *resultEntry );
- *   \endcode
+ Copy constructor.
+ \param entry const reference to CaEntry.
+ \code
+ ...
+ CaEntry * copyEntry( *resultEntry );
+ \endcode
  */
 CaEntry::CaEntry(const CaEntry &entry) :
     m_d(new CaEntryPrivate(this))

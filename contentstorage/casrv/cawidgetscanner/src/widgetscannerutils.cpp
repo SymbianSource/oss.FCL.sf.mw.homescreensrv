@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
  *
 */
 
@@ -21,11 +21,11 @@
 #include "cadef.h"
 
 // -----------------------------------------------------------------------------
-// 
+//
 // -----------------------------------------------------------------------------
 //
 TBool WidgetScannerUtils::IsFileOnDrive(const TDesC& aFileName,
-    const DriveInfo::TDefaultDrives& aDefaultDrive) 
+    const DriveInfo::TDefaultDrives& aDefaultDrive)
 {
     if (aFileName.Length()) {
         TInt drive;
@@ -43,12 +43,11 @@ TBool WidgetScannerUtils::IsFileOnDrive(const TDesC& aFileName,
 
 
 // -----------------------------------------------------------------------------
-// 
+//
 // -----------------------------------------------------------------------------
 //
-TUint WidgetScannerUtils::CurrentMmcId( RFs& aFs )
+void WidgetScannerUtils::CurrentMmcId( const RFs& aFs, TDes& aMmcId )
     {
-    TUint mmcId = 0;
     TInt mmcDrive;
     if ( DriveInfo::GetDefaultDrive(
             DriveInfo::EDefaultRemovableMassStorage, mmcDrive ) == KErrNone )
@@ -56,10 +55,10 @@ TUint WidgetScannerUtils::CurrentMmcId( RFs& aFs )
         TVolumeInfo volumeInfo;
         if( aFs.Volume( volumeInfo, mmcDrive ) == KErrNone )
             {
-            mmcId = volumeInfo.iUniqueID;
+            aMmcId.Zero();
+            aMmcId.AppendNum( volumeInfo.iUniqueID );
             }
         }
-    return mmcId;
     }
 
-//  End of File  
+//  End of File

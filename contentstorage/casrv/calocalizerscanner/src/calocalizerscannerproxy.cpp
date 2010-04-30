@@ -26,8 +26,10 @@
 #include "calocalizerscannerproxy.h"
 #include "castorageproxy.h"
 #include "cadef.h"
+#include "cainnerquery.h"
+#include "cainnerentry.h"
 
-const char* KEmptyString = "";
+_LIT(KPathLoc,"z:/resource/qt/translations");
 
 // ---------------------------------------------------------------------------
 // CCaLocalizerScannerProxy::NewL
@@ -65,8 +67,13 @@ CCaLocalizerScannerProxy* CCaLocalizerScannerProxy::NewLC(
 //
 void CCaLocalizerScannerProxy::ConstructL()
     {
-    iTranslator = new ( ELeave ) QTranslator();
-    PerformL();
+    TBuf<KCaMaxAttrNameLen> filenameDsc;
+    iStorageProxy->DbPropertyL( KCaDbPropQMfile, filenameDsc );
+    iResolver = new (ELeave) HbTextResolverSymbian;
+    iResolver->Init(filenameDsc, KPathLoc);
+    UpdateLocalNamesL();
+    delete iResolver;
+    iResolver = NULL;
     }
 
 // ---------------------------------------------------------------------------
@@ -88,46 +95,10 @@ CCaLocalizerScannerProxy::CCaLocalizerScannerProxy(
 //
 CCaLocalizerScannerProxy::~CCaLocalizerScannerProxy()
     {
-    delete iTranslator;
-    }
-
-// ---------------------------------------------------------------------------
-// CCaLocalizerScannerProxy::PerformL
-// ---------------------------------------------------------------------------
-//
-void CCaLocalizerScannerProxy::PerformL()
-    {
-    QString locale = QLocale::system().name();
-    QString filename = QString( "contentstorage_" ) + locale;
-    LoadTranslator( filename );
-    TPtrC ptrLocale( reinterpret_cast<const TText*>( locale.constData() ) );
-    TBuf<KCaMaxAttrNameLen> propertyValue;
-    // trap is here to assure deletion of qtranslator in case code leaves
-    iStorageProxy->DbPropertyL( KCaDbPropLanguage, propertyValue );
-    if( ptrLocale.CompareC( propertyValue ) )
-        {
-        // language is changed - update locale names
-        UpdateLocalNamesL();
-        // remember info about new language in db
-        iStorageProxy->SetDBPropertyL( KCaDbPropLanguage, ptrLocale );
-        }
-    }
-
-// ---------------------------------------------------------------------------
-// CCaLocalizerScannerProxy::LoadTranslator
-// ---------------------------------------------------------------------------
-//
-TBool CCaLocalizerScannerProxy::LoadTranslator( QString filename )
-    {
-    TBool loaded( false );
-    // load from rom or testbase 
-    loaded = iTranslator->load( filename, QString( "z:/resource/qt/translations" ) );
-    if( !loaded )
-        {
-        loaded = iTranslator->load( filename, QString( "c:/resource/qt/translations" ) );
-        }
-
-    return loaded;
+	if (iResolver)
+		{
+	    delete iResolver;
+		} 
     }
 
 // ---------------------------------------------------------------------------
@@ -151,47 +122,63 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
     {
     RPointerArray<CCaLocalizationEntry> locals;
     CleanupResetAndDestroyPushL( locals );
+    RPointerArray<CCaInnerEntry> entries;
+    CleanupResetAndDestroyPushL( entries );
+    RArray<TInt> ids;
+    CleanupClosePushL( ids );
+    
     GetLocalizationRowsL( locals );
-    QString locName;
-    RBuf localizedName;
-    CleanupClosePushL( localizedName );
-    localizedName.CreateL( KCaMaxAttrValueLen ); 
-
-    for( TInt i = 0; i < locals.Count(); i++ )
+     
+    TInt locCount = locals.Count();
+    for( TInt idx = 0; idx < locCount; idx++ )
         {
-        const char* temp = DescriptorToStringL( locals[i]->GetStringId() );
-        // first string is a contex, probably to put in database in future
-        locName = iTranslator->translate( KEmptyString, temp, KEmptyString );
-        localizedName = reinterpret_cast<const TText*> ( locName.constData() );
-        if (localizedName.Compare(KNullDesC))
-        	{
-        	locals[i]->SetLocalizedStringL( localizedName );
-        	}
-        else
-        	{
-        	locals[i]->SetLocalizedStringL( locals[i]->GetStringId() );  
-        	}
-        iStorageProxy->LocalizeEntryL( *( locals[i] ) );
-        delete[] temp;
+        ids.Append( locals[idx]->GetRowId() );
+        }    
+    CCaInnerQuery* query = CCaInnerQuery::NewLC();
+    query->SetIdsL( ids );
+    iStorageProxy->GetEntriesL( query, entries ); 
+    CleanupStack::PopAndDestroy( query );
+    
+    HBufC16* localizedName;
+    for( TInt i = 0; i < locCount; i++ )
+        {
+        localizedName = iResolver->LoadLC( locals[i]->GetStringId() );
+        if( localizedName->Compare(
+            GetEntryText( entries, locals[i]->GetRowId() ) ) )
+            // translation different than text
+            {
+            locals[i]->SetLocalizedStringL( *localizedName );
+            iStorageProxy->LocalizeEntryL( *( locals[i] ) );
+            } 
+        else if( !localizedName->Compare(KNullDesC) ) 
+            // no translation, string id as text
+            {
+            locals[i]->SetLocalizedStringL( locals[i]->GetStringId() );
+            iStorageProxy->LocalizeEntryL( *( locals[i] ) );
+            }
+        CleanupStack::PopAndDestroy( localizedName );
         }
-    CleanupStack::PopAndDestroy( &localizedName );
+   
+    CleanupStack::PopAndDestroy( &ids );
+    CleanupStack::PopAndDestroy( &entries );
     CleanupStack::PopAndDestroy( &locals );
     }
 
+
 // ---------------------------------------------------------------------------
-// CCaLocalizerScannerProxy::DescriptorToStringL
+// CCaLocalizerScannerProxy::LocalGetEntryById
 // ---------------------------------------------------------------------------
 //
-const char* CCaLocalizerScannerProxy::DescriptorToStringL(
-        const TDesC& aDescriptor )
+const TDesC& CCaLocalizerScannerProxy::GetEntryText(
+        RPointerArray<CCaInnerEntry> aEntries, TInt aId )
     {
-    TInt length = aDescriptor.Length();
-    HBufC8* buffer = HBufC8::NewLC( length );
-    buffer->Des().Copy( aDescriptor );
-    char* str = new ( ELeave ) char[length + 1];
-    Mem::Copy( str, buffer->Ptr(), length );
-    str[length] = '\0';
-    CleanupStack::PopAndDestroy( buffer );
-    return str;
+    TInt entriesCount = aEntries.Count();
+    for( TInt i=0; i < entriesCount; i++ )
+        {
+        if( aEntries[i]->GetId() == aId )
+            {
+            return aEntries[i]->GetText();
+            }
+        }
+    return KNullDesC();
     }
-

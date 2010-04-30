@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
  *
 */
 
@@ -46,64 +46,70 @@ public:
     /**
      * Two-phased constructor.
      */
-    static CCaWidgetStorageHandler* NewL( CCaStorageProxy* aStorage, 
+    static CCaWidgetStorageHandler* NewL( CCaStorageProxy* aStorage,
             RFs& aFs );
-    static CCaWidgetStorageHandler* NewLC( CCaStorageProxy* aStorage, 
+    static CCaWidgetStorageHandler* NewLC( CCaStorageProxy* aStorage,
             RFs& aFs );
 
     /**
      * Destructor.
      */
     virtual ~CCaWidgetStorageHandler();
- 
+
     /**
      * Synchronizes widgets
      * @param aWidgets widgets to synchronize
      */
-    void SynchronizeL( const RWidgetArray& aWidgets ); 
+    void SynchronizeL( const RWidgetArray& aWidgets );
 
-    
+
 private:
 
     /**
      * Adds widget to storage.
-     * @param aWidget widget to be added 
+     * @param aWidget widget to be added
      */
-    void AddL( const CCaWidgetDescription* aWidget ); 
+    void AddL( const CCaWidgetDescription* aWidget );
 
     /**
      * Updates widget in storage.
-     * @param aWidget widget to be updated 
+     * @param aWidget widget to be updated
      */
-    void UpdateL( const CCaWidgetDescription* aWidget, TUint aEntryId ); 
-    
+    void UpdateL( const CCaWidgetDescription* aWidget, TUint aEntryId );
+
     /**
      * Add/Updates widgets in DB
      * @param aWidgets widgets to add
      */
     void AddWidgetsL( const RWidgetArray& aWidgets );
- 
+
     /**
      * Removes widgets from DB
      */
     void RemoveWidgetsL( ) ;
-    
+
     /**
      * Fetch widgets from content storage
      */
-    void FetchWidgetsL( ); 
+    void FetchWidgetsL( );
 
     /**
      * Add widget to download collection
      * @param aEntry entry containing widget information
      */
     void AddWidgetToDownloadCollectionL( const CCaInnerEntry* aEntry );
-    
+
     /**
-     * Sets missing flag for an entry
-     * @param aWidget widget
+     * Set missing flag for an entry.
+     * @param aWidget widget.
      */
-    void SetMissingFlagL( const CCaWidgetDescription * aWidget ); 
+    void SetMissingFlagL( const CCaWidgetDescription * aWidget );
+
+    /**
+     * Clear missing flag for an entry.
+     * @param aWidget widget.
+     */
+    void ClearVisibleFlagL( const CCaWidgetDescription* aWidget );
 
 private:
 
@@ -117,30 +123,36 @@ private:
      */
     void ConstructL( );
 
+    /**
+     * Check if mass storage is not in use.
+     * @return true if mass storage is not in use.
+     */
+    TBool MassStorageNotInUse();
+
 private:
-    // Data    
+    // Data
 
     /*
      * Content Storage. Not Own
      */
     CCaStorageProxy* iStorage;
-    
+
     /*
      * File server. Not own
      */
     RFs iFs;
-    
+
     /*
      * Widgets. Own.
      */
     RWidgetArray iWidgets;
-    
+
     /*
      * Indexes updated during last add operation. Own.
      */
     RArray<TInt> iUpdatedIndexes;
-    
-    
+
+
     };
 
 #endif      // C_WIDGETSTORAGEHANDLER_H

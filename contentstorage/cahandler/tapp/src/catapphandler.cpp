@@ -70,7 +70,7 @@ int CaTappHandler::execute(CCaInnerEntry& innerEntry, const QString& command)
 
         // e.g. QUrl url ("application://101F7AE7?");
         QUrl url(QString::fromUtf16(attribute.Ptr(), attribute.Length()));
-        QScopedPointer<XQAiwRequest> request(mAiwMgr->create(url, true));
+        QScopedPointer<XQAiwRequest> request(mAiwMgr->create(url, false));
         if (!request.isNull()) {
             bool res = request->send();
             if (!res) {

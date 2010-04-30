@@ -24,14 +24,14 @@
 #include "canotifier_p.h"
 
 class CaNotifierFilter;
-class CaClientNotifierProxy;
+class CaObserver;
 
 class CaNotifiers
 {
 public:
     static int addNotifier(const CaNotifierFilter *notifierFilter,
                            CaNotifierPrivate::NotifierType notifierType,
-                           const CaClientNotifierProxy *notifierProxy);
+                           const CaObserver *notifierProxy);
 
     static void removeNotifier(const CaNotifierFilter *notifierFilter,
                                CaNotifierPrivate::NotifierType notifierType);
@@ -53,7 +53,7 @@ private:
 private:
     typedef QPair<const CaNotifierFilter *,
             CaNotifierPrivate::NotifierType> NotifierKey;
-    typedef QHash<NotifierKey, const CaClientNotifierProxy *> NotifierHash;
+    typedef QHash<NotifierKey, const CaObserver *> NotifierHash;
 
 private:
     static NotifierHash mNotifiers;

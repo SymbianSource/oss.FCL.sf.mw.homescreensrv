@@ -19,13 +19,14 @@
 #include <QStringList>
 
 #include "canotifiers.h"
+#include "caobserver.h"
 #include "caclientnotifierproxy.h"
 
 CaNotifiers::NotifierHash CaNotifiers::mNotifiers;
 
 int CaNotifiers::addNotifier(const CaNotifierFilter *notifierFilter,
                              CaNotifierPrivate::NotifierType notifierType,
-                             const CaClientNotifierProxy *notifierProxy)
+                             const CaObserver *notifierProxy)
 {
     NotifierKey key = NotifierKey(notifierFilter, notifierType);
     if (!mNotifiers.contains(key)) {

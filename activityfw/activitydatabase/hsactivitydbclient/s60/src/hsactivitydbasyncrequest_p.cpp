@@ -17,46 +17,70 @@
 
 #include "hsactivitydbasyncrequest_p.h"
 #include "hsactivitydbclient_p.h"
-#include "hsserializer.h"
+#include "hsactivitydbclient.h"
+#include <fbs.h>
+#include <xqconversions>
+
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 HsActivityDbAsyncRequestPrivate*
 HsActivityDbAsyncRequestPrivate::NewL(HsActivityDbAsyncRequestObserver &observer,
-                                      HsActivityDbClientPrivate &session)
+                                      HsActivityDbClientPrivate &session, 
+                                      TAsyncRequest requestType,
+                                      void* userData)
 {
-    HsActivityDbAsyncRequestPrivate *self =
-        HsActivityDbAsyncRequestPrivate::NewLC(observer, session);
+    HsActivityDbAsyncRequestPrivate *self = 
+    new(ELeave)HsActivityDbAsyncRequestPrivate(observer, session, requestType, userData);
+    CleanupStack::PushL(self);
+    self->mDataBuf.CreateL(64);
     CleanupStack::Pop(self);
     return self;
 }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 HsActivityDbAsyncRequestPrivate*
-HsActivityDbAsyncRequestPrivate::NewLC(HsActivityDbAsyncRequestObserver &observer,
-                                       HsActivityDbClientPrivate &session)
+HsActivityDbAsyncRequestPrivate::newWaitActivityL(HsActivityDbAsyncRequestObserver & observer, 
+            HsActivityDbClientPrivate & session)
+    {
+    return HsActivityDbAsyncRequestPrivate::NewL(observer, session, EWaitActivity);
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivityDbAsyncRequestPrivate::getThumbnailLD(HsActivityDbAsyncRequestObserver &observer,
+                                      HsActivityDbClientPrivate &session, 
+                                      QSize size, 
+                                      QString imagePath, 
+                                      QString  mimeType, 
+                                      void *userDdata)
 {
-    HsActivityDbAsyncRequestPrivate *self =
-        new(ELeave)HsActivityDbAsyncRequestPrivate(observer, session);
-    CleanupStack::PushL(self);
-    self->mDataBuf.CreateL(64);
-    return self;
+    HsActivityDbAsyncRequestPrivate *instance = 
+        HsActivityDbAsyncRequestPrivate::NewL(observer, session, EWaitGetThumbnail, userDdata);
+    instance->getThumbnail( size, imagePath, mimeType);
 }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 HsActivityDbAsyncRequestPrivate::HsActivityDbAsyncRequestPrivate(HsActivityDbAsyncRequestObserver &observer,
-                                                                 HsActivityDbClientPrivate &session)
+                                                                 HsActivityDbClientPrivate &session,
+                                                                 TAsyncRequest requestType, 
+                                                                 void* userData)
     :
     CActive(EPriorityStandard),
     mObserver(observer),
     mSession(session),
-    mRequestType(-1),
-    mDataSize()
+    mRequestType(requestType),
+    mUserData(userData)
 {
     CActiveScheduler::Add(this);
 }
@@ -69,6 +93,8 @@ HsActivityDbAsyncRequestPrivate::~HsActivityDbAsyncRequestPrivate()
 {
     mDataBuf.Close();
     Cancel();
+    delete mBitmapPath;
+    delete mBitmapMimeType;
 }
 
 // -----------------------------------------------------------------------------
@@ -88,21 +114,36 @@ void HsActivityDbAsyncRequestPrivate::DoCancel()
 //
 void HsActivityDbAsyncRequestPrivate::RunL()
 {
-    RBuf8 buff;
-    CleanupClosePushL(buff);
-    QString data;
     int requestResult(iStatus.Int());
     if (KErrNone == requestResult) {
-        if (0 < mDataSize()) {
-            buff.CreateL(mDataSize());
+        switch (mRequestType){
+        case WaitActivity: {
+            RBuf8 buff;
+            CleanupClosePushL(buff);
+            QString data;
+            if (0 < mDataSize()) {
+                buff.CreateL(mDataSize());
+            }
+            mSession.getData(mTaskId(), buff);
+            data = QString::fromAscii(reinterpret_cast<const char *>(buff.Ptr()),
+                                      buff.Length());
+            buff.Close();
+            mObserver.asyncRequestCompleated(requestResult, mRequestType, data);
+            CleanupStack::PopAndDestroy(&buff);
+            break;
+            }
+        case EWaitGetThumbnail: {
+            CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
+            CleanupStack::PushL(bitmap);
+            User::LeaveIfError(bitmap->Duplicate(mBitmapId()));
+            mSession.getData(mTaskId(), mDataBuf);//ACK Bitmap copy
+            mObserver.asyncRequestCompleated(requestResult, mRequestType, QPixmap::fromSymbianCFbsBitmap(bitmap), mUserData);
+            CleanupStack::PopAndDestroy(bitmap);
+            break;
+            }
         }
-        mSession.getData(buff);
-        data = QString::fromAscii(reinterpret_cast<const char *>(buff.Ptr()),
-                                  buff.Length());
-        buff.Close();
+        mSession.Pop(this);
     }
-    mObserver.asyncRequestCompleated(requestResult, mRequestType, data);
-    CleanupStack::PopAndDestroy(&buff);
 }
 
 // -----------------------------------------------------------------------------
@@ -111,9 +152,25 @@ void HsActivityDbAsyncRequestPrivate::RunL()
 //
 void HsActivityDbAsyncRequestPrivate::waitActivity(const QVariantHash &condition)
 {
-    mRequestType = WaitActivity;
     iStatus = KRequestPending;
     SetActive();
-    mDataBuf << condition;
-    mSession.sendDataAsync(mRequestType, TIpcArgs(&mDataBuf, &mDataSize), iStatus);
+    mDataSize = condition.find(ActivityApplicationKeyword).value().toInt();
+    TPtrC8 actId(KNullDesC8);
+    TPtrC8 desc(KNullDesC8);
+    mSession.sendDataAsync(mRequestType, TIpcArgs(&mDataSize, &actId, &desc, &mTaskId), iStatus);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivityDbAsyncRequestPrivate::getThumbnail(QSize size, QString imagePath, QString  mimeType)
+{
+    iStatus = KRequestPending;
+    SetActive();
+    mBitmapId = size.width();
+    mTaskId = size.height();
+    mBitmapPath = XQConversions::qStringToS60Desc(imagePath);
+    mBitmapMimeType = XQConversions::qStringToS60Desc8(mimeType);
+    mSession.sendDataAsync(mRequestType, TIpcArgs(&mBitmapId, &mTaskId, mBitmapPath, mBitmapMimeType), iStatus);
 }

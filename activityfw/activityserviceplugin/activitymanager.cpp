@@ -41,17 +41,7 @@ void ActivityManager::launchActivity(int applicationId, const QString &activityI
     d_ptr->launchActivity(applicationId, activityId);
 }
 
-void ActivityManager::removeActivity(int applicationId, const QString &activityId)
+void ActivityManager::getThumbnail(QSize resolution,const QString &thumbnailPath, void *data)
 {
-    d_ptr->removeActivity(applicationId, activityId);
-}
-
-void ActivityManager::removeApplicationActivities(int applicationId)
-{
-    d_ptr->removeApplicationActivities(applicationId);
-}
-
-void ActivityManager::getThumbnail(const QString &thumbnailId, void *userData)
-{
-   d_ptr->getThumbnail(thumbnailId, userData);
+   d_ptr->getThumbnail(resolution, thumbnailPath, data);
 }

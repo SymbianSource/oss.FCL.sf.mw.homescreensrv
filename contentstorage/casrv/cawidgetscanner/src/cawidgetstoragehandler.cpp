@@ -11,7 +11,7 @@
  *
  * Contributors:
  *
- * Description: 
+ * Description:
  *
  */
 // INCLUDE FILES
@@ -88,9 +88,9 @@ CCaWidgetStorageHandler::~CCaWidgetStorageHandler()
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::SynchronizeL( const RWidgetArray& aWidgets )
     {
     FetchWidgetsL();
@@ -99,14 +99,14 @@ void CCaWidgetStorageHandler::SynchronizeL( const RWidgetArray& aWidgets )
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::AddL( const CCaWidgetDescription* aWidget )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
     iStorage->AddL( entry );
-    if( ( entry->GetFlags() & ERemovable ) != 0 )
+    if( entry->GetFlags() & ERemovable )
         {
         AddWidgetToDownloadCollectionL( entry );
         }
@@ -114,24 +114,26 @@ void CCaWidgetStorageHandler::AddL( const CCaWidgetDescription* aWidget )
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
         TUint aEntryId )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
     entry->SetId( aEntryId );
-    if( !aWidget->IsMissing() && ( aWidget->GetLibrary() != KNoLibrary ) )
+    if( !aWidget->IsMissing() && aWidget->IsUsed() )
         {
         entry->SetFlags( entry->GetFlags() & ~EUsed );
         }
-    else if(aWidget->IsUsed())
+    TItemAppearance itemAppearanceChange = EItemAppearanceNotChanged;
+    if( ( entry->GetFlags() & EMissing ) ||
+        !( entry->GetFlags() & EVisible ) )
         {
-        entry->SetFlags( entry->GetFlags() | EUsed );
+        itemAppearanceChange = EItemAppeared;
         }
-    entry->SetFlags( entry->GetFlags() & ~EMissing );
-    iStorage->AddL( entry );
+    entry->SetFlags( entry->GetFlags() & ~EMissing | EVisible );
+    iStorage->AddL( entry, EFalse, itemAppearanceChange );
     if( !aWidget->IsMissing() )
         {
         AddWidgetToDownloadCollectionL( entry );
@@ -140,23 +142,24 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
     {
     iUpdatedIndexes.Reset();
     for( TInt i = 0; i < aWidgets.Count(); i++ )
         {
-        TInt index = iWidgets.Find( 
+        TInt index = iWidgets.Find(
                 aWidgets[i], CCaWidgetDescription::Compare );
         if( index != KErrNotFound )
             {
-            if( !iWidgets[index]->Compare( *aWidgets[i] ) || 
+            if( !iWidgets[index]->Compare( *aWidgets[i] ) ||
                     iWidgets[index]->IsMissing() )
                 {
                 aWidgets[i]->SetMissing( iWidgets[index]->IsMissing() );
                 aWidgets[i]->SetUsed( iWidgets[index]->IsUsed() );
+                aWidgets[i]->SetVisible( iWidgets[index]->IsVisible() );
                 UpdateL( aWidgets[i], iWidgets[index]->GetEntryId() );
                 }
             iUpdatedIndexes.AppendL( index );
@@ -169,33 +172,48 @@ void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::RemoveWidgetsL()
     {
     for( TInt i = 0; i < iWidgets.Count(); i++ )
         {
         if( iUpdatedIndexes.Find( i ) == KErrNotFound )
             {
-            if( iWidgets[i]->GetMmcId() && 
-                    ( iWidgets[i]->GetMmcId() != 
-                    WidgetScannerUtils::CurrentMmcId( iFs ) ) )
+            if( iWidgets[i]->GetMmcId() != KNullDesC )
                 {
-                SetMissingFlagL( iWidgets[i] );
+                RBuf currentMmcId;
+                currentMmcId.CreateL( KMassStorageIdLength );
+                currentMmcId.CleanupClosePushL();
+                WidgetScannerUtils::CurrentMmcId( iFs, currentMmcId );
+                if( iWidgets[i]->GetMmcId() == currentMmcId ||
+                        ( iWidgets[i]->GetMmcId() == KCaMassStorage() &&
+                        MassStorageNotInUse() ) )
+                    {
+                    //item was uninstalled so we remove its mmc id
+                    iWidgets[i]->RemoveMmcId();
+                    ClearVisibleFlagL( iWidgets[i] );
+                    }
+                else
+                    {
+                    SetMissingFlagL( iWidgets[i] );
+                    }
+                CleanupStack::PopAndDestroy(&currentMmcId);
                 }
             else
                 {
-                SetMissingFlagL( iWidgets[i] );
+                //item was uninstalled so we remove its mmc id
+                ClearVisibleFlagL( iWidgets[i] );
                 }
             }
         }
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-// 
+//
 void CCaWidgetStorageHandler::AddWidgetToDownloadCollectionL(
         const CCaInnerEntry* aEntry )
     {
@@ -228,9 +246,9 @@ void CCaWidgetStorageHandler::AddWidgetToDownloadCollectionL(
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::FetchWidgetsL()
     {
     CCaInnerQuery* query = CCaInnerQuery::NewLC();
@@ -257,20 +275,60 @@ void CCaWidgetStorageHandler::FetchWidgetsL()
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
-//  
+//
 void CCaWidgetStorageHandler::SetMissingFlagL(
         const CCaWidgetDescription* aWidget )
     {
-    CCaInnerEntry* entry = aWidget->GetEntryLC();
-    entry->SetFlags( entry->GetFlags() | EMissing );
-    if( aWidget->IsUsed() )
+    if( !aWidget->IsMissing() )
         {
-        entry->SetFlags( entry->GetFlags() | EUsed );
+        CCaInnerEntry* entry = aWidget->GetEntryLC();
+        entry->SetFlags( entry->GetFlags() | EMissing );
+        if( aWidget->IsUsed() )
+            {
+            entry->SetFlags( entry->GetFlags() | EUsed );
+            }
+        iStorage->AddL( entry, EFalse, EItemDisappeared );
+        CleanupStack::PopAndDestroy( entry );
         }
-    iStorage->AddL( entry );
-    CleanupStack::PopAndDestroy( entry );
     }
 
-//  End of File  
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetStorageHandler::ClearVisibleFlagL(
+        const CCaWidgetDescription* aWidget )
+    {
+    if( aWidget->IsVisible() )
+        {
+        CCaInnerEntry* entry = aWidget->GetEntryLC();
+        entry->SetFlags( entry->GetFlags() & ~EVisible & ~EMissing & ~EUsed );
+        iStorage->AddL( entry, EFalse, EItemDisappeared );
+        CleanupStack::PopAndDestroy( entry );
+        }
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+TBool CCaWidgetStorageHandler::MassStorageNotInUse()
+    {
+    TBool massStorageNotInUse( ETrue );
+    TInt drive;
+    if( DriveInfo::GetDefaultDrive( DriveInfo::EDefaultMassStorage, drive ) ==
+        KErrNone )
+        {
+        TUint status;
+        if( DriveInfo::GetDriveStatus( iFs, drive, status ) == KErrNone &&
+            ( status & DriveInfo::EDriveInUse ) )
+            {
+            massStorageNotInUse = EFalse;
+            }
+        }
+    return massStorageNotInUse;
+    }
+
+//  End of File

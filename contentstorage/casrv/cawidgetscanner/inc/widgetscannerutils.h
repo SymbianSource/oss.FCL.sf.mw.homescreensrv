@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
  *
 */
 
@@ -27,6 +27,7 @@
 _LIT(KAttrWidgetPath, "widget:path");
 _LIT(KAttrWidgetLibrary, "widget:library");
 _LIT(KAttrWidgetUri, "widget:uri");
+_LIT(KAttrWidgetServiceXml, "widget:servicexml");
 _LIT(KSlash, "/");
 _LIT(KDllExt, ".dll");
 _LIT(KNoLibrary, "NoLibrary");
@@ -38,7 +39,7 @@ class CCaInnerEntry;
  *
  *  @since Series Series60 5.x
  */
-class WidgetScannerUtils 
+class WidgetScannerUtils
     {
 public:
 
@@ -52,11 +53,11 @@ public:
         const DriveInfo::TDefaultDrives& aDefaultDrive);
 
     /**
-     * Returns current MMC id
-     * @param aFs file server session reference
-     * @return current mmc id
-     */  
-    static TUint CurrentMmcId( RFs& aFs );
+     * Returns current MMC id.
+     * @param aFs file server session reference.
+     * @param aMmcId mmc id reference.
+     */
+    static void CurrentMmcId( const RFs& aFs, TDes& aMmcId );
 
     };
 

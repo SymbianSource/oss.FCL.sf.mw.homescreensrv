@@ -18,6 +18,7 @@
 #ifndef CASTORAGEPROXY_H
 #define CASTORAGEPROXY_H
 
+#include "cadef.h"
 #include "caoperationparams.h"
 
 
@@ -84,12 +85,15 @@ public:
 
     /**
      * Adds or Updates data to storage.
-     * In case when data is added the input aEntry serves
+     * In case when data is added the input aEntry serves.
      * also as an output entry.
      * @param aEntry Entry data.
-     * @param aUpdate is entry updated by a client
+     * @param aUpdate is entry updated by a client.
+     * @param aItemAppearanceChange a type of change of the item.
      */
-    IMPORT_C void AddL( CCaInnerEntry* aEntry, TBool aUpdate = EFalse );
+    IMPORT_C void AddL( CCaInnerEntry* aEntry,
+        TBool aUpdate = EFalse,
+        TItemAppearance aItemAppearanceChange = EItemAppearanceNotChanged );
 
     /**
      * Removes entries from storage.

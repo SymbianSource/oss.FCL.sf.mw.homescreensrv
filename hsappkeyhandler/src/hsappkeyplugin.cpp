@@ -166,6 +166,7 @@ void CHsAppKeyPlugin::HandleLongPressL()
         
         if(KErrNone != mDialog->Show(KTsPluginName,*params,this)) {
             delete mDialog;
+            mDialog = 0;
         }
         delete params;
     }

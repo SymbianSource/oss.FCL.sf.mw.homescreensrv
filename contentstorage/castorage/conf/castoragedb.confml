@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<confml:configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:confml="http://www.s60.com/xml/confml/2" xsi:schemaLocation="http://www.s60.com/xml/confml/2 http://www.s60.com/xml/confml/1#//confml2" name="Content storage database settings">
+  <confml:feature ref="CaStorageDbSetting" name="Content storage database settings">
+    <confml:setting ref="Collections" mapKey="Name" mapValue="Name" name="Collections" type="sequence">
+      <confml:setting ref="Name" name="Name (English)" type="string"/>
+      <confml:setting ref="GroupName" name="Collection Group Name" type="string"/>
+      <confml:setting ref="Flags" name="Flags(0 to lock collection)" type="int"/>
+      <confml:setting ref="LocName" name="Localzied Name (from TS file)" type="string"/>
+      <confml:setting ref="Icon" name="Collection Icon" type="string"/>
+    </confml:setting>
+    <confml:setting ref="Items"  name="Items" type="sequence" >
+      <confml:setting ref="Type" name="Item type" type="string">
+      	<confml:option name="application" value="application"/>
+      	<confml:option name="url" value="url"/>
+      	<confml:option name="widget" value="widget"/>
+      </confml:setting>
+      <confml:setting ref="Name" name="Item name" type="string"/>
+      <confml:setting ref="Destination" name="Url/Uid/Widget Uri" type="string"/>
+      <confml:setting ref="Icon" name="Item icon (skin or file)" type="string"/>
+      <confml:setting ref="Col_Name" name="In collection " type="selection">
+        <confml:option map="CaStorageDbSetting/Collections"/>
+      </confml:setting>
+    </confml:setting>    
+  </confml:feature>
+   <confml:data>
+    <confml:CaStorageDbSetting>
+      <confml:Collections extensionPolicy="replace"><confml:Name>Favorites</confml:Name><confml:GroupName>Favorites</confml:GroupName><confml:Flags>4</confml:Flags><confml:LocName></confml:LocName><confml:Icon>qtg_large_applications_user</confml:Icon></confml:Collections>
+      <confml:Collections><confml:Name>Office</confml:Name><confml:GroupName>Office</confml:GroupName><confml:Flags>4</confml:Flags><confml:LocName>txt_applib_dblist_office</confml:LocName><confml:Icon>qtg_large_applications_user</confml:Icon></confml:Collections>
+      <confml:Collections><confml:Name>Multimedia</confml:Name><confml:GroupName>Multimedia</confml:GroupName><confml:Flags>4</confml:Flags><confml:LocName></confml:LocName><confml:Icon>qtg_large_applications_user</confml:Icon></confml:Collections>
+      <confml:Collections><confml:Name>Utils</confml:Name><confml:GroupName>Utils</confml:GroupName><confml:Flags>4</confml:Flags><confml:LocName></confml:LocName><confml:Icon>qtg_large_applications_user</confml:Icon></confml:Collections>
+      <confml:Collections><confml:Name>Games</confml:Name><confml:GroupName>Games</confml:GroupName><confml:Flags>4</confml:Flags><confml:LocName>txt_applib_dblist_games</confml:LocName><confml:Icon>qtg_large_applications_user</confml:Icon></confml:Collections>
+      <confml:Items extensionPolicy="append"><confml:Type>application</confml:Type><confml:Name>calendar</confml:Name><confml:Destination>268458241</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Camera</confml:Name><confml:Destination>270501242</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Contacts</confml:Name><confml:Destination>537014009</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Email</confml:Name><confml:Destination>537023930</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>FM Radio</confml:Name><confml:Destination>270530934</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Internet</confml:Name><confml:Destination>222222222</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Maps</confml:Name><confml:Destination>222222222</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Messaging</confml:Name><confml:Destination>537001593</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Music</confml:Name><confml:Destination>270564450</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Photos (camera)</confml:Name><confml:Destination>536913858</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Settings</confml:Name><confml:Destination>268458220</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Videos (video camera)</confml:Name><confml:Destination>222222222</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>calendar</confml:Name><confml:Destination>268458241</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Office']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Phonebook</confml:Name><confml:Destination>537014009</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Office']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Themes</confml:Name><confml:Destination>268458546</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Multimedia']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Paint Cursor</confml:Name><confml:Destination>537001564</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Multimedia']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Videoplayer</confml:Name><confml:Destination>537006590</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Multimedia']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>ControlPanel</confml:Name><confml:Destination>537026521</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Utils']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Bluetooth</confml:Name><confml:Destination>268458321</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Utils']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>SW update</confml:Name><confml:Destination>537001519</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Utils']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>eshell</confml:Name><confml:Destination>270498535</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Utils']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Conn. mgr.</confml:Name><confml:Destination>270501072</confml:Destination><confml:Icon></confml:Icon><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Utils']"></confml:Col_Name></confml:Items>
+    </confml:CaStorageDbSetting>
+  </confml:data>
+
+</confml:configuration>

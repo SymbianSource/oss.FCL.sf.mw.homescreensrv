@@ -66,6 +66,7 @@ enum ErrorCode
     NotFoundErrorCode,
     OutOfMemoryErrorCode,
     BadArgumentErrorCode,
+    ServerTerminated,
     UnknownErrorCode
 };
 

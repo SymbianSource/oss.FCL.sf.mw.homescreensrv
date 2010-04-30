@@ -69,7 +69,7 @@ public:
      * MMC id setter
      * @param aMmcId MMC id
      */
-    void SetMmcId( TUint aMmcId );
+    void SetMmcIdL( const TDesC& aMmcId );
 
     /*
      * PackageUid setter
@@ -112,13 +112,13 @@ public:
      * @param aLibrary widget library
      */
     void SetPathL( const TDesC& aPath );
-    
+
     /*
      * Path getter
      * @return widget library
      */
     TPtrC GetPath( ) const;
-    
+
     /*
      * Missing flag setter
      * @param aMissing flag
@@ -135,8 +135,8 @@ public:
      * Used flag setter
      * @param aUsed flag
      */
-    void SetUsed( TBool aUsed );    
-    
+    void SetUsed( TBool aUsed );
+
     /*
      * Content arsenal entry id getter
      * @return CA entry id
@@ -147,7 +147,7 @@ public:
      * MMC id getter
      * @return CA entry id
      */
-    TUint GetMmcId( ) const;
+    TPtrC GetMmcId( ) const;
 
     /*
      * Library getter
@@ -189,14 +189,21 @@ public:
      * Used flag
      * @return ETrue if flag used is set
      */
-    TBool IsUsed( ) const;    
+    TBool IsUsed( ) const;
     
+
+    /*
+     * Used flag
+     * @return ETrue if flag visible is set
+     */
+    TBool IsVisible( ) const;
+
     /*
      * Entry getter
      * @return entry representing widget
      */
     CCaInnerEntry* GetEntryLC( ) const;
-    
+
     /*
      * Modification time setter
      * @param aModificationTime
@@ -207,7 +214,22 @@ public:
      * Modification time getter
      * @return widget Modification time
      */
-    TPtrC GetModificationTime( ) const;
+    TPtrC GetModificationTime() const;
+
+    /*
+     * Remove MMC id.
+     */
+    void RemoveMmcId();
+    /*
+     * Set service fw xml filename
+     * @param aServiceXml Service xml filename
+     */
+    void SetServiceXmlL(const TDesC& aServiceXml);
+    /*
+     * Get service fw xml filename
+     * @return Service xml filename
+     */
+    TPtrC GetServiceXml() const;
 
 private:
 
@@ -254,7 +276,7 @@ private:
     /*
      * MMC id
      */
-    TUint iMmcId;
+    RBuf iMmcId;
 
     /*
      * Widget title. Own
@@ -280,7 +302,7 @@ private:
      * Widget library. Own
      */
     RBuf iPath;
-    
+
     /*
      * Widget library. Own
      */
@@ -290,11 +312,15 @@ private:
      * Widgets flags.
      */
     TInt iFlags;
-    
+
     /*
      * Modification time.
      */
     RBuf iModificationTime;
+    /*
+     * Service fw xml file
+     */
+    RBuf iServiceXml;
     };
 
 typedef RPointerArray<CCaWidgetDescription> RWidgetArray;

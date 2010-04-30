@@ -22,7 +22,6 @@
 #include "cainnerquery.h"
 #include "caarraycleanup.inl"
 #include "calocalizationentry.h"
-#include "cadef.h"
 #include "casrvsession.h"
 
 
@@ -101,11 +100,14 @@ EXPORT_C void CCaStorageProxy::GetEntriesIdsL(const CCaInnerQuery* aQuery,
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry, TBool aUpdate )
+EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
+    TBool aUpdate,
+    TItemAppearance aItemAppearanceChange )
     {
     TChangeType changeType = EAddChangeType;
     RArray<TInt> parentArray;
     CleanupClosePushL( parentArray );
+
     if( aEntry->GetId() > 0 )
         {
         changeType = EUpdateChangeType;
@@ -115,6 +117,16 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry, TBool aUpdate )
         iStorage->GetParentsIdsL( id, parentArray );
         CleanupStack::PopAndDestroy( &id );
         }
+
+    if( aItemAppearanceChange==EItemDisappeared )
+        {
+        changeType = ERemoveChangeType;
+        }
+    else if( aItemAppearanceChange==EItemAppeared )
+        {
+        changeType = EAddChangeType;
+        }
+
     iStorage->AddL( aEntry, aUpdate );
     for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
         {

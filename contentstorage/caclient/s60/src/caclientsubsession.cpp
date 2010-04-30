@@ -22,7 +22,7 @@
 #include "casrvdef.h"
 #include "cainnerentry.h"
 #include "caclientproxy.h"
-#include "caclientnotifierproxy.h"
+#include "caobserver.h"
 #include "cautils.h"
 
 // -----------------------------------------------------------------------------
@@ -34,7 +34,8 @@ RCaClientSubSession::RCaClientSubSession(
         const CCaInnerNotifierFilter *aInnerNotifierFilter ) :
     RSubSessionBase(), iSession( aSession ), iObserver( aObserver ),
     iInnerNotifierFilter( aInnerNotifierFilter ),
-    iNotifier( NULL ), iMessageSize( NULL )
+    iNotifier( NULL ), iMessageSize( NULL ), iChangedEntry( NULL ), 
+    iChangedEntryType( EAddChangeType )
     {
 
     }
@@ -44,10 +45,21 @@ RCaClientSubSession::RCaClientSubSession(
 // -----------------------------------------------------------------------------
 void RCaClientSubSession::CreateL()
     {
+    if( iNotifier )
+        {
+        delete iNotifier;
+        iNotifier = NULL;
+        }
+    if( iMessageSize )
+        {
+        delete iMessageSize;
+        iMessageSize = NULL;
+        }
     iMessageSize = new ( ELeave ) TPckgBuf<TInt> ();
     User::LeaveIfError( CreateSubSession( *iSession,
         static_cast<TInt>( EContentArsenalNotifierOpen ) ) );
     iNotifier = CCaClientNotifier::NewL( this );
+    iChangedEntry = CCaInnerEntry::NewL();    
     }
 
 // -----------------------------------------------------------------------------
@@ -55,6 +67,8 @@ void RCaClientSubSession::CreateL()
 // -----------------------------------------------------------------------------
 void RCaClientSubSession::Close()
     {
+    delete iChangedEntry;
+    iChangedEntry = NULL;
     delete iMessageSize;
     iMessageSize = NULL;
     delete iNotifier;
@@ -88,30 +102,28 @@ void RCaClientSubSession::UnregisterForNotifications() const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void RCaClientSubSession::NotifyObserver(
-        CCaInnerEntry* aEntry,
-        TChangeType aChangeType ) const
+void RCaClientSubSession::NotifyObserver() const
     {
     switch( iInnerNotifierFilter->GetNotifierType() )
         {
         case CCaInnerNotifierFilter::EEntryChangedWithId:
             {
-            iObserver->entryChanged( aEntry->GetId(), aChangeType );
+            iObserver->entryChanged( iChangedEntry->GetId(), iChangedEntryType );
             break;
             }
         case CCaInnerNotifierFilter::EEntryChangedWithEntry:
             {
-            iObserver->entryChanged( *aEntry, aChangeType );
+            iObserver->entryChanged( *iChangedEntry, iChangedEntryType );
             break;
             }
         case CCaInnerNotifierFilter::EEntryTouched:
             {
-            iObserver->entryTouched( aEntry->GetId() );
+            iObserver->entryTouched( iChangedEntry->GetId() );
             break;
             }
         case CCaInnerNotifierFilter::EGroupContentChanged:
             {
-            iObserver->groupContentChanged( aEntry->GetId() );
+            iObserver->groupContentChanged( iChangedEntry->GetId() );
             break;
             }
         default:
@@ -124,7 +136,7 @@ void RCaClientSubSession::NotifyObserver(
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void RCaClientSubSession::GetChangeInfoAndNotifyObserverL() const
+void RCaClientSubSession::GetChangeInfoL() const
     {
     TIpcArgs args;
     RBuf8 outbuf;
@@ -137,14 +149,11 @@ void RCaClientSubSession::GetChangeInfoAndNotifyObserverL() const
             EContentArsenalGetChangeInfo, args );
     if( error == KErrNone )
         {
-        CCaInnerEntry* entry = CCaInnerEntry::NewLC();
         RDesReadStream stream( outbuf );
         CleanupClosePushL( stream );
-        entry->InternalizeL( stream );
+        iChangedEntry->InternalizeL( stream );
         CleanupStack::PopAndDestroy( &stream );
-        TChangeType changeType = changeTypePckg();
-        NotifyObserver( entry, changeType );
-        CleanupStack::PopAndDestroy( entry );
+        iChangedEntryType = changeTypePckg();
         }
     CleanupStack::PopAndDestroy( &outbuf );
     }

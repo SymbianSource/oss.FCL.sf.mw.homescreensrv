@@ -36,7 +36,7 @@ _LIT( KDoubleSlash, "\\" );
 // -----------------------------------------------------------------------------
 //
 CCaWidgetDescription::CCaWidgetDescription() :
-    iEntryId(KNoId), iFlags(EVisible)
+    iEntryId(KNoId), iMmcId()
     {
     }
 
@@ -78,21 +78,13 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     iUri.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetUri, iUri );
     //mmc id
-    TBuf<KUidChars> mmcId;
-    if( aEntry->FindAttribute( KCaAttrMmcId, mmcId ) )
-        {
-        TLex mmcLex( mmcId );
-        User::LeaveIfError( mmcLex.Val( iMmcId, EHex ));
-        }
-    if( aEntry->GetFlags() &  EMissing )
-        {
-        iFlags = iFlags | EMissing;
-        }
-    if( aEntry->GetFlags() &  EUsed )
-        {
-        iFlags = iFlags | EUsed;
-        }
+    iMmcId.CreateL(KMassStorageIdLength);
+    aEntry->FindAttribute( KCaAttrMmcId, iMmcId );
+    //service xml
+    iServiceXml.CreateL( KCaMaxAttrValueLen );
+    aEntry->FindAttribute( KAttrWidgetServiceXml,iServiceXml );
     
+    iFlags = aEntry->GetFlags();
     iModificationTime.CreateL(KCaMaxAttrValueLen);
     aEntry->FindAttribute( KCaAttrInstallationTime, iModificationTime );
     }
@@ -148,6 +140,8 @@ CCaWidgetDescription::~CCaWidgetDescription()
     iLibrary.Close();
     iPath.Close();
     iModificationTime.Close();
+    iMmcId.Close();
+    iServiceXml.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -157,7 +151,7 @@ CCaWidgetDescription::~CCaWidgetDescription()
 TBool CCaWidgetDescription::Compare(
         const CCaWidgetDescription& aFirst,const CCaWidgetDescription& aSecond)
     {
-    if( aFirst.GetLibraryName() == aSecond.GetLibraryName() )
+    if( aFirst.GetUri() == aSecond.GetUri() )
         {
         return ETrue;
         }
@@ -179,7 +173,8 @@ TBool CCaWidgetDescription::Compare( const CCaWidgetDescription& aToCompare )
             aToCompare.GetIconUri() == GetIconUri() &&
             aToCompare.GetTitle() == GetTitle() &&
             aToCompare.GetLibrary() != KNoLibrary &&
-            aToCompare.GetModificationTime() == GetModificationTime()
+            aToCompare.GetModificationTime() == GetModificationTime() &&
+            aToCompare.GetServiceXml() == GetServiceXml()
             )
         {
         return ETrue;
@@ -194,9 +189,10 @@ TBool CCaWidgetDescription::Compare( const CCaWidgetDescription& aToCompare )
 //
 // -----------------------------------------------------------------------------
 //
-void CCaWidgetDescription::SetMmcId( TUint aMmcId )
+void CCaWidgetDescription::SetMmcIdL( const TDesC& aMmcId )
     {
-    iMmcId = aMmcId;
+    iMmcId.Close();
+    iMmcId.CreateL( aMmcId );
     }
 
 // -----------------------------------------------------------------------------
@@ -323,7 +319,7 @@ TInt CCaWidgetDescription::GetEntryId( ) const
 //
 // -----------------------------------------------------------------------------
 //
-TUint CCaWidgetDescription::GetMmcId( ) const
+TPtrC CCaWidgetDescription::GetMmcId( ) const
     {
     return iMmcId;
     }
@@ -425,6 +421,16 @@ TBool CCaWidgetDescription::IsUsed( ) const
     return iFlags & EUsed;
     }
 
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CCaWidgetDescription::IsVisible( ) const
+    {
+    return iFlags & EVisible;
+    }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -434,10 +440,7 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     CCaInnerEntry* entry = CCaInnerEntry::NewLC();
     entry->SetEntryTypeNameL( KCaTypeWidget );
     entry->SetRole( EItemEntryRole );
-    if ( iFlags & EVisible )
-        {
-        entry->SetFlags( EVisible );
-        }
+    entry->SetFlags( iFlags );
     if ( iPackageUid )
         {
         TBuf<KMaxUidName> uidDesc;
@@ -448,11 +451,9 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         {
         entry->SetId( iEntryId );
         }
-    if ( iMmcId )
+    if ( iMmcId != KNullDesC )
         {
-        TBuf<KMaxUidName> mmcId;
-        mmcId.AppendNum( iMmcId, EHex);
-        entry->AddAttributeL( KCaAttrMmcId, mmcId );
+        entry->AddAttributeL( KCaAttrMmcId, iMmcId );
         }
     if ( iLibrary != KNullDesC )
         {
@@ -498,7 +499,10 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
         {
         entry->AddAttributeL( KCaAttrInstallationTime, iModificationTime );
         }
-
+    if ( iServiceXml != KNullDesC )
+        {
+        entry->AddAttributeL( KAttrWidgetServiceXml, iServiceXml);
+        }
     return entry;
     }
 
@@ -520,5 +524,31 @@ TPtrC CCaWidgetDescription::GetLibraryName( ) const
         libraryName.Set( libraryName.Mid( 0, pos ));
         }
     return libraryName;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::RemoveMmcId( )
+    {
+    iMmcId.Close();
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetServiceXmlL(const TDesC& aServiceXml)
+    {
+    iServiceXml.Close();
+    iServiceXml.CreateL( aServiceXml );
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetServiceXml() const
+    {
+    return iServiceXml;
     }
 //  End of File

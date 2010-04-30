@@ -20,6 +20,12 @@
 #include "caquery.h"
 
 /*!
+ \var CaNotifierFilterPrivate::m_q
+ Points to the CaNotifierFilter instance that uses
+ this private implementation.
+ */
+
+/*!
  Constructor.
  \param pointer to CaNotifierFilter - public notifier implementation class.
  */

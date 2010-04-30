@@ -20,15 +20,18 @@
 #include "hsactivityglobals.h"
 #include "hsserializer.h"
 #include <qvariant.h>
+#include <xqconversions>
 
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityDbClientPrivate::HsActivityDbClientPrivate(HsActivityDbAsyncRequestObserver &observer)
+HsActivityDbClientPrivate::HsActivityDbClientPrivate(HsActivityDbAsyncRequestObserver &observer):
+    mObserver(observer)
 {
-    mAsyncDataHandler = HsActivityDbAsyncRequestPrivate::NewL(observer, *this);
+    mAsyncDataHandler = HsActivityDbAsyncRequestPrivate::newWaitActivityL(
+            observer, *this);
 }
 
 // -----------------------------------------------------------------------------
@@ -37,6 +40,7 @@ HsActivityDbClientPrivate::HsActivityDbClientPrivate(HsActivityDbAsyncRequestObs
 //
 HsActivityDbClientPrivate::~HsActivityDbClientPrivate()
 {
+    mAsyncTasks.ResetAndDestroy();
     delete mAsyncDataHandler;
     Close();
 }
@@ -57,7 +61,11 @@ int HsActivityDbClientPrivate::connect()
 //
 int HsActivityDbClientPrivate::addActivity(const QVariantHash &activity)
 {
-    TRAPD(errNo, execSimpleRequestL(AddActivity, activity);)
+    int errNo(KErrCorrupt);
+    if (activity.end() != activity.find(ActivityApplicationKeyword) &&
+        activity.end() != activity.find(ActivityActivityKeyword)) {
+        TRAP(errNo, execSimpleRequestL(AddActivity, activity);)
+    }
     return errNo;
 }
 
@@ -67,7 +75,11 @@ int HsActivityDbClientPrivate::addActivity(const QVariantHash &activity)
 //
 int HsActivityDbClientPrivate::updateActivity(const QVariantHash &activity)
 {
-    TRAPD(errNo, execSimpleRequestL(UpdateActivity, activity);)
+    int errNo(KErrCorrupt);
+    if (activity.end() != activity.find(ActivityApplicationKeyword) &&
+        activity.end() != activity.find(ActivityActivityKeyword)) {
+        TRAP(errNo, execSimpleRequestL(UpdateActivity, activity);)
+    }
     return errNo;
 }
 
@@ -77,7 +89,11 @@ int HsActivityDbClientPrivate::updateActivity(const QVariantHash &activity)
 //
 int HsActivityDbClientPrivate::removeActivity(const QVariantHash &activity)
 {
-    TRAPD(errNo, execSimpleRequestL(RemoveActivity, activity);)
+    int errNo(KErrCorrupt);
+    if (activity.end() != activity.find(ActivityApplicationKeyword) &&
+        activity.end() != activity.find(ActivityActivityKeyword)) {
+        TRAP(errNo, execSimpleRequestL(RemoveActivity, activity);)
+    }
     return errNo;
 }
 
@@ -87,7 +103,10 @@ int HsActivityDbClientPrivate::removeActivity(const QVariantHash &activity)
 //
 int HsActivityDbClientPrivate::removeApplicationActivities(const QVariantHash &activity)
 {
-    TRAPD(errNo, execSimpleRequestL(RemoveApplicationActivities, activity);)
+    int errNo(KErrCorrupt);
+    if (activity.end() != activity.find(ActivityApplicationKeyword)) {
+        TRAP(errNo, execSimpleRequestL(RemoveApplicationActivities, activity);)
+    }
     return errNo;
 }
 
@@ -120,6 +139,16 @@ int HsActivityDbClientPrivate::applicationActivities(QList<QVariantHash>& result
 int HsActivityDbClientPrivate::waitActivity(const QVariantHash &activity)
 {
     TRAPD(errNo, waitActivityL(activity);)
+    return errNo;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClientPrivate::getThumbnail(QSize size, QString imagePath, QString  mimeType, void *userDdata)
+{
+    TRAPD(errNo, getThumbnailL(size, imagePath, mimeType, userDdata);)
     return errNo;
 }
 
@@ -174,7 +203,7 @@ void HsActivityDbClientPrivate::startServerL()
 //
 void HsActivityDbClientPrivate::connectL()
 {
-    const int asyncMessageSlots(4);
+    const int asyncMessageSlots(12);
     const int maxRetry(4);
 
     TInt retry = maxRetry;
@@ -200,34 +229,17 @@ void HsActivityDbClientPrivate::connectL()
 //
 void HsActivityDbClientPrivate::execSimpleRequestL(int function, const QVariantHash &activity)
 {
+    TPckgBuf<TInt> appId( activity.find(ActivityApplicationKeyword).value().toInt() );
+    HBufC8 *actId = XQConversions::qStringToS60Desc8(activity.find(ActivityActivityKeyword).value().toString());
+    CleanupStack::PushL(actId);
+    TPckgBuf<TInt> taskId(0);
     RBuf8 data;
     CleanupClosePushL(data);
     data.CreateL(256);
     data << activity;
-    User::LeaveIfError(SendReceive(function, TIpcArgs(&data)));
+    User::LeaveIfError(SendReceive(function, TIpcArgs(&appId, actId, &data, &taskId)));
     CleanupStack::PopAndDestroy(&data);
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void HsActivityDbClientPrivate::requestedActivityNameL(QString &result,
-                                                const QVariantHash &activity)
-{
-    RBuf8 data;
-    TPckgBuf<int> sizeBuf;
-    CleanupClosePushL(data);
-    data.CreateL(256);
-    data << activity;
-    User::LeaveIfError(SendReceive(RequestedActivityName, TIpcArgs(&data,&sizeBuf)));
-    if (sizeBuf() > data.MaxSize()) {
-        data.ReAlloc(sizeBuf());
-    }
-    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&data)));
-    result = QString::fromAscii(reinterpret_cast<const char *>(data.Ptr()),
-                                data.Length());
-    CleanupStack::PopAndDestroy(&data);
+    CleanupStack::PopAndDestroy(actId);
 }
 
 // -----------------------------------------------------------------------------
@@ -236,15 +248,19 @@ void HsActivityDbClientPrivate::requestedActivityNameL(QString &result,
 //
 void HsActivityDbClientPrivate::activitiesL(QList<QVariantHash>& result)
 {
+    TPckgBuf<TInt> appId(0);
+    TPtrC8 actId(KNullDesC8);
+    TPtrC8 desc(KNullDesC8);
+    TPckgBuf<TInt> taskId(0);
+    User::LeaveIfError(SendReceive(Activities, 
+                       TIpcArgs(&appId, &actId, &desc, &taskId)));
+
+    int sizeBuf(appId());
     RBuf8 data;
-    TPckgBuf<int> sizeBuf;
     CleanupClosePushL(data);
-    data.CreateL(256);
-    User::LeaveIfError(SendReceive(Activities, TIpcArgs(&data, &sizeBuf)));
-    if (sizeBuf() > data.MaxSize()) {
-        data.ReAlloc(sizeBuf());
-    }
-    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&data)));
+    data.Create(sizeBuf);
+    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &data)));
+    
     result << data;
     CleanupStack::PopAndDestroy(&data);
 }
@@ -256,16 +272,19 @@ void HsActivityDbClientPrivate::activitiesL(QList<QVariantHash>& result)
 void HsActivityDbClientPrivate::applicationActivitiesL(QList<QVariantHash>& result,
                                                      const QVariantHash & condition)
 {
+    TPckgBuf<TInt> appId = condition.find(ActivityApplicationKeyword).value().toInt();
+    TPtrC8 actId(KNullDesC8);
+    TPtrC8 desc(KNullDesC8);
+    TPckgBuf<TInt> taskId(0);
+    User::LeaveIfError(SendReceive(ApplicationActivities, 
+                       TIpcArgs(&appId, &actId, &desc, &taskId)));
+
+    int sizeBuf(appId());
     RBuf8 data;
-    TPckgBuf<int> sizeBuf;
     CleanupClosePushL(data);
-    data.CreateL(256);
-    data << condition;
-    User::LeaveIfError(SendReceive(ApplicationActivities, TIpcArgs(&data, &sizeBuf)));
-    if (sizeBuf() > data.MaxSize()) {
-        data.ReAlloc(sizeBuf());
-    }
-    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&data)));
+    data.Create(sizeBuf);
+    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &data)));
+    
     result << data;
     CleanupStack::PopAndDestroy(&data);
 }
@@ -287,9 +306,20 @@ void HsActivityDbClientPrivate::waitActivityL(const QVariantHash &activity)
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityDbClientPrivate::getData(RBuf8 &data)
+void HsActivityDbClientPrivate::getThumbnailL(QSize size, QString imagePath, QString  mimeType, void *userDdata)
 {
-    SendReceive(GetData, TIpcArgs(&data));
+    HsActivityDbAsyncRequestPrivate::getThumbnailLD(mObserver,
+                              *this, size, imagePath, mimeType, userDdata);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivityDbClientPrivate::getData(int taskId, RBuf8 &data)
+{
+    TPckgBuf<int> requestId(taskId);
+    SendReceive(GetData, TIpcArgs(&requestId, &data));
 }
 
 // -----------------------------------------------------------------------------
@@ -307,21 +337,21 @@ void HsActivityDbClientPrivate::sendDataAsync(int func,
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityDbClientPrivate::getThumbnail(QPixmap &dst, const QString & src)
+void HsActivityDbClientPrivate::PushL(HsActivityDbAsyncRequestPrivate * task)
 {
-    RBuf8 data;
-    QVariantHash thumbnailRequest;
-    thumbnailRequest.insert(ActivityScreenshotKeyword, src);
-    TPckgBuf<int> sizeBuf(0);
-    CleanupClosePushL(data);
-    data.CreateL(256);
-    data << thumbnailRequest;
-    User::LeaveIfError(SendReceive(GetThumbnail, TIpcArgs(&data, &sizeBuf)));
-    if (sizeBuf() > data.MaxSize()) {
-        data.ReAlloc(sizeBuf());
+    (KErrNotFound == mAsyncTasks.Find(task)) ?
+        mAsyncTasks.AppendL(task):
+        User::Leave(KErrAlreadyExists);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivityDbClientPrivate::Pop(HsActivityDbAsyncRequestPrivate *task)
+{
+    const TInt offset(mAsyncTasks.Find(task));
+    if (KErrNotFound != offset) {
+        mAsyncTasks.Remove(offset);
     }
-    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&data)));
-    dst << data;
-    CleanupStack::PopAndDestroy(&data);
-    return 0;
 }

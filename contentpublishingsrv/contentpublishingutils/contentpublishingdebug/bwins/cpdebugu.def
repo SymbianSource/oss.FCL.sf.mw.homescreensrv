@@ -1,8 +1,0 @@
-EXPORTS
-	?Data@CCPDebug@@CAPAUDebugData@@XZ @ 1 NONAME ; struct DebugData * CCPDebug::Data(void)
-	?Enable@CCPDebug@@SAHXZ @ 2 NONAME ; int CCPDebug::Enable(void)
-	?EnableLogging@CCPDebug@@SAXH@Z @ 3 NONAME ; void CCPDebug::EnableLogging(int)
-	?NewL@CCPDebug@@SAPAV1@ABVTDesC16@@@Z @ 4 NONAME ; class CCPDebug * CCPDebug::NewL(class TDesC16 const &)
-	?NewLC@CCPDebug@@SAPAV1@ABVTDesC16@@@Z @ 5 NONAME ; class CCPDebug * CCPDebug::NewLC(class TDesC16 const &)
-	?Printf@CCPDebug@@SAXV?$TRefByValue@$$CBVTDesC8@@@@ZZ @ 6 NONAME ; void CCPDebug::Printf(class TRefByValue<class TDesC8 const >, ...)
-

@@ -40,55 +40,14 @@ CaClientNotifierProxy::~CaClientNotifierProxy()
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-void CaClientNotifierProxy::entryChanged(int entryId,
-        ChangeType changeType) const
-{
-    qDebug() << "CaClientProxy::entryChanged entryId:"
-             << entryId << "changeType:" << changeType;
-    emit signalEntryChanged(entryId, changeType);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientNotifierProxy::entryChanged(const CaEntry &entry,
-        ChangeType changeType) const
-{
-    qDebug() << "CaClientProxy::entryChanged changeType:" << changeType;
-    CaEntry *caEntry = new CaEntry(entry);
-    emit signalEntryChanged(*caEntry, changeType);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientNotifierProxy::entryTouched(int id) const
-{
-    qDebug() << "CaClientProxy::entryTouched id:" << id;
-    emit signalEntryTouched(id);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientNotifierProxy::groupContentChanged(int groupId) const
-{
-    qDebug() << "CaClientProxy::groupContentChanged groupId:" << groupId;
-    emit signalGroupContentChanged(groupId);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
 int CaClientNotifierProxy::registerNotifier(
     const CaNotifierFilter *notifierFilter,
     CaNotifierPrivate::NotifierType notifierType,
-    const CaClientNotifierProxy *notifierProxy)
+    const CaObserver *observer)
 {
     qDebug() << "CaClientProxy::registerNotifier notifierType:"
              << notifierType;
-    QMutexLocker locker(&mMutex);
-    return CaNotifiers::addNotifier(notifierFilter, notifierType, notifierProxy);
+    return CaNotifiers::addNotifier(notifierFilter, notifierType, observer);
 }
 
 //----------------------------------------------------------------------------
@@ -100,7 +59,16 @@ void CaClientNotifierProxy::unregisterNotifier(
 {
     qDebug() << "CaClientProxy::unregisterNotifier notifierType:"
              << notifierType;
-    QMutexLocker locker(&mMutex);
     CaNotifiers::removeNotifier(&notifierFilter, notifierType);
 }
+
+
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
+void CaClientNotifierProxy::connectSessions()
+{
+    qDebug() << "Nothing to do on windows";
+}
+
 

@@ -19,9 +19,7 @@ TEMPLATE = subdirs
 SUBDIRS  += appfoundation \
             hswidgetmodel \
             contentstorage \
-            contentpublishingsrv \
             homescreensrv_plat \
-            screensavermodel \
             tsrc
 symbian:SUBDIRS += activityfw
 symbian:SUBDIRS += hsappkeyhandler

@@ -18,7 +18,9 @@
 #define HSACTIVITYDBASYNCREQUESTPRIVATE_H
 #include <e32base.h>
 #include <QVariant>
+#include <QPixmap>
 #include <hsactivitydbasyncrequestobserver.h>
+#include <activitycmd.h>
 
 class HsActivityDbClientPrivate;
 
@@ -29,17 +31,36 @@ class HsActivityDbAsyncRequestPrivate : public CActive
 
 {
 public:
+    
+    enum TAsyncRequest{
+        EWaitActivity = WaitActivity,
+        EWaitGetThumbnail = GetThumbnail
+    };
+    
+private:
     /**
      * First step constructor
      */
     static HsActivityDbAsyncRequestPrivate*
-    NewL(HsActivityDbAsyncRequestObserver &, HsActivityDbClientPrivate &);
-
-    /**
-     * First step constructor
-     */
+    NewL(HsActivityDbAsyncRequestObserver &, 
+         HsActivityDbClientPrivate &,
+         TAsyncRequest,
+         void* userData = 0);
+    
+public:
+    
     static HsActivityDbAsyncRequestPrivate*
-    NewLC(HsActivityDbAsyncRequestObserver &, HsActivityDbClientPrivate &);
+    newWaitActivityL(HsActivityDbAsyncRequestObserver &, 
+            HsActivityDbClientPrivate &);
+    
+    static void
+    getThumbnailLD(HsActivityDbAsyncRequestObserver &observer,
+         HsActivityDbClientPrivate &session, 
+         QSize size, 
+         QString imagePath, 
+         QString  mimeType, 
+         void *userDdata);
+    
 
     /**
      * Destructor
@@ -51,6 +72,15 @@ public:
      * @param condition - activity filetering rules
      */
     void waitActivity(const QVariantHash &condition);
+private:
+    /**
+     */
+    void getThumbnail(QSize size, QString imagePath, QString  mimeType);
+
+    /**
+     */
+    QPixmap copyPixmap(CFbsBitmap* bitmap);
+    
 protected:
     /**
      * Interface implementation.
@@ -67,13 +97,20 @@ private:
     /**
      * Constructor
      */
-    HsActivityDbAsyncRequestPrivate(HsActivityDbAsyncRequestObserver &,
-                                    HsActivityDbClientPrivate &);
+    HsActivityDbAsyncRequestPrivate(HsActivityDbAsyncRequestObserver &, 
+                                    HsActivityDbClientPrivate &,
+                                    TAsyncRequest,
+                                    void* userData);
 private:
     HsActivityDbAsyncRequestObserver &mObserver;
     HsActivityDbClientPrivate &mSession;
-    int mRequestType;
-    RBuf8 mDataBuf;
+    const TAsyncRequest mRequestType;
+    TPckgBuf<int> mTaskId;
     TPckgBuf<int> mDataSize;
+    TPckgBuf<int> mBitmapId;
+    HBufC* mBitmapPath;
+    HBufC8* mBitmapMimeType;
+    RBuf8 mDataBuf;
+    void *const mUserData;
 };
 #endif // HSACTIVITYDBCLIENTPRIVATE_H

@@ -76,11 +76,12 @@ void CCaClientNotifier::RunL()
     TInt error = iStatus.Int();
     if( error == KErrNone )
         {
-        TRAP( error, iSubsession->GetChangeInfoAndNotifyObserverL() );
+        TRAP( error, iSubsession->GetChangeInfoL() );
         if( error == KErrNone )
             {
             iSubsession->RegisterForNotificationsL( iStatus );
             SetActive();
+            iSubsession->NotifyObserver();
             }
         }
     }

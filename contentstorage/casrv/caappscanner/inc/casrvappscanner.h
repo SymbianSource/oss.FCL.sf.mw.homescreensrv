@@ -157,7 +157,7 @@ private:
      * @result id of download collection
      */
     TInt GetCollectionDownloadIdL();
-    
+
     /**
      * Gets collectionId of all collection
      * @result id of all collection
@@ -169,7 +169,7 @@ private:
      * @param aEntryId application entry id.
      */
     void AddEntryToDownloadedCollectionL( TInt aEntryId );
-    
+
     /**
      * Add application entry to predefined collection
      * @param aEntry application entry.
@@ -177,14 +177,14 @@ private:
      */
     void AddEntryToPredefinedCollectionL( CCaInnerEntry* aEntry,
             TBool aUpdate = EFalse );
-    
+
     /**
      * Create predefined collection
      * @param aGroupName group name.
      * @result id of new created collection
      */
     TInt CreatePredefinedCollectionL( const TDesC& aGroupName );
-    
+
     /**
      * Add collection to all collection.
      * @param aCollectionId collection id to add.
@@ -200,20 +200,20 @@ private:
     TBool HandleLockDeleteFlagUpdateL( CCaInnerEntry* aItem );
 
     /**
-     * Updates application's missing attribute.
+     * Updates application's missing and visible flags.
      * Add new menu item referring to this application.
      * @param aItem menu item.
-     * @return ETrue if missing flag was updated
+     * @return ETrue if flags were updated
      */
-    TBool HandleMissingFlagUpdate( CCaInnerEntry* aItem );
+    TBool HandleMissingVisibleFlagsUpdate( CCaInnerEntry* aItem );
 
     /**
-     * Updates hidden flag.
+     * Updates visible flag.
      * @param aItem menu item.
      * @param aUid Application's uid.
-     * @return ETrue if hidden flag was updated
+     * @return ETrue if visible flag was updated
      */
-    TBool HandleHiddenFlagUpdateL( CCaInnerEntry* aItem );
+    TBool HandleVisibleFlagUpdate( CCaInnerEntry* aItem );
 
     /**
      * Updates used flag.
@@ -221,7 +221,7 @@ private:
      * @param aUid Application's uid.
      * @return ETrue if used flag was updated
      */
-    TBool HandleUsedFlagUpdateL( CCaInnerEntry* aItem );
+    TBool HandleUsedFlagUpdate( CCaInnerEntry* aItem );
     /**
      * Updates mmc attribute.
      * @param aItem menu item.
@@ -328,11 +328,16 @@ private:
     void RemoveAppL( CCaInnerEntry* aAppEntry );
 
     /**
-     * Adds flag objects(only one flag at time).
+     * Set "missing" flag.
      * @param aEntry entry.
-     * @param aFlag menu item's flag.
      */
-    void AddObjectFlagL( CCaInnerEntry* aEntry, const TInt& aFlag );
+    void SetMissingFlagL( CCaInnerEntry* aEntry );
+
+    /**
+     * Set "visible" flag.
+     * @param aEntry entry.
+     */
+    void ClearVisibleFlagL( CCaInnerEntry* aEntry );
 
     /**
      * Check currently inserted MMC card, update and save MMC history.
@@ -410,12 +415,12 @@ private:
      * Notifys storage abaut updated apps
      */
     void InstallationNotifyL();
-    
+
     /**
      * Make not empty collections with not hidden apps visible.
      */
     void MakeNotEmptyCollectionsVisibleL();
-    
+
     /**
      * Make collection visible if has visible entry.
      * @param aEntry application entry

@@ -54,6 +54,11 @@
  */
 
 /*!
+ \var CaQueryPrivate::m_q
+ Points to the CaQuery instance that uses this private implementation.
+ */
+
+/*!
  Default constructor.
  */
 CaQuery::CaQuery() :

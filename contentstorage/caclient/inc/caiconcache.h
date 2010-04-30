@@ -53,11 +53,11 @@ private slots:
 private:
     static QSharedPointer<CaIconCache> mInstance;
 
-    QCache<QString,HbIcon> mCache; //own
+    QCache<QString,HbIcon> mCache;
 
-    QSharedPointer<CaService> mService;//not own
+    QSharedPointer<CaService> mService;
 
-    CaNotifier *mNotifier;//own
+    CaNotifier *mNotifier;
 
     friend class QtSharedPointer::ExternalRefCount<CaIconCache>;
 };

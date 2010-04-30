@@ -17,6 +17,7 @@
 
 #include <QDebug>
 #include "caclientnotifierproxy.h"
+#include "caobserver.h"
 #include "caentry.h"
 #include "cainnerentry.h"
 #include "caobjectadapter.h"
@@ -38,63 +39,10 @@ CaClientNotifierProxy::~CaClientNotifierProxy()
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-void CaClientNotifierProxy::entryChanged(TInt entryId,
-        TChangeType changeType) const
-{
-    qDebug() << "CaClientProxy::entryChanged entryId:"
-             << entryId << "changeType:" << changeType;
-
-    int entryChangedId(entryId);
-    ChangeType entryChangeType(AddChangeType);
-    CaObjectAdapter::convert(changeType, entryChangeType);
-
-    emit signalEntryChanged(entryChangedId, entryChangeType);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientNotifierProxy::entryChanged(const CCaInnerEntry &entry,
-        TChangeType changeType) const
-{
-    qDebug() << "CaClientProxy::entryChanged changeType:" << changeType;
-
-    CaEntry *caEntry = new CaEntry(static_cast<EntryRole>(entry.GetRole()));
-    ChangeType entryChangeType(AddChangeType);
-    CaObjectAdapter::convert(entry, *caEntry);
-    CaObjectAdapter::convert(changeType, entryChangeType);
-
-    emit signalEntryChanged(*caEntry, entryChangeType);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientNotifierProxy::entryTouched(TInt id) const
-{
-    qDebug() << "CaClientProxy::entryTouched id:" << id;
-    emit signalEntryTouched(id);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaClientNotifierProxy::groupContentChanged(TInt groupId) const
-{
-    qDebug() << "CaClientProxy::groupContentChanged groupId:" << groupId;
-
-    int groupChangedId(groupId);
-
-    emit signalGroupContentChanged(groupChangedId);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
 int CaClientNotifierProxy::registerNotifier(
     const CaNotifierFilter *notifierFilter,
     CaNotifierPrivate::NotifierType notifierType,
-    const CaClientNotifierProxy *notifierProxy)
+    const IDataObserver *observer)
 {
     qDebug() << "CaClientProxy::registerNotifier notifierType:"
              << notifierType;
@@ -123,7 +71,7 @@ int CaClientNotifierProxy::registerNotifier(
         }
         if (!error) {
             error = session->RegisterNotifier(innerNotifierFilter,
-                                              notifierFilter, notifierProxy);
+                                              notifierFilter, observer);
         }
     }
 
@@ -159,6 +107,16 @@ void CaClientNotifierProxy::unregisterNotifier(
             mSessions.Remove(pos);
         }
     }
+}
+
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
+void CaClientNotifierProxy::connectSessions()
+{
+    for (int i = 0; i < mSessions.Count(); i++) {
+        TRAP_IGNORE(mSessions[i].ConnectAllL());
+    }    
 }
 
 //----------------------------------------------------------------------------

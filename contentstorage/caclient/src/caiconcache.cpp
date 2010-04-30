@@ -29,13 +29,25 @@ static const QChar separator = '*';
 QSharedPointer<CaIconCache> CaIconCache::mInstance(0);
 
 /*!
- *   \class CaIconCache
- *
- *   \brief This class provides icon caching mechanism
- *
- *   Class implements singleton design patern. Use cache() method
- *   to get an instance of CaIconCache
- *
+ \class CaIconCache
+ \brief This class provides icon caching mechanism
+ Class implements singleton design patern. Use cache() method
+ to get an instance of CaIconCache
+ */
+
+/*!
+ \var CaIconCache::mCache
+ Own.
+ */
+
+/*!
+ \var CaIconCache::mService
+ Not own.
+ */
+
+/*!
+ \var CaIconCache::mNotifier
+ Own.
  */
 
 /*!
