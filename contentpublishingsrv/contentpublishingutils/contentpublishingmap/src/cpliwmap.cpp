@@ -827,7 +827,7 @@ TBool CCPLiwMap::PropertyExists( const TDesC8& aProperty ) const
     {
     TBool result( EFalse );
     TInt pos( 0 );
-    const TLiwGenericParam* paramForValue = iMap->FindFirst( pos, aProperty );
+    iMap->FindFirst( pos, aProperty );
     if ( pos != KErrNotFound )
         {
         result = ETrue;

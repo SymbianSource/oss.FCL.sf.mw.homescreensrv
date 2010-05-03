@@ -41,7 +41,7 @@ public:
     ~CaItemModelList();
     void clear();
     int count() const;
-    CaEntry *at(int row) const;
+    QSharedPointer<CaEntry> at(int row) const;
     void reloadEntries(const CaQuery &query);
     void updateEntry(int id);
     void updateEntries(const CaQuery &query);
@@ -60,7 +60,7 @@ private:
 private: // data
 
     QList<int> mOrderedList;
-    QHash<int, CaEntry *> mEntriesHash;
+    QHash<int, QSharedPointer<CaEntry> > mEntriesHash;
     QSharedPointer<CaService> mService;
 
 };

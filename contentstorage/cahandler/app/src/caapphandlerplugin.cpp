@@ -19,11 +19,11 @@
 #include <qserviceinterfacedescriptor.h>
 #include <qabstractsecuritysession.h>
 #include <qservicecontext.h>
-#include "cahandlerloader.h"
 
+#include "cahandlerloader.h"
 #include "caapphandler.h"
 #include "caapphandlerplugin.h"
-#include "cas60handleradapter.h"
+#include "cas60apphandleradapter.h"
 
 /*!
     \class CaAppHandlerPlugin
@@ -47,13 +47,12 @@ QObject *CaAppHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
 
     if (descriptor.interfaceName() ==
             "com.nokia.homescreen.ICommandHandler") {
-        return new CaS60HandlerAdapter<CCaAppHandler>;
+        return new CaS60AppHandlerAdapter();
     } else {
         return 0;
     }
 }
-// TODO: uncomment when it will be used in plugin
-//Q_EXPORT_PLUGIN2(caapphandlerplugin, CaAppHandlerPlugin)
+Q_EXPORT_PLUGIN2(caapphandlerplugin, CaAppHandlerPlugin)
 
 
 /*!
@@ -81,7 +80,7 @@ QObject *CaAppHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
 */
 
 /*!
-    \fn int CaS60HandlerAdapter<typename Plugin>::execute(const CaEntry &entry, const QString &commandName) 
+    \fn int CaS60HandlerAdapter<typename Plugin>::execute(const CaEntry &entry, const QString &commandName)
     \param entry Subject of the command.
     \param commandName The name of the command to execute.
     \return 0 on success, error code otherwise.

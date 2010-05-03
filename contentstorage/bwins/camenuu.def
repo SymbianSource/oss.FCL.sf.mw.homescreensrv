@@ -19,4 +19,6 @@ EXPORTS
 	?AddL@CCaStorageProxy@@QAEXPAVCCaInnerEntry@@H@Z @ 18 NONAME ; void CCaStorageProxy::AddL(class CCaInnerEntry *, int)
 	?CustomSortL@CCaStorageProxy@@QAEXABV?$RArray@H@@H@Z @ 19 NONAME ; void CCaStorageProxy::CustomSortL(class RArray<int> const &, int)
 	?LoadDataBaseFromRomL@CCaStorageProxy@@QAEXXZ @ 20 NONAME ; void CCaStorageProxy::LoadDataBaseFromRomL(void)
+	?NewL@CCaMmcWatcher@@SAPAV1@AAVRFs@@PAVMMmcWatcherCallback@@@Z @ 21 NONAME ; class CCaMmcWatcher * CCaMmcWatcher::NewL(class RFs &, class MMmcWatcherCallback *)
+	?NewLC@CCaMmcWatcher@@SAPAV1@AAVRFs@@PAVMMmcWatcherCallback@@@Z @ 22 NONAME ; class CCaMmcWatcher * CCaMmcWatcher::NewLC(class RFs &, class MMmcWatcherCallback *)
 

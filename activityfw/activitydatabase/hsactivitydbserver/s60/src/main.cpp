@@ -28,34 +28,34 @@
 #include "hsactivitystorage.h"
 
 class HsActivityMainAppUi : public QS60MainAppUi
-   {
+{
 public:
     TBool FrameworkCallsRendezvous() const {
         return EFalse;
     }
-   };
+};
 
 class HsActivityMainDocument : public QS60MainDocument
-   {
+{
 public:
-    HsActivityMainDocument(CEikApplication &mainApplication):QS60MainDocument(mainApplication){}
-    
+    HsActivityMainDocument(CEikApplication &mainApplication):QS60MainDocument(mainApplication) {}
+
     CEikAppUi *CreateAppUiL() {
-        return (static_cast <CEikAppUi*>(new(ELeave)HsActivityMainAppUi));
+        return (static_cast <CEikAppUi *>(new(ELeave)HsActivityMainAppUi));
     }
-   };
+};
 
 class HsActivityApplication : public QS60MainApplication
-   {
+{
 protected:
     CApaDocument *CreateDocumentL() {
-        return new (ELeave) HsActivityMainDocument(*this);
-    }   
-   };
+        return new(ELeave) HsActivityMainDocument(*this);
+    }
+};
 
 CApaApplication *newHsActivityApplication()
 {
-     return new HsActivityApplication;
+    return new HsActivityApplication;
 }
 
 int main(int argc, char *argv[])
@@ -64,20 +64,20 @@ int main(int argc, char *argv[])
     HsActivityStorage storage;
     HsActivityServer server(storage);
     int retVal(KErrGeneral);
-    if( server.start() ){
-        CEikonEnv * env = CEikonEnv::Static();
-        if ( env ) {
-            CApaWindowGroupName* wgName = CApaWindowGroupName::NewLC(env->WsSession());
+    if (server.start()) {
+        CEikonEnv *env = CEikonEnv::Static();
+        if (env) {
+            CApaWindowGroupName *wgName = CApaWindowGroupName::NewLC(env->WsSession());
             wgName->SetHidden(ETrue); // hides us from FSW and protects us from OOM FW etc.
-            wgName->SetSystem(ETrue); // Allow only application with PowerManagement cap to shut us down    
+            wgName->SetSystem(ETrue); // Allow only application with PowerManagement cap to shut us down
             RWindowGroup &rootWindowGroup = env->RootWin();
             wgName->SetWindowGroupName(rootWindowGroup);
-            rootWindowGroup.SetOrdinalPosition(-1, ECoeWinPriorityNormal); //move to background.        
+            rootWindowGroup.SetOrdinalPosition(-1, ECoeWinPriorityNormal); //move to background.
             CleanupStack::PopAndDestroy();
-         }
+        }
         RProcess::Rendezvous(KErrNone);
         retVal = app.exec();
-    }else
+    } else
         RProcess::Rendezvous(retVal);
     return retVal;
 }

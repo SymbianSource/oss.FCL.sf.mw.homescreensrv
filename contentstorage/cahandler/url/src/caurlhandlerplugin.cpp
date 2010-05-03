@@ -22,7 +22,7 @@
 #include "cahandlerloader.h"
 
 #include "caurlhandlerplugin.h"
-#include "cas60handleradapter.h"
+#include "cas60urlhandleradapter.h"
 #include "caurlhandler.h"
 
 /*!
@@ -35,7 +35,7 @@
     \param descriptor Service descriptor.
     \param context Ignored.
     \param session Ignored.
-    \return An instance of the CaS60HandlerAdapter<CCaUrlHandler> when descriptor interface name
+    \return An instance of the CaS60UrlHandlerAdapter<CCaUrlHandler> when descriptor interface name
     is "com.nokia.homescreen.ICommandHandler", NULL otherwise.
 */
 QObject *CaUrlHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &descriptor,
@@ -47,10 +47,9 @@ QObject *CaUrlHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
 
     if (descriptor.interfaceName() ==
             "com.nokia.homescreen.ICommandHandler") {
-        return new CaS60HandlerAdapter<CCaUrlHandler>;
+        return new CaS60UrlHandlerAdapter();
     } else {
         return 0;
     }
 }
-// TODO: uncomment when it will be a plugin
-//Q_EXPORT_PLUGIN2(caurlhandlerplugin, CaUrlHandlerPlugin)
+Q_EXPORT_PLUGIN2(caurlhandlerplugin, CaUrlHandlerPlugin)

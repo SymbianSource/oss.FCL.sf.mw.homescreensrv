@@ -26,8 +26,8 @@ QTM_USE_NAMESPACE
 
 class CaTappHandlerPlugin: public QObject, public QServicePluginInterface
 {
-Q_OBJECT 
-Q_INTERFACES(QtMobility::QServicePluginInterface)
+    Q_OBJECT
+    Q_INTERFACES(QtMobility::QServicePluginInterface)
 
 public:
     QObject *createInstance(const QServiceInterfaceDescriptor &descriptor,

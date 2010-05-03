@@ -39,7 +39,6 @@ symbian: {
     -lecom \
     -lswinstcli \
     -lcautils \
-    -lcaclient \
     -lapgrfx \
     -lws32 \
     -lapparc \

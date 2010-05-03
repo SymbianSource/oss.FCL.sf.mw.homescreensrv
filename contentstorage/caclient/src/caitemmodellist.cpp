@@ -49,7 +49,6 @@ void CaItemModelList::clear()
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelList::clear");
     mOrderedList.clear();
-    qDeleteAll(mEntriesHash);
     mEntriesHash.clear();
     CACLIENTTEST_FUNC_EXIT("CaItemModelList::clear");
 }
@@ -68,7 +67,7 @@ int CaItemModelList::count() const
  \param row of model list
  \retval entry at row
  */
-CaEntry *CaItemModelList::at(int row) const
+QSharedPointer<CaEntry> CaItemModelList::at(int row) const
 {
     int id = mOrderedList[row];
     return mEntriesHash.value(id);
@@ -83,7 +82,7 @@ void CaItemModelList::reloadEntries(const CaQuery &query)
     CACLIENTTEST_FUNC_ENTRY("CaItemModelList::reloadEntries");
     clear();
     int id=0;
-    QList<CaEntry *> eList = mService->getEntries(query);
+    QList< QSharedPointer<CaEntry> > eList = mService->getEntries(query);
     for (int i = 0; i < eList.count(); i++) {
         id = eList[i]->id();
         mOrderedList << id;
@@ -100,7 +99,6 @@ void CaItemModelList::updateEntry(int id)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelList::updateEntry");
     if (mEntriesHash.contains(id)) {
-        delete mEntriesHash.take(id);
         mEntriesHash.insert(id, mService->getEntry(id));
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelList::updateEntry");
@@ -155,7 +153,7 @@ void CaItemModelList::remove(int id)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelList::remove");
     if (mEntriesHash.contains(id)) {
-        delete mEntriesHash.take(id);
+        mEntriesHash.remove(id);
     }
     mOrderedList.removeOne(id);
     CACLIENTTEST_FUNC_EXIT("CaItemModelList::remove");

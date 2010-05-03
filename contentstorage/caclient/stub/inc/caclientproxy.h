@@ -109,7 +109,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const QList<int>& entryIdList, QList<CaEntry *>& sourceList);
+    ErrorCode getData(const QList<int>& entryIdList, QList< QSharedPointer<CaEntry> >& sourceList);
 
     /**
      * Method for fetching entries.
@@ -118,7 +118,7 @@ public:
      * @param sourceList List of results.
      * @return error code
      */
-    ErrorCode getData(const CaQuery &query, QList<CaEntry *>& sourceList);
+    ErrorCode getData(const CaQuery &query, QList< QSharedPointer<CaEntry> >& sourceList);
 
     /**
      * Method for fetching entries.
@@ -178,6 +178,7 @@ private:
         const QList<int> &entryIds,
         const QList<int> &parentIds,
         QString &query);
+    int getEntryIdByUid(const CaEntry &entry, const int uid);
 
 private:
     QString mWidgetRegistryPath;

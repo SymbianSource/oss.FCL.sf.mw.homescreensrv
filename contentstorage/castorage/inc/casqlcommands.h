@@ -91,6 +91,10 @@ _LIT( KSQLUpdateEntryUidNULL, "EN_UID = NULL " );
 _LIT( KSQLUpdateEntryFlags, "EN_FLAGS = :EN_FLAGS " );
 _LIT( KSQLUpdateWhere, "WHERE ENTRY_ID = :ENTRY_ID " );
 
+// Null Icon params 
+_LIT( KSQLEmptyIconFileName, "(IC_FILENAME IS NULL OR IC_FILENAME = '')" );
+_LIT( KSQLEmptyIconSkinId, "(IC_SKIN_ID IS NULL OR IC_SKIN_ID = '')" );
+_LIT( KSQLEmptyIconAppId, "(IC_APP_ID IS NULL OR IC_APP_ID = '')" );
 
 // Update Icon
 _LIT( KSQLUpdateIconId, "ICON_ID = :ICON_ID " );
@@ -175,10 +179,7 @@ WHERE GE_ENTRY_ID IN ( %S )" );
 
 _LIT( KSQLNotINIds," AND GE_GROUP_ID NOT IN( %S )" );
 
-_LIT( KSQLGetIconId,"SELECT ICON_ID AS Data FROM CA_ICON \
-WHERE IC_FILENAME = :IC_FILENAME AND \
-IC_SKIN_ID = :IC_SKIN_ID AND \
-IC_APP_ID = :IC_APP_ID");
+_LIT( KSQLGetIconIdWhere,"SELECT ICON_ID AS Data FROM CA_ICON WHERE ");
 
 _LIT( KSQLGetEntryIdFromEntryTable,"SELECT ENTRY_ID AS Data FROM CA_ENTRY \
 WHERE ENTRY_ID = :ENTRY_ID");

@@ -16,11 +16,9 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS+=  servicemodel \
-           statemodel \
+SUBDIRS+=  statemodel \
            appruntimemodel
 
 CONFIG += ordered
 
 tests:include(appfoundation_tests.pri)
-

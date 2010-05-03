@@ -34,7 +34,7 @@ symbian {
     pluginDep.sources = hbactivityplugin.dll
     pluginDep.path = $$QT_PLUGINS_BASE_DIR    
     DEPLOYMENT += pluginDep
-
+    TARGET.UID3 = 0x200267B1
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.CAPABILITY = ALL -TCB
 }

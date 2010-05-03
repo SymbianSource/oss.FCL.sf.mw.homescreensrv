@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #include "activitydatastorage.h"
@@ -28,9 +28,9 @@ ActivityDataStorage::ActivityDataStorage()
     QSqlDatabase database;
     if (QSqlDatabase::contains(KConnectionName)) {
         database = QSqlDatabase::database(KConnectionName);
-    } else {   
+    } else {
         database = QSqlDatabase::addDatabase("QSQLITE", KConnectionName);
-        database.setDatabaseName("activitydatastorage.db");    
+        database.setDatabaseName("activitydatastorage.db");
         if (!database.open()) {
             qFatal(qPrintable(database.lastError().text()));
         }
@@ -49,13 +49,13 @@ ActivityDataStorage::~ActivityDataStorage()
 bool ActivityDataStorage::addActivity(const QString &activityId, const QVariant &data)
 {
     QSqlDatabase database = QSqlDatabase::database(KConnectionName);
-    
+
     QByteArray streamedData;
     {
         QDataStream stream(&streamedData, QIODevice::WriteOnly);
         stream << data;
-    }    
-    
+    }
+
     // insert data
     QSqlQuery query(database);
     if (!query.prepare("INSERT INTO Activities(Name, Data) VALUES(:Name, :Data)")) {
@@ -67,8 +67,8 @@ bool ActivityDataStorage::addActivity(const QString &activityId, const QVariant 
     if (!query.exec()) {
         qCritical(qPrintable(query.lastError().text()));
         return false;
-    }        
-    
+    }
+
     return true;
 }
 
@@ -86,13 +86,13 @@ bool ActivityDataStorage::removeActivity(const QString &activityId)
 bool ActivityDataStorage::updateActivity(const QString &activityId, const QVariant &data)
 {
     QSqlDatabase database = QSqlDatabase::database(KConnectionName);
-    
+
     QByteArray streamedData;
     {
         QDataStream stream(&streamedData, QIODevice::WriteOnly);
         stream << data;
-    }    
-    
+    }
+
     // update data
     QSqlQuery query(database);
     if (!query.prepare("UPDATE Activities SET Data = :Data WHERE Name = :Name")) {
@@ -105,7 +105,7 @@ bool ActivityDataStorage::updateActivity(const QString &activityId, const QVaria
         qCritical(qPrintable(query.lastError().text()));
         return false;
     }
-    
+
     return query.numRowsAffected() > 0;
 }
 
@@ -117,13 +117,13 @@ QVariant ActivityDataStorage::activityData(const QString &activityId) const
         qCritical(qPrintable(query.lastError().text()));
         return QVariant();
     }
-    
+
     QVariant result;
     if (query.next()) {
         QByteArray data(query.value(0).toByteArray());
         QDataStream stream(&data, QIODevice::ReadOnly);
         stream >> result;
-    }   
+    }
     return result;
 }
 
@@ -131,17 +131,17 @@ bool ActivityDataStorage::checkTables()
 {
     QStringList expectedTables("Activities");
     QStringList actualTables = QSqlDatabase::database(KConnectionName).tables();
-    return (expectedTables == actualTables);    
+    return (expectedTables == actualTables);
 }
 
 void ActivityDataStorage::recreateTables()
 {
     QSqlDatabase database = QSqlDatabase::database(KConnectionName);
-    
+
     if (!database.transaction()) {
         qFatal(qPrintable(database.lastError().text()));
     }
-    
+
     // drop any existing tables
     {
         QSqlQuery dropQuery(database);
@@ -158,14 +158,14 @@ void ActivityDataStorage::recreateTables()
         QString statement(
             "CREATE TABLE Activities("
             "Name TEXT NOT NULL PRIMARY KEY UNIQUE,"
-            "Data BLOB NOT NULL)");    
-        
+            "Data BLOB NOT NULL)");
+
         if (!createQuery.exec(statement)) {
             qFatal(qPrintable(createQuery.lastError().text()));
         }
     }
-    
+
     if (!database.commit()) {
         qFatal(qPrintable(database.lastError().text()));
-    }    
+    }
 }

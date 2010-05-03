@@ -55,6 +55,20 @@ void CaNotifiers::Notify(int groupId)
     }
 }
 
+void CaNotifiers::NotifyTouched(int id)
+{
+    for (NotifierHash::const_iterator i = mNotifiers.constBegin();
+            i != mNotifiers.constEnd();
+            ++i) {
+        const CaNotifierFilter *filter = i.key().first;
+        if (filter->getIds().isEmpty() || filter->getIds().contains(id)) {
+            if (i.key().second == CaNotifierPrivate::EntryTouchedNotifierType) {
+                i.value()->entryTouched(id);
+            }
+        }
+    }
+}
+
 void CaNotifiers::Notify(const CaEntry &targetEntry,
                          ChangeType changeType,
                          QList<int> &parentIds)

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -24,11 +24,11 @@ class HbActivityPlugin : public HbActivityPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(HbActivityPluginInterface)
-    
+
 public:
     HbActivityPlugin(QObject *parent = 0);
     ~HbActivityPlugin();
-    
+
 public:
     virtual bool addActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters);
     virtual bool removeActivity(const QString &activityId);
@@ -36,10 +36,11 @@ public:
     virtual QList<QVariantHash> activities();
     virtual QVariant activityData(const QString &activityId);
     virtual bool waitActivity();
+    virtual QVariantHash parseCommandLine(const QStringList &commandLineParams);
 
 private:
     QObject *mActivityClient;
-    
+
 };
 
 #endif //HBACTIVITYPLUGIN_H

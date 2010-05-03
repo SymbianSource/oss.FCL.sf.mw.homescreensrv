@@ -11,14 +11,14 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #include "applicationlauncher_p.h"
 
 #include <apgcli.h>
 #include <apacmdln.h>
-#include <APGTASK.H>
+#include <apgtask.h>
 #include <eikenv.h>
 
 #include <XQConversions>
@@ -32,33 +32,32 @@ bool ApplicationLauncherPrivate::isRunning(int applicationId)
 
 void ApplicationLauncherPrivate::startApplication(int applicationId, const QString &activityId)
 {
-	QString actId = "\""+activityId+"\"";
+    QString actId = "\""+activityId+"\"";
     QString uri = QString("-activity appto://%1?activityname=%2").arg(uint(applicationId), 8, 16, QChar('0')).arg(actId);
-    
-    QT_TRAP_THROWING(
-    {
-        HBufC* uriAsDescriptor = XQConversions::qStringToS60Desc(uri);
+
+    QT_TRAP_THROWING( {
+        HBufC *uriAsDescriptor = XQConversions::qStringToS60Desc(uri);
         CleanupStack::PushL(uriAsDescriptor);
-        
+
         RApaLsSession apaLsSession;
         User::LeaveIfError(apaLsSession.Connect());
         CleanupClosePushL(apaLsSession);
-     
+
         TApaAppInfo appInfo;
         TInt retVal = apaLsSession.GetAppInfo(appInfo, TUid::Uid(applicationId));
-     
-        if(retVal == KErrNone) {
+
+        if (retVal == KErrNone) {
             RProcess application;
             User::LeaveIfError(application.Create(appInfo.iFullName, *uriAsDescriptor));
             application.Resume();
         } else {
             // @todo
         }
-     
+
         CleanupStack::PopAndDestroy(&apaLsSession);
         CleanupStack::PopAndDestroy(uriAsDescriptor);
     }
-    );
+                    );
 }
 
 void ApplicationLauncherPrivate::bringToForeground(int applicationId)

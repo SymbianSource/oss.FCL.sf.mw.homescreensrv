@@ -34,7 +34,7 @@ _LIT( KBrowserPrefix, "4 " );
  *
  *  @lib caclient.lib
  */
-NONSHARABLE_CLASS( CCaUrlHandler )
+NONSHARABLE_CLASS( CCaUrlHandler ): public CBase
     {
 
 public:

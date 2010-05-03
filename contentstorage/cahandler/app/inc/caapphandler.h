@@ -24,13 +24,14 @@
 class CEikonEnv;
 class CCaInnerEntry;
 class CCaUninstallOperation;
+class CCaUsifUninstallOperation;
 
 /**
  *  Command handler for application entries.
  *
  *  @lib caclient.lib
  */
-NONSHARABLE_CLASS( CCaAppHandler )
+NONSHARABLE_CLASS( CCaAppHandler ): public CBase
     {
 
 public:
@@ -72,18 +73,48 @@ private:
      */
     void LaunchApplicationL( const TUid aUid, const TDesC8 &aParam,
             TInt aViewId );
-    
+
     /**
      * Closes application
      * @param aEntry the entry represeting application to close
      */
     void CloseApplicationL( CCaInnerEntry& aEntry );
 
+    /**
+     * Uninstall application 
+     * @param aEntry the entry represeting application to uninstall
+     */
+    void HandleRemoveL( CCaInnerEntry &aEntry );
+
+    /**
+     * Gets component id 
+     * @param aEntry the entry 
+     * @param aSoftwareType indicates software type
+     * @return component id
+     */
+    TInt GetComponentIdL( const CCaInnerEntry &aEntry,
+            const TDesC& aSoftwareType );
+    
+    /**
+     * Start uninstall operation via usif 
+     * @param aComponentId component id
+     */
+    void StartUsifUninstallL( TInt aComponentId );
+
+    
+    /**
+     * Start uninstall operation via swi 
+     * @param aEntry the entry 
+     */
+    void StartSwiUninstallL(CCaInnerEntry &aEntry );
+
+    
 private:
     // data
 
     CEikonEnv* iEikEnv;
     CCaUninstallOperation* iUninstallOperation;
+    CCaUsifUninstallOperation* iUsifUninstallOperation;
     };
 
 #endif // C_CAAPPHANDLER_H

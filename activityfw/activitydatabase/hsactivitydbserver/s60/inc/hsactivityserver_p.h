@@ -24,53 +24,53 @@
 /**
  * Class implemets server functionality for S60 enviroment
  */
-class HsActivityServerPrivate : public CServer2 
+class HsActivityServerPrivate : public CServer2
 {
 public:
     /**
      * Constructor
      */
-    HsActivityServerPrivate(HsActivityDbClientInterface& storage);
-    
+    HsActivityServerPrivate(HsActivityDbClientInterface &storage);
+
     /**
      * Destructor
      */
     ~HsActivityServerPrivate();
-    
+
     /**
      * Function establish server and initialize listening proces
-     * @return true on succees, false otherwise 
+     * @return true on succees, false otherwise
      */
     bool start();
-    
+
     /**
-     * Function look for active application session and complete pending message 
+     * Function look for active application session and complete pending message
      */
-    void notifyL(int applicationId, const QString& activityName);
-    
+    void notifyL(int applicationId, const QString &activityName);
+
     /**
-     * Cancel notification 
+     * Cancel notification
      */
     void cancelNotify(int applicationId);
-    
+
     /**
      * Function add item to pending messages
      */
-    void waitNotification(int applicationId, const RMessage2& msg);
+    void waitNotification(int applicationId, const RMessage2 &msg);
 private:
     /**
      * Function create new client session to handle its request
      * @param version - client implementation version
      * @param message - request message
      */
-    CSession2* NewSessionL(const TVersion& version,const RMessage2& message)const;
+    CSession2 *NewSessionL(const TVersion &version,const RMessage2 &message)const;
 
 private:
     /**
      * Reference to initialized storage client
      */
-    HsActivityDbClientInterface& mStorage;
-    
+    HsActivityDbClientInterface &mStorage;
+
     QHash<int,RMessage2> mPendingMessage;
 };
 

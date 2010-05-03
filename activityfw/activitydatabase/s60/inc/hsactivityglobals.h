@@ -19,8 +19,8 @@
 
 #include <e32base.h>
 const TUid KActivityServerUid = {0x200267B4};
-_LIT( KActivityServerName, "hsactivitydbserver" );
-_LIT( KErr400, "Bad Reqest" );
-_LIT( KErr403, "Access denied" );
+_LIT(KActivityServerName, "hsactivitydbserver");
+_LIT(KErr400, "Bad Reqest");
+_LIT(KErr403, "Access denied");
 
 #endif

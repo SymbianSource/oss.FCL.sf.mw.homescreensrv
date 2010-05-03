@@ -115,10 +115,10 @@ EXPORT_C TInt CCaSrvEngUtils::GetAppInfo( const CCaInnerEntry& aEntry,
     }
 
 // ---------------------------------------------------------
-// CMenuSrvEngUtils::IsNative
+// CMenuSrvEngUtils::IsNativeL
 // ---------------------------------------------------------
 //
-TBool CCaSrvEngUtils::IsNative( const CCaInnerEntry& aEntry )
+TBool CCaSrvEngUtils::IsNativeL( const CCaInnerEntry& aEntry )
     {
     TBool native( EFalse );
     if( aEntry.GetEntryTypeName().CompareF( KCaTypeApp ) == KErrNone )
@@ -126,7 +126,7 @@ TBool CCaSrvEngUtils::IsNative( const CCaInnerEntry& aEntry )
         TUid uid;
         if( GetAppUid( aEntry, uid ) == KErrNone )
             {
-            IsNative( uid, native );
+            IsNativeL( uid, native );
             }
         }
     return native;
@@ -137,17 +137,18 @@ TBool CCaSrvEngUtils::IsNative( const CCaInnerEntry& aEntry )
 // ---------------------------------------------------------
 //
 
-void CCaSrvEngUtils::IsNative( TUid aAppUid, TBool& aIsNative )
+void CCaSrvEngUtils::IsNativeL( TUid aAppUid, TBool& aIsNative )
     {
-    TApaAppInfo appInfo;
+    TApaAppInfo* appInfo = new( ELeave ) TApaAppInfo();
     aIsNative = EFalse;
-    TInt error = iApaLsSession.GetAppInfo( appInfo, aAppUid );
+    TInt error = iApaLsSession.GetAppInfo( *appInfo, aAppUid );
     if( error == KErrNone )
         {
-        error = iApaLsSession.IsProgram( appInfo.iFullName, aIsNative );
+        error = iApaLsSession.IsProgram( appInfo->iFullName, aIsNative );
         if( error != KErrNone )
             {
             aIsNative = EFalse;
             }
         }
+    delete appInfo;
     }

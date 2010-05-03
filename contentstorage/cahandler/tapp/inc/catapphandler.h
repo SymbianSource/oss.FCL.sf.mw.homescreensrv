@@ -19,25 +19,23 @@
 #define CATAPPHANDLER_H
 
 #include <QObject>
-#include "cahandler.h"
-#include "cadefs.h"
 
-class CaEntry;
+#include "cahandler.h"
+
+class CCaInnerEntry;
 class XQApplicationManager;
 
-const QString hsitemLaunchUri("item:launchuri");
-
-class CaTappHandler: public CaHandler
+class CaTappHandler: public QObject, public CaHandler
 {
-Q_OBJECT
+    Q_OBJECT
+    Q_INTERFACES(CaHandler)
 
 public:
-
-explicit    CaTappHandler(QObject *parent = 0);
+    explicit CaTappHandler(QObject *parent = 0);
     ~CaTappHandler();
 
     Q_INVOKABLE
-    int execute(const CaEntry& entry, const QString& command);
+    int execute(CCaInnerEntry& innerEntry, const QString& command);
 
 private:
     XQApplicationManager* mAiwMgr;

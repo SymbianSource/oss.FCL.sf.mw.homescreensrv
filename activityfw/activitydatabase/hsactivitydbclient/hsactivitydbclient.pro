@@ -20,8 +20,6 @@ TARGET = hsactivitydbclient
 QT        += core \
              sql
 
-QT        -= gui 
-
 HEADERS   += inc/hsactivitydbclient.h
 
 SOURCES   += src/hsactivitydbclient.cpp
@@ -50,5 +48,6 @@ BLD_INF_RULES.prj_exports += "../inc/hsactivitydbclientinterface.h /epoc32/inclu
 DEPLOYMENT += api
 TARGET.CAPABILITY = ALL -TCB
 TARGET.EPOCALLOWDLLDATA = 1
+TARGET.UID3 = 0x200267B3
 MMP_RULES += EXPORTUNFROZEN
 }

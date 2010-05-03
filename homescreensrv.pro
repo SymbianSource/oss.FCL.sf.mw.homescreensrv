@@ -22,9 +22,10 @@ SUBDIRS  += appfoundation \
             contentpublishingsrv \
             homescreensrv_plat \
             screensavermodel \
-            bagetmodel \
-            activityfw \
             tsrc
+symbian:SUBDIRS += activityfw
+symbian:SUBDIRS += hsappkeyhandler
+
 
 CONFIG += ordered
 

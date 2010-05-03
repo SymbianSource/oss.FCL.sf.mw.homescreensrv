@@ -327,7 +327,7 @@ public:
      * @param aIconAttributes an icon attributes.
      * @return Entry count.
      */
-    TInt ExecuteL( CCaInnerEntry::TIconAttributes& aIconAttributes );
+    TInt ExecuteL( CCaInnerIconDescription* aInnerIconDescription );
 
 private:
 

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYSERVERCLIENT_P_H
@@ -27,7 +27,7 @@ class ActivityServerClientPrivate
 
 public:
     ActivityServerClientPrivate();
-  
+
 public: // API used by ActivityClient
     bool addActivity(const QString &activityId, const QVariantHash &parameters);
     bool removeActivity(const QString &activityId);
@@ -37,11 +37,11 @@ public: // API used by ActivityClient
 public: // API  used by ActivityManager
     bool removeActivity(int applicationId, const QString &activityId);
     bool removeApplicationActivities(int applicationId);
-    QList<QVariantHash> activities();    
-    
+    QList<QVariantHash> activities();
+
 public:
-    ActivityServerClient* q_ptr;    
-    
+    ActivityServerClient *q_ptr;
+
 };
 
 #endif // ACTIVITYSERVERCLIENT_P_H

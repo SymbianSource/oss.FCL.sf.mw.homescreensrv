@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -34,13 +34,13 @@ ActivityDatabasePrivate::~ActivityDatabasePrivate()
 {
 }
 
-void ActivityDatabasePrivate::saveActivity(const QString &applicationName, const QString &activityName, const QVariantHash &activityMetadata) 
+void ActivityDatabasePrivate::saveActivity(const QString &applicationName, const QString &activityName, const QVariantHash &activityMetadata)
 {
     QVariantHash request(activityMetadata);
     request.insert(ActivityApplicationKeyword,applicationName);
     request.insert(ActivityActivityKeyword,activityName);
     mClient.saveActivity(request);
-    
+
 }
 
 void ActivityDatabasePrivate::deleteActivity(const QString &applicationName, const QString &activityName)
@@ -65,7 +65,7 @@ QList<QVariantHash> ActivityDatabasePrivate::allActivitiesList()
     return retVal;
 }
 
-QList<QVariantHash> ActivityDatabasePrivate::applicationActivitiesList(const QString & applicationName)
+QList<QVariantHash> ActivityDatabasePrivate::applicationActivitiesList(const QString &applicationName)
 {
     QList<QVariantHash> result;
     QVariantHash request;

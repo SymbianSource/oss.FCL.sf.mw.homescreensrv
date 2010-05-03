@@ -20,7 +20,6 @@ BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
 include(appruntimemodel_api/appruntimemodel_api.pri)
 include(contentstorage_api/contentstorage_api.pri)
 include(hswidgetmodel_api/hswidgetmodel_api.pri)
-include(servicemodel_api/servicemodel_api.pri)
 include(statemodel_api/statemodel_api.pri)
 include(menu_sat_interface_api/menu_sat_interface_api.pri)
 include(homescreen_information_api/homescreen_information_api.pri)

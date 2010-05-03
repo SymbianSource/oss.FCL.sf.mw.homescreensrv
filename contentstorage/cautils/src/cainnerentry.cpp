@@ -30,6 +30,7 @@ CCaInnerEntry::~CCaInnerEntry()
     iDescription.Close();
     iEntryTypeName.Close();
     iAttributes.ResetAndDestroy();
+    delete iIcon;
     }
 
 // ---------------------------------------------------------------------------
@@ -63,13 +64,6 @@ EXPORT_C void CCaInnerEntry::ExternalizeL( RWriteStream& aStream ) const
     {
     aStream.WriteInt32L( iId );
     aStream.WriteInt32L( iUid );
-    aStream.WriteInt32L( iIcon.iId );
-    aStream.WriteUint32L( iIcon.iFileName.Length() );
-    aStream.WriteL( iIcon.iFileName, iIcon.iFileName.Length() );
-    aStream.WriteUint32L( iIcon.iSkinId.Length() );
-    aStream.WriteL( iIcon.iSkinId, iIcon.iSkinId.Length() );
-    aStream.WriteUint32L( iIcon.iApplicationId.Length() );
-    aStream.WriteL( iIcon.iApplicationId, iIcon.iApplicationId.Length() );
     aStream.WriteUint32L( iFlags );
     aStream.WriteUint32L( iRole );
     aStream.WriteUint32L( iText.Length() );
@@ -79,6 +73,7 @@ EXPORT_C void CCaInnerEntry::ExternalizeL( RWriteStream& aStream ) const
     aStream.WriteUint32L( iEntryTypeName.Length() );
     aStream.WriteL( iEntryTypeName, iEntryTypeName.Length() );
     iAttributes.ExternalizeL( aStream );
+    iIcon->ExternalizeL( aStream );
     aStream.CommitL();
     }
 
@@ -90,16 +85,9 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
     {
     iId = aStream.ReadInt32L();
     iUid = aStream.ReadInt32L();
-    iIcon.iId = aStream.ReadInt32L();
-    TUint length = aStream.ReadUint32L();
-    aStream.ReadL( iIcon.iFileName, length );
-    length = aStream.ReadUint32L();
-    aStream.ReadL( iIcon.iSkinId, length );
-    length = aStream.ReadUint32L();
-    aStream.ReadL( iIcon.iApplicationId, length );
     iFlags = aStream.ReadUint32L();
     iRole = aStream.ReadUint32L();
-    length = aStream.ReadUint32L();
+    TUint length = aStream.ReadUint32L();
     iText.Close();
     iText.CreateL( length );
     aStream.ReadL( iText, length );
@@ -112,6 +100,7 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
     iEntryTypeName.CreateL( length );
     aStream.ReadL( iEntryTypeName, length );
     iAttributes.InternalizeL( aStream );
+    iIcon->InternalizeL( aStream );
     }
 
 // ---------------------------------------------------------------------------
@@ -120,7 +109,7 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
 //
 void CCaInnerEntry::ConstructL()
     {
-
+    iIcon = CCaInnerIconDescription::NewL();
     }
 
 // ---------------------------------------------------------------------------
@@ -129,7 +118,6 @@ void CCaInnerEntry::ConstructL()
 //
 CCaInnerEntry::CCaInnerEntry()
     {
-
     }
 
 // ---------------------------------------------------------------------------
@@ -172,7 +160,7 @@ EXPORT_C const RBuf& CCaInnerEntry::GetEntryTypeName() const
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C const CCaInnerEntry::TIconAttributes& CCaInnerEntry::GetIcon() const
+EXPORT_C const CCaInnerIconDescription* CCaInnerEntry::Icon() const
     {
     return iIcon;
     }
@@ -219,7 +207,7 @@ EXPORT_C TInt32 CCaInnerEntry::GetUid() const
 //
 EXPORT_C TInt CCaInnerEntry::GetIconId() const
     {
-    return iIcon.iId;
+    return iIcon->Id();
     }
 //    SETTERS
 
@@ -269,9 +257,9 @@ EXPORT_C void CCaInnerEntry::SetEntryTypeNameL( const TDesC& aTypeName )
 EXPORT_C void CCaInnerEntry::SetIconDataL(
         const TDesC& aFilename, const TDesC& aSkinId, const TDesC& aApplicationId )
     {
-    iIcon.iFileName.Copy( aFilename );
-    iIcon.iSkinId.Copy( aSkinId );
-    iIcon.iApplicationId.Copy(aApplicationId);
+    iIcon->SetFileNameL( aFilename );
+    iIcon->SetSkinIdL( aSkinId );
+    iIcon->SetApplicationIdL( aApplicationId );
     }
 
 // ---------------------------------------------------------------------------
@@ -333,6 +321,16 @@ EXPORT_C TBool CCaInnerEntry::FindAttribute( const TDesC& aKey,
 //
 // ---------------------------------------------------------------------------
 //
+EXPORT_C TBool CCaInnerEntry::FindAttribute( const TDesC& aKey,
+        TPtrC& aAttrVal )
+    {
+    return iAttributes.Find( aKey, aAttrVal );
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 EXPORT_C void CCaInnerEntry::SetUid( TInt32 aUid )
     {
     iUid = aUid;
@@ -344,5 +342,5 @@ EXPORT_C void CCaInnerEntry::SetUid( TInt32 aUid )
 //
 EXPORT_C void CCaInnerEntry::SetIconId( TInt aIconId )
     {
-    iIcon.iId = aIconId;
+    iIcon->SetId( aIconId );
     }

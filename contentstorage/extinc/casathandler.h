@@ -20,7 +20,7 @@
 
 #include <AknIconUtils.h>
 
-#include <rsatsession.h>
+#include <RSatSession.h>
 #include <tsaticoninfo.h>
 #ifdef SIM_ATK_SERVICE_API_V1
 #include <rsatservice.h>// MCL

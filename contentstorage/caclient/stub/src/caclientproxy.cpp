@@ -32,6 +32,7 @@
 #include "canotifier_p.h"
 #include "canotifiers.h"
 
+#include "caclient_defines.h"
 #include "hswidgetregistryservice.h"
 
 const char *DATABASE_CONNECTION_NAME = "CaService";
@@ -47,7 +48,7 @@ static QSqlDatabase dbConnection()
 //
 //----------------------------------------------------------------------------
 CaClientProxy::CaClientProxy() :
-    mWidgetRegistryPath("hsresources/import/widgetregistry")
+    mWidgetRegistryPath("private/20022F35/import/widgetregistry")
 {
 }
 
@@ -278,10 +279,10 @@ ErrorCode CaClientProxy::removeData(const QList<int> &entryIdList)
     qDebug() << "CaClientProxy::removeData" << "entryIdList: "
              << entryIdList;
 
-    QList<CaEntry *> entryList;
+    QList< QSharedPointer<CaEntry> > entryList;
     getData(entryIdList, entryList);
     QList<QList<int> > parentsIds;
-    foreach(CaEntry *entry, entryList) {
+    foreach(QSharedPointer<CaEntry> entry, entryList) {
         QList<int> parentIds;
         GetParentsIds(QList<int>() << entry->id(), parentIds);
         parentsIds.append(parentIds);
@@ -486,7 +487,7 @@ ErrorCode CaClientProxy::removeEntriesFromGroup(int groupId,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
-                                 QList<CaEntry *> &sourceList)
+                                 QList< QSharedPointer<CaEntry> > &sourceList)
 {
     qDebug() << "CaClientProxy::getData" << "entryIdList: "
              << entryIdList;
@@ -507,7 +508,7 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
             qDebug() << query.executedQuery();
             int role =
                 query.value(query.record().indexOf("EN_ROLE")).toInt();
-            CaEntry *entry = new CaEntry((EntryRole) role);
+            QSharedPointer<CaEntry> entry (new CaEntry((EntryRole) role));
             CaObjectAdapter::setId(*entry,
                                    query.value(query.record().indexOf("ENTRY_ID")).toInt());
             entry->setText(query.value(
@@ -571,7 +572,7 @@ ErrorCode CaClientProxy::getData(const QList<int> &entryIdList,
 //
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::getData(const CaQuery &query,
-                                 QList<CaEntry *> &sourceList)
+                                 QList< QSharedPointer<CaEntry> > &sourceList)
 {
     QList<int> entryIdList;
     ErrorCode errorCode = getEntryIds(query, entryIdList);
@@ -709,7 +710,12 @@ ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
 {
     qDebug() << "CaClientProxy::executeCommand" << "entry id: "
              << entry.id() << "command: " << command;
-    return NoErrorCode;
+
+    ErrorCode result = NoErrorCode;
+    if (command != caCmdOpen && command != QString("remove")) {
+        result = UnknownErrorCode;
+    }
+    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -717,7 +723,12 @@ ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
 //----------------------------------------------------------------------------
 ErrorCode CaClientProxy::touch(const CaEntry &entry)
 {
-    const int id = entry.id();
+    int id = entry.id();
+    if (id <= 0) {
+        const int uid = entry.attribute(
+            QString(APPLICATION_UID_ATTRIBUTE_NAME)).toInt();
+        id = getEntryIdByUid(entry, uid);
+    }
 
     qDebug() << "CaClientProxy::touch" << "id: " << id;
 
@@ -742,11 +753,11 @@ ErrorCode CaClientProxy::touch(const CaEntry &entry)
     ErrorCode error = NoErrorCode;
     if (success) {
         query.exec("commit");
-        QList<CaEntry *> entryList;
+        QList< QSharedPointer<CaEntry> > entryList;
         if (getData(QList<int>() << id, entryList) == NoErrorCode) {
             QList<int> parentIds;
             GetParentsIds(QList<int>() << id, parentIds);
-            CaNotifiers::Notify(*entryList[0], UpdateChangeType, parentIds);
+            CaNotifiers::NotifyTouched(id);
         }
     } else {
         query.exec("rollback");
@@ -1017,4 +1028,20 @@ bool CaClientProxy::GetParentsIds(const QList<int> &entryIds,
         GetParentsIds(newParentIds, parentIds);
     }
     return success;
+}
+
+int CaClientProxy::getEntryIdByUid(const CaEntry &entry, const int uid)
+{
+    int result = -1;
+
+    QSqlQuery query(dbConnection());
+    query.prepare("SELECT ENTRY_ID from CA_ENTRY where EN_UID=?");
+    query.addBindValue(uid);
+    bool success = query.exec();
+
+    if (success && (query.first())) {
+        result = query.value(query.record().indexOf("ENTRY_ID")).toInt();
+    }
+
+    return result;
 }

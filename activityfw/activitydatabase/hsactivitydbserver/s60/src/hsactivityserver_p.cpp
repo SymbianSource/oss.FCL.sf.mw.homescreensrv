@@ -22,9 +22,9 @@
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityServerPrivate::HsActivityServerPrivate(HsActivityDbClientInterface& storage)
-:
-    CServer2( EPriorityNormal, ESharableSessions),
+HsActivityServerPrivate::HsActivityServerPrivate(HsActivityDbClientInterface &storage)
+    :
+    CServer2(EPriorityNormal, ESharableSessions),
     mStorage(storage)
 {
 }
@@ -43,19 +43,19 @@ HsActivityServerPrivate::~HsActivityServerPrivate()
 //
 bool HsActivityServerPrivate::start()
 {
-    return ( KErrNone == Start(KActivityServerName) );
+    return (KErrNone == Start(KActivityServerName));
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityServerPrivate::notifyL(int applicationId, 
-                                     const QString& activityName)
+void HsActivityServerPrivate::notifyL(int applicationId,
+                                      const QString &activityName)
 {
-    if(mPendingMessage.end() != mPendingMessage.find(applicationId)) {
-        static_cast<HsActivitySessionPrivate*>(mPendingMessage.find(applicationId).value().Session())
-            ->LaunchActivityL(mPendingMessage.find(applicationId).value(), activityName );
+    if (mPendingMessage.end() != mPendingMessage.find(applicationId)) {
+        static_cast<HsActivitySessionPrivate *>(mPendingMessage.find(applicationId).value().Session())
+        ->LaunchActivityL(mPendingMessage.find(applicationId).value(), activityName);
         mPendingMessage.erase(mPendingMessage.find(applicationId));
     }
 }
@@ -64,10 +64,10 @@ void HsActivityServerPrivate::notifyL(int applicationId,
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityServerPrivate::waitNotification(int applicationId, 
-                                               const RMessage2& msg)
+void HsActivityServerPrivate::waitNotification(int applicationId,
+        const RMessage2 &msg)
 {
-    if(mPendingMessage.find(applicationId) != mPendingMessage.end()) {
+    if (mPendingMessage.find(applicationId) != mPendingMessage.end()) {
         msg.Kill(EBadMessageNumber);
     }
     mPendingMessage.insert(applicationId,msg);
@@ -77,21 +77,20 @@ void HsActivityServerPrivate::waitNotification(int applicationId,
 // -----------------------------------------------------------------------------
 //
 void HsActivityServerPrivate::cancelNotify(int applicationId)
-	{
-	if(mPendingMessage.end() != mPendingMessage.find(applicationId)) 
-		{
-		static_cast<HsActivitySessionPrivate*>(mPendingMessage.find(applicationId).value().Session())
-			->CancelNotify(mPendingMessage.find(applicationId).value());
-	    mPendingMessage.erase(mPendingMessage.find(applicationId));
-		}
-	}
+{
+    if (mPendingMessage.end() != mPendingMessage.find(applicationId)) {
+        static_cast<HsActivitySessionPrivate *>(mPendingMessage.find(applicationId).value().Session())
+            ->CancelNotify(mPendingMessage.find(applicationId).value());
+        mPendingMessage.erase(mPendingMessage.find(applicationId));
+    }
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-CSession2* HsActivityServerPrivate::NewSessionL(const TVersion&,
-                                               const RMessage2&)const
+CSession2 *HsActivityServerPrivate::NewSessionL(const TVersion &,
+                                                const RMessage2&)const
 {
-    return new (ELeave) HsActivitySessionPrivate(mStorage);
+    return new(ELeave) HsActivitySessionPrivate(mStorage);
 }

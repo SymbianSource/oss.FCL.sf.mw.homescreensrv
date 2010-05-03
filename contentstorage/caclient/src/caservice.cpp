@@ -103,15 +103,15 @@ CaService::~CaService()
 
  \endcode
  */
-CaEntry *CaService::getEntry(int entryId) const
+QSharedPointer<CaEntry> CaService::getEntry(int entryId) const
 {
-    QList<CaEntry *> entries = getEntries(QList<int> () << entryId);
+    QList< QSharedPointer<CaEntry> > entries = getEntries(QList<int> () << entryId);
     if (entries.count()) {
         // there should be exactly one entry with specified ID if present
         Q_ASSERT(entries.count() == 1);
         return entries[0];
     } else {
-        return NULL;
+        return QSharedPointer<CaEntry>();
     }
 }
 
@@ -135,7 +135,7 @@ CaEntry *CaService::getEntry(int entryId) const
 
  \endcode
  */
-QList<CaEntry *> CaService::getEntries(const QList<int> &entryIdList) const
+QList< QSharedPointer<CaEntry> > CaService::getEntries(const QList<int> &entryIdList) const
 {
     return m_d->getEntries(entryIdList);
 }
@@ -162,7 +162,7 @@ QList<CaEntry *> CaService::getEntries(const QList<int> &entryIdList) const
 
  \endcode
  */
-QList<CaEntry *> CaService::getEntries(const CaQuery &query) const
+QList< QSharedPointer<CaEntry> > CaService::getEntries(const CaQuery &query) const
 {
     return m_d->getEntries(query);
 }
@@ -216,7 +216,7 @@ QList<int> CaService::getEntryIds(const CaQuery &query) const
  ...
  \endcode
  */
-CaEntry *CaService::createEntry(const CaEntry &entry) const
+QSharedPointer<CaEntry> CaService::createEntry(const CaEntry &entry) const
 {
     return m_d->createEntry(entry);
 }
@@ -284,15 +284,15 @@ bool CaService::removeEntries(const QList<int> &entryIdList) const
  \example
  \code
  ...
- bool result = service->removeEntries( QList<CaEntry *>() << newItem );
+ bool result = service->removeEntries( QList< QSharedPointer<CaEntry> >() << newItem );
  \b Output:
  result == true
  \endcode
  */
-bool CaService::removeEntries(const QList<CaEntry *> &entryList) const
+bool CaService::removeEntries(const QList< QSharedPointer<CaEntry> > &entryList) const
 {
     QList<int> idList;
-    CaEntry *entry(NULL);
+    QSharedPointer<CaEntry> entry;
     foreach(entry, entryList) {
         idList << entry->id();
     }
@@ -449,10 +449,10 @@ bool CaService::insertEntriesIntoGroup(int groupId,
  \endcode
  */
 bool CaService::insertEntriesIntoGroup(const CaEntry &group,
-                                       const QList<CaEntry *> &entryList, int beforeEntryId) const
+                                       const QList< QSharedPointer<CaEntry> > &entryList, int beforeEntryId) const
 {
     QList<int> idList;
-    CaEntry *entry(NULL);
+    QSharedPointer<CaEntry> entry;
     foreach(entry, entryList) {
         idList << entry->id();
     }
@@ -563,10 +563,10 @@ bool CaService::removeEntriesFromGroup(int groupId,
  \endcode
  */
 bool CaService::removeEntriesFromGroup(const CaEntry &group,
-                                       const QList<CaEntry *> &entryList) const
+                                       const QList< QSharedPointer<CaEntry> > &entryList) const
 {
     QList<int> idList;
-    CaEntry *entry(NULL);
+    QSharedPointer<CaEntry> entry;
     foreach(entry, entryList) {
         idList << entry->id();
     }
@@ -681,17 +681,17 @@ bool CaService::appendEntriesToGroup(int groupId,
  itemToAppend.setTypeName( "TypeNameAppend" );
  CaEntry * entryToAppend = service->createEntry( itemToAppend );
  bool result = service->appendEntriesToGroup(
- *newGroup, QList<CaEntry *>() << entryToAppend );
+ *newGroup, QList< QSharedPointer<CaEntry> >() << entryToAppend );
  ...
  \b Output:
  result == true
  \endcode
  */
 bool CaService::appendEntriesToGroup(const CaEntry &group,
-                                     const QList<CaEntry *> &entryList) const
+                                     const QList< QSharedPointer<CaEntry> > &entryList) const
 {
     QList<int> idList;
-    CaEntry *entry(NULL);
+    QSharedPointer<CaEntry> entry;
     foreach(entry, entryList) {
         idList << entry->id();
     }
@@ -797,10 +797,10 @@ bool CaService::prependEntriesToGroup(int groupId,
  \endcode
  */
 bool CaService::prependEntriesToGroup(const CaEntry &group,
-                                      const QList<CaEntry *> &entryList) const
+                                      const QList< QSharedPointer<CaEntry> > &entryList) const
 {
     QList<int> idList;
-    CaEntry *entry(NULL);
+    QSharedPointer<CaEntry> entry;
     foreach(entry, entryList) {
         idList << entry->id();
     }
@@ -831,11 +831,10 @@ bool CaService::executeCommand(int entryId, const QString &command) const
 {
     bool result = false;
     
-    CaEntry *const temporaryEntry = getEntry(entryId);
+    const QSharedPointer<CaEntry> temporaryEntry = getEntry(entryId);
     
-    if (temporaryEntry != NULL) {
+    if (!temporaryEntry.isNull()) {
         result = executeCommand(*temporaryEntry, command);
-        delete temporaryEntry;
     }
     return result;
 }
@@ -957,14 +956,14 @@ CaServicePrivate::~CaServicePrivate()
  \param entryIdList list of entry ids
  \retval list of entries (pointers)
  */
-QList<CaEntry *> CaServicePrivate::getEntries(const QList<int> &entryIdList) const
+QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(const QList<int> &entryIdList) const
 {
     qDebug() << "CaServicePrivate::getEntries"
              << "entryIdList:" << entryIdList;
 
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::getEntries");
 
-    QList<CaEntry *> resultList;
+    QList< QSharedPointer<CaEntry> > resultList;
 
     mErrorCode = mProxy->getData(entryIdList, resultList);
 
@@ -987,9 +986,9 @@ QList<CaEntry *> CaServicePrivate::getEntries(const QList<int> &entryIdList) con
  \param query the query information to select specific entries.
  \param placeholder list of entries for a specific select.
  */
-QList<CaEntry *> CaServicePrivate::getEntries(const CaQuery &query) const
+QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(const CaQuery &query) const
 {
-    QList<CaEntry *> resultList;
+    QList< QSharedPointer<CaEntry> > resultList;
 
     mErrorCode = mProxy->getData(query, resultList);
 
@@ -1019,36 +1018,29 @@ QList<int> CaServicePrivate::getEntryIds(const CaQuery &query) const
  \param query const reference to entry to copy
  \retval pointer to newely created copy
  */
-CaEntry *CaServicePrivate::createEntry(const CaEntry &entry)
+QSharedPointer<CaEntry> CaServicePrivate::createEntry(const CaEntry &entry)
 {
     qDebug() << "CaServicePrivate::createEntry"
              << "entry id:" << entry.id();
 
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::createEntry");
 
-    CaEntry *newEntry = NULL;
     ErrorCode addDataResult = NoErrorCode;
 
-    try {
-        newEntry = new CaEntry(entry.role());
+    QSharedPointer<CaEntry> newEntry (new CaEntry(entry.role())); 
 
-        QScopedPointer<CaEntry> entryClone(new CaEntry(entry));
+    QScopedPointer<CaEntry> entryClone(new CaEntry(entry));
+    const int nonExistingObjectId = 0;
+    CaObjectAdapter::setId(*entryClone, nonExistingObjectId);
 
-        const int nonExistingObjectId = 0;
+    addDataResult =
+        mProxy->addData(*entryClone, *newEntry);
 
-        CaObjectAdapter::setId(*entryClone, nonExistingObjectId);
-
-        addDataResult =
-            mProxy->addData(*entryClone, *newEntry);
-    } catch (const std::bad_alloc &) {
-        addDataResult = OutOfMemoryErrorCode;
-    }
-
+    // return empty pointer if nothing was added
     if (addDataResult != NoErrorCode) {
-        delete newEntry;
-        newEntry = NULL;
+        newEntry.clear();
     }
-
+    
     mErrorCode = addDataResult;
 
     qDebug() << "CaServicePrivate::createEntry mErrorCode:" << mErrorCode;

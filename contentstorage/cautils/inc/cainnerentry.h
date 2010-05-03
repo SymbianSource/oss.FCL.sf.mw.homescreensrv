@@ -21,25 +21,13 @@
 #include <e32base.h>
 
 #include "caentryattribute.h"
+#include "cainnericondescription.h"
 
 /**
  * Class represents Content Arsenal entry
  */
 NONSHARABLE_CLASS( CCaInnerEntry ): public CBase
     {
-public:
-    /*
-     * Struct containing icon attributes
-     */
-    struct TIconAttributes
-        {
-        //TODO: maybe it should be C class with RBuf instead of TFileName
-        TInt iId;
-        TFileName iFileName;
-        TBuf<KMaxFileName> iSkinId;        
-        TBuf<KMaxUidName> iApplicationId;
-        };
-
 public:
 
     /**
@@ -77,7 +65,7 @@ public:
      * @return Entry description.
      */
     IMPORT_C const RBuf& GetDescription() const;
-    
+
     /**
      * Gets entry typename.
      * @return Entry typename.
@@ -85,10 +73,10 @@ public:
     IMPORT_C const RBuf& GetEntryTypeName() const;
 
     /**
-     * Gets icon attributes.
-     * @return Icon atrributes.
+     * Gets icon description.
+     * @return Icon description.
      */
-    IMPORT_C const CCaInnerEntry::TIconAttributes& GetIcon() const;
+    IMPORT_C const CCaInnerIconDescription* Icon() const;
 
     /**
      * Gets entry flags.
@@ -138,7 +126,7 @@ public:
      * @param aText Entry description.
      */
     IMPORT_C void SetDescriptionL( const TDesC& aText );
-    
+
     /**
      * Sets the entry typename.
      * @param aTypeName Entry typename.
@@ -151,8 +139,8 @@ public:
      * @param aSkinId Skin id.
      * @param aApplicationId application id.
      */
-    IMPORT_C void SetIconDataL(             
-            const TDesC& aFilename, const TDesC& aSkinId, const TDesC& aApplicationId );
+    IMPORT_C void SetIconDataL(
+        const TDesC& aFilename, const TDesC& aSkinId, const TDesC& aApplicationId );
 
     /**
      * Adds attribute to entry.
@@ -186,7 +174,15 @@ public:
      * @return ETrue if attribute exists.
      */
     IMPORT_C TBool FindAttribute( const TDesC& aKey, TDes& aAttrVal );
-    
+
+    /**
+     * Verifies if attribute exists, and returns its value for the given key.
+     * @param aKey Attribute key.
+     * @param aAttrVal Attribute value.
+     * @return ETrue if attribute exists.
+     */
+    IMPORT_C TBool FindAttribute( const TDesC& aKey, TPtrC& aAttrVal );
+
     /**
      * Sets the entry uid.
      * @param aUid Entry uid.
@@ -242,7 +238,7 @@ private:
      * Own.
      */
     RBuf iDescription;
-    
+
     /*
      * Entry type.
      * Own.
@@ -250,9 +246,10 @@ private:
     RBuf iEntryTypeName;
 
     /*
+     * Icon.
      * Own.
      */
-    TIconAttributes iIcon;
+    CCaInnerIconDescription* iIcon;
 
     /*
      * Flags.

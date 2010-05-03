@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -24,14 +24,14 @@
 #include "activityclient.h"
 #include "activitymanager.h"
 
-QObject* ActivityServicePlugin::createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session)
+QObject *ActivityServicePlugin::createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session)
 {
     Q_UNUSED(context);
     Q_UNUSED(session);
 
     if (descriptor.interfaceName() == "com.nokia.qt.activities.ActivityClient") {
         return new ActivityClient();
-    } else if (descriptor.interfaceName() == "com.nokia.qt.activities.ActivityManager") {        
+    } else if (descriptor.interfaceName() == "com.nokia.qt.activities.ActivityManager") {
         return new ActivityManager();
     } else {
         return NULL;

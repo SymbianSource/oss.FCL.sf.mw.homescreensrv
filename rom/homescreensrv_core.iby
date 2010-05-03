@@ -22,12 +22,22 @@
 ////////////////////////////////////////
 
 // ---- contentstorage --------------------------------------------
+file=ABI_DIR\BUILD_DIR\caapphandlerplugin.dll     SHARED_LIB_DIR\caapphandlerplugin.dll
+data=\epoc32\data\z\hsresources\plugins\commandhandler\caapphandlerplugin.qtplugin  hsresources\plugins\commandhandler\caapphandlerplugin.qtplugin
+data=\epoc32\data\z\hsresources\plugins\commandhandler\caapphandlerplugin.xml       hsresources\plugins\commandhandler\caapphandlerplugin.xml
+
+file=ABI_DIR\BUILD_DIR\catapphandlerplugin.dll     SHARED_LIB_DIR\catapphandlerplugin.dll
+data=\epoc32\data\z\hsresources\plugins\commandhandler\catapphandlerplugin.qtplugin  hsresources\plugins\commandhandler\catapphandlerplugin.qtplugin
+data=\epoc32\data\z\hsresources\plugins\commandhandler\catapphandlerplugin.xml       hsresources\plugins\commandhandler\catapphandlerplugin.xml
+
+file=ABI_DIR\BUILD_DIR\caurlhandlerplugin.dll     SHARED_LIB_DIR\caurlhandlerplugin.dll
+data=\epoc32\data\z\hsresources\plugins\commandhandler\caurlhandlerplugin.qtplugin  hsresources\plugins\commandhandler\caurlhandlerplugin.qtplugin
+data=\epoc32\data\z\hsresources\plugins\commandhandler\caurlhandlerplugin.xml       hsresources\plugins\commandhandler\caurlhandlerplugin.xml
 
 file=ABI_DIR\BUILD_DIR\caclient.dll     SHARED_LIB_DIR\caclient.dll
 file=ABI_DIR\BUILD_DIR\cautils.dll     SHARED_LIB_DIR\cautils.dll
 file=ABI_DIR\BUILD_DIR\camenu.dll     SHARED_LIB_DIR\camenu.dll
 file=ABI_DIR\BUILD_DIR\camenuserver.exe     PROGRAMS_DIR\camenuserver.exe
-file=ABI_DIR\BUILD_DIR\caextendedmenu.dll     SHARED_LIB_DIR\caextendedmenu.dll
 file=ABI_DIR\BUILD_DIR\casathandler.dll     SHARED_LIB_DIR\casathandler.dll
 file=ABI_DIR\BUILD_DIR\castorage.dll     SHARED_LIB_DIR\castorage.dll
 file=ABI_DIR\BUILD_DIR\MenuInterface.dll     SHARED_LIB_DIR\MenuInterface.dll
@@ -37,13 +47,11 @@ ECOM_PLUGIN( caappscanner.dll, caappscanner.rsc )
 ECOM_PLUGIN( cawidgetscanner.dll, cawidgetscanner.rsc )
 ECOM_PLUGIN( calocalizerscanner.dll, calocalizerscanner.rsc )
 ECOM_PLUGIN( carunningappmonitor.dll, carunningappmonitor.rsc )
+ECOM_PLUGIN( causifscanner.dll, causifscanner.rsc )
 
 data=ZPRIVATE\20022F90\castorage.db          private\20022F90\castorage.db
 
 // ---- appfoundation --------------------------------------------
-
-// -------- servicemodel
-file=ABI_DIR\BUILD_DIR\hsservicemodel.dll     SHARED_LIB_DIR\hsservicemodel.dll
 
 // -------- statemodel
 file=ABI_DIR\BUILD_DIR\statemodel.dll       SHARED_LIB_DIR\statemodel.dll
@@ -56,9 +64,6 @@ file=ABI_DIR\BUILD_DIR\hswidgetmodel.dll    SHARED_LIB_DIR\hswidgetmodel.dll
 
 // ---- screensavermodel --------------------------------------------
 file=ABI_DIR\BUILD_DIR\screensavermodel.dll    SHARED_LIB_DIR\screensavermodel.dll
-
-// ---- bagetmodel --------------------------------------------
-file=ABI_DIR\BUILD_DIR\bagetmodel.dll    SHARED_LIB_DIR\bagetmodel.dll
 
 // ---- homescreen_information_api --------------------------------------------
 data=\epoc32\data\c\resource\qt\crml\homescreeninformation.qcrml   resource\qt\crml\homescreeninformation.qcrml

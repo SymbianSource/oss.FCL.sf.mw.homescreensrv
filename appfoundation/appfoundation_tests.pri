@@ -14,7 +14,5 @@
 # Description:
 #
 
-SUBDIRS += ./appruntimemodel/tsrc \
-           ./servicemodel/tsrc \
+SUBDIRS += ./appruntimemodel/tsrc \           
            ./statemodel/tsrc
-

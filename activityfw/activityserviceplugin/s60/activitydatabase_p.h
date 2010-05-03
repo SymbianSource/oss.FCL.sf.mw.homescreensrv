@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYDATABASE_P_H
@@ -20,24 +20,25 @@
 #include <QVariant>
 #include <QList>
 #include <hsactivitydbclient.h>
-class ActivityDatabasePrivate {
+class ActivityDatabasePrivate
+{
 
 public:
     ActivityDatabasePrivate();
     ~ActivityDatabasePrivate();
-    
+
 public:
-    void saveActivity(const QString &applicationName, const QString &activityName, const QVariantHash &activityMetadata);    
+    void saveActivity(const QString &applicationName, const QString &activityName, const QVariantHash &activityMetadata);
     void deleteActivity(const QString &applicationName, const QString &activityName);
-    void deleteApplicationActivities(const QString &applicationName);    
+    void deleteApplicationActivities(const QString &applicationName);
     QList<QVariantHash> allActivitiesList();
-    QList<QVariantHash> applicationActivitiesList(const QString &applicationName);    
+    QList<QVariantHash> applicationActivitiesList(const QString &applicationName);
     QString requestedActivityName(const QString &applicationName);
     void setActivityRequestFlag(const QString &applicationName, const QString &activityName);
     void clearActivityRequestFlag(const QString &applicationName, const QString &activityName);
-    
+
 private:
-	HsActivityDbClient mClient;
+    HsActivityDbClient mClient;
 };
 
 #endif // ACTIVITYDATABASE_P_H

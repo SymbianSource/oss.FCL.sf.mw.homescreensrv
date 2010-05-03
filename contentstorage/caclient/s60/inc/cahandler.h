@@ -21,16 +21,17 @@
 #include <cadefs.h>
 #include <caclient_global.h>
 
-class CaEntry;
+class CCaInnerEntry;
 class QString;
 
-class CaHandler: public QObject
+class CaHandler
 {
-    Q_OBJECT
-    
 public:
-    virtual int execute(const CaEntry &entry,
+    virtual ~CaHandler() {}
+    virtual int execute(CCaInnerEntry &innerEntry,
                         const QString &commandName) = 0;
 };
+
+Q_DECLARE_INTERFACE(CaHandler, "com.nokia.homescreen.ICommandHandler")
 
 #endif

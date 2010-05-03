@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYSERVICEPLUGIN_H
@@ -26,10 +26,10 @@ class ActivityServicePlugin : public QObject, public QServicePluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(QtMobility::QServicePluginInterface)
-    
+
 public:
-    QObject* createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session);
-    
+    QObject *createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session);
+
 };
 
 #endif //ACTIVITYSERVICEPLUGIN_H

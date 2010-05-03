@@ -22,6 +22,7 @@
 
 // CLASS DECLARATION
 #include <QList>
+#include <QSharedPointer>
 
 #include <cadefs.h>
 
@@ -83,7 +84,7 @@ public:
      */
     static void convertL(
         const RPointerArray<CCaInnerEntry>& fromEntriesArray,
-        QList<CaEntry *>& toEntriesArray);
+        QList< QSharedPointer<CaEntry> > & toEntriesArray);
 
     /**
      * Converts QList of ids to RArray of TInts.
@@ -106,13 +107,6 @@ public:
      */
     static ErrorCode convertErrorCode(
         TInt internalErrorCode);
-
-    /**
-     * Creates icon.
-     * @param entry entry.
-     * @return HbIcon.
-     */
-    static HbIcon makeIcon(const CaEntry &entry, const QSize &size);
 
     /**
      * Converts notifier type to inner notifier type.
@@ -149,19 +143,6 @@ public:
                       int id);
 
 private:
-    /**
-     * Creates icon. Leaving version.
-     * @param entry entry.
-     * @return HbIcon.
-     */
-    static HbIcon makeIconL(const CaEntry &entry, const QSize &size);
-
-    /**
-     * Make bitmap copy, used to get rid of compression for extended bitmap
-     * @param input input bitmap.
-     * @return copied bitmap.
-     */
-    static CFbsBitmap *copyBitmapLC(CFbsBitmap *input);
 
     /**
      * Maps a given sort subject and the order to be applied

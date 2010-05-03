@@ -174,8 +174,6 @@ void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
 //  
 void CCaWidgetStorageHandler::RemoveWidgetsL()
     {
-    RArray<TInt> widgetsToRemove;
-    CleanupClosePushL( widgetsToRemove );
     for( TInt i = 0; i < iWidgets.Count(); i++ )
         {
         if( iUpdatedIndexes.Find( i ) == KErrNotFound )
@@ -188,15 +186,10 @@ void CCaWidgetStorageHandler::RemoveWidgetsL()
                 }
             else
                 {
-                widgetsToRemove.AppendL( iWidgets[i]->GetEntryId() );
+                SetMissingFlagL( iWidgets[i] );
                 }
             }
         }
-    if( widgetsToRemove.Count() > 0 )
-        {
-        iStorage->RemoveL( widgetsToRemove );
-        }
-    CleanupStack::PopAndDestroy( &widgetsToRemove );
     }
 
 // ----------------------------------------------------------------------------

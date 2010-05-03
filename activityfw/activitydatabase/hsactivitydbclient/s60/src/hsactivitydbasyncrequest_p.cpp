@@ -22,11 +22,11 @@
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityDbAsyncRequestPrivate* 
-    HsActivityDbAsyncRequestPrivate::NewL(HsActivityDbAsyncRequestObserver& observer,
-                                          HsActivityDbClientPrivate& session)
+HsActivityDbAsyncRequestPrivate*
+HsActivityDbAsyncRequestPrivate::NewL(HsActivityDbAsyncRequestObserver &observer,
+                                      HsActivityDbClientPrivate &session)
 {
-    HsActivityDbAsyncRequestPrivate* self = 
+    HsActivityDbAsyncRequestPrivate *self =
         HsActivityDbAsyncRequestPrivate::NewLC(observer, session);
     CleanupStack::Pop(self);
     return self;
@@ -35,12 +35,12 @@ HsActivityDbAsyncRequestPrivate*
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityDbAsyncRequestPrivate* 
-    HsActivityDbAsyncRequestPrivate::NewLC(HsActivityDbAsyncRequestObserver& observer,
-                                           HsActivityDbClientPrivate& session)
+HsActivityDbAsyncRequestPrivate*
+HsActivityDbAsyncRequestPrivate::NewLC(HsActivityDbAsyncRequestObserver &observer,
+                                       HsActivityDbClientPrivate &session)
 {
-    HsActivityDbAsyncRequestPrivate* self = 
-        new (ELeave)HsActivityDbAsyncRequestPrivate(observer, session);
+    HsActivityDbAsyncRequestPrivate *self =
+        new(ELeave)HsActivityDbAsyncRequestPrivate(observer, session);
     CleanupStack::PushL(self);
     self->mDataBuf.CreateL(64);
     return self;
@@ -51,7 +51,7 @@ HsActivityDbAsyncRequestPrivate*
 //
 HsActivityDbAsyncRequestPrivate::HsActivityDbAsyncRequestPrivate(HsActivityDbAsyncRequestObserver &observer,
                                                                  HsActivityDbClientPrivate &session)
-:
+    :
     CActive(EPriorityStandard),
     mObserver(observer),
     mSession(session),
@@ -77,8 +77,8 @@ HsActivityDbAsyncRequestPrivate::~HsActivityDbAsyncRequestPrivate()
 //
 void HsActivityDbAsyncRequestPrivate::DoCancel()
 {
-    if(IsActive()) {
-    mSession.cancelWaitActivity();
+    if (IsActive()) {
+        mSession.cancelWaitActivity();
     }
 }
 
@@ -92,12 +92,12 @@ void HsActivityDbAsyncRequestPrivate::RunL()
     CleanupClosePushL(buff);
     QString data;
     int requestResult(iStatus.Int());
-    if(KErrNone == requestResult) {
-        if(0 < mDataSize()) {
+    if (KErrNone == requestResult) {
+        if (0 < mDataSize()) {
             buff.CreateL(mDataSize());
         }
         mSession.getData(buff);
-        data = QString::fromAscii(reinterpret_cast<const char*>(buff.Ptr()), 
+        data = QString::fromAscii(reinterpret_cast<const char *>(buff.Ptr()),
                                   buff.Length());
         buff.Close();
     }
@@ -109,7 +109,7 @@ void HsActivityDbAsyncRequestPrivate::RunL()
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityDbAsyncRequestPrivate::waitActivity(const QVariantHash& condition)
+void HsActivityDbAsyncRequestPrivate::waitActivity(const QVariantHash &condition)
 {
     mRequestType = WaitActivity;
     iStatus = KRequestPending;

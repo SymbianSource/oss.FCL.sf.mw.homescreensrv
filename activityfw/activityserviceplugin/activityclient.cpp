@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -54,4 +54,9 @@ QVariant ActivityClient::activityData(const QString &activityId) const
 bool ActivityClient::waitActivity()
 {
     return d_ptr->waitActivity();
+}
+
+QVariantHash ActivityClient::parseCommandLine(const QStringList &commandLineParams) const
+{
+    return d_ptr->parseCommandLine(commandLineParams);
 }

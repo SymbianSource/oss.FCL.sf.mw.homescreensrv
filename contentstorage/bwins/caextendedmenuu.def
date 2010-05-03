@@ -1,3 +1,0 @@
-EXPORTS
-	?GetItemIcon@CaMenuIconUtility@@SAPAVCAknIcon@@ABVCCaInnerEntry@@@Z @ 1 NONAME ; class CAknIcon * CaMenuIconUtility::GetItemIcon(class CCaInnerEntry const &)
-

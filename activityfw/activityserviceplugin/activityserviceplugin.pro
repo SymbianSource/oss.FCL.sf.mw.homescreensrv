@@ -42,8 +42,11 @@ symbian {
     
     HEADERS += ./s60/applicationlauncher_p.h
 
-    LIBS += -lhsactivitydbclient \
-            -lxqutils \
+    LIBS += -lapparc \
+            -lapgrfx \
+            -lcone \
+            -lhsactivitydbclient \
+            -lxqutils
  
 }
 
@@ -58,6 +61,8 @@ symbian {
     load(data_caging_paths) 
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.CAPABILITY = ALL -TCB
+    TARGET.UID3 = 0x200267B2
+
 
     plugin.sources = activityserviceplugin.dll
     plugin.path = $$QT_PLUGINS_BASE_DIR     

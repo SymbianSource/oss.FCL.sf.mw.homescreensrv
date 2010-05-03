@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 
@@ -26,9 +26,8 @@ int main(int argc, char *argv[])
 
     QServiceManager manager;
     bool ok = manager.addService(":/activityserviceplugin.xml");
-    if ( !ok )
-    {
-    int err = manager.error();    
-    qFatal("%d ini", err);
+    if (!ok) {
+        int err = manager.error();
+        qFatal("%d ini", err);
     }
 }

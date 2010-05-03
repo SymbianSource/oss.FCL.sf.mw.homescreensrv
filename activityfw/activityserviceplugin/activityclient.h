@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef ACTIVITYCLIENT_H
@@ -26,7 +26,7 @@ class ActivityClientPrivate;
 class ActivityClient : public QObject
 {
 
-Q_OBJECT
+    Q_OBJECT
 
 public:
     ActivityClient(QObject *parent = 0);
@@ -39,14 +39,15 @@ public slots:
     QList<QVariantHash> activities() const;
     QVariant activityData(const QString &activityId) const;
     bool waitActivity();
+    QVariantHash parseCommandLine(const QStringList &commandLineParams) const;
 
 signals:
     void activityRequested(const QString &activityId);
-    
+
 private:
     ActivityClientPrivate *d_ptr;
     friend class ActivityClientPrivate;
-    
+
 };
 
 #endif // ACTIVITYCLIENT_H

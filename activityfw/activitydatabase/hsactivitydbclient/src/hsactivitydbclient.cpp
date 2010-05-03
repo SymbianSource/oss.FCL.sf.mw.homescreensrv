@@ -21,8 +21,8 @@
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityDbClient::HsActivityDbClient(QObject* obj)
-:
+HsActivityDbClient::HsActivityDbClient(QObject *obj)
+    :
     QObject(obj),
     d_ptr(0)
 {
@@ -51,16 +51,16 @@ int HsActivityDbClient::connect()
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityDbClient::asyncRequestCompleated(int result, 
+void HsActivityDbClient::asyncRequestCompleated(int result,
                                                 int requestType, 
                                                 const QString& data)
 {
-    switch(requestType){
-    case WaitActivity:
-        if( KErrNone == result ) {
-            emit activityRequested(data);
-        }
-        break;
+    switch (requestType) {
+        case WaitActivity:
+            if (KErrNone == result) {
+                emit activityRequested(data);
+            }
+            break;
     }
 }
 
@@ -90,7 +90,7 @@ int HsActivityDbClient::removeActivity(const QVariantHash &activity)
 {
     return d_ptr->removeActivity(activity);
 }
-    
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -113,8 +113,8 @@ int HsActivityDbClient::activities(QList<QVariantHash>& result)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityDbClient::applicationActivities(QList<QVariantHash> & result, 
-                                              const QVariantHash & conditions)
+int HsActivityDbClient::applicationActivities(QList<QVariantHash> & result,
+        const QVariantHash &conditions)
 {
     return d_ptr->applicationActivities(result, conditions);
 }
@@ -135,4 +135,13 @@ int HsActivityDbClient::waitActivity(const QVariantHash &activity)
 int HsActivityDbClient::launchActivity(const QVariantHash &activity)
 {
     return d_ptr->launchActivity(activity);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClient::getThumbnail(QPixmap &dst, const QString & src)
+{
+    return d_ptr->getThumbnail(dst, src);
 }

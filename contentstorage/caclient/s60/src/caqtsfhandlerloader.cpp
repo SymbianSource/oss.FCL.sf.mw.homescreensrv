@@ -15,6 +15,8 @@
  *
  */
 
+#include <QApplication>
+#include <QDir>
 #include <QMap>
 #include <QScopedPointer>
 #include <QString>
@@ -25,16 +27,12 @@
 #include "cahandler.h"
 #include "caqtsfhandlerloader.h"
 #include "caclient_defines.h"
-#include "caapphandler.h"
-#include "caurlhandler.h"
-#include "catapphandler.h" 
-#include "cas60handleradapter.h"
 
 QTM_USE_NAMESPACE
 
 /*!
     \class CaQtSfHandlerLoader
-    \ingroup 
+    \ingroup
     \brief Loads handlers implementation
 
     The purpose of the class is to find Qt SF plugins implementing command handlers.
@@ -44,10 +42,44 @@ QTM_USE_NAMESPACE
 */
 
 /*!
-    Loads handler implementations appropriate for the requested entry type name and command.
+    Constructor.
+*/
+CaQtSfHandlerLoader::CaQtSfHandlerLoader()
+{
+    registerPlugins();
+}
+
+/*!
+    Load plugins for command handling.
+*/
+void CaQtSfHandlerLoader::registerPlugins() const
+{
+    const QString pluginPath("hsresources/plugins/commandhandler");
+    const QFileInfoList drives = QDir::drives();
     
+    foreach(QFileInfo drive, drives) {
+        const QString driveLetter = drive.absolutePath();
+        const QString pluginAbsolutePath = driveLetter + pluginPath;
+        const QDir pluginDir(pluginAbsolutePath);
+        if(QDir(pluginDir).exists()) {
+            const QFileInfoList fileInfos = 
+                pluginDir.entryInfoList(QStringList("*.xml"));
+            
+            QApplication::addLibraryPath(pluginAbsolutePath);
+            
+            QServiceManager serviceManager;
+            foreach(QFileInfo fileInfo, fileInfos) {
+                serviceManager.addService(fileInfo.absoluteFilePath());
+            }
+        }
+    }
+}
+
+/*!
+    Loads handler implementations appropriate for the requested entry type name and command.
+
     The caller takes ownership of the returned pointer.
-        
+
     \param entryTypeName Entry type name.
     \param commandName Name of the command to be handled.
     \return A pointer to handler serving the entry type and command if found, NULL otherwise.
@@ -57,18 +89,26 @@ CaHandler *CaQtSfHandlerLoader::loadHandler(const QString &entryTypeName,
 {
     Q_UNUSED(commandName);
 
-    CaHandler *implementation(0);
-
-    if (entryTypeName == APPLICATION_ENTRY_TYPE_NAME
-        || entryTypeName == WIDGET_ENTRY_TYPE_NAME) {
-        implementation = new CaS60HandlerAdapter<CCaAppHandler>;
-    } else if (entryTypeName == URL_ENTRY_TYPE_NAME) {
-        implementation = new CaS60HandlerAdapter<CCaUrlHandler>;
-    } else if (entryTypeName == TEMPLATED_APPLICATION_ENTRY_TYPE_NAME) {
-        implementation = new CaTappHandler;
+    QString typeName(entryTypeName);
+    if (entryTypeName == WIDGET_ENTRY_TYPE_NAME
+        || entryTypeName == PACKAGE_ENTRY_TYPE_NAME) {
+        typeName = QString(APPLICATION_ENTRY_TYPE_NAME);
     }
 
-    return implementation;
+    QServiceManager serviceManager;
+    QServiceFilter serviceFilter("com.nokia.homescreen.ICommandHandler");
+    serviceFilter.setCustomAttribute("entryTypeName", typeName);
+    QList<QServiceInterfaceDescriptor> serviceInterfaceDescriptorList =
+        serviceManager.findInterfaces(serviceFilter);
+    CaHandler *interfaceHandler = NULL;
+    if (!serviceInterfaceDescriptorList.isEmpty()) {
+        QServiceInterfaceDescriptor serviceInterfaceDescriptor =
+            serviceInterfaceDescriptorList[0];
+         QObject *handler =
+            serviceManager.loadInterface(serviceInterfaceDescriptor);
+         interfaceHandler = qobject_cast<CaHandler *>(handler);
+    }
+    return interfaceHandler;
 }
 
 

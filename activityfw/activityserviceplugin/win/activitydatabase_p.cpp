@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #include "activitydatabase_p.h"
@@ -38,14 +38,14 @@ ActivityDatabasePrivate::ActivityDatabasePrivate()
     QSqlDatabase database;
     if (QSqlDatabase::contains(KConnectionName)) {
         database = QSqlDatabase::database(KConnectionName);
-    } else {   
+    } else {
         database = QSqlDatabase::addDatabase("QSQLITE", KConnectionName);
-        database.setDatabaseName(databaseFile);    
+        database.setDatabaseName(databaseFile);
         if (!database.open()) {
             qFatal(qPrintable(database.lastError().text()));
         }
-    }    
-    
+    }
+
     if (!checkTables()) {
         recreateTables();
     }
@@ -56,30 +56,30 @@ ActivityDatabasePrivate::~ActivityDatabasePrivate()
     QSqlDatabase::database(KConnectionName).close();
 }
 
-void ActivityDatabasePrivate::saveActivity(const QString &applicationName, const QString &activityName, const QVariantHash &activityMetadata) 
+void ActivityDatabasePrivate::saveActivity(const QString &applicationName, const QString &activityName, const QVariantHash &activityMetadata)
 {
     if (applicationName.isEmpty() || activityName.isEmpty() || activityMetadata.value("screenshot").isNull()) {
         qWarning("Activity entry is invalid, aborting save");
         return;
     }
-    
+
     QVariantHash activityData(activityMetadata);
     activityData.insert(ActivityApplicationKeyword, applicationName);
-    activityData.insert(ActivityActivityKeyword, activityName);    
-    
+    activityData.insert(ActivityActivityKeyword, activityName);
+
     // stream whole entry to bytearray
     QByteArray streamedData;
     {
         QDataStream stream(&streamedData, QIODevice::WriteOnly);
         stream << activityData;
-    }  
+    }
 
     QSqlDatabase database = QSqlDatabase::database(KConnectionName);
-    
+
     if (!database.transaction()) {
         qFatal(qPrintable(database.lastError().text()));
     }
-        
+
     // update or insert data
     {
         QSqlQuery query(database);
@@ -106,13 +106,13 @@ void ActivityDatabasePrivate::saveActivity(const QString &applicationName, const
             query.bindValue(":Data", streamedData);
             if (!query.exec()) {
                 qFatal(qPrintable(query.lastError().text()));
-            }        
+            }
         }
     }
-    
+
     if (!database.commit()) {
         qFatal(qPrintable(database.lastError().text()));
-    } 
+    }
 }
 
 void ActivityDatabasePrivate::deleteActivity(const QString &applicationName, const QString &activityName)
@@ -143,13 +143,13 @@ QList<QVariantHash> ActivityDatabasePrivate::applicationActivitiesList(const QSt
     return activitiesList(QString("SELECT Data FROM Activities WHERE ApplicationName = '%1'").arg(applicationName));
 }
 
-QList<QVariantHash> ActivityDatabasePrivate::activitiesList(const QString& sqlCommand)
-{   
+QList<QVariantHash> ActivityDatabasePrivate::activitiesList(const QString &sqlCommand)
+{
     QSqlQuery query(QSqlDatabase::database(KConnectionName));
     if (!query.exec(sqlCommand)) {
         qFatal(qPrintable(query.lastError().text()));
     }
-    
+
     QList<QVariantHash> result;
     while (query.next()) {
         QVariantHash activityEntry;
@@ -159,7 +159,7 @@ QList<QVariantHash> ActivityDatabasePrivate::activitiesList(const QString& sqlCo
             stream >> activityEntry;
         }
         result.append(activityEntry);
-    }   
+    }
     return result;
 }
 
@@ -169,23 +169,23 @@ QString ActivityDatabasePrivate::requestedActivityName(const QString &applicatio
     if (!query.exec(QString("SELECT ActivityName FROM Activities WHERE ApplicationName = '%1' AND RequestFlag").arg(applicationName))) {
         qFatal(qPrintable(query.lastError().text()));
     }
-    
+
     QString result;
     if (query.next()) {
         result = query.value(0).toString();
-    }   
+    }
     return result;
 }
 
 void ActivityDatabasePrivate::setActivityRequestFlag(const QString &applicationName, const QString &activityName)
 {
     QSqlQuery query(QSqlDatabase::database(KConnectionName));
-    
+
     // clear old requests for given application
     if (!query.exec(QString("UPDATE Activities SET RequestFlag=0 WHERE ApplicationName = '%1'").arg(applicationName))) {
         qFatal(qPrintable(query.lastError().text()));
     }
-    
+
     // set new request
     if (!query.exec(QString("UPDATE Activities SET RequestFlag=1 WHERE ApplicationName = '%1' AND ActivityName = '%2'").arg(applicationName).arg(activityName))) {
         qFatal(qPrintable(query.lastError().text()));
@@ -206,17 +206,17 @@ bool ActivityDatabasePrivate::checkTables()
 {
     QStringList expectedTables("Activities");
     QStringList actualTables = QSqlDatabase::database(KConnectionName).tables();
-    return (expectedTables == actualTables); 
+    return (expectedTables == actualTables);
 }
 
 void ActivityDatabasePrivate::recreateTables()
 {
     QSqlDatabase database = QSqlDatabase::database(KConnectionName);
-    
+
     if (!database.transaction()) {
         qFatal(qPrintable(database.lastError().text()));
     }
-    
+
     // drop any existing tables
     {
         QSqlQuery dropQuery(database);
@@ -237,13 +237,13 @@ void ActivityDatabasePrivate::recreateTables()
             "RequestFlag BOOL NOT NULL DEFAULT FALSE,"
             "Data BLOB NOT NULL,"
             "PRIMARY KEY(ActivityName, ApplicationName))");
-        
+
         if (!createQuery.exec(statement)) {
             qFatal(qPrintable(createQuery.lastError().text()));
         }
     }
-    
+
     if (!database.commit()) {
         qFatal(qPrintable(database.lastError().text()));
-    }  
+    }
 }

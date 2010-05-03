@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #include "hsserializer.h"
@@ -20,15 +20,15 @@
 //
 // -----------------------------------------------------------------------------
 //
-RBuf8& operator <<(RBuf8& dst, const QVariantHash& src)
+RBuf8 &operator <<(RBuf8 &dst, const QPixmap &src)
 {
     QByteArray buffer;
     QDataStream stream(&buffer, QIODevice::WriteOnly);
-    
+
     QT_TRYCATCH_LEAVING(stream << src);
     const int dataLength(buffer.length());
-    const unsigned char* dataPtr(reinterpret_cast<const unsigned char*>(buffer.constData()));
-    if( dst.MaxLength() < dataLength ) {
+    const unsigned char *dataPtr(reinterpret_cast<const unsigned char *>(buffer.constData()));
+    if (dst.MaxLength() < dataLength) {
         dst.ReAllocL(dataLength);
     }
     dst.Copy(dataPtr, dataLength);
@@ -39,11 +39,11 @@ RBuf8& operator <<(RBuf8& dst, const QVariantHash& src)
 //
 // -----------------------------------------------------------------------------
 //
-QVariantHash& operator <<(QVariantHash& dst, const TDesC8& src)
+QPixmap &operator <<(QPixmap &dst, const TDesC8 &src)
 {
-    QByteArray buffer( QByteArray::fromRawData(reinterpret_cast<const char*>(src.Ptr()), 
-                                               src.Length()) );
-    
+    QByteArray buffer(QByteArray::fromRawData(reinterpret_cast<const char *>(src.Ptr()),
+                                              src.Length()) );
+
     QDataStream stream(&buffer, QIODevice::ReadOnly);
     QT_TRYCATCH_LEAVING(stream >> dst);
     return dst;
@@ -53,17 +53,18 @@ QVariantHash& operator <<(QVariantHash& dst, const TDesC8& src)
 //
 // -----------------------------------------------------------------------------
 //
-RBuf8& operator <<(RBuf8& dst, const QList<QVariantHash>& src)
+RBuf8 &operator <<(RBuf8 &dst, const QVariantHash &src)
 {
     QByteArray buffer;
     QDataStream stream(&buffer, QIODevice::WriteOnly);
-    
+
     QT_TRYCATCH_LEAVING(stream << src);
-    
-    if( dst.MaxLength() < buffer.length() ) {
-        dst.ReAllocL(buffer.length());
+    const int dataLength(buffer.length());
+    const unsigned char *dataPtr(reinterpret_cast<const unsigned char *>(buffer.constData()));
+    if (dst.MaxLength() < dataLength) {
+        dst.ReAllocL(dataLength);
     }
-    dst.Copy(reinterpret_cast<const TUint8*>(buffer.data()), buffer.length());
+    dst.Copy(dataPtr, dataLength);
     return dst;
 }
 
@@ -71,11 +72,43 @@ RBuf8& operator <<(RBuf8& dst, const QList<QVariantHash>& src)
 //
 // -----------------------------------------------------------------------------
 //
-QList<QVariantHash>& operator <<(QList<QVariantHash>& dst, const TDesC8& src)
+QVariantHash &operator <<(QVariantHash &dst, const TDesC8 &src)
 {
-    QByteArray buffer(QByteArray::fromRawData(reinterpret_cast<const char*>(src.Ptr()), 
+    QByteArray buffer(QByteArray::fromRawData(reinterpret_cast<const char *>(src.Ptr()),
+                                               src.Length()) );
+
+    QDataStream stream(&buffer, QIODevice::ReadOnly);
+    QT_TRYCATCH_LEAVING(stream >> dst);
+    return dst;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+RBuf8 &operator <<(RBuf8 &dst, const QList<QVariantHash>& src)
+{
+    QByteArray buffer;
+    QDataStream stream(&buffer, QIODevice::WriteOnly);
+
+    QT_TRYCATCH_LEAVING(stream << src);
+
+    if (dst.MaxLength() < buffer.length()) {
+        dst.ReAllocL(buffer.length());
+    }
+    dst.Copy(reinterpret_cast<const TUint8 *>(buffer.data()), buffer.length());
+    return dst;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+QList<QVariantHash>& operator <<(QList<QVariantHash>& dst, const TDesC8 &src)
+{
+    QByteArray buffer(QByteArray::fromRawData(reinterpret_cast<const char *>(src.Ptr()),
                                               src.Length()));
-    
+
     QDataStream stream(&buffer, QIODevice::ReadOnly);
     QT_TRYCATCH_LEAVING(stream >> dst);
     return dst;

@@ -167,6 +167,15 @@ public:
     static void CreateCustomSortQueryL( const RArray<TInt>& aEntryIds,
             RPointerArray<CCaSqlQuery>& aSqlQuery,
             RSqlDatabase& aSqlDb );
+
+    /**
+     * Creates an sql query for finding an icon.
+     *
+     * @param aEntry The entry which has icon description.
+     * @param aQuery The result query.
+     */
+    static void CreateFindIconQueryL( CCaInnerEntry* aEntry,
+            CCaSqlQuery* aQuery);
     
 private:
 
@@ -220,7 +229,7 @@ private:
      */
     static void CreateUpdateQueryEntryL( const CCaInnerEntry* aEntry,
             CCaSqlQuery* aQuery );
-
+    
     /**
      * Creates an sql query to get a list of entries by the given ids.
      *

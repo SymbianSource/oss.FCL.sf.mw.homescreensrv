@@ -24,6 +24,7 @@
 #include "caobjectadapter.h"
 #include "caiconcache.h"
 #include "caclienttest_global.h"
+#include "camenuiconutility.h"
 
 
 // ======== MEMBER FUNCTIONS ========
@@ -473,7 +474,7 @@ EntryRole CaEntry::role() const
 CaEntryPrivate::CaEntryPrivate(CaEntry *entryPublic) :
     m_q(entryPublic), mId(0), mText(), mDescription(), mIconDescription(),
     mFlags(RemovableEntryFlag|VisibleEntryFlag),mEntryTypeName(),
-    mAttributes()
+    mAttributes(), mEntryRole(ItemEntryRole)
 {
 }
 /*!
@@ -629,7 +630,7 @@ void CaEntryPrivate::setAttribute(const QString &name, const QString &value)
  */
 HbIcon CaEntryPrivate::makeIcon(const QSize &size) const
 {
-    return CaObjectAdapter::makeIcon(*m_q, size);
+    return CaMenuIconUtility::getEntryIcon(*m_q, size);
 }
 
 /*!

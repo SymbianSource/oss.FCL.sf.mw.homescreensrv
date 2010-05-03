@@ -29,24 +29,24 @@ public:
      * Constructor
      */
     HsActivityStorage();
-    
+
     /**
      * Destructor
      */
     ~HsActivityStorage();
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::addActivity(const QVariantHash&)
      */
     int addActivity(const QVariantHash &activity);
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash&)
      */
     int updateActivity(const QVariantHash &activity);
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::removeActivity(const QVariantHash &)
@@ -58,26 +58,26 @@ public:
      * @see int HsActivityDbClientInterface::removeApplicationActivities(const QVariantHash &)
     */
     int removeApplicationActivities(const QVariantHash &activity);
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::activities(QList<QVariantHash> &)
      */
     int activities(QList<QVariantHash>& result);
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::applicationActivities(QList<QVariantHash> &, const QVariantHash &)
      */
-    int applicationActivities(QList<QVariantHash>& result, 
+    int applicationActivities(QList<QVariantHash>& result,
                               const QVariantHash &activity);
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::waitActivity(const QVariantHash &)
      */
     int waitActivity(const QVariantHash &activity);
-    
+
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::launchActivity(const QVariantHash &)
@@ -88,6 +88,6 @@ private:
      * Private storage implementation
      * Own.
      */
-    HsActivityStoragePrivate* d_ptr;
+    HsActivityStoragePrivate *d_ptr;
 };
 #endif //HSACTIVITYSTORAGE_H

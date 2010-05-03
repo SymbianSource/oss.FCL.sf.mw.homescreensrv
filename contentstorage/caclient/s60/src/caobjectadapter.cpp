@@ -34,64 +34,10 @@
 #include "caentry_p.h"
 #include "cainnerquery.h"
 #include "caquery.h"
-#include "camenuiconutility.h"
+
 #include "canotifierfilter.h"
 #include "cainnernotifierfilter.h"
 #include "caclient_defines.h"
-
-static  QImage::Format TDisplayMode2Format(TDisplayMode mode)
-{
-    QImage::Format format;
-    switch (mode) {
-    case EGray2:
-        format = QImage::Format_MonoLSB;
-        break;
-    case EColor256:
-    case EGray256:
-        format = QImage::Format_Indexed8;
-        break;
-    case EColor4K:
-        format = QImage::Format_RGB444;
-        break;
-    case EColor64K:
-        format = QImage::Format_RGB16;
-        break;
-    case EColor16M:
-        format = QImage::Format_RGB888;
-        break;
-    case EColor16MU:
-        format = QImage::Format_RGB32;
-        break;
-    case EColor16MA:
-        format = QImage::Format_ARGB32;
-        break;
-    case EColor16MAP:
-        format = QImage::Format_ARGB32_Premultiplied;
-        break;
-    default:
-        format = QImage::Format_Invalid;
-        break;
-    }
-    return format;
-}
-
-QPixmap fromSymbianCFbsBitmap(CFbsBitmap *aBitmap)
-{
-    aBitmap->BeginDataAccess();
-    uchar *data = (uchar *)aBitmap->DataAddress();
-    TSize size = aBitmap->SizeInPixels();
-    TDisplayMode displayMode = aBitmap->DisplayMode();
-
-    // QImage format must match to bitmap format
-    QImage image(data, size.iWidth, size.iHeight, TDisplayMode2Format(
-        displayMode));
-    aBitmap->EndDataAccess();
-
-    // No data copying happens because
-    // image format matches native OpenVG format.
-    // So QPixmap actually points to CFbsBitmap data.
-    return QPixmap::fromImage(image);
-}
 
 // ---------------------------------------------------------------------------
 //
@@ -181,10 +127,16 @@ void CaObjectAdapter::convertL(const CaQuery &fromQuery,
     const QMap<QString, QString> attributesMap = fromQuery.attributes();
 
     foreach(QString key, attributesMap.keys()) {
-        toQuery.AddAttributeL(
-            XQConversions::qStringToS60Desc(key)->Des(),
-            XQConversions::qStringToS60Desc(
-                attributesMap.value(key))->Des());
+        if (key == APPLICATION_UID_ATTRIBUTE_NAME) {
+            const TInt32 uid = attributesMap.value(key).toInt();
+            toQuery.SetUid(uid);
+        }
+        else {
+            toQuery.AddAttributeL(
+                XQConversions::qStringToS60Desc(key)->Des(),
+                XQConversions::qStringToS60Desc(
+                    attributesMap.value(key))->Des());
+        }
     }
 }
 
@@ -206,16 +158,16 @@ void CaObjectAdapter::convert(
     toEntry.setFlags(static_cast<EntryFlag>(fromEntry.GetFlags()));
 
     // take care of converting icon attributes
-    const CCaInnerEntry::TIconAttributes &icon = fromEntry.GetIcon();
-
+    const CCaInnerIconDescription* innerIcon = fromEntry.Icon();
     CaIconDescription iconDescription;
-    iconDescription.setId(icon.iId);
+
+    iconDescription.setId(innerIcon->Id());
     iconDescription.setFilename(
-        XQConversions::s60DescToQString(icon.iFileName));
+        XQConversions::s60DescToQString(innerIcon->FileName()));
     iconDescription.setSkinId(
-        XQConversions::s60DescToQString(icon.iSkinId));
+        XQConversions::s60DescToQString(innerIcon->SkinId()));
     iconDescription.setApplicationId(
-        XQConversions::s60DescToQString(icon.iApplicationId));
+        XQConversions::s60DescToQString(innerIcon->ApplicationId()));
 
     toEntry.setIconDescription(iconDescription);
 
@@ -282,11 +234,11 @@ void CaObjectAdapter::convertL(const CaNotifierFilter &notifierFilter,
 //----------------------------------------------------------------------------
 void CaObjectAdapter::convertL(
     const RPointerArray<CCaInnerEntry> &fromEntriesArray,
-    QList<CaEntry *> &toEntryList)
+    QList< QSharedPointer<CaEntry> > &toEntryList)
 {
     for (int i = 0; i < fromEntriesArray.Count(); ++i) {
-        CaEntry *const toEntry = new CaEntry(
-            static_cast<EntryRole>(fromEntriesArray[i]->GetRole()));
+        const QSharedPointer<CaEntry> toEntry (new CaEntry(
+            static_cast<EntryRole>(fromEntriesArray[i]->GetRole())));
 
         CaObjectAdapter::convert(*fromEntriesArray[i], *toEntry);
 
@@ -319,21 +271,6 @@ void CaObjectAdapter::convertL(const RArray<TInt> &innerEntryIdList,
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
-{
-
-    HbIcon icon;
-    TRAPD(leaveCode, icon = makeIconL(entry, size));
-
-    USE_QDEBUG_IF(leaveCode) << "CaObjectAdapter::makeIcon leaveCode:"
-                             << leaveCode;
-
-    return icon;
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
 ErrorCode CaObjectAdapter::convertErrorCode(int internalErrorCode)
 {
     ErrorCode error(NoErrorCode);
@@ -355,94 +292,6 @@ ErrorCode CaObjectAdapter::convertErrorCode(int internalErrorCode)
         break;
     }
     return error;
-}
-
-
-// -----------------------------------------------------------------------------
-// copying compressed bitmap
-//----------------------------------------------------------------------------
-CFbsBitmap *CaObjectAdapter::copyBitmapLC(CFbsBitmap *input)
-{
-    CFbsBitmap *bmp = new(ELeave) CFbsBitmap();
-    CleanupStack::PushL(bmp);
-    bmp->Create(input->SizeInPixels(), input->DisplayMode());
-
-    CFbsBitmapDevice *bitmapDevice = CFbsBitmapDevice::NewL(bmp);
-    CleanupStack::PushL(bitmapDevice);
-    CFbsBitGc *bmpGc;
-    bitmapDevice->CreateContext(bmpGc);
-    bmpGc->BitBlt(TPoint(0,0), input);
-    delete bmpGc;
-    CleanupStack::PopAndDestroy(bitmapDevice);
-    return bmp;
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-HbIcon CaObjectAdapter::makeIconL(const CaEntry &entry, const QSize &size)
-{
-    HbIcon icon;
-    QString skinId(entry.iconDescription().skinId());
-    if (!skinId.isEmpty()) {
-        icon = HbIcon(skinId);
-    }
-    if (icon.isNull() || !(icon.size().isValid())) {
-        QString filename(entry.iconDescription().filename());
-        if (!filename.isEmpty()) {
-            
-            // TODO:
-            // work-around for HbIcon::size() method locking files if returns 
-            // default size, error id: ou1cimx1#279208 Case: mcl06HsDo07 - 
-            // "Cannot delete file" when trying to uninstall sisx file
-            
-            if (entry.entryTypeName() == XQConversions::s60DescToQString(KCaTypeWidget)) {
-                icon = QIcon(filename);
-                qWarning("Widget icon created by QIcon, as work-around for HbIcon::size");
-            } else {           
-                icon = HbIcon(filename);
-            }
-        }
-    }    
-    
-    //try to load symbian icon from multi-bitmap (mbm, mbg)
-    if (icon.isNull() || !(icon.size().isValid())) {
-        CCaInnerEntry *innerEntry = CCaInnerEntry::NewLC();
-        CaObjectAdapter::convertL(entry, *innerEntry);
-
-        CAknIcon *aknIcon = CaMenuIconUtility::GetItemIcon(*innerEntry);
-        QPixmap pixmap;
-        if (aknIcon) {
-            CleanupStack::PushL(aknIcon);
-
-            //need to disable compression to properly convert the bitmap
-            AknIconUtils::DisableCompression(aknIcon->Bitmap());
-            AknIconUtils::SetSize(
-                aknIcon->Bitmap(), TSize(size.width(), size.height()),
-                EAspectRatioPreservedAndUnusedSpaceRemoved);
-            if (aknIcon->Bitmap()->Header().iCompression
-                    == ENoBitmapCompression) {
-                pixmap = fromSymbianCFbsBitmap(aknIcon->Bitmap());
-                QPixmap mask = fromSymbianCFbsBitmap(aknIcon->Mask());
-                pixmap.setAlphaChannel(mask);
-            } else { // we need special handling for icons in 9.2 (NGA)
-                // let's hope that in future it will be in QT code
-                CFbsBitmap *temp(NULL);
-                temp = copyBitmapLC(aknIcon->Bitmap());
-                pixmap = fromSymbianCFbsBitmap(temp);
-                CleanupStack::PopAndDestroy();
-                temp = copyBitmapLC(aknIcon->Mask());
-                QPixmap mask = fromSymbianCFbsBitmap(temp);
-                CleanupStack::PopAndDestroy();
-                pixmap.setAlphaChannel(mask);
-            }
-            pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
-            CleanupStack::PopAndDestroy(aknIcon);
-            icon = HbIcon(QIcon(pixmap));
-        }
-        CleanupStack::PopAndDestroy(innerEntry);
-    }
-    return icon;
 }
 
 //----------------------------------------------------------------------------

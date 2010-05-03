@@ -239,7 +239,7 @@ void CCaWidgetScannerParser::ParseWidgetL(
     SetIconUriL( aElement, aPackageUid, widget);
     widget->SetPackageUidL( aPackageUid );
     SetMmcIdL( widget );
-    
+
     TTime modificationTime;
     iFs.Modified( aFilePath, modificationTime);
     TInt64 modificationIntTime = modificationTime.Int64();
@@ -268,7 +268,7 @@ void CCaWidgetScannerParser::ParseWidgetL(
 void CCaWidgetScannerParser::SetUriL(
     TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
 {
-    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf7L(
+    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
         aElement.AttributeValueL( KUri ) );
     CleanupStack::PushL( attributeValue );
 
@@ -286,7 +286,7 @@ void CCaWidgetScannerParser::SetUriL(
 void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
     const TDesC & aPackageUid, CCaWidgetDescription * aWidget )
 {
-    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf7L(
+    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
         aElement.AttributeValueL( KLibrary ) );
     CleanupStack::PushL( attributeValue );
 
@@ -296,7 +296,7 @@ void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
 
         //set path for hs to use, trim last 2 chars (doubleslash)
         aWidget->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
-        
+
         libraryPath->ReAllocL(
             libraryPath->Length() + attributeValue->Length());
 
@@ -320,7 +320,7 @@ void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
 void CCaWidgetScannerParser::SetTitleL(
     TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
 {
-    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf7L(
+    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
                 aElement.AttributeValueL( KTitle ) );
     CleanupStack::PushL( attributeValue );
 
@@ -338,7 +338,7 @@ void CCaWidgetScannerParser::SetTitleL(
 void CCaWidgetScannerParser::SetDescriptionL(
     TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
 {
-    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf7L(
+    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
                 aElement.AttributeValueL( KDescription ) );
     CleanupStack::PushL( attributeValue );
 
@@ -356,7 +356,7 @@ void CCaWidgetScannerParser::SetDescriptionL(
 void CCaWidgetScannerParser::SetVisibilityL(
     TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
 {
-    HBufC *hidden = CnvUtfConverter::ConvertToUnicodeFromUtf7L(
+    HBufC *hidden = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
                 aElement.AttributeValueL( KHidden ) );
     CleanupStack::PushL( hidden );
 
@@ -374,7 +374,7 @@ void CCaWidgetScannerParser::SetVisibilityL(
 void CCaWidgetScannerParser::SetIconUriL( TXmlEngElement & aElement,
     const TDesC & aPackageUid, CCaWidgetDescription * aWidget )
 {
-    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf7L(
+    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
                 aElement.AttributeValueL( KIconUri ) );
     CleanupStack::PushL( attributeValue );
 

@@ -21,10 +21,6 @@
 file=ABI_DIR\BUILD_DIR\activityserviceplugin.dll					       SHARED_LIB_DIR\activityserviceplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\activityserviceplugin.qtplugin    resource\qt\plugins\activityserviceplugin.qtplugin
 
-file=ABI_DIR\BUILD_DIR\activitylauncher.exe                            PROGRAMS_DIR\activitylauncher.exe
-data=ZPRIVATE\10003a3f\import\apps\activitylauncher_reg.rsc            private\10003a3f\import\apps\activitylauncher_reg.rsc
-data=\epoc32\data\z\resource\apps\activitylauncher.rsc                 resource\apps\activitylauncher.rsc
-
 file=ABI_DIR\BUILD_DIR\hsactivitydbserver.exe                            PROGRAMS_DIR\hsactivitydbserver.exe
 data=ZPRIVATE\10003a3f\import\apps\hsactivitydbserver_reg.rsc            private\10003a3f\import\apps\hsactivitydbserver_reg.rsc
 data=\epoc32\data\z\resource\apps\hsactivitydbserver.rsc                 resource\apps\hsactivitydbserver.rsc

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef APPLICATIONLAUNCHER_P_H
@@ -21,12 +21,12 @@
 
 class ApplicationLauncherPrivate
 {
-    
-public:    
+
+public:
     bool isRunning(int applicationId);
     void startApplication(int applicationId, const QString &activityId);
     void bringToForeground(int applicationId);
-    
+
 };
 
 #endif // APPLICATIONLAUNCHER_P_H

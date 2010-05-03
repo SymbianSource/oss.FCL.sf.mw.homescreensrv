@@ -21,7 +21,6 @@ CONFIG += ordered
 symbian:SUBDIRS += activitydatabase
 
 SUBDIRS +=  activityserviceplugin \
-            activitylauncher \
             orbitintegration/hbactivityplugin 
             
 

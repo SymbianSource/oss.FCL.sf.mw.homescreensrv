@@ -9,5 +9,5 @@
 # Contributors:
 # Description:
 
-HEADERS += ./inc/*.h ../inc/*.h
+HEADERS += ./inc/*.h
 SOURCES += ./src/*.cpp

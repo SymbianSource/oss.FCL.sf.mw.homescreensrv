@@ -25,10 +25,10 @@ public:
      * Function inform observer about asynchronous request results
      * @param result - request result
      * @param requestType - request type
-     * @param data - respons data  
+     * @param data - respons data
      */
-    virtual void asyncRequestCompleated(int result, 
-                                        int requestType, 
-                                        const QString& data)=0;
+    virtual void asyncRequestCompleated(int result,
+                                        int requestType,
+                                        const QString &data)=0;
 };
 #endif // HSACTIVITYDBASYNCREQUESTOBSERVER_H

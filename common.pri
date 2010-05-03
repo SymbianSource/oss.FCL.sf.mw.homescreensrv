@@ -81,7 +81,6 @@ win32 {
                 $$PWD/homescreensrv_plat/appruntimemodel_api \
                 $$PWD/homescreensrv_plat/contentstorage_api \
                 $$PWD/homescreensrv_plat/hswidgetmodel_api \
-                $$PWD/homescreensrv_plat/servicemodel_api \
                 $$PWD/homescreensrv_plat/statemodel_api \
                 $$PWD/homescreensrv_plat/homescreen_information_api/inc
 }
