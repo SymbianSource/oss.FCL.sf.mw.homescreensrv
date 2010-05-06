@@ -1,0 +1,129 @@
+#if LANGUAGE_sc
+	#include <sc/profileapp.loc>
+#elif LANGUAGE_01
+	#include <01/profileapp_01.loc>
+#elif LANGUAGE_02
+	#include <02/profileapp_02.loc>
+#elif LANGUAGE_03
+	#include <03/profileapp_03.loc>
+#elif LANGUAGE_04
+	#include <04/profileapp_04.loc>
+#elif LANGUAGE_05
+	#include <05/profileapp_05.loc>
+#elif LANGUAGE_06
+	#include <06/profileapp_06.loc>
+#elif LANGUAGE_07
+	#include <07/profileapp_07.loc>
+#elif LANGUAGE_08
+	#include <08/profileapp_08.loc>
+#elif LANGUAGE_09
+	#include <09/profileapp_09.loc>
+#elif LANGUAGE_10
+	#include <10/profileapp_10.loc>
+#elif LANGUAGE_102
+	#include <102/profileapp_102.loc>
+#elif LANGUAGE_103
+	#include <103/profileapp_103.loc>
+#elif LANGUAGE_129
+	#include <129/profileapp_129.loc>
+#elif LANGUAGE_13
+	#include <13/profileapp_13.loc>
+#elif LANGUAGE_14
+	#include <14/profileapp_14.loc>
+#elif LANGUAGE_14346
+	#include <14346/profileapp_14346.loc>
+#elif LANGUAGE_14387
+	#include <14387/profileapp_14387.loc>
+#elif LANGUAGE_14412
+	#include <14412/profileapp_14412.loc>
+#elif LANGUAGE_14419
+	#include <14419/profileapp_14419.loc>
+#elif LANGUAGE_15
+	#include <15/profileapp_15.loc>
+#elif LANGUAGE_157
+	#include <157/profileapp_157.loc>
+#elif LANGUAGE_158
+	#include <158/profileapp_158.loc>
+#elif LANGUAGE_159
+	#include <159/profileapp_159.loc>
+#elif LANGUAGE_16
+	#include <16/profileapp_16.loc>
+#elif LANGUAGE_160
+	#include <160/profileapp_160.loc>
+#elif LANGUAGE_161
+	#include <161/profileapp_161.loc>
+#elif LANGUAGE_17
+	#include <17/profileapp_17.loc>
+#elif LANGUAGE_18
+	#include <18/profileapp_18.loc>
+#elif LANGUAGE_230
+	#include <230/profileapp_230.loc>
+#elif LANGUAGE_25
+	#include <25/profileapp_25.loc>
+#elif LANGUAGE_26
+	#include <26/profileapp_26.loc>
+#elif LANGUAGE_27
+	#include <27/profileapp_27.loc>
+#elif LANGUAGE_28
+	#include <28/profileapp_28.loc>
+#elif LANGUAGE_29
+	#include <29/profileapp_29.loc>
+#elif LANGUAGE_30
+	#include <30/profileapp_30.loc>
+#elif LANGUAGE_31
+	#include <31/profileapp_31.loc>
+#elif LANGUAGE_32
+	#include <32/profileapp_32.loc>
+#elif LANGUAGE_326
+	#include <326/profileapp_326.loc>
+#elif LANGUAGE_327
+	#include <327/profileapp_327.loc>
+#elif LANGUAGE_33
+	#include <33/profileapp_33.loc>
+#elif LANGUAGE_37
+	#include <37/profileapp_37.loc>
+#elif LANGUAGE_39
+	#include <39/profileapp_39.loc>
+#elif LANGUAGE_42
+	#include <42/profileapp_42.loc>
+#elif LANGUAGE_44
+	#include <44/profileapp_44.loc>
+#elif LANGUAGE_45
+	#include <45/profileapp_45.loc>
+#elif LANGUAGE_49
+	#include <49/profileapp_49.loc>
+#elif LANGUAGE_50
+	#include <50/profileapp_50.loc>
+#elif LANGUAGE_51
+	#include <51/profileapp_51.loc>
+#elif LANGUAGE_54
+	#include <54/profileapp_54.loc>
+#elif LANGUAGE_57
+	#include <57/profileapp_57.loc>
+#elif LANGUAGE_58
+	#include <58/profileapp_58.loc>
+#elif LANGUAGE_59
+	#include <59/profileapp_59.loc>
+#elif LANGUAGE_65
+	#include <65/profileapp_65.loc>
+#elif LANGUAGE_67
+	#include <67/profileapp_67.loc>
+#elif LANGUAGE_68
+	#include <68/profileapp_68.loc>
+#elif LANGUAGE_70
+	#include <70/profileapp_70.loc>
+#elif LANGUAGE_76
+	#include <76/profileapp_76.loc>
+#elif LANGUAGE_78
+	#include <78/profileapp_78.loc>
+#elif LANGUAGE_79
+	#include <79/profileapp_79.loc>
+#elif LANGUAGE_83
+	#include <83/profileapp_83.loc>
+#elif LANGUAGE_93
+	#include <93/profileapp_93.loc>
+#elif LANGUAGE_94
+	#include <94/profileapp_94.loc>
+#elif LANGUAGE_96
+	#include <96/profileapp_96.loc>
+#endif

@@ -4,8 +4,6 @@ platform_paths.hrh             platform_paths.hrh
 defaultcaps.hrh                defaultcaps.hrh
 bldvariant.hrh                 bldvariant.hrh
 
-telinformationpskeys.h			telinformationpskeys.h
-
 liwservicehandler.h				liwservicehandler.h
 liwserviceifmenu.h				liwserviceifmenu.h
 liwserviceifbase.h				liwserviceifbase.h
@@ -95,6 +93,18 @@ GSListBox.h     MW_LAYER_PLATFORM_EXPORT_PATH(gslistbox.h)
 gsframeworkrsc.rsg	gsframeworkrsc.rsg
 gsfwicon.mbg		gsfwicon.mbg
 
+profileapp.loc  platform/app/loc/profileapp.loc
+profileapp_01.loc  platform/app/loc/01/profileapp_01.loc
+profileapp_sc.loc  platform/app/loc/sc/profileapp.loc
+profileapp.loc  platform/mw/loc/profileapp.loc
+profileapp_01.loc  platform/mw/loc/01/profileapp_01.loc
+profileapp_sc.loc  platform/mw/loc/sc/profileapp.loc
+
+AknSoftNotifier.h                    MW_LAYER_PLATFORM_EXPORT_PATH(AknSoftNotifier.h)
+UikonInternalPSKeys.h     MW_LAYER_PLATFORM_EXPORT_PATH(UikonInternalPSKeys.h)
+
+dtd_installer.pl +/tools/dtd_installer.pl
+
 #include "extended_skin_api/bld.inf"
 #include "S3libs/bld.inf"
 
@@ -138,5 +148,6 @@ gsfwicon.mbg		gsfwicon.mbg
 #include "gsprofilesrv_plat-profiles_engine_api/group/bld.inf"
 #include "phonesrv_plat-ss_settings_api/group/bld.inf"
 #include "logs_ui_command_line_api/group/bld.inf"
+#include "telephony_information_api/group/bld.inf"
 // #include "/group/bld.inf"
 // #include "/group/bld.inf"
