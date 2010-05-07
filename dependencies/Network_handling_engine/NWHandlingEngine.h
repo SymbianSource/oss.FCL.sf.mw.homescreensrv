@@ -153,14 +153,14 @@ enum TNWRead
     EFullFileChange
     };
 
-#ifdef RD_PHONE_NG
+//#ifdef RD_PHONE_NG
 enum TNWNetworkSelectionSetting
     {
     ENWNetworkSelectionUnknown,
     ENWNetworkSelectionAutomatic,
     ENWNetworkSelectionManual
     };    
-#endif // RD_PHONE_RG
+//#endif // RD_PHONE_RG
 // CLASS DECLARATION
 
 //Network info definition
@@ -185,9 +185,9 @@ struct TNWInfo
     TNWNoServiceMode iNoServerMode;                         // 
     TNWVoicePrivacyStatus iVoicePrivacyStatus;              // Voice Privacy Status
     TNWPLMNField iPLMNField;                                // Contains a number of PLMN network names coded as TLV objects
-#ifdef RD_PHONE_NG
+//#ifdef RD_PHONE_NG
     TNWNetworkSelectionSetting iSelectionSetting;           // Contains a network selection setting manual/automatic etc.
-#endif // RD_PHONE_NG
+//#endif // RD_PHONE_NG
     RPacketService::TDynamicCapsFlags iDynamicCapsFlags;    // Dynamic packet data capabilities 
                                                             // (used to hide alpha tag when CS registration is unsuccessful)
     };
