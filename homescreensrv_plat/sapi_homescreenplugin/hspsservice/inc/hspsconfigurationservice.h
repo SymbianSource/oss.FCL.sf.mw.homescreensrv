@@ -28,6 +28,7 @@
 #include <hspsodt.h>
 #include <hspsdomlist.h>
 #include <hspsdomdocument.h>
+#include <e32property.h>
 
 // FORWARD DECLARATIONS
 class ChspsDomNode;
@@ -191,9 +192,12 @@ class CHspsConfigurationService : public CBase, public MhspsClientRequestService
         ChspsLogBus* iLogBus;
 #endif        
         /**
-         * ETrue if iHspsODT is invalid.
+         * Currently loaded version of the CHspsODT instance
          */  
-        TBool iInvalidODT;        
+        TInt iODTVersion;        
+        
+        // For validation of the iHspsODT member
+        RProperty iProperty;
     };
 
 

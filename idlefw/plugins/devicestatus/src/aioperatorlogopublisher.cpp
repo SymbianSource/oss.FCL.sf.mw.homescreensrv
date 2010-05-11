@@ -171,6 +171,13 @@ void CAiOperatorLogoPublisher::Subscribe( MAiContentObserver& aObserver,
     iBroadcaster = &aBroadcaster;
     }
 
+void CAiOperatorLogoPublisher::RefreshIfActiveL( TBool aClean )
+    {
+    if ( !iSuspended )
+        {
+        UpdateOperatorLogoL( aClean );
+        }
+    }
 
 void CAiOperatorLogoPublisher::RefreshL( TBool aClean )
     {

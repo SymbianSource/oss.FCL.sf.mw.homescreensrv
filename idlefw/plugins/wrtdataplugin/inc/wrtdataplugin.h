@@ -341,6 +341,8 @@ private:
     RFs iRfs;
     /** Timer for initial data republishing, owned */
     CPeriodic* iTimer;
+    /** Flag to indicate if this plugin is stopped */
+    TBool iStopped;
     };
 
 #endif // WRTDATAPLUGIN_H

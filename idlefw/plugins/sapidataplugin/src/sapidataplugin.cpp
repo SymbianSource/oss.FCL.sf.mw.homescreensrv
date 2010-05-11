@@ -79,7 +79,7 @@ CSapiDataPlugin* CSapiDataPlugin::NewL()
 // ---------------------------------------------------------------------------
 //
 CSapiDataPlugin::CSapiDataPlugin()
-    : iNetworkStatus( EUnknown ), iPluginState( ENone )
+    : iNetworkStatus( EUnknown ), iPluginState( EStopped )
     {
     }
     
@@ -120,7 +120,6 @@ CSapiDataPlugin::~CSapiDataPlugin()
     iIconArray.Reset();
     iRfs.Close();
     }
-
 
 // ---------------------------------------------------------------------------
 // Publishes widget's texts and images
@@ -325,7 +324,6 @@ TInt CSapiDataPlugin::GetIdL( TDesC& aObjectId)
 	return id;
 	}
  
-
 // ---------------------------------------------------------------------------
 // Gets type of a content
 // ---------------------------------------------------------------------------
@@ -419,23 +417,46 @@ void CSapiDataPlugin::Clean(MAiContentObserver* aObserver,
 //
 void CSapiDataPlugin::Start( TStartReason aReason )
     {
-    if( aReason == ESystemStartup )
+    iPluginState = EStarted;
+    
+    TRAP_IGNORE( StartL( aReason ) );
+    }
+
+// ----------------------------------------------------------------------------
+// CSapiDataPlugin::StartL
+//
+// ----------------------------------------------------------------------------
+//
+void CSapiDataPlugin::StartL( TStartReason aReason )
+    {       
+    // Activate the publisher
+    iData->ChangePublisherStatusL( KActive );
+    
+    if ( aReason == ESystemStartup )
         {
-        TRAP_IGNORE( PublishL() );
-        TRAP_IGNORE( iData->SetStartupReasonL( KSystemStartup ));
+        PublishL();
+        iData->SetStartupReasonL( KSystemStartup );
         }
-    else if( aReason == EPageStartup )
+    else if ( aReason == EPageStartup )
         {
-        TRAP_IGNORE( iData->SetStartupReasonL( KPageStartup ));
+        iData->SetStartupReasonL( KPageStartup );
         }
-    else if( aReason == EPluginStartup )
+    else if ( aReason == EPluginStartup )
         {
-        TRAP_IGNORE( PublishL() );
-        TRAP_IGNORE( iData->SetStartupReasonL( KPluginStartup));
+        PublishL();
+        iData->SetStartupReasonL( KPluginStartup );
         }
 
-    // Listen for publisher registration to resend the events 
-    TRAP_IGNORE( iData->RegisterPublisherObserverL() );
+    if ( !iPubObsRegistered )
+        {
+        // Listen for publisher registration to resend the events 
+        iData->RegisterPublisherObserverL() ;
+
+        // Execute the active trigger 
+        iData->TriggerActiveL();    
+        
+        iPubObsRegistered = ETrue;
+        }    
     }
 
 // ----------------------------------------------------------------------------
@@ -445,23 +466,35 @@ void CSapiDataPlugin::Start( TStartReason aReason )
 //
 void CSapiDataPlugin::Stop( TStopReason aReason )
     {
-    if( aReason == ESystemShutdown )
+    TRAP_IGNORE( StopL( aReason ) );
+    
+    iPluginState = EStopped;
+    }
+
+// ----------------------------------------------------------------------------
+// CSapiDataPlugin::StopL
+//
+// ----------------------------------------------------------------------------
+//
+void CSapiDataPlugin::StopL( TStopReason aReason )
+    {
+    if ( aReason == ESystemShutdown )
         {
-        TRAP_IGNORE( iData->ChangePublisherStatusL( KSystemShutdown ));
+        iData->ChangePublisherStatusL( KSystemShutdown );
         }
-    else if( aReason == EPageShutdown )
+    else if ( aReason == EPageShutdown )
         {
-        TRAP_IGNORE( iData->ChangePublisherStatusL( KPageShutdown ));
+        iData->ChangePublisherStatusL( KPageShutdown );
         }
-    else if( aReason == EPluginShutdown )
+    else if ( aReason == EPluginShutdown )
         {
-        TRAP_IGNORE( iData->ChangePublisherStatusL( KPluginShutdown ));
+        iData->ChangePublisherStatusL( KPluginShutdown );
         }
 
     if ( iData )
         {
-        TRAP_IGNORE( iData->ChangePublisherStatusL( KDeActive ));
-        }
+        iData->ChangePublisherStatusL( KDeActive );
+        }          
     }
 
 // ----------------------------------------------------------------------------
@@ -471,7 +504,7 @@ void CSapiDataPlugin::Stop( TStopReason aReason )
 //
 void CSapiDataPlugin::Resume( TResumeReason aReason )
     {
-    if ( aReason == EForeground )
+    if ( aReason == EForeground && iPluginState != EStopped )
         {
         iPluginState = EResume;
         TRAP_IGNORE( iData->ChangePublisherStatusL( KResume ));
@@ -485,7 +518,7 @@ void CSapiDataPlugin::Resume( TResumeReason aReason )
 //
 void CSapiDataPlugin::Suspend( TSuspendReason aReason )
     {
-    if ( aReason == EBackground )
+    if ( aReason == EBackground && iPluginState != EStopped )
         {
         iPluginState = ESuspend;
         TRAP_IGNORE( iData->ChangePublisherStatusL( KSuspend ));
@@ -499,7 +532,7 @@ void CSapiDataPlugin::Suspend( TSuspendReason aReason )
 //
 void CSapiDataPlugin::SetOnline()
     {
-    if ( iNetworkStatus != EOnline )
+    if ( iNetworkStatus != EOnline && iPluginState != EStopped )
         {
         iNetworkStatus = EOnline;
         TRAP_IGNORE( iData->ChangePublisherStatusL( KOnLine ));
@@ -513,7 +546,7 @@ void CSapiDataPlugin::SetOnline()
 //
 void CSapiDataPlugin::SetOffline()
     {
-    if ( iNetworkStatus != EOffline )
+    if ( iNetworkStatus != EOffline && iPluginState != EStopped )
         {
         iNetworkStatus = EOffline;
         TRAP_IGNORE( iData->ChangePublisherStatusL( KOffLine ));
@@ -617,17 +650,9 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         
         // Configurations 
         iData->ConfigureL( configurationItemsArr );
-        
-        iPluginState = ESuspend;
 
         // Listen the publisher content update
-        iData->RegisterContentObserverL();
-        
-        // Activate the publisher
-        iData->ChangePublisherStatusL( KActive );
-        // Execute the active trigger 
-        iData->TriggerActiveL();
-        
+        iData->RegisterContentObserverL();              
         }
     
     contentItemsArr.Reset();
@@ -644,7 +669,7 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
 //
 void CSapiDataPlugin::SetProperty( TProperty aProperty, TAny* aAny )
     {
-    if (aProperty == ECpsCmdBuffer )
+    if ( aProperty == ECpsCmdBuffer )
         {
         iData->SetCommandBuffer( aAny );
         }

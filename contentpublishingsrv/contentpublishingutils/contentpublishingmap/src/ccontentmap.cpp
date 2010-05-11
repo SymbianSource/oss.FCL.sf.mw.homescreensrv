@@ -170,6 +170,7 @@ void CContentMap::SaveQueryResultsL( RSqlStatement& aStmt,
             		content_id ) );
             CLiwDefaultMap* targetMap = CLiwDefaultMap::NewLC( );
             targetMap->InsertL( KId, TLiwVariant( id ) );
+            targetMap->InsertL( KType, TLiwVariant( KCpData ) );
             targetMap->InsertL( KPublisherId, TLiwVariant( publisher ) );
             targetMap->InsertL( KContentType, TLiwVariant(content_type ) );
             targetMap->InsertL( KContentId, TLiwVariant( content_id ) );

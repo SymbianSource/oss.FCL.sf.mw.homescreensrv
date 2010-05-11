@@ -21,6 +21,7 @@
 #include <s32mem.h>
 #include <sysutil.h>
 #include <bautils.h>
+#include <centralrepository.h>
 
 #include "hsps_builds_cfg.hrh"
 
@@ -54,6 +55,10 @@ _LIT(KMatchSkeleton, ".o0000");
 
 const TInt KTIntMahspsumbers( 11 );
 
+_LIT_SECURITY_POLICY_C1( KPSReadPolicy, ECapabilityReadDeviceData );
+_LIT_SECURITY_POLICY_C1( KPSWritePolicy, ECapabilityWriteDeviceData );
+
+
 // ============================= LOCAL FUNCTIONS ===============================
     
 // ============================ MEMBER FUNCTIONS ===============================
@@ -64,8 +69,10 @@ const TInt KTIntMahspsumbers( 11 );
 // might leave.
 // -----------------------------------------------------------------------------
 //
-ChspsDefinitionRepository::ChspsDefinitionRepository() :
-        iCacheLastODT( NULL )
+ChspsDefinitionRepository::ChspsDefinitionRepository( 
+        CRepository& aCentralRepository ) :
+        iCacheLastODT( NULL ),
+        iCentralRepository( aCentralRepository )
     {        
     }
 
@@ -75,10 +82,14 @@ ChspsDefinitionRepository::ChspsDefinitionRepository() :
 // -----------------------------------------------------------------------------
 //
 void ChspsDefinitionRepository::ConstructL()
-    {
+    {    
+    // Setup RProperty keys for the client applications
+    SetupPropertiesL( KPropertyAI3Key );
+    SetupPropertiesL( KPropertyMTKey );
+                
 	User::LeaveIfError( iFs.Connect() );
 	//Create private path if it doesn't exist already
-	TInt err=iFs.CreatePrivatePath(EDriveC);
+	TInt err = iFs.CreatePrivatePath(EDriveC);
 	if (err!=KErrNone && err!=KErrAlreadyExists)
 		{
 		User::Leave(err);	
@@ -103,9 +114,11 @@ void ChspsDefinitionRepository::ConstructL()
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-EXPORT_C ChspsDefinitionRepository* ChspsDefinitionRepository::NewL()
+EXPORT_C ChspsDefinitionRepository* ChspsDefinitionRepository::NewL(
+        CRepository& aCentralRepository )
     {
-    ChspsDefinitionRepository* self = new( ELeave ) ChspsDefinitionRepository;
+    ChspsDefinitionRepository* self = 
+            new( ELeave ) ChspsDefinitionRepository( aCentralRepository );
     
     CleanupStack::PushL( self );
     self->ConstructL();
@@ -117,6 +130,7 @@ EXPORT_C ChspsDefinitionRepository* ChspsDefinitionRepository::NewL()
 // Destructor
 ChspsDefinitionRepository::~ChspsDefinitionRepository()
     {
+    iProperty.Close();
     iFs.Close();
     iRepositoryInfoQueue.Reset();
     iRepositoryInfoQueue.Close();
@@ -128,6 +142,31 @@ ChspsDefinitionRepository::~ChspsDefinitionRepository()
     
 	iTempFileName1 = KNullDesC;
 	iTempFileName2 = KNullDesC;    
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsDefinitionRepository::SetupPropertiesL
+// -----------------------------------------------------------------------------
+//
+void ChspsDefinitionRepository::SetupPropertiesL( const TUint aKey )
+    {    
+    TInt err = RProperty::Define(
+        KPropertyHspsCat,
+        aKey,
+        RProperty::EInt,
+        KPSReadPolicy,
+        KPSWritePolicy );
+    if( err != KErrAlreadyExists && err != KErrNone )
+        {
+        User::LeaveIfError( err );
+        }    
+    // Init
+    User::LeaveIfError( 
+        RProperty::Set( 
+            KPropertyHspsCat, 
+            aKey, 
+            KPropertyKeyDefault ) 
+        );
     }
 
 // -----------------------------------------------------------------------------
@@ -208,7 +247,40 @@ EXPORT_C TInt ChspsDefinitionRepository::SetOdtL( const ChspsODT &aODT )
         {
         delete iCacheLastODT;
 		iCacheLastODT = NULL;        
-        iCacheLastODT = aODT.CloneL();                
+        iCacheLastODT = aODT.CloneL();              
+                
+        // Check whether we updated active application configuration
+        TInt configurationUid = -1;
+        User::LeaveIfError( 
+            iCentralRepository.Get( iCacheLastODT->RootUid(), configurationUid ) 
+            );
+        if( configurationUid == aODT.ThemeUid() )
+            {            
+            
+            const TUint key = iCacheLastODT->RootUid();
+                    
+            // Get current value
+            TInt version( 0 );
+            User::LeaveIfError( 
+                RProperty::Get( 
+                        KPropertyHspsCat, 
+                        key, 
+                        version ) 
+                    );
+            
+            // Increment the version, each client session should update the ODT copies            
+            version++;
+            if( version < 1 )
+                {
+                version = 1;
+                }                                
+            User::LeaveIfError( 
+                RProperty::Set( 
+                        KPropertyHspsCat, 
+                        key, 
+                        version ) 
+                    );
+            }
         }
     
     return ret;

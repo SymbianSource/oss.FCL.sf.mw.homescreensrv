@@ -23,6 +23,7 @@
 
 // FORWARD DECLARATIONS
 class CCpStorage;
+class TLiwVariant;
 
 // CLASS DECLARATION
 /**
@@ -34,7 +35,7 @@ class CCpStorage;
 class StorageFactory
     {
 public:
-    IMPORT_C static CCpStorage* NewDatabaseL();
+    IMPORT_C static CCpStorage* NewDatabaseL(TLiwVariant& aDataMapCache);
     };
 
 #endif //C_CPSTORAGE_FACTORY_H

@@ -53,7 +53,8 @@ const TImplementationProxy KImplementationTable[] =
 // ----------------------------------------------------------------------------
 //
 CAiDeviceStatusPlugin::CAiDeviceStatusPlugin() 
-    : iResourceOffset( KErrNotFound )   	
+    : iResourceOffset( KErrNotFound ),
+    iRequirePublish( EFalse )
     {
     }
 
@@ -164,6 +165,8 @@ void CAiDeviceStatusPlugin::AllocateResourcesL()
 //
 void CAiDeviceStatusPlugin::FreeResources()
     {
+    iRequirePublish = EFalse;
+
 	if( iResourceOffset >= 0 )
 	    {
 	    CCoeEnv* coe = CCoeEnv::Static();
@@ -202,7 +205,8 @@ void CAiDeviceStatusPlugin::Start( TStartReason /*aReason*/ )
 // ----------------------------------------------------------------------------
 //
 void CAiDeviceStatusPlugin::Stop( TStopReason /*aReason*/ )     
-    {    
+    {
+    iRequirePublish = EFalse;
     }
 
 // ----------------------------------------------------------------------------
@@ -216,10 +220,14 @@ void CAiDeviceStatusPlugin::Resume( TResumeReason aReason )
         {
         if ( iRequirePublish )
             {
-            TRAP_IGNORE( DoResumeL() );
-            
+            TRAP_IGNORE( DoResumeL() );            
             iRequirePublish = EFalse;
-            }          
+            }
+        else
+            {
+            TRAP_IGNORE( 
+				iEngine->RefreshActivePublishersL( EFalse ) );
+            }
         }
     }
   

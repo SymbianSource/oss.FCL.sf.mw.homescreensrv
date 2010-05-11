@@ -23,6 +23,11 @@
 #include "sapidata.h"
 #include "sapidataobserver.h"
 #include "sapidatapluginconst.h"
+
+// Constants
+_LIT8( KErrorCode, "ErrorCode" );
+_LIT8( KTransactionId, "TransactionID" );
+
 // ---------------------------------------------------------------------------
 // Constructor
 // ---------------------------------------------------------------------------
@@ -47,25 +52,52 @@ CSapiDataObserver ::~CSapiDataObserver ()
 // Register for notifications
 // ---------------------------------------------------------------------------
 //
-void CSapiDataObserver::RegisterL( CLiwDefaultMap* aFilter, const TDesC& aRegistry )
+void CSapiDataObserver::RegisterL( CLiwDefaultMap* aFilter, 
+                                   const TDesC& aRegistry,
+                                   TUint aOptions )
     {
     CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
     CleanupStack::PushL( inParamList );
+    
     CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
     CleanupStack::PushL( outParamList );
         
     // Fill in input list for RequestNotification command
-    inParamList->AppendL(TLiwGenericParam(KType,TLiwVariant(aRegistry)));
-    inParamList->AppendL(TLiwGenericParam(KFilter ,TLiwVariant(aFilter)));
+    inParamList->AppendL(
+        TLiwGenericParam( KType, TLiwVariant( aRegistry ) ) );
+    
+    inParamList->AppendL(
+        TLiwGenericParam( KFilter ,TLiwVariant( aFilter ) ) );
         
-    TRAP_IGNORE( iInterface->ExecuteCmdL(KRequestNotification,
+    TRAP_IGNORE( iInterface->ExecuteCmdL(
+                KRequestNotification,
                 *inParamList,
                 *outParamList,
-                0,
+                aOptions,
                 this ) );
+      
+    TInt pos( 0 );
     
-    CleanupStack::PopAndDestroy( outParamList );
-    CleanupStack::PopAndDestroy( inParamList ); 
+    const TLiwGenericParam* outParam( 
+        outParamList->FindFirst( pos, KErrorCode ) );
+    
+    if ( outParam )
+        {
+        TInt retval( outParam->Value().AsTInt32() );
+        
+        if( retval == KErrNone )
+            {
+            pos = 0;
+            outParam = outParamList->FindFirst( pos, KTransactionId );
+                    
+            if ( outParam )
+                {
+                iTransactionId = outParam->Value().AsTInt32();            
+                }            
+            }                
+        }
+    
+    CleanupStack::PopAndDestroy( 2, inParamList ); 
     }
 
 // ---------------------------------------------------------------------------
@@ -74,22 +106,29 @@ void CSapiDataObserver::RegisterL( CLiwDefaultMap* aFilter, const TDesC& aRegist
 //
 void CSapiDataObserver::ReleaseL()
     {
-    if( iInterface )
+    if( !iInterface )
         {
-        CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( inParamList );
-        CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( outParamList );
-        
-        TRAP_IGNORE( iInterface->ExecuteCmdL( KRequestNotification,
-                *inParamList,
-                *outParamList,
-                KLiwOptCancel,
-                this ));
-        
-        CleanupStack::PopAndDestroy( outParamList );
-        CleanupStack::PopAndDestroy( inParamList );
+        return;
         }
+    
+    CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( inParamList );
+    
+    CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( outParamList );
+    
+    inParamList->AppendL( TLiwGenericParam( KTransactionId,
+        TLiwVariant( iTransactionId ) ) ); 
+    
+    TRAP_IGNORE( iInterface->ExecuteCmdL( 
+            KRequestNotification,
+            *inParamList,
+            *outParamList,
+            KLiwOptCancel,
+            this ));
+    
+    
+    CleanupStack::PopAndDestroy( 2, inParamList );
     }
 
 // ---------------------------------------------------------------------------

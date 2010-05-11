@@ -29,6 +29,7 @@
 #include "hspsmanifest.h"
 #include "bautils.h" 
 #include "sysutil.h"
+#include <syslangutil.h>
 
 
 _LIT(KHspsFolder, "\\200159c0\\themes\\" );
@@ -1944,21 +1945,23 @@ void hspsServerUtil::PopulateLogoPathsL(
     }     
 
 // -----------------------------------------------------------------------------
-// hspsServerUtil::FindFilesRecursivelyL
+// hspsServerUtil::FindResourcesL
 // -----------------------------------------------------------------------------
-void hspsServerUtil::FindFilesRecursivelyL(
+void hspsServerUtil::FindResourcesL(
         RFs& aFs,
         const RArray<TInt>& aDriveArray, 
         const TDesC& aPath,        
-        RPointerArray<HBufC>& aFolders,
+        RPointerArray<HBufC>& aFileArray,
+        CArrayFixFlat<TInt>* aDeviceLanguages,
         TBool aRecursive )
     {
-    TParsePtrC parser( aPath );
-  
+    // Scan internal drives only 
     TFindFile fileFinder( aFs );    
     fileFinder.SetFindMask( KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+         
+    TParsePtrC parser( aPath );
     
-    _LIT(KMaskFile, "*");          
+    // Loop the provided disk drives
     for( TInt driveIndex=0; driveIndex < aDriveArray.Count(); driveIndex++ )
         {
         TChar driveChar;
@@ -1970,38 +1973,64 @@ void hspsServerUtil::FindFilesRecursivelyL(
         TPath path;        
         path.Copy( driveBuf );        
         path.Append( parser.Path() );
-                        
-        CDir* dirList( NULL );             
-        fileFinder.FindWildByDir( KMaskFile, path, dirList );
-        if ( dirList )
-          {
-          CleanupStack::PushL( dirList );
                        
-          const TInt count = dirList->Count();          
-          for( TInt entryIndex = 0; entryIndex < count; entryIndex++ )
-              {
-              const TEntry& entry = (*dirList)[ entryIndex ];                        
+        // Find files from the drive and path
+        CDir* dirList( NULL );        
+        fileFinder.FindWildByPath( path, NULL, dirList );
+        if ( dirList )
+            {
+            CleanupStack::PushL( dirList );
+                       
+            const TInt count = dirList->Count();          
+            for( TInt entryIndex = 0; entryIndex < count; entryIndex++ )
+                {
+                const TEntry& entry = (*dirList)[ entryIndex ];                        
                                                          
-              TFileName file( path );              
-              file.Append( entry.iName );
-              if( entry.IsDir() )
-                  {
+                TFileName file( path );              
+                file.Append( entry.iName );
+                
+                if( entry.IsDir() )
+                    {                               
+                    if( aDeviceLanguages )
+                        {
+                        TInt dirLanguage = 0;
+                        TLex lex( entry.iName );
+                        TBool skipDir = ETrue;
+                        if( lex.Val( dirLanguage ) == KErrNone && dirLanguage >= ELangTest )
+                            {                   
+                            for( TInt i=0; i < aDeviceLanguages->Count(); i++ )
+                                {
+                                TInt supportedLanguage = aDeviceLanguages->At( i );
+                                if( supportedLanguage == dirLanguage )
+                                    {
+                                    skipDir = EFalse;
+                                    break;
+                                    }
+                                }
+                            }
+                        if( skipDir )
+                            {
+                            continue;
+                            }
+                        }
+              
                   file.Append( KDoubleBackSlash );
                   }
                                 
-              if( !BaflUtils::FileExists( aFs, file ) )
-                  {
-                  continue;
-                  }
               if( entry.IsDir() && aRecursive )
-                  {                                
-                  FindFilesRecursivelyL( aFs, aDriveArray, file, aFolders );                  
+                  {                   
+                  // Find files from the directory and drive
+                  RArray<TInt> driveArray;
+                  CleanupClosePushL( driveArray );                  
+                  driveArray.Append( aDriveArray[driveIndex] );                                   
+                  FindResourcesL( aFs, driveArray, file, aFileArray, NULL );   
+                  CleanupStack::PopAndDestroy( &driveArray );
                   }
               else
-                  {                                             
+                  {                                                  
                   HBufC* nameBuf = file.AllocLC();                
-                  aFolders.AppendL( nameBuf );
-                  CleanupStack::Pop( nameBuf );
+                  aFileArray.AppendL( nameBuf );
+                  CleanupStack::Pop( nameBuf );                      
                   }              
               } 
           
@@ -2012,6 +2041,32 @@ void hspsServerUtil::FindFilesRecursivelyL(
         } // driveIndex    
     }
 
+void hspsServerUtil::GetInstalledLanguagesL(
+        CArrayFixFlat<TInt>*& aLanguages )
+    {
+    User::LeaveIfError( SysLangUtil::GetInstalledLanguages( aLanguages ) );
+    CleanupStack::PushL( aLanguages );
+    
+    const TInt testLang = (TInt)ELangTest;
+    
+    TBool isIncluded = EFalse;           
+    for( TInt i = 0; i < aLanguages->Count(); i++ )
+        {
+        if( aLanguages->At( i ) == testLang )
+            {    
+            isIncluded = ETrue;            
+            break;
+            }
+        }    
+    
+    if( !isIncluded )
+        {
+        aLanguages->InsertL( 0, testLang );        
+        }
+    
+    CleanupStack::Pop( aLanguages );
+    }
+    
 
 // -----------------------------------------------------------------------------
 // hspsServerUtil::hspsServerUtil

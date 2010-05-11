@@ -27,14 +27,39 @@
 #include "hspsclientrequesthandler.h"
 #include "hspsserverutil.h"
 
-_LIT(KPrivateInstallZ, "Z:\\private\\200159c0\\install\\");
 _LIT(KPrivateInstallC, "C:\\private\\200159c0\\install\\");
-_LIT(KMaskAllFiles, "*");
+_LIT(KPrivateInstallE, "E:\\private\\200159c0\\install\\");
+_LIT(KPrivateInstallZ, "Z:\\private\\200159c0\\install\\");
+
 _LIT(KBackslash, "\\");
 _LIT(KHsps, "hsps");
 _LIT(KTestLanguage, "00");
 _LIT(KManifest, "manifest.dat");
 
+// ========================= LOCAL FUNCTIONS ==================================
+
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroy()
+// ----------------------------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroy( TAny* aObj )
+    {
+    if( aObj )
+        {
+        static_cast<T*>( aObj )->ResetAndDestroy();
+        }
+    }
+
+// ----------------------------------------------------------------------------
+// CleanupResetAndDestroyPushL
+// ----------------------------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroyPushL(T& aArray)
+    {
+    CleanupStack::PushL( TCleanupItem( &CleanupResetAndDestroy<T>, &aArray ) );
+    }
 
 // ========================= MEMBER FUNCTIONS ==================================
 
@@ -110,16 +135,16 @@ ChspsRomInstaller::~ChspsRomInstaller()
 //
 void ChspsRomInstaller::InstallL()
     {
-    RPointerArray<HBufC> pluginFolders;
-    CleanupClosePushL( pluginFolders );             
+    RPointerArray<HBufC> fileArray;
+    CleanupResetAndDestroyPushL( fileArray );
             
     // Find UDA and ROM widgets to be installed     
-    FindInstallationFilesL( pluginFolders );
+    FindInstallationFilesL( fileArray );
             
     // Install the manifest files    
-    for( TInt index=0; index < pluginFolders.Count(); index++ )
+    for( TInt index=0; index < fileArray.Count(); index++ )
         {         
-        TPtrC namePtr( pluginFolders[index]->Des() );                               
+        TPtrC namePtr( fileArray[index]->Des() );                               
                 
         // Synchronous method
         ThspsServiceCompletedMessage ret = EhspsInstallThemeFailed;
@@ -130,14 +155,13 @@ void ChspsRomInstaller::InstallL()
             }
         }
     
-    if ( pluginFolders.Count() == 0 )
+    if ( fileArray.Count() == 0 )
         {
         // Mandatory plugins were missing 
         User::Leave( KErrCorrupt );
         }
-        
-    pluginFolders.ResetAndDestroy();
-    CleanupStack::PopAndDestroy( 1, &pluginFolders );
+            
+    CleanupStack::PopAndDestroy(); // fileArray
     }
 
 
@@ -146,12 +170,13 @@ void ChspsRomInstaller::InstallL()
 // -----------------------------------------------------------------------------
 //
 void ChspsRomInstaller::FindInstallationFilesL(  
-        RPointerArray<HBufC>& aFolders )
+        RPointerArray<HBufC>& aFileArray )
     {
-    __ASSERT_DEBUG( aFolders.Count() == 0, User::Leave( KErrArgument ) );
-    
-    DoFindInstallationFilesL( aFolders, KPrivateInstallC );    
-    DoFindInstallationFilesL( aFolders, KPrivateInstallZ );    
+    __ASSERT_DEBUG( aFileArray.Count() == 0, User::Leave( KErrArgument ) );
+                    
+    DoFindInstallationFilesL( aFileArray, KPrivateInstallE );
+    DoFindInstallationFilesL( aFileArray, KPrivateInstallC );    
+    DoFindInstallationFilesL( aFileArray, KPrivateInstallZ );    
     }
 
 // -----------------------------------------------------------------------------
@@ -159,35 +184,24 @@ void ChspsRomInstaller::FindInstallationFilesL(
 // -----------------------------------------------------------------------------
 //
 void ChspsRomInstaller::DoFindInstallationFilesL(  
-        RPointerArray<HBufC>& aFolders,
+        RPointerArray<HBufC>& aFileArray,
         const TDesC& aPath )
     {               
     TFindFile fileFinder( iFsSession );    
     fileFinder.SetFindMask( 
          KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
-    CDir* dirList( NULL );             
-    fileFinder.FindWildByDir( KMaskAllFiles, aPath, dirList );
+    CDir* dirList( NULL );    
+    fileFinder.FindWildByPath( aPath, NULL, dirList );
     if ( dirList )
         {
         CleanupStack::PushL( dirList );
                      
-        const TInt count = dirList->Count();
-        const TInt KMaxEntryLength = KMaxFileName - 50; 
+        const TInt count = dirList->Count();        
         for( TInt i = 0; i < count; i++ )
             {
             const TEntry& dirEntry = (*dirList)[i];                        
             if ( dirEntry.IsDir() )
-                {
-                // Populate path for the manifest file
-                const TEntry& folderEntry = (*dirList)[i];
-
-                // Check for length of the directory name
-                if( dirEntry.iName.Length() > KMaxEntryLength ) 
-                    {
-                    // Skip plugins which have too long name
-                    continue;
-                    }
-                
+                {                                              
                 TFileName manifest( aPath );
                 manifest.Append( dirEntry.iName );
                 manifest.Append( KBackslash );
@@ -195,19 +209,14 @@ void ChspsRomInstaller::DoFindInstallationFilesL(
                 manifest.Append( KBackslash );
                 manifest.Append( KTestLanguage );
                 manifest.Append( KBackslash );
-                manifest.Append( KManifest );
-                
-                if( !BaflUtils::FileExists( iFsSession, manifest ) )
-                    {
-                    continue;
-                    }
-                
+                manifest.Append( KManifest );                                
+                                                
                 // Check for duplicates
                 TBool isShadowed = EFalse;
                 TParsePtrC manifestPtr( manifest );                
-                for( TInt i=0; i < aFolders.Count(); i++ )
+                for( TInt i=0; i < aFileArray.Count(); i++ )
                     {
-                    TParsePtrC ptr( aFolders[i]->Des() );
+                    TParsePtrC ptr( aFileArray[i]->Des() );
                     if( ptr.Path() == manifestPtr.Path() )
                         {
                         isShadowed = ETrue;
@@ -216,18 +225,11 @@ void ChspsRomInstaller::DoFindInstallationFilesL(
                     }
                 
                 if( !isShadowed )
-                    {
-                    // Append the drive information (C or Z)
-                    TFileName driveIncluded;
-                    hspsServerUtil::FindFile(
-                            iFsSession,
-                            manifest,
-                            KNullDesC,
-                            driveIncluded );
-                    if( driveIncluded.Length() )
+                    {           
+                    if( BaflUtils::FileExists( iFsSession, manifest ) )
                         {                        
-                        HBufC* nameBuf = driveIncluded.AllocLC();                
-                        aFolders.AppendL( nameBuf );
+                        HBufC* nameBuf = manifest.AllocLC();                
+                        aFileArray.AppendL( nameBuf );
                         CleanupStack::Pop( nameBuf );
                         }
                     }

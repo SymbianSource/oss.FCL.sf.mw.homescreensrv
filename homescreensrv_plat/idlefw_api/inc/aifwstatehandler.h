@@ -25,7 +25,7 @@
 #include <aifwdefs.h>
 
 // Forward declarations
-class THsPublisherInfo;
+class TAiFwPublisherInfo;
 
 /**
  * Active Idle Framework internal state handling interface. 
@@ -43,22 +43,17 @@ public:
      * Instructs to load plugin
      * 
      * @since S60 5.2
-     * @param aPublisherInfo plugin to load
-     * @param aReason startup reason 
-     * @return Error code, KErrNone if loaded succesfully.
+     * @param aPublisherInfo plugin to load    
      */    
-    virtual TInt LoadPlugin( const THsPublisherInfo& aPublisherInfo,
-        TAiFwLoadReason aReason ) = 0;
+    virtual void LoadPlugin( const TAiFwPublisherInfo& aPublisher ) = 0;        
     
     /** 
      * Instructs to destroy plugin
      * 
      * @since S60 5.2
      * @param aPublisherInfo plugin to destroy
-     * @param aReason shutdown reason
      */
-    virtual void DestroyPlugin( const THsPublisherInfo& aPublisherInfo,
-        TAiFwDestroyReason aReason ) = 0;
+    virtual void DestroyPlugin( const TAiFwPublisherInfo& aPublisher ) = 0;                
     
     /**
      * Instructs to change all plugins' state
@@ -67,7 +62,6 @@ public:
      * @param aState State to change
      */
     virtual void ChangePluginState( TAiFwState aState ) = 0;
-
     };
 
 #endif // M_AIFWSTATEHANDLER_H

@@ -99,10 +99,16 @@ public:  // new functions
     
     /**
     * Registers to CPS for add, delete , update and execute notifications
-    * @aFilter - filter for input parameter list
+    * 
+    * @param aFilter filter for input parameter list
+    * @param aRegistry Publisher or content registry
+    * @param aOptions Options for the registration
+    * 
     * @return void.
     */
-    void RegisterL( CLiwDefaultMap* aFilter, const TDesC& aRegistry );
+    void RegisterL( CLiwDefaultMap* aFilter, 
+                    const TDesC& aRegistry, 
+                    TUint aOptions = 0 );
 
     /**
     * Cancel all the registered notifications. 
@@ -115,7 +121,9 @@ private: // data
     /** Interface Reference, not owned */    
     MLiwInterface* iInterface;   
     /** Reference of the sapi data, not owned */
-    CSapiData* iData;    
+    CSapiData* iData;
+    /** Transaction Id */
+    TInt32 iTransactionId;
     };
 
 #endif // SAPIDATAOBSERVER_H

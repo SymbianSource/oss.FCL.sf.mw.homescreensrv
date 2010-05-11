@@ -28,5 +28,7 @@ PRJ_EXPORTS
 ../inc/aifwstatehandler.h        MW_LAYER_PLATFORM_EXPORT_PATH(aifwstatehandler.h)
 ../inc/aiuicontroller.h          MW_LAYER_PLATFORM_EXPORT_PATH(aiuicontroller.h)
 ../inc/aiuiidleintegration.h     MW_LAYER_PLATFORM_EXPORT_PATH(aiuiidleintegration.h)
-../inc/debug.h                   MW_LAYER_PLATFORM_EXPORT_PATH(debug.h) // needed?
+../inc/debug.h                   MW_LAYER_PLATFORM_EXPORT_PATH(debug.h) 
 ../inc/aifwdefs.h                MW_LAYER_PLATFORM_EXPORT_PATH(aifwdefs.h)
+../inc/aifwpublisherinfo.h       MW_LAYER_PLATFORM_EXPORT_PATH(aifwpublisherinfo.h)
+../inc/aifwpublisherinfo.inl     MW_LAYER_PLATFORM_EXPORT_PATH(aifwpublisherinfo.inl)

@@ -112,6 +112,13 @@ public:
      */
     RPointerArray<CLiwDefaultList>& GetNotifications( ); 
 
+    /**
+     * Get DataMap Cache
+     *
+     * @return DataMap cache reference
+     */
+    TLiwVariant& GetDataMapCache();
+    
 private:
     // From CActive
 
@@ -222,6 +229,12 @@ private:
      * activation during startup 
      */
     RPointerArray<CLiwDefaultList> iNotifications;
+    
+    /*
+     * Own.
+     */
+    TLiwVariant iDataMapCache;
+    
     };
 
 #endif // C_CCPSERVER_H

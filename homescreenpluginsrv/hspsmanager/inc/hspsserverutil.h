@@ -570,15 +570,25 @@ class hspsServerUtil
 	     * @param aFs is a reference to open file server session handle
 	     * @param aDriveArray An array of drives in search order
 	     * @param aPath Relative path to be found
-	     * @param aFolders Search results or empty
-	     * @param aRecursive True if files should be found from any sudirectories 
+	     * @param aFileArray Search results or empty
+	     * @param aDeviceLanguages An array of languages the HW supports
+	     * @param aRecursive True if files should be found from any sudirectories	     
 	     */	    	    
-	    static void FindFilesRecursivelyL(
+	    static void FindResourcesL(
                 RFs& aFs,
                 const RArray<TInt>& aDriveArray, 
                 const TDesC& aPath,        
-                RPointerArray<HBufC>& aFolders,
+                RPointerArray<HBufC>& aFileArray,
+                CArrayFixFlat<TInt>* aDeviceLanguages,
                 TBool aRecursive = EFalse );
+	    
+	    /**
+	     * Returns an array of languages which can be used in the UI.
+	     * @since S60 5.2
+	     * @param aLanguages Array of language ids
+	     */
+	    static void GetInstalledLanguagesL(
+	            CArrayFixFlat<TInt>*& aLanguages );
 	    
 	private:
         /**

@@ -30,6 +30,7 @@
 class CAiUiControllerManager;
 class CAiStateManager;
 class CAiCpsCommandBuffer;
+class TAiFwPublisherInfo;
 class CHsContentPublisher;
 class THsPublisherInfo;
 
@@ -42,7 +43,7 @@ class THsPublisherInfo;
  *  @lib aifw
  *  @since S60 5.2
  */
-NONSHARABLE_CLASS( CAiPluginFactory ) : public CBase
+NONSHARABLE_CLASS( CAiPluginFactory ) : public CTimer
 	{
 public:
     // Constructors and destructor
@@ -51,7 +52,12 @@ public:
      * Two-phased constructor.
      */	
     static CAiPluginFactory* NewL( CAiUiControllerManager& aManager );
-	
+
+    /**
+     * 2nd phase constructor
+     */
+    void ConstructL();
+    
     /**
      * Destructor
      */    
@@ -59,26 +65,30 @@ public:
 
 public:
     // new functions
-		
-    /**
-     * Create plugin
-     *
-     * @since S60 5.2
-     * @param aPublisherInfo plugin to create. Factory keeps plugin's ownership. 
-     * @return KErrNone if plugin is created succesfully, otherwise system wide error code.      
-     */
-    TInt CreatePlugin( 
-        const THsPublisherInfo& aPublisherInfo );						
-                         						
-    /**
-     * Destroy plugin
-     *
-     * @since S60 5.2
-     * @param aPublisherInfo plugin to destroy.      
-     */
-    void DestroyPlugin( 
-        const THsPublisherInfo& aPublisherInfo );		    
 
+    /**
+     * Lists KInterfaceUidHsContentPlugin ECom implementations 
+     * 
+     * @since S60 5.2
+     */
+    void ListImplementationsL();
+    
+    /**
+     * Schedules plugin loading
+     *
+     * @since S60 5.2
+     * @param aInfo Plugin to load           
+     */    
+    void LoadPlugin( const TAiFwPublisherInfo& aInfo );
+
+    /**
+     * Schedules plugin destroyal
+     *
+     * @since S60 5.2
+     * @param aInfo Plugin to destroy
+     */        
+    void DestroyPlugin( const TAiFwPublisherInfo& aInfo );
+    
     /**
      * Destroy plugin
      *
@@ -86,8 +96,22 @@ public:
      * @param aUid Implementation UID of a plugin to destroy.
      */
     void DestroyPlugin( 
-        const TUid& aUid );           
-
+        const TUid& aUid );      
+    
+    /**
+     * Destroys all plugins during system shutdown
+     * 
+     * @since S60 5.2
+     */
+    void DestroyAllPlugins();
+    
+    /**
+     * Flushes cps command buffer
+     * 
+     * @since S60 5.2
+     */    
+    void FlushCommandBuffer();
+    
     /**
      * Finds plugin by publisher info.
      *
@@ -117,20 +141,36 @@ public:
     CHsContentPublisher* PluginByName( const TDesC& aName ) const;
       
     /**
-     * Sets cps command buffer
+     * Sets state manager
      * 
      * @since S60 5.2
-     * @param aCommanddBuffer Command buffer
+     * @param aStateManager State Manager
      */
-    void SetCommandBuffer( CAiCpsCommandBuffer* aCommanddBuffer );
+    void SetStateManager( CAiStateManager* aStateManager );
+    
+    /**
+     * Gets all plugins from factory
+     * 
+     * @since S60 5.2
+     * @return Array of plugins
+     */
+    RPointerArray< CHsContentPublisher >& Publishers() const;
+        
+private:
+    // from CTimer
+    
+    /**
+     * @see CTimer
+     */
+    void RunL();
+    
+    /**
+     * @see CTimer
+     */
+    void DoCancel();
     
 private:	
     // private constructors
-
-    /**
-     * Leaving constructor
-     */
-    void ConstructL();
     
     /**
      * C++ default constructor
@@ -139,35 +179,52 @@ private:
 		
 private:    								
     // new functions
-	       
-    void CreatePluginL( 
-        const THsPublisherInfo& aPublisherInfo );
-                            
-    void SubscribeContentObserversL( 
+	      
+    TInt DoCreatePlugin( 
+        const TAiFwPublisherInfo& aPublisherInfo );                     
+                                                
+    void DoDestroyPlugin( 
+        const TAiFwPublisherInfo& aPublisherInfo );         
+    
+    void DoCreatePluginL( 
+        const TAiFwPublisherInfo& aPublisherInfo );
+                 
+    void SubscribePluginL( 
         CHsContentPublisher& aContentPublisher,		    
         const THsPublisherInfo& aPublisherInfo );
                                          
     void ConfigurePluginL(         
         CHsContentPublisher& aContentPublisher,
         const THsPublisherInfo& aPublisherInfo );		                           
-    
-    RPointerArray< CHsContentPublisher >& Publishers() const;
+           
+    void HandleQueueChanged();
         
+    static TInt ProcessQueue( TAny* aAny );
+    
 private:     
     // data	
 
     /** UI Controller Manager, Not owned */
     CAiUiControllerManager& iUiControllerManager;
-    /** Cps command buffer, Not owned */
+    /** State Manager, Not owned */
+    CAiStateManager* iStateManager;
+    /** Cps command buffer, Owned */
     CAiCpsCommandBuffer* iCommandBuffer;
+    /** Queue starter, Owned */
+    CPeriodic* iStarter;
     /** Array of loaded data plugins, Owned */
     mutable RPointerArray< CHsContentPublisher > iPublishers;
     /** Ecom implementation info, Owned */
     RImplInfoPtrArray iEComPlugins;		          
+    /** Load queue, Owned */
+    RArray< TAiFwPublisherInfo > iLoadQueue;
+    /** Destroy queue, Owned */
+    RArray< TAiFwPublisherInfo > iDestroyQueue;
+    /** Flag to determine wheter flush is allowed */
+    TBool iAllowFlush;
     
 private: 
     // friend classes
-    friend class CAiStateManager;
     
 #ifdef _AIFW_UNIT_TEST
     friend class UT_AiPluginFactory;

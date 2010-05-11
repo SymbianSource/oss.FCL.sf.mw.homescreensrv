@@ -84,6 +84,7 @@ LIBRARY     hspsdefinitionengineinterface.lib
 LIBRARY     ecom.lib // definition engine
 LIBRARY     MemMan.lib
 LIBRARY     ws32.lib    // RWsSession
+LIBRARY     SysLangUtil.lib
 
 #ifdef _hsps_DEBUG_
 LIBRARY     flogger.lib

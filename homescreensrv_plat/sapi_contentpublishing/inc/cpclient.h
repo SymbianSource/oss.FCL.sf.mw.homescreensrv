@@ -96,10 +96,14 @@ public:
      * Send command to server to Register observer for notifications
      *
      * @since S6CCPActiveNotifierNotifier v 5.CCPActiveNotifierNotifier
-     * @param aObserver 
+     * @param aObserver callback pointer
+     * @param aInParamList input parameter list 
+     * @param aCmdOptions options for the command     
      */
     void RegisterObserverL( MLiwNotifyCallback* aObserver,
-        const CLiwGenericParamList& aInParamList, TInt32 aTransactionId );
+                            const CLiwGenericParamList& aInParamList, 
+                            TInt32 aTransactionId,
+                            TUint aCmdOptions );
    
     /**
      * Unregister observer if Transaction Id provided or all observers if not

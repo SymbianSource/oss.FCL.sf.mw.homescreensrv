@@ -29,7 +29,7 @@
 
 // Forward declarations
 class CAiPluginFactory;
-class CAiCpsCommandBuffer;
+class TAiFwPublisherInfo;
 class CHsContentPublisher;
 class THsPublisherInfo;
 
@@ -38,7 +38,7 @@ class THsPublisherInfo;
  * 
  * @ingroup group_aifw
  * @lib aifw.lib
- * @since S60 5.0
+ * @since S60 5.2
  */
 NONSHARABLE_CLASS( CAiStateManager ) : public CBase,
     public MAiStateObserver
@@ -102,14 +102,12 @@ private:
     /**
      * @see MAiStateObserver
      */    
-    TInt NotifyLoadPlugin( const THsPublisherInfo& aInfo, 
-        TAiFwLoadReason aReason );
+    void NotifyLoadPlugin( const TAiFwPublisherInfo& aInfo );         
     
     /**
      * @see MAiStateObserver
      */    
-    void NotifyDestroyPlugin( const THsPublisherInfo& aInfo,
-        TAiFwDestroyReason aReason );
+    void NotifyDestroyPlugin( const TAiFwPublisherInfo& aInfo );        
 
     /**
      * @see MAiStateObserver
@@ -122,6 +120,27 @@ private:
      */            
     void NotifyReleasePlugins( const RArray<TUid>& aUidList );
 
+public:
+    // new functions
+    
+    /** 
+     * Runs plugin startup sequence
+     * 
+     * @since S60 5.2     
+     * @param aPlugin Plugin to start
+     * @param aReason Start reason
+     */
+    void StartPlugin( CHsContentPublisher& aPlugin, TInt aReason ); 
+        
+    /** 
+     * Runs plugin shutdown sequence
+     * 
+     * @since S60 5.2     
+     * @param aPlugin Plugin to stop
+     * @param aReason Stop reason
+     */    
+    void StopPlugin( CHsContentPublisher& aPlugin, TInt aReason );        
+        
 private:
     // new functions
         
@@ -162,48 +181,12 @@ private:
      * @since S60 5.2
      */
     void ProcessOnlineStateChange();
-    
-    /** 
-     * Runs plugin startup sequence
-     * 
-     * @since S60 5.2     
-     * @param aPlugin Plugin to start
-     * @param aReason Start reason
-     */
-    void StartPlugin( CHsContentPublisher& aPlugin, 
-        CHsContentPublisher::TStartReason aReason );
-
-    /** 
-     * Runs plugin shutdown sequence
-     * 
-     * @since S60 5.2     
-     * @param aPlugin Plugin to stop
-     * @param aReason Stop reason
-     */    
-    void StopPlugin( CHsContentPublisher& aPlugin,
-        CHsContentPublisher::TStopReason aReason );
-        
-    /**
-     * Destroys all plugins from plugin factory
-     * 
-     * @since S60 5.2
-     */
-    void DestroyPlugins();
-                         
-    /**
-     * Flushes cps command buffer
-     * 
-     * @since S60 5.2
-     */
-    void FlushCommandBuffer();
-    
+                                         
 private:
     // data
     
     /** Plugin Factory, Not owned */
     CAiPluginFactory& iFactory;
-    /** CPS Command buffer, Owned */
-    CAiCpsCommandBuffer* iCommandBuffer;
     /** Current state */
     TState iCurrentState;    
     /** Flags */
@@ -212,7 +195,7 @@ private:
     TBool iHalt;   
     /** List of plugins which should be reloaded */
     RArray<THsPublisherInfo> iReloadPlugins;
-
+    
 private:
     // friend classes
     

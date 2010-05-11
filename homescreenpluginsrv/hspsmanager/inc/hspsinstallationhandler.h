@@ -650,7 +650,22 @@ class ChspsInstallationHandler : public CBase,
                 HBufC8& aValue8, 
                 const TDesC8& aTag,
                 HBufC*& aResultString );
-                
+
+
+        /**
+         * Find resource files
+         * @since S60 5.0
+         * @param aPath Path to files
+         * @param aRecursive Is recursive search
+         * @param aDriveArray Drives to search
+         * @param aDeviceLanguages Required languages
+         */
+
+        void ChspsInstallationHandler::FindResourceFilesL( const TDesC& aPath,
+            const TBool aRecursive,
+            RArray<TInt>& aDriveArray,
+            CArrayFixFlat<TInt>* aDeviceLanguages );
+
     public: 
         
         ChspsResult* iResult;

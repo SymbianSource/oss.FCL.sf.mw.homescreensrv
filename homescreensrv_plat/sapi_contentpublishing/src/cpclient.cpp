@@ -144,7 +144,9 @@ void CCPClient::DeleteL( const CLiwGenericParamList& aInParamList )
 // -----------------------------------------------------------------------------
 //    
 void CCPClient::RegisterObserverL( MLiwNotifyCallback* aObserver,
-    const CLiwGenericParamList& aInParamList, TInt32 aTransactionId )
+                                   const CLiwGenericParamList& aInParamList, 
+                                   TInt32 aTransactionId, 
+                                   TUint aCmdOptions )
     {
     CP_DEBUG( _L8("CCPClient::RegisterObserverL()") );
     CP_EXTENDED_DEBUG( "RegisterObserver()" , aInParamList );
@@ -156,7 +158,8 @@ void CCPClient::RegisterObserverL( MLiwNotifyCallback* aObserver,
         {
         iActiveNotifier = CCPActiveNotifier::NewL( iServerClient );
         }
-    iActiveNotifier->RegisterL( aObserver, aTransactionId, inMapForServer );
+    iActiveNotifier->RegisterL( aObserver, aTransactionId, inMapForServer,
+                                                           aCmdOptions );
     CleanupStack::PopAndDestroy( inMapForServer );
     }
 

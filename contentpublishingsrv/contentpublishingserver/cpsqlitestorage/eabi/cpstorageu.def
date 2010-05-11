@@ -1,3 +1,3 @@
 EXPORTS
-	_ZN14StorageFactory12NewDatabaseLEv @ 1 NONAME
+	_ZN14StorageFactory12NewDatabaseLER11TLiwVariant @ 1 NONAME
 

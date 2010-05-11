@@ -224,6 +224,9 @@ void CAiFw::AppEnvReadyL()
     // Create WS pluign manager
     iWsPluginManager = CAiWsPluginManager::NewL( env );
     
+    // Finalise factory construction
+    iFactory->ConstructL();
+    
     // Start state provider
     iStateProvider->StartL( env );
                
@@ -335,6 +338,9 @@ void CAiFw::HandleUiShutdown( CAiUiController& aUiController )
         iWsPluginManager = NULL;
         
         iStateProvider->Stop();
+        
+        delete iFactory;
+        iFactory = NULL;
         }
     }
 

@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Internal array type definition
+* Description:  AiFw definitions
 *
 */
 

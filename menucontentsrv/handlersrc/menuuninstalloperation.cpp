@@ -33,7 +33,33 @@ _LIT8( KWidgetMimeType, "application/x-nokia-widget");
 
 const TUid KMidletType = { 0x10210E26 };
 
-// ================= MEMBER FUNCTIONS =======================
+
+// ========================= LOCAL FUNCTIONS ===============
+
+// ---------------------------------------------------------
+// CleanupResetAndDestroy()
+// ---------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroy( TAny* aObj )
+    {
+    if( aObj )
+        {
+        static_cast<T*>( aObj )->ResetAndDestroy();
+        }
+    }
+
+// ---------------------------------------------------------
+// CleanupResetAndDestroyPushL
+// ---------------------------------------------------------
+//
+template<class T>
+static void CleanupResetAndDestroyPushL(T& aArray)
+    {
+    CleanupStack::PushL( TCleanupItem( &CleanupResetAndDestroy<T>, &aArray ) );
+    }
+
+// ========================= MEMBER FUNCTIONS ==============
 
 // ---------------------------------------------------------
 // CMenuUninstallOperation::~CMenuUninstallOperation
@@ -217,7 +243,7 @@ TBool CMenuUninstallOperation::GetInstallPkgUidL( const TDesC& aAppFullName, TUi
     iSisRegSession.InstalledUidsL( packageIds );
     
     RPointerArray< HBufC > packageFiles;
-    CleanupClosePushL( packageFiles );
+    CleanupResetAndDestroyPushL( packageFiles );
     
     for( TInt i = 0; i < packageIds.Count() && !found; ++i )
         {
@@ -239,7 +265,6 @@ TBool CMenuUninstallOperation::GetInstallPkgUidL( const TDesC& aAppFullName, TUi
 	                found = ETrue;
 	                }
 	            }
-	        packageFiles.ResetAndDestroy();
 	        CleanupStack::PopAndDestroy( &packageEntry );    
         	}
         }

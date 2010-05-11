@@ -19,7 +19,7 @@
 #include "cpstoragefactory.h"
 #include "cpstorageengine.h"
 
-EXPORT_C CCpStorage* StorageFactory::NewDatabaseL()
+EXPORT_C CCpStorage* StorageFactory::NewDatabaseL(TLiwVariant& aDataMapCache)
     {
-    return CCpStorageEngine::NewL();
+    return CCpStorageEngine::NewL(aDataMapCache);
     }

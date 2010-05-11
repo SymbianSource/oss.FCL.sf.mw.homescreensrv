@@ -67,6 +67,15 @@ public:
     void AppendL( const CLiwGenericParamList* aParamList); 
     
     /**
+     * Appends empty item to the cache to indicate that the entry 
+     * doesn't exist in a storage and it makes not sense to call GetList
+     * operation on a storage
+     * 
+     * @param aIdsMap a map containing entry identifiers
+     */
+    void AppendEmptyL( const CLiwMap* aIdsMap );
+
+    /**
      * Checks if it is possible to cache the item. 
      * Only items that are specified, which means that id or 
      * all parameters ( publisher, content_type, content_id ) are provided
@@ -113,6 +122,23 @@ private:
      * @return ETrue if items match , EFalse if not
      */
     TBool MatchL(const CLiwMap* aCachedMap, const CLiwMap* aInputMap);
+    
+    /**
+     * Checks if types of two items match
+     * 
+     * @param aCachedMap a map from the cache containing item identifiers 
+     * @param aInputMap an input map containing item identifiers 
+     * @return ETrue if types match , EFalse if not
+     */
+    TBool TypesMatchL(const CLiwMap* aCachedMap, const CLiwMap* aInputMap);
+    
+    /**
+     * Extracts RBuf from a variant
+     * 
+     * @param aVariant a variant
+     * @param aBuf a result descriptor
+     */
+    void ExtractRBufL(const TLiwVariant& aVariant, RBuf& aBuf);
     
     /**
      * Checks if two strings contained in both maps match

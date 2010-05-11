@@ -26,6 +26,7 @@
 #include "cpglobals.h"
 #include "cpserverdef.h"
 
+static const int KMaxKeyLength =  256;
 using namespace LIW;
 // ======== MEMBER FUNCTIONS ========
 
@@ -33,7 +34,8 @@ using namespace LIW;
 // 
 // ---------------------------------------------------------------------------
 //
-CCPNotificationHandler::CCPNotificationHandler()
+CCPNotificationHandler::CCPNotificationHandler( TLiwVariant& aDataMapCache ):
+        iDataMapCache(aDataMapCache)
     {
 
     }
@@ -57,11 +59,11 @@ void CCPNotificationHandler::ConstructL( RPointerArray<CLiwDefaultList>&
 // 
 // ---------------------------------------------------------------------------
 //
-CCPNotificationHandler* CCPNotificationHandler::NewL(  
-        RPointerArray<CLiwDefaultList>& aNotifications )
+CCPNotificationHandler* CCPNotificationHandler::NewL(RPointerArray<
+        CLiwDefaultList>& aNotifications, TLiwVariant& aDataMapCache)
     {
-    CCPNotificationHandler* self = CCPNotificationHandler::NewLC( 
-                                                            aNotifications );
+    CCPNotificationHandler* self = CCPNotificationHandler::NewLC(
+            aNotifications, aDataMapCache);
     CleanupStack::Pop( self );
     return self;
     }
@@ -70,10 +72,11 @@ CCPNotificationHandler* CCPNotificationHandler::NewL(
 // 
 // ---------------------------------------------------------------------------
 //
-CCPNotificationHandler* CCPNotificationHandler::NewLC( 
-        RPointerArray<CLiwDefaultList>& aNotifications )
+CCPNotificationHandler* CCPNotificationHandler::NewLC(RPointerArray<
+        CLiwDefaultList>& aNotifications, TLiwVariant& aDataMapCache)
     {
-    CCPNotificationHandler* self = new( ELeave ) CCPNotificationHandler;
+    CCPNotificationHandler* self = new (ELeave) CCPNotificationHandler(
+            aDataMapCache);
     CleanupStack::PushL( self );
     self->ConstructL( aNotifications );
     return self;
@@ -99,6 +102,7 @@ CCPNotificationHandler::~CCPNotificationHandler()
         transaction = iter.NextKey( );
         }  
     iFilters.Close();    
+    iExtendedFlags.Close();
     Reset( );
     for ( TInt i(0); i< iNotifications.Count( ); i++ )
         {
@@ -131,6 +135,9 @@ void CCPNotificationHandler::SaveMessageL( const RMessage2& aMessage )
     		CCPLiwMap* filterMap = CCPLiwMap::NewL( datastrm );
     		CleanupStack::PushL( filterMap );
     		iFilters.InsertL( transactionId, filterMap );
+    	    TUint options = static_cast<TUint> (aMessage.Int2()); // 2 == KOptionsPosition
+            iExtendedFlags.InsertL(transactionId, options
+                    & KExtendedNotifications);
     		CleanupStack::Pop( filterMap );
     		CleanupStack::PopAndDestroy( &datastrm );
     		CleanupStack::PopAndDestroy( buffer );
@@ -160,6 +167,9 @@ void CCPNotificationHandler::AddObserverL( const RMessage2& aMessage )
         CCPLiwMap* filterMap = CCPLiwMap::NewL( datastrm );
 		CleanupStack::PushL( filterMap );
         iFilters.InsertL( transactionId, filterMap );
+        TUint options = static_cast<TUint> (aMessage.Int2()); // 2 == KOptionsPosition
+        iExtendedFlags.InsertL(transactionId, options
+                & KExtendedNotifications);
 		CleanupStack::Pop( filterMap );
         CleanupStack::PopAndDestroy( &datastrm );
         CleanupStack::PopAndDestroy( buffer );
@@ -177,6 +187,7 @@ void CCPNotificationHandler::RemoveObserverL( const RMessage2& aMessage )
     filter->Reset();
     filter->Close();
     iFilters.Remove( transactionId );
+    iExtendedFlags.Remove( transactionId );
     }
 
 // -----------------------------------------------------------------------------
@@ -297,7 +308,6 @@ TBool CCPNotificationHandler::SendChangeInfoListL(
     const CCPLiwMap*const* filter = iter.NextValue( );
     while( filter )
         {
-        
         CLiwDefaultList* listOfMatchingMaps = CLiwDefaultList::NewLC( );
         TInt count = aListOfMaps->Count( );
         //for every item in the input list
@@ -308,9 +318,33 @@ TBool CCPNotificationHandler::SendChangeInfoListL(
 			aListOfMaps->AtL( j, variant );
             if ( variant.TypeId() == EVariantTypeMap )
                 {
-                if ( IsProperForFilterL( *variant.AsMap(), **filter ) )
+                const CLiwMap* map = variant.AsMap();
+                if ( IsProperForFilterL( *map, **filter ) )
                     {
-                    listOfMatchingMaps->AppendL( variant );
+                    if (iExtendedFlags.FindL(*iter.CurrentKey())
+                            && (iDataMapCache.TypeId() == EVariantTypeDesC8))
+                        {
+                        //extended notifications - append data map
+                        CLiwDefaultMap* extendedMap = CLiwDefaultMap::NewLC();
+                        TInt count = map->Count();
+                        for(TInt i=0; i<count;i++)
+                            {
+                            TLiwVariant temporary;
+                            temporary.PushL();
+                            TBuf8<KMaxKeyLength> key;
+                            map->AtL(i,key);
+                            map->FindL(key, temporary);
+                            extendedMap->InsertL(key,temporary);
+                            CleanupStack::PopAndDestroy(&temporary);
+                            }
+                        extendedMap->InsertL(KDataMap,iDataMapCache);
+                        listOfMatchingMaps->AppendL( TLiwVariant(extendedMap) );
+                        CleanupStack::PopAndDestroy(extendedMap);
+                        }
+                    else
+                        {
+                        listOfMatchingMaps->AppendL( variant );
+                        }
                     }
                 }
             CleanupStack::PopAndDestroy( &variant );
@@ -325,7 +359,6 @@ TBool CCPNotificationHandler::SendChangeInfoListL(
 		CleanupStack::PopAndDestroy( listOfMatchingMaps );
 		filter = iter.NextValue( );
         }
-
     if( iChangeInfoList->Count( ) )
     	{
     	TPckgBuf<TInt> sizeDes( iChangeInfoList->Size( ) );

@@ -29,7 +29,7 @@ class CCPDebug;
 #endif
 class MCPChangeNotifier;
 class CRepository;
-
+class TLiwVariant;
 // CLASS DECLARATION
 /**
  *  SQLite based databse for Content Publisher 
@@ -44,12 +44,12 @@ public:
     /**
      * Two-phased constructor.
      */
-    static CCpStorageEngine* NewL();
+    static CCpStorageEngine* NewL(TLiwVariant& aDataMapCache);
 
     /**
      * Two-phased constructor.
      */
-    static CCpStorageEngine* NewLC();
+    static CCpStorageEngine* NewLC(TLiwVariant& aDataMapCache);
 
     /**
      * Destructor.
@@ -95,7 +95,7 @@ private:
     /**
      * C++ default constructor.
      */
-    CCpStorageEngine();
+    CCpStorageEngine(TLiwVariant& aDataMapCache);
 
     /**
      * Creates database tables.
@@ -136,7 +136,11 @@ private:
      * Own.
      */
     CRepository* iRepository;
-
+    
+    /**
+     * Not own.
+     */
+    TLiwVariant& iDataMapCache;
 #ifdef CONTENT_PUBLISHER_DEBUG
     CCPDebug* iDebug;
 #endif

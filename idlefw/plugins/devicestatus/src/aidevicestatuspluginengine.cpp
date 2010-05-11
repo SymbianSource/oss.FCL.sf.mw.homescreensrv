@@ -167,6 +167,25 @@ void CAiDeviceStatusPluginEngine::ResumePublishersL()
 	}
 
 // ----------------------------------------------------------------------------
+// CAiDeviceStatusPluginEngine::RefreshActivePublishersL
+//
+// ----------------------------------------------------------------------------
+//
+void CAiDeviceStatusPluginEngine::RefreshActivePublishersL( TBool aClean )
+    {
+    iContentObserver->StartTransaction( KImplUidDevStaPlugin );
+
+    const TInt count( iPublishers.Count() );
+
+    for ( TInt i( 0 ); i < count; i++ )
+        {
+        iPublishers[i]->RefreshIfActiveL( aClean );
+        }    
+        
+    iContentObserver->Commit( KImplUidDevStaPlugin );
+    }
+
+// ----------------------------------------------------------------------------
 // CAiDeviceStatusPluginEngine::RefreshPublishersL
 //
 // ----------------------------------------------------------------------------

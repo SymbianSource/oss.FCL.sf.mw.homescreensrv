@@ -163,10 +163,10 @@ class ChspsRomInstaller : public CActive
          * @since S60 5.0
          */
         void FindInstallationFilesL(  
-                RPointerArray<HBufC>& aFolders );
+                RPointerArray<HBufC>& aFileArray );
         
         void DoFindInstallationFilesL(  
-                RPointerArray<HBufC>& aFolders,
+                RPointerArray<HBufC>& aFileArray,
                 const TDesC& aPath );
         
         /**

@@ -93,7 +93,7 @@ void CCPServer::ConstructL()
     iBURListener = CCPServerBURListener::NewL(this);
     iCountSession = 0;
     iBURLock = iBURListener->CheckBUR();
-    iDataManager = CCPDataManager::NewL(iBURLock);
+    iDataManager = CCPDataManager::NewL(iDataMapCache, iBURLock);
     iActionHandlerThread = CCPActionHandlerThread::NewL();
     if (!iBURLock)
         {
@@ -123,6 +123,7 @@ CCPServer* CCPServer::NewLC()
 CCPServer::~CCPServer()
     {
     CP_DEBUG( _L8("CCPServer::~CCPServer()" ) );
+    iDataMapCache.Reset();
     for ( TInt i(0); i< iNotifications.Count( ); i++ )
         {
         iNotifications[i]->Close( );
@@ -171,7 +172,7 @@ void CCPServer::HandleBUREventL( TBURStatus aStatus )
         }
     else
         {
-        iDataManager->OpenDatabaseL( );
+        iDataManager->OpenDatabaseL(iDataMapCache);
         iBURLock = EFalse;
         }
     }
@@ -192,6 +193,15 @@ TBool CCPServer::GetLock()
 RPointerArray<CLiwDefaultList>& CCPServer::GetNotifications( ) 
     {
     return iNotifications;
+    }
+
+// -----------------------------------------------------------------------------
+// CCPServer::GetDataMapCache
+// -----------------------------------------------------------------------------
+//
+TLiwVariant& CCPServer::GetDataMapCache()
+    {
+    return iDataMapCache;
     }
 
 

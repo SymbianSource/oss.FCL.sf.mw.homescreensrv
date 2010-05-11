@@ -26,6 +26,7 @@
 
 // Forward declarations
 class CLiwGenericParamList;
+class CLiwDefaultMap;
 // Constants
 
 /**

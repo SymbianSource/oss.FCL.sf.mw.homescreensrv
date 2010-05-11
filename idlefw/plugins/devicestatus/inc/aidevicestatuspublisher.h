@@ -89,6 +89,15 @@ public:
     virtual TBool RefreshL( TInt /*aContentId*/, TBool /*aClean*/ ) { return EFalse; }
 
     /**
+     * Refresh publisher if not suspended.
+     *
+     * This has the same effect as the publisher would get content update from system.
+     * Publisher publishes content if it is available.
+	 * @param aClean ETrue if current content needs to be cleaned.
+     */
+    virtual void RefreshIfActiveL( TBool /*aClean*/ ) {};
+
+    /**
      * Suspends specific content.
      *     
      * Publisher suspends content publishing specified by aContentId.

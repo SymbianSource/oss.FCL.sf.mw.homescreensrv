@@ -17,13 +17,13 @@ EXPORTS
 	_ZN25ChspsDefinitionRepository21GetThemeListAsStreamLER12CArrayPtrSegI6HBufC8ERK8ChspsODT @ 16 NONAME
 	_ZN25ChspsDefinitionRepository26RestoreBackupConfigurationERK8ChspsODT @ 17 NONAME
 	_ZN25ChspsDefinitionRepository4LockEv @ 18 NONAME
-	_ZN25ChspsDefinitionRepository4NewLEv @ 19 NONAME
+	_ZN25ChspsDefinitionRepository4NewLER11CRepository @ 19 NONAME
 	_ZN25ChspsDefinitionRepository6UnlockEv @ 20 NONAME
 	_ZN25ChspsDefinitionRepository7GetOdtLER8ChspsODT @ 21 NONAME
 	_ZN25ChspsDefinitionRepository7GetOdtLERK6TDes16R8ChspsODT @ 22 NONAME
 	_ZN25ChspsDefinitionRepository7SetOdtLERK8ChspsODT @ 23 NONAME
 	_ZN25ChspsDefinitionRepository9SetLogBusEPv @ 24 NONAME
 	_ZNK25ChspsDefinitionRepository6LockedEv @ 25 NONAME
-	_ZTI25ChspsDefinitionRepository @ 26 NONAME ; #<TI>#
-	_ZTV25ChspsDefinitionRepository @ 27 NONAME ; #<VT>#
+	_ZTI25ChspsDefinitionRepository @ 26 NONAME
+	_ZTV25ChspsDefinitionRepository @ 27 NONAME
 

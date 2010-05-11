@@ -568,28 +568,15 @@ void ChspsMaintenanceHandler::ServiceAddPluginL( const RMessage2& aMessage )
                         }
 #endif
                     }
+                else
+                    {
+                    iThemeServer.SetResourceFileCopyRequired( appODT->RootUid() );
+                    }
                 }
-            
+                        
             // Unlock after the changes have been done
             iDefinitionRepository.Unlock();
-            CleanupStack::Pop(&iDefinitionRepository);
-
-            if ( !err )
-                {
-                // Inform clients that the ODT has been modified
-                ThspsRepositoryInfo info( 
-                    ThspsRepositoryEvent(EhspsODTModified),
-                    appODT->RootUid(),
-                    appODT->ThemeUid(),
-                    aMessage.SecureId().iId,
-                    appODT->ProviderUid(),
-                    0,
-                    0,
-                    pluginUid,usedPluginId,ETrue,
-                    pluginODT->ThemeFullName(),
-                    (TLanguage)(appODT->OdtLanguage() ) );                                
-                iDefinitionRepository.RegisterNotification( info );
-                }                                        
+            CleanupStack::Pop(&iDefinitionRepository);                            
             }       
        }    
     
@@ -1200,23 +1187,6 @@ void ChspsMaintenanceHandler::ServiceRemovePluginL( const RMessage2& aMessage )
             // Unlock after the changes have been done
             iDefinitionRepository.Unlock();
             CleanupStack::Pop(&iDefinitionRepository);
-
-            if ( !err )
-                {
-                // Inform clients that the ODT has been modified
-                ThspsRepositoryInfo info( 
-                    ThspsRepositoryEvent(EhspsODTRemoved),
-                    appODT->RootUid(),
-                    appODT->ThemeUid(),
-                    aMessage.SecureId().iId,
-                    appODT->ProviderUid(),
-                    0,0,
-                    pluginUid,pluginId,ETrue,
-                    pluginName,
-                    (TLanguage)(appODT->OdtLanguage())
-                    );                                
-                iDefinitionRepository.RegisterNotification( info );
-                }                                        
             }       
        }    
     
@@ -1600,6 +1570,7 @@ void ChspsMaintenanceHandler::ServiceReplacePluginL( const RMessage2& aMessage )
 #endif                
                 // Stores the new application configuration into the repository
                 err = iDefinitionRepository.SetOdtL( *appODT );
+                                
                 // Unlock after the changes have been done
                 iDefinitionRepository.Unlock();
                 if ( err )
@@ -1610,26 +1581,11 @@ void ChspsMaintenanceHandler::ServiceReplacePluginL( const RMessage2& aMessage )
                         iLogBus->LogText( _L( "ChspsMaintenanceHandler::ServiceReplacePluginL(): - Updating failed" ) );
                         }
 #endif                    
-                    }
+                    }      
                 else
                     {
-                    // Inform clients that the ODT has been modified
-                    ThspsRepositoryInfo info( 
-                        ThspsRepositoryEvent(EhspsPluginReplaced),
-                        appODT->RootUid(),
-                        appODT->ThemeUid(),
-                        aMessage.SecureId().iId,
-                        0,
-                        0,
-                        0,
-                        confUid,
-                        pluginId,
-                        ETrue,
-                        KNullDesC(),
-                        (TLanguage)(appODT->OdtLanguage())
-                        );                                
-                    iDefinitionRepository.RegisterNotification( info );
-                    }
+                    iThemeServer.SetResourceFileCopyRequired( appODT->RootUid() );
+                    }                         
                 }
             else
                 {
@@ -3641,15 +3597,13 @@ void ChspsMaintenanceHandler::UpdatePluginFromAppConfsL( ChspsODT& aOdt,
                 odt->SetFlags( header->Flags() ); 
                 odt->SetMultiInstance( header->MultiInstance() );
                 User::LeaveIfError( iDefinitionRepository.GetOdtL( *odt ) );
-                     
                 
                 RArray<TInt> pluginIds;
-                
+                CleanupClosePushL( pluginIds );
                 hspsServerUtil::GetPluginIdsByUidL( *odt,
                                                     TUid::Uid( aOdt.ThemeUid() ),
                                                     pluginIds );
                
-                
                 if ( pluginIds.Count() > 0 )
                     {
                     
@@ -3660,8 +3614,6 @@ void ChspsMaintenanceHandler::UpdatePluginFromAppConfsL( ChspsODT& aOdt,
                             pluginIds );
                  
                     User::LeaveIfError( iDefinitionRepository.SetOdtL( *odt ) );
-                    
-                   
                         
                     TBool status = EFalse;
                     for(TInt i = 0; i < pluginIds.Count(); i++ )
@@ -3686,13 +3638,9 @@ void ChspsMaintenanceHandler::UpdatePluginFromAppConfsL( ChspsODT& aOdt,
                         aNotificationParams.Append(info);
                         }
                     }
-                        
-                    
-               
-                pluginIds.Close();
-                
-                CleanupStack::PopAndDestroy( odt );                        
-                                   
+
+                CleanupStack::PopAndDestroy(); // pluginIds.                
+                CleanupStack::PopAndDestroy( odt );                                   
                 }
             }
         

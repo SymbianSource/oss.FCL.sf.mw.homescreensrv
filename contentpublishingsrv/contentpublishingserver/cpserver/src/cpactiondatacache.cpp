@@ -20,6 +20,7 @@
 #include <liwcommon.h>
 #include <liwvariant.h>
 #include <s32mem.h>
+#include <escapeutils.h>
 
 #include "cpactiondatacache.h"
 #include "cpglobals.h"
@@ -28,7 +29,7 @@ using namespace LIW;
 
 _LIT8(KCachedMap, "cached_map");
 
-static const int KMaxCacheItems = 6; 
+static const int KMaxCacheItems = 18; 
 
 
 // ======== MEMBER FUNCTIONS ========
@@ -113,6 +114,7 @@ void CCPActionDataCache::AppendL( const CLiwGenericParamList* aParamList)
         {
         const CLiwMap* inputMap = param->Value().AsMap();
         CLiwDefaultMap* map = CLiwDefaultMap::NewLC();
+        CopyVariantL(KType, inputMap, map);
         CopyVariantL(KId, inputMap, map);
         CopyVariantL(KPublisherId, inputMap, map);
         CopyVariantL(KContentType, inputMap, map);
@@ -126,6 +128,22 @@ void CCPActionDataCache::AppendL( const CLiwGenericParamList* aParamList)
             iInternalList->Remove(0);
             }
         }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CCPActionDataCache::AppendEmptyL( const CLiwMap* aIdsMap )
+    {
+    CLiwDefaultMap* map = CLiwDefaultMap::NewLC();
+    CopyVariantL(KType, aIdsMap, map);
+    CopyVariantL(KId, aIdsMap, map);
+    CopyVariantL(KPublisherId, aIdsMap, map);
+    CopyVariantL(KContentType, aIdsMap, map);
+    CopyVariantL(KContentId, aIdsMap, map);
+    iInternalList->AppendL(TLiwVariant(map));
+    CleanupStack::PopAndDestroy(map);
     }
 
 // ---------------------------------------------------------------------------
@@ -203,24 +221,81 @@ TBool CCPActionDataCache::MatchL(const CLiwMap* aCachedMap,
     TLiwVariant l, r;
     l.PushL();
     r.PushL();
-    if (aCachedMap->FindL(KId, l) && aInputMap->FindL(KId, r) && l.AsTInt32()
-            == r.AsTInt32())
+    if (TypesMatchL(aCachedMap,aInputMap))
         {
-        idMatch = ETrue;
-        }
-    if (!idMatch)
-        {
-        if (MatchL(aCachedMap, aInputMap, KPublisherId) && MatchL(aCachedMap,
-                aInputMap, KContentType) && MatchL(aCachedMap, aInputMap,
-                KContentId))
+        if (aCachedMap->FindL(KId, l) && aInputMap->FindL(KId, r) && l.AsTInt32()
+                == r.AsTInt32())
             {
             idMatch = ETrue;
             }
+        if (!idMatch)
+            {
+            if (MatchL(aCachedMap, aInputMap, KPublisherId) && MatchL(aCachedMap,
+                    aInputMap, KContentType) && MatchL(aCachedMap, aInputMap,
+                    KContentId))
+                {
+                idMatch = ETrue;
+                }
+            }
         }
-
     CleanupStack::PopAndDestroy(&r);
     CleanupStack::PopAndDestroy(&l);
     return idMatch;
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+TBool CCPActionDataCache::TypesMatchL(const CLiwMap* aCachedMap,
+        const CLiwMap* aInputMap)
+    {
+    TBool typesMatch(EFalse);
+    TLiwVariant cacheVariant;
+    TLiwVariant inputVariant;
+    cacheVariant.PushL();
+    inputVariant.PushL();
+    if (aCachedMap->FindL(KType, cacheVariant) && aInputMap->FindL(KType,
+            inputVariant))
+        {
+        RBuf typeCache;
+        RBuf typeInput;
+        CleanupClosePushL(typeCache);
+        CleanupClosePushL(typeInput);
+        ExtractRBufL(cacheVariant, typeCache);
+        ExtractRBufL(inputVariant, typeInput);
+        if (typeCache.Compare(typeInput)==0)
+            {
+            typesMatch = ETrue;
+            }
+        CleanupStack::PopAndDestroy( &typeInput );
+        CleanupStack::PopAndDestroy( &typeCache );
+        }
+    CleanupStack::PopAndDestroy(&inputVariant);
+    CleanupStack::PopAndDestroy(&cacheVariant);
+    return typesMatch;
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CCPActionDataCache::ExtractRBufL(const TLiwVariant& aVariant, RBuf& aBuf)
+    {
+    TPtrC type( KNullDesC );
+    if( !aVariant.Get( type ) )
+        {
+        TPtrC8 type8( KNullDesC8 );
+        if( !aVariant.Get( type8 ) )
+            {
+            User::Leave( KErrBadName );
+            }
+        aBuf.Assign( EscapeUtils::ConvertToUnicodeFromUtf8L( type8 ) );
+        }
+    else
+        {
+        aBuf.CreateL( type );
+        }
     }
 
 // ---------------------------------------------------------------------------

@@ -59,9 +59,10 @@ public:
 	 */
 	enum TPluginStates
 		{
-		ENone,
+	    EStopped,
+	    EStarted,
 		EResume,
-		ESuspend
+		ESuspend			
 		};
 	
 public:
@@ -165,6 +166,12 @@ public:
      */
     TBool HasMenuItem( const TDesC16& aMenuItem );
      
+private:
+    // new functions
+    
+    void StartL( TStartReason aReason );
+    void StopL( TStopReason aReason );
+    
 public: 
     // new functions
 	
@@ -290,6 +297,8 @@ private:
     TPluginNetworkStatus iNetworkStatus;       
 	/** Plugin state */    
     TPluginStates iPluginState;
+    /** Flag to indicate whether observer is registered */
+    TBool iPubObsRegistered;
     };
 
 #endif // SAPIDATAPLUGIN_H

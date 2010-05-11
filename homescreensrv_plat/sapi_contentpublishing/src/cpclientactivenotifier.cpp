@@ -60,7 +60,9 @@ CCPActiveNotifier::~CCPActiveNotifier()
 // ----------------------------------------------------------------------------
 //
 void CCPActiveNotifier::RegisterL( MLiwNotifyCallback* aObserver, 
-		TInt32 aTransactionId, CCPLiwMap* aMap )
+                                   TInt32 aTransactionId, 
+                                   CCPLiwMap* aMap,
+                                   TUint aCmdOptions )
     {
     CP_DEBUG( _L8("CCPActiveNotifier::RegisterL()" ) );
     TIpcArgs args;
@@ -77,7 +79,7 @@ void CCPActiveNotifier::RegisterL( MLiwNotifyCallback* aObserver,
    	CleanupStack::Pop( iObserverBuf );
    	args.Set( KDescriptorPosition, &*iObserverBuf );
 	args.Set( KTransactionPosition, aTransactionId );
-    
+    args.Set( KOptionsPosition, static_cast<TInt>( aCmdOptions ));
     if ( !IsActive( ) )
         {
         iSizeDes = new (ELeave) TPckgBuf<TInt>( );

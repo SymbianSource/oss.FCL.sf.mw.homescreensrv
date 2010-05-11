@@ -879,9 +879,11 @@ void CXCFWEngine::AddCurrentXMLNodeToTreeL()
     if ( obj )
         {
         CleanupStack::PushL( obj );
-        
+
         factory->InitializeObjectL( *this );
-        
+
+        CleanupStack::Pop( obj );
+
         if ( !iCurrentTreeNode )
             {
             //Adding root.
@@ -892,8 +894,6 @@ void CXCFWEngine::AddCurrentXMLNodeToTreeL()
             //add under certain parent.
             iCurrentTreeNode = iTree->AddNodeL( obj, iCurrentTreeNode );            
             }
-            
-        CleanupStack::Pop( obj );
         }
     else
         {

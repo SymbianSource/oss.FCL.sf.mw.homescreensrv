@@ -164,6 +164,13 @@ void CAiOperatorNamePublisher::Subscribe( MAiContentObserver& /*aObserver*/,
     iBroadcaster = &aBroadcaster;
     }
 
+void CAiOperatorNamePublisher::RefreshIfActiveL( TBool aClean )
+    {
+    if ( !iSuspended )
+        {
+        RefreshL( aClean );
+        }
+    }
 
 void CAiOperatorNamePublisher::RefreshL( TBool aClean )
     {
@@ -617,7 +624,7 @@ void CAiOperatorNamePublisher::StartDelayedPLMNOperation()
     if( !iPeriodic->IsActive() )
         {
         iPeriodic->Start( KCleanOperationDelay,
-                          0,
+                          KCleanOperationDelay,
                           TCallBack( CleanAndShowPLMNOperationCallback, this ) );
         }
     }
@@ -630,13 +637,18 @@ TInt CAiOperatorNamePublisher::CleanAndShowPLMNOperationCallback( TAny* aPtr )
 
     if( self )
         {
-        TRAP_IGNORE
-            (
-            //clean
-            self->DoCleanOperationL();
-            //show PLMN name
-            self->ShowNetworkIdentityNameL( ETrue );
-            );
+        self->iPeriodic->Cancel();
+		// check if got suspended while timer was active
+        if ( !self->iSuspended )
+            {
+            TRAP_IGNORE
+                (
+                //clean
+                self->DoCleanOperationL();
+                //show PLMN name
+                self->ShowNetworkIdentityNameL( ETrue );
+                );
+            }
         }
 
     return KErrNone;
@@ -648,7 +660,6 @@ void CAiOperatorNamePublisher::DoCleanOperationL()
     iPrioritizer->TryToCleanL( *iBroadcaster,
                                 EAiDeviceStatusContentNetworkIdentity,
                                 EAiServiceProviderName );
-    iPeriodic->Cancel();
     }
 
 
@@ -674,7 +685,7 @@ TBool CAiOperatorNamePublisher::SuspendL( TInt aContentId, TBool /*aClean*/ )
     if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
         {
         iSuspended = ETrue;
-        
+        iPeriodic->Cancel();
         return ETrue;
         }
 

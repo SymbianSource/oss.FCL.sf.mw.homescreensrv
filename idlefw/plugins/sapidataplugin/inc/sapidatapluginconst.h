@@ -102,6 +102,8 @@ _LIT( KColon,		 ":");
 
 const TUint KLeftParenthesis = '(';
 
+// Option for registering in CPS
+const TUint KExtendedNotifications = 0x4000;
 
 // Sapi Data Plugin Constants
 const TUint KPluginNameSeprator =  '/';

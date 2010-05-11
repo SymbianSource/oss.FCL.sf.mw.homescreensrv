@@ -29,7 +29,8 @@
 //
 // ---------------------------------------------------------------------------
 //
-CCpStorageEngine::CCpStorageEngine()
+CCpStorageEngine::CCpStorageEngine(TLiwVariant& aDataMapCache) :
+    iDataMapCache(aDataMapCache)
     {
     }
 
@@ -72,9 +73,9 @@ void CCpStorageEngine::ConstructL()
 //
 // ---------------------------------------------------------------------------
 //
-CCpStorageEngine* CCpStorageEngine::NewL()
+CCpStorageEngine* CCpStorageEngine::NewL(TLiwVariant& aDataMapCache)
     {
-    CCpStorageEngine* self = CCpStorageEngine::NewLC( );
+    CCpStorageEngine* self = CCpStorageEngine::NewLC(aDataMapCache);
     CleanupStack::Pop( self );
     return self;
     }
@@ -84,9 +85,9 @@ CCpStorageEngine* CCpStorageEngine::NewL()
 //
 // ---------------------------------------------------------------------------
 //
-CCpStorageEngine* CCpStorageEngine::NewLC()
+CCpStorageEngine* CCpStorageEngine::NewLC(TLiwVariant& aDataMapCache)
     {
-    CCpStorageEngine* self = new (ELeave) CCpStorageEngine();
+    CCpStorageEngine* self = new (ELeave) CCpStorageEngine(aDataMapCache);
     CleanupStack::PushL( self );
     self->ConstructL( );
     return self;
@@ -136,7 +137,10 @@ void CCpStorageEngine::GetListL( const CLiwMap* aMap,
     {
     CP_DEBUG( _L8("CCpStorageEngine::GetListL()") );
     const CCPLiwMap* map = static_cast<const CCPLiwMap*>(aMap);
+    
     RArray<TInt32> itemsToDelete;
+    CleanupClosePushL( itemsToDelete );
+    
     TUint numberOfItems = map->GetListL( iSqlDb, &aList, itemsToDelete );
     //delete outdated items
     CContentMap* removeItemMap = CContentMap::NewLC( );
@@ -148,7 +152,7 @@ void CCpStorageEngine::GetListL( const CLiwMap* aMap,
         removeItemMap->Remove( KId );
         }
     CleanupStack::PopAndDestroy( removeItemMap );
-    itemsToDelete.Reset( );
+    CleanupStack::PopAndDestroy( &itemsToDelete );
 
     if ( numberOfItems == 0 )
         {
@@ -170,6 +174,8 @@ TInt32 CCpStorageEngine::AddL( const CLiwMap* aMap )
         {
         CLiwDefaultList* listOfMaps = CLiwDefaultList::NewLC( );
         id = map->AddL( iSqlDb, listOfMaps );
+        iDataMapCache.Reset();
+        map->FindL(KDataMap, iDataMapCache);
         iCallback->HandleChangeL( listOfMaps );
         CleanupStack::PopAndDestroy( listOfMaps ) ;
         }

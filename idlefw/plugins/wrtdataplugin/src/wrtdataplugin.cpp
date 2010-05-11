@@ -138,6 +138,8 @@ CWrtDataPlugin::~CWrtDataPlugin()
 //
 void CWrtDataPlugin::Start( TStartReason aReason )
     {
+    iStopped = EFalse;
+    
     if( aReason == ESystemStartup || 
         aReason == EPluginStartup )
         {
@@ -158,6 +160,8 @@ void CWrtDataPlugin::Stop( TStopReason aReason )
         {
         TRAP_IGNORE(iData->NotifyPublisherL( KDeActive ));
         }
+    
+    iStopped = ETrue;
     }
 
 // ----------------------------------------------------------------------------
@@ -167,7 +171,7 @@ void CWrtDataPlugin::Stop( TStopReason aReason )
 //
 void CWrtDataPlugin::Resume( TResumeReason aReason )
     {
-    if ( aReason == EForeground )
+    if ( aReason == EForeground && !iStopped )
         {
         iPluginState = EResume;
 
@@ -182,7 +186,7 @@ void CWrtDataPlugin::Resume( TResumeReason aReason )
 //
 void CWrtDataPlugin::Suspend( TSuspendReason aReason )
     {    
-    if ( aReason == EBackground )
+    if ( aReason == EBackground && !iStopped )
         {
         iPluginState = ESuspend;
         
@@ -197,8 +201,11 @@ void CWrtDataPlugin::Suspend( TSuspendReason aReason )
 //
 void CWrtDataPlugin::SetOnline()
     {    
-    iNetworkStatus = EOnline;
-    TRAP_IGNORE( iData->NotifyPublisherL( KOnLine ));            
+    if ( !iStopped )
+        {
+        iNetworkStatus = EOnline;
+        TRAP_IGNORE( iData->NotifyPublisherL( KOnLine ));                
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -208,8 +215,11 @@ void CWrtDataPlugin::SetOnline()
 //
 void CWrtDataPlugin::SetOffline()
     {
-    iNetworkStatus = EOffline;
-    TRAP_IGNORE( iData->NotifyPublisherL( KOffLine ));            
+    if ( !iStopped )
+        {   
+        iNetworkStatus = EOffline;
+        TRAP_IGNORE( iData->NotifyPublisherL( KOffLine ));
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -365,7 +375,7 @@ void CWrtDataPlugin::HandleEvent( const TDesC& aEventName,
 //
 TBool CWrtDataPlugin::IsActive() const
     {
-    return iPluginState == EResume;
+    return iPluginState == EResume && !iStopped;
     }
 
 // ----------------------------------------------------------------------------
@@ -810,7 +820,7 @@ void CWrtDataPlugin::StartTimer()
             iTimer = CPeriodic::NewL( CActive::EPriorityStandard );
             }
         
-        if ( !iTimer->IsActive() )
+        if ( iTimer && !iTimer->IsActive() )
             {
             TTimeIntervalMicroSeconds32 delay( KTryAgainDelay );
             iTimer->Start( delay, delay, TCallBack( Timeout, this ) );

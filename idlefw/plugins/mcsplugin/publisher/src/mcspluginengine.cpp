@@ -213,9 +213,12 @@ CMCSPluginEngine::~CMCSPluginEngine()
     StopObserving();
 
     delete iPluginData;
-    
+
+    // Notifier close has to be before iMenu close
+    iNotifier.Close();
     iMenu.Close();
     delete iWatcher;
+    delete iNotifyWatcher;
 
     CCoeEnv::Static()->DeleteResourceFile( iResourceOffset );
 
@@ -320,20 +323,21 @@ TMenuItem CMCSPluginEngine::FindMenuItemL( CMenuFilter& aFilter )
 //
 CMenuItem* CMCSPluginEngine::FetchMenuItemL( CMCSData& aData )
     {
+    CMenuItem* item = NULL;
     if( aData.MenuItem().Type() == KMenuTypeUrl )
         {
-        return CreateBkmItemL( aData );
+        item = CreateBkmItemL( aData );
         }
     else if( aData.MenuItem().Type() == KMenuTypeMailbox )
         {
-        return CreateMailboxItemL( aData);
+        item = CreateMailboxItemL( aData);
         }
     else
-        {
-        CMenuItem* item = NULL;
-        TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() ) );
-        return item;
+        {        
+        item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() );
         }
+    
+    return item;
     }
 
 // ---------------------------------------------------------------------------

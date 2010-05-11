@@ -61,7 +61,12 @@ public:
 
 public:
     // new functions
-    
+
+    /**
+     * Refreshes all active publishers.
+     */
+    void RefreshActivePublishersL( TBool aClean );    
+
     /**
      * Resumes all publishers.
      */

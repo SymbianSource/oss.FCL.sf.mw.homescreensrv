@@ -41,13 +41,13 @@ public:
      * Two-phased constructor.
      */
     static CCPNotificationHandler* NewL( RPointerArray<CLiwDefaultList>&
-        aNotifications );
+        aNotifications, TLiwVariant& aDataMapCache );
 
     /**
      * Two-phased constructor.
      */
     static CCPNotificationHandler* NewLC( RPointerArray<CLiwDefaultList>&
-        aNotifications );
+        aNotifications, TLiwVariant& aDataMapCache );
 
     /**
      * Destructor.
@@ -97,12 +97,12 @@ private:
     /**
      * C++ default constructor.
      */
-    CCPNotificationHandler();
+    CCPNotificationHandler(TLiwVariant& aDataMapCache);
 
     /**
      * By default Symbian 2nd phase constructor is private.
      */
-    void ConstructL( RPointerArray<CLiwDefaultList>& aNotifications );
+    void ConstructL(RPointerArray<CLiwDefaultList>& aNotifications);
 
     /**
      * Invoked in order to send notification
@@ -202,6 +202,18 @@ private:
      * Filters
      */
     RHashMap< TInt32, CCPLiwMap*> iFilters;
+
+    
+    /*
+     * Own.
+     * Filters
+     */
+    RHashMap< TInt32, TBool> iExtendedFlags;
+
+    /*
+     * Not Own.
+     */
+    TLiwVariant& iDataMapCache;
     };
 
 #endif // C_CPNOTIFICATIONHANDLER_H

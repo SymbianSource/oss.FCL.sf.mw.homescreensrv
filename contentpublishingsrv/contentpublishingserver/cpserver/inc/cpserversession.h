@@ -74,10 +74,10 @@ public:
 
     /**
      * Selects correct function from message
-     * @param aMessage message from client (containing requested operation 
-     * and any data)
+     * @param aMessage message from client (containing requested operation and any data) 
+     * @param aCompleteRequest flag for marking need of completing request
      */
-    void DispatchMessageL(const RMessage2& aMessage, TBool& aPanicedClient);
+    void DispatchMessageL(const RMessage2& aMessage, TBool& aCompleteRequest);
 
 private:
     // New methods
@@ -269,7 +269,7 @@ private:
      * Manager to prepare and execute action
      */
     CCPActionHandlerThread* iActionHandlerThread;
-
+    
 #ifdef CONTENT_PUBLISHER_DEBUG
     CCPDebug* iDebug;
 #endif

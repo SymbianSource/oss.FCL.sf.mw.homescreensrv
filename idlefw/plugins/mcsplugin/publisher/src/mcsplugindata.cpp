@@ -75,6 +75,7 @@ static void CleanupResetAndDestroyPushL(T& aArray)
 // ---------------------------------------------------------------------------
 //
 CMCSData::CMCSData()
+    :iDirty( ETrue )
     {
     }
 
@@ -229,43 +230,67 @@ void CMCSPluginData::UpdateDataL()
     RPointerArray<CItemMap> settings;
     CleanupResetAndDestroyPushL( settings );
 
-    iPluginSettings->GetSettingsL( iInstanceUid, settings );
-    TInt count = settings.Count();
+    User::LeaveIfError( iPluginSettings->GetSettingsL( iInstanceUid, settings ) );
+    if ( settings.Count() <= 0 )
+        {
+        User::Leave( KErrNotFound );
+        }
+
     TBool wasEmpty = !iData.Count();
     
-    for ( TInt i = 0; i < count; i++ )
+    for ( TInt i = 0; i < settings.Count(); i++ )
        {
         CItemMap* itemMap = settings[ i ];
+        
+        // get properties
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
             = itemMap->Properties();
+        
         CMCSData* data = GetMenuDataL( properties );
-
+        CleanupStack::PushL( data );
         if ( wasEmpty )
             {
             // list of shortcut slot was empty
-            // we append the shortcut data slots one-by-one to the list
+            // we append the shortcut data slots one-by-one to the list            
             data->SetDirty( ETrue );
             iData.AppendL( data );
+            CleanupStack::Pop( data );
             }
         else 
             {
             // check for updates in existing shortcut data slot
             // if menuitem id has changed, replace the item and 
             // set as dirty
-            TInt id = -1;
-            id = iData[ i ]->MenuItem().Id();
+            TInt id( iData[ i ]->MenuItem().Id() );
             
-            if ( data->MenuItem().Id() != id )
+            // id of all bookmarks is zero so name has to be check
+            // in case of bookmark has changed
+            if ( id >= 0 && ( data->MenuItem().Id() != id ||
+                    ( id == 0 && data->Name().CompareF(
+                            iData[ i ]->Name() ) != 0 ) ) )
                 {
                 data->SetDirty( ETrue );
                 CMCSData* oldData = iData[i];
                 iData.Remove( i );
                 delete oldData;
+                
                 iData.InsertL( data, i );
+                CleanupStack::Pop( data );
+                }
+            else
+                {
+                CleanupStack::PopAndDestroy( data );
                 }
             }
         }
-
+    
+    // Leave if there isn't any data filled into array as there isn't
+    // anything shortcut to publish on homescreen.
+    if ( iData.Count() <= 0 ) 
+        {
+        User::Leave( KErrNotFound );
+        }
+    
     // Cleanup.
     CleanupStack::PopAndDestroy(); // settings
     }
@@ -308,12 +333,18 @@ void CMCSPluginData::SettingsChangedL( const TDesC8& /*aEvent*/,  const TDesC8& 
 // Gets the menu item from engine using the setting properties as filter
 // ---------------------------------------------------------------------------
 //
-CMCSData* CMCSPluginData::GetMenuDataL( RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
+CMCSData* CMCSPluginData::GetMenuDataL( 
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
     {
+    if ( aProperties.Count() <= 0 )
+		{
+		User::Leave( KErrArgument );
+		}
+
     TPtrC8 type;
-    TPtrC8 uid;
-    TPtrC8 view;
-    TPtrC8 param;
+	TPtrC8 uid;
+	TPtrC8 view;
+	TPtrC8 param;
     
     // first we need to check the item type
     for ( TInt i = 0; i < aProperties.Count(); i++ )
@@ -495,8 +526,11 @@ void CMCSPluginData::SaveUndefinedItemL( const TInt& aIndex )
     if ( aIndex >= 0 && aIndex < settingItems.Count() )
         {
         CItemMap* itemMap = settingItems[ aIndex ];
-        RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
-        properties = itemMap->Properties();
+        
+        // get properties
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
+            = itemMap->Properties();
+
         for ( TInt i = 0; i < properties.Count(); i++ )
             {
             if ( properties[ i ]->Name() == KProperNameType )

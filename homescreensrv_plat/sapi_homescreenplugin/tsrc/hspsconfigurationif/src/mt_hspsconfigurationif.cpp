@@ -3527,19 +3527,19 @@ EUNIT_BEGIN_TEST_TABLE(
        "FUNCTIONALITY",
        SetupL, SetActiveAppConf_4_L, Teardown )
 
-    EUNIT_TEST(
-       "RequestNotify(1)",
-       "IConfiguration",
-       "RequestNotify",
-       "FUNCTIONALITY",
-       SetupL, RequestNotify_1_L, Teardown )
+//    EUNIT_TEST(
+//       "RequestNotify(1)",
+//       "IConfiguration",
+//       "RequestNotify",
+//       "FUNCTIONALITY",
+//       SetupL, RequestNotify_1_L, Teardown )
        
-    EUNIT_TEST(
-       "RequestNotify(2)",
-       "IConfiguration",
-       "RequestNotify",
-       "FUNCTIONALITY",
-       SetupL, RequestNotify_2_L, Teardown )
+//    EUNIT_TEST(
+//       "RequestNotify(2)",
+//       "IConfiguration",
+//       "RequestNotify",
+//       "FUNCTIONALITY",
+//       SetupL, RequestNotify_2_L, Teardown )
        
     EUNIT_TEST(
        "RequestNotify(3)",
@@ -3555,12 +3555,12 @@ EUNIT_BEGIN_TEST_TABLE(
        "FUNCTIONALITY",
        SetupL, RequestNotify_4_L, Teardown )
 
-    EUNIT_TEST(
-       "RequestNotify(5)",
-       "IConfiguration",
-       "RequestNotify",
-       "FUNCTIONALITY",
-       SetupL, RequestNotify_5_L, Teardown )
+//    EUNIT_TEST(
+//       "RequestNotify(5)",
+//       "IConfiguration",
+//       "RequestNotify",
+//       "FUNCTIONALITY",
+//       SetupL, RequestNotify_5_L, Teardown )
        
    EUNIT_TEST(
        "RequestNotify(6)",

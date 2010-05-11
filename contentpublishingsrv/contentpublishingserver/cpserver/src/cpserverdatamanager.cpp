@@ -47,9 +47,9 @@ CCPDataManager::~CCPDataManager()
 // 
 // ---------------------------------------------------------------------------
 //
-CCPDataManager* CCPDataManager::NewL( TBool aBool )
+CCPDataManager* CCPDataManager::NewL(TLiwVariant& aDataMapCache, TBool aBool)
     {
-    CCPDataManager* self = CCPDataManager::NewLC( aBool );
+    CCPDataManager* self = CCPDataManager::NewLC( aDataMapCache, aBool );
     CleanupStack::Pop( self );
     return self;
     }
@@ -58,11 +58,11 @@ CCPDataManager* CCPDataManager::NewL( TBool aBool )
 // 
 // ---------------------------------------------------------------------------
 //
-CCPDataManager* CCPDataManager::NewLC( TBool aBool )
+CCPDataManager* CCPDataManager::NewLC(TLiwVariant& aDataMapCache, TBool aBool)
     {
-    CCPDataManager* self = new( ELeave ) CCPDataManager;
+    CCPDataManager* self = new( ELeave ) CCPDataManager();
     CleanupStack::PushL( self );
-    self->ConstructL( aBool );
+    self->ConstructL( aDataMapCache, aBool );
     return self;
     }
 
@@ -70,7 +70,7 @@ CCPDataManager* CCPDataManager::NewLC( TBool aBool )
 // C++ constructor.
 // ---------------------------------------------------------------------------
 //
-CCPDataManager::CCPDataManager()
+CCPDataManager::CCPDataManager() 
     {
 
     }
@@ -79,12 +79,12 @@ CCPDataManager::CCPDataManager()
 // Standard 2nd phase constructor.
 // ---------------------------------------------------------------------------
 //
-void CCPDataManager::ConstructL( TBool aBool )
+void CCPDataManager::ConstructL(TLiwVariant& aDataMapCache, TBool aBool)
     {
     CP_DEBUG( _L8("CCPDataManager::ConstructL()") );
     if ( !aBool )
         {
-        iStorage = StorageFactory::NewDatabaseL( );
+        iStorage = StorageFactory::NewDatabaseL( aDataMapCache );
         }
     iActionDataCache = CCPActionDataCache::NewL();
     }
@@ -183,9 +183,16 @@ TInt CCPDataManager::GetActionsL( const CCPLiwMap& aMap, TBool aEnableCache,
         else 
             {
             TRAP( result, iStorage->GetListL( &aMap, *paramList ) );
-            if ( aEnableCache && cacheable && result == KErrNone )
+            if ( aEnableCache && cacheable )
                 {
-                iActionDataCache->AppendL(paramList);
+                if ( result == KErrNone )
+                    {   
+                    iActionDataCache->AppendL(paramList);
+                    }
+                else if ( result == KErrNotFound )
+                    {
+                    iActionDataCache->AppendEmptyL(&aMap);
+                    }
                 }
             }
         
@@ -202,11 +209,24 @@ TInt CCPDataManager::GetActionsL( const CCPLiwMap& aMap, TBool aEnableCache,
         //iteration through paramList items
     	while ( param && pos != KErrNotFound )
     		{
-    		BuildChangeInfoL( &aMap, actionTriggers, param, 
-    		        aNotificationList );
-    		FillActionParamListL( aOutParamList, param, actionTriggers );
-    		param = paramList->FindNext( pos, KListMap );
+    	    RBuf8 actionBinaries;
+    	    actionBinaries.CleanupClosePushL();
+    	    ExtractActionL( param, actionBinaries );
+    	    RDesReadStream str(actionBinaries);
+    	    CleanupClosePushL( str );
+    	    CLiwDefaultMap* actionMap = CLiwDefaultMap::NewLC( str );
+            BuildChangeInfoL( &aMap, actionTriggers, param, actionMap,
+                    aNotificationList );
+            FillActionParamListL( aOutParamList, actionMap, actionTriggers );
+            param = paramList->FindNext( pos, KListMap );
+            CleanupStack::PopAndDestroy( actionMap );
+            CleanupStack::PopAndDestroy( &str );
+            CleanupStack::PopAndDestroy( &actionBinaries );
     		}
+        if (aNotificationList->Count() == 0)
+            {
+            User::Leave(KErrNotFound);
+            }
         }
     else
         {
@@ -225,20 +245,11 @@ TInt CCPDataManager::GetActionsL( const CCPLiwMap& aMap, TBool aEnableCache,
 //
 void CCPDataManager::FillActionParamListL( 
 		CLiwGenericParamList& aOutParamList, 
-		const TLiwGenericParam* aParam,
+		const CLiwDefaultMap* aActionMap,
 		const CLiwDefaultList* aActionTriggers)
 	{
     CP_DEBUG( _L8("CCPDataManager::FillActionParamListL()") );
     __ASSERT_DEBUG( iStorage , User::Panic( _L("cpserver"), 0 ) );
-		
-	RBuf8 actionBinaries;
-	actionBinaries.CleanupClosePushL();
-	ExtractActionL(  aParam, actionBinaries );
-
-	RDesReadStream str(actionBinaries);
-	CleanupClosePushL( str );
-	CLiwDefaultMap* actionMap = CLiwDefaultMap::NewLC( str );
-
     TLiwVariant trigger;
     trigger.PushL();
     TInt count = aActionTriggers->Count();
@@ -246,13 +257,9 @@ void CCPDataManager::FillActionParamListL(
 	    {
 	    trigger.Reset();
 	    aActionTriggers->AtL( i,trigger );
-	    ExtractTriggerL( aOutParamList, actionMap, trigger.AsData());
+	    ExtractTriggerL( aOutParamList, aActionMap, trigger.AsData());
 	    }
     CleanupStack::PopAndDestroy(&trigger);
-
-	CleanupStack::PopAndDestroy( actionMap );
-	CleanupStack::PopAndDestroy( &str );
-	CleanupStack::PopAndDestroy( &actionBinaries );
 	}
 
 // ---------------------------------------------------------------------------
@@ -282,14 +289,9 @@ void CCPDataManager::ExtractTriggerL( CLiwGenericParamList& aOutParamList,
     if ( aMap->FindL( aTrigger, variant ) )
         {
         targetMap->InsertL( KActionMap, variant );
+        TLiwGenericParam result( KListMap, TLiwVariant( targetMap ));
+        aOutParamList.AppendL( result );
         }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
-
-    TLiwGenericParam result( KListMap, TLiwVariant( targetMap ));
-    aOutParamList.AppendL( result );
     CleanupStack::PopAndDestroy( &variant );
     CleanupStack::PopAndDestroy( targetMap );
     }
@@ -374,12 +376,12 @@ void CCPDataManager::CloseDatabase()
 //
 // ---------------------------------------------------------------------------
 //
-void CCPDataManager::OpenDatabaseL()
+void CCPDataManager::OpenDatabaseL(TLiwVariant& aDataMapCache)
     {
     CP_DEBUG( _L8("CCPDataManager::OpenDatabaseL()") );
     if ( !iStorage )
         {
-        iStorage = StorageFactory::NewDatabaseL( );
+        iStorage = StorageFactory::NewDatabaseL( aDataMapCache );
         
         // Restore storage observers
         if ( iNotificationsArray.Count() > 0 )
@@ -490,6 +492,7 @@ TBool CCPDataManager::GetActivateInfoL( const CCPLiwMap* aMap )
 void CCPDataManager::BuildChangeInfoL( const CCPLiwMap* aMap, 
         const CLiwDefaultList* aActionTriggers,
 		const TLiwGenericParam* aParam,	
+		const CLiwDefaultMap* aActionMap,
 		CLiwDefaultList* aChangeInfoList )
 	{
 	TLiwVariant resultVar = aParam->Value();
@@ -498,31 +501,33 @@ void CCPDataManager::BuildChangeInfoL( const CCPLiwMap* aMap,
         {
         for ( TInt i = 0; i<aActionTriggers->Count(); i++ )
             {
-            CLiwDefaultMap* changeInfoMap = CLiwDefaultMap::NewLC(); 
-        
-            CopyVariantL(KId, resultVar.AsMap(), changeInfoMap );
-            CopyVariantL(KPublisherId, resultVar.AsMap(), changeInfoMap );
-            CopyVariantL(KContentType, resultVar.AsMap(), changeInfoMap );
-            CopyVariantL(KContentId, resultVar.AsMap(), changeInfoMap );
-            CopyVariantL(KFlag, resultVar.AsMap(), changeInfoMap );
-            CopyVariantL(KType, aMap, changeInfoMap );
-    
+            TLiwVariant dummyVariant;
+            dummyVariant.PushL();
             TLiwVariant trigger;
             trigger.PushL();
             aActionTriggers->AtL(i,trigger);
-            changeInfoMap->InsertL(KActionTrigger, trigger);
-            CopyActionTrigger16L(trigger,changeInfoMap);
+            if (aActionMap->FindL( trigger.AsData(), dummyVariant ))
+                {
+                CLiwDefaultMap* changeInfoMap = CLiwDefaultMap::NewLC();
+                CopyVariantL(KId, resultVar.AsMap(), changeInfoMap);
+                CopyVariantL(KPublisherId, resultVar.AsMap(), changeInfoMap);
+                CopyVariantL(KContentType, resultVar.AsMap(), changeInfoMap);
+                CopyVariantL(KContentId, resultVar.AsMap(), changeInfoMap);
+                CopyVariantL(KFlag, resultVar.AsMap(), changeInfoMap);
+                CopyVariantL(KType, aMap, changeInfoMap);
+                changeInfoMap->InsertL(KActionTrigger, trigger);
+                CopyActionTrigger16L(trigger, changeInfoMap);
+                changeInfoMap->InsertL(KOperation, TLiwVariant(
+                        KOperationExecute));
+                aChangeInfoList->AppendL(TLiwVariant(changeInfoMap));
+                CleanupStack::PopAndDestroy(changeInfoMap);
+                }
             CleanupStack::PopAndDestroy(&trigger);
-            
-            changeInfoMap->InsertL( KOperation, TLiwVariant( KOperationExecute ) );
-        
-            aChangeInfoList->AppendL( TLiwVariant( changeInfoMap ) );
-            CleanupStack::PopAndDestroy( changeInfoMap );
+            CleanupStack::PopAndDestroy(&dummyVariant);
             }
         }
     CleanupStack::PopAndDestroy( &resultVar );
 	}
-
 
 // -----------------------------------------------------------------------------
 // 

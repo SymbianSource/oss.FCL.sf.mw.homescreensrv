@@ -307,13 +307,14 @@ void ChspsThemeServer::ConstructL()
            
     // Setup a runtime array of headers (=header cache)
     iHeaderListCache = new ( ELeave ) CArrayPtrSeg< ChspsODT >( KHeaderListGranularity );
+      
+    // Setup a Plug-in Repository listener
+    iCentralRepository = CRepository::NewL( KhspsThemeStatusRepositoryUid );
         
-    iDefinitionRepository = ChspsDefinitionRepository::NewL();
+    iDefinitionRepository = ChspsDefinitionRepository::NewL( *iCentralRepository );
 #ifdef HSPS_LOG_ACTIVE    
     iDefinitionRepository->SetLogBus( iLogBus );
-#endif
-    // Setup a Plug-in Repository listener
-    iCentralRepository = CRepository::NewL( KhspsThemeStatusRepositoryUid ); 
+#endif    
     
     // Get active device language
     iDeviceLanguage = GetDeviceLanguage();
@@ -607,13 +608,7 @@ TBool ChspsThemeServer::HandleDefinitionRespositoryEvent( ThspsRepositoryInfo aR
         aRepositoryInfo.iEventType & EhspsODTModified ||
         aRepositoryInfo.iEventType & EhspsPluginReplaced )
         {
-        for( TInt i = 0; i < iSessions.Count(); i++ )
-            {
-            if( iSessions[i]->AppUid() == aRepositoryInfo.iAppUid )
-                {
-                iSessions[i]->SetResourceFileCopyRequired( ETrue );
-                }
-            }        
+        SetResourceFileCopyRequired( aRepositoryInfo.iAppUid );
         }    
     
     // If header cache should be updated from files in the Plug-in Repository
@@ -3610,5 +3605,22 @@ ChspsFamily* ChspsThemeServer::Family()
 	return iFamily;
 	}
 
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServer::SetResourceFileCopyRequired()
+// -----------------------------------------------------------------------------
+//
+void ChspsThemeServer::SetResourceFileCopyRequired( const TInt aAppUid )
+    {
+    // Handle all related sessions
+    for( TInt i = 0; i < iSessions.Count(); i++ )
+        {
+        if( iSessions[i]->AppUid() == aAppUid )
+            {
+            iSessions[i]->SetResourceFileCopyRequired( ETrue );
+            }
+        }
+    }
+    
 // end of file
 

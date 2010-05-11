@@ -26,6 +26,9 @@
 #include "wrtdataobserver.h"
 #include "wrtdatapluginconst.h"
 
+_LIT8( KErrorCode, "ErrorCode" );
+_LIT8( KTransactionId, "TransactionID" );
+
 // ---------------------------------------------------------------------------
 // Factory method construction
 // ---------------------------------------------------------------------------
@@ -167,12 +170,16 @@ void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
     {
     CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
     CleanupStack::PushL( inParamList );
+    
     CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
     CleanupStack::PushL( outParamList );
         
     // Fill in input list for RequestNotification command
-    inParamList->AppendL(TLiwGenericParam(KType,TLiwVariant(KCpData_PubData)));
-    inParamList->AppendL(TLiwGenericParam(KFilter ,TLiwVariant(aFilter)));
+    inParamList->AppendL(
+        TLiwGenericParam( KType, TLiwVariant( KCpData_PubData ) ) );
+    
+    inParamList->AppendL(
+        TLiwGenericParam( KFilter, TLiwVariant( aFilter ) ) );
         
     iError = KErrNone;
     TRAP( iError, iInterface->ExecuteCmdL( 
@@ -181,9 +188,29 @@ void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
                 *outParamList,
                 0,
                 this ) );
+           
+    TInt pos( 0 );
     
-    CleanupStack::PopAndDestroy( outParamList );
-    CleanupStack::PopAndDestroy( inParamList ); 
+    const TLiwGenericParam* outParam( 
+        outParamList->FindFirst( pos, KErrorCode ) );
+    
+    if ( outParam )
+        {
+        TInt retval( outParam->Value().AsTInt32() );
+        
+        if( retval == KErrNone )
+            {
+            pos = 0;
+            outParam = outParamList->FindFirst( pos, KTransactionId );
+                    
+            if ( outParam )
+                {
+                iTransactionId = outParam->Value().AsTInt32();            
+                }            
+            }                
+        }
+               
+    CleanupStack::PopAndDestroy( 2, inParamList ); 
     }
 
 // ---------------------------------------------------------------------------
@@ -193,24 +220,28 @@ void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
 //
 void CWrtDataObserver::ReleaseL()
     {
-    if( iInterface )
+    if( !iInterface )
         {
-        CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( inParamList );
-        CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
-        CleanupStack::PushL( outParamList );
-        
-        TInt err(KErrNone);
-        TRAP(err, iInterface->ExecuteCmdL( 
-                KRequestNotification,
-                *inParamList,
-                *outParamList,
-                KLiwOptCancel,
-                this ));
-        
-        CleanupStack::PopAndDestroy( outParamList );
-        CleanupStack::PopAndDestroy( inParamList );
+        return;
         }
+    
+    CLiwGenericParamList* inParamList = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( inParamList );
+    
+    CLiwGenericParamList* outParamList = CLiwGenericParamList::NewL();
+    CleanupStack::PushL( outParamList );
+       
+    inParamList->AppendL( TLiwGenericParam( KTransactionId,
+        TLiwVariant( iTransactionId ) ) ); 
+            
+    TRAP_IGNORE( iInterface->ExecuteCmdL( 
+            KRequestNotification,
+            *inParamList,
+            *outParamList,
+            KLiwOptCancel,
+            this ) );
+            
+    CleanupStack::PopAndDestroy( 2, inParamList );
     }
 
 // End of file

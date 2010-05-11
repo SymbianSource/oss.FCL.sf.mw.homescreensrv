@@ -50,11 +50,14 @@ public:
      * Register observer
      *
      * @param aObserver Pointer for callback
-     * @param aMap Map containing parameters
      * @param aTransactionId Integer transaction id
+     * @param aMap Map containing parameters
+     * @param aCmdOptions options for the command    
      */
-    void RegisterL( MLiwNotifyCallback* aObserver, TInt32 aTransactionId, 
-    		CCPLiwMap* aMap );
+    void RegisterL( MLiwNotifyCallback* aObserver, 
+                    TInt32 aTransactionId, 
+                    CCPLiwMap* aMap,
+                    TUint aCmdOptions );
 
     /**
      * Unregister observer
@@ -120,8 +123,7 @@ private:
     /*
      * Register observer
      */
-    void RegisterAgainL( );
-
+    void RegisterAgainL( );  
     
 private:
 

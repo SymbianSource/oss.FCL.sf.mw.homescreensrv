@@ -44,6 +44,7 @@ LIBRARY    hspsodt.lib
 LIBRARY    hspsresource.lib
 LIBRARY    sysutil.lib
 LIBRARY    fbscli.lib
+LIBRARY    centralrepository.lib
 
 
 

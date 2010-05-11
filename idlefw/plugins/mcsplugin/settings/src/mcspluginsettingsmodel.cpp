@@ -202,13 +202,15 @@ void CMCSPluginSettingsModel::UpdateSettingsL()
     RPointerArray<CItemMap> settingItems;
     CleanupResetAndDestroyPushL( settingItems );
 
-    iPluginSettings->GetSettingsL( *iPluginId, settingItems );
+    User::LeaveIfError( 
+            iPluginSettings->GetSettingsL( *iPluginId, settingItems ) );
 
     for ( TInt i = 0; i < settingItems.Count(); i++ )
         {
         CItemMap* itemMap = settingItems[i];
-        RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
-        properties = itemMap->Properties();
+        // get properties
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
+            = itemMap->Properties();
         TSettingItem item = ItemL( properties );
         iSettings.AppendL( item );
         }
@@ -312,15 +314,17 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
 
     RPointerArray<CItemMap> settingItems;    
     CleanupResetAndDestroyPushL( settingItems );
-    iPluginSettings->GetSettingsL( *iPluginId, settingItems );
+    User::LeaveIfError( iPluginSettings->GetSettingsL( *iPluginId, settingItems ) );
 
     if ( aIndex >= 0 && aIndex < settingItems.Count() )
         {
         TBool exists( EFalse );
         CItemMap* itemMap = settingItems[ aIndex ];
-        RPointerArray<HSPluginSettingsIf::CPropertyMap> properties;
-        properties = itemMap->Properties();
         
+        // get properties
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& properties
+            = itemMap->Properties();
+
         const TInt KGranularity = 6;
         CDesC8Array* propertiesList = new ( ELeave ) CDesC8ArrayFlat( KGranularity );
         CleanupStack::PushL( propertiesList );

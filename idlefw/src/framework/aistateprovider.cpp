@@ -251,8 +251,10 @@ void CAiStateProvider::SkinPackageChanged(
 void CAiStateProvider::NotifyEcomRegistryChanged()
     {
     __PRINTS( "CAiStateProvider::NotifyEcomRegistryChanged" );    
+    
     iObserver.NotifyReloadPlugins();
-    __PRINTS( "CAiStateProvider::NotifyEcomRegistryChanged - return void" );    
+    
+    __PRINTS( "CAiStateProvider::NotifyEcomRegistryChanged - done" );    
     }
 
 // ----------------------------------------------------------------------------
@@ -260,10 +262,9 @@ void CAiStateProvider::NotifyEcomRegistryChanged()
 // 
 // ----------------------------------------------------------------------------
 //
-TInt CAiStateProvider::LoadPlugin( const THsPublisherInfo& aPublisherInfo, 
-    TAiFwLoadReason aReason )
+void CAiStateProvider::LoadPlugin( const TAiFwPublisherInfo& aInfo )     
     {
-    return iObserver.NotifyLoadPlugin( aPublisherInfo, aReason );
+    iObserver.NotifyLoadPlugin( aInfo );
     }
 
 // ----------------------------------------------------------------------------
@@ -271,10 +272,9 @@ TInt CAiStateProvider::LoadPlugin( const THsPublisherInfo& aPublisherInfo,
 // 
 // ----------------------------------------------------------------------------
 //
-void CAiStateProvider::DestroyPlugin( const THsPublisherInfo& aPublisherInfo,
-    TAiFwDestroyReason aReason )
+void CAiStateProvider::DestroyPlugin( const TAiFwPublisherInfo& aInfo )    
     {
-    iObserver.NotifyDestroyPlugin( aPublisherInfo, aReason );
+    iObserver.NotifyDestroyPlugin( aInfo );
     }
 
 // ----------------------------------------------------------------------------
@@ -328,12 +328,15 @@ void CAiStateProvider::ChangePluginState( TAiFwState aState )
     {
     CAiStateProvider* self = static_cast< CAiStateProvider* >( aAny );
 
-    RArray<TUid> uidList;
-    if ( KErrNone == Swi::GetAllUids( uidList ) )
+    RArray< TUid > list;
+    
+    if ( Swi::GetAllUids( list ) == KErrNone )
         {
-        self->iObserver.NotifyReleasePlugins( uidList );
+        self->iObserver.NotifyReleasePlugins( list );
         }
 
+    list.Reset();
+    
     return KErrNone;
     }
 

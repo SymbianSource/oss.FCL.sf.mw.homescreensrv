@@ -19,10 +19,7 @@
 
 // User includes
 #include <hscontentpublisher.h>
-#include <aifwdefs.h>
-#include <AknWaitDialog.h> 
-#include <bautils.h>
-#include <ConeResLoader.h>
+#include <aifwpublisherinfo.h>
 #include <debug.h>
 
 #include "caicpscommandbuffer.h"
@@ -36,7 +33,7 @@
 // 
 // ----------------------------------------------------------------------------
 //
-static CHsContentPublisher::TStartReason StartReason( TAiFwLoadReason aReason )
+static CHsContentPublisher::TStartReason StartReason( TInt aReason )
     {
     CHsContentPublisher::TStartReason reason; 
              
@@ -61,7 +58,7 @@ static CHsContentPublisher::TStartReason StartReason( TAiFwLoadReason aReason )
 // 
 // ----------------------------------------------------------------------------
 //
-static CHsContentPublisher::TStopReason StopReason( TAiFwDestroyReason aReason )
+static CHsContentPublisher::TStopReason StopReason( TInt aReason )
     {
     CHsContentPublisher::TStopReason reason; 
              
@@ -113,9 +110,8 @@ CAiStateManager* CAiStateManager::NewLC( CAiPluginFactory& aFactory )
 // ----------------------------------------------------------------------------
 //
 CAiStateManager::~CAiStateManager()
-    {  
-    delete iCommandBuffer;
-	iReloadPlugins.Close();
+    {      
+    iReloadPlugins.Reset();
     }
 
 // ----------------------------------------------------------------------------
@@ -134,10 +130,8 @@ CAiStateManager::CAiStateManager( CAiPluginFactory& aFactory )
 // ----------------------------------------------------------------------------
 //
 void CAiStateManager::ConstructL()
-    {        
-    iCommandBuffer = CAiCpsCommandBuffer::NewL();
-    
-    iFactory.SetCommandBuffer( iCommandBuffer );
+    {               
+    iFactory.SetStateManager( this );    
     }
 
 // ----------------------------------------------------------------------------
@@ -152,15 +146,15 @@ void CAiStateManager::NotifyStateChange( TAiFwState aState )
         __PRINTS( "CAiStateManager::NotifyStateChange, aState: EAiFwUiShutdown" );
         
         iFlags.Set( EShutdown );
-        
-        DestroyPlugins();
+                
+        iFactory.DestroyAllPlugins();
         
         return;
         }    
     else if ( aState == EAiFwUiStartup )
         {
         __PRINTS( "CAiStateManager::NotifyStateChange, aState: EAiFwUiStartup" );
-        
+                        
         iFlags.Clear( EShutdown );
         
         return;
@@ -228,6 +222,7 @@ void CAiStateManager::NotifyStateChange( TAiFwState aState )
 
     // State change evaluation and state change trial is done always here
     __PRINTS( "CAiStateManager::NotifyStateChange, Run state change" );    
+    
     ProcessStateChange( EvaluateNextState() );            
     }
 
@@ -236,32 +231,17 @@ void CAiStateManager::NotifyStateChange( TAiFwState aState )
 // 
 // ----------------------------------------------------------------------------
 //
-TInt CAiStateManager::NotifyLoadPlugin( const THsPublisherInfo& aPublisherInfo,
-    TAiFwLoadReason aReason )
+void CAiStateManager::NotifyLoadPlugin( const TAiFwPublisherInfo& aInfo )    
     {                
     __PRINT( __DBG_FORMAT( 
         "CAiStateManager::NotifyLoadPlugin: name: %S, reason: %d " ), 
-              &aPublisherInfo.Name(), (TInt) aReason );      
+              &aInfo.Info().Name(), aInfo.Reason() );      
           
     __TIME_MARK( time );
-      
-    // Create plugin
-    TInt retval( iFactory.CreatePlugin( aPublisherInfo ) );
+       
+    iFactory.LoadPlugin( aInfo );
     
-    if ( retval == KErrNone )
-        {
-        CHsContentPublisher* plugin( iFactory.PluginByInfo( aPublisherInfo ) );
-        
-        if( plugin )
-            {
-            // Do startup state transition    
-            StartPlugin( *plugin, StartReason( aReason ) );  
-            }    
-        }
-      
-    __TIME_ENDMARK( "CAiStateManager::NotifyLoadPlugin, construction", time );
-    
-    return retval;
+    __TIME_ENDMARK( "CAiStateManager::NotifyLoadPlugin - done", time );       
     }
 
 // ----------------------------------------------------------------------------
@@ -269,46 +249,17 @@ TInt CAiStateManager::NotifyLoadPlugin( const THsPublisherInfo& aPublisherInfo,
 // 
 // ----------------------------------------------------------------------------
 //
-void CAiStateManager::NotifyDestroyPlugin( 
-    const THsPublisherInfo& aPublisherInfo, TAiFwDestroyReason aReason )    
+void CAiStateManager::NotifyDestroyPlugin( const TAiFwPublisherInfo& aInfo )           
     {
     __PRINT( __DBG_FORMAT( 
         "CAiStateManager::NotifyDestroyPlugin: name: %S, reason: %d " ), 
-            &aPublisherInfo.Name(), (TInt)aReason );              
+            &aInfo.Info().Name(), aInfo.Reason() );              
     
     __TIME_MARK( time );
     
-    // Resolve plugin
-    CHsContentPublisher* plugin( iFactory.PluginByInfo( aPublisherInfo ) );
-            
-    if ( plugin )
-        {                  
-        // Do shutdown state transition
-        StopPlugin( *plugin, StopReason( aReason ) );
-        
-        // Destroy plugin
-        iFactory.DestroyPlugin( aPublisherInfo );                                    
-        }
-           
-    __TIME_ENDMARK( "CAiStateManager::DestroyPlugin, done", time );
-    }
-
-// ----------------------------------------------------------------------------
-// CAiStateManager::NotifyReloadPlugins()
-// 
-// ----------------------------------------------------------------------------
-//
-void CAiStateManager::NotifyReloadPlugins()
-    {
-    __PRINTS( "CAiStateManager::NotifyReloadPlugins" );
-
-    for ( TInt i = 0; i < iReloadPlugins.Count(); i++ )
-        {
-        // Reload plugin
-        NotifyLoadPlugin( iReloadPlugins[ i ], EAiFwSystemStartup );
-        }
-    
-    __PRINTS( "CAiStateManager::NotifyReloadPlugins, done" );
+    iFactory.DestroyPlugin( aInfo );
+                                 
+    __TIME_ENDMARK( "CAiStateManager::DestroyPlugin - done", time );
     }
 
 // ----------------------------------------------------------------------------
@@ -380,14 +331,14 @@ void CAiStateManager::ProcessStateChange( TState aNextState )
                 }            
             }
         
-        FlushCommandBuffer();
+        iFactory.FlushCommandBuffer();
         }
     else
         {
         __PRINTS( "CAiStateManager::ProcessStateChange, no state change" );
         }
     
-    __TIME_ENDMARK( "CAiStateManager::ProcessStateChange, done", time );
+    __TIME_ENDMARK( "CAiStateManager::ProcessStateChange - done", time );
     }
 
 // ----------------------------------------------------------------------------
@@ -415,9 +366,9 @@ void CAiStateManager::ProcessGeneralThemeChange()
             }        
         } 
     
-    FlushCommandBuffer();
+    iFactory.FlushCommandBuffer();
     
-    __TIME_ENDMARK( "CAiStateManager::ProcessGeneralThemeChange, done", time );
+    __TIME_ENDMARK( "CAiStateManager::ProcessGeneralThemeChange - done", time );
     }
 
 // ----------------------------------------------------------------------------
@@ -452,9 +403,9 @@ void CAiStateManager::ProcessBackupRestore( TBool aStart )
             }
         }
     
-    FlushCommandBuffer();
+    iFactory.FlushCommandBuffer();
             
-    __TIME_ENDMARK( "CAiStateManager::ProcessBackupRestore, done", time );
+    __TIME_ENDMARK( "CAiStateManager::ProcessBackupRestore - done", time );
     }
 
 // ----------------------------------------------------------------------------
@@ -482,7 +433,9 @@ void CAiStateManager::ProcessOnlineStateChange()
             }
         }               
     
-    FlushCommandBuffer();
+    iFactory.FlushCommandBuffer();
+    
+    __PRINTS( "CAiStateManager::ProcessOnlineStateChange - done" );
     }
 
 // ----------------------------------------------------------------------------
@@ -490,15 +443,14 @@ void CAiStateManager::ProcessOnlineStateChange()
 // 
 // ----------------------------------------------------------------------------
 //
-void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin,
-    CHsContentPublisher::TStartReason aReason )
+void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin, TInt aReason )    
     {    
     const THsPublisherInfo& info( aPlugin.PublisherInfo() );
     
     __PRINT( __DBG_FORMAT( 
         "CAiStateManager::StartPlugin: name: %S, reason: %d" ), &info.Name(), (TInt)aReason ); 
     
-    aPlugin.Start( aReason );
+    aPlugin.Start( StartReason( aReason ) );
     
     if ( iCurrentState == EAlive )
         {
@@ -525,9 +477,7 @@ void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin,
             
         aPlugin.SetOffline() );
         }
-    
-    FlushCommandBuffer();
-    
+           
     __PRINTS( "CAiStateManager::StartPlugin - done" );
     }
 
@@ -536,8 +486,7 @@ void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin,
 // 
 // ----------------------------------------------------------------------------
 //
-void CAiStateManager::StopPlugin( CHsContentPublisher& aPlugin,
-    CHsContentPublisher::TStopReason aReason )
+void CAiStateManager::StopPlugin( CHsContentPublisher& aPlugin, TInt aReason )    
     {
     const THsPublisherInfo& info( aPlugin.PublisherInfo() );
     
@@ -551,60 +500,37 @@ void CAiStateManager::StopPlugin( CHsContentPublisher& aPlugin,
         aPlugin.Suspend( CHsContentPublisher::EBackground ) );
         }
     
-    aPlugin.Stop( aReason );   
-    
-    FlushCommandBuffer();
-    
+    aPlugin.Stop( StopReason( aReason ) );   
+           
     __PRINTS( "CAiStateManager::StopPlugin - done" );
     }
 
 // ----------------------------------------------------------------------------
-// CAiStateManager::DestroyPlugins()
+// CAiStateManager::NotifyReloadPlugins()
 // 
 // ----------------------------------------------------------------------------
 //
-void CAiStateManager::DestroyPlugins()
+void CAiStateManager::NotifyReloadPlugins()
     {
-    __PRINTS( "CAiStateManager::DestroyPlugins, start" );    
-    __TIME_MARK( time );
+    __PRINTS( "CAiStateManager::NotifyReloadPlugins" );
+
+    // Factory needs to update its ecom plugins list
+    TRAP_IGNORE( iFactory.ListImplementationsL() );
     
-    RPointerArray< CHsContentPublisher >& plugins( iFactory.Publishers() );
-    
-    for ( TInt i = 0; i < plugins.Count(); i++ )
+    for ( TInt i = 0; i < iReloadPlugins.Count(); i++ )
         {
-        CHsContentPublisher* plugin( plugins[i] );
-
-        // Do shutdown state transition
-        StopPlugin( *plugin, CHsContentPublisher::ESystemShutdown );        
-        }    
-    
-    FlushCommandBuffer();
-    
-    // Finally get rid of all plugins
-    plugins.ResetAndDestroy();
-    
-    __TIME_ENDMARK( "CAiStateManager::DestroyPlugins, done", time );
-    }
-
-// ----------------------------------------------------------------------------
-// CAiStateManager::FlushCommandBuffer();()
-// 
-// ----------------------------------------------------------------------------
-//
-void CAiStateManager::FlushCommandBuffer()
-    {
-    __PRINTS( "CAiStateManager::FlushCommandBuffer, start" );    
+        TAiFwPublisherInfo info( iReloadPlugins[i], 
+            TAiFwCallback(), EAiFwSystemStartup );
         
-    if ( iCommandBuffer )
-        {
-        __TIME( "CAiStateManager::FlushCommandBuffer, flush",
-                
-        iCommandBuffer->Flush() );
+        // Reload plugin
+        NotifyLoadPlugin( info );             
         }
     
-    __PRINTS( "CAiStateManager::FlushCommandBuffer - done" );
+    iReloadPlugins.Reset();
+    
+    __PRINTS( "CAiStateManager::NotifyReloadPlugins - done" );
     }
-	
+
 // ----------------------------------------------------------------------------
 // CAiStateManager::NotifyReleasePlugins()
 // 
@@ -616,18 +542,36 @@ void CAiStateManager::NotifyReleasePlugins( const RArray<TUid>& aUidList )
 
     iReloadPlugins.Reset();
     
+    TBool flush( EFalse );
+    
     for ( TInt i = 0; i < aUidList.Count(); i++ )
         {
-        CHsContentPublisher* plugin = iFactory.PluginByUid( aUidList[ i ] );
-        if ( plugin )
+        const TUid& uid( aUidList[ i ] );
+        
+        CHsContentPublisher* plugin( iFactory.PluginByUid( uid ) );
+                
+        while ( plugin )               
             {
             StopPlugin( *plugin, CHsContentPublisher::ESystemShutdown );
-            THsPublisherInfo info = plugin->PublisherInfo();
+            
+            const THsPublisherInfo& info( plugin->PublisherInfo() );            
             iReloadPlugins.Append( info );
-            iFactory.DestroyPlugin( aUidList[ i ] );
+            
+            iFactory.DestroyPlugin( uid );
+            
+            flush = ETrue;
+            
+            // Get next plugin with same uid
+            plugin = iFactory.PluginByUid( uid );                        
             }
-        }        
-    __PRINTS( "CAiStateManager::NotifyReleasePlugins: return void" );    
+        }     
+    
+    if ( flush )
+        {
+        iFactory.FlushCommandBuffer();
+        }
+        
+    __PRINTS( "CAiStateManager::NotifyReleasePlugins - done" );    
     }
-
+    
 // End of file

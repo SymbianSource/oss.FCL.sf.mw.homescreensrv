@@ -69,6 +69,7 @@ protected:
                     MAiPublisherBroadcaster& aBroadcaster );
     void RefreshL( TBool aClean );
     TBool RefreshL( TInt aContentId, TBool aClean );
+    void RefreshIfActiveL( TBool aClean );
     TBool SuspendL( TInt aContentId, TBool aClean );
     TBool RefreshContentWithPriorityL( TInt aContentId, TInt aPriority );
 

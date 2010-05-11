@@ -21,12 +21,14 @@
 
 // User includes
 #include <aisystemuids.hrh>
+#include <aifwpublisherinfo.h>
 #include <hscontentpublisher.h>
 #include <hspublisherinfo.h>
 #include <aicontentobserver.h>
 #include <aiuicontroller.h>
 #include "caicpscommandbuffer.h"
 #include "aiuicontrollermanager.h"
+#include "aistatemanager.h"
 #include "aipluginfactory.h"
 #include "debug.h"
 
@@ -37,9 +39,13 @@ const TUid KDeviceStatusPluginUid =
 const TUid KProfilePluginUid =
     { AI_UID_ECOM_IMPLEMENTATION_CONTENTPUBLISHER_PROFILEPLUGIN };
 
+const TUid KSapiPluginImplUid = { 0x20019594 };                
+const TUid KWrtPluginImplUid = { 0x200286DD };                          
+
 _LIT( KDeviceStatusPluginName, "DeviceStatus" );
 _LIT( KProfilePluginName, "Profile" );
 
+const TInt KQueueStartInterval( 500000 );
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
@@ -58,6 +64,17 @@ TBool IsRecyclable( const THsPublisherInfo& aInfo )
         }
     
     return EFalse;
+    }
+
+// ----------------------------------------------------------------------------
+// IsSapiOrWrt()
+//
+// ----------------------------------------------------------------------------
+//
+TBool IsSapiOrWrt( const THsPublisherInfo& aInfo )
+    {
+    return ( aInfo.Uid() == KSapiPluginImplUid || 
+             aInfo.Uid() == KWrtPluginImplUid );             
     }
 
 // ----------------------------------------------------------------------------
@@ -91,7 +108,8 @@ static void CleanupResetAndDestroyPushL( T& aArray )
 // ----------------------------------------------------------------------------
 //
 CAiPluginFactory::CAiPluginFactory( CAiUiControllerManager& aManager )
-    : iUiControllerManager( aManager )
+    : CTimer( CActive::EPriorityUserInput - 1 ), 
+      iUiControllerManager( aManager ), iAllowFlush( ETrue )
     {
     }
 
@@ -102,6 +120,15 @@ CAiPluginFactory::CAiPluginFactory( CAiUiControllerManager& aManager )
 //
 CAiPluginFactory::~CAiPluginFactory()
     {
+    Cancel();
+    
+    delete iStarter;
+    
+    delete iCommandBuffer;
+    
+    iLoadQueue.Reset();
+    iDestroyQueue.Reset();
+    
     // All publishers should be already deleted from CAiFw::HandleUiShutdown       
     iPublishers.ResetAndDestroy();
     
@@ -117,13 +144,7 @@ CAiPluginFactory::~CAiPluginFactory()
 //
 CAiPluginFactory* CAiPluginFactory::NewL( CAiUiControllerManager& aManager )
     {
-    CAiPluginFactory* self = 
-        new ( ELeave ) CAiPluginFactory( aManager );
-                                                                      
-    CleanupStack::PushL( self );
-    self->ConstructL();
-    CleanupStack::Pop( self );
-    return self;
+    return new ( ELeave ) CAiPluginFactory( aManager ); 
     }
 
 // ----------------------------------------------------------------------------
@@ -132,28 +153,172 @@ CAiPluginFactory* CAiPluginFactory::NewL( CAiUiControllerManager& aManager )
 // ----------------------------------------------------------------------------
 //
 void CAiPluginFactory::ConstructL()
-    {               
-    REComSession::ListImplementationsL( 
-        KInterfaceUidHsContentPlugin, iEComPlugins );    
+    {             
+    ListImplementationsL();
+    
+    iCommandBuffer = CAiCpsCommandBuffer::NewL();
+    
+    // Ensure interface is available
+    iCommandBuffer->GetCPSInterfaceL();
+    
+    CActiveScheduler::Add( this );
+    
+    CTimer::ConstructL();
+    
+    iStarter = CPeriodic::NewL( CActive::EPriorityIdle );
     }
-        
-// ----------------------------------------------------------------------------
-// CAiPluginFactory::CreatePluginL()
-//
-// ----------------------------------------------------------------------------
-//
-TInt CAiPluginFactory::CreatePlugin( 
-    const THsPublisherInfo& aPublisherInfo )
-    {
-    __PRINTS( "*** CAiPluginFactory::CreatePlugin: Start ***" );
 
-    if ( IsRecyclable( aPublisherInfo ) )
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::ListImplementationsL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::ListImplementationsL()
+    {
+    iEComPlugins.ResetAndDestroy();
+    
+    REComSession::ListImplementationsL( 
+        KInterfaceUidHsContentPlugin, iEComPlugins );
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::LoadPlugin()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::LoadPlugin( const TAiFwPublisherInfo& aInfo )
+    {    
+    const THsPublisherInfo& info( aInfo.Info() );
+    
+    for ( TInt i = 0; i < iDestroyQueue.Count(); i++ )
         {
-        CHsContentPublisher* plugin( PluginByUid( aPublisherInfo.Uid() ) );
+        if ( iDestroyQueue[i] == info )
+            {
+            iDestroyQueue.Remove( i );
+            break;
+            }
+        }
+           
+    if ( IsSapiOrWrt( info ) || IsRecyclable( info ) || !PluginByInfo( info ) )
+        {
+        TBool append( ETrue );
+        
+        for ( TInt i = 0; i < iLoadQueue.Count(); i++ )       
+            {
+            if ( iLoadQueue[i] == info )
+                {                
+                append = EFalse;
+                break;
+                }
+            }    
+                
+        // Plugin is not in load queue and is not currently loaded
+        if( append )
+            {                               
+            iLoadQueue.Append( aInfo );
+                        
+            HandleQueueChanged();
+            }    
+        }    
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::DestroyPlugin()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::DestroyPlugin( const TAiFwPublisherInfo& aInfo )
+    {
+    const THsPublisherInfo& info( aInfo.Info() );
+           
+    for ( TInt i = 0; i < iLoadQueue.Count(); i++ )
+        {
+        if ( iLoadQueue[i] == info )
+            {
+            iLoadQueue[i].Callback( KErrCancel );
+            
+            iLoadQueue.Remove( i );                       
+            break;
+            }
+        }
+        
+    if ( PluginByInfo( info ) )
+        {
+        TBool append( ETrue );
+        
+        for ( TInt i = 0; i < iDestroyQueue.Count(); i++ )
+            {
+            if ( iDestroyQueue[i] == info )
+                {
+                append = EFalse;
+                break;
+                }        
+            }
+        
+        // Plugin is not in destroy queue and is currently loaded
+        if ( append )
+            {                       
+            iDestroyQueue.Append( aInfo );
+            
+            HandleQueueChanged();
+            }    
+        } 
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::HandleQueueChanged()
+// 
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::HandleQueueChanged()
+    {
+    __PRINTS( "CAiPluginFactory::HandleQueueChanged" );
+
+    if ( iLoadQueue.Count() == 0 && iDestroyQueue.Count() == 0 )
+        {
+        __PRINTS( "CAiPluginFactory::HandleQueueChanged - done, queues empty" );
+        
+        return;
+        }
+            
+    Cancel();
+    iStarter->Cancel();
+
+    __PRINTS( "CAiPluginFactory::HandleQueueChanged, iStarter->Start()" );
+
+    if ( iLoadQueue.Count() == 1 && iDestroyQueue.Count() == 0 &&
+        iLoadQueue[0].Reason() == EAiFwPluginStartup )
+        {
+        ProcessQueue( this );
+        }
+    else
+        {
+        iStarter->Start( KQueueStartInterval, 0, 
+            TCallBack( ProcessQueue, this ) );        
+        }               
+
+    __PRINTS( "CAiPluginFactory::HandleQueueChanged - done" );
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::DoCreatePlugin()
+//
+// ----------------------------------------------------------------------------
+//
+TInt CAiPluginFactory::DoCreatePlugin( 
+    const TAiFwPublisherInfo& aPublisherInfo )
+    {
+    __PRINTS( "*** CAiPluginFactory::DoCreatePlugin: Start ***" );
+
+    const THsPublisherInfo& info( aPublisherInfo.Info() );
+    
+    if ( IsRecyclable( info ) )
+        {
+        CHsContentPublisher* plugin( PluginByUid( info.Uid() ) );
 
         if ( plugin )
             {
-            if ( aPublisherInfo.Namespace() == KNullDesC8 )
+            if ( info.Namespace() == KNullDesC8 )
                 {
                 // No namespace available
                 __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
@@ -162,10 +327,10 @@ TInt CAiPluginFactory::CreatePlugin(
                 }
 
             // Plugin already exists, update its namespace
-            THsPublisherInfo& info( 
+            THsPublisherInfo& pubinfo( 
                 const_cast< THsPublisherInfo& >( plugin->PublisherInfo() ) );
 
-            info.iNamespace.Copy( aPublisherInfo.Namespace() );
+            pubinfo.iNamespace.Copy( info.Namespace() );
 
             __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
                            Plugin recycled ***" );
@@ -180,14 +345,14 @@ TInt CAiPluginFactory::CreatePlugin(
         {
         CImplementationInformation* information( iEComPlugins[i] );
 
-        if( information->ImplementationUid().iUid == aPublisherInfo.Uid().iUid )
+        if( information->ImplementationUid() == info.Uid() )
             {
             implFound = ETrue;
             break;
             }
         }
     
-    if( aPublisherInfo.Namespace() == KNullDesC8 || !implFound )
+    if( info.Namespace() == KNullDesC8 || !implFound )
         {
         // No namespace available or no ecom implementation available
         __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
@@ -196,19 +361,19 @@ TInt CAiPluginFactory::CreatePlugin(
         return KErrNotSupported;
         }
            
-    CHsContentPublisher* plugin( PluginByInfo( aPublisherInfo ) );
+    CHsContentPublisher* plugin( PluginByInfo( info ) );
 
     if( plugin )
         {
         __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
-                       Failed to Load Plug-in: KErrAlreadyExists ***" );
+                       No need to Load Plug-in: KErrAlreadyExists ***" );
         
         return KErrAlreadyExists;
         }
 
     TInt err( KErrNone );
 
-    TRAP( err, CreatePluginL( aPublisherInfo ) );
+    TRAP( err, DoCreatePluginL( aPublisherInfo ) );
     
     __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Load Plug-in ***" );
 
@@ -216,23 +381,37 @@ TInt CAiPluginFactory::CreatePlugin(
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::DestroyPlugin()
+// CAiPluginFactory::DoDestroyPlugin()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::DestroyPlugin( const THsPublisherInfo& aPublisherInfo )                             
+void CAiPluginFactory::DoDestroyPlugin( 
+    const TAiFwPublisherInfo& aPublisherInfo )                             
     {
-    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Start ***" );
+    __PRINTS( "*** CAiPluginFactory::DoDestroyPlugin: Start ***" );
     
-    if ( IsRecyclable( aPublisherInfo ) )
+    const THsPublisherInfo& info( aPublisherInfo.Info() );
+      
+    if ( IsRecyclable( info ) )
         {
         // Don't destroy recyclable plugin
         __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done - Keeping recyclable Plug-in ***" );
         
         return;
         }
-        
-    CHsContentPublisher* plugin( PluginByInfo( aPublisherInfo ) );
+   
+    if ( IsSapiOrWrt( info ) )
+        {
+        if ( aPublisherInfo.Reason() == EAiFwPageShutdown )
+            {
+            // Don't destroy sapi or wrt plugin when page is changed        
+            __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done - Keeping SAPI/WRT plugin ***" );
+            
+            return;
+            }
+        }
+               
+    CHsContentPublisher* plugin( PluginByInfo( info ) );
     
     if ( plugin )
         {
@@ -256,51 +435,81 @@ void CAiPluginFactory::DestroyPlugin( const TUid& aUid )
     
     CHsContentPublisher* plugin( PluginByUid( aUid ) );
     
-    while ( plugin )
-        {
+    if ( plugin )
+        {                
         iPublishers.Remove( iPublishers.Find( plugin ) );
         
         __PRINT( __DBG_FORMAT( 
-            "CAiPluginFactory::DestroyPlugin: name: %S" ), &plugin->PublisherInfo().Name() ); 
+            "CAiPluginFactory::DestroyPlugin: name: %S" ), 
+                &plugin->PublisherInfo().Name() ); 
 
         delete plugin;
-        plugin = NULL;            
+        plugin = NULL;                
         }
     
     __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done ***" );
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::CreatePluginL()
+// CAiPluginFactory::DestroyAllPlugins()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::CreatePluginL(
-    const THsPublisherInfo& aPublisherInfo )
+void CAiPluginFactory::DestroyAllPlugins()
     {       
+    Cancel();
+    iStarter->Cancel();
+    
+    iLoadQueue.Reset();
+    iDestroyQueue.Reset();
+           
+    for ( TInt i = 0; i < iPublishers.Count(); i++ )
+        {
+        CHsContentPublisher* plugin( iPublishers[i] );
+    
+        // Do shutdown state transition
+        iStateManager->StopPlugin( *plugin, EAiFwSystemShutdown );        
+        }    
+    
+    FlushCommandBuffer();
+    
+    // Finally get rid of all plugins
+    iPublishers.ResetAndDestroy();
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::DoCreatePluginL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::DoCreatePluginL(
+    const TAiFwPublisherInfo& aPublisherInfo )
+    {       
+    const THsPublisherInfo& info( aPublisherInfo.Info() );
+    
     __PRINT( __DBG_FORMAT( "\t[I]\t Loading plug-in uid=%x name=%S"), 
-    aPublisherInfo.Uid(), &(aPublisherInfo.Name() ) );
+    info.Uid(), &(info.Name() ) );
 
     iPublishers.ReserveL( iPublishers.Count() + 1 );
     
     CHsContentPublisher* plugin( NULL );
     
     __TIME( "CAiPluginFactory::CreatePluginL Create plug-in:",                                  
-    plugin = CHsContentPublisher::NewL( aPublisherInfo ) );            
+    plugin = CHsContentPublisher::NewL( info ) );            
     
     CleanupStack::PushL( plugin );
     
-    // Ensure interface is available
-    iCommandBuffer->GetCPSInterfaceL();
-    
-    plugin->SetProperty( CHsContentPublisher::ECpsCmdBuffer, 
-        static_cast< MAiCpsCommandBuffer* >( iCommandBuffer ) );
+    if ( IsSapiOrWrt( info ) )
+        {
+        plugin->SetProperty( CHsContentPublisher::ECpsCmdBuffer, 
+            static_cast< MAiCpsCommandBuffer* >( iCommandBuffer ) );    
+        }
     
     __TIME( "FW: Subscribe content observers",    
-    SubscribeContentObserversL( *plugin, aPublisherInfo ) );             
+    SubscribePluginL( *plugin, info ) );             
                                                       
     __TIME( "FW: Configure Plugin",
-    ConfigurePluginL( *plugin, aPublisherInfo ) );
+    ConfigurePluginL( *plugin, info ) );
     
     // Take plugin's ownership
     iPublishers.Append( plugin );
@@ -308,11 +517,11 @@ void CAiPluginFactory::CreatePluginL(
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::SubscribeContentObserversL()
+// CAiPluginFactory::SubscribePluginL()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::SubscribeContentObserversL(
+void CAiPluginFactory::SubscribePluginL(
     CHsContentPublisher& aContentPublisher,        
     const THsPublisherInfo& aPublisherInfo )    
     {
@@ -432,13 +641,136 @@ RPointerArray< CHsContentPublisher >& CAiPluginFactory::Publishers() const
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::SetCommandBuffer()
+// CAiPluginFactory::SetStateManager()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::SetCommandBuffer( CAiCpsCommandBuffer* aCommandBuffer )
+void CAiPluginFactory::SetStateManager( CAiStateManager* aStateManager )
     {
-    iCommandBuffer = aCommandBuffer;
+    iStateManager = aStateManager;
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::FlushCommandBuffer()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::FlushCommandBuffer()
+    {
+    __PRINTS( "CAiPluginFactory::FlushCommandBuffer" );
+    
+    if ( iCommandBuffer && iAllowFlush && !IsActive() )
+        {
+        iCommandBuffer->Flush();
+        }
+    
+    __PRINTS( "CAiPluginFactory::FlushCommandBuffer - done" );
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::ProcessQueue()
+//
+// ----------------------------------------------------------------------------
+//
+/* static */ TInt CAiPluginFactory::ProcessQueue( TAny* aAny )
+    {
+    CAiPluginFactory* self = static_cast< CAiPluginFactory* >( aAny );
+    
+    self->iStarter->Cancel();
+    
+    if ( !self->IsActive() )
+        {
+        self->After( 0 );
+        }
+    
+    return KErrNone;
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::RunL()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::RunL()
+    {
+    __PRINTS( "CAiPluginFactory::RunL" );
+    
+    if ( iStarter->IsActive() )
+        {
+        __PRINTS( "CAiPluginFactory::RunL - done, iStarter->IsActive()" );
+        
+        return;
+        }
+    
+    iAllowFlush = EFalse;
+           
+    if ( iDestroyQueue.Count() > 0 )
+        {        
+        TAiFwPublisherInfo info( iDestroyQueue[ 0 ] );         
+        iDestroyQueue.Remove( 0 );
+               
+        // Resolve plugin
+        CHsContentPublisher* plugin( PluginByInfo( info.Info() ) ); 
+
+        if ( plugin )
+            {                  
+            // Do shutdown state transition
+            iStateManager->StopPlugin( *plugin, info.Reason() );
+            
+            // Destroy plugin
+            DoDestroyPlugin( info );                        
+            }        
+        }
+    else if ( iLoadQueue.Count() > 0 )
+        {
+        TAiFwPublisherInfo info( iLoadQueue[ 0 ] );            
+        iLoadQueue.Remove( 0 );
+    
+        // Create plugin
+        TInt retval( DoCreatePlugin( info ) );
+        
+        if ( retval == KErrNone || retval == KErrAlreadyExists )
+            {
+            CHsContentPublisher* plugin( PluginByInfo( info.Info() ) );
+            
+            if( plugin )
+                {
+                // Do startup state transition    
+                iStateManager->StartPlugin( *plugin, info.Reason() );                
+                }    
+            else
+                {
+                retval = KErrNotFound;
+                }            
+            }
+        
+        info.Callback( retval );
+        }
+
+    iAllowFlush = ETrue;
+    
+    After( 0 );
+    
+    if ( iLoadQueue.Count() == 0 && iDestroyQueue.Count() == 0 )
+        {
+        __PRINTS( "CAiPluginFactory::RunL - queues now empty" );
+        
+        Cancel();
+        
+        FlushCommandBuffer();                             
+        }
+    
+    __PRINTS( "CAiPluginFactory::RunL - done" );    
+    }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::DoCancel()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::DoCancel()
+    {
+    __PRINTS( "CAiPluginFactory::DoCancel" );       
     }
 
 // End of file

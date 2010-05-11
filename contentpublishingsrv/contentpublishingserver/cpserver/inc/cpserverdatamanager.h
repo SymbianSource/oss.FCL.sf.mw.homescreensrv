@@ -53,12 +53,14 @@ public:
     /**
      * Two-phased constructor.
      */
-    static CCPDataManager* NewL( TBool aTBool = EFalse );
+    static CCPDataManager* NewL(TLiwVariant& aDataMapCache, TBool aTBool =
+            EFalse);
 
     /**
      * Two-phased constructor.
      */
-    static CCPDataManager* NewLC( TBool aTBool = EFalse );
+    static CCPDataManager* NewLC(TLiwVariant& aDataMapCache, TBool aTBool =
+            EFalse);
 
     /**
      * Add a new data to database
@@ -136,7 +138,7 @@ public:
      * Open database 
      * @return 
      */
-    void OpenDatabaseL();
+    void OpenDatabaseL(TLiwVariant& aDataMapCache);
 
 private:
     // methods
@@ -149,7 +151,7 @@ private:
     /**
      * Standard 2nd phase constructor.
      */
-    void ConstructL( TBool aTBool );
+    void ConstructL( TLiwVariant& aDataMapCache, TBool aTBool );
 
     /**
      * Fetches action bound to provided trigger.
@@ -180,12 +182,12 @@ private:
      * Fills aOutParamList with parameters for action.
      *
      * @param aOutParamList parsed list of items
-     * @param aParamList list of items from data base
+     * @param aActionMap action map from the database
      * @param aActionTrigger action trigger
      */
     void FillActionParamListL(
     		CLiwGenericParamList & aOutParamList, 
-    		const TLiwGenericParam* aParam,
+            const CLiwDefaultMap* aActionMap,
     		const CLiwDefaultList* aActionTriggers);
 
      /**
@@ -208,7 +210,8 @@ private:
     /**
     * Builds change info list based on query result to database
     * @param aMap - map containing parameters needed to build change info list
-    * @param aParam - param from getlist result 
+    * @param aParam - param from getlist result     
+    * @param aActionMap - action map from a database 
     * @param aChangeInfoList - output list containing change info list sent
     * as notification
     */
@@ -216,7 +219,9 @@ private:
     		const CCPLiwMap* aMap, 
     		const CLiwDefaultList* aActionTriggers,
     		const TLiwGenericParam* aParam,	
+    		const CLiwDefaultMap* aActionMap,
     		CLiwDefaultList* aChangeInfoList );
+  
     /**
     * Builds change info list when query to database returned nothing
     * @param aMap - map containing parameters needed to build change info list
@@ -282,7 +287,6 @@ private:
      * Own.
      */
     CCPActionDataCache* iActionDataCache;
-
     
 #ifdef CONTENT_PUBLISHER_DEBUG
     CCPDebug* iDebug;

@@ -122,7 +122,9 @@ private:
     // Reference of the wrt data, not owned */    
     CWrtData* iData;    
     /** Call back error code */
-    TInt iError;        
+    TInt iError;      
+    /** Transaction id */
+    TInt32 iTransactionId;
     };
 
 #endif // WRTDATAOBSERVER_H

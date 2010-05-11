@@ -581,6 +581,7 @@ void CSapiData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
 		   //Create filter criteria for requested entries in form of LIW map:
 		   filter = CreateFilterLC( aObjectId );
 		   }
+
 	   //append type to inparam list
 	   TLiwGenericParam cptype( KType, TLiwVariant( KCpData ) );
 	   inParamList->AppendL( cptype );
@@ -588,18 +589,18 @@ void CSapiData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
 	   }
 
     filter->InsertL( KActionTrigger, TLiwVariant( triggerName->Des() ) );
-   //append filter to input param
+    //append filter to input param
     TLiwGenericParam item( KFilter, TLiwVariant( filter ) );
     inParamList->AppendL( item );
-    iInterface->ExecuteCmdL( KExecuteAction,  *inParamList, *outParamList );
-    
+    iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList );
+
     CleanupStack::PopAndDestroy( filter );
     CleanupStack::PopAndDestroy( triggerName );
     item.Reset();
 
     inParamList->Reset();
     outParamList->Reset();  
-    
+
     }
 
 // ---------------------------------------------------------------------------
@@ -627,7 +628,8 @@ void CSapiData::RegisterContentObserverL()
     	{
 		CLiwDefaultMap* conRegFilter = CreateFilterLC();
 		conRegFilter->InsertL( KOperation, TLiwVariant( KAddUpdateDelete ) );
-		iContentObserver->RegisterL( conRegFilter, KCpData() );
+		iContentObserver->RegisterL( conRegFilter, KCpData(), 
+                                     KExtendedNotifications );
 		CleanupStack::PopAndDestroy( conRegFilter );
 		}
     }

@@ -198,7 +198,7 @@ int HsWidgetPublisherImpl::HandleWidgetActionL( const TDesC8& aActionDes,
 		    {
 		    // remove widget data when widget removed from screen
 		    CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
-		    InsertWidgetDataIdentifiersL( aWidget, cpdatamap, KAll );
+		    InsertWidgetDataIdentifiersL( aWidget, cpdatamap );
 		    // removal may fail if the client has already removed the data
 		    TRAP_IGNORE( RemoveFromCpsL( cpdatamap, KCpData ) );
 		    mWidgetContentIds.erase( aWidget.getIdentifier() );
@@ -411,54 +411,45 @@ void HsWidgetPublisherImpl::PublishWidget( HsWidget& aWidget )
 // ---------------------------------------------------------------------------
 //
 void HsWidgetPublisherImpl::PublishWidgetDataL( HsWidget& aWidget )
-    {
-    CLiwGenericParamList* inParam = &(mServiceHandler->InParamListL());
-    CLiwGenericParamList* outParam = &(mServiceHandler->OutParamListL());
-    TLiwGenericParam type(KType, TLiwVariant(KCpData));
-    
-    int count = aWidget.itemsCount();
-    for( int i = 0; i < count; i++ )
-        {
-        inParam->AppendL(type);
-        CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
-
-        HsWidgetItem* const widgetItem = aWidget.getWidgetItem( i );
-        
-        // insert widget data identifiers
-        HBufC* itemName = StdStringToUnicodeLC( widgetItem->getItemName());
-        InsertWidgetDataIdentifiersL( aWidget, cpdatamap, *itemName );
-        CleanupStack::PopAndDestroy( itemName );
-        
-        // insert widget item
-        CLiwDefaultMap* datamap = CLiwDefaultMap::NewLC();
-        InsertWidgetItemL( *widgetItem, datamap );
-        cpdatamap->InsertL( KDataMap, TLiwVariant( datamap ) );
-        
-        // insert widget access control list
-        InsertWidgetACLL( cpdatamap );
-        
-        // insert item triggers
-        CLiwDefaultMap* triggermap = CLiwDefaultMap::NewLC();
-        InsertItemTriggerL( *widgetItem, triggermap );
-        cpdatamap->InsertL( KActionMap, TLiwVariant( triggermap ) );
-        CleanupStack::PopAndDestroy( triggermap );
+	{
+	CLiwGenericParamList* inParam = &(mServiceHandler->InParamListL());
+	CLiwGenericParamList* outParam = &(mServiceHandler->OutParamListL());
+	
+	TLiwGenericParam type(KType, TLiwVariant(KCpData));
+	inParam->AppendL(type);
+	
+	CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
+	InsertWidgetDataIdentifiersL( aWidget, cpdatamap );
+   
+	CLiwDefaultMap* datamap = CLiwDefaultMap::NewLC();
+	InsertWidgetItemsL( aWidget, datamap );
+	cpdatamap->InsertL( KDataMap, TLiwVariant( datamap ) );
+	InsertWidgetACLL( cpdatamap );
+	
+	int count = aWidget.itemsCount();
+	if( count > 0 )
+		{
+		CLiwDefaultMap* triggermap = CLiwDefaultMap::NewLC();
+		InsertItemsTriggersL( aWidget, triggermap );
+		cpdatamap->InsertL( KActionMap, TLiwVariant( triggermap ) );
+		CleanupStack::PopAndDestroy( triggermap );
+		}
 
         // add to CPS
-        TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ));
-        inParam->AppendL( item );
-        mServiceInterface->ExecuteCmdL( KAdd,
-                *inParam, *outParam);
-        TInt ret= ObtainErrorCode( *outParam );
-        
-        CleanupStack::PopAndDestroy( datamap );
-        CleanupStack::PopAndDestroy( cpdatamap );
-        
-        item.Reset();
-        outParam->Reset();
-        inParam->Reset();
-        User::LeaveIfError( ret );
-        }
-    type.Reset();
+	TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ));	    
+	inParam->AppendL( item );
+	mServiceInterface->ExecuteCmdL( KAdd,
+			*inParam, *outParam);
+	TInt ret= ObtainErrorCode( *outParam );
+
+	CleanupStack::PopAndDestroy( datamap );
+	CleanupStack::PopAndDestroy( cpdatamap );
+
+	item.Reset();
+	type.Reset();	
+	outParam->Reset();
+	inParam->Reset();
+	User::LeaveIfError( ret );
     }
 
 // ---------------------------------------------------------------------------
@@ -572,7 +563,7 @@ void HsWidgetPublisherImpl::RemoveWidgetL( HsWidget& aWidget )
     CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
     
     TRAPD( err,
-            InsertWidgetDataIdentifiersL( aWidget, cpdatamap, KAll );
+            InsertWidgetDataIdentifiersL( aWidget, cpdatamap );
             RemoveFromCpsL( cpdatamap, KCpData ) );
     if ( err != KErrNotFound )
         {
@@ -783,7 +774,7 @@ void HsWidgetPublisherImpl::InsertWidgetIdentifiersL( HsWidget& aWidget,
 // ---------------------------------------------------------------------------
 //
 void HsWidgetPublisherImpl::InsertWidgetDataIdentifiersL( HsWidget& aWidget,
-	CLiwDefaultMap* aDataMap, const TDesC& aContentType )
+	CLiwDefaultMap* aDataMap )
     {
     WidgetContentIdMapType::const_iterator contentIdIter =
             mWidgetContentIds.find( aWidget.getIdentifier() );
@@ -797,7 +788,7 @@ void HsWidgetPublisherImpl::InsertWidgetDataIdentifiersL( HsWidget& aWidget,
     HBufC* publisherName = StdStringToUnicodeLC( GetPublisherNameL( aWidget ) );
     
     aDataMap->InsertL( KPublisherId, TLiwVariant( *publisherName ) );
-    aDataMap->InsertL( KContentType, TLiwVariant( aContentType ) );
+    aDataMap->InsertL( KContentType, TLiwVariant( KAll ) );
     aDataMap->InsertL( KContentId, TLiwVariant( contentId ) );
     
     CleanupStack::PopAndDestroy( publisherName );
@@ -845,25 +836,31 @@ void HsWidgetPublisherImpl::InsertWidgetInfoL( HsWidget& aWidget,
 // 
 // ---------------------------------------------------------------------------
 //
-void HsWidgetPublisherImpl::InsertWidgetItemL ( HsWidgetItem& aWidgetItem,
+void HsWidgetPublisherImpl::InsertWidgetItemsL ( HsWidget& aWidget,
 	CLiwDefaultMap* aDataMap )
 	{
-    TPtrC8 itemName = ((TUint8*)aWidgetItem.getItemName().c_str());
-    if( aWidgetItem.isStringValue() )
-        {
-        TPtrC8 itemValue = ((TUint8*)aWidgetItem.getItemValue().c_str());
-        HBufC* value = HBufC::NewLC( KUnicodeSize * itemValue.Length() );
-        TPtr dest( value->Des() );
-        CnvUtfConverter::ConvertToUnicodeFromUtf8( dest, itemValue );
-        
-        aDataMap->InsertL( itemName, TLiwVariant(*value ));
-        CleanupStack::PopAndDestroy(value);
-        }
-    else
-        {
-        int itemValue = aWidgetItem.getItemValueInt();
-        aDataMap->InsertL( itemName, TLiwVariant( TInt32( itemValue ) ));
-        }
+	int count = aWidget.itemsCount();
+	for (int index = 0; index < count; index++)
+		{
+		HsWidgetItem* const item = aWidget.getWidgetItem( index );
+		
+		TPtrC8 itemName = ((TUint8*)item->getItemName().c_str());
+		if( item->isStringValue() )
+			{
+			TPtrC8 itemValue = ((TUint8*)item->getItemValue().c_str());
+		    HBufC* value = HBufC::NewLC( KUnicodeSize * itemValue.Length() );
+		    TPtr dest( value->Des() );
+		    CnvUtfConverter::ConvertToUnicodeFromUtf8( dest, itemValue );
+		    
+		    aDataMap->InsertL( itemName, TLiwVariant(*value ));
+			CleanupStack::PopAndDestroy(value);
+			}
+		else
+			{
+			int itemValue = item->getItemValueInt();
+			aDataMap->InsertL( itemName, TLiwVariant( TInt32( itemValue ) ));
+			}
+		}
 	}
 
 // ---------------------------------------------------------------------------
@@ -941,9 +938,10 @@ TInt HsWidgetPublisherImpl::TranslateServiceError( TInt32 aServiceErrorCode )
 // 
 // ---------------------------------------------------------------------------
 //
-void HsWidgetPublisherImpl::InsertItemTriggerL( HsWidgetItem& aWidgetItem,
+void HsWidgetPublisherImpl::InsertItemsTriggersL( HsWidget& aWidget,
 	CLiwDefaultMap* aTriggerMap )
 	{
+	int count = aWidget.itemsCount();
 	CLiwDefaultMap* activateAction = CLiwDefaultMap::NewLC();
 	activateAction->InsertL( KPluginId, TLiwVariant( KCASpaAppLauncherPlugin ) );
 	
@@ -954,10 +952,13 @@ void HsWidgetPublisherImpl::InsertItemTriggerL( HsWidgetItem& aWidgetItem,
 	activate->InsertL( KApaCommand, TLiwVariant( KApaCommandBackground ) );
 	
 	activateAction->InsertL( KData, TLiwVariant( activate ) );
-
-    TPtrC8 itemName = ((TUint8*)aWidgetItem.getItemName().c_str());
-    aTriggerMap->InsertL( itemName, TLiwVariant( activateAction ));
-
+	
+	for (int index = 0; index < count; index++)
+		{
+		HsWidgetItem* const item = aWidget.getWidgetItem( index );
+		TPtrC8 itemName = ((TUint8*)item->getItemName().c_str());
+		aTriggerMap->InsertL( itemName, TLiwVariant( activateAction ));
+		}
 	CleanupStack::PopAndDestroy( activate );
 	CleanupStack::PopAndDestroy( activateAction );
 	}

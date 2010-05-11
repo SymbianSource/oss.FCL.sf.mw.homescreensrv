@@ -160,6 +160,11 @@ private:
     * Owned.
     */
     RPointerArray<CAiCpsExecuteParam> iPlugins;
+
+private: 
+#ifdef _AIFW_UNIT_TEST
+    friend class UT_AiCpsCommandBuffer;
+#endif
     };
 
 #endif // C_CAICPSCOMMANDBUFFER_H

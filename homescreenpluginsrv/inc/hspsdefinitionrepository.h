@@ -26,12 +26,28 @@
 #include <badesca.h>
 #include <s32mem.h>
 #include <fbs.h>
+#include <e32property.h>
 
 #include "hspsresource.h"
 
+class CRepository;
 #ifdef HSPS_LOG_ACTIVE
 class ChspsLogBus;
 #endif
+
+
+/** 
+* Publish & Subscribe functionality for controlling the ODT copies.
+*
+* IPC clients, such as such as sapi_homescreenplugin, should update any ChspsODT based 
+* runtime copies when the active application configuration is updated. 
+* Updated versions are indicated by an increment in the associated RProperty key.
+**/
+const TUid KPropertyHspsCat = {0x200159C0};
+const TUint KPropertyAI3Key = {0x102750F0}; // Homescreen
+const TUint KPropertyMTKey = {0x20000FB1}; // EUNIT MT
+const TInt KPropertyKeyDefault = 1;
+
 
 /**
 *   ThspsRepositoryEvent.
@@ -170,7 +186,8 @@ class ChspsDefinitionRepository : public CBase
         * 
         * @since S60 5.0
         */
-        IMPORT_C static ChspsDefinitionRepository* NewL();
+        IMPORT_C static ChspsDefinitionRepository* NewL(
+                CRepository& aCentralRepository );
         
         /**
         * Destructor.
@@ -435,12 +452,14 @@ class ChspsDefinitionRepository : public CBase
         /**
         * C++ default constructor.
         */
-        ChspsDefinitionRepository();
+        ChspsDefinitionRepository( CRepository& aCentralRepository );
 
         /**
         * By default Symbian 2nd phase constructor is private.
         */
         void ConstructL();
+        
+        void SetupPropertiesL( const TUint aKey );
         
         void SelectFilesFromPathL( CDesCArraySeg& aFileList, const TDesC& aPath, TEntryKey aSortFlag, const TDesC& aFileExtension );
 
@@ -495,6 +514,12 @@ class ChspsDefinitionRepository : public CBase
        
         // Cached copy of last retrieved ODT.
         ChspsODT* iCacheLastODT;        
+        
+        // For indicating ODT updates
+        RProperty iProperty;
+        
+        // Reference to central repository
+        CRepository& iCentralRepository;
     };
 
 #endif      // C_hspsDEFINITIONREPOSITORY_H   

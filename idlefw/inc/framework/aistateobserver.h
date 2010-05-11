@@ -25,7 +25,7 @@
 #include <aifwdefs.h>
 
 // Forward declarations
-class THsPublisherInfo;
+class TAiFwPublisherInfo;
 
 /**
  * State Observer
@@ -50,21 +50,16 @@ public:
      * 
      * @since S60 5.2
      * @param aInfo Publisher Info, which describes the plugin to be loaded.
-     * @param aReason Startup reason, which will be forwarded to the plugin.
-     * @return Error code, KErrNone if succesfully loaded. 
      */
-    virtual TInt NotifyLoadPlugin( const THsPublisherInfo& aInfo,
-        TAiFwLoadReason aReason ) = 0;
+    virtual void NotifyLoadPlugin( const TAiFwPublisherInfo& aInfo ) = 0;        
 
     /**
      * Content publisher destroy request.
      * 
      * @since S60 5.2
      * @param aInfo Publisher Info, which describes the plugin to be destroyed.
-     * @param aReason Shutdown reason, which will be forwarded to the plugin.
      */    
-    virtual void NotifyDestroyPlugin( const THsPublisherInfo& aInfo,
-        TAiFwDestroyReason aReason ) = 0;
+    virtual void NotifyDestroyPlugin( const TAiFwPublisherInfo& aInfo ) = 0;        
     
     /**
      * Notifies to reload previously released plugins

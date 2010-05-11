@@ -32,7 +32,7 @@
 // Forward declarations
 class MAiPSPropertyObserver;
 class MAiStateObserver;
-class THsPublisherInfo;
+class TAiFwPublisherInfo;
 
 // Class declaration
 
@@ -150,14 +150,12 @@ private:
     /**
      * @see MAiFwStateHandler
      */
-    TInt LoadPlugin( const THsPublisherInfo& aPublisherInfo, 
-        TAiFwLoadReason aReason );
+    void LoadPlugin( const TAiFwPublisherInfo& aInfo );         
     
     /**
      * @see MAiFwStateHandler
      */
-    void DestroyPlugin( const THsPublisherInfo& aPublisherInfo,
-        TAiFwDestroyReason aReason );
+    void DestroyPlugin( const TAiFwPublisherInfo& aInfo );        
     
     /**
      * @see MAiFwStateHandler

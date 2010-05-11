@@ -180,6 +180,7 @@ void CPublisherRegistryMap::SaveQueryResultsL( RSqlStatement& aStmt,
 			if (!(filter & EFlag) || ( (flag_db & flag_map)==flag_map))
 				{
 				CLiwDefaultMap* targetMap = CLiwDefaultMap::NewLC();
+	            targetMap->InsertL( KType, TLiwVariant( KPublisher ) );
 				targetMap->InsertL( KId , TLiwVariant( id ) );
 				targetMap->InsertL( KPublisherId , TLiwVariant( publisher ) );
 				targetMap->InsertL( KContentType , TLiwVariant( content_type ) );

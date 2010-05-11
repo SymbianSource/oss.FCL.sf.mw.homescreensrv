@@ -669,7 +669,14 @@ public: // From MShutdownObserver
     */
     void ShutdownInitiating();    
 #endif // _hsps_SERVER_SHUTDOWN_ENABLED_
-    
+        
+    /**
+     * Foreces checking of related file resouces within each server session.
+     * Should be called when the application configuration has been modified.
+     * @since S60 5.2 
+     * @param aAppUid UID of the application configuration
+     */
+    void SetResourceFileCopyRequired( const TInt aAppUid );
     
 public: // from MhspsDefinitioRepositoryObserver
 	

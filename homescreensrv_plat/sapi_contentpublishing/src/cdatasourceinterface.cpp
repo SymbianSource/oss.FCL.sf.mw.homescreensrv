@@ -158,7 +158,10 @@ void CDataSourceInterface::ProcessCommandL( const TDesC8& aCmdName,
             	User::Leave( KErrPathNotFound );
             	}
             transactionId = aCallback->GetTransactionID();
-            iCPClient->RegisterObserverL( aCallback, aInParamList, transactionId );
+            iCPClient->RegisterObserverL( aCallback, 
+                                          aInParamList, 
+                                          transactionId,
+                                          aCmdOptions );
             }
         else
             {

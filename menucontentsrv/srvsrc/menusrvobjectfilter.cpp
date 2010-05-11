@@ -55,9 +55,20 @@ TBool TMenuSrvObjectFilter::MatchesObject( const CMenuEngObject& aObject ) const
         if ( haveAttr )
             {
             __ASSERT_DEBUG( needAttr, User::Invariant() ); // Checked above.
-            if ( needVal != haveVal )
+            //we want co compare uid case onsensitive
+            if( !name.Compare( KMenuAttrUid() ) )
                 {
-                return EFalse;
+                if ( needVal.CompareF( haveVal ) )
+                    {
+                    return EFalse;
+                    }
+                }
+            else
+                {
+                if ( needVal.Compare( haveVal ) )
+                    {
+                    return EFalse;
+                    }
                 }
             }
         }

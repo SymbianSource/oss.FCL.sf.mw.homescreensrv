@@ -62,6 +62,7 @@ EXPORT_C CHspsConfigurationService* CHspsConfigurationService::NewL()
 //
 CHspsConfigurationService::~CHspsConfigurationService()
     {
+    iProperty.Close();
     iPluginIds.Close();
     if(iHspsRequestClient)
         {
@@ -85,7 +86,7 @@ CHspsConfigurationService::~CHspsConfigurationService()
 // ---------------------------------------------------------------------------
 //
 CHspsConfigurationService::CHspsConfigurationService() :
-    iInvalidODT ( ETrue )
+        iODTVersion( 0 )
     {
     }
 
@@ -113,11 +114,49 @@ EXPORT_C ChspsDomDocument& CHspsConfigurationService::GetDOML()
 		User::Leave( KErrNotFound );
 		}
 
-    // If current ODT is invalidated, then update it.
-    if( iInvalidODT )
-        {
-        GetODTL( iHspsODT->RootUid() );
-        }	
+     if( iODTVersion < 1 )
+         {
+         GetODTL( iHspsODT->RootUid() );         
+         }     
+     
+     // Get app uid/key
+     TInt key = 0;
+     GetAppUidL( key );
+     if( key < 1 )
+         {
+         User::Leave( KErrNotFound );
+         }
+     
+     if( iODTVersion < 1 )
+         {
+         User::LeaveIfError( 
+             iProperty.Attach( 
+                 KPropertyHspsCat, 
+                 key ) 
+                 );
+         User::LeaveIfError( 
+             iProperty.Get( 
+                 KPropertyHspsCat, 
+                 key, 
+                 iODTVersion ) 
+                 );         
+         }
+     else
+         {
+         // Check whether the ODT needs to be updated
+         TInt latestVersion( -1 );
+         User::LeaveIfError( 
+             iProperty.Get( 
+                 KPropertyHspsCat, 
+                 key,
+                 latestVersion ) 
+                 );      
+         if( latestVersion != iODTVersion )
+             {
+             GetODTL( iHspsODT->RootUid() );
+             iODTVersion = latestVersion;
+             }              
+         }
 	
 	return iHspsODT->DomDocument();
 	}
@@ -152,7 +191,7 @@ EXPORT_C void CHspsConfigurationService::GetODTL( const TInt aAppUid )
     else
         {
         // ODT is now valid.
-        iInvalidODT = EFalse;
+
         /*
         // Start observing ODT changes
         if ( EhspsServiceRequestSheduled != iHspsRequestClient->hspsGetODTUpdate() )
@@ -211,7 +250,7 @@ EXPORT_C void CHspsConfigurationService::SetLogBus( ChspsLogBus* /*aLogBus*/ )
 // -----------------------------------------------------------------------------
 EXPORT_C void CHspsConfigurationService::InvalidateODT()
     {
-    iInvalidODT = ETrue;
+    iODTVersion = 0;
     }
 
 // -----------------------------------------------------------------------------

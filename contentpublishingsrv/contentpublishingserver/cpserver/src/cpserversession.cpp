@@ -42,9 +42,9 @@ using namespace LIW;
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CCPServerSession* CCPServerSession::NewL( TPointersForSession& aPasser )
+CCPServerSession* CCPServerSession::NewL(TPointersForSession& aPasser)
     {
-    CCPServerSession* self = CCPServerSession::NewLC( aPasser );
+    CCPServerSession* self = CCPServerSession::NewLC(aPasser);
     CleanupStack::Pop( self ) ;
     return self;
     }
@@ -54,9 +54,9 @@ CCPServerSession* CCPServerSession::NewL( TPointersForSession& aPasser )
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-CCPServerSession* CCPServerSession::NewLC( TPointersForSession& aPasser )
+CCPServerSession* CCPServerSession::NewLC(TPointersForSession& aPasser)
     {
-    CCPServerSession* self = new ( ELeave ) CCPServerSession();
+    CCPServerSession* self = new (ELeave) CCPServerSession();
     CleanupStack::PushL( self );
     self->ConstructL( aPasser ) ;
     return self;
@@ -129,12 +129,18 @@ void CCPServerSession::ServiceL( const RMessage2& aMessage )
     else
         {
         TInt err(KErrNone);
-        TBool panicedClient(EFalse);
-        TRAP( err , DispatchMessageL( aMessage, panicedClient ) );
+        TBool completeRequest( ETrue ); 
+        //complete request by default
+        //not applicable when client panicked or 
+        //in case of ECpServerExecuteMultipleActions
+        TRAP( err , DispatchMessageL( aMessage, completeRequest ) );
         if ( (!(aMessage.Function( ) == ECpServerRegisterObserver ) 
-            || err == KErrInUse) && !panicedClient )
+            || err == KErrInUse) && completeRequest )
             {
-            aMessage.Complete( err );
+            if( !aMessage.IsNull() ) 
+                {
+                aMessage.Complete( err );
+                }
             }
         }
     }
@@ -144,7 +150,8 @@ void CCPServerSession::ServiceL( const RMessage2& aMessage )
 // Handle client requests.
 // -----------------------------------------------------------------------------
 //
-void CCPServerSession::DispatchMessageL( const RMessage2& aMessage, TBool& aPanicedClient )
+void CCPServerSession::DispatchMessageL( const RMessage2& aMessage, 
+                                         TBool& aCompleteRequest )
     {
     CP_DEBUG( _L8("CCPServerSession::DispatchMessageL()" ) );
     switch ( aMessage.Function( ) )
@@ -184,10 +191,11 @@ void CCPServerSession::DispatchMessageL( const RMessage2& aMessage, TBool& aPani
             break;
         case ECpServerExecuteMultipleActions:
             ExecuteMultipleActionsL( aMessage );
+            aCompleteRequest = EFalse;
             break;
         default:
             iServer->PanicClient( aMessage, ECPServerBadRequest );
-            aPanicedClient = ETrue;
+            aCompleteRequest = EFalse;
             break;
         }
     }
@@ -325,13 +333,14 @@ void CCPServerSession::ExecuteMultipleActionsL(const RMessage2& aMessage)
     
     CLiwGenericParamList* genericList = UnpackForMultiExecuteLC(aMessage);
     TUint options = static_cast<TUint> (aMessage.Int2()); // 2 == KOptionsPosition
-
+    //complete message in order to unblock HS
+    aMessage.Complete( KErrNone );
+    
     const TLiwGenericParam* param = NULL;
     TInt pos(0);
     param = genericList->FindFirst(pos, KFilters);
     const CLiwList* maps = param->Value().AsList();
     CLiwDefaultList* cpMaps = CheckValidityLC(maps);
-    
     //execute actions
     for (TInt i = 0; i < cpMaps->Count(); i++)
         {
@@ -387,7 +396,7 @@ void CCPServerSession::RegisterObserverL( const RMessage2& aMessage )
         if ( !iNotificationHandler )
             {
             iNotificationHandler = CCPNotificationHandler::NewL(
-                                               iServer->GetNotifications());
+                    iServer->GetNotifications(), iServer->GetDataMapCache());
             iDataManager->AddObserverL( iNotificationHandler );
             }
         iNotificationHandler->SaveMessageL( aMessage );
