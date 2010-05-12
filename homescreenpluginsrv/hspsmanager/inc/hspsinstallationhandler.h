@@ -604,18 +604,20 @@ class ChspsInstallationHandler : public CBase,
                 const TDesC& aPath,
                 const TLanguage aLanguage );
         
+        /**
+         * Finds all language specific folders and resources  
+         * under the interface path in ROM or UDA drive.
+         * @since S60 5.0
+         * @path aPath Xuikon path
+         */
         void AddInterfaceResourcesV2L(
                 const TDesC& aPath );
-
-        void AddLocalizedResourcesV2L(
-                const TDesC& aPath,
-                const TLanguage aLanguage );
         
         /**
          * Validates manifest contents and installs files into the Plug-in Repository.
          * @since S60 5.0
          */
-        void ValidateL();
+        void FinalizeParsingL();
         
         /**
          * Validates provided UID value.

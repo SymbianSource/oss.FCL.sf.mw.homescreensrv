@@ -114,12 +114,20 @@ public:
      *
      * @since S6CCPActiveNotifierNotifier v 5.CCPActiveNotifierNotifier
      * @param aInParamList input parameter list (filter)
-     * @param aOutParamList output action_map
      * @param aCmdOptions options for the command
      */
     void ExecuteActionL( const CLiwGenericParamList& aInParamList,
             TUint aCmdOptions );
 
+    /**
+     * Send command to server to ExecuteMultipleActions
+     *
+     * @param aInParamList input parameter list (filter)
+     * @param aCmdOptions options for the command
+     */
+    void ExecuteMultipleActionsL(
+            const CLiwGenericParamList& aInParamList, TUint aCmdOptions);
+    
     /**
      * Check second param from IDataSource interface
      *
@@ -129,7 +137,15 @@ public:
      */    
     void CheckMapL( const CLiwGenericParamList& aInParamList, 
             const TDesC8& aKey );
-
+    
+    /**
+     * Check proper data is passed as parameter to ExecuteMultipleActions
+     *
+     * @since S6CCPActiveNotifierNotifier v 5.CCPActiveNotifierNotifier
+     * @param aList generic list containing input parameters 
+     */    
+    void CheckMultiExecuteInputParamsL(const CLiwGenericParamList& aList);
+    
 private:
 
     /**

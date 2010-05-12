@@ -1660,10 +1660,10 @@ ChspsDomNode* hspsServerUtil::GetParentNode(
     }
 
 // -----------------------------------------------------------------------------
-// hspsServerUtil::IsFile
+// hspsServerUtil::IsLogoFile
 // -----------------------------------------------------------------------------
 //
-TBool hspsServerUtil::IsFile(
+TBool hspsServerUtil::IsLogoFile(
         const TDesC& aFileDeclaration,
         TFileName& aFilename )        
     {
@@ -1891,6 +1891,127 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
               
      return err;
      }
+     
+// -----------------------------------------------------------------------------
+// hspsServerUtil::ResolveLogoPathL
+// -----------------------------------------------------------------------------
+void hspsServerUtil::PopulateLogoPathsL(
+        const TDesC& aLogoDeclaration,
+        const TUint aAppUid,
+        RBuf& aTargetPath,
+        RBuf& aSourcePath,
+        RBuf& aUpdatedDeclaration)
+    {        
+    // Process widget types only 
+    if ( aLogoDeclaration.Length() && aAppUid > 0 )
+        {                          
+        // Get possible file name from the optional logo declaration
+        // and if found, populate the paths and update the declaration 
+        TFileName filename;
+        if( IsLogoFile( aLogoDeclaration, filename ) )
+            {      
+            // Get client's private directory                
+            _LIT( KClientPrivatePath, "c:\\private\\%X\\");
+            TPath clientPath;            
+            clientPath.Format( KClientPrivatePath, aAppUid );
+                                    
+            // Updated logo declaration
+            TInt offset = aLogoDeclaration.FindF( filename );                       
+            __ASSERT_DEBUG( offset != KErrNotFound, User::Leave( KErrCorrupt ) );            
+            if( aLogoDeclaration.Length() + aLogoDeclaration.Mid( offset ).Length() < KMaxFileName )
+                {
+                aUpdatedDeclaration.Copy( aLogoDeclaration );
+                aUpdatedDeclaration.Insert( offset, clientPath );
+                                                               
+                // Set path and name of the target file            
+                if( clientPath.Length() + filename.Length() < KMaxFileName )
+                    {
+                    aTargetPath.Copy( clientPath );
+                    aTargetPath.Append( filename );
+                    
+                    // Set name of the source file
+                    _LIT( KServerPrivateFolder, "c:\\private\\200159c0\\themes\\" );
+                    if( KServerPrivateFolder().Length() + filename.Length() < KMaxFileName )
+                        {                       
+                        aSourcePath.Copy( KServerPrivateFolder );
+                        aSourcePath.Append( filename );                        
+                        }
+                    }
+                }
+                        
+            }
+        }
+    }     
+
+// -----------------------------------------------------------------------------
+// hspsServerUtil::FindFilesRecursivelyL
+// -----------------------------------------------------------------------------
+void hspsServerUtil::FindFilesRecursivelyL(
+        RFs& aFs,
+        const RArray<TInt>& aDriveArray, 
+        const TDesC& aPath,        
+        RPointerArray<HBufC>& aFolders,
+        TBool aRecursive )
+    {
+    TParsePtrC parser( aPath );
+  
+    TFindFile fileFinder( aFs );    
+    fileFinder.SetFindMask( KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+    
+    _LIT(KMaskFile, "*");          
+    for( TInt driveIndex=0; driveIndex < aDriveArray.Count(); driveIndex++ )
+        {
+        TChar driveChar;
+        User::LeaveIfError( RFs::DriveToChar( aDriveArray[driveIndex], driveChar ) );
+        TBuf16<2> driveBuf(2);
+        driveBuf[0] = TUint( driveChar );
+        driveBuf[1] = TUint( TChar(':') );
+                        
+        TPath path;        
+        path.Copy( driveBuf );        
+        path.Append( parser.Path() );
+                        
+        CDir* dirList( NULL );             
+        fileFinder.FindWildByDir( KMaskFile, path, dirList );
+        if ( dirList )
+          {
+          CleanupStack::PushL( dirList );
+                       
+          const TInt count = dirList->Count();          
+          for( TInt entryIndex = 0; entryIndex < count; entryIndex++ )
+              {
+              const TEntry& entry = (*dirList)[ entryIndex ];                        
+                                                         
+              TFileName file( path );              
+              file.Append( entry.iName );
+              if( entry.IsDir() )
+                  {
+                  file.Append( KDoubleBackSlash );
+                  }
+                                
+              if( !BaflUtils::FileExists( aFs, file ) )
+                  {
+                  continue;
+                  }
+              if( entry.IsDir() && aRecursive )
+                  {                                
+                  FindFilesRecursivelyL( aFs, aDriveArray, file, aFolders );                  
+                  }
+              else
+                  {                                             
+                  HBufC* nameBuf = file.AllocLC();                
+                  aFolders.AppendL( nameBuf );
+                  CleanupStack::Pop( nameBuf );
+                  }              
+              } 
+          
+          CleanupStack::PopAndDestroy( dirList );
+          dirList = 0;
+          } // dirlist
+    
+        } // driveIndex    
+    }
+
 
 // -----------------------------------------------------------------------------
 // hspsServerUtil::hspsServerUtil

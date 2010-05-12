@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -21,55 +21,12 @@
 
 #include <e32base.h>
 #include <bamdesca.h>   // For MDesCArray
-#include <apgcli.h>     // For RApaLsSession
 #include <msvapi.h>     // For MMsvSessionObserver
-#include <apgnotif.h>   // For MApaAppListServObserver
 #include <mcsmenu.h>    // For MenuContentService
 #include <propertymap.h>// For HSPS settings property map
 
-/**
- *  @ingroup group_mcsplugin
- *
- * Observer interface for application list events
- *
- * @since S60 v3.2
- */
-class MMCSPluginListObserver
-{
-public:
-
-    /**
-     * AppList event codes
-     */
-    enum TScutListEvent
-    {
-        EAppListReady,
-        EAppListUpdated,
-        EBkmListUpdated
-    };
-
-    /**
-     * Callback for application list events
-     *
-     * @since S60 v3.2
-     * @param aEvent AppList event code
-     * @param aAdded ETrue if applications were added, EFalse if removed
-     */
-    virtual void HandleScutListEventL( 
-        TScutListEvent aEvent, TBool aAdded ) = 0;
-
-   // virtual TBool IsHidden(const TUid& aAppUid) const = 0;
-
-};
-
 struct TSettingItem;
-/**
- * Application list for settings listbox
- *
- * @since S60 v3.2
- */
-
-class CMCSPluginWatcher;
+class CMenuItem;
 
 /**
  *  @ingroup group_mcsplugin
@@ -78,7 +35,7 @@ class CMCSPluginWatcher;
  *
  * @since S60 v9.1
  */
-class CMCSPluginSettingsAppList : public CBase, //public CActive
+class CMCSPluginSettingsAppList : public CBase,
     public MDesCArray, public MMsvSessionObserver
 {
 
@@ -143,14 +100,14 @@ public:
         TAny* aArg3 );
 
     /**
-     * Starts the asynchronous appliation list initialization
+     * Starts the asynchronous application list initialization
      *
      * @since S60 v3.2
      */
     void StartL();
 
     /**
-     * FindItemL
+     * Finds item from item array based on property values.
      *
      * @since S60 
      * @param aProperties
@@ -160,21 +117,18 @@ public:
         aProperties );
 
     /**
-     * 
+     * Returns menu item from list, based on given index
      *
      * @since S60 
-     * @param 
+     * @param aIndex List index
      * @return
      */
-    CMenuItem& ItemL(const TInt& aIndex );
+    CMenuItem* ItemL(const TInt& aIndex );
+    
     /**
-     * RemoveMenuItemL
-     * 
-     * @param aIndex
+     * Returns title for undefined item
      */
-    void RemoveMenuItemL( TInt aIndex );
-
-protected:
+    TPtrC UndefinedText() { return *iUndefinedText; };
 
 private:
     /**
@@ -215,20 +169,6 @@ private:
      */
     void AddMailboxL( const TDesC& aMailbox, const TDesC& aMailboxId );
 
-    /**
-     * GetID of MCS Plugin Folder
-     * 
-     * @return TInt
-     */
-    TInt GetMCSPluginFolderIdL();
-
-    /**
-     * Update menu items
-     * 
-     * @return TInt
-     */
-    TInt UpdateMenuItemsRefCountL( CMenuItem* aItem, TInt aValueToAdd );
-
 private:  // data
 
     /**
@@ -242,47 +182,20 @@ private:  // data
      * Own.
      */
     CMsvSession* iMsvSession;
-
-    /**
-     * Registered observer for application list events
-     */
-    //MMCSPluginListObserver& iObserver;
-
-    /**
-     * A flag indicating if the app list should observe changes
-     */
-    TBool iObserving;
-
     /**
      * iMenu
      */
     RMenu iMenu;
 
     /**
-     * iSaveWatcher
-     */
-    CMCSPluginWatcher* iSaveWatcher;
-
-    /**
-     * iUpdateWatcher
-     */
-    CMCSPluginWatcher* iUpdateWatcher;
-
-    /**
-     * iRemoveWatcher
-     */
-    CMCSPluginWatcher* iRemoveWatcher;
-
-    /**
-     * iMCSPluginFolderId
-     */
-    TInt iMCSPluginFolderId;
-
-public:
-    /**
-     * Name of "Undefined" application
+     * Name of "Undefined" application, own
      */
     HBufC* iUndefinedText;
+    
+    /*
+     * Undefined MCS item, own
+     */
+    CMenuItem* iUndefinedItem;
 };
 
 #endif // CMCSPLUGINSETTINGSAPPLIST_H

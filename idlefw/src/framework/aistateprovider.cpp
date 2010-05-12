@@ -19,6 +19,9 @@
 #include <AknDef.h>
 #include <connect/sbdefs.h>
 #include <e32property.h>
+#include <swi/swispubsubdefs.h>
+#include <swi/swiutils.h>
+#include <sacls.h> // KSWIUidsCurrentlyBeingProcessed
 
 // User includes
 #include <aipspropertyobserver.h>
@@ -28,6 +31,8 @@
 #include "aistateobserver.h"
 
 #include "aistateprovider.h"
+
+#include "debug.h"
 
 // Constants
 
@@ -113,7 +118,11 @@ void CAiStateProvider::StartL( CCoeEnv& aCoeEnv )
         iBackupRestoreObserver = AiUtility::CreatePSPropertyObserverL(
             TCallBack( BackupRestoreEvent, this ),
             KUidSystemCategory, conn::KUidBackupRestoreKey );
-        
+
+        iSwiUidListObserver = AiUtility::CreatePSPropertyObserverL(
+                TCallBack( SwiUidListEvent, this ),
+                KUidSystemCategory, KSWIUidsCurrentlyBeingProcessed );
+
         User::LeaveIfError( iSkinSrv.Connect( this ) );
            
         iEcomObserver = CAiEcomObserver::NewL();
@@ -152,7 +161,10 @@ void CAiStateProvider::Stop()
                
         Release( iBackupRestoreObserver );
         iBackupRestoreObserver = NULL;
-        
+
+        Release( iSwiUidListObserver );
+        iSwiUidListObserver = NULL;
+
         delete iLightObserver;      
         iLightObserver = NULL;
         }           
@@ -238,7 +250,9 @@ void CAiStateProvider::SkinPackageChanged(
 //
 void CAiStateProvider::NotifyEcomRegistryChanged()
     {
-    iObserver.NotifyUpdatePlugins();
+    __PRINTS( "CAiStateProvider::NotifyEcomRegistryChanged" );    
+    iObserver.NotifyReloadPlugins();
+    __PRINTS( "CAiStateProvider::NotifyEcomRegistryChanged - return void" );    
     }
 
 // ----------------------------------------------------------------------------
@@ -277,16 +291,6 @@ void CAiStateProvider::ChangePluginState( TAiFwState aState )
     }
 
 // ----------------------------------------------------------------------------
-// CAiStateProvider::OnlineStateInUse()
-// 
-// ----------------------------------------------------------------------------
-//
-TBool CAiStateProvider::OnlineStateInUse() const
-    {
-    return iObserver.OnlineStateInUse();
-    }
-
-// ----------------------------------------------------------------------------
 // CAiStateProvider::BackupRestoreEvent()
 // 
 // ----------------------------------------------------------------------------
@@ -312,6 +316,24 @@ TBool CAiStateProvider::OnlineStateInUse() const
             }
         }
     
+    return KErrNone;
+    }
+
+// ----------------------------------------------------------------------------
+// CAiStateProvider::SwiUidLIstEvent()
+// 
+// ----------------------------------------------------------------------------
+//
+/* static */ TInt CAiStateProvider::SwiUidListEvent( TAny* aAny )
+    {
+    CAiStateProvider* self = static_cast< CAiStateProvider* >( aAny );
+
+    RArray<TUid> uidList;
+    if ( KErrNone == Swi::GetAllUids( uidList ) )
+        {
+        self->iObserver.NotifyReleasePlugins( uidList );
+        }
+
     return KErrNone;
     }
 

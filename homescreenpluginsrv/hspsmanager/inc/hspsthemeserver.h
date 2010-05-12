@@ -179,7 +179,7 @@
 _LIT(KhspsThemeServerName,"hspsthemeserver");
 
 /** Supported manifest version */
-_LIT(KhspsSupportedManifestVersion,"1.0");
+_LIT(KhspsSupportedManifestVersion,"2.0");
 
 /** hspsThemeServer Uid3 = SECUREID. */
 const TUid KhspsThemeServerUid3 = {0x200159C0}; //old uid 0x10207254};
@@ -210,6 +210,7 @@ class ChspsSecurityEnforcer;
 class ChspsRomInstaller;
 class ChspsAutoInstaller;
 class ChspsThemeServerSession;
+class ChspsFamily;
 
 #ifdef HSPS_LOG_ACTIVE
 class ChspsLogBus;
@@ -631,7 +632,19 @@ public: // public functions
     * @returns The active family
     */
    TUint32 GetActiveFamilyL( 
-           const TInt aAppUid );      
+           const TInt aAppUid );    
+
+   /**
+    * Installs widgets located at \private\200159C0\install\ directories.
+    * @since S60 5.0 
+    */
+   void InstallWidgetsL();   
+   
+   /**
+    * Install all widgets from uda
+    * @since S60 5.2
+    */
+   void InstallUDAWidgetsL();   
    
 public: // from MhspsFileChangeObserver
 	
@@ -671,10 +684,11 @@ public: // from MhspsCenRepObserver
          
     void HandleCenRepChangeL( const TUint32 aId );    
      
-#if defined(WINSCW) || defined(__WINS__)    
+    
 public: // from MshspFamilyObserver    
     TBool HandleFamilyChangeL( const ThspsFamily aNewFamily );
-#endif // defined(WINSCW)
+
+    ChspsFamily* Family();
     
 private:
 	
@@ -806,12 +820,6 @@ private:
      * @since S60 5.0 
      */
     void HandleRomInstallationsL();
-    
-    /**
-     * Installs widgets located at \private\200159C0\install\ directories.
-     * @since S60 5.0 
-     */
-    void InstallWidgetsL();
                                         
     /**
      * Initiates uninstallation of a manifest file located under the imports folder.
@@ -977,15 +985,8 @@ private:
      */
     void RestoreConfigurationL(
         ChspsODT& aOdt );
-    
-    /**
-     * Install all widgets from uda
-     * @since S60 5.2
-     */
-    void InstallUDAWidgetsL();
-    
-#if defined(WINSCW) || defined(__WINS__)    
 
+#if defined(WINSCW) || defined(__WINS__)
     /**
      * Executed at startup to activate root configurations which were designed
      * for the current resolution.
@@ -993,7 +994,7 @@ private:
      */
     void ActivateRootConfigurationsL();
            
-#endif // defined(WINSCW)
+#endif // defined(WINSCW) || defined(__WINS__)
         
 #ifdef _hsps_SERVER_SHUTDOWN_ENABLED_    
     CShutdown* iShutdown;
@@ -1066,10 +1067,10 @@ private:
     CHSPSBRHandler* iBRHandler;
     
 
-#if defined(WINSCW) || defined(__WINS__)
-    // Listener for resolution and orientation changes
-    ChspsFamilyListener* iFamilyListener;
-#endif // defined(WINSCW)    
+
+    // Family handler, own
+    ChspsFamily* iFamily;
+    
     
 #ifdef HSPS_LOG_ACTIVE    
     /**

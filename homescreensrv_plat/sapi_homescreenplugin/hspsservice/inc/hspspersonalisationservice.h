@@ -87,12 +87,14 @@ class CHspsPersonalisationService : public CBase, public MhspsThemeManagementSer
          * @param aInterface Interface of the requested plugins.
          * @param aType Type of the requested plugins.
          * @param aFamily Requested plugin configuration family
+         * @param aCopyLogos Controls whether to copy logos to client's private folder
          * @param aList List of plugins ODT headers.
          */
         IMPORT_C void GetPluginListL( 
             TDesC8& aInterface,
             TDesC8& aType,
             TUint32 aFamily,
+            const TBool aCopyLogos,
             CArrayPtrFlat<ChspsODT>& aList
             );
 

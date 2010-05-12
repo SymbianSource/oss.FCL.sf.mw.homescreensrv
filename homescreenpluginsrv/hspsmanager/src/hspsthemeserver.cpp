@@ -35,6 +35,7 @@
 #include "hspsdefinitionrepository.h"
 #include "hspsdefinitionengineinterface.h"
 #include "hspsconfiguration.h"
+#include "hspsfamily.h"
 #ifdef _hsps_PERFORMANCE_TEST_
 #include "hspstimemon.h"
 #endif //_hsps_PERFORMANCE_TEST_
@@ -316,7 +317,10 @@ void ChspsThemeServer::ConstructL()
     
     // Get active device language
     iDeviceLanguage = GetDeviceLanguage();
-            
+#ifdef HSPS_LOG_ACTIVE    
+    iLogBus->LogText( _L( "ChspsThemeServer::GetDeviceLanguage() %d" ), iDeviceLanguage );
+#endif
+
     // Setup a search mask for finding headers from the cache
     iCacheMask = ChspsODT::NewL();
 
@@ -345,10 +349,13 @@ void ChspsThemeServer::ConstructL()
     // Start observing the notifications
     iDefinitionRepository->RegisterObserverL( *this );
            
-	// Resolution & orientation change listener
+
 #if defined(WINSCW) || defined(__WINS__)
-    iFamilyListener = ChspsFamilyListener::NewL( *this );
-#endif // defined(WINSCW)    
+    // Resolution & orientation change listener
+    iFamily = ChspsFamilyListener::NewL( *this );
+#else 
+    iFamily = ChspsFamily::NewL();
+#endif //defined(WINSCW) || defined(__WINS__)
     
     // Auto-localize ODTs in the Definition Repository when the device language has changed
     HandleLanguageChangeL();            
@@ -440,11 +447,12 @@ void ChspsThemeServer::Cleanup()
     DisableAutoInstallation();
 #endif //__DISABLE_SISX_INSTALLATION_
 
-#if defined(WINSCW) || defined(__WINS__)    
-    delete iFamilyListener;
-    iFamilyListener = NULL;
-#endif // defined(WINSCW)    
-    
+    if ( iFamily )
+        {
+        delete iFamily;
+        iFamily = NULL;
+        }
+
     delete iCenRepListener;
     iCenRepListener = NULL;
     
@@ -515,7 +523,7 @@ void ChspsThemeServer::AddSession( ChspsThemeServerSession* aSession )
 
 #ifdef HSPS_LOG_ACTIVE    
     iLogBus->LogText( _L( "ChspsThemeServer::AddSession(): - now %d concurrent sessions." ),
-            iSessionCount );
+        iSessions.Count() );
 #endif    
     }
 
@@ -544,7 +552,7 @@ void ChspsThemeServer::DropSession( ChspsThemeServerSession* aSession )
 
 #ifdef HSPS_LOG_ACTIVE    
     iLogBus->LogText( _L( "ChspsThemeServer::DropSession(): - %d concurrent sessions left." ),
-            iSessionCount );
+        iSessions.Count() );
 #endif    
     }
   
@@ -1882,10 +1890,6 @@ TBool ChspsThemeServer::ComparePaths(const ChspsODT& aOldHeader, const ChspsODT&
 //
 TLanguage ChspsThemeServer::GetDeviceLanguage()
     {
-#ifdef HSPS_LOG_ACTIVE    
-    iLogBus->LogText( _L( "ChspsThemeServer::GetDeviceLanguage(): %d returned" ), User::Language() );
-#endif                    
-
     return User::Language();
     } 
 	
@@ -2757,7 +2761,7 @@ void ChspsThemeServer::HandleRomInstallationsL()
     // Activate client specific root configurations from active display resolution
     ActivateRootConfigurationsL();
 #endif // defined(WINSCW)    
-    
+
     res.Close();    
     CleanupStack::PopAndDestroy(1, &res); 
     }
@@ -2774,44 +2778,8 @@ void ChspsThemeServer::InstallWidgetsL()
 	iRomInstaller->SetLogBus( iLogBus );
 #endif
 		
-	RPointerArray<HBufC> pluginFolders;
-    CleanupClosePushL( pluginFolders );				
-	        
-    // Find UDA and ROM widgets to be installed     
-    iRomInstaller->FindInstallationFilesL( pluginFolders );
-            
-	// Install the manifest files    
-    for( TInt index=0; index < pluginFolders.Count(); index++ )
-        {         
-        TPtrC namePtr( pluginFolders[index]->Des() );                               
-#ifdef HSPS_LOG_ACTIVE            
-        iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - installing configuration: %S" ), &namePtr );
-#endif      
-                
-        // Synchronous method
-        ThspsServiceCompletedMessage ret = iRomInstaller->InstallThemeL( namePtr  );
-        if ( ret != EhspsInstallThemeSuccess )
-            {
-#ifdef HSPS_LOG_ACTIVE            
-            iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - installation failed: %S" ), &namePtr );
-#endif                  
-//            User::Leave( KErrAbort );
-            }
-        }
-    
-    if ( pluginFolders.Count() == 0 )
-        {
-#ifdef HSPS_LOG_ACTIVE            
-        iLogBus->LogText( _L( "ChspsThemeServer::InstallWidgetsL(): - mandatory plugins were not found!" ) );
-#endif                                  
-        // Mandatory plugins were missing 
-        User::Leave( KErrCorrupt );
-        }
-        
-    pluginFolders.ResetAndDestroy();
-    CleanupStack::PopAndDestroy( 1, &pluginFolders );
-		
-	// The ROM installer is not needed anymore and therefore it can be released
+	iRomInstaller->InstallL();
+			
 	delete iRomInstaller;
 	iRomInstaller = 0;
 	
@@ -3516,7 +3484,7 @@ TUint32 ChspsThemeServer::GetActiveFamilyL(
 void ChspsThemeServer::ActivateRootConfigurationsL()
     {
     // Get family from the active resolution
-    const ThspsFamily family = iFamilyListener->GetFamilyType();
+    const ThspsFamily family = iFamily->GetFamilyType();
         
     // Try to activate an application configuration which was designed 
     // for the active resolution
@@ -3526,6 +3494,8 @@ void ChspsThemeServer::ActivateRootConfigurationsL()
         HandleFamilyChangeL( KDefaultFamily );
         }
     }
+#endif // defined(WINSCW) || defined(__WINS__)
+
 
 // -----------------------------------------------------------------------------
 // ChspsThemeServer::HandleFamilyChangeL()
@@ -3631,7 +3601,14 @@ TBool ChspsThemeServer::HandleFamilyChangeL(
     return activated;
     }
 
-#endif // defined(WINSCW)
+// -----------------------------------------------------------------------------
+// ChspsThemeServer::Family()
+// -----------------------------------------------------------------------------
+//
+ChspsFamily* ChspsThemeServer::Family()
+	{
+	return iFamily;
+	}
 
 // end of file
 

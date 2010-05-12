@@ -320,6 +320,9 @@ EXPORT_C void CHsContentInfo::ExternalizeL( RWriteStream& aStream )
     
     // externalise iIsWrt
     aStream.WriteInt16L( iIsWrt );
+
+    // externalise iIsFull
+    aStream.WriteInt16L( iIsFull );
 	}
 
 // -----------------------------------------------------------------------
@@ -498,6 +501,9 @@ EXPORT_C void CHsContentInfo::InternalizeL( RReadStream& aStream )
     
     // internalize iIsWrt
     iIsWrt = aStream.ReadInt16L();
+
+    // internalize iIsFull
+    iIsFull = aStream.ReadInt16L();
     }
 
 // -----------------------------------------------------------------------
@@ -521,6 +527,7 @@ EXPORT_C TInt CHsContentInfo::Size( )
     size = size + sizeof( TUint32 );    // installation time high
     size = size + PublisherUid().Size();// publisher uid
     size = size + sizeof( TInt16 );     // is wrt
+    size = size + sizeof( TInt16 );     // is full
     
     return size;
     }   
@@ -553,6 +560,24 @@ EXPORT_C const TDesC8& CHsContentInfo::PublisherUid() const
 EXPORT_C void CHsContentInfo::SetIsWrt( TBool aIsWrt )    
     {
     iIsWrt = aIsWrt;
+    }
+
+// -----------------------------------------------------------------------
+// CHsContentInfo::IsFull()
+// -----------------------------------------------------------------------
+// 
+EXPORT_C TBool CHsContentInfo::IsFull() const
+    {
+    return iIsFull;
+    }
+
+// -----------------------------------------------------------------------
+// CHsContentInfo::SetIsFull()
+// -----------------------------------------------------------------------
+//   
+EXPORT_C void CHsContentInfo::SetIsFull( TBool aIsFull )    
+    {
+    iIsFull = aIsFull;
     }
 
 // -----------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -16,19 +16,13 @@
 */
 
 #include <ecom/implementationproxy.h>
-#include <e32std.h>
 #include <eikmenup.h>
 #include <eikbtgpc.h>
-#include <StringLoader.h>
 #include <gsfwviewuids.h>
 #include <gsprivatepluginproviderids.h>
-#include <bautils.h>
 #include <pathinfo.h>
 #include <featmgr.h>
-#include <e32property.h>                // For RProperty
-#include <activeidle2domainpskeys.h>    // For KPSUidActiveIdle2
 
-#include <avkon.rsg>
 #include <mcspluginsettingsres.rsg>
 #include <aisystemuids.hrh>
 
@@ -156,8 +150,8 @@ void CMCSPluginSettings::HandleCommandL(TInt aCommand)
     case EAknSoftkeyBack:
         if (iAppUi->View(KGSMainViewUid))
         {
-            // if we are in GS activate parent plugin view (standby view)...
-            iAppUi->ActivateLocalViewL(KGSPrslnPluginUid);
+        // if we are in GS activate parent plugin view (standby view)...
+        iAppUi->ActivateLocalViewL(KGSPrslnPluginUid);
         }
         else
         {
@@ -181,7 +175,7 @@ void CMCSPluginSettings::HandleCommandL(TInt aCommand)
 // ----------------------------------------------------------------------------
 //
 void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage)
-{
+    {
     CEikButtonGroupContainer* cba = Cba();
 
     if (cba)
@@ -196,11 +190,13 @@ void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustom
         }
         cba->DrawDeferred();
     }
-    iModel->UpdateSettingModelL( aCustomMessage);
-    CGSBaseView::DoActivateL(aPrevViewId, aCustomMessageId, aCustomMessage);
-    
-    iModel->UpdateSettingsContainerL( aCustomMessage );
-}
+
+    iModel->SetPluginIdL( aCustomMessage );
+    iModel->UpdateAppListL( EFalse );
+    iModel->UpdateBkmListL( EFalse );
+    iModel->UpdateSettingsL();
+    CGSBaseView::DoActivateL( aPrevViewId, aCustomMessageId, aCustomMessage );
+    }
 
 // ----------------------------------------------------------------------------
 // From CAknView
@@ -208,11 +204,9 @@ void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustom
 // ----------------------------------------------------------------------------
 //
 void CMCSPluginSettings::DoDeactivate()
-{
+    {
     CGSBaseView::DoDeactivate();
-
-    iModel->SetContainer(Container());
-}
+    }
 
 // ----------------------------------------------------------------------------
 // From MEikMenuObserver
@@ -236,7 +230,7 @@ void CMCSPluginSettings::DynInitMenuPaneL(
 }
 
 // ---------------------------------------------------------------------------
-// From CGSPluginInterface. 256
+// From CGSPluginInterface
 // ---------------------------------------------------------------------------
 //
 void CMCSPluginSettings::GetCaptionL(TDes& aCaption) const
@@ -294,14 +288,5 @@ void CMCSPluginSettings::HandleListBoxSelectionL()
 {
     Container()->HandleChangeCommandL();
 }
-
-// ---------------------------------------------------------------------------
-// Returns if container exists or not
-// ---------------------------------------------------------------------------
-//
-TBool CMCSPluginSettings::Activated() const
-    {
-    return iContainer ? ETrue : EFalse;
-    }
 
 // End of File.

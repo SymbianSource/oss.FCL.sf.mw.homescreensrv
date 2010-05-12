@@ -56,7 +56,6 @@ LIBRARY         apgrfx.lib
 LIBRARY         apparc.lib
 LIBRARY         sendui.lib
 LIBRARY         hlplch.lib 
-LIBRARY         ws32.lib  
-
+LIBRARY         ws32.lib
 
 // End of File

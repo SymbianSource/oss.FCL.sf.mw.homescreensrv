@@ -105,6 +105,43 @@ ChspsRomInstaller::~ChspsRomInstaller()
     }
 
 // -----------------------------------------------------------------------------
+// ChspsRomInstaller::InstallL()
+// -----------------------------------------------------------------------------
+//
+void ChspsRomInstaller::InstallL()
+    {
+    RPointerArray<HBufC> pluginFolders;
+    CleanupClosePushL( pluginFolders );             
+            
+    // Find UDA and ROM widgets to be installed     
+    FindInstallationFilesL( pluginFolders );
+            
+    // Install the manifest files    
+    for( TInt index=0; index < pluginFolders.Count(); index++ )
+        {         
+        TPtrC namePtr( pluginFolders[index]->Des() );                               
+                
+        // Synchronous method
+        ThspsServiceCompletedMessage ret = EhspsInstallThemeFailed;
+        TRAP_IGNORE( ret = InstallThemeL( namePtr  ) );
+        if ( ret != EhspsInstallThemeSuccess )
+            {
+//            User::Leave( KErrAbort );
+            }
+        }
+    
+    if ( pluginFolders.Count() == 0 )
+        {
+        // Mandatory plugins were missing 
+        User::Leave( KErrCorrupt );
+        }
+        
+    pluginFolders.ResetAndDestroy();
+    CleanupStack::PopAndDestroy( 1, &pluginFolders );
+    }
+
+
+// -----------------------------------------------------------------------------
 // ChspsRomInstaller::FindInstallationFilesL()
 // -----------------------------------------------------------------------------
 //
@@ -159,6 +196,11 @@ void ChspsRomInstaller::DoFindInstallationFilesL(
                 manifest.Append( KTestLanguage );
                 manifest.Append( KBackslash );
                 manifest.Append( KManifest );
+                
+                if( !BaflUtils::FileExists( iFsSession, manifest ) )
+                    {
+                    continue;
+                    }
                 
                 // Check for duplicates
                 TBool isShadowed = EFalse;
@@ -254,7 +296,9 @@ ThspsServiceCompletedMessage ChspsRomInstaller::InstallThemeL(
     // Start installation by reading the manifest file
     iRet = iInstallationHandler->hspsInstallTheme( aFileName, iHeaderData );    
     if ( iRet == EhspsInstallThemeSuccess && !IsActive() )
-        {                
+        {            
+        iRet = EhspsInstallThemeFailed;
+        
         // Continue with remaining installation phases
         SetActive();
         iInstallationHandler->hspsInstallNextPhaseL( iHeaderData, iStatus );        
@@ -332,6 +376,7 @@ void ChspsRomInstaller::SetLogBus( ChspsLogBus* aLogBus )
 //
 TInt ChspsRomInstaller::RunError( TInt /*aError*/ )
     {
+    iRet = EhspsInstallThemeFailed;
     // Called when error occurred in asynchronous request
     CActiveScheduler::Stop();    
     return KErrNone;

@@ -25,7 +25,7 @@
 #include <hspublisherinfo.h>
 #include <aicontentobserver.h>
 #include <aiuicontroller.h>
-
+#include "caicpscommandbuffer.h"
 #include "aiuicontrollermanager.h"
 #include "aipluginfactory.h"
 #include "debug.h"
@@ -143,34 +143,43 @@ void CAiPluginFactory::ConstructL()
 // ----------------------------------------------------------------------------
 //
 TInt CAiPluginFactory::CreatePlugin( 
-    const THsPublisherInfo& aPublisherInfo )                             
-    {                                            
+    const THsPublisherInfo& aPublisherInfo )
+    {
     __PRINTS( "*** CAiPluginFactory::CreatePlugin: Start ***" );
-                                    
+
     if ( IsRecyclable( aPublisherInfo ) )
         {
         CHsContentPublisher* plugin( PluginByUid( aPublisherInfo.Uid() ) );
-        
+
         if ( plugin )
             {
+            if ( aPublisherInfo.Namespace() == KNullDesC8 )
+                {
+                // No namespace available
+                __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                               Failed to Load Plug-in: KErrNotSupported ***" );
+                return KErrNotSupported;
+                }
+
             // Plugin already exists, update its namespace
             THsPublisherInfo& info( 
                 const_cast< THsPublisherInfo& >( plugin->PublisherInfo() ) );
-            
+
             info.iNamespace.Copy( aPublisherInfo.Namespace() );
-            
-            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Plugin recycled ***" );
-            
+
+            __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                           Plugin recycled ***" );
+
             return KErrNone;
             }
         }
-            
+
     TBool implFound( EFalse );
-    
+
     for( TInt i = 0; i < iEComPlugins.Count(); i++ )
         {
         CImplementationInformation* information( iEComPlugins[i] );
-                                                                 
+
         if( information->ImplementationUid().iUid == aPublisherInfo.Uid().iUid )
             {
             implFound = ETrue;
@@ -181,29 +190,31 @@ TInt CAiPluginFactory::CreatePlugin(
     if( aPublisherInfo.Namespace() == KNullDesC8 || !implFound )
         {
         // No namespace available or no ecom implementation available
-        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Failed to Load Plug-in: KErrNotSupported ***" );
+        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                       Failed to Load Plug-in: KErrNotSupported ***" );
         
         return KErrNotSupported;
         }
            
     CHsContentPublisher* plugin( PluginByInfo( aPublisherInfo ) );
-    
+
     if( plugin )
-        {                             
-        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Failed to Load Plug-in: KErrAlreadyExists ***" );
+        {
+        __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done -\
+                       Failed to Load Plug-in: KErrAlreadyExists ***" );
         
         return KErrAlreadyExists;
         }
-    
+
     TInt err( KErrNone );
-    
+
     TRAP( err, CreatePluginL( aPublisherInfo ) );
     
     __PRINTS( "*** CAiPluginFactory::CreatePlugin: Done - Load Plug-in ***" );
-    
-    return err;    
+
+    return err;
     }
-        
+
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::DestroyPlugin()
 //
@@ -233,7 +244,32 @@ void CAiPluginFactory::DestroyPlugin( const THsPublisherInfo& aPublisherInfo )
     
     __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done ***" );
     }
+
+// ----------------------------------------------------------------------------
+// CAiPluginFactory::DestroyPlugin()
+//
+// ----------------------------------------------------------------------------
+//
+void CAiPluginFactory::DestroyPlugin( const TUid& aUid )
+    {
+    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Start ***" );
+    
+    CHsContentPublisher* plugin( PluginByUid( aUid ) );
+    
+    while ( plugin )
+        {
+        iPublishers.Remove( iPublishers.Find( plugin ) );
         
+        __PRINT( __DBG_FORMAT( 
+            "CAiPluginFactory::DestroyPlugin: name: %S" ), &plugin->PublisherInfo().Name() ); 
+
+        delete plugin;
+        plugin = NULL;            
+        }
+    
+    __PRINTS( "*** CAiPluginFactory::DestroyPlugin: Done ***" );
+    }
+
 // ----------------------------------------------------------------------------
 // CAiPluginFactory::CreatePluginL()
 //
@@ -253,6 +289,12 @@ void CAiPluginFactory::CreatePluginL(
     plugin = CHsContentPublisher::NewL( aPublisherInfo ) );            
     
     CleanupStack::PushL( plugin );
+    
+    // Ensure interface is available
+    iCommandBuffer->GetCPSInterfaceL();
+    
+    plugin->SetProperty( CHsContentPublisher::ECpsCmdBuffer, 
+        static_cast< MAiCpsCommandBuffer* >( iCommandBuffer ) );
     
     __TIME( "FW: Subscribe content observers",    
     SubscribeContentObserversL( *plugin, aPublisherInfo ) );             
@@ -390,58 +432,13 @@ RPointerArray< CHsContentPublisher >& CAiPluginFactory::Publishers() const
     }
 
 // ----------------------------------------------------------------------------
-// CAiPluginFactory::ResolvePluginsToUpgradeL()
+// CAiPluginFactory::SetCommandBuffer()
 //
 // ----------------------------------------------------------------------------
 //
-void CAiPluginFactory::ResolvePluginsToUpgradeL( 
-    RArray< THsPublisherInfo >& aArray )
+void CAiPluginFactory::SetCommandBuffer( CAiCpsCommandBuffer* aCommandBuffer )
     {
-    RImplInfoPtrArray ecomPlugins;
-    CleanupResetAndDestroyPushL( ecomPlugins );
-        
-    REComSession::ListImplementationsL( 
-        KInterfaceUidHsContentPlugin, ecomPlugins );
-    
-    for ( TInt i = 0; i < ecomPlugins.Count(); i++ )
-        {
-        CImplementationInformation* newInformation( ecomPlugins[i] );
-                 
-        for( TInt j = 0; j < iEComPlugins.Count(); j++ )
-            {            
-            CImplementationInformation* oldInformation( iEComPlugins[j] );
-                                                                 
-            if( newInformation->ImplementationUid() == oldInformation->ImplementationUid() )
-                {
-                if( newInformation->Version() != oldInformation->Version() )
-                    {                        
-                    for ( TInt k = 0; k < iPublishers.Count(); k++ )
-                        {
-                        const THsPublisherInfo& info( 
-                            iPublishers[k]->PublisherInfo() );
-                                                
-                        if ( info.Uid() == newInformation->ImplementationUid() )
-                            {                            
-                            __PRINT( __DBG_FORMAT( "\t[I]\t Plug-in to update uid=%x name=%S namespace=%S, version update %d to %d"), 
-                                info.Uid(), &(info.Name()), &(info.Namespace()), oldInformation->Version(), newInformation->Version()  );
-                            
-                            aArray.Append( info );
-                            }
-                        }
-                                                         
-                    break;
-                    }
-                }                
-            }
-        }
-    
-    CleanupStack::PopAndDestroy( &ecomPlugins );
-           
-    // Update ecom plugin array
-    iEComPlugins.ResetAndDestroy();
-    
-    REComSession::ListImplementationsL( 
-        KInterfaceUidHsContentPlugin, iEComPlugins );
+    iCommandBuffer = aCommandBuffer;
     }
 
 // End of file

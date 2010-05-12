@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,32 +15,18 @@
 *
 */
 
-
-#include <e32cmn.h>
-#include <msvuids.h>        // For KMsvRootIndexEntryIdValue
-#include <SenduiMtmUids.h>
-#include <StringLoader.h>
 #include <aistrcnv.h>
-#include <featmgr.h>
 #include <mcsmenuitem.h>
 #include <mcsmenufilter.h>
 
 #include "mcspluginsettingsapplist.h"
-#include "mcspluginsettingsmodel.h"
-#include "mcspluginwatcher.h"
+#include "mcspluginsettingsmodel.h" // For TSettingItem
 
 _LIT( KMyMenuData, "matrixmenudata" );
 _LIT( KMenuTypeShortcut, "menu:shortcut" );
-_LIT( KMenuAttrRefcount, "ref_count" );
-_LIT( KMenuParamMailbox, "mailbox:" );
+_LIT( KMenuTypeMailbox, "menu:mailbox" );
 _LIT( KMenuAttrParameter, "param" );
 _LIT( KMenuAttrLocked, "locked" );
-_LIT( KMenuIconFile, "aimcsplugin.mif" );
-_LIT( KMenuIconId, "16388" );
-_LIT( KMenuMaskId, "16389" );
-_LIT( KMailboxUid, "0x100058c5" );
-_LIT( KInitialRefCount, "1" );
-_LIT( KMCSFolder, "mcsplugin_folder" );
 _LIT8( KItemLocked, "locked");
 _LIT8( KProperValueFolder, "folder" );
 _LIT( KMenuAttrUndefUid, "0x99999991" );
@@ -56,7 +42,6 @@ _LIT( KMenuItemLongName, "long_name" );
 //
 CMCSPluginSettingsAppList::CMCSPluginSettingsAppList()
     {
-    iMCSPluginFolderId = 0;
     }
 
 // ---------------------------------------------------------------------------
@@ -68,9 +53,6 @@ void CMCSPluginSettingsAppList::ConstructL()
     iMsvSession = CMsvSession::OpenAsObserverL(*this);
 
     iMenu.OpenL( KMyMenuData );
-    iSaveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
-    iUpdateWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
-    iRemoveWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::EOperation );
     
     // Get "Undefined" icon and text
     CMenuFilter* filter = CMenuFilter::NewL();
@@ -84,19 +66,16 @@ void CMCSPluginSettingsAppList::ConstructL()
     RArray<TMenuItem> items;
     CleanupClosePushL( items );
     iMenu.GetItemsL( items, root, filter, ETrue );
-    TMenuItem undefItem;
 
     if ( items.Count() > 0 )
         {
-        undefItem = items[ 0 ];
-        CMenuItem* undefinedItem = CMenuItem::OpenL( iMenu, undefItem );
+        iUndefinedItem = CMenuItem::OpenL( iMenu, items[ 0 ] );
         iUndefinedText = NULL;
 
-        if ( undefinedItem )
+        if ( iUndefinedItem )
             {
-            TBool exists( KErrNotFound );
-            CleanupStack::PushL( undefinedItem );
-            TPtrC undefined = undefinedItem->GetAttributeL( KMenuItemLongName, exists );
+            TBool exists( KErrNotFound );//CleanupStack::PushL( undefinedItem );
+            TPtrC undefined = iUndefinedItem->GetAttributeL( KMenuItemLongName, exists );
 
             if ( exists )
                 {
@@ -107,7 +86,6 @@ void CMCSPluginSettingsAppList::ConstructL()
                 {
                 iUndefinedText = KNullDesC().Alloc();
                 }
-            CleanupStack::PopAndDestroy( undefinedItem );
             }
         }
 
@@ -138,15 +116,9 @@ CMCSPluginSettingsAppList::~CMCSPluginSettingsAppList()
 
     iListItems.ResetAndDestroy();
     iMenu.Close();
-    delete iSaveWatcher;
-    delete iUpdateWatcher;
-    delete iRemoveWatcher;
     
-    if ( iUndefinedText )
-        {
-        delete iUndefinedText;
-        iUndefinedText = NULL;
-        }
+    delete iUndefinedText;
+    delete iUndefinedItem;
     }
 
 // ---------------------------------------------------------------------------
@@ -174,10 +146,11 @@ TPtrC CMCSPluginSettingsAppList::MdcaPoint( TInt aIndex ) const
     CMenuItem* item = iListItems[ aIndex ];
 
     TBool attrExists;
-    TPtrC itm;
+    TPtrC itm( KNullDesC );
     TRAP_IGNORE( 
         itm.Set( item->GetAttributeL( KMenuAttrLongName, attrExists ) );
         )
+
     return itm;
     }
 
@@ -223,14 +196,13 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
         {
         if( aProperties[j]->Name() == KType )
             {
-
             if ( aProperties[j]->Value() == KProperValueFolder )
                 {
                 isFolder = ETrue;
                 }
             break;
             }
-        }   
+        }
 
     TBool itemFound( EFalse );
     
@@ -239,7 +211,6 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
         {
         TBool match( ETrue );
         CMenuItem* item = iListItems[ i ];
-
         for ( TInt j = 0; j < aProperties.Count() && match; j++ )
             {
             // type and locked properties skipped
@@ -296,82 +267,19 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
     return settingItem;
     }
 
-
 // ---------------------------------------------------------------------------
-// Returns menuitems at given index. Since this method is called during
-// adding the item to the Desktop widget, we also have to increment
-// ref_count attribute if the item is run-time generated (i.e. Mailbox)
+// Returns menuitems at given index.
 // ---------------------------------------------------------------------------
 //
-CMenuItem& CMCSPluginSettingsAppList::ItemL( const TInt& aIndex )
+CMenuItem* CMCSPluginSettingsAppList::ItemL( const TInt& aIndex )
     {
-
     CMenuItem* menuItem( NULL );
-    
-    // check if index in within the list boundaries
+    // check if index is within the list boundaries
     if ( aIndex >= 0 && aIndex < iListItems.Count() )
         {
-
         menuItem = iListItems[ aIndex ];
-
-        TBool hasParam = EFalse;
-        CleanupStack::PushL( menuItem );
-        TPtrC param = menuItem->GetAttributeL( KMenuAttrParameter, hasParam ); 
-        CleanupStack::Pop( menuItem );
-
-        // if item is a mailbox, add it to MCS
-        // (if it is not already there)
-        if ( hasParam && param.Find( KMenuParamMailbox ) != KErrNotFound )
-            {
-
-            // set up a filter for finding the mailbox
-            // with given ID in MCS
-            CMenuFilter* filter = CMenuFilter::NewL();
-            CleanupStack::PushL( filter );
-
-            filter->SetType( KMenuTypeShortcut );
-            filter->HaveAttributeL( KMenuAttrParameter, param );
-
-            // search menu from the Root folder with the filter
-            const TInt rootId = iMenu.RootFolderL();
-            RArray<TMenuItem> itemArray;
-            CleanupClosePushL( itemArray );
-            iMenu.GetItemsL( itemArray, rootId, filter, ETrue );
-                
-            // save the number of findings
-            TInt count( itemArray.Count() );
-
-            // if MenuItem does not exist in MCS
-            if ( count == 0 )
-                {
-                // save the item into Matrixmenudata.xml
-                // the "op" variable is cleaned up by iSaveWatcher when asynchronous 
-                // operation finishes
-                CleanupStack::PushL( menuItem );
-                CMenuOperation* op = menuItem->SaveL( iSaveWatcher->iStatus );
-                CleanupStack::Pop( menuItem );
-                iSaveWatcher->Watch( op ); 
-                }
-            else
-                {
-                // Item already exists in MCS
-                // If it has reference counter, increment it before returning.
-                CMenuItem* itm = CMenuItem::OpenL( iMenu, itemArray[ 0 ] );
-
-                TInt newRefCount = UpdateMenuItemsRefCountL( itm, 1 );
-                if ( newRefCount > -1 )
-                    {
-                    CleanupStack::PushL( itm );
-                    CMenuOperation* op = itm->SaveL( iSaveWatcher->iStatus );
-                    CleanupStack::PopAndDestroy( itm );
-                    iSaveWatcher->Watch( op );
-                    }
-                }
-            CleanupStack::PopAndDestroy( &itemArray );
-            CleanupStack::PopAndDestroy( filter );
-            }
         }
-    return *menuItem;
+    return menuItem;
     }
 
 // ---------------------------------------------------------------------------
@@ -403,8 +311,7 @@ void CMCSPluginSettingsAppList::AddStaticItemsL()
     CMenuFilter* filter = CMenuFilter::NewL();
     CleanupStack::PushL( filter );
 
-    // skip run-time generated items
-    filter->DoNotHaveAttributeL( KMenuAttrRefcount );
+    // skip locked items
     filter->DoNotHaveAttributeL( KMenuAttrLocked );
     const TInt rootId = iMenu.RootFolderL();
     RArray<TMenuItem> itemArray;
@@ -460,8 +367,6 @@ CMsvEntry* CMCSPluginSettingsAppList::GetRootEntryL()
 //
 void CMCSPluginSettingsAppList::AddMailboxesL()
     {
-    
-    iListItems.ResetAndDestroy();
     CMsvEntry* rootEntry = GetRootEntryL();
     CleanupStack::PushL(rootEntry);
     TBuf<255> mailboxId;
@@ -494,175 +399,19 @@ void CMCSPluginSettingsAppList::AddMailboxesL()
 void CMCSPluginSettingsAppList::AddMailboxL( const TDesC& aMailbox,
                                              const TDesC& aMailboxId )
     {
-        // prepare param value
-        HBufC* params = HBufC::NewLC( KMenuParamMailbox().Length() + aMailboxId.Length() );
-        params->Des().Copy( KMenuParamMailbox );
-        params->Des().Append( aMailboxId );
-        TPtrC paramValue( params->Des() );
+    TLinearOrder<CMenuItem> sortMethod( CMCSPluginSettingsAppList::CompareNameL );
+    CMenuItem* newItem = CMenuItem::CreateL( iMenu, KMenuTypeMailbox, 0, 0 );
+    CleanupStack::PushL( newItem );
 
-        TLinearOrder<CMenuItem> sortMethod( CMCSPluginSettingsAppList::CompareNameL );
-        CMenuItem* newItem = CMenuItem::CreateL( iMenu, 
-                                                 KMenuTypeShortcut, 
-                                                 GetMCSPluginFolderIdL(), 
-                                                 0 );
-        CleanupStack::PushL( newItem );
+    // mailbox is a shortcut item with "mailbox:mailboxID" parameter
+    newItem->SetAttributeL( KMenuAttrUid, aMailboxId );
+    newItem->SetAttributeL( KMenuAttrLongName, aMailbox );
+    // Mailbox name is saved to settings into param field.
+    newItem->SetAttributeL( KMenuAttrParameter, aMailbox );
 
-        // mailbox is a shortcut item with "mailbox:mailboxID" parameter
-        newItem->SetAttributeL( KMenuAttrUid, KMailboxUid );
-        newItem->SetAttributeL( KMenuAttrLongName, aMailbox );
-        newItem->SetAttributeL( KMenuAttrParameter, paramValue );
-        newItem->SetAttributeL( KMenuAttrRefcount, KInitialRefCount );
-
-        // setting icon for the shortcut
-        newItem->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
-        newItem->SetAttributeL( KMenuAttrIconId, KMenuIconId );
-        newItem->SetAttributeL( KMenuAttrMaskId, KMenuMaskId );
-
-        // append the item into iListItems lists
-        User::LeaveIfError( iListItems.InsertInOrderAllowRepeats( newItem, sortMethod ) );
-        CleanupStack::Pop( newItem );
-        CleanupStack::PopAndDestroy( params );
+    // append the item into iListItems lists
+    User::LeaveIfError( iListItems.InsertInOrderAllowRepeats( newItem, sortMethod ) );
+    CleanupStack::Pop( newItem );
     }
-
-// ---------------------------------------------------------------------------
-// Removes run-time generated menuitem (i.e. Mailbox) from MCS
-// If the item at given index is not run-time generated, return
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginSettingsAppList::RemoveMenuItemL( TInt aIndex )
-    {
-
-    if ( aIndex < 0 || aIndex > iListItems.Count() - 1 )
-        {
-        return;
-        }
-
-    CMenuItem* menuItem = iListItems[ aIndex ];
-    
-    TBool hasParam = ETrue;
-    TPtrC param = menuItem->GetAttributeL( KMenuAttrParameter, hasParam );
-
-    if ( !hasParam )
-        {
-        // nothing to do
-        return;
-        }
-
-    // set up a filter for finding the mailbox
-    // with given ID in MCS
-    CMenuFilter* filter = CMenuFilter::NewL();
-    CleanupStack::PushL( filter );
-
-    filter->SetType( KMenuTypeShortcut );
-    filter->HaveAttributeL( KMenuAttrParameter, param );
-
-    // search menu from the Root folder with the filter
-    const TInt rootId = iMenu.RootFolderL();
-    RArray<TMenuItem> itemArray;
-    CleanupClosePushL( itemArray );
-    iMenu.GetItemsL( itemArray, rootId, filter, ETrue );
-
-    // save the number of findings
-    TInt count( itemArray.Count() );
-    
-    if ( count > 0 )
-        {
-        // Item already exists in MCS
-        // If it has reference counter, increment it before returning.
-        CMenuItem* itm = CMenuItem::OpenL( iMenu, itemArray[ 0 ] );
-        
-        // decrement ref_count attribute 
-        TInt newRefCount = UpdateMenuItemsRefCountL( itm, -1 );
-        if ( newRefCount > 0 )
-            {
-            CleanupStack::PushL( itm ); 
-            CMenuOperation* op = itm->SaveL( iUpdateWatcher->iStatus );
-            CleanupStack::Pop( itm );
-            iUpdateWatcher->Watch( op );
-            }
-        else if ( newRefCount == 0 )
-            {
-            // counter reached 0 -> item is not referenced by any shortcut
-            // so remove it from MCS
-            if ( iRemoveWatcher->IsActive() )
-               {
-               return;
-               }
-            CMenuOperation* op = iMenu.RemoveL( itm->Id(), iRemoveWatcher->iStatus );
-            iRemoveWatcher->Watch( op );
-            }
-            delete itm;
-        }
-    CleanupStack::PopAndDestroy( &itemArray );
-    CleanupStack::PopAndDestroy( filter );
-    }
-
-// ---------------------------------------------------------------------------
-// Gets MCS Plugin folder ID. This hidden folder in matrixmenudata.xml is used 
-// for storing run-time generated menuitems
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginSettingsAppList::GetMCSPluginFolderIdL()
-    {
-    
-    if ( iMCSPluginFolderId == 0 )
-        {
-        CMenuItem* item( NULL );
-        CMenuFilter* filter = CMenuFilter::NewL();
-        CleanupStack::PushL( filter );
-        filter->SetType( KMenuTypeFolder );
-        filter->HaveAttributeL( KMenuAttrLongName, KMCSFolder );
-        const TInt rootId = iMenu.RootFolderL();
-        RArray<TMenuItem> itemArray;
-        CleanupClosePushL( itemArray );
-        iMenu.GetItemsL( itemArray, rootId, filter, ETrue );
-        if ( itemArray.Count() > 0 )
-            {
-            item = CMenuItem::OpenL( iMenu, itemArray[ 0 ] );
-            iMCSPluginFolderId = item->Id();
-            }
-        else 
-            {
-            iMCSPluginFolderId = iMenu.RootFolderL();
-            }
-        CleanupStack::PopAndDestroy( &itemArray );
-        CleanupStack::PopAndDestroy( filter ); 
-        delete item; 
-        }
-    return iMCSPluginFolderId;
-    
-    }
-
-// ---------------------------------------------------------------------------
-// Helper method for updating ref_count attribute of run-time generated 
-// menuitems
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginSettingsAppList::UpdateMenuItemsRefCountL( CMenuItem* aItem, 
-                                                          TInt aValueToAdd )
-    {
-    
-    TBool exists = EFalse;
-    CleanupStack::PushL( aItem ); 
-    TPtrC param = aItem->GetAttributeL( KMenuAttrRefcount, exists );
-    CleanupStack::Pop( aItem );
-    if ( exists )
-        {
-        TInt references;
-        TLex16 lextmp( param );
-        lextmp.Val( references );
-        references += aValueToAdd;
-        TBuf<128> buf;
-        buf.NumUC( references );
-        // set new ref_count
-        CleanupStack::PushL( aItem ); 
-        aItem->SetAttributeL( KMenuAttrRefcount, buf );
-        CleanupStack::Pop( aItem );
-        // return new ref_count
-        return references;
-        }
-    return -1;
-    }
-
 
 // End of File.

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -15,27 +15,19 @@
 *
 */
 
-
-#include <aknlists.h>
-#include <AknWaitDialog.h>
 #include <aknnotewrappers.h>
-#include <eikbtgpc.h>
-#include <gslistbox.h>
-#include <gsfwviewuids.h>
+#include <aknlistquerydialog.h>
+#include <e32cmn.h>
 #include <aknradiobuttonsettingpage.h>
-#include <akntextsettingpage.h>
-#include <centralrepository.h>
 #include <StringLoader.h>
-
 #include <csxhelp/ai.hlp.hrh>
 #include <hlplch.h>
-
-// For CActiveFavouritesDbNotifier
-#include <activefavouritesdbnotifier.h> 
+#include <activefavouritesdbnotifier.h>
 #include <mcspluginsettingsres.rsg>
 
 #include "mcspluginsettingscontainer.h"
 #include "mcspluginsettingsmodel.h"
+#include "mcspluginsettingsapplist.h"
 #include "mcspluginsettingsbkmlist.h"
 #include "mcspluginsettings.hrh"
 #include "mcspluginuids.hrh"
@@ -61,7 +53,7 @@ void CMCSPluginSettingsContainer::ConstructL( const TRect& aRect )
     iListBox = new (ELeave) CAknSettingStyleListBox;
     BaseConstructL(aRect, R_AI_MCS_SETTINGS_VIEW_TITLE, NULL);
     StartObservingL();
-    CheckMiddleSoftkeyLabelL();
+    CheckMiddleSoftkeyLabel();
     }
 
 // ---------------------------------------------------------------------------
@@ -88,9 +80,7 @@ void CMCSPluginSettingsContainer::StartObservingL()
         {
         iNotifyWatcher = CMCSPluginWatcher::NewL( CMCSPluginWatcher::ENotify );
         iNotifier.Notify( 0,
-            RMenuNotifier::EItemsAddedRemoved | 
-            RMenuNotifier::EItemsReordered |
-            RMenuNotifier::EItemAttributeChanged,
+            RMenuNotifier::EItemsAddedRemoved,
         iNotifyWatcher->iStatus );
         iNotifyWatcher->WatchNotify( this );
         }
@@ -238,15 +228,6 @@ void CMCSPluginSettingsContainer::HandleHelpCommandL()
 }
 
 // ---------------------------------------------------------------------------
-// Helper method which indicates if the Applist or Bkmlist is showing
-// ---------------------------------------------------------------------------
-//
-TBool CMCSPluginSettingsContainer::IsChangeDialogShowing()
-{
-    return ( iAppListDialog || iBkmListDialog );
-}
-
-// ---------------------------------------------------------------------------
 // Method for closing change dialog (app or bkm) if it is beeing shown
 // ---------------------------------------------------------------------------
 //
@@ -292,7 +273,7 @@ void CMCSPluginSettingsContainer::ResetCurrentListL( TInt aIndex )
     }
 
     iListBox->SetCurrentItemIndex( aIndex );
-    CheckMiddleSoftkeyLabelL();
+    CheckMiddleSoftkeyLabel();
 }
 
 // ---------------------------------------------------------------------------
@@ -314,10 +295,6 @@ void CMCSPluginSettingsContainer::HandleSessionEventL(
         // fall-through intended here
     case EMsvEntriesChanged:
         {
-        if ( IsChangeDialogShowing() )
-            {
-            CloseChangeDialog();
-            }
         iModel->UpdateAppListL();
         }
         break;
@@ -335,22 +312,13 @@ void CMCSPluginSettingsContainer::ConstructListBoxL(TInt /*aResLbxId*/)
 {
 	iListBox->ConstructL(this, EAknListBoxSelectionList);
     // Set empty listbox's text.
-	if (iModel->MdcaCount() == 0)
-		{
-		HBufC* text = iCoeEnv->AllocReadResourceLC(R_AI_MCS_SETTINGS_TXT_ALL_FIXED);
-		iListBox->View()->SetListEmptyTextL(*text);
-		CleanupStack::PopAndDestroy(text);
-		}
-	else
-		{
-		 iListBox->View()->SetListEmptyTextL(KNullDesC);  
-		}
+    iListBox->View()->SetListEmptyTextL(KNullDesC);
     iListBox->Model()->SetItemTextArray(iModel);
     iListBox->Model()->SetOwnershipType(ELbmDoesNotOwnItemArray);
 }
 
 // ---------------------------------------------------------------------------
-// Chandles a setting change command to select application from a list.
+// Handles a setting change command to select application from a list.
 // ---------------------------------------------------------------------------
 //
 TBool CMCSPluginSettingsContainer::HandleAppListChangeCommandL( const TInt& aIndex,
@@ -372,7 +340,7 @@ TBool CMCSPluginSettingsContainer::HandleAppListChangeCommandL( const TInt& aInd
     if (iAppListDialog->ExecuteLD(CAknSettingPage::EUpdateWhenChanged) &&
         index != oldIndex)
         {
-        changed = iModel->ReplaceItemL( iListBox->CurrentItemIndex(), index , EApplication );
+        changed = iModel->ReplaceItemL( aSettingIndex, index , EApplication );
         }
 
     CleanupStack::PopAndDestroy( title );
@@ -403,7 +371,7 @@ TBool CMCSPluginSettingsContainer::HandleBookmarkChangeCommandL( const TInt& aIn
     if (iBkmListDialog->ExecuteLD(CAknSettingPage::EUpdateWhenChanged) &&
         index != oldIndex)
         {
-        changed = iModel->ReplaceItemL( iListBox->CurrentItemIndex(), index , EBookmark );
+        changed = iModel->ReplaceItemL( aSettingIndex, index , EBookmark );
         }
 
     CleanupStack::PopAndDestroy( title );
@@ -451,7 +419,7 @@ TKeyResponse CMCSPluginSettingsContainer::OfferKeyEventL(
 // Checks if there is a need to update the middle softkey label.
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginSettingsContainer::CheckMiddleSoftkeyLabelL()
+void CMCSPluginSettingsContainer::CheckMiddleSoftkeyLabel()
 {
     CEikButtonGroupContainer* cba = CEikButtonGroupContainer::Current();
     if (cba)
@@ -475,10 +443,7 @@ void CMCSPluginSettingsContainer::HandleFavouritesDbEventL(RDbNotifier::TEvent a
             // fall-through intended here
         case RDbNotifier::ERollback :
             {
-            if ( IsChangeDialogShowing() )
-                {
-                CloseChangeDialog();
-                }
+            CloseChangeDialog();
             iModel->UpdateBkmListL();
             }
             break;
@@ -494,18 +459,15 @@ void CMCSPluginSettingsContainer::HandleFavouritesDbEventL(RDbNotifier::TEvent a
 //
 void CMCSPluginSettingsContainer::HandleNotifyL()
     {
-    if ( IsChangeDialogShowing() )
-        {
-        CloseChangeDialog();
-        }
+    CloseChangeDialog();
+
     iModel->UpdateAppListL();
+    ResetCurrentListL(0);
     
     // Notification must be activated again
     iNotifyWatcher->Cancel();
     iNotifier.Notify( 0,
-        RMenuNotifier::EItemsAddedRemoved | 
-        RMenuNotifier::EItemsReordered |
-        RMenuNotifier::EItemAttributeChanged,
+        RMenuNotifier::EItemsAddedRemoved,
         iNotifyWatcher->iStatus );
     iNotifyWatcher->WatchNotify( this );
     }

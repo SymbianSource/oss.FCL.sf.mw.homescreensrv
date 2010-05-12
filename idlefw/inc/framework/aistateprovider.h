@@ -164,16 +164,13 @@ private:
      */
     void ChangePluginState( TAiFwState aState );
 
-    /**
-     * @see MAiFwStateHandler
-     */    
-    TBool OnlineStateInUse() const;
-
 private:
     // new functions
     
     static TInt BackupRestoreEvent( TAny* aAny );
-    
+
+    static TInt SwiUidListEvent( TAny* aAny );
+
 private:
     // data
 
@@ -190,8 +187,10 @@ private:
     /** Backup Restore observer, Owned */
     MAiPSPropertyObserver* iBackupRestoreObserver;
     /** Flag to indicate whether state providing is started */
-    TBool iStarted;    
-    
+    TBool iStarted;
+    /** SWI UID list observer, owned */
+    MAiPSPropertyObserver* iSwiUidListObserver;
+
 private:
     // friend classes
     

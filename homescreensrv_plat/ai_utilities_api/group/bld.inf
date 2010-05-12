@@ -31,7 +31,4 @@ PRJ_EXPORTS
 ../inc/aipluginsettings.h         MW_LAYER_PLATFORM_EXPORT_PATH(aipluginsettings.h)
 ../inc/aistrcnv.h                 MW_LAYER_PLATFORM_EXPORT_PATH(aistrcnv.h)
 ../inc/contentprioritymap.h       MW_LAYER_PLATFORM_EXPORT_PATH(contentprioritymap.h)
-
-#ifdef __COVER_DISPLAY
-../inc/aisecondarydisplayapi.h       MW_LAYER_PLATFORM_EXPORT_PATH(secondarydisplay/aisecondarydisplayapi.h)
-#endif
+../inc/aicpscommandbuffer.h       MW_LAYER_PLATFORM_EXPORT_PATH(aicpscommandbuffer.h)

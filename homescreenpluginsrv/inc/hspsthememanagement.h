@@ -1294,11 +1294,14 @@ class MhspsMaintenanceService
         * @param aSearchMask is ChspsODT-object which attributes are filled to present search 
         *        parameters for theme set queried by client. This parametrisation follows the 
         *        high-level schema. 
+        * @param aCopyLogos indicates that logo resources should be copied to a private directory
         * @param aHeaderList is an list object able to carry ChspsODT-objects. 
         * @return ThspsServiceCompletedMessage expressing the result of the call.
         */
-        virtual ThspsServiceCompletedMessage hspsGetListHeaders(const ChspsODT& aSearchMask,
-                                 CArrayPtrFlat<ChspsODT>& aHeaderList) = 0;
+        virtual ThspsServiceCompletedMessage hspsGetListHeaders(
+                const ChspsODT& aSearchMask,
+                const TBool aCopyLogos, 
+                CArrayPtrFlat<ChspsODT>& aHeaderList) = 0;
 
         /** hspsGetListHeaders
         * 

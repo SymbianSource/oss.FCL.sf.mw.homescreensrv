@@ -87,6 +87,7 @@ _LIT8( KHspsLiwReturnValue, "ReturnValue" );
 _LIT8( KHspsLiwNotification, "notification" );
 _LIT8( KHspsLiwId, "id" );
 _LIT8( KHspsLiwType, "type" );
+_LIT8( KHspsLiwCopyLogos, "copylogos" );
 _LIT8( KHspsLiwInterface, "interface" );
 _LIT8( KHspsLiwUid, "uid" );
 _LIT8( KHspsLiwName, "name" );

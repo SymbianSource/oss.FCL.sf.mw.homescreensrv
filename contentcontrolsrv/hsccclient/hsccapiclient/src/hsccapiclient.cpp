@@ -329,6 +329,64 @@ TInt CHsCcApiClient::ViewListL( CHsContentInfoArray& aArray )
     }
 
 // -----------------------------------------------------------------------------
+// CHsCcApiClient::ViewListL
+// -----------------------------------------------------------------------------
+//
+TInt CHsCcApiClient::ViewListL( 
+    CHsContentInfo& aInfo, CHsContentInfoArray& aArray )
+    {
+    TInt err( KErrNone );
+    
+    // Create ViewListReq API request
+    CCcSrvMsg* reqMsg = CCcSrvMsg::NewL();
+    CleanupStack::PushL( reqMsg );
+    reqMsg->SetMsgId( EHsCcViewListReq );
+    reqMsg->SetTrId( 0 );
+
+    // Marshal ViewListReq data to a descriptor
+    HBufC8* dataBuf = aInfo.MarshalL();
+    TPtr8 dataPtr( NULL, 0 );
+    dataPtr.Set( dataBuf->Des() );
+    reqMsg->SetData( dataPtr );
+    
+    delete dataBuf;
+    dataBuf = NULL;
+    
+    // Marshal API request
+    HBufC8* msgBuf = reqMsg->MarshalL();
+    CleanupStack::PushL( msgBuf );
+    TPtr8 msgPtr( NULL, 0 );
+    msgPtr.Set( msgBuf->Des() );
+ 
+    // Send API request
+    // Sender and receiver address not defined -> message is routed
+    // according to the provider id
+    TPckgBuf<TUint32> provider( ECcHomescreen );
+    TPckgBuf<TUint32> sender;
+    TPckgBuf<TUint32> receiver;
+    err = iSession.Send( ECcApiReq, provider, sender, receiver, msgPtr );
+    
+    if ( !err )
+        {
+        // Internalize response message
+        TUint32 trId;
+        TUint32 dataSize;
+        err = InternalizeRespL( msgPtr, trId, dataSize );
+        if ( !err && dataSize )
+            {
+            // Internalize API response data
+            err = InternalizeContentInfoArrayL( aArray, trId, dataSize );
+            }
+        }
+
+    // Cleanup
+    CleanupStack::PopAndDestroy( msgBuf );
+    CleanupStack::PopAndDestroy( reqMsg );
+
+    return err;
+    }
+
+// -----------------------------------------------------------------------------
 // CHsCcApiClient::AppListL
 // -----------------------------------------------------------------------------
 //

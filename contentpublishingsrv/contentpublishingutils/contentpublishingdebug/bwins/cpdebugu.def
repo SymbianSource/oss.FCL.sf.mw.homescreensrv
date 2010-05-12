@@ -1,8 +1,9 @@
 EXPORTS
-	?Data@CCPDebug@@CAPAUDebugData@@XZ @ 1 NONAME ; struct DebugData * CCPDebug::Data(void)
-	?Enable@CCPDebug@@SAHXZ @ 2 NONAME ; int CCPDebug::Enable(void)
-	?EnableLogging@CCPDebug@@SAXH@Z @ 3 NONAME ; void CCPDebug::EnableLogging(int)
-	?NewL@CCPDebug@@SAPAV1@ABVTDesC16@@@Z @ 4 NONAME ; class CCPDebug * CCPDebug::NewL(class TDesC16 const &)
+	?EnableLogging@CCPDebug@@SAXH@Z @ 1 NONAME ; void CCPDebug::EnableLogging(int)
+	?Printf@CCPDebug@@SAXV?$TRefByValue@$$CBVTDesC8@@@@ZZ @ 2 NONAME ; void CCPDebug::Printf(class TRefByValue<class TDesC8 const >, ...)
+	?NewL@CCPDebug@@SAPAV1@ABVTDesC16@@@Z @ 3 NONAME ; class CCPDebug * CCPDebug::NewL(class TDesC16 const &)
+	?Data@CCPDebug@@CAPAUDebugData@@XZ @ 4 NONAME ; struct DebugData * CCPDebug::Data(void)
 	?NewLC@CCPDebug@@SAPAV1@ABVTDesC16@@@Z @ 5 NONAME ; class CCPDebug * CCPDebug::NewLC(class TDesC16 const &)
-	?Printf@CCPDebug@@SAXV?$TRefByValue@$$CBVTDesC8@@@@ZZ @ 6 NONAME ; void CCPDebug::Printf(class TRefByValue<class TDesC8 const >, ...)
+	?ExtendedPrint@CCPDebug@@SAXPBDABVCLiwGenericParamList@@@Z @ 6 NONAME ; void CCPDebug::ExtendedPrint(char const *, class CLiwGenericParamList const &)
+	?Enable@CCPDebug@@SAHXZ @ 7 NONAME ; int CCPDebug::Enable(void)
 

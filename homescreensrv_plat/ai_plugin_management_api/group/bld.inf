@@ -33,7 +33,3 @@ PRJ_EXPORTS
 ../inc/hscontentpublisher.inl        MW_LAYER_PLATFORM_EXPORT_PATH(hscontentpublisher.inl)
 ../inc/hspublisherinfo.h             MW_LAYER_PLATFORM_EXPORT_PATH(hspublisherinfo.h)
 ../inc/hspublisherinfo.inl           MW_LAYER_PLATFORM_EXPORT_PATH(hspublisherinfo.inl)
-
-// Deprecated
-../inc/aicontentpublisheruid.hrh     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentpublisheruid.hrh)
-../inc/aicontentpublisher.h          MW_LAYER_PLATFORM_EXPORT_PATH(aicontentpublisher.h)

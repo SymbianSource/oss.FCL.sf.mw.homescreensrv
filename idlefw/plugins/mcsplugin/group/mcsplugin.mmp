@@ -78,7 +78,7 @@ LIBRARY         gslauncher.lib
 LIBRARY         eikdlg.lib
 LIBRARY         commonengine.lib 
 LIBRARY         favouritesengine.lib
-
+LIBRARY         viewcli.lib
 LIBRARY         gfxtrans.lib 
 
 // End of File

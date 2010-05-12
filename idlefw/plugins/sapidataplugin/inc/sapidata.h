@@ -33,6 +33,7 @@ class CLiwServiceHandler;
 class CSapiDataObserver;
 class CSapiDataPlugin;
 class MAiContentObserver;
+class MAiCpsCommandBuffer;
 
 /**
  *  @ingroup group_sapidataplugin
@@ -131,16 +132,6 @@ private:
     */
     void ConstructL(CSapiDataPlugin* aPlugin);
 
-    // new functions
-
-    /**
-    * Gets the menu item from the publisher
-    *
-    * @param none
-    * @return void
-    */
-    void GetMenuItemsL();
-    
 public:
     // new functions
     
@@ -150,7 +141,7 @@ public:
     * @param aStatus new status of the publisher
     * @return void
     */
-    void ChangePublisherStatusL(const TDesC& aStatus);
+    void ChangePublisherStatusL(const TDesC8& aStatus);
     
     /**
     * Triggers active event with KNoNotification option.
@@ -183,7 +174,7 @@ public:
      * 
      * @param aStartupReason A reason
      */
-    void SetStartupReasonL(const TDesC& aStartupReason);
+    void SetStartupReasonL(const TDesC8& aStartupReason);
     
     /**
 	* Execute the command to get the data from CPS
@@ -349,31 +340,55 @@ public:
 	*/
     void SetUpdateNeeded(TBool aStatus);
     
+    /**
+    * Sets property value.
+    *
+    * @since S60 5.2
+    * @param aAny - contains pointer to command buffer.
+    */
+    void SetCommandBuffer(TAny* aAny);
+
+private:
+    // new functions
+
+    /**
+    * Gets the menu item from the publisher
+    *
+    * @param none
+    * @return void
+    */
+    void GetMenuItemsL();
+    
+    /**
+    * Change the publisher status with list of actions
+    *
+    * @param aActionsList new list of status for the publisher
+    * @return void
+    */
+    void ChangePublisherStatusL(CLiwDefaultList* aActionsList);
+    
 private:   
     // data
-    
-    /** Subscriber interface, owned */    
-    MLiwInterface* iInterface;      
+    /** CPS Command Buffer Interface, Not Owned */
+    MAiCpsCommandBuffer* iCpsExecute;
+    /** Subscriber interface, Not owned */    
+    MLiwInterface* iInterface;
+    /** Service handler, Not owned */    
+    CLiwServiceHandler* iServiceHandler; 
     /** Data Observer to CPS content registry, owned */    
     CSapiDataObserver* iContentObserver;    
     /** Data Observer to CPS publisher registry, owned */    
     CSapiDataObserver* iPubObserver;
-    /** Service handler, owned */    
-    CLiwServiceHandler* iServiceHandler;    
     /** Array of configurations, owned */    
     RPointerArray<CContentItem> iItemList;
     /** Number of configurations */ 
     TInt iItemCount;    
-    /** Command name in configuration Array, owned */
-    HBufC8* iCommandName;
 	/** publisher id, owned */
 	HBufC* iPublisher;
-	/** content type, owned */
-	HBufC* iContentType;
 	/** content id, owned */
 	HBufC* iContentId;
 	/** Startup reason, owned */
-	HBufC* iStartupReason;
+	HBufC8* iStartupReason;
     /** Reference of the sapi data plugin, not owned */    
     CSapiDataPlugin* iPlugin;    
     /** Menu item names, owned */    
@@ -382,8 +397,11 @@ private:
     RPointerArray<HBufC8> iMenuTriggers;    
     /** Store the status of update needed on resume */
     TBool iUpdateNeeded;
+    // Is Menu item read.
+    TBool iGetMenuItems;
     };
 
 #endif // SAPIDATA_H
 
 // End of file
+

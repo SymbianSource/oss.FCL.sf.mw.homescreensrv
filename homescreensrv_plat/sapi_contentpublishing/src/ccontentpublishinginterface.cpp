@@ -90,12 +90,16 @@ void CContentPublishingInterface::ProcessCommandL( const TDesC8& aCmdName,
     CP_DEBUG( _L8("CContentPublishingInterface::ProcessCommandL") );
     
     if ( aCmdName.CompareF( KExecuteAction ) == 0 )
-       {
-       iCPClient->ExecuteActionL( aInParamList, aCmdOptions );
-       }
-   else
-       {
-       CDataSourceInterface::ProcessCommandL(aCmdName,
-           aInParamList, aOutParamList, aCmdOptions, aCallback);
-       }
+        {
+        iCPClient->ExecuteActionL( aInParamList, aCmdOptions );
+        }
+    else if ( aCmdName.CompareF( KExecuteMultipleActions ) == 0 )
+        {
+        iCPClient->ExecuteMultipleActionsL( aInParamList, aCmdOptions );
+        }
+    else
+        {
+        CDataSourceInterface::ProcessCommandL(aCmdName,
+            aInParamList, aOutParamList, aCmdOptions, aCallback);
+        }
     }

@@ -343,6 +343,7 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
         * @return ThspsServiceCompletedMessage expressing the result of the call.
         */
         ThspsServiceCompletedMessage hspsGetListHeaders(const ChspsODT& /*aSearchMask*/
+                                                         , const TBool /*aCopyLogos*/ 
                                                          , CArrayPtrFlat<ChspsODT>& /*aHeaderList*/);
         
         /**
@@ -806,14 +807,6 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
                 ChspsDomNode& aPluginNode );
         
         /**
-         * Copies logo icons to Homescreen's private folder
-         * @since S60 5.1
-         * @param aAppUid Identifies the client process         
-         */
-        void CopyIconsToHomescreenL(
-                const TUint aAppUid );
-
-        /**
          * Appends missing plugin with a dummy configuration where status="Error"
          * @since S60 5.0
          * @param aAppDom is a DOM of an application configuration 
@@ -884,8 +877,7 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
         TBool iSubscription;
         TInt iDeliveryCount;
         ChspsODT* iSearchMask;
-        ChspsODT* iSetMask;
-        TLanguage iLanguage;
+        ChspsODT* iSetMask;        
         
         ChspsThemeServer& iThemeServer;
         // Identifies the client application
@@ -899,6 +891,7 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
         CArrayPtrSeg<ChspsODT>& iHeaderListCache;        
         ChspsThemeServerSession* iServerSession;	// Not owned.
         CFileMan* iFileMan;
+        TBool iMaintainLogoResources;
 #ifdef HSPS_LOG_ACTIVE
         /**
          * Log bus.

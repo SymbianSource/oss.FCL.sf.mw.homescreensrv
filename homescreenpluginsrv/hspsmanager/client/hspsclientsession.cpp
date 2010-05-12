@@ -153,11 +153,13 @@ EXPORT_C void RhspsClientSession::InstallNextPhase(TDes8& aResultData, TDes8& aH
 // -----------------------------------------------------------------------------
 //
 EXPORT_C TInt RhspsClientSession::GetListHeaders(TDes8& aResultData, const TDesC8& aSearchMaskData,
-                         TDes8& aHeaderData)
+                         const TBool aCopyLogos, TDes8& aHeaderData)
     {
     aHeaderData.Zero();
     aResultData.Zero();
-    return SendReceive(EhspsGetListHeaders, TIpcArgs(&aResultData, &aSearchMaskData, &aHeaderData));  
+    TPckg<TInt> intPkg( aCopyLogos );
+    return SendReceive( EhspsGetListHeaders, 
+            TIpcArgs(&aResultData, &aSearchMaskData, &aHeaderData, &intPkg) );  
     } 
   
 // -----------------------------------------------------------------------------

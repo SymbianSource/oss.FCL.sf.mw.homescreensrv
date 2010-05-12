@@ -555,9 +555,9 @@ void MT_CHSPS::RunTestStepAsyncL(
     TInt err = testThread.Create( 
         _L( "TestStep" ),
         HSPSTestStepThread,
-        0x5000, // 20kB
-        KDefaultHeapSize,
-        KDefaultHeapSize,
+        0xA000, // 40kB
+        KDefaultHeapSize * 2, // 2 times of base size
+        KDefaultHeapSize * 8, // 8 times of base size - needed by Eunit
         ( TAny* )&data,
         EOwnerProcess );
         

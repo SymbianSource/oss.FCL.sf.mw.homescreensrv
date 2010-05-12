@@ -424,8 +424,9 @@ void CHSPSConfigurationIf::GetPluginsL(
     TInt pos;
     TPtrC8 interface;
     TPtrC8 type;
+    TBool copyLogos = EFalse;
     const TLiwGenericParam* inParam;
-    TLiwVariant inParamVariant;
+    TLiwVariant inParamVariant;    
     
     // Get interface parameter (mandatory)
     pos = 0;
@@ -433,43 +434,58 @@ void CHSPSConfigurationIf::GetPluginsL(
         pos, 
         KHspsLiwInterface );
     
-    if( inParam )
-        {
-        inParamVariant = inParam->Value();
-        interface.Set( inParamVariant.AsData() );    
-
-        // Get type parameter (optional)
-        pos = 0;
-        inParam = aInParamList.FindFirst( 
-            pos, 
-            KHspsLiwType );
-        if ( inParam )
-            {
-            inParamVariant = inParam->Value();
-            type.Set( inParamVariant.AsData() );
-            }
-        
-        // Get headers list of defined interface
-        TUint32 family;
-        iHspsConfigurationService->GetFamilyL( family );
-        CArrayPtrFlat<ChspsODT>* list = 
-            new ( ELeave )CArrayPtrFlat<ChspsODT>( KHeaderListGranularity );
-        CleanupStack::PushL( TCleanupItem( DeleteArrayItems, list ) );
-        iHspsPersonalisationService->GetPluginListL( 
-            interface, 
-            type,
-            family,
-            *list );
-        
-        // Create GetPlugins output parameters
-        CHspsLiwUtilities::GetPluginsOutputL( *list, aOutParamList );
-        CleanupStack::PopAndDestroy( list );
-        }
-    else
+    if( !inParam )        
         {
         // Invalid method call
         User::Leave( KErrArgument );
         }
+            
+    inParamVariant = inParam->Value();
+    interface.Set( inParamVariant.AsData() );    
+
+    // Get type parameter (optional)
+    pos = 0;
+    inParam = aInParamList.FindFirst( 
+        pos, 
+        KHspsLiwType );
+    if ( inParam )
+        {
+        inParamVariant = inParam->Value();
+        type.Set( inParamVariant.AsData() );
+        }        
+    
+    // Get copylogos parameter (optional)
+    pos = 0;
+    inParam = aInParamList.FindFirst( 
+        pos, 
+        KHspsLiwCopyLogos );
+    if ( inParam )
+        {
+        inParamVariant = inParam->Value();
+        copyLogos = inParamVariant.AsTBool();            
+        }        
+        
+    // Get headers list of defined interface
+    TUint32 family;
+    iHspsConfigurationService->GetFamilyL( family );
+    
+    CArrayPtrFlat<ChspsODT>* list = 
+        new ( ELeave )CArrayPtrFlat<ChspsODT>( KHeaderListGranularity );
+    CleanupStack::PushL( TCleanupItem( DeleteArrayItems, list ) );
+    
+    // Get headers list of defined interface
+    iHspsPersonalisationService->GetPluginListL( 
+        interface, 
+        type,
+        family,
+        copyLogos,
+        *list );
+    
+    // Create GetPlugins output parameters
+    CHspsLiwUtilities::GetPluginsOutputL( *list, aOutParamList );
+    
+    CleanupStack::PopAndDestroy( list );
+            
     }
 
 // -----------------------------------------------------------------------------

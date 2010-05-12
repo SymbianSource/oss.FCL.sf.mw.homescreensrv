@@ -154,6 +154,11 @@ NONSHARABLE_CLASS( MT_CHSPSConfigurationIf ) : public MT_CHSPS
          */
         void GetPlugins_7_L();
         /**
+         * Test case function for test case GetPlugins(8)
+         * See HSPS module test specification
+         */
+        void GetPlugins_8_L();        
+        /**
          * Test case function for test case GetPluginList(1)
          * See HSPS module test specification
          */

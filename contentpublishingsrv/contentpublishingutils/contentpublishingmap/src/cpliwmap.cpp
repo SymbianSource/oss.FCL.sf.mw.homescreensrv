@@ -20,7 +20,6 @@
 #include <liwgenericparam.h>
 #include <escapeutils.h>
 #include <badesca.h>
-#include <aiwvarianttype.hrh>
 
 #include "cpliwmap.h"
 #include "cpdebug.h"
@@ -28,6 +27,8 @@
 #include "ccontentmap.h"
 #include "cpublisherregistrymap.h"
 #include "cpsecuritypolicy.h"
+
+using namespace LIW;
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -56,34 +57,16 @@ EXPORT_C CCPLiwMap* CCPLiwMap::NewL( const CLiwGenericParamList& aList )
     CCPLiwMap* map( NULL );
     if( param && pos !=KErrNotFound )
         {
-        RBuf typeBuf;
-        typeBuf.CleanupClosePushL();
-        TPtrC type( KNullDesC );
-        if( !param->Value().Get( type ) )
-            {
-            TPtrC8 type8( KNullDesC8 );
-            if( !param->Value().Get( type8 ) )
-                {
-                User::Leave( KErrBadName );
-                }
-            typeBuf.Assign( EscapeUtils::ConvertToUnicodeFromUtf8L( type8 ) );
-            }
-        else
-            {
-            typeBuf.CreateL( type );
-            }
-        if( typeBuf.Find( KCpData () ) != KErrNotFound )
-            {
-            map = CContentMap::NewLC();
-            }
-        else if ( typeBuf.Find( KPublisher () ) != KErrNotFound )
+        if( IsTypePublisherL(param->Value()) )
             {
             map = CPublisherRegistryMap::NewLC();
             }
-        else User::Leave( KErrArgument );
-        map->SetL( aList );
-        CleanupStack::Pop( map );
-        CleanupStack::PopAndDestroy( &typeBuf );
+        else 
+            {
+            map = CContentMap::NewLC();
+            }
+        map->SetL(aList);
+        CleanupStack::Pop(map);
         }
     else
         {
@@ -92,6 +75,38 @@ EXPORT_C CCPLiwMap* CCPLiwMap::NewL( const CLiwGenericParamList& aList )
     return map;
     }
 
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+EXPORT_C CCPLiwMap* CCPLiwMap::NewL( const CLiwMap& aMap )
+    {
+    CP_DEBUG( _L8("CCPLiwMap::NewL") );
+    TLiwVariant typeVariant;
+    typeVariant.PushL();
+    CCPLiwMap* map( NULL );
+
+    if (aMap.FindL(KType, typeVariant))
+        {
+        if( IsTypePublisherL(typeVariant) )
+            {
+            map = CPublisherRegistryMap::NewLC();
+            }
+        else 
+            {
+            map = CContentMap::NewLC();
+            }
+        map->SetL(aMap);
+        CleanupStack::Pop(map);
+        }
+    else
+        {
+        User::Leave( KErrPathNotFound );
+        }
+    CleanupStack::PopAndDestroy(&typeVariant);
+    return map;
+    }
+    
 // ---------------------------------------------------------------------------
 // 
 // ---------------------------------------------------------------------------
@@ -282,6 +297,63 @@ EXPORT_C TBool CCPLiwMap::GetProperty( const TDesC8& aProperty ,
     return result;
     }
 
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+EXPORT_C CLiwDefaultList* CCPLiwMap::GetActionTriggersLC( ) const
+    {
+    CP_DEBUG( _L8("CCPLiwMap::GetActionTriggers") );
+    TInt pos( 0 );
+    CLiwDefaultList* list(NULL); 
+    const TLiwGenericParam* paramForValue = iMap->FindFirst( pos, 
+            KActionTrigger );
+    if ( paramForValue )
+        {
+        if ( paramForValue->Value().TypeId() == EVariantTypeDesC8  )
+            {
+            list = CLiwDefaultList::NewLC();
+            list->AppendL(paramForValue->Value());
+            }
+        if ( paramForValue->Value().TypeId() == EVariantTypeDesC  )
+            {
+            list = CLiwDefaultList::NewLC();
+            RBuf8 desc8;
+            desc8.CleanupClosePushL();
+            desc8.Assign( EscapeUtils::ConvertFromUnicodeToUtf8L( 
+                    paramForValue->Value().AsDes() ) );
+            list->AppendL(TLiwVariant(desc8));
+            CleanupStack::PopAndDestroy( &desc8 );
+            }
+        else if ( paramForValue->Value().TypeId() == EVariantTypeList )
+            {
+            list = CLiwDefaultList::NewLC();
+            const CLiwList* sourceList = paramForValue->Value().AsList(); 
+            TInt count = sourceList->Count();
+            for (TInt i = 0; i < count; i++)
+                {
+                TLiwVariant trigger;
+                trigger.PushL();
+                sourceList->AtL(i,trigger);
+                if (trigger.TypeId() == EVariantTypeDesC8)
+                    {
+                    list->AppendL(trigger);
+                    }
+                else if (trigger.TypeId() == EVariantTypeDesC)
+                    {
+                    RBuf8 desc8;
+                    desc8.CleanupClosePushL();
+                    desc8.Assign( EscapeUtils::ConvertFromUnicodeToUtf8L( 
+                            trigger.AsDes() ) );
+                    list->AppendL(TLiwVariant(desc8));
+                    CleanupStack::PopAndDestroy( &desc8 );
+                    }
+                CleanupStack::PopAndDestroy(&trigger);
+                }
+            }
+        }
+    return list;
+    }
 
 // ---------------------------------------------------------------------------
 // 
@@ -445,49 +517,78 @@ void CCPLiwMap::FillChangeInfoMapL( RSqlStatement& aStmt,
 //
 void CCPLiwMap::SetL( const CLiwGenericParamList& aInParamList )
     {
-    
     CP_DEBUG( _L8("CCPLiwMap::SetL") );
     for ( TInt i = 0; i < aInParamList.Count( ); i++ )
         {
         const TLiwGenericParam& param = aInParamList[i];
-        if ( param.Value().TypeId( ) == LIW::EVariantTypeMap )
+        ExtractParamL(param);
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CCPLiwMap::SetL( const CLiwMap& aMap )
+    {
+    CP_DEBUG( _L8("CCPLiwMap::SetL") );
+    for ( TInt i = 0; i < aMap.Count( ); i++ )
+        {
+        TBuf8<128> key;
+        aMap.AtL(i, key);
+        TLiwVariant value;
+        value.PushL();
+        aMap.FindL(key, value);
+        TLiwGenericParam param(key,value);
+        ExtractParamL(param);
+        CleanupStack::PopAndDestroy(&value);
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void CCPLiwMap::ExtractParamL(const TLiwGenericParam& aParam)
+    {
+    CP_DEBUG( _L8("CCPLiwMap::ExtractVariantL") );
+    if (aParam.Value().TypeId() == LIW::EVariantTypeMap)
+        {
+        const CLiwMap* map = aParam.Value().AsMap();
+        for (TInt i = 0; i < map->Count(); i++)
             {
-            const CLiwMap* map = param.Value().AsMap( );
-            for ( TInt i = 0; i <map->Count( ); i++ )
+            TBuf8<128> key;
+            map->AtL(i, key);
+            TLiwVariant value;
+            value.PushL();
+            map->FindL(key, value);
+            if (key == KOperation)
                 {
-                TBuf8<128> key;
-                map->AtL( i, key );
-                TLiwVariant value;
-                value.PushL( );
-                map->FindL( key, value );
-                if ( key == KOperation )
-                	{
-                	IsProperOperationL( value );
-                	}
-                RBuf8 datadesc;
-                datadesc.CleanupClosePushL();
-                if ( value.TypeId( ) == LIW::EVariantTypeMap )
-                    {
-                    const CLiwMap* internalMap = value.AsMap( );
-                    datadesc.CreateL( internalMap->Size( ) );
-                    RDesWriteStream datastrm(datadesc);
-                    CleanupClosePushL( datastrm );
-                    internalMap->ExternalizeL( datastrm );
-                    datastrm.CommitL( );
-                    CleanupStack::PopAndDestroy( &datastrm );
-                    value.Reset( );
-                    value.Set( datadesc );
-                    }
-                TLiwGenericParam data( key, value);
-                iMap->AppendL( data );
-                CleanupStack::PopAndDestroy( &datadesc );
-                CleanupStack::PopAndDestroy( &value );
+                IsProperOperationL(value);
                 }
+            RBuf8 datadesc;
+            datadesc.CleanupClosePushL();
+            if (value.TypeId() == LIW::EVariantTypeMap)
+                {
+                const CLiwMap* internalMap = value.AsMap();
+                datadesc.CreateL(internalMap->Size());
+                RDesWriteStream datastrm(datadesc);
+                CleanupClosePushL(datastrm);
+                internalMap->ExternalizeL(datastrm);
+                datastrm.CommitL();
+                CleanupStack::PopAndDestroy(&datastrm);
+                value.Reset();
+                value.Set(datadesc);
+                }
+            TLiwGenericParam data(key, value);
+            iMap->AppendL(data);
+            CleanupStack::PopAndDestroy(&datadesc);
+            CleanupStack::PopAndDestroy(&value);
             }
-        else
-            {
-            iMap->AppendL( param );
-            }
+        }
+    else
+        {
+        iMap->AppendL(aParam);
         }
     }
 
@@ -765,11 +866,21 @@ TBool CCPLiwMap::IsContentIdL() const
 //
 TBool CCPLiwMap::IsTriggerL( ) const
     {
-    TBool result( EFalse );
-    RBuf8 buffer;
-    buffer.CleanupClosePushL();
-    result = GetPropertyL( KActionTrigger, buffer );
-    CleanupStack::PopAndDestroy( &buffer );
+    TBool result(EFalse);
+    TInt pos( 0 );
+    const TLiwGenericParam* paramForValue = iMap->FindFirst( pos, 
+            KActionTrigger );
+    if ( pos != KErrNotFound )
+        {
+        result = ETrue;
+        LIW::TVariantTypeId variantType = paramForValue->Value().TypeId();
+        if ( variantType != EVariantTypeDesC &&
+                variantType != EVariantTypeDesC8 &&
+                variantType != EVariantTypeList ) 
+            {
+            User::Leave( KErrBadName );
+            }
+        }
     return result;
     }
 
@@ -1177,6 +1288,46 @@ void CCPLiwMap::ConstructL()
 // 
 // ---------------------------------------------------------------------------
 //
+TBool CCPLiwMap::IsTypePublisherL( const TLiwVariant& aVariant )
+    {
+    TBool result (EFalse);
+    RBuf typeBuf;
+    typeBuf.CleanupClosePushL();
+    TPtrC type( KNullDesC );
+    if( !aVariant.Get( type ) )
+        {
+        TPtrC8 type8( KNullDesC8 );
+        if( !aVariant.Get( type8 ) )
+            {
+            User::Leave( KErrBadName );
+            }
+        typeBuf.Assign( EscapeUtils::ConvertToUnicodeFromUtf8L( type8 ) );
+        }
+    else
+        {
+        typeBuf.CreateL( type );
+        }
+    if( typeBuf.Find( KCpData () ) != KErrNotFound )
+        {
+        result = EFalse;
+        }
+    else if ( typeBuf.Find( KPublisher () ) != KErrNotFound )
+        {
+        result = ETrue;
+        }
+    else
+        {
+        User::Leave( KErrArgument );
+        }
+    CleanupStack::PopAndDestroy( &typeBuf );
+    return result;
+    }
+
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
 void CCPLiwMap::CheckIdentifiersL() const
     {
     IsPublisherNameL();
@@ -1253,7 +1404,7 @@ TBool CCPLiwMap::IsPropertyValidL( const TDesC8& aProperty ) const
     if ( pos != KErrNotFound )
         {
         found = ETrue;
-        TInt length;
+        TInt length(0);
         if( paramForValue->Value().TypeId() == EVariantTypeDesC )
             {
             length = paramForValue->Value().AsDes().Length(); 

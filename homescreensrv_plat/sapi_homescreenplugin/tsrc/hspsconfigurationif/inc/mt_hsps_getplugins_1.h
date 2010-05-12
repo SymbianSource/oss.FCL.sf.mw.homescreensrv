@@ -128,7 +128,7 @@ const TUint8 getplugins_1_ts_1_output[] = {
 //   - Version 1.0
 //   - Item count (LE)
 10,
-6,0,0,0,
+7,0,0,0,
 // - plugins[0]::uid
 //   - Variant name
 //     - Version 1.0
@@ -272,6 +272,30 @@ const TUint8 getplugins_1_ts_1_output[] = {
 5,
 0,0,0,0,
 2,
+// - plugins[0]::logo
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+4,0,0,0,
+18,
+'l','o','g','o',
+// - plugins[0]::logo
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+55,0,0,0,
+222,
+'m','i','f','(','2','4','5','6','\\','2','7','0','5','1','3','7','5','1','\\','5','3','6','9','1','6','2','7','4','\\','1','.','0','\\','s','o','u','r','c','e','s','\\','d','u','m','m','y','.','m','i','f',' ','1',' ','2',')',
 // GetPlugins(Output)::plugins
 // - Version 1.0
 // - List item starts
@@ -452,10 +476,9 @@ const TUint8 getplugins_1_ts_1_output[] = {
 //     - Variant value
 10,
 5,
-75,0,0,0,
-93,
-2,
-'m','i','f','(','c',':','\\','p','r','i','v','a','t','e','\\','2','0','0','0','0','F','B','1','\\','2','4','5','6','\\','2','7','0','5','1','3','7','5','1','\\','5','3','6','9','1','6','2','7','3','\\','1','.','0','\\','s','o','u','r','c','e','s','\\','d','u','m','m','y','.','m','i','f',' ','1',' ','2',')',
+55,0,0,0,
+222,
+'m','i','f','(','2','4','5','6','\\','2','7','0','5','1','3','7','5','1','\\','5','3','6','9','1','6','2','7','3','\\','1','.','0','\\','s','o','u','r','c','e','s','\\','d','u','m','m','y','.','m','i','f',' ','1',' ','2',')',
 // GetPlugins(Output)::plugins
 // - Version 1.0
 // - List item starts

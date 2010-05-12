@@ -85,11 +85,12 @@ class RhspsClientSession : public RSessionBase
         * @since S60 5.0
         * @param aResultData        Result data.
         * @param aSearchMaskData    Search mask data.
+        * @param aCopyLogos         Set if logo resources should be copied to client         
         * @param aHeaderData        Header data.
         * @return Symbian error code.
         */
         IMPORT_C TInt GetListHeaders(TDes8& aResultData, const TDesC8& aSearchMaskData,
-                       TDes8& aHeaderData);
+                       const TBool aCopyLogos,TDes8& aHeaderData);
     
         /**
         * SetActiveTheme.

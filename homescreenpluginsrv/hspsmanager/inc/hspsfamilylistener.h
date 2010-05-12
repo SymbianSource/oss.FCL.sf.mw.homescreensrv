@@ -24,12 +24,9 @@
 #ifndef HSPSFAMILYLISTENER_H_
 #define HSPSFAMILYLISTENER_H_
 
-#include <e32base.h>
-#include <w32std.h>
+#include "hspsfamily.h"
 
-#include "hspsthememanagement.h"
-
-
+class ChspsFamilyListener;
 /**
  * @ingroup group_hspsserver  
  * HandleFamilyChangeL.
@@ -47,45 +44,44 @@ class MhspsFamilyObserver
         virtual TBool HandleFamilyChangeL( const ThspsFamily aNewFamily ) = 0;
     };
 
-/**
-*  @ingroup group_hspsserver
-*  ChspsFamilyListener is used to listen to the changes in UI's resolution and orientation.
-*  Used on emulator environment only. 
-*
-*  @lib hspsThemeServer.exe 
-*  @since S60 5.0
-*/
-class ChspsFamilyListener : public CActive
-    {
+
+class ChspsFamilyListenerActive : public CActive
+	{
     public:  // Constructors and destructor
 
         /**
         * NewL
         * Two-phased constructor.
         */
-        static ChspsFamilyListener* NewL(
+        static ChspsFamilyListenerActive* NewL(
+                ChspsFamilyListener& aListener,
                 MhspsFamilyObserver& aObserver );
         
         /**
         * ~ChspsFamilyListener
         * Destructor.
         */
-        virtual ~ChspsFamilyListener();
+        virtual ~ChspsFamilyListenerActive();
         
+
+    private:
+
         /**
-         * Retrieves family type from a string
-         * @since S60 5.0 
+        * ConstructL
+        * By default Symbian 2nd phase constructor is private.
+        */
+        void ConstructL();
+
+        ChspsFamilyListenerActive(
+                        ChspsFamilyListener& aListener,
+                        MhspsFamilyObserver& iObserver);
+
+    public:
+         /**
+         * Start listener.
          */
-        static ThspsFamily GetFamilyType( 
-                const TDesC8& aFamilyString );
-        
-        /**
-         * Retrieves family type from the current resolution.
-         * @since S60 5.0
-         * @return Family id
-         */
-        ThspsFamily GetFamilyType();
-                
+        void Queue();
+
     protected:  // Functions from base classes
 
         /**
@@ -108,6 +104,42 @@ class ChspsFamilyListener : public CActive
          * @since S60 5.0 
          */
         TInt RunError(TInt aError);
+        
+    private: // data
+    
+        // Listener reference, not owned
+        ChspsFamilyListener& iListener;
+
+        // Observer which is called when RunL occurs
+        MhspsFamilyObserver& iObserver;
+
+	};
+
+/**
+*  @ingroup group_hspsserver
+*  ChspsFamilyListener is used to listen to the changes in UI's resolution and orientation.
+*  Used on emulator environment only. 
+*
+*  @lib hspsThemeServer.exe 
+*  @since S60 5.0
+*/
+class ChspsFamilyListener : public ChspsFamily
+    {
+    public:  // Constructors and destructor
+
+        /**
+        * NewL
+        * Two-phased constructor.
+        */
+        static ChspsFamilyListener* NewL(
+                MhspsFamilyObserver& aObserver );
+        
+        /**
+        * ~ChspsFamilyListener
+        * Destructor.
+        */
+        virtual ~ChspsFamilyListener();
+        
 
     private:
 
@@ -115,19 +147,14 @@ class ChspsFamilyListener : public CActive
         * ConstructL
         * By default Symbian 2nd phase constructor is private.
         */
-        void ConstructL();
+        void ConstructL( MhspsFamilyObserver& aObserver );
 
         /**
         * ChspsCenRepListener
         * C++ default constructor.
         */
-        ChspsFamilyListener( 
-                MhspsFamilyObserver& aObserver );
+        ChspsFamilyListener();
         
-        /**
-         * Start listener.
-         */
-        void Queue();
         
         /**
          * Retrieves used display code.
@@ -137,20 +164,10 @@ class ChspsFamilyListener : public CActive
 
     private:    // Data
 
-        // Observer which is called when RunL occurs
-        MhspsFamilyObserver& iObserver;
-        
-        // Window server session.
-        RWsSession iWsSession;   
-        
         // Client-side handle to a server-side window group.
         RWindowGroup iWindowGroup;
         
-        CWsScreenDevice* iScreenDevice;
-        
-        TUint32 iActiveFamily;
-        
-        TBool iFeatureManagerLoaded;
+        ChspsFamilyListenerActive* iFamilyListenerActive;
         
     };
 

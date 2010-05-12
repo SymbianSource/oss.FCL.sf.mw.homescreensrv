@@ -91,14 +91,15 @@ ChspsMaintenanceHandler::ChspsMaintenanceHandler(
         ChspsThemeServer& aThemeServer, 
         const TUint aSecureId ): 
     CTimer(EPriorityLow), 
-    iLanguage ( aThemeServer.DeviceLanguage() ),
     iThemeServer( aThemeServer ), 
     iSecureId( aSecureId ),
     iCentralRepository( aThemeServer.CentralRepository() ),    
     iDefinitionRepository( aThemeServer.DefinitionRepository() ),
     iSecurityEnforcer( aThemeServer.SecurityEnforcer() ),
     iHeaderListCache( aThemeServer.HeaderListCache() ),
-    iFileMan( NULL )
+    iServerSession( NULL ),         
+    iFileMan( NULL ),
+    iMaintainLogoResources( EFalse )
     { 
     iDeliveryCount = 0;
     iSubscription = EFalse;
@@ -194,11 +195,11 @@ void ChspsMaintenanceHandler::ServiceGetListHeadersL(const RMessage2& aMessage)
             }
         iSearchMask = ChspsODT::NewL();
         iSearchMask->UnMarshalHeaderL(searchMaskData);
-        
-        // check the device language
-        iLanguage  = iThemeServer.DeviceLanguage();        
- 	    iSearchMask->SetOdtLanguage( (TInt)iLanguage );
-                 
+                
+        iMaintainLogoResources = EFalse;
+        TPckg<TInt> intPkg( iMaintainLogoResources );                                    
+        messagePtr.ReadL(3, intPkg );
+                                                           
         // now there is a subscription
         iSubscription = ETrue;
         // fetch the header list from repository
@@ -242,9 +243,6 @@ void ChspsMaintenanceHandler::ServiceGetNextHeaderL(const RMessage2& aMessage)
         // is there headers to delivere left
         if (iHeaderDataList->Count() > iDeliveryCount)
             {                                    
-            // Handle copying of logo icon resources
-            CopyIconsToHomescreenL( aMessage.SecureId().iId );
-            
             // at least one header on the list
             TPtr8 bufPtr( iHeaderDataList->At(iDeliveryCount)->Des() );
             iMessagePtr.WriteL(2, bufPtr, 0);
@@ -262,82 +260,6 @@ void ChspsMaintenanceHandler::ServiceGetNextHeaderL(const RMessage2& aMessage)
         }
     }
     
-// -----------------------------------------------------------------------------
-// ChspsMaintenanceHandler::CopyIconsToHomescreenL
-// -----------------------------------------------------------------------------
-//
-void ChspsMaintenanceHandler::CopyIconsToHomescreenL(
-        const TUint aAppUid ) 
-    {        
-    HBufC8* headerData = iHeaderDataList->At(iDeliveryCount);
-    ChspsODT* header = ChspsODT::UnMarshalHeaderLC( headerData->Des() );
-    if ( iServerSession && header )
-        {    
-        if( header->LogoFile().Length() )
-            {                              
-            // If a file reference was found from the logo declaration
-            TFileName filename;
-            if ( hspsServerUtil::IsFile( header->LogoFile(), filename ) )
-                {
-                if ( !iFileMan )
-                    {                
-                    iFileMan = CFileMan::NewL( iServerSession->FileSystem() );
-                    }
-    
-                // Get client's private directory: 
-                // We should use some common directory if there are more than one SAPI clients,
-                // for now we can copy files to AI3's private folder
-                _LIT( KPrivatePath, "c:\\private\\%X\\");
-                TPath privatePath;            
-                privatePath.Format( KPrivatePath, aAppUid );                
-                                                                                        
-                // Append private path to the logo file reference
-                TInt offset = header->LogoFile().FindF( filename );
-                if ( offset >= 0 )
-                    {                                      
-                    // Insert private path prior to the file reference                    
-                    HBufC* logoBuf = HBufC::NewLC( 
-                            privatePath.Length() + header->LogoFile().Length() );
-                    logoBuf->Des().Copy( header->LogoFile() );
-                    logoBuf->Des().Insert( offset, privatePath );
-                    header->SetLogoFileL( logoBuf->Des() );
-                    CleanupStack::PopAndDestroy( logoBuf );
-                                        
-                    // Replace the serialized header descriptor                    
-                    HBufC8* newHeaderData = header->MarshalHeaderL();                    
-                    CleanupStack::PushL( newHeaderData );
-                    iHeaderDataList->InsertL( 
-                           iDeliveryCount,
-                           newHeaderData );                       
-                    CleanupStack::Pop( newHeaderData );                    
-                    delete headerData;
-                    headerData = 0;
-                    iHeaderDataList->Delete( iDeliveryCount + 1 );
-                    }                               
-
-                // Set target directory for file copying
-                TPath targetPath;            
-                targetPath.Copy( privatePath );
-                targetPath.Append( filename );
-                
-                // Set source directory for file copying
-                TFileName sourceFile;     
-                _LIT( KThemesFolder, "themes\\" );
-                iServerSession->FileSystem().SessionPath( sourceFile );
-                sourceFile.Append( KThemesFolder );                
-                sourceFile.Append( filename );
-                
-                // Create the target path and copy files when required
-                hspsServerUtil::CopyResourceFileL(
-                        iServerSession->FileSystem(),
-                        *iFileMan, 
-                        targetPath,
-                        sourceFile );
-                }
-            }
-        }
-    CleanupStack::PopAndDestroy( header );
-    }
 
 // -----------------------------------------------------------------------------
 // ChspsMaintenanceHandler::SetServerSession
@@ -1120,7 +1042,7 @@ TInt ChspsMaintenanceHandler::HandlePluginReferencesL(
                     CleanupStack::PushL( pluginIter );                                
                     ChspsDomNode* pluginNode =  pluginIter->First();                              
                     TBool steppingtoConfNode(EFalse);                     
-                    while(pluginNode && !steppingtoConfNode)
+                    while( pluginNode && !steppingtoConfNode )
                         {
                         const TDesC8& pluginNodeName = pluginNode->Name();
                          
@@ -1135,10 +1057,18 @@ TInt ChspsMaintenanceHandler::HandlePluginReferencesL(
                         }
                     CleanupStack::PopAndDestroy( pluginIter );
                     
-                    // Copy the plugin configuration to the main document.
-                    ChspsDomNode* rootCopy = pluginNode->CloneL( node->StringPool());
-                    rootCopy->SetParent( node );
-                    node->AddChildL( rootCopy );
+                    if ( pluginNode )
+                        {
+                        // Copy the plugin configuration to the main document.
+                        ChspsDomNode* rootCopy = pluginNode->CloneL( node->StringPool());
+                        rootCopy->SetParent( node );
+                        node->AddChildL( rootCopy );
+                        }
+                    else
+                        {
+                        // configuration is corrupted
+                        User::Leave( KErrCorrupt );
+                        }
                     }
                
                 CleanupStack::PopAndDestroy( pluginOdt );
@@ -1859,14 +1789,20 @@ TBool ChspsMaintenanceHandler::IsViewConfiguration(
     {
     TBool isView = EFalse;
     
-    ChspsDomNode* confNode = 
-            (ChspsDomNode*)aPluginNode.ChildNodes().FindByName( KConfigurationElement );
+    ChspsDomNode* confNode = static_cast<ChspsDomNode*>(
+            aPluginNode.ChildNodes().FindByName( KConfigurationElement ));
+    
     if( confNode )
         {
-        ChspsDomAttribute* typeAttr = 
-                (ChspsDomAttribute*)confNode->AttributeList().FindByName( KConfigurationAttrType );
-        isView = ( typeAttr->Value().CompareF( KConfTypeView ) == 0 );            
+        ChspsDomAttribute* typeAttr = static_cast<ChspsDomAttribute*>(
+                confNode->AttributeList().FindByName( KConfigurationAttrType ));
+        
+        if( typeAttr )
+            {
+            isView = ( typeAttr->Value().CompareF( KConfTypeView ) == 0 ); 
+            }     
         }
+    
     return isView;
     }
 
@@ -3841,8 +3777,10 @@ TInt ChspsMaintenanceHandler::UpdatePluginConfigurationL(
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsGetListHeaders(const ChspsODT& /*aSearchMask*/,
-                                                     CArrayPtrFlat<ChspsODT>& /*aHeaderList*/)        
+ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsGetListHeaders(
+        const ChspsODT& /*aSearchMask*/,
+        const TBool /*aCopyLogos*/,
+        CArrayPtrFlat<ChspsODT>& /*aHeaderList*/)        
     {
     return EhspsServiceNotSupported;
     }
@@ -4052,6 +3990,18 @@ TBool ChspsMaintenanceHandler::HandleDefinitionRespositoryEventL( ThspsRepositor
         {
         After(KHeaderListUpdatePollingTimeSpan);    
         }      
+    
+    else if( aRepositoryInfo.iEventType & EhspsODTAdded
+            || aRepositoryInfo.iEventType & EhspsODTUpdated )
+        {
+        // If a widget has been installed or updated
+        if( iServerSession )
+            {
+            // Make sure all logos are copied when user retrieves the list
+            iServerSession->SetIconFileCopyRequired( ETrue );
+            }
+        }
+ 
     return EFalse;
     }
 
@@ -4315,37 +4265,83 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::GetHeaderListUpdateL()
 void ChspsMaintenanceHandler::GetHeaderListL( 
         CArrayPtrSeg<HBufC8>& aHeaderDataList, 
         const ChspsODT& aSearchMask )
-    {    
-    HBufC8* headerBuf = aSearchMask.MarshalHeaderL();
-    if ( !headerBuf )
-        {
-        User::Leave(KErrGeneral);
-        }
-    CleanupStack::PushL( headerBuf );    
-    ChspsODT* searchOdt = ChspsODT::UnMarshalHeaderLC( *headerBuf );
-    
+    {            
     // Reset search results
     aHeaderDataList.ResetAndDestroy();
+                    
+    if( !iFileMan )
+       {                
+       iFileMan = CFileMan::NewL( iServerSession->FileSystem() );
+       }    
         
     for ( TInt i = 0; i < iHeaderListCache.Count(); i++ )
         {
         ChspsODT* header = iHeaderListCache.At( i );
         
-        // Check whether the header matches the search criteria
-        if ( FilterHeader( *searchOdt, *header ) )
+        // Header clone is needed because it prevents modifying list cache
+        ChspsODT* clone = header->CloneL();
+        CleanupStack::PushL( clone ); 
+        
+        // Check whether the header matches the search criteria (family etc)
+        if ( FilterHeader( aSearchMask, *clone ) )
             {
-            // Append to the search results
-            HBufC8* data = header->MarshalHeaderL();
+        
+            // Update file paths into the existing logo declarations
+            if( clone->LogoFile().Length() &&
+                iMaintainLogoResources &&
+                ( header->ConfigurationType() == EhspsWidgetConfiguration ||
+                  header->ConfigurationType() == EhspsTemplateConfiguration ) )
+                {    
+            
+                RBuf targetFile;
+                CleanupClosePushL( targetFile );       
+                targetFile.CreateL( KMaxFileName );
+                
+                RBuf sourceFile;
+                CleanupClosePushL( sourceFile );
+                sourceFile.CreateL( KMaxFileName );
+                
+                RBuf newDeclaration;
+                CleanupClosePushL( newDeclaration );
+                newDeclaration.CreateL( clone->LogoFile().Length() + KMaxFileName );
+                
+                // Find location of the logo file and location where it shold be copied                
+                hspsServerUtil::PopulateLogoPathsL(
+                    clone->LogoFile(),
+                    iSecureId,
+                    targetFile,
+                    sourceFile,
+                    newDeclaration );
+                
+                if( targetFile.Length()
+                        && sourceFile.Length() 
+                        && newDeclaration.Length() )
+                    {
+                    // Update private path information to the logo declaration                
+                    clone->SetLogoFileL( newDeclaration );
+                                        
+                    hspsServerUtil::CopyResourceFileL(
+                        iServerSession->FileSystem(),
+                        *iFileMan,                         
+                        targetFile,
+                        sourceFile );
+                    }
+                
+                CleanupStack::PopAndDestroy( 3, &targetFile ); // targetFile, sourceFile, newDeclaration                
+                }      
+        
+            // Convert the header to a descriptor
+            HBufC8* data = clone->MarshalHeaderL();            
             if ( data )
                 {
+                // Append to the search results
                 CleanupStack::PushL( data );
                 aHeaderDataList.AppendL( data );
                 CleanupStack::Pop( data );
                 }
             }
-        }                              
-        
-    CleanupStack::PopAndDestroy( 2, headerBuf ); // searchOdt, headerBuf    
+        CleanupStack::PopAndDestroy( clone );
+        }          
     }
 
 // -----------------------------------------------------------------------------
@@ -4555,7 +4551,7 @@ TBool ChspsMaintenanceHandler::FilterHeader(
             )
         &&
             (
-            ( aMask.ConfigurationType() && aMask.ConfigurationType() == aHeader.ConfigurationType() )
+            ( aMask.ConfigurationType() && ( aHeader.ConfigurationType() == aMask.ConfigurationType() ) )
             ||
             ( !aMask.ConfigurationType() )
             )            
@@ -4723,10 +4719,7 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
         
         // Get active root configuration for the client application
         ChspsODT* appODT = ChspsODT::NewL();
-        CleanupStack::PushL( appODT );
-        iThemeServer.GetActivateAppConfigurationL( 
-                params.appUid,
-                *appODT );     
+        CleanupStack::PushL( appODT );    
 
 #ifdef HSPS_LOG_ACTIVE                
         if( iLogBus )
@@ -4741,12 +4734,20 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
         TInt err = KErrNone;
         if ( !params.restoreAll )
             {
-            // Remove all widgets from the active view
-            err = RestoreActiveViewL( *appODT );
-            }        
+            // reinstall all widgets
+            TRAP( err, iThemeServer.InstallWidgetsL();
+                       iThemeServer.InstallUDAWidgetsL() );
+            
+            // Force updating of the header cache
+            iThemeServer.UpdateHeaderListCacheL();          
+            }  
+        
+        iThemeServer.GetActivateAppConfigurationL( 
+                params.appUid,
+                *appODT );
         
         // As a backup, if restoration of the active view fails,  
-        // or if all views but the locked view should be removed
+        // or if all views but the locked view should be removedc
         if ( err || params.restoreAll )
             {                        
             // Remove all views but the locked one and reset active view            

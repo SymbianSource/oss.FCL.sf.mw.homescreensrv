@@ -275,12 +275,11 @@ void CHsCcProviderClient::WaitForApiReqL()
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleRegisterObserverNtfL(
-    TUint32 /* aSender */,
+    TUint32 aSender,
     TUint32 /* aReceiver */,
     CCcSrvMsg& /* aMessage */ )
     {
-    TUint32 observer = iPckgSender();
-    iObservers.AppendL( observer );
+    iObservers.AppendL( aSender );
     }
 
 // -----------------------------------------------------------------------------
@@ -288,14 +287,13 @@ void CHsCcProviderClient::HandleRegisterObserverNtfL(
 // -----------------------------------------------------------------------------
 //
 void CHsCcProviderClient::HandleUnregisterObserverNtfL(
-    TUint32 /* aSender */,
+    TUint32 aSender,
     TUint32 /* aReceiver */,
     CCcSrvMsg& /* aMessage */ )
     {
-    TUint32 observer = iPckgSender();
     for ( TInt i = 0; i < iObservers.Count(); i++ )
         {
-        if ( iObservers[ i ] == observer )
+        if ( iObservers[ i ] == aSender )
             {
             iObservers.Remove( i );
             break;
@@ -459,11 +457,33 @@ void CHsCcProviderClient::HandleViewListReqL(
     TUint32 aReceiver,
     CCcSrvMsg& aMessage )
     {
+    TInt err( KErrNone );
     // Get view list
     CHsContentInfoArray* views = CHsContentInfoArray::NewL();
     CleanupStack::PushL( views );
-    TInt err = iController.ViewListL( *views );
 
+    if ( aMessage.DataSize() )
+        {
+        // Internalize message data
+        RDesReadStream dataStream( aMessage.Data() );
+        CleanupClosePushL( dataStream );
+        CHsContentInfo* info = CHsContentInfo::NewL( dataStream );
+        CleanupStack::PopAndDestroy( &dataStream );
+        CleanupStack::PushL( info );
+
+        // Get list of views included in the defined 
+        // application configuration
+        err = iController.ViewListL( *info, *views );
+        
+        CleanupStack::PopAndDestroy( info );        
+        }
+    else
+        {
+        // Get list of available views
+        err = iController.ViewListL( *views );
+        }
+
+    
     // Create and send ViewListResp
     CCcSrvMsg* message = CCcSrvMsg::NewL();
     CleanupStack::PushL( message );

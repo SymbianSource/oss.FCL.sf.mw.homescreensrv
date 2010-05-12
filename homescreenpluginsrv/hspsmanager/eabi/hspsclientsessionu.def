@@ -11,7 +11,7 @@ EXPORTS
 	_ZN18RhspsClientSession13GetNextHeaderER5TDes8S1_R14TRequestStatus @ 10 NONAME
 	_ZN18RhspsClientSession13ReinstallConfER5TDes8RK23ThspsParamReinstallConf @ 11 NONAME
 	_ZN18RhspsClientSession13ReplacePluginER5TDes8RK23ThspsParamReplacePlugin @ 12 NONAME
-	_ZN18RhspsClientSession14GetListHeadersER5TDes8RK6TDesC8S1_ @ 13 NONAME
+	_ZN18RhspsClientSession14GetListHeadersER5TDes8RK6TDesC8iS1_ @ 13 NONAME
 	_ZN18RhspsClientSession14RestoreDefaultER5TDes8RK6TDesC8S1_ @ 14 NONAME
 	_ZN18RhspsClientSession14SetActiveThemeER5TDes8RK6TDesC8S1_ @ 15 NONAME
 	_ZN18RhspsClientSession15SetActivePluginER5TDes8RK24ThpsParamSetActivePlugin @ 16 NONAME
@@ -20,9 +20,9 @@ EXPORTS
 	_ZN18RhspsClientSession17SetPluginSettingsER5TDes8S1_27ThspsParamSetPluginSettingsS1_ @ 19 NONAME
 	_ZN18RhspsClientSession18AccessResourceFileER5TDes8RK18ThspsConfigurationRK7TDesC16Ri @ 20 NONAME
 	_ZN18RhspsClientSession20RestoreActiveAppConfER5TDes8RK30ThspsParamRestoreActiveAppConf @ 21 NONAME
-	_ZN18RhspsClientSession5CloseEv @ 22 NONAME
-	_ZN18RhspsClientSession6GetODTER5TDes8RK18ThspsConfigurationRK6TDesC8R6TDes16 @ 23 NONAME
-	_ZN18RhspsClientSession7ConnectEv @ 24 NONAME
-	_ZN18RhspsClientSession9AddPluginER5TDes8RK18ThpsParamAddPluginRi @ 25 NONAME
-	_ZN18RhspsClientSession21RestoreConfigurationsER5TDes8RK31ThspsParamRestoreConfigurations @ 26 NONAME
+	_ZN18RhspsClientSession21RestoreConfigurationsER5TDes8RK31ThspsParamRestoreConfigurations @ 22 NONAME
+	_ZN18RhspsClientSession5CloseEv @ 23 NONAME
+	_ZN18RhspsClientSession6GetODTER5TDes8RK18ThspsConfigurationRK6TDesC8R6TDes16 @ 24 NONAME
+	_ZN18RhspsClientSession7ConnectEv @ 25 NONAME
+	_ZN18RhspsClientSession9AddPluginER5TDes8RK18ThpsParamAddPluginRi @ 26 NONAME
 

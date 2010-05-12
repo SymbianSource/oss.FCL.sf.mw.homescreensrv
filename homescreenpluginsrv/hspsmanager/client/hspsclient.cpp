@@ -236,8 +236,10 @@ EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsReinstallConf(
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsGetListHeaders( const ChspsODT& aSearchMask, 
-                                CArrayPtrFlat<ChspsODT>& aHeaderList )
+EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsGetListHeaders( 
+        const ChspsODT& aSearchMask,
+        const TBool aCopyLogos,
+        CArrayPtrFlat<ChspsODT>& aHeaderList )
     {
     ThspsServiceCompletedMessage ret = EhspsServiceRequestError; 
     TBuf8<KMaxHeaderDataLength8> headerData;
@@ -263,8 +265,11 @@ EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsGetListHeaders( const Chs
             // cancel previous subscription first
             hspsCancelGetListHeaders();
             }        
-        ret = (ThspsServiceCompletedMessage)iSession.GetListHeaders(iResultData, 
-                                                             iSearchMaskData->Des(),headerData );
+        ret = (ThspsServiceCompletedMessage)iSession.GetListHeaders(
+                iResultData, 
+                iSearchMaskData->Des(),
+                aCopyLogos,
+                headerData );
 
 #ifdef HSPS_LOG_ACTIVE
         if( iLogBus )
@@ -534,8 +539,10 @@ EXPORT_C void ChspsClient::GethspsResult(ChspsResult& aResult)
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
 //
-EXPORT_C TInt ChspsClient::hspsGetHeaders( const ChspsODT& aSearchMask, 
-                                CArrayPtrFlat<ChspsODT>& aHeaderList )
+EXPORT_C TInt ChspsClient::hspsGetHeaders( 
+        const ChspsODT& aSearchMask,
+        const TBool aCopyLogos,
+        CArrayPtrFlat<ChspsODT>& aHeaderList )
     {
     iHeaderList = &aHeaderList;
     // Convert search mask ODT to binary stream
@@ -553,6 +560,7 @@ EXPORT_C TInt ChspsClient::hspsGetHeaders( const ChspsODT& aSearchMask,
             ( ThspsServiceCompletedMessage )iSession.GetListHeaders(
                 iResultData, 
                 iSearchMaskData->Des(),
+                aCopyLogos,
                 iHeaderData );
                 
         if ( ret == EhspsGetListHeadersSuccess )

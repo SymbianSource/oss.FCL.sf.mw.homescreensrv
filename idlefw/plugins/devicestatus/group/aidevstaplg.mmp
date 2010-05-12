@@ -84,6 +84,7 @@ LIBRARY         bitgdi.lib
 LIBRARY         aiutils.lib
 LIBRARY         flogger.lib
 LIBRARY         bafl.lib
+LIBRARY         profileengine.lib
 
 // End of file
 

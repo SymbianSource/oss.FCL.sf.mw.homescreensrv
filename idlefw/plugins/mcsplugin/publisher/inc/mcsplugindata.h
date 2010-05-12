@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -26,23 +26,25 @@
 #include <hspluginsettings.h>
 #include <propertymap.h>
 #include <mcsmenu.h>
-#include <msvapi.h>     // For MMsvSessionObserver
 
 class TMenuItem;
 class CMCSPluginEngine;
-class CMCSPluginWatcher;
-
 
 /**
  *  @ingroup group_mcsplugin
  *
- *  TMCData class
+ *  Stores the MCS Menu Items and keeps track whether
+ *  item needs to be published or not.
  *
  *  @since S60 v9.1
  */
-class TMCSData
+NONSHARABLE_CLASS( CMCSData ) : public CBase
     {
 public:
+    CMCSData();
+    
+    ~CMCSData();
+    
     /**
      * SetMenuItem
      * 
@@ -56,7 +58,27 @@ public:
      * @return TMenuItem
      */
     TMenuItem& MenuItem();
+    
+    /**
+     * Name of the item.
+     */
+    TDesC& Name();
+    
+    /**
+     * Set name of the item,
+     */
+    void SetNameL( const TDesC& aName );
 
+    /**
+     * Value of the item. Used for bookmark url.
+     */
+    TDesC& Value();
+    
+    /*
+     * Set value of the item.
+     */   
+    void SetValueL( const TDesC& aValue );
+    
     /**
      * SetDirty
      * 
@@ -77,6 +99,16 @@ private:
      * iMenuItem
      */
     TMenuItem iMenuItem;
+    
+    /**
+     * Item name, own
+     */
+    HBufC* iName;
+    
+    /**
+     * Item value, own
+     */
+    HBufC* iValue;
 
     /**
      * iDirty
@@ -91,9 +123,8 @@ private:
  *
  *  @since
  */
-class CMCSPluginData : public CBase,
-    public HSPluginSettingsIf::MHomeScreenSettingsObserver,
-    public MMsvSessionObserver
+NONSHARABLE_CLASS( CMCSPluginData ) : public CBase,
+    public HSPluginSettingsIf::MHomeScreenSettingsObserver
     {
 
 public:
@@ -131,23 +162,15 @@ public:
      * @param aIndex
      * @return TMCSData&
      */
-    TMCSData& DataItemL( TInt aIndex );
+    CMCSData& DataItemL( TInt aIndex );
 
     /**
-     * ReplaceMenuItemL
+     * Saves 'Undefined' menu item into settings when mailbox is deleted
      * 
      * @param aIndex
      * @param aMenuItem
      */
-    void ReplaceMenuItemL( const TInt& aIndex, TMenuItem& aMenuItem );
-
-    /**
-     * SaveSettingsL
-     * 
-     * @param aIndex
-     * @param aMenuItem
-     */
-    void SaveSettingsL( const TInt& aIndex, CMenuItem& aMenuItem );
+    void SaveUndefinedItemL( const TInt& aIndex );
 
     /**
      * DataCount
@@ -157,10 +180,15 @@ public:
     TInt DataCount(){ return iData.Count();};
 
     /**
-     * UpdateDataL
+     * Gets the instance specific settings from HSPS and creates data items
      */
     void UpdateDataL();
 
+    /**
+     * Removes data item from data list and saves new setting into HSPS
+     */
+    void RemoveDataL( TInt aId );
+    
     // From MHomeScreenSettingsObserver
     /**
      * SettingsChangedL
@@ -173,28 +201,6 @@ public:
     void SettingsChangedL( const TDesC8& aEvent,  const TDesC8& aPluginName,
                            const TDesC8& aPluginUid, const TDesC8& aPluginId );
 
-    /**
-     * CreateRunTimeMenuItemsL
-     * @param void
-     * @return void
-     */
-    void CreateRuntimeMenuItemsL();
-    
-    // from base class MMsvSessionObserver
-
-    /**
-     * Handles an event from the message server.
-     * Not used, but must be defined to be able to use the messaging server.
-     *
-     * @since S60 v3.2
-     * @param aEvent Indicates the event type.
-     * @param aArg1 Event type-specific argument value
-     * @param aArg2 Event type-specific argument value
-     * @param aArg3 Event type-specific argument value
-     */
-    void HandleSessionEventL( TMsvSessionEvent aEvent, TAny* aArg1, TAny* aArg2, 
-        TAny* aArg3 );
-    
 private:
 
     /**
@@ -206,24 +212,49 @@ private:
     void ConstructL();
 
     /**
-     * CreateMenuItemL
+     * GetMenuDataL
      * @param aProperties
      * @return TMenuItem
      */
-    TMenuItem CreateMenuItemL(
+    CMCSData* GetMenuDataL(
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
+    
+    /**
+     * Get bookmark data item
+     * @param aView, used for bookmark url
+     * @param aParam, used for bookmark name
+     * @param aData, is filled with appropriate values
+     */
+    void GetBkmDataL( const TDesC8& aView, const TDesC8& aParam, CMCSData& aData );
 
     /**
-     * GetMCSPluginFolderIdL
-     * 
-     * @return TInt
+     * Get folder data item
+     * @param aParam, is used for folder id (in MCS)
+     * @param aData, is filled with appropriate values
+     */    
+    void GetFolderData( const TDesC8& aParam, CMCSData& aData );
+
+    /**
+     * Get mailbox data item
+     * @param aUid, uid of the mailbox in messaging application
+     * @param aParam, name of the mailbox
+     * @param aData, is filled with appropriate values
      */
-    TInt GetMCSPluginFolderIdL();
+    void GetMailboxDataL( const TDesC8& aUid, const TDesC8& aParam,  CMCSData& aData );
+    
+    /**
+     * Get MCS data item
+     * @param aProperties, Properties are used to filter correct item from MCS.
+     * @param aData, is filled with appropriate values
+     */
+    void GetMCSDataL(
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties,  CMCSData& aData );
+
 private: // data
 
     // Menu items, which are defined in settings
     // Own
-    RArray<TMCSData> iData;
+    RPointerArray<CMCSData> iData;
 
     // Plugin settings. NOT OWNED!
     HSPluginSettingsIf::CHomescreenSettings* iPluginSettings;
@@ -234,17 +265,9 @@ private: // data
     // Reference to instance uid of HSPS widget
     const TDesC8& iInstanceUid;
 
-    // MCS asynchronous operation watcher, owned 
-    CMCSPluginWatcher* iSaveWatcher; 
-
     // MCS resource handle, owned 
     RMenu iMenu;
-    
-    /**
-     * Message server session
-     * Own.
-     */
-    CMsvSession* iMsvSession;
+
     };
 
 #endif // CMCSPLUGINDATA_H

@@ -78,9 +78,15 @@ class ChspsRomInstaller : public CActive
       
     public: // New functions
         
+        
         /**
-         * InstallTheme
-         * Synchronous service for installing configurations from provided manifest files.         
+         * Installs all plugin configurations which can be found from ROM and C drives (UDA).         
+         * @since S60 5.2         
+         */
+        void InstallL();
+        
+        /**
+         * Installs a plugin configuration from the provided manifest file (synchronous).         
          * @since S60 5.0
          * @param aFileName is name of the manifest file to be installed.
          * @return ThspsServiceCompletedMessage error code 
@@ -89,26 +95,16 @@ class ChspsRomInstaller : public CActive
                 const TDesC& aFileName ); 
         
         /**
-         * ReinstallThemeL.
-         * Synchronous service for re-installing corrupted application configurations  
-         * from an import (imports\app_*.dat file).
+         * Re-installs an application plugin configuration (synchronous).         
          * @since S60 5.0
          * @param aAppUid is UID of an application 
-         * @param aConfigurationUid is UID of a HSPS configuration
+         * @param aConfigurationUid is UID of an application plugin configuration
          * @return ThspsServiceCompletedMessage error code 
          */
         ThspsServiceCompletedMessage ReinstallThemeL(
                 const TInt aAppUid,
                 const TInt aConfigurationUid );
-        
-        /**         
-         * Retrieves manifest files from both Z and C drives located in
-         * \\private\200159C0\install\ paths.
-         * @since S60 5.0
-         */
-        void FindInstallationFilesL(  
-                RPointerArray<HBufC>& aFolders );
-        
+                        
 #ifdef HSPS_LOG_ACTIVE        
         /** 
         * Set log bus.
@@ -161,6 +157,14 @@ class ChspsRomInstaller : public CActive
         */
         void ConstructL();           
                         
+        /**         
+         * Retrieves manifest files from both Z and C drives located in
+         * \\private\200159C0\install\ paths.
+         * @since S60 5.0
+         */
+        void FindInstallationFilesL(  
+                RPointerArray<HBufC>& aFolders );
+        
         void DoFindInstallationFilesL(  
                 RPointerArray<HBufC>& aFolders,
                 const TDesC& aPath );

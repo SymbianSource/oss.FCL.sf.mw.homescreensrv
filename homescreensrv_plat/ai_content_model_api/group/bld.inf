@@ -28,8 +28,3 @@ PRJ_EXPORTS
 ../inc/aicontentobserver.h     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentobserver.h)
 ../inc/aicontentmodel.h     MW_LAYER_PLATFORM_EXPORT_PATH(aicontentmodel.h)
 ../inc/aicontentrequest.h   MW_LAYER_PLATFORM_EXPORT_PATH(aicontentrequest.h)
-
-// Deprecated
-../inc/aipropertyextension.h     MW_LAYER_PLATFORM_EXPORT_PATH(aipropertyextension.h)
-../inc/aipropertyextension.inl     MW_LAYER_PLATFORM_EXPORT_PATH(aipropertyextension.inl)
-../inc/aieventhandlerextension.h     MW_LAYER_PLATFORM_EXPORT_PATH(aieventhandlerextension.h)

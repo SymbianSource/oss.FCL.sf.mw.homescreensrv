@@ -25,10 +25,7 @@ RestoreConfigurations(1)
  
 Test purpose
 
-Verify that HSPS removes all plugin configurations from the active view
-or that all but one view are removed from the application configuration.
-Activity should be maintained. First locked view should remain or if not found,
-first unlocked view. 
+Verify that "restore active" and "restore all" functionality works as specified. 
 
 Pre-conditions
 •   There must be installed test themes for Active Idle application and Typical 
@@ -46,14 +43,13 @@ Test step 2:
 •   Input:
     GetActiveAppConf    
 •   Expected output:
-    There are still two views of which the first view remains active     
+    ROM configuration is restored and returned.
 
 Test step 3:
 •   Input:
     GetPluginConf(“Typical - View1”)    
 •   Expected output:
-    There are no plugins (widgets) in the first view     
-
+    ROM view configuration is returned.     
  
 Test step 4:
 •   Input:
@@ -71,8 +67,7 @@ Test step 6:
 •   Input:
     GetPluginConf(“Typical - View1”)    
 •   Expected output:
-    There are no plugins (widgets) in the remaining view
-    
+    There are no plugins (widgets) in the remaining view    
 */
 
 // Test step 1 method:
@@ -1104,7 +1099,340 @@ const TUint8 restoreconfigurations_1_ts_3_output[] = {
 //   - Version 1.0
 //   - Item count (LE)
 10,
+3,0,0,0,
+// - appConf::plugins
+//   - Version 1.0
+//   - List item starts
+10,
 0,0,0,0,
+// - appConf::plugins[0]
+//   - Version 1.0
+//   - Variant value type, EVariantTypeMap
+10,
+8,
+// - plugins[0] map
+//   - Version 1.0
+//   - Item count (LE)
+10,
+4,0,0,0,
+// - plugins[0]::id
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+2,0,0,0,
+10,
+'i','d',
+// - plugins[0]::id
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+1,0,0,0,
+6,
+'2',
+// - plugins[0]::uid
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+3,0,0,0,
+14,
+'u','i','d',
+// - plugins[0]::uid
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+10,0,0,0,
+42,
+'0','x','2','0','0','0','B','1','2','0',
+// - plugins[0]::activationstate
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+15,0,0,0,
+62,
+'a','c','t','i','v','a','t','i','o','n','s','t','a','t','e',
+// - plugins[0]::activationstate
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+1,0,0,0,
+6,
+'1',
+// - plugins[0]::locking_status
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+14,0,0,0,
+58,
+'l','o','c','k','i','n','g','_','s','t','a','t','u','s',
+// - plugins[0]::locking_status
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+4,0,0,0,
+18,
+'n','o','n','e',
+// - appConf::plugins
+//   - Version 1.0
+//   - List item starts
+10,
+0,0,0,0,
+// - appConf::plugins[1]
+//   - Version 1.0
+//   - Variant value type, EVariantTypeMap
+10,
+8,
+// - plugins[1] map
+//   - Version 1.0
+//   - Item count (LE)
+10,
+4,0,0,0,
+// - plugins[1]::id
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+2,0,0,0,
+10,
+'i','d',
+// - plugins[1]::id
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+1,0,0,0,
+6,
+'3',
+// - plugins[1]::uid
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+3,0,0,0,
+14,
+'u','i','d',
+// - plugins[1]::uid
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+10,0,0,0,
+42,
+'0','x','2','0','0','0','B','1','2','0',
+// - plugins[1]::activationstate
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+15,0,0,0,
+62,
+'a','c','t','i','v','a','t','i','o','n','s','t','a','t','e',
+// - plugins[1]::activationstate
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+1,0,0,0,
+6,
+'0',
+// - plugins[1]::locking_status
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+14,0,0,0,
+58,
+'l','o','c','k','i','n','g','_','s','t','a','t','u','s',
+// - plugins[1]::locking_status
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+4,0,0,0,
+18,
+'n','o','n','e',
+// - appConf::plugins
+//   - Version 1.0
+//   - List item starts
+10,
+0,0,0,0,
+// - appConf::plugins[2]
+//   - Version 1.0
+//   - Variant value type, EVariantTypeMap
+10,
+8,
+// - plugins[2] map
+//   - Version 1.0
+//   - Item count (LE)
+10,
+4,0,0,0,
+// - plugins[2]::id
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+2,0,0,0,
+10,
+'i','d',
+// - plugins[2]::id
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+1,0,0,0,
+6,
+'4',
+// - plugins[2]::uid
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+3,0,0,0,
+14,
+'u','i','d',
+// - plugins[2]::uid
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+10,0,0,0,
+42,
+'0','x','2','0','0','0','B','1','2','0',
+// - plugins[2]::activationstate
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+15,0,0,0,
+62,
+'a','c','t','i','v','a','t','i','o','n','s','t','a','t','e',
+// - plugins[2]::activationstate
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+1,0,0,0,
+6,
+'0',
+// - plugins[2]::locking_status
+//   - Variant name
+//     - Version 1.0
+//     - Semantic ID (LE)    
+//     - Variant name length (LE)
+//     - Variant name descriptor maximum length ( ( variant name length * 4 ) + 2 )
+//     - Variant name
+10,
+12,0,0,0,
+14,0,0,0,
+58,
+'l','o','c','k','i','n','g','_','s','t','a','t','u','s',
+// - plugins[2]::locking_status
+//   - Variant value
+//     - Version 1.0
+//     - Variant value type, EVariantTypeDesC
+//     - Variant value length (LE)
+//     - Variant value descriptor maximum length ( ( variant value length * 4 ) + 2 )
+//     - Variant value
+10,
+5,
+4,0,0,0,
+18,
+'n','o','n','e',
 // - pluginConf::settings
 //   - Variant name
 //     - Version 1.0
@@ -1133,7 +1461,6 @@ const TUint8 restoreconfigurations_1_ts_3_output[] = {
 //   - List item starts
 10,
 0,0,0,0,
-
 // - items[0]
 //   - Version 1.0
 //   - Variant value type, EVariantTypeMap

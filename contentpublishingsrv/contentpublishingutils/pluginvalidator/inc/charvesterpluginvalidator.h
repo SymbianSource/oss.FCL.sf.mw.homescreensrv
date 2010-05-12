@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
  *
 */
 
@@ -22,7 +22,7 @@
 // INCLUDES
 #include <e32base.h>
 #include <e32hashtab.h>
-#include "cpluginvalidator.h" 
+#include "cpluginvalidator.h"
 
 // FORWARD DECLARATIONS
 class CBlacklistHandler;
@@ -41,7 +41,7 @@ enum EPSActiveIdleCpsPluginsUpdated
 /**
  *  Class used to maintain required ECOM plugins implementations
  *
- * 
+ *
  *  @lib cpclient.dll
  *  @since S60 v 5.0
  */
@@ -51,21 +51,21 @@ public:
 
     /**
      * Two-phased constructor.
-     * 
-     */     
-    IMPORT_C static CHarvesterPluginValidator* NewL( TUid aUid, 
+     *
+     */
+    IMPORT_C static CHarvesterPluginValidator* NewL( TUid aUid,
                                             TAny *aParameter = NULL );
 
     /**
      * Two-phased constructor.
-     * 
-     */     
+     *
+     */
     IMPORT_C static CHarvesterPluginValidator* NewLC( TUid aUid,
                                              TAny *aParameter = NULL );
-    
+
     /**
      * Desctructor.
-     */     
+     */
     ~CHarvesterPluginValidator();
 
 
@@ -73,39 +73,33 @@ private:
 
     /**
      * C++ default constructor.
-     */    
-	CHarvesterPluginValidator( TUid aUid, TAny *aParameter );
+     */
+  CHarvesterPluginValidator( TUid aUid, TAny *aParameter );
 
     /**
      * Perform the second phase construction of a CPluginValidator object.
-     */    
+     */
     void ConstructL();
 
     /**
      * Loads or destroys plugins
-     */    
+     */
     void ManagePluginsL();
-    
+
     /**
      * Loads ECOM plugins
-     */    
+     */
     void LoadPluginL( TPluginInfo& aPluginInfo );
 
 
 private:
-     
+
     /**
      * Blacklist Handler
      * Own
      */
     CBlacklistHandler* iBlacklist;
-    
-    /*
-     * Startup flag
-     * 
-     */
-    TBool iStartup;
-    
+
     /*
      * Property indicating the status of load operation
      * Own

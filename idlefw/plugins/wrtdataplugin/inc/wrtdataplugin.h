@@ -139,6 +139,11 @@ public:
     
     /**
      * @see CHsContentPublisher
+     */
+    void SetProperty( TProperty aProperty, TAny* aAny );
+    
+    /**
+     * @see CHsContentPublisher
      */    
     TAny* GetProperty( TProperty aProperty );
     
@@ -146,12 +151,7 @@ public:
      * @see CHsContentPublisher
      */    
     void HandleEvent( const TDesC& aEventName, const TDesC& aParam );
-    
-    /**
-     * @see CHsContentPublisher
-     */    
-    TBool HasMenuItem( const TDesC& aMenuItem );
-         
+
 public:
 
     /**
@@ -260,16 +260,21 @@ public:
      */
     TPluginNetworkStatus NetworkStatus() const;
     
+    /**
+    * Creates initial data republishing timer if needed and starts it
+    */
+    void StartTimer();
+
 private:
     // new functions
     
     /**
-    * Publishes widget's texts and images
+    * Publishes widget's initial texts and images
     *
     * @param void
     * @return void
     */
-    void PublishL();
+    void PublishInitialDataL();
         
 	/**
 	* Resolves skin item id and Mif id from pattern 
@@ -285,7 +290,32 @@ private:
 	*/
 	TBool ResolveSkinIdAndMifId( const TDesC& aPath, TAknsItemID& aItemId,
 	        TInt& aMifId, TInt& aMaskId, TDes& aFilename );
-        
+
+    /**
+    * Cancels transaction in case of leave
+    *
+    * @param aObserver Transaction target
+    */
+    static void CancelTransaction( TAny* aObserver );
+  
+    /**
+    * Cancels initial data republishing timer
+    */
+    void CancelTimer();
+
+    /**
+    * Stops and deletes initial data republishing timer. 
+    */
+    void StopTimer();
+
+    /**
+    * Timeout callback from timer. Used if publishing of initial data has failed.
+    *
+    * @param aPtr Contains pointer to instance of this class 
+    */
+    static TInt Timeout( TAny* aPtr );
+
+
 private: 
     // data
 
@@ -309,6 +339,8 @@ private:
     TPluginStates iPluginState;
     /** File server session handle, owned */
     RFs iRfs;
+    /** Timer for initial data republishing, owned */
+    CPeriodic* iTimer;
     };
 
 #endif // WRTDATAPLUGIN_H

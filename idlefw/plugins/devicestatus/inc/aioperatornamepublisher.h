@@ -22,12 +22,15 @@
 // System includes
 #include <e32base.h>
 #include <AknUtils.h>
+#include <MProEngProfileActivationObserver.h>
 
 // User includes
 #include "aidevicestatuspublisher.h"
 #include "ainetworkinfoobserver.h"
 
 // Forward declarations
+class MProfileEngine;
+class MProEngNotifyHandler;
 class CAiNetworkInfoListener;
 class MAiDeviceStatusContentObserver;
 class CHsContentPublisher;
@@ -45,7 +48,8 @@ class CHsContentPublisher;
  */
 NONSHARABLE_CLASS( CAiOperatorNamePublisher ) : public CBase, 
     public MAiDeviceStatusPublisher,
-    public MAiNetworkInfoObserver
+    public MAiNetworkInfoObserver,
+    public MProEngProfileActivationObserver
     {
 public:
 
@@ -78,6 +82,13 @@ protected:
     							  const TNWInfo& aInfo, 
     							  const TBool aShowOpInd );
 
+private:
+    // from MProEngProfileActivationObserver
+    
+    /**
+     * @see MProEngProfileActivationObserver    
+     */    
+    void HandleProfileActivatedL( TInt aProfileId );
 
 private:
 
@@ -167,6 +178,10 @@ private: // data
     TPtrC iNetworkIdentityName;    
     /** Flag to indicate if the content is suspended */ 
     TBool iSuspended;
+    /** Profile engine, owned */
+    MProfileEngine* iProfileEngine;
+    /** Profile change notifier, owned */
+    MProEngNotifyHandler* iProfileNotifier;
     };
 
 #endif // C_AIOPERATORPROVIDERNAMEPUBLISHER_H

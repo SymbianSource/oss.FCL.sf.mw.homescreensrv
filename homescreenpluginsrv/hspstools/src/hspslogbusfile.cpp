@@ -18,7 +18,7 @@
 
 #include "hspslogbusfile.h"
 #include "e32debug.h"
-
+#include "f32file.h"
 // Constants
 
 #ifdef HSPS_BUILD_LOG_IMPLEMENTATION
@@ -86,6 +86,13 @@ EXPORT_C ChspsLogBusFile* ChspsLogBusFile::NewLC(  const TDesC& aLoggingFile,
 #ifdef HSPS_BUILD_LOG_IMPLEMENTATION
 EXPORT_C TFileName ChspsLogBusFile::CreateLogFilename( const TDesC& aBaseline )
     {
+    RFs fs;
+    if ( KErrNone == fs.Connect() )
+        {
+        fs.MkDirAll(_L("c:\\logs\\hsps\\"));
+        fs.Close();
+        }
+    
     TFileName fileName;
     
     // Append baseline and trailing '_'.

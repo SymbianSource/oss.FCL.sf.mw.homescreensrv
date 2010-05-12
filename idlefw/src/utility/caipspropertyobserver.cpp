@@ -38,7 +38,7 @@ void CPSPropertyObserver::ConstructL()
 CPSPropertyObserver::CPSPropertyObserver( TCallBack aCallBack,
                                           TUid aCategory,
                                           TInt aKey )
-  : CActive( EPriorityStandard ),
+  : CActive( EPriorityHigh ),
     iCallBack( aCallBack ),
     iCategory( aCategory ),
     iKey( aKey )

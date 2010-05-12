@@ -384,22 +384,6 @@ class ChspsODT : public CBase
         * @return TUint configuration type.
         */ 
         IMPORT_C TUint ConfigurationType() const;
-
-        /**
-        * Set package version.
-        * 
-        * @since S60 5.0
-        * @param aVersion Version. 
-        */ 
-        IMPORT_C void SetPackageVersionL( const TDesC& aVersion );
-        
-        /**
-        * Get configuration type.
-        * 
-        * @since S60 5.0
-        * @return TDesC package version
-        */ 
-        IMPORT_C const TDesC& PackageVersion() const;
         
         /**
         * Set family.
@@ -506,9 +490,6 @@ class ChspsODT : public CBase
         TInt HeaderSize() const;
         
     private:    // Data        
-        // Indicates whether we are able to internalize the instance        
-        HBufC* iPackageVersion;        
-        
         // Identifies specific configuration
         TUint  iThemeUid;
         HBufC* iProviderName;

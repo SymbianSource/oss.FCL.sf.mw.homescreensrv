@@ -75,22 +75,23 @@ _LIT( KOperationUpdate, "update" );
 _LIT( KOperationDelete, "delete" );
 _LIT( KOperationExecute, "execute" );
 _LIT( KAddUpdateDelete, "add:update:delete" );
-_LIT( KUpdate, "update" );
+_LIT( KAddUpdate, "add:update" );
 
 _LIT(KWidget, "hswidget");
-_LIT( KDeActive, "deactive");
-_LIT( KActive, "active");
-_LIT( KSystemStartup, "systemstartup");
-_LIT( KPageStartup, "pagestartup");
-_LIT( KPluginStartup, "pluginstartup");
-_LIT( KSuspend , "suspend");
-_LIT( KResume, "resume");
-_LIT( KSystemShutdown, "systemshutdown");
-_LIT( KPageShutdown, "pageshutdown");
-_LIT( KPluginShutdown, "pluginshutdown");
-_LIT( KOnLine, "online");
-_LIT( KOffLine, "offline");
-_LIT( KInActive, "inactive");
+_LIT8( KDeActive, "deactive");
+_LIT8( KActive, "active");
+_LIT8( KSystemStartup, "systemstartup");
+_LIT8( KPageStartup, "pagestartup");
+_LIT8( KPluginStartup, "pluginstartup");
+_LIT8( KSuspend , "suspend");
+_LIT8( KResume, "resume");
+_LIT8( KSystemShutdown, "systemshutdown");
+_LIT8( KPageShutdown, "pageshutdown");
+_LIT8( KPluginShutdown, "pluginshutdown");
+_LIT8( KOnLine, "online");
+_LIT8( KOffLine, "offline");
+
+
 // reserved extension for retrieving mask handle 
 _LIT8( KMask, "_mask");
 

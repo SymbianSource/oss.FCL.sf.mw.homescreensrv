@@ -26,7 +26,6 @@
 
 // Forward declarations
 class CAiUiController;
-class CAiContentPublisher;
 class MAiMainUiController;
 class CRepository;
 class CCoeEnv;

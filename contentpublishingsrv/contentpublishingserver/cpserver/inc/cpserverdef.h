@@ -39,6 +39,7 @@ enum TCpServerRqst
     ECpServerAddObserver = 23,
     ECpServerRemoveObserver = 24,
     ECpServerExecuteAction = 30,
+    ECpServerExecuteMultipleActions = 31,
     ECpServerInternal = 100
     };
 

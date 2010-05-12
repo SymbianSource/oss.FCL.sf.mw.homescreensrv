@@ -33,7 +33,6 @@ class CAiStateProvider;
 class CAiPluginFactory;
 class CAiEventHandler;
 class CAiWsPluginManager;
-class MAiPSPropertyObserver;
 class THsPublisherInfo;
 
 // Class declaration
@@ -174,8 +173,7 @@ public:
     
 private: 
     // new functions        
-                     
-    static TInt HandleRestartEvent( TAny* aSelf );
+
     void SwapUiControllerL( TBool aToExtHS );
 
 private: 
@@ -199,8 +197,6 @@ private:
     CCenRepNotifyHandler* iNotifyHandlerESS;
     /** Idle repository, Owned. */
     CRepository* iRepository;    
-    /** Idle restart PS observer, Owned. */
-    MAiPSPropertyObserver* iIdleRestartObserver;
     
     TBool iLibrariesLoaded;
     

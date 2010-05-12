@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -122,15 +122,6 @@ public:
      */
     CMCSPluginSettingsContainer* Container();
 
-    /**
-    * Check if view is activate
-    * @since S60 5.1
-    * @return ETrue if activated, EFalse otherwise
-    */
-    TBool Activated() const;
-
-protected:
-
 private: // From MEikMenuObserver
 
     /**
@@ -167,15 +158,6 @@ private:
      * Implement by sub-class.
      */
     void HandleListBoxSelectionL();
-
-    /**
-     * DoHandleListBoxSelectionL
-     * 
-     * @param aAny
-     * @return TInt
-     */
-    static TInt DoHandleListBoxSelectionL( TAny* aAny );
-
 
 private:  // data
 

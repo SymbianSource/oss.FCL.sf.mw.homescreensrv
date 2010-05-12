@@ -267,8 +267,10 @@ class ChspsClient : public CActive, public MhspsInstallationService, public Mhsp
         /**
         * From MhspsMaintenanceService.
         */
-        IMPORT_C ThspsServiceCompletedMessage hspsGetListHeaders(const ChspsODT& aSearchMask,
-                                   CArrayPtrFlat<ChspsODT>& aHeaderList);
+        IMPORT_C ThspsServiceCompletedMessage hspsGetListHeaders(
+                const ChspsODT& aSearchMask,
+                const TBool aCopyLogos, 
+                CArrayPtrFlat<ChspsODT>& aHeaderList );
         
         /** 
         * From MhspsMaintenanceService.
@@ -324,11 +326,14 @@ class ChspsClient : public CActive, public MhspsInstallationService, public Mhsp
         * @param aSearchMask is ChspsODT-object which attributes are filled to present search 
         *        parameters for theme set queried by client. This parametrisation follows 
         *        the high-level schema. 
+        * @param aCopyLogos is set if client wants to view logos         
         * @param aHeaderList is an list object able to carry ChspsODT-objects. 
         * @return Error code
         */
-        IMPORT_C TInt hspsGetHeaders(const ChspsODT& aSearchMask,
-                                   CArrayPtrFlat<ChspsODT>& aHeaderList);
+        IMPORT_C TInt hspsGetHeaders(
+                const ChspsODT& aSearchMask,
+                const TBool aCopyLogos,
+                CArrayPtrFlat<ChspsODT>& aHeaderList);
 
         /**
         * From MhspsMaintenanceService        

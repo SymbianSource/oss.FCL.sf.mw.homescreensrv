@@ -231,19 +231,14 @@ void CMCSPluginHandler::LaunchShortcutL( CMenuItem& aItem )
         }
     else if ( param.Find( KParamValueMailbox ) != KErrNotFound ) // Mailbox
         {
-        TBool attrExists = ETrue;
         TInt pos = param.Locate( TChar( ':' ) ) + 1;
         TPtrC mailboxId = param.Mid( pos );
-
-        if ( attrExists )
-            {
-            TInt number;
-            TLex16 lextmp( mailboxId );
-            lextmp.Val( number );
-            TUid uId = TUid::Uid( number );
-            const TVwsViewId viewId( TUid::Uid( KMCSCmailUidValue ), TUid::Uid( KMCSCmailMailboxViewIdValue ) );
-            iVwsSession->CreateActivateViewEvent( viewId, uId, KNullDesC8() );
-            }
+        TInt number;
+        TLex16 lextmp( mailboxId );
+        lextmp.Val( number );
+        TUid uId = TUid::Uid( number );
+        const TVwsViewId viewId( TUid::Uid( KMCSCmailUidValue ), TUid::Uid( KMCSCmailMailboxViewIdValue ) );
+        iVwsSession->CreateActivateViewEvent( viewId, uId, KNullDesC8() );
         }
     else if ( param.Find( KMenuAttrParamLogs ) != KErrNotFound )
         {

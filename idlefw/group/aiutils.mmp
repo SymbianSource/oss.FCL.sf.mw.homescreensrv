@@ -17,7 +17,6 @@
 
 #include        <platform_paths.hrh>
 #include        <data_caging_paths.hrh>
-//#include        <platform/mw/aisystemuids.hrh>
 
 TARGET          aiutils.dll
 TARGETTYPE      dll
@@ -26,11 +25,11 @@ VENDORID        VID_DEFAULT
 CAPABILITY      CAP_GENERAL_DLL
 
 SOURCEPATH      ../src/utility
-SOURCE			aiutility.cpp
-SOURCE			caipspropertyobserver.cpp
-SOURCE			caistrparser.cpp
-SOURCE			caiplugintool.cpp
-SOURCE			caicontentitemarrayiterator.cpp
+SOURCE		aiutility.cpp
+SOURCE		caipspropertyobserver.cpp
+SOURCE		caistrparser.cpp
+SOURCE		caiplugintool.cpp
+SOURCE		caicontentitemarrayiterator.cpp
 SOURCE          contentprioritymap.cpp
 SOURCE          aipluginsettingsimpl.cpp
 
@@ -40,5 +39,5 @@ USERINCLUDE     ../inc/utility
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
-LIBRARY			charconv.lib
+LIBRARY		charconv.lib
 

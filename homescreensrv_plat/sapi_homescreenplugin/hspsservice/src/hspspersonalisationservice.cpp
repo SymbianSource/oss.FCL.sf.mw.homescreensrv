@@ -76,6 +76,7 @@ EXPORT_C void CHspsPersonalisationService::GetPluginListL(
     TDesC8& aInterface,
     TDesC8& aType,
     TUint32 aFamily,
+    const TBool aCopyLogos,
     CArrayPtrFlat<ChspsODT>& aList )
     {
     // Setup a mask for finding plugins with defined interface 
@@ -96,6 +97,7 @@ EXPORT_C void CHspsPersonalisationService::GetPluginListL(
     
     TInt err = iHspsClient->hspsGetHeaders( 
         *searchMask, 
+        aCopyLogos,
         aList );
     
     CleanupStack::PopAndDestroy( searchMask );
@@ -270,6 +272,7 @@ EXPORT_C void CHspsPersonalisationService::GetAppConfListL(
     // Get application configurations
     User::LeaveIfError( iHspsClient->hspsGetHeaders( 
         *searchMask, 
+        EFalse,
         aList ) );
 
     CleanupStack::PopAndDestroy( searchMask );

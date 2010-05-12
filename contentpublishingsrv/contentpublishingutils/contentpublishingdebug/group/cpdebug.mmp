@@ -39,5 +39,7 @@ MW_LAYER_SYSTEMINCLUDE
 LIBRARY         euser.lib
 LIBRARY	        estor.lib
 LIBRARY         efsrv.lib
+LIBRARY         liwservicehandler.lib
+
 
 //end of file

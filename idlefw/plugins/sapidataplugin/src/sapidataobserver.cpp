@@ -19,7 +19,7 @@
 #include <liwservicehandler.h>
 #include <liwvariant.h>
 #include <liwgenericparam.h>
-#include <S32MEM.H>
+#include <s32mem.h>
 #include "sapidata.h"
 #include "sapidataobserver.h"
 #include "sapidatapluginconst.h"
@@ -38,6 +38,7 @@ CSapiDataObserver::CSapiDataObserver ()
 //
 CSapiDataObserver ::~CSapiDataObserver ()
     {
+    TRAP_IGNORE( ReleaseL() );
     iInterface = NULL;
     iData = NULL;
     }
@@ -71,7 +72,7 @@ void CSapiDataObserver::RegisterL( CLiwDefaultMap* aFilter, const TDesC& aRegist
 // Sing off to notification
 // ---------------------------------------------------------------------------
 //
-void CSapiDataObserver ::ReleaseL()
+void CSapiDataObserver::ReleaseL()
     {
     if( iInterface )
         {

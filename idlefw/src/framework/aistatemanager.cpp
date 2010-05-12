@@ -20,15 +20,15 @@
 // User includes
 #include <hscontentpublisher.h>
 #include <aifwdefs.h>
+#include <AknWaitDialog.h> 
+#include <bautils.h>
+#include <ConeResLoader.h>
+#include <debug.h>
 
+#include "caicpscommandbuffer.h"
 #include "aipluginfactory.h"
 
 #include "aistatemanager.h"
-
-#include "debug.h"
-
-// Constants
-_LIT( KOnlineOffline, "online_offline" );
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
@@ -114,6 +114,8 @@ CAiStateManager* CAiStateManager::NewLC( CAiPluginFactory& aFactory )
 //
 CAiStateManager::~CAiStateManager()
     {  
+    delete iCommandBuffer;
+	iReloadPlugins.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -133,6 +135,9 @@ CAiStateManager::CAiStateManager( CAiPluginFactory& aFactory )
 //
 void CAiStateManager::ConstructL()
     {        
+    iCommandBuffer = CAiCpsCommandBuffer::NewL();
+    
+    iFactory.SetCommandBuffer( iCommandBuffer );
     }
 
 // ----------------------------------------------------------------------------
@@ -246,9 +251,12 @@ TInt CAiStateManager::NotifyLoadPlugin( const THsPublisherInfo& aPublisherInfo,
     if ( retval == KErrNone )
         {
         CHsContentPublisher* plugin( iFactory.PluginByInfo( aPublisherInfo ) );
-
-        // Do startup state transition    
-        StartPlugin( *plugin, StartReason( aReason ) );            
+        
+        if( plugin )
+            {
+            // Do startup state transition    
+            StartPlugin( *plugin, StartReason( aReason ) );  
+            }    
         }
       
     __TIME_ENDMARK( "CAiStateManager::NotifyLoadPlugin, construction", time );
@@ -286,55 +294,21 @@ void CAiStateManager::NotifyDestroyPlugin(
     }
 
 // ----------------------------------------------------------------------------
-// CAiStateManager::NotifyUpdatePlugins()
+// CAiStateManager::NotifyReloadPlugins()
 // 
 // ----------------------------------------------------------------------------
 //
-void CAiStateManager::NotifyUpdatePlugins()
+void CAiStateManager::NotifyReloadPlugins()
     {
-    __PRINTS( "CAiStateManager::NotifyUpdatePlugins" );
-    
-    RArray< THsPublisherInfo > publishers;
-        
-    // Get plugins which has upgrade available
-    TRAP_IGNORE( iFactory.ResolvePluginsToUpgradeL( publishers ) );
-    
-    for ( TInt i = 0; i < publishers.Count(); i++ )
-        {        
-        THsPublisherInfo info( publishers[i] );
-        
-        // Update by destroy - load sequence 
-        NotifyDestroyPlugin( info, EAiFwSystemShutdown );
-        NotifyLoadPlugin( info, EAiFwSystemStartup );         
-        }
-    
-    publishers.Reset();
-    
-    __PRINTS( "CAiStateManager::NotifyUpdatePlugins, done" );
-    }
+    __PRINTS( "CAiStateManager::NotifyReloadPlugins" );
 
-// ----------------------------------------------------------------------------
-// CAiStateManager::OnlineStateInUse()
-// 
-// ----------------------------------------------------------------------------
-//
-TBool CAiStateManager::OnlineStateInUse() const
-    {
-    __PRINTS( "CAiStateManager::OnlineStateInUse" );        
-    
-    RPointerArray< CHsContentPublisher >& plugins( iFactory.Publishers() );
-    
-    for( TInt i = 0; i < plugins.Count(); i++ )
+    for ( TInt i = 0; i < iReloadPlugins.Count(); i++ )
         {
-        CHsContentPublisher* plugin( plugins[i] );
-        
-        if ( plugin->HasMenuItem( KOnlineOffline() ) )
-            {
-            return ETrue;
-            }
+        // Reload plugin
+        NotifyLoadPlugin( iReloadPlugins[ i ], EAiFwSystemStartup );
         }
     
-    return EFalse;
+    __PRINTS( "CAiStateManager::NotifyReloadPlugins, done" );
     }
 
 // ----------------------------------------------------------------------------
@@ -405,6 +379,8 @@ void CAiStateManager::ProcessStateChange( TState aNextState )
                 plugin->Suspend( CHsContentPublisher::EBackground ) );
                 }            
             }
+        
+        FlushCommandBuffer();
         }
     else
         {
@@ -438,6 +414,8 @@ void CAiStateManager::ProcessGeneralThemeChange()
             plugin->Resume( CHsContentPublisher::EForeground );
             }        
         } 
+    
+    FlushCommandBuffer();
     
     __TIME_ENDMARK( "CAiStateManager::ProcessGeneralThemeChange, done", time );
     }
@@ -473,6 +451,8 @@ void CAiStateManager::ProcessBackupRestore( TBool aStart )
                 }
             }
         }
+    
+    FlushCommandBuffer();
             
     __TIME_ENDMARK( "CAiStateManager::ProcessBackupRestore, done", time );
     }
@@ -501,6 +481,8 @@ void CAiStateManager::ProcessOnlineStateChange()
             plugin->SetOffline();
             }
         }               
+    
+    FlushCommandBuffer();
     }
 
 // ----------------------------------------------------------------------------
@@ -544,6 +526,8 @@ void CAiStateManager::StartPlugin( CHsContentPublisher& aPlugin,
         aPlugin.SetOffline() );
         }
     
+    FlushCommandBuffer();
+    
     __PRINTS( "CAiStateManager::StartPlugin - done" );
     }
 
@@ -569,6 +553,8 @@ void CAiStateManager::StopPlugin( CHsContentPublisher& aPlugin,
     
     aPlugin.Stop( aReason );   
     
+    FlushCommandBuffer();
+    
     __PRINTS( "CAiStateManager::StopPlugin - done" );
     }
 
@@ -592,10 +578,56 @@ void CAiStateManager::DestroyPlugins()
         StopPlugin( *plugin, CHsContentPublisher::ESystemShutdown );        
         }    
     
+    FlushCommandBuffer();
+    
     // Finally get rid of all plugins
     plugins.ResetAndDestroy();
     
     __TIME_ENDMARK( "CAiStateManager::DestroyPlugins, done", time );
+    }
+
+// ----------------------------------------------------------------------------
+// CAiStateManager::FlushCommandBuffer();()
+// 
+// ----------------------------------------------------------------------------
+//
+void CAiStateManager::FlushCommandBuffer()
+    {
+    __PRINTS( "CAiStateManager::FlushCommandBuffer, start" );    
+        
+    if ( iCommandBuffer )
+        {
+        __TIME( "CAiStateManager::FlushCommandBuffer, flush",
+                
+        iCommandBuffer->Flush() );
+        }
+    
+    __PRINTS( "CAiStateManager::FlushCommandBuffer - done" );
+    }
+	
+// ----------------------------------------------------------------------------
+// CAiStateManager::NotifyReleasePlugins()
+// 
+// ----------------------------------------------------------------------------
+//
+void CAiStateManager::NotifyReleasePlugins( const RArray<TUid>& aUidList )
+    {
+    __PRINTS( "CAiStateManager::NotifyReleasePlugins" );    
+
+    iReloadPlugins.Reset();
+    
+    for ( TInt i = 0; i < aUidList.Count(); i++ )
+        {
+        CHsContentPublisher* plugin = iFactory.PluginByUid( aUidList[ i ] );
+        if ( plugin )
+            {
+            StopPlugin( *plugin, CHsContentPublisher::ESystemShutdown );
+            THsPublisherInfo info = plugin->PublisherInfo();
+            iReloadPlugins.Append( info );
+            iFactory.DestroyPlugin( aUidList[ i ] );
+            }
+        }        
+    __PRINTS( "CAiStateManager::NotifyReleasePlugins: return void" );    
     }
 
 // End of file

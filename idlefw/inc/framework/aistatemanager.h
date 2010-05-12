@@ -29,6 +29,7 @@
 
 // Forward declarations
 class CAiPluginFactory;
+class CAiCpsCommandBuffer;
 class CHsContentPublisher;
 class THsPublisherInfo;
 
@@ -113,13 +114,14 @@ private:
     /**
      * @see MAiStateObserver
      */        
-    void NotifyUpdatePlugins();
+    void NotifyReloadPlugins();
     
+
     /**
      * @see MAiStateObserver
      */            
-    TBool OnlineStateInUse() const;
-            
+    void NotifyReleasePlugins( const RArray<TUid>& aUidList );
+
 private:
     // new functions
         
@@ -187,19 +189,30 @@ private:
      * @since S60 5.2
      */
     void DestroyPlugins();
-                           
+                         
+    /**
+     * Flushes cps command buffer
+     * 
+     * @since S60 5.2
+     */
+    void FlushCommandBuffer();
+    
 private:
     // data
     
     /** Plugin Factory, Not owned */
     CAiPluginFactory& iFactory;
+    /** CPS Command buffer, Owned */
+    CAiCpsCommandBuffer* iCommandBuffer;
     /** Current state */
     TState iCurrentState;    
     /** Flags */
     TBitFlags32 iFlags;
     /** Halted flag */
-    TBool iHalt;
-    
+    TBool iHalt;   
+    /** List of plugins which should be reloaded */
+    RArray<THsPublisherInfo> iReloadPlugins;
+
 private:
     // friend classes
     

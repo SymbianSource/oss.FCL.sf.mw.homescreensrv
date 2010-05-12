@@ -55,8 +55,7 @@ void CWrtDataObserver::ConstructL( MLiwInterface* aInterface, CWrtData* aData )
 // ---------------------------------------------------------------------------
 //
 CWrtDataObserver::CWrtDataObserver ()
-    {
-
+    {    
     }
         
 // ---------------------------------------------------------------------------
@@ -65,7 +64,8 @@ CWrtDataObserver::CWrtDataObserver ()
 //
 CWrtDataObserver ::~CWrtDataObserver ()
     {
-    TRAP_IGNORE( ReleaseL());
+    TRAP_IGNORE( ReleaseL() );
+    
     iInterface = NULL;
     iData = NULL;
     }
@@ -191,7 +191,7 @@ void CWrtDataObserver::RegisterL( CLiwDefaultMap* aFilter )
 // Sing off to notification
 // ---------------------------------------------------------------------------
 //
-void CWrtDataObserver ::ReleaseL()
+void CWrtDataObserver::ReleaseL()
     {
     if( iInterface )
         {
@@ -212,3 +212,5 @@ void CWrtDataObserver ::ReleaseL()
         CleanupStack::PopAndDestroy( inParamList );
         }
     }
+
+// End of file

@@ -68,6 +68,8 @@ private:
            
     static TInt HandleCallEvent( TAny *aPtr );
     
+    static TInt HandleUiStartupStateChange( TAny *aPtr );
+    
 private: 
     // data  
 
@@ -94,6 +96,13 @@ private:
     * Owned
     */
     MAiPSPropertyObserver* iCallStatusObserver;
+    
+    /**
+    * Ui startup state
+    * Owned
+    */
+    MAiPSPropertyObserver* iUiStartupStateObserver;
+    
     /**
      * Framework event handler. For notifying critical startup over.
      * Not owned.
@@ -101,7 +110,8 @@ private:
     MAiFwEventHandler* iAiFwEventHandler;
     
     TBool iForeground;
-    TBool iIncallBubbleAllowed;    
+    TBool iIncallBubbleAllowed;  
+    TBool iUiStartupPhaseOk;    
     };
 
 #endif // C_AIUIIDLEINTEGRATION_H

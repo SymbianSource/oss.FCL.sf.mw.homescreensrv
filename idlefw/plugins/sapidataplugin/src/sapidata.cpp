@@ -22,6 +22,7 @@
 #include <utf.h>
 
 // User includes
+#include <aicpscommandbuffer.h>
 #include "sapidata.h"
 #include "sapidatapluginconst.h"
 #include "sapidataobserver.h"
@@ -103,10 +104,8 @@ CSapiData::CSapiData()
 void CSapiData::ConstructL(CSapiDataPlugin* aPlugin)
     { 
      iPlugin = aPlugin;
-     iCommandName = NULL;
-	 iContentId = NULL;
-	 iContentType = NULL;
 	 iUpdateNeeded = EFalse;
+	 iGetMenuItems = ETrue;
     }
     
 // ---------------------------------------------------------------------------
@@ -116,40 +115,29 @@ void CSapiData::ConstructL(CSapiDataPlugin* aPlugin)
 //
 CSapiData::~CSapiData()
     {
-    delete iCommandName;
 	delete iPublisher;
-	delete iContentType;
 	delete iContentId;
 	delete iStartupReason;
 	
 	if(iPubObserver)
 		{
-		TRAP_IGNORE(iPubObserver->ReleaseL() );
 		delete iPubObserver;
 		iPubObserver = NULL;
 		}
     if(iContentObserver)
         {
-        TRAP_IGNORE(iContentObserver->ReleaseL() );
         delete iContentObserver;
         iContentObserver = NULL;
         }
-    if( iInterface )
-         {
-         iInterface->Close();
-         iInterface = NULL;
-         }
-    if( iServiceHandler )
-         {
-         iServiceHandler->Reset();
-         delete iServiceHandler;
-         iServiceHandler = NULL;
-         }
     iMenuItems.ResetAndDestroy();
     iMenuTriggers.ResetAndDestroy();
     iItemList.ResetAndDestroy();
     // not owned
     iPlugin = NULL;
+    iInterface = NULL;
+    iServiceHandler = NULL;
+    iCpsExecute = NULL;
+    
     }
 
 // ---------------------------------------------------------------------------
@@ -158,30 +146,13 @@ CSapiData::~CSapiData()
 //
 void CSapiData::ConfigureL(RAiSettingsItemArray& aConfigurations )
     {
-    HBufC8* serviceName = NULL;
-    HBufC8* interfaceName = NULL;
-
     TInt count = aConfigurations.Count();
-    
     for(TInt i = 0;i<count;i++)
        {
        MAiPluginConfigurationItem& confItem = ( aConfigurations[i] )->AiPluginConfigurationItem();
-       // if owner is plugin then it (key,value) is for plugin configurations items
        if(confItem.Owner() == KPlugin())
            {
-           if(confItem.Name() ==  KService())
-               {
-               serviceName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(confItem.Value());
-               }
-           else if( confItem.Name() == KInterface() )
-                 {
-                 interfaceName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(confItem.Value());
-                 }
-           else if( confItem.Name() == KCommand() )
-                 {
-                 iCommandName  = CnvUtfConverter::ConvertFromUnicodeToUtf8L(confItem.Value());
-                 }
-           else if( confItem.Name()  == KPublisher16() ) 
+           if( confItem.Name()  == KPublisher16() ) 
 				  {
 				  iPublisher = confItem.Value().AllocL();
 				  }
@@ -201,54 +172,12 @@ void CSapiData::ConfigureL(RAiSettingsItemArray& aConfigurations )
            CleanupStack::PopAndDestroy(objectId);
            }
        }
-    
     iItemCount = iItemList.Count();  
-    
-    if( !serviceName || !interfaceName || !iCommandName  
-    		|| !iContentId || !iPublisher || !iItemCount )
+    if( iPublisher->Des().Length() == 0 ) 
         {
         // No service to offer without plugin configurations 
         User::Leave( KErrNotSupported );
         }
-    iServiceHandler = CLiwServiceHandler::NewL(); 
-
-    // for convenience keep pointers to Service Handler param lists 
-    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-
-    CLiwCriteriaItem* criteriaItem = CLiwCriteriaItem::NewLC( KLiwCmdAsStr, *interfaceName , *serviceName );
-    criteriaItem->SetServiceClass( TUid::Uid( KLiwClassBase ) );
-    // Interface name 
-    RCriteriaArray criteriaArray;
-    criteriaArray.AppendL( criteriaItem );
-    // attach Liw criteria
-    iServiceHandler->AttachL( criteriaArray );
-    iServiceHandler->ExecuteServiceCmdL( *criteriaItem, *inParamList, *outParamList );
-
-    CleanupStack::PopAndDestroy(criteriaItem);
-    criteriaArray.Reset();
-
-    // extract CPS interface from output params
-    TInt pos( 0 );
-    outParamList->FindFirst( pos, *interfaceName );
-    if( pos != KErrNotFound )
-        {
-        //iInterface is MLiwInterface*
-        iInterface = (*outParamList)[pos].Value().AsInterface(); 
-        User::LeaveIfNull( iInterface );
-        }
-    else
-        {
-        User::Leave( KErrNotFound );
-        }
-    inParamList->Reset();
-    outParamList->Reset();
-    delete interfaceName;
-    delete serviceName;
-
-	//Gets the menu items from the publisher registry    
-    GetMenuItemsL();
- 
     iContentObserver = CSapiDataObserver::NewL( iInterface, this );   
     iPubObserver = CSapiDataObserver::NewL( iInterface, this );
     }
@@ -266,7 +195,7 @@ void CSapiData::SetContentIdL(const TDesC8& aId)
 // SetStartupReasonL
 // ---------------------------------------------------------------------------
 //
-void CSapiData::SetStartupReasonL(const TDesC& aStartupReason)
+void CSapiData::SetStartupReasonL(const TDesC8& aStartupReason)
     {
     delete iStartupReason;
     iStartupReason = NULL;
@@ -442,6 +371,13 @@ void CSapiData::RemoveL( MAiContentObserver* aObserver, TDesC& aContentType  )
 //
 TBool CSapiData::HasMenuItem(const TDesC& aMenuItem )
 	{
+    if ( iGetMenuItems )
+        {
+        //Gets the menu items from the publisher registry
+        TRAP_IGNORE( GetMenuItemsL() );
+        iGetMenuItems = EFalse;
+        }
+    
 	TBool found = EFalse;
 	for (TInt i = 0; i < iMenuItems.Count(); i++ )
 		{
@@ -570,27 +506,24 @@ void CSapiData::PublishDataL(MAiContentObserver* aObserver, CLiwDefaultMap* aDat
 void CSapiData::ExecuteCommandL(const TDesC& aRegistry, CLiwDefaultMap* aInFilter, 
 		CLiwGenericParamList* aOutParamList)
 	{
-	CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-	
-	TLiwGenericParam type( KType, TLiwVariant( aRegistry ) );
-	inParamList->AppendL( type );
-	
-	//append filter to input param
-	 TLiwGenericParam item( KFilter, TLiwVariant( aInFilter ));
-	 inParamList->AppendL( item );
-	 
-	// execute service.It is assumed that iInterface is already initiated
-	if(iInterface)
-		{
-		iInterface->ExecuteCmdL( *iCommandName, *inParamList, *aOutParamList);
-		}
-	else
-		{
-		User::Leave( KErrNotSupported );
-		}
-	type.Reset();
-	item.Reset();
-	inParamList->Reset();
+    if( iInterface == NULL )
+        {
+        User::Leave( KErrNotSupported );
+        }
+    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+    
+    TLiwGenericParam type( KType, TLiwVariant( aRegistry ) );
+    inParamList->AppendL( type );
+    
+    //append filter to input param
+    TLiwGenericParam item( KFilter, TLiwVariant( aInFilter ));
+    inParamList->AppendL( item );
+    
+    // execute service.It is assumed that iInterface is already initiated
+    iInterface->ExecuteCmdL( KGetList, *inParamList, *aOutParamList);
+    type.Reset();
+    item.Reset();
+    inParamList->Reset();
 	}
 
 // ---------------------------------------------------------------------------
@@ -599,6 +532,10 @@ void CSapiData::ExecuteCommandL(const TDesC& aRegistry, CLiwDefaultMap* aInFilte
 //
 void CSapiData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
    {
+    if( iInterface == NULL )
+        {
+        User::Leave( KErrNotSupported );
+        }
    HBufC8* triggerName = HBufC8::NewLC( KSAPIContentNameMaxLength );
   
    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
@@ -674,7 +611,7 @@ void CSapiData::RegisterPublisherObserverL()
     if ( iItemCount > 0)
     	{
 		CLiwDefaultMap* pubRegFilter = CreateFilterLC( KAll(), KAll() );
-		pubRegFilter->InsertL( KOperation, TLiwVariant( KUpdate ) );
+		pubRegFilter->InsertL( KOperation, TLiwVariant( KAddUpdate ) );
 		iPubObserver->RegisterL( pubRegFilter, KPubData() );
 		CleanupStack::PopAndDestroy( pubRegFilter );
 		}
@@ -721,45 +658,58 @@ TBool CSapiData::IsPluginActive()
     }
 
 // ---------------------------------------------------------------------------
-// PublisherStatusL
+// ChangePublisherStatusL
 // ---------------------------------------------------------------------------
 //
-void CSapiData::ChangePublisherStatusL(const TDesC& aStatus)
+void CSapiData::ChangePublisherStatusL(const TDesC8& aStatus)
     {
+    if( iCpsExecute == NULL )
+        {
+        User::Leave( KErrNotSupported );
+        }
+
     if ( aStatus == KResume && iUpdateNeeded )
         {
         iPlugin->PublishL();
         iUpdateNeeded = EFalse;
         }
+    CLiwDefaultMap* filter = CreateFilterLC( KWidget() );
+    // Add execute command triggers. Idle framework will execute 
+    iCpsExecute->AddCommand( *iContentId, KPubData, filter, aStatus );
+    CleanupStack::PopAndDestroy( filter );
+    
+    }
+
+// ---------------------------------------------------------------------------
+// ChangePublisherStatusL
+// ---------------------------------------------------------------------------
+//
+void CSapiData::ChangePublisherStatusL(CLiwDefaultList* aActionsList)
+    {
+    if( iInterface == NULL )
+        {
+        User::Leave( KErrNotSupported );
+        }
     
     CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
     CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
-    HBufC8* triggerName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(aStatus);
-    CleanupStack::PushL( triggerName );
-
+    
     TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
     inParamList->AppendL( type );
-			  
+     
     CLiwDefaultMap* filter = CreateFilterLC( KWidget() );
-    filter->InsertL(KActionTrigger, TLiwVariant(triggerName->Des()) );
-   
+    // add list of action triggers to execute
+    filter->InsertL(KActionTrigger, TLiwVariant(aActionsList) );
+    
     TLiwGenericParam item( KFilter, TLiwVariant( filter ));
     inParamList->AppendL( item );
-           
-    if(iInterface)
-	   {
-	   iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
-	   }
-    else
-	   {
-	   User::Leave( KErrNotSupported );
-	   }
-    
+
+    iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList);
     CleanupStack::PopAndDestroy( filter );
-    CleanupStack::PopAndDestroy( triggerName );
-    inParamList->Reset();
     outParamList->Reset();
-   }
+    inParamList->Reset();
+
+    }
 
 // ---------------------------------------------------------------------------
 // TriggerActiveL
@@ -767,29 +717,29 @@ void CSapiData::ChangePublisherStatusL(const TDesC& aStatus)
 //
 void CSapiData::TriggerActiveL()
     {
-    
-    CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
-    CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
- 
-    TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
-    inParamList->AppendL( type );
-
-    CLiwDefaultMap* filter = CreateFilterLC( KAll(), KAll() );
-    filter->InsertL(KActionTrigger, TLiwVariant( KActive() ));
-   
-    TLiwGenericParam item( KFilter, TLiwVariant( filter ));
-    inParamList->AppendL( item );
     if(iInterface)
-       {
-       iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList, KDisableNotification );
+        {
+        CLiwGenericParamList* inParamList  = &iServiceHandler->InParamListL();
+        CLiwGenericParamList* outParamList = &iServiceHandler->OutParamListL();
+        
+        TLiwGenericParam type( KType, TLiwVariant( KPubData ) );
+        inParamList->AppendL( type );
+        
+        CLiwDefaultMap* filter = CreateFilterLC( KAll(), KAll() );
+        filter->InsertL(KActionTrigger, TLiwVariant( KActive() ));
+        
+        TLiwGenericParam item( KFilter, TLiwVariant( filter ));
+        inParamList->AppendL( item );
+        iInterface->ExecuteCmdL( KExecuteAction, *inParamList, *outParamList, KDisableNotification );
+        
+        CleanupStack::PopAndDestroy( filter );
+        inParamList->Reset();
+        outParamList->Reset();
        }
     else
        {
        User::Leave( KErrNotSupported );
        }
-    CleanupStack::PopAndDestroy( filter );
-    inParamList->Reset();
-    outParamList->Reset();
    }
 // ---------------------------------------------------------------------------
 // UpdatePublisherStatusL
@@ -798,31 +748,34 @@ void CSapiData::TriggerActiveL()
 void CSapiData::UpdatePublisherStatusL( TDesC& aPublisher )
 	{
 	 if ( aPublisher == iPublisher )
-		 {
-		 // Resend the plugin status to publisher
-         ChangePublisherStatusL( KActive );
+        {
+       // Resend the plugin status to publisher
+        CLiwDefaultList* actionsToLaunch = CLiwDefaultList::NewLC();
+        actionsToLaunch->AppendL( TLiwVariant( KActive ));
          if( iStartupReason->Length() != 0 )
              {
-             ChangePublisherStatusL( *iStartupReason );
+             actionsToLaunch->AppendL( TLiwVariant( *iStartupReason ));
              }
-         
 		 if ( iPlugin->IsActive() )
 			 {
-             ChangePublisherStatusL( KResume );
+		     actionsToLaunch->AppendL( TLiwVariant( KResume ));
 			 }
 		 else
 			 {
-             ChangePublisherStatusL( KSuspend );
+		     actionsToLaunch->AppendL(TLiwVariant( KSuspend ));
 			 }
 		  // forward the network status if it uses.
 		if ( iPlugin->NetworkStatus() == CSapiDataPlugin::EOnline )
 			{
-            ChangePublisherStatusL( KOnLine );
+		    actionsToLaunch->AppendL(TLiwVariant( KOnLine ));
 			}
 		else if ( iPlugin->NetworkStatus() == CSapiDataPlugin::EOffline )
 			{
-            ChangePublisherStatusL( KOffLine );
+		    actionsToLaunch->AppendL(TLiwVariant( KOffLine ));
 			}
+	 
+	     ChangePublisherStatusL( actionsToLaunch );
+	     CleanupStack::PopAndDestroy( actionsToLaunch );
 		 }
 	}
 
@@ -912,3 +865,19 @@ void CSapiData::SetUpdateNeeded(TBool aStatus)
 	{
 	iUpdateNeeded = aStatus;
 	}
+
+// ---------------------------------------------------------------------------
+// SetCommandBuffer
+// ---------------------------------------------------------------------------
+//
+void CSapiData::SetCommandBuffer(TAny* aAny)
+    {
+    iCpsExecute = reinterpret_cast <MAiCpsCommandBuffer* > ( aAny );
+    if ( iCpsExecute )
+        {
+        iInterface = iCpsExecute->CpsInterface();
+        iServiceHandler = iCpsExecute->ServiceHandler();
+        }
+    }
+
+// End of file

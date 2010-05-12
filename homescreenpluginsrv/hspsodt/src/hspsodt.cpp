@@ -22,6 +22,9 @@
 #include "hspsdomdocument.h"
 #include "hspsresource.h"
 
+// ODT version number
+_LIT( KHpspOdtVersion, "3.0" );
+
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -62,7 +65,6 @@ void ChspsODT::CopyODTDataL( const ChspsODT& aSource, ChspsODT& aTarget )
     aTarget.SetThemeFullNameL(      aSource.ThemeFullName() );
     aTarget.SetThemeShortNameL(     aSource.ThemeShortName() );
     aTarget.SetThemeVersionL(       aSource.ThemeVersion() );
-    aTarget.SetPackageVersionL(     aSource.PackageVersion() );
     aTarget.SetDescriptionL(        aSource.Description() );
     aTarget.SetLogoFileL(           aSource.LogoFile() );
     aTarget.SetPreviewFileL(        aSource.PreviewFile() );
@@ -126,7 +128,6 @@ ChspsODT::~ChspsODT()
     delete iThemeFullName;
     delete iThemeShortName;
     delete iThemeVersion;
-    delete iPackageVersion;
     // clean up the array
     if( iResourceList )
         {
@@ -219,14 +220,10 @@ EXPORT_C void ChspsODT::InternalizeL( RReadStream& aStream )
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------    
 void ChspsODT::ExternalizeHeaderL( RWriteStream& aStream ) const
-    {    
-    const TDesC& packageVersion = PackageVersion();
-    aStream.WriteInt32L( packageVersion.Length() );
-    if( packageVersion.Length() > 0 )
-        {
-        aStream << packageVersion;
-        }
-        
+    {
+    aStream.WriteInt32L( KHpspOdtVersion().Length() );
+    aStream << KHpspOdtVersion();
+
     aStream.WriteUint32L( iThemeUid );
     
     const TDesC& providerName = ProviderName();
@@ -297,11 +294,8 @@ void ChspsODT::ExternalizeHeaderL( RWriteStream& aStream ) const
 TInt ChspsODT::HeaderSize() const
     {
     TInt size = sizeof( TInt32 );
-    if( PackageVersion().Length() > 0 )
-        {         
-        size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
-        size += PackageVersion().Size();
-        }
+    size += sizeof( TUint32 ); // String streaming insert also max. 32bit member of TCardinality.
+    size += KHpspOdtVersion().Size();
     
     size += sizeof( TUint32 ); // iThemeUid
     
@@ -370,42 +364,18 @@ TInt ChspsODT::HeaderSize() const
 EXPORT_C void ChspsODT::InternalizeHeaderL( RReadStream& aStream )
     {    
     TInt len = aStream.ReadInt32L();
-    HBufC* version = NULL;
-    if( len > 0 )
+    HBufC* odtVersion = NULL;
+    if ( len > 0 )
         {
-        version = HBufC::NewL( aStream, len );
+        odtVersion = HBufC::NewL( aStream, len );
         }
-    CleanupStack::PushL( version );    
-    
-    // Check version request.
-    if( iPackageVersion )
+    CleanupStack::PushL( odtVersion );
+    // ODT version check.
+    if ( KHpspOdtVersion() != *odtVersion )
         {
-        TBool supported = ETrue;
-        if( version == NULL )
-            {
-            supported = EFalse;
-            }
-        else if( version &&
-                 version->Compare( *iPackageVersion ) != 0 )
-            {
-            supported = EFalse;
-            }    
-    
-        if( !supported )
-            {
-            // Package version check requested (iPackageVersion defined) 
-            // and package version not supported
-            User::Leave( KErrNotSupported );
-            }
+        User::Leave( KErrNotSupported );
         }
-    
-    if( version )
-        {
-        delete iPackageVersion;
-        iPackageVersion = NULL;    
-        iPackageVersion = version->AllocL();
-        }
-    CleanupStack::PopAndDestroy( version );
+    CleanupStack::PopAndDestroy( odtVersion );
 
     iThemeUid = aStream.ReadUint32L();
           
@@ -925,42 +895,6 @@ EXPORT_C TUint ChspsODT::ConfigurationType() const
 	{
 	return iConfigurationType;
 	}
-
-// -----------------------------------------------------------------------------
-// ChspsODT::SetPackageVersionL
-// Set package version
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------    
-EXPORT_C void ChspsODT::SetPackageVersionL( const TDesC& aVersion )
-    {
-    if( iPackageVersion )
-        {
-        delete iPackageVersion;
-        iPackageVersion = NULL;
-        }
-    
-    if( aVersion.Length() != 0 )
-        {        
-        iPackageVersion = aVersion.AllocL();
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// ChspsODT::PackageVersion
-// Get package version
-// (other items were commented in a header).
-// -----------------------------------------------------------------------------
-EXPORT_C const TDesC& ChspsODT::PackageVersion() const
-    {
-    if ( iPackageVersion )
-        {
-        return *iPackageVersion;
-        }
-    else
-        {
-        return KNullDesC;
-        }
-    }
 
 // -----------------------------------------------------------------------------
 // ChspsODT::SetFamily

@@ -32,6 +32,7 @@ SOURCE          cpserveractionmanager.cpp
 SOURCE			cpnotificationhandler.cpp
 SOURCE			cpserverburlistener.cpp
 SOURCE          cpactionhandlerthread.cpp
+SOURCE          cpactiondatacache.cpp
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../cpsqlitestorage/inc

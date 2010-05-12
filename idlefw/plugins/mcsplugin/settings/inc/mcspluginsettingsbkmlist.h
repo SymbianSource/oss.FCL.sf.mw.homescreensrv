@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -21,15 +21,10 @@
 
 #include <e32base.h>
 #include <bamdesca.h>               // For MDesCArray
-#include <favouritesdbobserver.h>   // For MFavouritesDbObserver
 #include <favouritesdb.h>           // For RFavouritesDb
-#include <favouritesitemlist.h>     // For CFavouritesItemList
 #include <mcsmenu.h>                // For MenuContentService
+#include <propertymap.h>
 
-class CActiveFavouritesDbNotifier;
-class CAiScutSettingsItem;
-class CMCSPluginSettingsModel;
-class CMCSPluginWatcher;
 struct TSettingItem;
 /**
  *  @ingroup group_mcsplugin
@@ -100,7 +95,7 @@ public:
      * @param aIndex Setting item to find
      * @return MCS menu item
      */
-    CMenuItem& ItemL( TInt aIndex );
+    CMenuItem* ItemL( TInt aIndex );
 
     /**
      * Returns target bookmark data from the given index
@@ -110,18 +105,10 @@ public:
      * @param aParams On return, the bookmark parameters
      * @param aCaption On return, the bookmark caption
      * @return KErrNotFound if the bookmark cannot be found, KErrNone otherwise
-     */
-    //TInt GetDataByIndex(TInt aIndex, TPtrC& aParams, TPtrC& aCaption) const;
-    
+     */    
     TSettingItem FindItemL( 
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
-    
-    /**
-     * Remove menu item
-     * 
-     * @param aIndex 
-     */
-    void RemoveMenuItemL( TInt aIndex );
+
 
 protected:
 
@@ -145,13 +132,6 @@ private:
      */
     void AddBookmarkL( const TDesC&  aUid, const TDesC& aCaption, 
         const TDesC& aUrl, TBookmarkType aType );
-
-    /**
-     * Updates the bookmark list
-     *
-     * @since S60 v3.2
-     */
-    void UpdateBkmListL();
 
     /**
      * Get bookmarks from favourites
@@ -184,23 +164,6 @@ private:
      */
     CMenuItem* MCSMenuItemL( const TDesC& aUid,const TDesC& aName,
         const TDesC& aUrl );
-
-    /**
-     * GetMCSPluginFolderIdL
-     * 
-     * @return TInt
-     */
-    TInt GetMCSPluginFolderIdL();
-
-    /**
-     * UpdateMenuItemsRefCountL
-     * 
-     * @param aItem
-     * @param aValueToAdd
-     * @return TInt
-     */
-    TInt UpdateMenuItemsRefCountL( CMenuItem* aItem, TInt aValueToAdd );
-
 
 private:
 
@@ -289,9 +252,6 @@ private:
          */
         void ConstructL( const TDesC&  aUid, const TDesC& aCaption);
 
-    private:  // data
-
-
     };
 
 private:  // data
@@ -302,13 +262,11 @@ private:  // data
      */
     RPointerArray<CBkmListItem> iListItems;
 
-    // Runtime created CMenuItems must be stored, because those are refered 
-    RPointerArray<CMenuItem> iMenuItems;
-
     /**
-     * A flag indicating if the bookmark list should observe changes
+     * Runtime created CMenuItems must be stored,
+     * because those are refered later, own.  
      */
-    TBool iObserving;
+    RPointerArray<CMenuItem> iMenuItems;
 
     /**
      * Bookmark database session.
@@ -324,30 +282,9 @@ private:  // data
 
     /**
      * iMenu
+     * Own.
      */
     RMenu iMenu;
-
-    /**
-     * Save watcher
-     */
-
-    CMCSPluginWatcher* iSaveWatcher;
-
-    /**
-     * Update watcher
-     */
-    CMCSPluginWatcher* iUpdateWatcher;
-
-    /**
-     * Remove watcher
-     */
-    CMCSPluginWatcher* iRemoveWatcher;
-
-    /**
-     * MCS plugin folder ID
-     */
-    TInt iMCSPluginFolderId;
-
 };
 
 #endif // CMCSPLUGINSETTINGSBKMLIST_H

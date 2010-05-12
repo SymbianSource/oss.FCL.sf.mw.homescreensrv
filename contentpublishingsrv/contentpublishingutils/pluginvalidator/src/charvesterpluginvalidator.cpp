@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
  *
 */
 
@@ -32,11 +32,11 @@ const TUint32 KHarvesterUid	= { 0x10282E5A };
 //
 // ----------------------------------------------------------------------------
 //
-EXPORT_C CHarvesterPluginValidator* CHarvesterPluginValidator::NewL( TUid aUid, 
+EXPORT_C CHarvesterPluginValidator* CHarvesterPluginValidator::NewL( TUid aUid,
                                                    TAny *aParameter )
     {
-    CHarvesterPluginValidator* self = 
-					CHarvesterPluginValidator::NewLC( aUid , aParameter );
+    CHarvesterPluginValidator* self =
+          CHarvesterPluginValidator::NewLC( aUid , aParameter );
     CleanupStack::Pop( self );
     return self;
     }
@@ -48,8 +48,8 @@ EXPORT_C CHarvesterPluginValidator* CHarvesterPluginValidator::NewL( TUid aUid,
 EXPORT_C CHarvesterPluginValidator* CHarvesterPluginValidator::NewLC( TUid aUid,
                                                     TAny *aParameter )
     {
-    CHarvesterPluginValidator* self = new( ELeave ) 
-				CHarvesterPluginValidator( aUid, aParameter );
+    CHarvesterPluginValidator* self = new( ELeave )
+        CHarvesterPluginValidator( aUid, aParameter );
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
@@ -70,12 +70,12 @@ CHarvesterPluginValidator::~CHarvesterPluginValidator()
 //
 // ----------------------------------------------------------------------------
 //
-CHarvesterPluginValidator::CHarvesterPluginValidator( TUid aUid, TAny* aParameter ): 
-											CPluginValidator(aUid, aParameter),
-                                            iStartup( ETrue )
-    {
-    
-    }
+CHarvesterPluginValidator::CHarvesterPluginValidator(TUid aUid,
+    TAny* aParameter) :
+    CPluginValidator(aUid, aParameter)
+{
+
+}
 
 // ----------------------------------------------------------------------------
 //
@@ -83,7 +83,7 @@ CHarvesterPluginValidator::CHarvesterPluginValidator( TUid aUid, TAny* aParamete
 //
 void CHarvesterPluginValidator::ConstructL()
     {
-    iBlacklist = CBlacklistHandler::NewL( );    
+    iBlacklist = CBlacklistHandler::NewL();
     CPluginValidator::ConstructL();
     }
 
@@ -92,76 +92,70 @@ void CHarvesterPluginValidator::ConstructL()
 //
 // ----------------------------------------------------------------------------
 //
-void CHarvesterPluginValidator::ManagePluginsL()    
+void CHarvesterPluginValidator::ManagePluginsL()
     {
-    TInt errorCode = iInProgressProperty.Define( TUid::Uid( KHarvesterUid ), 
-        		KInProgressPropertyKey, RProperty::EInt );
-    
+    TInt errorCode = iInProgressProperty.Define( TUid::Uid( KHarvesterUid ),
+            KInProgressPropertyKey, RProperty::EInt );
+
     if ( KErrAlreadyExists == errorCode )
-    	{
-    	TInt value(-1);
-    	iInProgressProperty.Get( TUid::Uid( KHarvesterUid ), 
-        		KInProgressPropertyKey, value);
-    	if ( value == 1 )
-    		{
-    		// property value == inprogress
-    		// there was a panic in the previous startup
-    		// so we make unofficial blacklist official
-    		iBlacklist->CopyBlacklistL( EFalse );
-    		}
-    	}
+      {
+      TInt value(-1);
+      iInProgressProperty.Get( TUid::Uid( KHarvesterUid ),
+            KInProgressPropertyKey, value);
+      if ( value == 1 )
+        {
+        // property value == inprogress
+        // there was a panic in the previous startup
+        // so we make unofficial blacklist official
+        iBlacklist->CopyBlacklistL( EFalse );
+        }
+      }
     else
-    	{
-    	User::LeaveIfError( errorCode );
-    	}
+      {
+      User::LeaveIfError( errorCode );
+      }
     // copy blacklisted plugins to unoffical blacklist at startup
     iBlacklist->CopyBlacklistL( ETrue );
-    
+
     // set property value to 1 (which means "in progress")
-	iInProgressProperty.Set( TUid::Uid( KHarvesterUid ), 
-    		KInProgressPropertyKey, 1 );
-    
+    iInProgressProperty.Set( TUid::Uid( KHarvesterUid ),
+        KInProgressPropertyKey, 1 );
+
     CPluginValidator::ManagePluginsL();
-    
-    if ( iStartup )
-    	{
-    	RProperty::Set( KPSUidActiveIdle2, 
-    		KActiveIdleCpsPluginsUpdated , EPSAiPluginsUpdated );
-    	iStartup = EFalse;
-    	}
+
     // set property value to 0 (which means "finished")
-	iInProgressProperty.Set( TUid::Uid( KHarvesterUid ), 
-    		KInProgressPropertyKey, 0 );
+    iInProgressProperty.Set( TUid::Uid( KHarvesterUid ),
+        KInProgressPropertyKey, 0 );
     }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CHarvesterPluginValidator::LoadPluginL( TPluginInfo& aPluginInfo )    
+void CHarvesterPluginValidator::LoadPluginL( TPluginInfo& aPluginInfo )
     {
     if ( !iBlacklist->IsPresentL( aPluginInfo.iImplementationUid ) )
-    	{
-    	//first we append UID to the blacklist
-    	iBlacklist->AppendL( aPluginInfo.iImplementationUid );
-    	TAny* plug ( NULL );
-    	TInt err( KErrNone );
-    	TRAP( err, plug = REComSession::CreateImplementationL( 
-										aPluginInfo.iImplementationUid, 
-										aPluginInfo.iDtor_ID_Key, iParameter ) );
-    	if( err==KErrNone && plug ) 
-    		{
-			TRAP_IGNORE( 
-				CleanupStack::PushL( plug );
-				aPluginInfo.iPlugin = plug;
-				iPluginArray.AppendL( aPluginInfo );
-				CleanupStack::Pop( plug );
-   				static_cast<CContentHarvesterPlugin*>( plug )->UpdateL()
-						);
-    		}
-    	//no panic during load so we can remove UID from blacklist
-    	iBlacklist->RemoveL( aPluginInfo.iImplementationUid );
-    	}
+      {
+      //first we append UID to the blacklist
+      iBlacklist->AppendL( aPluginInfo.iImplementationUid );
+      TAny* plug ( NULL );
+      TInt err( KErrNone );
+      TRAP( err, plug = REComSession::CreateImplementationL(
+                    aPluginInfo.iImplementationUid,
+                    aPluginInfo.iDtor_ID_Key, iParameter ) );
+      if( err==KErrNone && plug )
+        {
+      TRAP_IGNORE(
+        CleanupStack::PushL( plug );
+        aPluginInfo.iPlugin = plug;
+        iPluginArray.AppendL( aPluginInfo );
+        CleanupStack::Pop( plug );
+           static_cast<CContentHarvesterPlugin*>( plug )->UpdateL()
+            );
+        }
+      //no panic during load so we can remove UID from blacklist
+      iBlacklist->RemoveL( aPluginInfo.iImplementationUid );
+      }
     }
 
 

@@ -148,6 +148,11 @@ public:
     /**
      * @see CHsContentPublisher
      */
+    void SetProperty( TProperty aProperty, TAny* aAny );
+    
+    /**
+     * @see CHsContentPublisher
+     */
     TAny* GetProperty( TProperty aProperty );     
 
     /**
@@ -265,7 +270,6 @@ public:
 	
 private: 
     // data
-
     /** Iterator for plugin content, owned */    
     MAiContentItemIterator* iContent;
     /** Array of content observers, owned */
@@ -291,3 +295,4 @@ private:
 #endif // SAPIDATAPLUGIN_H
 
 // End of file
+

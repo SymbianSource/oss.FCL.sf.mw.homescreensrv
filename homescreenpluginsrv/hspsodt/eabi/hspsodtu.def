@@ -16,8 +16,8 @@ EXPORTS
 	_ZN8ChspsODT16UnMarshalHeaderLERK6TDesC8 @ 15 NONAME
 	_ZN8ChspsODT17SetThemeFullNameLERK7TDesC16 @ 16 NONAME
 	_ZN8ChspsODT17UnMarshalHeaderLCERK6TDesC8 @ 17 NONAME
-	_ZN8ChspsODT18InternalizeHeaderLER11RReadStream @ 18 NONAME
-	_ZN8ChspsODT18SetPackageVersionLERK7TDesC16 @ 19 NONAME
+	_ZN8ChspsODT18DeleteAllResourcesEv @ 18 NONAME
+	_ZN8ChspsODT18InternalizeHeaderLER11RReadStream @ 19 NONAME
 	_ZN8ChspsODT18SetThemeShortNameLERK7TDesC16 @ 20 NONAME
 	_ZN8ChspsODT20SetConfigurationTypeEj @ 21 NONAME
 	_ZN8ChspsODT24InternalizeResourceListLER11RReadStream @ 22 NONAME
@@ -38,18 +38,16 @@ EXPORTS
 	_ZNK8ChspsODT13ResourceCountEv @ 37 NONAME
 	_ZNK8ChspsODT13ThemeFullNameEv @ 38 NONAME
 	_ZNK8ChspsODT14MarshalHeaderLEv @ 39 NONAME
-	_ZNK8ChspsODT14PackageVersionEv @ 40 NONAME
-	_ZNK8ChspsODT14ThemeShortNameEv @ 41 NONAME
-	_ZNK8ChspsODT17ConfigurationTypeEv @ 42 NONAME
-	_ZNK8ChspsODT24ExternalizeResourceListLER12RWriteStream @ 43 NONAME
-	_ZNK8ChspsODT5FlagsEv @ 44 NONAME
-	_ZNK8ChspsODT6CloneLEv @ 45 NONAME
-	_ZNK8ChspsODT6FamilyEv @ 46 NONAME
-	_ZNK8ChspsODT7RootUidEv @ 47 NONAME
-	_ZNK8ChspsODT8LogoFileEv @ 48 NONAME
-	_ZNK8ChspsODT8ThemeUidEv @ 49 NONAME
-	_ZNK8ChspsODT9ResourceLEi @ 50 NONAME
-	_ZTI8ChspsODT @ 51 NONAME
-	_ZTV8ChspsODT @ 52 NONAME
-	_ZN8ChspsODT18DeleteAllResourcesEv @ 53 NONAME
+	_ZNK8ChspsODT14ThemeShortNameEv @ 40 NONAME
+	_ZNK8ChspsODT17ConfigurationTypeEv @ 41 NONAME
+	_ZNK8ChspsODT24ExternalizeResourceListLER12RWriteStream @ 42 NONAME
+	_ZNK8ChspsODT5FlagsEv @ 43 NONAME
+	_ZNK8ChspsODT6CloneLEv @ 44 NONAME
+	_ZNK8ChspsODT6FamilyEv @ 45 NONAME
+	_ZNK8ChspsODT7RootUidEv @ 46 NONAME
+	_ZNK8ChspsODT8LogoFileEv @ 47 NONAME
+	_ZNK8ChspsODT8ThemeUidEv @ 48 NONAME
+	_ZNK8ChspsODT9ResourceLEi @ 49 NONAME
+	_ZTI8ChspsODT @ 50 NONAME
+	_ZTV8ChspsODT @ 51 NONAME
 

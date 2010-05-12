@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2009 - 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -23,8 +23,8 @@
 
 // User includes
 #include <aicontentobserver.h>
-#include <aiutility.h>
 #include <aistrcnv.h>
+#include <aiutility.h>
 #include "mcspluginuids.hrh"
 #include "mcsplugin.h"
 #include "mcsplugindata.h"
@@ -150,16 +150,14 @@ void CMCSPlugin::PublishL()
 // ----------------------------------------------------------------------------
 //
 void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver, 
-    TMCSData& aData, TInt aIndex )
+    CMCSData& aData, TInt aIndex )
     {
     if( !aData.IsDirty() )
         {
         return;
         }
 
-    CMenuItem* item = NULL;
-    TRAP_IGNORE ( item = iEngine->FetchMenuItemL( aData.MenuItem() ) );
-    
+    CMenuItem* item = iEngine->FetchMenuItemL( aData );    
     CleanupStack::PushL( item );
     
     // One widget item has iDataCount number of elements
@@ -197,12 +195,9 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
 // 
 // ----------------------------------------------------------------------------
 //
-void CMCSPlugin::Start( TStartReason aReason )
+void CMCSPlugin::Start( TStartReason /*aReason*/ )
     {
-    if ( aReason == EPluginStartup )
-        {
-        TRAP_IGNORE( iEngine->CreateRuntimeMenuItemsL() );
-        }    
+ 
     }
 
 // ----------------------------------------------------------------------------
@@ -210,12 +205,9 @@ void CMCSPlugin::Start( TStartReason aReason )
 // 
 // ----------------------------------------------------------------------------
 //
-void CMCSPlugin::Stop( TStopReason aReason )
+void CMCSPlugin::Stop( TStopReason /*aReason*/ )
     {
-    if( aReason == EPluginShutdown )
-        {
-        TRAP_IGNORE( iEngine->CleanMCSItemsL() );
-        }
+
     }
 
 // ----------------------------------------------------------------------------
