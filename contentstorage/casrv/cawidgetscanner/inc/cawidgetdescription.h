@@ -148,7 +148,7 @@ public:
      * @return CA entry id
      */
     TPtrC GetMmcId( ) const;
-
+    
     /*
      * Library getter
      * @return widget library
@@ -230,7 +230,18 @@ public:
      * @return Service xml filename
      */
     TPtrC GetServiceXml() const;
-
+    
+    /*
+     * Set manifest file path name.
+     * @param aServiceXml Manifest file path name.
+     */
+    void SetManifestFilePathNameL(const TDesC& aManifestFilePathName);
+    
+    /*
+     * Get manifest file path name.
+     * @return Manifest file path name.
+     */
+    TPtrC GetManifestFilePathName() const;
 private:
 
     /*
@@ -321,6 +332,10 @@ private:
      * Service fw xml file
      */
     RBuf iServiceXml;
+    /*
+     * Manifest file path name.
+     */
+    RBuf iManifestFilePathName;
     };
 
 typedef RPointerArray<CCaWidgetDescription> RWidgetArray;

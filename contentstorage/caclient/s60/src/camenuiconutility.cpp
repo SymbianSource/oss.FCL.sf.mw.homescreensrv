@@ -19,9 +19,14 @@
 #include <XQConversions>
 // apparc
 #include <apparc.h>
-#include <APGCLI.H>
+#include <apgcli.h>
+#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
+#include <apaidpartner.h>
+#else
+#include <apaid.h>
+#endif
 // cfbsbitmap
-#include <APGICNFL.H>
+#include <apgicnfl.h>
 
 #include <HbIcon>
 #include "camenuiconutility.h"
@@ -223,16 +228,19 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
 {
     HbIcon icon;
     icon = getIconFromEntry(entry);
-
+ 
     if (icon.isNull() || !(icon.size().isValid())) {
         TRAP_IGNORE(icon = getIconFromApparcL(entry, size));
     }
-
+ 
     if (icon.isNull() || !(icon.size().isValid())) {
         icon = getDefaultIcon(entry);
     }
-    
+ 
+    if (entry.entryTypeName() == XQConversions::s60DescToQString(
+            KCaTypeWidget)) {
+        icon.addBadge(Qt::AlignBottom | Qt::AlignLeft,
+		    HbIcon("qtg_small_hs_widget"));
+    }
     return icon;
 }
-
-

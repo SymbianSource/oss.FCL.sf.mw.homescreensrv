@@ -40,6 +40,13 @@ public:
     virtual void LocalizeEntryL( CCaLocalizationEntry& aLocalization ) = 0;
 
     /**
+     * Adds localization row to the localization table
+     *
+     * @param aLocalization localization information about entry.
+     */
+    virtual void AddLocalizationL( const CCaLocalizationEntry& aLocalization ) = 0;
+    
+    /**
      * Fetches data from database
      *
      * @param aResultContainer container for localizations information.

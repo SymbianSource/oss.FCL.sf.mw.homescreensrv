@@ -89,6 +89,8 @@ public:
     int waitActivity(const QVariantHash &activity);
     
     int getThumbnail(QSize size, QString imagePath, QString  mimeType, void *userDdata);
+    
+    int notifyDataChange();
 
     /**
      * Interface implementation.
@@ -101,6 +103,8 @@ public:
      * @see int HsActivityDbClientInterface::cancelWaitActivity()
      */
     int cancelWaitActivity();
+    
+    int cancelNotifyDataChange();
     
 public:
     /**
@@ -174,11 +178,6 @@ private:
     
     void getThumbnailL(QSize size, QString imagePath, QString  mimeType, void *userDdata);
 private:
-    /**
-     * Async request handler
-     * Own
-     */
-    HsActivityDbAsyncRequestPrivate *mAsyncDataHandler;
     RPointerArray<HsActivityDbAsyncRequestPrivate> mAsyncTasks;
     HsActivityDbAsyncRequestObserver& mObserver;
 };

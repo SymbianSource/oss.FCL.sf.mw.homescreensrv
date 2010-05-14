@@ -19,7 +19,6 @@
 #define CAUSIFSCANNER_H
 
 #include <e32base.h>
-#include <e32std.h>
 #include <usif/sif/sifcommon.h>
 #include <usif/scr/scr.h>
 
@@ -29,6 +28,14 @@
 
 class CCaStorageProxy;
 class CCaInnerEntry;
+class CCaInstallNotifier;
+class CCaMmcWatcher;
+class TPluginParams;
+
+namespace Usif
+    {
+    class CComponentEntry;
+    }
 
 using namespace Usif;
 
@@ -55,14 +62,8 @@ public:
      */
     ~CCaUsifScanner();
 
-    /**
-     * Installs application.
-     * @param aFileName File name to be installed.
-     */
-    //    void InstallL( const TDesC& aFileName );
-
 public:
-    // from MCaInstallListener
+    // From MCaInstallListener.
 
     /**
      * Handle Install/Uninstall Event.
@@ -70,6 +71,9 @@ public:
      * @param aUid installed uid.
      */
     void HandleInstallNotifyL( TInt aUid );
+
+public:
+    // From MMmcWatcherCallback.
 
     /**
      * MmcChangeL is called when the MMC is removed or inserted.
@@ -88,17 +92,6 @@ private:
      * Second phased constructor.
      */
     void ConstructL();
-
-    /**
-     * Copy constructor.
-     */
-    CCaUsifScanner( const CCaUsifScanner & );
-
-    /**
-     * Operator "=". Assigns new object.
-     *
-     */
-    CCaUsifScanner& operator =( const CCaUsifScanner & );
 
     /**
      * Creates AppLib's entry from Usif's entry
@@ -136,7 +129,7 @@ private:
      *  @param aEntry Entry data to be checked if exists.
      *  @retval Returns array index if exists, otherwise KErrNotFound.
      */
-    TInt PackageExistL( RPointerArray<CCaInnerEntry>& aArray,
+    TInt PackageExists( RPointerArray<CCaInnerEntry>& aArray,
             const CComponentEntry* aEntry );
 
     /**

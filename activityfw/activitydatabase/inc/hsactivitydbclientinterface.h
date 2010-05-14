@@ -24,6 +24,7 @@
 
 const char ActivityApplicationKeyword [] = ":ApplicationId";
 const char ActivityActivityKeyword [] = ":ActivityName";
+const char ActivityParametersKeyword [] = ":ActivityParams";
 const char ActivityScreenshotKeyword [] = "screenshot";
 
 class HsActivityDbClientInterface

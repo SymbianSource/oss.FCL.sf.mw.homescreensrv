@@ -24,7 +24,7 @@ void ActivityBroadcastTask::ExecuteL(MActivityTaskStorage& storage,
                                      const RMessage2& msg)
 {
     const RPointerArray<CActivityTask> &tasks(storage.StorageData());
-    for (TInt iter(0); iter < tasks.Count(); ++iter) {
+    for (TInt iter(tasks.Count() - 1); iter >= 0 ; --iter ) {
         (tasks[iter])->BroadcastReceivedL(msg);
     }
     msg.Complete(KErrNone);

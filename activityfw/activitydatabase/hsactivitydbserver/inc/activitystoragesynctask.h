@@ -23,6 +23,7 @@
 
 #include "activitytask.h"
 #include "activitystorage.h"
+#include "activitytaskstorage.h"
 
 /**
  *  CActivityStorageSyncTask
@@ -36,7 +37,8 @@ public:
      * @param dataStorage - data storage
      * @param msg - request message
      */
-    static void ExecuteL(CActivityStorage& dataStorage, 
+    static void ExecuteL(MActivityTaskStorage& observers,
+                         CActivityStorage& dataStorage, 
                          const RMessage2& msg);
 
 private:
@@ -71,6 +73,9 @@ private:
      */
     static void DeleteApplicationActivitiesL(CActivityStorage& dataStorage, 
                                              const RMessage2& msg);
+    
+    static void NotifyChangeL(MActivityTaskStorage& observers,
+                              const RMessage2& msg);
 
     };
 

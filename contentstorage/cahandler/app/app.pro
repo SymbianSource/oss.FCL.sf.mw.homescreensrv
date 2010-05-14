@@ -50,7 +50,7 @@ symbian: {
     -lscrclient \
     -lxqutils
 
-    exists($${EPOCROOT}epoc32/include/mw/XQSettingsManager):LIBS += -lxqsettingsmanager
+    exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager):LIBS += -lxqsettingsmanager
 }
 
 

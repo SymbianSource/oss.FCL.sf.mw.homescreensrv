@@ -59,6 +59,12 @@ public:
     static CCaSrvManager* NewLC( CCaStorageProxy& aCaStorageProxy,
             CCaSrvEngUtils* aUtils = NULL );
 
+    /**
+     * Load operation error code
+     * @return error code for load plugins operation
+     */
+    IMPORT_C TInt LoadOperationErrorCodeL();
+    
 private:
 
     /**
@@ -93,6 +99,11 @@ private:
      * Reference to the Storage Proxy, Storage Utils.
      */
     TPluginParams* iPluginParams;
+    
+    /**
+     * Error code for load plugins operation
+     */
+    TInt iErrorCode;
     };
 
 #endif // C_MM_EXTENSION_MANAGER_H

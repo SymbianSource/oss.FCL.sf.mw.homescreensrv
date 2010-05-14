@@ -17,19 +17,17 @@
 #ifndef __TSACTMAN_CORE_IBY__
 #define __TSACTMAN_CORE_IBY__
 
-//file=ABI_DIR\BUILD_DIR\activityserviceinstaller.exe                            PROGRAMS_DIR\activityserviceinstaller.exe
 file=ABI_DIR\BUILD_DIR\activityserviceplugin.dll					       SHARED_LIB_DIR\activityserviceplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\activityserviceplugin.qtplugin    resource\qt\plugins\activityserviceplugin.qtplugin
 
 file=ABI_DIR\BUILD_DIR\hsactivitydbserver.exe                            PROGRAMS_DIR\hsactivitydbserver.exe
-data=ZPRIVATE\10003a3f\import\apps\hsactivitydbserver_reg.rsc            private\10003a3f\import\apps\hsactivitydbserver_reg.rsc
-data=\epoc32\data\z\resource\apps\hsactivitydbserver.rsc                 resource\apps\hsactivitydbserver.rsc
 
 file=ABI_DIR\BUILD_DIR\hsactivitydbclient.dll					       SHARED_LIB_DIR\hsactivitydbclient.dll
 
 file=ABI_DIR\BUILD_DIR\hbactivityplugin.dll					       SHARED_LIB_DIR\hbactivityplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\hbactivityplugin.qtplugin    resource\qt\plugins\hbactivityplugin.qtplugin
 
+data=DATAZ_\resource\activity\activityserviceplugin.xml resource\activity\activityserviceplugin.xml
 
 // stub sis
 data=ZSYSTEM/install/activitymanager_stub.sis                  system/install/activitymanager_stub.sis

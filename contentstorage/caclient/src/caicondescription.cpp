@@ -190,7 +190,7 @@ void CaIconDescription::setId(int id)
 CaIconDescriptionPrivate::CaIconDescriptionPrivate(
     CaIconDescription *iconDescriptionPublic) :
     m_q(iconDescriptionPublic), mId(0), mFilename(), mSkinId(), 
-    mApplicationId(0)
+    mApplicationId()
 {
 }
 

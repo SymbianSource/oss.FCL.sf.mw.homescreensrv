@@ -27,10 +27,11 @@
 
 CCaLocalizationEntry::~CCaLocalizationEntry( )
     {
-    iTableName.Close( );
-    iAttribName.Close( );
-    iStringId.Close( );
-    iLocalName.Close( );
+    iTableName.Close();
+    iAttribName.Close();
+    iStringId.Close();
+    iLocalName.Close();
+    iQmFilename.Close();
     }
 
 // ---------------------------------------------------------------------------
@@ -184,6 +185,24 @@ EXPORT_C const RBuf& CCaLocalizationEntry::GetStringId( ) const
     return iStringId;
     }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C const RBuf& CCaLocalizationEntry::GetQmFilename( ) const
+    {
+    return iQmFilename;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCaLocalizationEntry::SetQmFilenameL( const TDesC& aQmFilename )
+    {
+	iQmFilename.Close( );
+	iQmFilename.CreateL( aQmFilename );
+    }
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------

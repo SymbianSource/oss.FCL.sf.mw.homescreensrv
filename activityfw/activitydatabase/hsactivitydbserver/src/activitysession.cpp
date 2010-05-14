@@ -87,7 +87,7 @@ void CActivitySession::ServiceL(const RMessage2& message)
     case UpdateActivity:
     case RemoveActivity:
     case RemoveApplicationActivities:
-        ActivityStorageSyncTask::ExecuteL(mStorage, message);
+        ActivityStorageSyncTask::ExecuteL(mTasksStorage, mStorage, message);
         break;
     
     case Activities:
@@ -96,6 +96,7 @@ void CActivitySession::ServiceL(const RMessage2& message)
         break;
     
     case WaitActivity:
+    case NotifyChange:
         CActivityObserverTask::ExecuteLD(mTasksStorage, *this, message);
         break;
     case GetThumbnail:
@@ -104,6 +105,7 @@ void CActivitySession::ServiceL(const RMessage2& message)
     
     case LaunchActivity:
     case CancelWait:
+    case CancelNotify:
         ActivityBroadcastTask::ExecuteL(mTasksStorage, message);
         break;
     

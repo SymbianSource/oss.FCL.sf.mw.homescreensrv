@@ -38,19 +38,25 @@
 /*!
 
  \class CaService.
- \brief This class operates on data, anable creating and inserting new entry
+ \brief This class operates on data, enables creating and inserting new entry
  to DB, removing entry from DB, update entry or get entry from DB, execute
- command on entry and create notifier to notify client about changes onto DB.
+ command on entry and create notifier to notify a client about changes onto DB.
 
  CaService class uses singleton design pattern, so that it contains static
  method called instance() to get instance of a class.
+
+ References to CaService instance are counted. When the number of references
+ drops to zero the instance is deleted to save memory.
+ CaNotifier class contains a member referencing to the CaService instance so
+ it is not deleted unless all CaNotifier instances are deleted (and there are
+ no variables referencing CaService).
 
  \code
  QSharedPointer<CaService> service = CaService::instance();
  \endcode
 
- For every operations on data is used always one instantiation of a class.
- Below are examples how to create data and work on those ones.
+ For every operations on data is used always one instantiation of the class.
+ Below, there are examples how to create data and work on those ones.
 
  */
 

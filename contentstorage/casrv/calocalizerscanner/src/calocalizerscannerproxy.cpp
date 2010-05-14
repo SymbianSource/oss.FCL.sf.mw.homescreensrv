@@ -67,13 +67,8 @@ CCaLocalizerScannerProxy* CCaLocalizerScannerProxy::NewLC(
 //
 void CCaLocalizerScannerProxy::ConstructL()
     {
-    TBuf<KCaMaxAttrNameLen> filenameDsc;
-    iStorageProxy->DbPropertyL( KCaDbPropQMfile, filenameDsc );
-    iResolver = new (ELeave) HbTextResolverSymbian;
-    iResolver->Init(filenameDsc, KPathLoc);
+	iRecentQmFile.CreateL( KCaMaxAttrLenght );
     UpdateLocalNamesL();
-    delete iResolver;
-    iResolver = NULL;
     }
 
 // ---------------------------------------------------------------------------
@@ -95,10 +90,7 @@ CCaLocalizerScannerProxy::CCaLocalizerScannerProxy(
 //
 CCaLocalizerScannerProxy::~CCaLocalizerScannerProxy()
     {
-	if (iResolver)
-		{
-	    delete iResolver;
-		} 
+	iRecentQmFile.Close();
     }
 
 // ---------------------------------------------------------------------------
@@ -126,13 +118,12 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
     CleanupResetAndDestroyPushL( entries );
     RArray<TInt> ids;
     CleanupClosePushL( ids );
-    
+    //gets all localizations
     GetLocalizationRowsL( locals );
-     
     TInt locCount = locals.Count();
-    for( TInt idx = 0; idx < locCount; idx++ )
+    for( TInt i = 0; i < locCount; i++ )
         {
-        ids.Append( locals[idx]->GetRowId() );
+        ids.Append( locals[i]->GetRowId() );
         }    
     CCaInnerQuery* query = CCaInnerQuery::NewLC();
     query->SetIdsL( ids );
@@ -142,18 +133,13 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
     HBufC16* localizedName;
     for( TInt i = 0; i < locCount; i++ )
         {
-        localizedName = iResolver->LoadLC( locals[i]->GetStringId() );
+        localizedName = GetLocalizedNameLC( locals[i] );
+        
         if( localizedName->Compare(
             GetEntryText( entries, locals[i]->GetRowId() ) ) )
             // translation different than text
             {
             locals[i]->SetLocalizedStringL( *localizedName );
-            iStorageProxy->LocalizeEntryL( *( locals[i] ) );
-            } 
-        else if( !localizedName->Compare(KNullDesC) ) 
-            // no translation, string id as text
-            {
-            locals[i]->SetLocalizedStringL( locals[i]->GetStringId() );
             iStorageProxy->LocalizeEntryL( *( locals[i] ) );
             }
         CleanupStack::PopAndDestroy( localizedName );
@@ -166,11 +152,29 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
 
 
 // ---------------------------------------------------------------------------
-// CCaLocalizerScannerProxy::LocalGetEntryById
+// 
+// ---------------------------------------------------------------------------
+//
+HBufC* CCaLocalizerScannerProxy::GetLocalizedNameLC(
+		const CCaLocalizationEntry* aLocEntry)
+    {
+	if( iRecentQmFile.Compare( aLocEntry->GetQmFilename() ) )
+		{
+	    HbTextResolverSymbian::Init( aLocEntry->GetQmFilename(), KPathLoc );
+        // keeping last qm filename to avoid another initialization
+	    iRecentQmFile.Close();
+	    iRecentQmFile.Create( aLocEntry->GetQmFilename().Length() );
+	    iRecentQmFile.Copy( aLocEntry->GetQmFilename() );
+		}
+	return HbTextResolverSymbian::LoadLC( aLocEntry->GetStringId() );
+    }
+
+// ---------------------------------------------------------------------------
+//  
 // ---------------------------------------------------------------------------
 //
 const TDesC& CCaLocalizerScannerProxy::GetEntryText(
-        RPointerArray<CCaInnerEntry> aEntries, TInt aId )
+        const RPointerArray<CCaInnerEntry>& aEntries, TInt aId )
     {
     TInt entriesCount = aEntries.Count();
     for( TInt i=0; i < entriesCount; i++ )

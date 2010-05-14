@@ -18,10 +18,9 @@
 #ifndef HBACTIVITYPLUGIN_H
 #define HBACTIVITYPLUGIN_H
 
-#include <QObject>
-#include "hbactivityplugininterface_p.h"
+#include "hbactivityplugininterface.h"
 
-class HbActivityPlugin : public QObject, public HbActivityPluginInterface
+class HbActivityPlugin : public HbActivityPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(HbActivityPluginInterface)
@@ -38,9 +37,6 @@ public:
     virtual QVariant activityData(const QString &activityId);
     virtual bool waitActivity();
     virtual QVariantHash parseCommandLine(const QStringList &commandLineParams);
-
-signals:
-    void activityRequested(const QString &activityId);
 
 private:
     QObject *mActivityClient;

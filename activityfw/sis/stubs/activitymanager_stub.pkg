@@ -36,8 +36,6 @@
 "" - "Z:\resource\qt\plugins\activityserviceplugin.qtplugin"
 
 ""    - "Z:\sys\bin\hsactivitydbserver.exe"
-""    - "Z:\resource\apps\hsactivitydbserver.rsc"
-""    - "Z:\private\10003a3f\import\apps\hsactivitydbserver_reg.rsc"
 
 ""    - "Z:\sys\bin\hsactivitydbclient.dll"
 

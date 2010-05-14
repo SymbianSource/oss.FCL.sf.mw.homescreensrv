@@ -56,8 +56,18 @@ enum TKindOfScaling
 
     ~CGraphicsSalingHandler();
 
-    static CGraphicsSalingHandler* NewL(MImageReadyCallBack &aNotify, RFs &aFs, const TDesC &aFileName, const TDesC8& aMimeType, const TSize &aNewSize, TKindOfScaling aKindOfScaling);
-    static CGraphicsSalingHandler* NewLC(MImageReadyCallBack &aNotify, RFs &aFs, const TDesC &aFileName, const TDesC8& aMimeType, const TSize &aNewSize, TKindOfScaling aKindOfScaling);
+    static CGraphicsSalingHandler* NewL(MImageReadyCallBack &aNotify,
+        RFs &aFs,
+        const TDesC &aFileName,
+        const TDesC8& aMimeType,
+        const TSize &aNewSize,
+        TKindOfScaling aKindOfScaling = CGraphicsSalingHandler::EIgnoreAspectRatio);
+    static CGraphicsSalingHandler* NewLC(MImageReadyCallBack &aNotify,
+        RFs &aFs,
+        const TDesC &aFileName,
+        const TDesC8& aMimeType,
+        const TSize &aNewSize,
+        TKindOfScaling aKindOfScaling = CGraphicsSalingHandler::EIgnoreAspectRatio);
 
 protected:
     void DoCancel();
@@ -66,7 +76,9 @@ protected:
 
 private:
     void ConstructL(RFs &aFs, const TDesC &aFileName, const TDesC8& aMimeType);
-    CGraphicsSalingHandler(MImageReadyCallBack &aNotify, const TSize &aNewSize, TKindOfScaling aKindOfScaling);
+    CGraphicsSalingHandler(MImageReadyCallBack &aNotify,
+        const TSize &aNewSize,
+        TKindOfScaling aKindOfScaling = CGraphicsSalingHandler::EIgnoreAspectRatio);
     TSize Scaling();
 
 private:

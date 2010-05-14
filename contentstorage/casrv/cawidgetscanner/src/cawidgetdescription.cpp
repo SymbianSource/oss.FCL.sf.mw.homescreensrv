@@ -142,6 +142,7 @@ CCaWidgetDescription::~CCaWidgetDescription()
     iModificationTime.Close();
     iMmcId.Close();
     iServiceXml.Close();
+    iManifestFilePathName.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -550,5 +551,25 @@ void CCaWidgetDescription::SetServiceXmlL(const TDesC& aServiceXml)
 TPtrC CCaWidgetDescription::GetServiceXml() const
     {
     return iServiceXml;
+    }
+
+/*
+ * Set manifest file path name
+ * @param aManifestFilePt
+ */
+void CCaWidgetDescription::SetManifestFilePathNameL( 
+    const TDesC& aManifestFilePathName )
+    {
+    iManifestFilePathName.Close();
+    iManifestFilePathName.CreateL( aManifestFilePathName );
+    }
+
+/*
+ * Get service fw xml filename
+ * @return Service xml filename
+ */
+TPtrC CCaWidgetDescription::GetManifestFilePathName() const
+    {
+    return iManifestFilePathName;
     }
 //  End of File

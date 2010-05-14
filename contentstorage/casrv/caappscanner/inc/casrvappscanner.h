@@ -22,10 +22,10 @@
 #include <apgcli.h>
 #include <apgnotif.h>
 #include <driveinfo.h>
+#include <usif/scr/scr.h>
 #include "cainstallnotifier.h"
 #include "castorage_global.h"
 
-class TCaAppAtributes;
 class CCaSrvMmcHistory;
 class CCaInnerEntry;
 class CCaStorageProxy;
@@ -78,6 +78,16 @@ public:
     static CCaSrvAppScanner* NewL( CCaStorageProxy& aCaStorageProxy,
             CCaSrvEngUtils& aUtils );
 
+public:
+    // from MCaInstallListener
+
+    /**
+     * Handle Install Event.
+     * @since S60 v5.0
+     * @param aUid installed/uninstalled app uid.
+     */
+    void HandleInstallNotifyL( TInt aUid );
+
 private:
     // Constructors and destructor
 
@@ -94,29 +104,19 @@ private:
      */
     void ConstructL();
 
-public:
-    // from MCaInstallListener
-
-    /**
-     * Handle Install Event.
-     * @since S60 v5.0
-     * @param aUid installed/uninstalled app uid.
-     */
-    void HandleInstallNotifyL( TInt aUid );
-
 private:
 
     /**
-     * Notifies storage abaut change for aAppUid.
+     * Notifies storage about change for aAppUid.
      * @param aAppUid application uid.
      */
     void NotifyL( TInt aAppUid );
 
     /**
-     * Notifies storage abaut change for aPackageEntry related app.
+     * Notifies storage about change for aPackageEntry related app.
      * @param aPackageEntry application package entry.
      */
-    void NotifyL( Swi::RSisRegistryEntry & aPackageEntry );
+    void NotifyL( Swi::RSisRegistryEntry& aPackageEntry );
 
 private:
     // from CActive
@@ -133,7 +133,7 @@ private:
 
     /**
      * Error handling: ignore error.
-     * @param aErr Error code.
+     * @param aError Error code.
      */
     TInt RunError( TInt aError );
 
@@ -142,46 +142,39 @@ private:
 
     void HandleAppListEvent( TInt aEvent );
 
-public:
-    /**
-     * Schedule appscanner run.
-     * Self complete active object.
-     */
-    void ScheduleScan();
-
 private:
     // new methods
 
     /**
-     * Gets collectionId of download collection
-     * @result id of download collection
+     * Gets collectionId of download collection.
+     * @result id of download collection.
      */
     TInt GetCollectionDownloadIdL();
 
     /**
-     * Gets collectionId of all collection
-     * @result id of all collection
+     * Gets collectionId of all collection.
+     * @result id of all collection.
      */
     TInt GetAllCollectionIdL();
 
     /**
-     * Adds application entry to downloaded collection
+     * Adds application entry to downloaded collection.
      * @param aEntryId application entry id.
      */
     void AddEntryToDownloadedCollectionL( TInt aEntryId );
 
     /**
-     * Add application entry to predefined collection
+     * Add application entry to predefined collection.
      * @param aEntry application entry.
-     * @param aUpdate is entry updated by a client
+     * @param aUpdate is entry updated by a client.
      */
     void AddEntryToPredefinedCollectionL( CCaInnerEntry* aEntry,
             TBool aUpdate = EFalse );
 
     /**
-     * Create predefined collection
+     * Create predefined collection.
      * @param aGroupName group name.
-     * @result id of new created collection
+     * @result id of a newly created collection.
      */
     TInt CreatePredefinedCollectionL( const TDesC& aGroupName );
 
@@ -192,94 +185,95 @@ private:
     void AddCollectionToAllCollectionL( TInt aCollectionId );
 
     /**
-     * Removes application entry from downloaded collection
+     * Removes application entry from downloaded collection.
      * @param aEntryId application entry id.
      */
     void RemoveEntryFromDownloadedL( TInt aEntryId );
 
-    TBool HandleLockDeleteFlagUpdateL( CCaInnerEntry* aItem );
+    /**
+     * Updates application's removable and visible flags.
+     * @param aItem menu item.
+     * @return ETrue if flags were updated.
+     */
+    TBool HandleRemovableVisibleFlagsUpdateL( CCaInnerEntry* aItem );
 
     /**
      * Updates application's missing and visible flags.
-     * Add new menu item referring to this application.
      * @param aItem menu item.
-     * @return ETrue if flags were updated
+     * @return ETrue if flags were updated.
      */
     TBool HandleMissingVisibleFlagsUpdate( CCaInnerEntry* aItem );
 
     /**
      * Updates visible flag.
      * @param aItem menu item.
-     * @param aUid Application's uid.
-     * @return ETrue if visible flag was updated
+     * @return ETrue if visible flag was updated.
      */
     TBool HandleVisibleFlagUpdate( CCaInnerEntry* aItem );
 
     /**
      * Updates used flag.
      * @param aItem menu item.
-     * @param aUid Application's uid.
-     * @return ETrue if used flag was updated
+     * @return ETrue if used flag was updated.
      */
     TBool HandleUsedFlagUpdate( CCaInnerEntry* aItem );
+
     /**
      * Updates mmc attribute.
      * @param aItem menu item.
-     * @param aUid Application's uid.
      * @param aMmcId MMC ID of currently inserted MMC, or 0.
-     * @return ETrue if mmc attribute was updated
+     * @return ETrue if mmc attribute was updated.
      */
     TBool HandleMmcAttrUpdateL( CCaInnerEntry* aItem, TUint aMmcId );
 
     /**
-     * Check if application is in rom
+     * Check if application is in rom.
      * Add new menu item referring to this application.
-     * @param aUid uid applications
-     * @return ETrue if app is in rom
+     * @return ETrue if app is in rom.
      */
     TBool IsInRomL( TInt aUid );
 
     /**
-     * Get applications from AppArc
-     * @param aArray RArray with applications
+     * Get applications from AppArc.
+     * @param aArray RArray with applications' uids.
      */
-    void GetApaItemsL( RArray<TCaAppAtributes>& aArray );
+    void GetApaItemsL( RArray<TUint>& aArray );
 
     /**
-     * Remove application from array (found in AppArc)
-     * @param aArray RArray with application
-     * @param aUid uid of application to remove
+     * Remove application from array (found in AppArc).
+     * @param aArray RArray with applications' uids.
+     * @param aUid uid of application to remove.
      */
-    void RemoveApp( RArray<TCaAppAtributes>& aArray, TInt32 aUid );
+    void RemoveApp( RArray<TUint>& aArray, TInt32 aUid );
 
     /**
-     * Get applications from CaStorage
-     * @param aArray RPointerArray with CCaInnerEntries
-     * contains applications
+     * Get applications from CaStorage.
+     * @param aArray RPointerArray with CCaInnerEntries.
+     * contains applications.
      */
     void GetCaAppEntriesL( RPointerArray<CCaInnerEntry>& aArray );
 
     /**
-     * Remove sat application from array(found in CaStorage)
+     * Remove sat application from array(found in CaStorage).
      * @param aArray RPointerArray with CCaInnerEntries
-     * contains applications
+     * contains applications.
      */
     void RemoveSatAppL( RPointerArray<CCaInnerEntry>& aArray );
 
     /**
-     * Ensure that HsApplicaiton is not visible: Add HsApplication
+     * Ensure that HsApplicaiton is not visible: Add HsApplication.
      * as hidden to CaStorage or remove HsApplication entry
      * from array (found in CaStorage).
      * @param aArray RPointerArray with CCaInnerEntries
-     * contains application
+     * contains application.
      */
     void HandleHsAppEntryL( RPointerArray<CCaInnerEntry>& aArray );
 
     /**
-     * Get application with specified uid from CaStorage
-     * @param aUid RPointerArray with CCaInnerEntries
+     * Get application with specified uid from CaStorage.
+     * @param aUid RPointerArray with CCaInnerEntries.
      * @param aArray RPointerArray with CCaInnerEntries
-     * contains application
+     * contains application.
      */
     void GetCaAppEntriesL( TInt aUid, RPointerArray<CCaInnerEntry>& aArray );
 
@@ -293,30 +287,22 @@ private:
 
     /**
      * Removes given uid from iInstalledPackages.
-     * Add new menu item referring to this application.
-     * @param aUid Application capability.
+     * @param aUid Application uid.
      */
     void RemoveFromInstalledPackages( TUint aUid );
 
     /**
-     * Set information from TApaAppInfo to entry
+     * Set information from TApaAppInfo to entry.
      * @param aEntry CCaInnerEntry with application.
      * @return ETrue if app info was updatedd
      */
     TBool SetApaAppInfoL( CCaInnerEntry* aEntry );
 
     /**
-     * Find the default folder (folder having attribute 'default="1"').
-     * If not found, return 0.
-     * @param aFolderId Dedault folder or 0.
-     */
-    void DefaultFolderL( TInt& aFolderId );
-
-    /**
-     * Handle items are in the menu but no corresponding app is present:
-     * - Items that are on a recently used MMC are get "missing" flag but kept.
+     * Handle items which are in the menu but no corresponding app is present:
+     * - Items that are on a recently used MMC get "missing" flag but kept.
      * - Items that are not on MMC or the MMC is not recently used, are
-     *   removed form the menu.
+     *   removed from the menu.
      * @param aItems Missing items.
      */
     void HandleMissingItemsL( RPointerArray<CCaInnerEntry>& aCaEnties );
@@ -334,7 +320,7 @@ private:
     void SetMissingFlagL( CCaInnerEntry* aEntry );
 
     /**
-     * Set "visible" flag.
+     * Clear "visible" flag (and also "missing" and "used").
      * @param aEntry entry.
      */
     void ClearVisibleFlagL( CCaInnerEntry* aEntry );
@@ -347,23 +333,24 @@ private:
 
     /**
      * Get current MMC id. 0 if no MMC is inserted, or in case of any errors.
-     * @return Current MMC id, or 0.
+     * @return Current MMC id or 0.
      */
     TUint CurrentMmcId() const;
 
     /**
-     * Check if file is on given default drive type.
+     * Check if file is on a given default drive type.
      * @param aFileName File name.
-     * @return ETrue if aFileName is on given default drive type.
+     * @param aDefaultDrive default drive type
+     * @return ETrue if aFileName is on a given default drive type.
      */
     TBool IsFileInDrive( const TDesC& aFileName,
             const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
 
     /**
-     * Check if application is installed on given drive type.
+     * Check if application is installed on a given drive type.
      * @param aUid app uid.
-     * @param aDefaultDrive drive type.
-     * @return ETrue if app is installed on given drive type.
+     * @param aDefaultDrive default drive type.
+     * @return ETrue if app is installed on a given drive type.
      */
     TBool IsAppInDriveL( const TUid aUid,
             const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
@@ -390,29 +377,29 @@ private:
     TBool IsDriveInUse( const DriveInfo::TDefaultDrives& aDefaultDrive );
 
     /**
-     * Add application to storage or update entry if necessary
-     * @param aCaEnties with applications from storage
-     * @param aApaItem application item with uid and hidden flag on or off
-     * @param aMmcId unique mmc id
+     * Add application to storage or update entry if necessary.
+     * @param aCaEnties with applications from storage.
+     * @param aAppUid application uid.
+     * @param aMmcId unique mmc id.
      */
     void UpdateApplicationEntryL( RPointerArray<CCaInnerEntry>& aCaEnties,
-            const TCaAppAtributes& aApaItem, TUint aMmcId );
+            TUint aAppUid, TUint aMmcId );
 
     /**
-     * Update entry from storage
-     * @param aEntry application entry
-     * @param aMmcId unique mmc id
+     * Update entry from storage.
+     * @param aEntry application entry.
+     * @param aMmcId unique mmc id.
      */
     void UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId );
 
     /**
-     * Get all application from storage and visible from apparc
-     * and update if necessary
+     * Get all applications from storage and visible from apparc
+     * and update if necessary.
      */
     void UpdateApplicationEntriesL();
 
     /**
-     * Notifys storage abaut updated apps
+     * Notifys storage about updated apps.
      */
     void InstallationNotifyL();
 
@@ -423,61 +410,42 @@ private:
 
     /**
      * Make collection visible if has visible entry.
-     * @param aEntry application entry
+     * @param aEntry application entry.
      */
     void MakeCollectionVisibleIfHasVisibleEntryL( CCaInnerEntry* aEntry );
+    
+    /**
+     * Adds or updates component id attribute in entry based on SCR provided data
+     * @param appInfo application data carrying full path name of application file.
+     * @param aEntry entry being updated with component id attribute.
+     * @return ETrue when component id attribute of the entry has been added or changed.
+     */
+    TBool UpdateComponentIdL( TApaAppInfo& appInfo, 
+        CCaInnerEntry& aEntry ) const;
+
+    /**
+     * Schedule appscanner run.
+     * Self complete active object.
+     */
+    void ScheduleScan();
 
 private:
     // data
 
     RApaLsSession iApaLsSession; ///< AppArc session. Own.
     CApaAppListNotifier* iNotifier; ///< Change notifier. Own.
-    CCaInstallNotifier* iInstallNotifier;///< Install notifier. Own.
+    CCaInstallNotifier* iInstallNotifier; ///< Install notifier. Own.
     CCaSrvMmcHistory* iMmcHistory; ///< MMC history. Own.
     RFs iFs; ///< File Server Session. Own.
+    Usif::RSoftwareComponentRegistry iSoftwareRegistry;
 
-    CCaStorageProxy& iCaStorageProxy;///< not own
-    CCaSrvEngUtils& iSrvEngUtils;//<not own
-    RArray<TInt> iInstalledPackages;
+    CCaStorageProxy& iCaStorageProxy; ///< Not own
+    CCaSrvEngUtils& iSrvEngUtils; ///< Not own
+    RArray<TInt> iInstalledPackages; ///< Own.
 
     TInt iCollectionDownloadId;
     TInt iAllCollectionId;
 CA_STORAGE_TEST_FRIEND_CLASS    (T_casrvAppScaner)
-
-    };
-
-/**
- * Application atributes.
- * Object contains uid and hidden flag
- */
-class TCaAppAtributes
-    {
-
-public:
-    /**
-     * Constructor.
-     * @param aUid uid application.
-     */
-    TCaAppAtributes( TUint aUid );
-
-    /*
-     * Get uid
-     * @return application uid
-     */
-    TUint GetUid() const;
-
-    /*
-     * Match application items
-     * @param item1 first item to matching.
-     * @param item2 second item to matching.
-     */
-    static TBool MatchItems( const TCaAppAtributes& item1,
-            const TCaAppAtributes& item2 );
-
-private:
-    // data
-
-    TUint iUid;///< uid application
 
     };
 

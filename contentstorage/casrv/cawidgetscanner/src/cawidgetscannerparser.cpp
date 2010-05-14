@@ -230,7 +230,7 @@ void CCaWidgetScannerParser::ParseManifestFileL(
         iWidgetDescriptor = CCaWidgetDescription::NewL();
         iWidgetDescriptor->SetPackageUidL(aPackageUid);
         iWidgetDescriptor->SetVisible(ETrue);
-
+        iWidgetDescriptor->SetManifestFilePathNameL( aFilePath );
 
         SetMmcIdL( iWidgetDescriptor );
 
@@ -323,6 +323,7 @@ void CCaWidgetScannerParser::ParseWidgetL(
     SetVisibilityL( aElement, widget );
     SetIconUriL( aElement, aPackageUid, widget);
     widget->SetPackageUidL( aPackageUid );
+    widget->SetManifestFilePathNameL( aFilePath );
     SetMmcIdL( widget );
 
     TTime modificationTime;

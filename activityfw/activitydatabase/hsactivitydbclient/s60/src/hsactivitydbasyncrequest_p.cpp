@@ -19,7 +19,7 @@
 #include "hsactivitydbclient_p.h"
 #include "hsactivitydbclient.h"
 #include <fbs.h>
-#include <xqconversions>
+#include <XQConversions>
 
 
 // -----------------------------------------------------------------------------
@@ -27,7 +27,7 @@
 // -----------------------------------------------------------------------------
 //
 HsActivityDbAsyncRequestPrivate*
-HsActivityDbAsyncRequestPrivate::NewL(HsActivityDbAsyncRequestObserver &observer,
+HsActivityDbAsyncRequestPrivate::NewLC(HsActivityDbAsyncRequestObserver &observer,
                                       HsActivityDbClientPrivate &session, 
                                       TAsyncRequest requestType,
                                       void* userData)
@@ -36,7 +36,6 @@ HsActivityDbAsyncRequestPrivate::NewL(HsActivityDbAsyncRequestObserver &observer
     new(ELeave)HsActivityDbAsyncRequestPrivate(observer, session, requestType, userData);
     CleanupStack::PushL(self);
     self->mDataBuf.CreateL(64);
-    CleanupStack::Pop(self);
     return self;
 }
 
@@ -44,12 +43,36 @@ HsActivityDbAsyncRequestPrivate::NewL(HsActivityDbAsyncRequestObserver &observer
 //
 // -----------------------------------------------------------------------------
 //
-HsActivityDbAsyncRequestPrivate*
-HsActivityDbAsyncRequestPrivate::newWaitActivityL(HsActivityDbAsyncRequestObserver & observer, 
-            HsActivityDbClientPrivate & session)
-    {
-    return HsActivityDbAsyncRequestPrivate::NewL(observer, session, EWaitActivity);
-    }
+void HsActivityDbAsyncRequestPrivate::waitActivityLD(
+                                HsActivityDbAsyncRequestObserver & observer, 
+                                HsActivityDbClientPrivate & session, 
+                                const QVariantHash &activity)
+{
+    HsActivityDbAsyncRequestPrivate *self =
+        HsActivityDbAsyncRequestPrivate::NewLC(observer, 
+                                               session, 
+                                               EWaitActivity);
+    self->mSession.PushL(self);
+    CleanupStack::Pop(self);
+    self->waitActivity(activity);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivityDbAsyncRequestPrivate::notifyDataChangeLD(
+                                   HsActivityDbAsyncRequestObserver &observer, 
+                                   HsActivityDbClientPrivate &session)
+{
+    HsActivityDbAsyncRequestPrivate *self = 
+        HsActivityDbAsyncRequestPrivate::NewLC(observer, 
+                                              session,
+                                              ENotifyDataChange);
+    self->mSession.PushL(self);
+    CleanupStack::Pop(self);
+    self->notifyDataChange();
+}
 
 // -----------------------------------------------------------------------------
 //
@@ -58,12 +81,14 @@ HsActivityDbAsyncRequestPrivate::newWaitActivityL(HsActivityDbAsyncRequestObserv
 void HsActivityDbAsyncRequestPrivate::getThumbnailLD(HsActivityDbAsyncRequestObserver &observer,
                                       HsActivityDbClientPrivate &session, 
                                       QSize size, 
-                                      QString imagePath, 
-                                      QString  mimeType, 
+                                      const QString &imagePath, 
+                                      const QString &mimeType, 
                                       void *userDdata)
 {
     HsActivityDbAsyncRequestPrivate *instance = 
-        HsActivityDbAsyncRequestPrivate::NewL(observer, session, EWaitGetThumbnail, userDdata);
+        HsActivityDbAsyncRequestPrivate::NewLC(observer, session, EWaitGetThumbnail, userDdata);
+    session.PushL(instance);
+    CleanupStack::Pop(instance);
     instance->getThumbnail( size, imagePath, mimeType);
 }
 
@@ -104,7 +129,10 @@ HsActivityDbAsyncRequestPrivate::~HsActivityDbAsyncRequestPrivate()
 void HsActivityDbAsyncRequestPrivate::DoCancel()
 {
     if (IsActive()) {
-        mSession.cancelWaitActivity();
+        switch (mRequestType) {
+        case EWaitActivity: mSession.cancelWaitActivity(); break;
+        case ENotifyDataChange: mSession.cancelNotifyDataChange(); break;
+        };
     }
 }
 
@@ -114,35 +142,45 @@ void HsActivityDbAsyncRequestPrivate::DoCancel()
 //
 void HsActivityDbAsyncRequestPrivate::RunL()
 {
-    int requestResult(iStatus.Int());
-    if (KErrNone == requestResult) {
-        switch (mRequestType){
-        case WaitActivity: {
+    switch (mRequestType) {
+    case WaitActivity: {
+        QString data;
+        if (KErrNone == iStatus.Int()) {
             RBuf8 buff;
             CleanupClosePushL(buff);
-            QString data;
             if (0 < mDataSize()) {
                 buff.CreateL(mDataSize());
             }
             mSession.getData(mTaskId(), buff);
             data = QString::fromAscii(reinterpret_cast<const char *>(buff.Ptr()),
                                       buff.Length());
-            buff.Close();
-            mObserver.asyncRequestCompleated(requestResult, mRequestType, data);
             CleanupStack::PopAndDestroy(&buff);
-            break;
-            }
-        case EWaitGetThumbnail: {
+        }
+        mObserver.asyncRequestCompleated(iStatus.Int(), mRequestType, data);
+        mSession.Pop(this);
+        delete this;
+        break;
+        }
+    case EWaitGetThumbnail: {
+        QPixmap pixmap;
+        if (KErrNone == iStatus.Int()) {
             CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
             CleanupStack::PushL(bitmap);
             User::LeaveIfError(bitmap->Duplicate(mBitmapId()));
             mSession.getData(mTaskId(), mDataBuf);//ACK Bitmap copy
-            mObserver.asyncRequestCompleated(requestResult, mRequestType, QPixmap::fromSymbianCFbsBitmap(bitmap), mUserData);
+            pixmap = QPixmap::fromSymbianCFbsBitmap(bitmap);
             CleanupStack::PopAndDestroy(bitmap);
-            break;
-            }
         }
+        mObserver.asyncRequestCompleated(iStatus.Int(), mRequestType, pixmap, mUserData);
         mSession.Pop(this);
+        delete this;
+        break;
+        }
+    case ENotifyDataChange: {
+        mObserver.asyncRequestCompleated(iStatus.Int(),mRequestType);
+        mSession.Pop(this);
+        delete this;
+        }
     }
 }
 
@@ -173,4 +211,15 @@ void HsActivityDbAsyncRequestPrivate::getThumbnail(QSize size, QString imagePath
     mBitmapPath = XQConversions::qStringToS60Desc(imagePath);
     mBitmapMimeType = XQConversions::qStringToS60Desc8(mimeType);
     mSession.sendDataAsync(mRequestType, TIpcArgs(&mBitmapId, &mTaskId, mBitmapPath, mBitmapMimeType), iStatus);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void HsActivityDbAsyncRequestPrivate::notifyDataChange()
+{
+    iStatus = KRequestPending;
+    SetActive();
+    mSession.sendDataAsync(ENotifyDataChange, TIpcArgs(), iStatus);
 }

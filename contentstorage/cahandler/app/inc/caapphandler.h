@@ -23,7 +23,6 @@
 // forward declarations
 class CEikonEnv;
 class CCaInnerEntry;
-class CCaUninstallOperation;
 class CCaUsifUninstallOperation;
 
 /**
@@ -100,20 +99,11 @@ private:
      * @param aComponentId component id
      */
     void StartUsifUninstallL( TInt aComponentId );
-
-    
-    /**
-     * Start uninstall operation via swi 
-     * @param aEntry the entry 
-     */
-    void StartSwiUninstallL(CCaInnerEntry &aEntry );
-
     
 private:
     // data
 
     CEikonEnv* iEikEnv;
-    CCaUninstallOperation* iUninstallOperation;
     CCaUsifUninstallOperation* iUsifUninstallOperation;
     };
 

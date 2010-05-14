@@ -121,6 +121,10 @@ void CActivityStorageAsyncTask::ApplicationActivitiesL(CActivityStorage& dataSto
 //
 void CActivityStorageAsyncTask::WriteResponseL(const RMessage2& msg)
 {
-    msg.WriteL(KResponseDataSizeOffset, TPckgBuf<TInt>(mData.Length()));//write data size
-    msg.WriteL(KResponseIdOffset, TPckgBuf<CBase*>(this));//task identyfier
+    if (EFalse == msg.IsNull()) {
+        msg.WriteL(KResponseDataSizeOffset, 
+                   TPckgBuf<TInt>(mData.Length()));//write data size
+        msg.WriteL(KResponseIdOffset, 
+                   TPckgBuf<CBase*>(this));//task identyfier
+    }
 }
