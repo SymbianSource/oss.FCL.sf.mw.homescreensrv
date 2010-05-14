@@ -26,11 +26,11 @@
 #include <QDebug>
 #include <QDir>
 
-ActivityClientPrivate::ActivityClientPrivate(ActivityClient *q) : QObject(q), isconnected(false)
+ActivityClientPrivate::ActivityClientPrivate(ActivityClient *q) : QObject(q), mIsconnected(false)
 {
     mDataStorage = new ActivityDataStorage();
     mServerClient = new HsActivityDbClient();
-    isconnected = ( KErrNone == mServerClient->connect());
+    mIsconnected = ( KErrNone == mServerClient->connect());
     connect(mServerClient, SIGNAL(activityRequested(QString)), q, SIGNAL(activityRequested(QString)));
 }
 
@@ -42,55 +42,67 @@ ActivityClientPrivate::~ActivityClientPrivate()
 
 bool ActivityClientPrivate::addActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters)
 {
-    if (isconnected) {
-        mDataStorage->addActivity(activityId, data);
-        QVariantHash activity(parameters);
-        RProcess process;
-        registerThumbnail(activityId, activity);
-        activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-        activity.insert(ActivityActivityKeyword, activityId);
-        mServerClient->addActivity(activity);
+    bool result(false);
+    if (mIsconnected) {
+        result = mDataStorage->addActivity(activityId, data);
+        if ( result ) {
+            QVariantHash activity(parameters);
+            RProcess process;
+            registerThumbnail(activityId, activity);
+            activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+            activity.insert(ActivityActivityKeyword, activityId);
+            int error = mServerClient->addActivity(activity);
+            result = error == KErrNone ? true : false;
+        }
     }
     // @todo make those operations atomic
-    // @todo return real result
-    return isconnected;
+    return result;
 }
 
 bool ActivityClientPrivate::removeActivity(const QString &activityId)
 {
-    if (isconnected) {
-        mDataStorage->removeActivity(activityId);
-        QVariantHash activity;
-        RProcess process;
-        activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-        activity.insert(ActivityActivityKeyword, activityId);
-        mServerClient->removeActivity(activity);
+    bool result(false);
+    if (mIsconnected) {
+        result = mDataStorage->removeActivity(activityId);
+        if ( result ) {            
+            QVariantHash activity;
+            RProcess process;
+            activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+            activity.insert(ActivityActivityKeyword, activityId);
+            int error = mServerClient->removeActivity(activity);
+            result = error == KErrNone ? true : false;
+            if (result) {
+                result = QFile::remove(thumbnailName(activityId));
+            }
+        }
     }
     // @todo make those operations atomic
-    // @todo return real result
-    return isconnected;
+    return result;
 }
 
 bool ActivityClientPrivate::updateActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters)
 {
-    if (isconnected) {
-        mDataStorage->updateActivity(activityId, data);
-        QVariantHash activity(parameters);
-        RProcess process;
-        registerThumbnail(activityId, activity);
-        activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-        activity.insert(ActivityActivityKeyword, activityId);
-        mServerClient->updateActivity(activity);
+    bool result(false);
+    if (mIsconnected) {
+        result = mDataStorage->updateActivity(activityId, data);
+        if ( result ) {
+            QVariantHash activity(parameters);
+            RProcess process;
+            registerThumbnail(activityId, activity);
+            activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+            activity.insert(ActivityActivityKeyword, activityId);
+            int error = mServerClient->updateActivity(activity);
+            result = error == KErrNone ? true : false;
+        }
     }
     // @todo make those operations atomic
-    // @todo return real result
-    return isconnected;
+    return result;
 }
 
 QList<QVariantHash> ActivityClientPrivate::activities() const
 {
     QList<QVariantHash> activities;
-    if (isconnected) {
+    if (mIsconnected) {
         QVariantHash activity;
         RProcess process;
         activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
@@ -101,13 +113,13 @@ QList<QVariantHash> ActivityClientPrivate::activities() const
 
 QVariant ActivityClientPrivate::activityData(const QString &activityId) const
 {
-    return isconnected ? mDataStorage->activityData(activityId) : QVariant();
+    return mIsconnected ? mDataStorage->activityData(activityId) : QVariant();
 }
 
 bool ActivityClientPrivate::waitActivity()
 {
-    bool retVal(isconnected);
-    if (isconnected) {
+    bool retVal(mIsconnected);
+    if (mIsconnected) {
         RProcess process;
         QVariantHash activity;
         activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
@@ -138,7 +150,7 @@ QVariantHash ActivityClientPrivate::parseCommandLine(const QStringList &commandL
 
 void ActivityClientPrivate::registerThumbnail(const QString &name, QVariantHash &activity)
 {
-    QVariantHash::const_iterator    findIterator(activity.constFind(ActivityScreenshotKeyword));
+    QVariantHash::const_iterator findIterator(activity.constFind(ActivityScreenshotKeyword));
     if (activity.constEnd() != findIterator   &&
         findIterator.value().canConvert<QPixmap>()) {
         const QString thumbnailManagerName = thumbnailName(name);
@@ -157,3 +169,4 @@ QString ActivityClientPrivate::thumbnailName(const QString &activityId) const
                                     QString::number(qHash(activityId), 16) + 
                                     ".png");
 }
+

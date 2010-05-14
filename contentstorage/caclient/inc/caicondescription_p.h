@@ -45,29 +45,14 @@ public:
 
 private:
 
-    /*!
-     * Points to the CaEntry instance that uses this private implementation.
-     */
     CaIconDescription *const m_q;
 
-    /*!
-     *
-     */
     int mId;
 
-    /*!
-     *
-     */
     QString mFilename;
 
-    /*!
-     *
-     */
     QString mSkinId;
 
-    /*!
-     *
-     */
     QString mApplicationId;
 
 };

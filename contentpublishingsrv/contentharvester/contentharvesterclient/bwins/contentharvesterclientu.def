@@ -1,6 +1,0 @@
-EXPORTS
-	??0RContentHarvesterClient@@QAE@XZ @ 1 NONAME ; RContentHarvesterClient::RContentHarvesterClient(void)
-	?Connect@RContentHarvesterClient@@QAEHXZ @ 2 NONAME ; int RContentHarvesterClient::Connect(void)
-	?Stop@RContentHarvesterClient@@QAEHXZ @ 3 NONAME ; int RContentHarvesterClient::Stop(void)
-	?Update@RContentHarvesterClient@@QAEHXZ @ 4 NONAME ; int RContentHarvesterClient::Update(void)
-

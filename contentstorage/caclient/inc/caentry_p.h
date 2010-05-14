@@ -68,50 +68,22 @@ public:
 
 private:
 
-    /*!
-     * Points to the CaEntry instance that uses
-     * this private implementation.
-     */
     CaEntry *const m_q;
 
-    /*!
-     *
-     */
     int mId;
 
-    /*!
-     *
-     */
     QString mText;
 
-    /*!
-     *
-     */
     QString mDescription;
 
-    /*!
-     *
-     */
     CaIconDescription mIconDescription;
 
-    /*!
-     *
-     */
     EntryFlags mFlags;
 
-    /*!
-     *
-     */
     QString mEntryTypeName;
 
-    /*!
-     *
-     */
     QMap<QString, QString> mAttributes;
 
-    /*!
-     *
-     */
     EntryRole mEntryRole;
 };
 

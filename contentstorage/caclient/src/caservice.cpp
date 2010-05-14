@@ -29,6 +29,7 @@
 #include "cadefs.h"
 
 #include "caclientproxy.h"
+#include "caclientnotifierproxy.h"
 #include "caobjectadapter.h"
 #include "caclienttest_global.h"
 
@@ -51,6 +52,26 @@
  For every operations on data is used always one instantiation of a class.
  Below are examples how to create data and work on those ones.
 
+ */
+
+/*!
+ \var CaServicePrivate::m_q
+ Points to the CaService instance that uses this private implementation.
+ */
+
+/*!
+ \var CaServicePrivate::mProxy
+ Proxy to communicate with Symbian server.
+ */
+
+/*!
+ \var CaServicePrivate::mErrorCode
+ code of error caused by last operation.
+ */
+
+/*!
+ \var CaServicePrivate::mNotifierProxy
+ Proxy to client notifier.
  */
 
 // Initialization of a static member variable.
@@ -574,22 +595,6 @@ bool CaService::removeEntriesFromGroup(const CaEntry &group,
 }
 
 /*!
- Performs touch operation on entry.
- \param entry to be touched
- \retval boolean with result of operation
- */
-bool CaServicePrivate::touch(const CaEntry &entry)
-{
-    qDebug() << "CaServicePrivate::touch" << "entryId: " << entry.id();
-
-    mErrorCode = mProxy->touch(entry);
-
-    qDebug() << "CaServicePrivate::touch mErrorCode:" << mErrorCode;
-
-    return (mErrorCode == NoErrorCode);
-}
-
-/*!
  Place entries in a given group at the end.
  \param groupId id of a group.
  \param entryId id of entry to append.
@@ -933,7 +938,8 @@ ErrorCode CaService::lastError() const
  \param servicePublic pointer to public service
  */
 CaServicePrivate::CaServicePrivate(CaService *servicePublic) :
-    m_q(servicePublic), mProxy(new CaClientProxy)
+    m_q(servicePublic), mProxy(new CaClientProxy), 
+    mNotifierProxy(NULL)
 {
     const ErrorCode connectionResult = mProxy->connect();
 
@@ -949,6 +955,7 @@ CaServicePrivate::CaServicePrivate(CaService *servicePublic) :
 CaServicePrivate::~CaServicePrivate()
 {
     delete mProxy;
+    delete mNotifierProxy;
 }
 
 /*!
@@ -972,6 +979,15 @@ QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(const QList<int> &
     if (mErrorCode == NoErrorCode
             && entryIdList.count() != resultList.count()) {
         mErrorCode = NotFoundErrorCode;
+    }//one line with else if
+    else if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            resultList.clear();
+            mErrorCode = mProxy->getData(entryIdList, resultList);
+        }
     }
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::getEntries");
 
@@ -991,7 +1007,15 @@ QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(const CaQuery &que
     QList< QSharedPointer<CaEntry> > resultList;
 
     mErrorCode = mProxy->getData(query, resultList);
-
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            resultList.clear();
+            mErrorCode = mProxy->getData(query, resultList);
+        }
+    }
     qDebug() << "CaServicePrivate::getEntries mErrorCode:" << mErrorCode;
 
     return resultList;
@@ -1008,6 +1032,15 @@ QList<int> CaServicePrivate::getEntryIds(const CaQuery &query) const
 
     QList<int> resultList;
     mErrorCode = mProxy->getEntryIds(query, resultList);
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            resultList.clear();
+            mErrorCode = mProxy->getEntryIds(query, resultList);
+        }
+    }
     CACLIENTTEST_FUNC_EXIT("CaItemModelList::getEntryIds");
     qDebug() << "CaServicePrivate::getEntryIds mErrorCode:" << mErrorCode;
     return resultList;
@@ -1035,6 +1068,15 @@ QSharedPointer<CaEntry> CaServicePrivate::createEntry(const CaEntry &entry)
 
     addDataResult =
         mProxy->addData(*entryClone, *newEntry);
+    if (addDataResult == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            addDataResult =
+                mProxy->addData(*entryClone, *newEntry);
+        }
+    }    
 
     // return empty pointer if nothing was added
     if (addDataResult != NoErrorCode) {
@@ -1048,6 +1090,30 @@ QSharedPointer<CaEntry> CaServicePrivate::createEntry(const CaEntry &entry)
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::createEntry");
 
     return newEntry;
+}
+
+/*!
+ Performs touch operation on entry.
+ \param entry to be touched
+ \retval boolean with result of operation
+ */
+bool CaServicePrivate::touch(const CaEntry &entry)
+{
+    qDebug() << "CaServicePrivate::touch" << "entryId: " << entry.id();
+
+    mErrorCode = mProxy->touch(entry);
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            mErrorCode = mProxy->touch(entry);
+        }
+    }
+
+    qDebug() << "CaServicePrivate::touch mErrorCode:" << mErrorCode;
+
+    return (mErrorCode == NoErrorCode);
 }
 
 /*!
@@ -1069,6 +1135,14 @@ bool CaServicePrivate::updateEntry(const CaEntry &entry)
             QScopedPointer<CaEntry> updatedEntry(new CaEntry(entry.role()));
 
             updateEntryResult = mProxy->addData(entry, *updatedEntry);
+            if (updateEntryResult == ServerTerminated) {
+                if (!mProxy->connect()) {
+                    if (mNotifierProxy) {
+                        mNotifierProxy->connectSessions();
+                    }
+                    updateEntryResult = mProxy->addData(entry, *updatedEntry);
+                }
+            }
 
         } catch (const std::bad_alloc &) {
             updateEntryResult = OutOfMemoryErrorCode;
@@ -1097,6 +1171,14 @@ bool CaServicePrivate::removeEntries(const QList<int> &entryIdList)
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::removeEntries");
 
     mErrorCode = mProxy->removeData(entryIdList);
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            mErrorCode = mProxy->removeData(entryIdList);
+        }
+    }
 
     qDebug() << "CaServicePrivate::removeEntries mErrorCode:" << mErrorCode;
 
@@ -1123,8 +1205,17 @@ bool CaServicePrivate::insertEntriesIntoGroup(
 
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::insertEntriesIntoGroup");
 
-    mErrorCode = mProxy->insertEntriesIntoGroup(groupId, entryIdList, beforeEntryId);
-
+    mErrorCode = mProxy->insertEntriesIntoGroup(groupId, 
+            entryIdList, beforeEntryId);
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            mErrorCode = mProxy->insertEntriesIntoGroup(groupId, 
+                    entryIdList, beforeEntryId);
+        }
+    }
     qDebug() << "CaServicePrivate::insertEntriesIntoGroup mErrorCode:"
              << mErrorCode;
 
@@ -1150,6 +1241,14 @@ bool CaServicePrivate::removeEntriesFromGroup(
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::removeEntriesFromGroup");
 
     mErrorCode = mProxy->removeEntriesFromGroup(groupId, entryIdList);
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            mErrorCode = mProxy->removeEntriesFromGroup(groupId, entryIdList);
+        }
+    }
 
     qDebug() << "CaServicePrivate::removeEntriesFromGroup mErrorCode:"
              << mErrorCode;
@@ -1250,7 +1349,10 @@ bool CaServicePrivate::executeCommand(const CaEntry &entry,
  */
 CaNotifier *CaServicePrivate::createNotifier(const CaNotifierFilter &filter)
 {
-    return new CaNotifier(new CaNotifierPrivate(filter));
+    if (!mNotifierProxy) {
+        mNotifierProxy = new CaClientNotifierProxy();
+    }
+    return new CaNotifier(new CaNotifierPrivate(filter, mNotifierProxy));
 }
 
 /*!
@@ -1265,7 +1367,14 @@ bool CaServicePrivate::customSort(int groupId, QList<int> &entryIdList)
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::customSort");
 
     mErrorCode = mProxy->customSort(entryIdList, groupId);
-
+    if (mErrorCode == ServerTerminated) {
+        if (!mProxy->connect()) {
+            if (mNotifierProxy) {
+                mNotifierProxy->connectSessions();
+            }
+            mErrorCode = mProxy->customSort(entryIdList, groupId);
+        }
+    }
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::customSort");
 
     return (mErrorCode == NoErrorCode);

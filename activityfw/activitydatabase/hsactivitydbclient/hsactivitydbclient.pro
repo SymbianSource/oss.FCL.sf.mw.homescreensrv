@@ -37,12 +37,17 @@ SOURCES   += ../s60/src/hsserializer.cpp \
              s60/src/hsactivitydbclient_p.cpp \
 			 s60/src/hsactivitydbasyncrequest_p.cpp
 
+LIBS      += -lxqutils \
+             -lestor \
+             -lfbscli
+
 
 hsactivitydbclientdll.sources = hsactivitydbclient.dll
 hsactivitydbclientdll.path = $$SHARED_LIB_DIR
 DEPLOYMENT += hsactivitydbclientdll
 
 BLD_INF_RULES.prj_exports += "../inc/hsactivitydbclientinterface.h /epoc32/include/hsactivitydbclientinterface.h" \
+                             "../inc/activitycmd.h /epoc32/include/activitycmd.h" \
                              "inc/hsactivitydbclient.h /epoc32/include/hsactivitydbclient.h" \
 							 "inc/hsactivitydbasyncrequestobserver.h /epoc32/include/hsactivitydbasyncrequestobserver.h"
 DEPLOYMENT += api

@@ -26,6 +26,7 @@ class CaEntry;
 class CaQuery;
 class CaService;
 class CaNotifier;
+class CaClientNotifierProxy;
 
 class CaServicePrivate
 {
@@ -66,19 +67,12 @@ public:
 
 private:
 
-    /**
-     * Points to the CaService instance that uses this private implementation.
-     */
     CaService *const m_q;
 
-    /**
-     * Proxy to communicate with Symbian server.
-     */
     CaClientProxy *mProxy;
+ 
+    CaClientNotifierProxy *mNotifierProxy;
 
-    /**
-     * code of error caused by last operation.
-     */
     mutable ErrorCode mErrorCode;
 
 };

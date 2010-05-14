@@ -18,7 +18,7 @@
 #ifndef CAQUERY_H
 #define CAQUERY_H
 
-#include <QStringList.h>
+#include <QStringList>
 #include "caclient_global.h"
 #include "cadefs.h"
 

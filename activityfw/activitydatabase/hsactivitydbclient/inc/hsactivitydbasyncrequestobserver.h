@@ -18,6 +18,8 @@
 #ifndef HSACTIVITYDBASYNCREQUESTOBSERVER_H
 #define HSACTIVITYDBASYNCREQUESTOBSERVER_H
 #include <QString>
+#include <QPixmap>
+
 class HsActivityDbAsyncRequestObserver
 {
 public:
@@ -30,5 +32,16 @@ public:
     virtual void asyncRequestCompleated(int result,
                                         int requestType,
                                         const QString &data)=0;
+
+    /**
+     * Function inform observer about asynchronous request results
+     * @param result - request result
+     * @param requestType - request type
+     * @param pixmap - pixmap respons
+     */
+    virtual void asyncRequestCompleated(int result,
+                                        int requestType,
+                                        const QPixmap& pixmap, 
+                                        void* userData)=0;
 };
 #endif // HSACTIVITYDBASYNCREQUESTOBSERVER_H

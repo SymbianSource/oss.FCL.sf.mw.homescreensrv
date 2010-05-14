@@ -51,7 +51,7 @@ private:
 private:
     ActivityDataStorage *mDataStorage;
     HsActivityDbClient *mServerClient;
-    bool isconnected;
+    bool mIsconnected;
 };
 
 #endif // ACTIVITYCLIENT_P_H

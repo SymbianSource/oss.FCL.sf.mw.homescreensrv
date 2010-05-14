@@ -21,16 +21,14 @@
 // INCLUDES
 #include <e32std.h>
 #include <e32base.h>
-#include <driveinfo.h>
-#include <QObject>
+#include "hbtextresolversymbian.h"
 
 #include "castorage_global.h"
 
 // FORWARD DECLARATIONS
 class CCaLocalizationEntry;
-class QTranslator;
 class CCaStorageProxy;
-
+class CCaInnerEntry;
 
 /**
  *  CCaLocalizerScannerProxy
@@ -39,7 +37,6 @@ class CCaStorageProxy;
 class CCaLocalizerScannerProxy : public CBase
     {
     
-//CA_STORAGE_TEST_FRIEND_CLASS    (TestCaLocalizerScanner)
 
 public:
     
@@ -59,11 +56,7 @@ public:
      */
     ~CCaLocalizerScannerProxy( );
 
-    /**
-     * Performs whole localization of database, can be called at any moment
-     */
-    void PerformL( );
-    
+   
 private:
 
     /**
@@ -83,36 +76,23 @@ private:
     void UpdateLocalNamesL( );
 
     /**
-     * Load translations to mTranslator
-     * @param aFilename file name with translations
-     * @return success or failure
-     */   
-    TBool LoadTranslator( QString aFilename );
-
-    /**
      * Gets localization rows from database as table of CCaLocalizationEntries
      * @param aLocals pointers to localization entries
      */
     void GetLocalizationRowsL( RPointerArray<CCaLocalizationEntry>& aLocals );
     
-    /**
-     * Converts descriptor to const char*
-     * @param aDescriptor descriptor with text to convert
-     * @return pointer to const char containing text
-     */
-    const char* DescriptorToStringL( const TDesC& aDescriptor );
-
+    const TDesC& GetEntryText(
+            RPointerArray<CCaInnerEntry> aEntries, TInt aId );
     /*
      * Not own
      */
     CCaStorageProxy* iStorageProxy;
 
     /*
-     * Own
-     */    
-    QTranslator* iTranslator;
+     * Owned
+     */
+    HbTextResolverSymbian* iResolver;
 
-    //CA_STORAGE_TEST_FRIEND_CLASS    (TestCaLocalizerScanner)
     };
 
 #endif // CALOCALSCANNERPROXY_H

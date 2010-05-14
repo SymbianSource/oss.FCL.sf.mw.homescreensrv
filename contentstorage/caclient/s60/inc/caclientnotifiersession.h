@@ -74,6 +74,13 @@ public:
     void Close();
 
     /**
+     * Reconnect all subsession
+     *
+     * @since S60 v 5.0
+     */
+    void ConnectAllL();
+
+    /**
      * Registers a notifier.
      * @param innerNotifierFilter pointer to inner (symbian style) filter.
      * @param notifierFilter notifier filter address
@@ -84,7 +91,7 @@ public:
      */
     TInt RegisterNotifier(CCaInnerNotifierFilter *innerNotifierFilter,
             const TAny* notifierFilter,
-            const CaClientNotifierProxy* notifierProxy);
+            const IDataObserver* notifierProxy);
 
     /**
      * Unregisters a notifier.
@@ -135,7 +142,7 @@ private:
      */
     void RegisterNotifierL(CCaInnerNotifierFilter* innerNotifierFilter,
             const TAny* notifierFilter,
-            const CaClientNotifierProxy *notifierProxy);
+            const IDataObserver *notifierProxy);
 
     /*
      * GetSizeL method

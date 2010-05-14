@@ -21,6 +21,7 @@
 #include <QVariant>
 #include <QList>
 #include <QPixmap>
+#include <QSize>
 
 class ActivityManagerPrivate;
 
@@ -37,9 +38,7 @@ public slots:
     QList<QVariantHash> activitiesList();
     void launchActivity(const QString &uri);
     void launchActivity(int applicationId, const QString &activityId);
-    void removeActivity(int applicationId, const QString &activityId);
-    void removeApplicationActivities(int applicationId);
-    void getThumbnail(const QString &thumbnailId, void * =0);
+    void getThumbnail(QSize resolution,const QString &thumbnailPath, void *data =0);
 
 signals:
     void thumbnailReady(QPixmap, void *);

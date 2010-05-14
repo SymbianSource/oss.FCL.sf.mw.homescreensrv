@@ -11,32 +11,53 @@
 *
 * Contributors:
 *
-* Description: Application entry point
+* Description:
 *
 */
-#include <QtCore>
-#include <QCoreApplication>
+#include "activityserver.h"
+#include <e32base.h>
 
-#include "hsactivityserver.h"
-#include "hsactivitystorage.h"
-
-#ifdef Q_OS_SYMBIAN
-#include <coemain.h>
-#include <coedef.h>
-#endif
-
-int main(int argc, char *argv[])
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+LOCAL_C void StartActivityServerL()
 {
-#ifdef Q_OS_SYMBIAN
-    CCoeEnv::Static()->RootWin().SetOrdinalPosition(0, ECoeWinPriorityNeverAtFront);
-#endif
+    CActiveScheduler* activeScheduler = new( ELeave ) CActiveScheduler;
+    CleanupStack::PushL( activeScheduler );
+    CActiveScheduler::Install( activeScheduler );
+    CActivityServer* serverObject = CActivityServer::NewLC();
+    RProcess::Rendezvous( KErrNone );
+    CActiveScheduler::Start();
+    CleanupStack::PopAndDestroy( serverObject );
+    CleanupStack::PopAndDestroy( activeScheduler );
+}
 
-    QCoreApplication app(argc, argv);
-    HsActivityStorage storage;
-    HsActivityServer server(storage);
-    int retVal(KErrGeneral);
-    if (server.start()) {
-        retVal = app.exec();
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+LOCAL_C TInt StartActivityServer()
+{
+    __UHEAP_MARK;
+    TInt errNo(KErrNoMemory);
+    CTrapCleanup* cleanupStack = CTrapCleanup::New();
+    if (cleanupStack) {
+        TRAP(errNo, StartActivityServerL());
+        delete cleanupStack;
     }
-    return retVal;
+    __UHEAP_MARKEND;
+    if (KErrNone != errNo) {
+        RProcess::Rendezvous(errNo);
+    }
+    return errNo;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TInt E32Main()
+{
+    return StartActivityServer();
 }

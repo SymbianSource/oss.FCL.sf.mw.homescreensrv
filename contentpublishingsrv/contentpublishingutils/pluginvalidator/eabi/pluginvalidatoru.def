@@ -1,9 +1,0 @@
-EXPORTS
-	_ZN16CPluginValidator17GetImplementationE4TUid @ 1 NONAME
-	_ZN16CPluginValidator17GetImplementationEi @ 2 NONAME
-	_ZN16CPluginValidator4NewLE4TUidPv @ 3 NONAME
-	_ZN16CPluginValidator5NewLCE4TUidPv @ 4 NONAME
-	_ZN16CPluginValidator8GetCountEv @ 5 NONAME
-	_ZN25CHarvesterPluginValidator4NewLE4TUidPv @ 6 NONAME
-	_ZN25CHarvesterPluginValidator5NewLCE4TUidPv @ 7 NONAME
-

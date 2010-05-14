@@ -287,6 +287,9 @@ ErrorCode CaObjectAdapter::convertErrorCode(int internalErrorCode)
     case KErrArgument:
         error = BadArgumentErrorCode;
         break;
+    case KErrServerTerminated:
+        error = ServerTerminated;
+        break;
     default:
         error = UnknownErrorCode;
         break;

@@ -15,7 +15,7 @@
 *
 */
 #include "hsserializer.h"
-
+#include <s32mem.h>
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -106,10 +106,28 @@ RBuf8 &operator <<(RBuf8 &dst, const QList<QVariantHash>& src)
 //
 QList<QVariantHash>& operator <<(QList<QVariantHash>& dst, const TDesC8 &src)
 {
-    QByteArray buffer(QByteArray::fromRawData(reinterpret_cast<const char *>(src.Ptr()),
-                                              src.Length()));
-
-    QDataStream stream(&buffer, QIODevice::ReadOnly);
-    QT_TRYCATCH_LEAVING(stream >> dst);
+    dst.clear();
+    
+    QVariantHash item;
+    TRAP_IGNORE(
+    RDesReadStream srcStream(src);
+    int numOfItems(srcStream.ReadInt32L());
+    int bufferSize;
+    
+    RBuf8 tmpBuff;
+    CleanupClosePushL(tmpBuff);
+    for (int iter(0); iter < numOfItems; ++iter) {
+        bufferSize = srcStream.ReadInt32L();
+        if (tmpBuff.MaxLength() < bufferSize) {
+            tmpBuff.ReAllocL(bufferSize);
+        }
+        item.clear();
+        if (0 < bufferSize) {
+            srcStream.ReadL(tmpBuff, bufferSize);
+            item << tmpBuff;
+        }
+        dst.append(item);
+    }
+    CleanupStack::PopAndDestroy(&tmpBuff));
     return dst;
 }

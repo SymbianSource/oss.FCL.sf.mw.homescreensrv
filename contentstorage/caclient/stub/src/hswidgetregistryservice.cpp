@@ -21,15 +21,9 @@
 
 #include "hswidgetregistryservice.h"
 #include "hswidgetregistryservice_p.h"
-#include "hswidgetprovidermanifest.h"
+#include "hswidgetcomponentdescriptor.h"
+#include "hswidgetcomponentparser.h"
 
-const char POSTERURI[] = "homescreen.nokia.com/widget/poster/";
-const char POSTERWIDGETNAME[] = "name";
-const char POSTERWIDGETID[] = "posterwidgetid";
-const char PUBLISHER[] = "publisher";
-const char TEMPLATETYPE[] = "templatetype";
-const char CONTENTID[] = "contentid";
-const char CONTENTTYPE[] = "contenttype";
 
 /*!
     ?Qt_style_documentation
@@ -161,7 +155,6 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
     const QString &manifestFilePath)
 {
     QList<HsWidgetToken> widgets;
-    HsWidgetProviderManifest manifest;
     QStringList filters("*.manifest");
     QDir dir(manifestFilePath);
     QStringList manifestDir = dir.entryList(filters, QDir::Files);
@@ -169,12 +162,30 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
     if (!manifestDir.isEmpty()) {
         // ?
         QString fileName = manifestDir.first();
+        HsWidgetComponentParser componentParser(dir.absoluteFilePath(fileName));
+        if ( !componentParser.error() ) {
+            HsWidgetToken widgetToken;
+            HsWidgetComponentDescriptor widgetDescriptor = componentParser.widgetComponentDescriptor();
+            widgetToken.mUri = widgetDescriptor.uri;
+            widgetToken.mLibrary = manifestFilePath + "/" + widgetDescriptor.uri + ".dll";
+            widgetToken.mTitle = widgetDescriptor.title;
+            if (widgetDescriptor.iconUri.length() > 0 ) {
+                widgetToken.mIconUri = manifestFilePath + "/" + widgetDescriptor.iconUri;
+            }
+            widgetToken.mDescription = widgetDescriptor.description;
+            int widgetUid = dir.dirName().toUInt(0, 16);
+            widgetToken.mUid = widgetUid;
+            widgets << widgetToken;
+            qDebug() << "HsWidgetRegistryServicePrivate::readManifestFile - " \
+                     "widget added: " << fileName;
+        }
+#if 0
 
         if (fileName != "hsposterwidgetprovider.manifest") {
             // Directory differs from the poster widget's directory
             // which is not supported for the time being.
-            manifest.loadFromXml(dir.absoluteFilePath(fileName));
-            widgets = manifest.widgets();
+//            manifest.loadFromXml(dir.absoluteFilePath(fileName));
+//            widgets = manifest.widgets();
             int widgetUid = dir.dirName().toUInt(0, 16);
 
             // ?
@@ -190,6 +201,7 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
             qDebug() << "HsWidgetRegistryServicePrivate::readManifestFile - " \
                      "widget added: " << fileName;
         }
+#endif                
     }
     return widgets;
 }

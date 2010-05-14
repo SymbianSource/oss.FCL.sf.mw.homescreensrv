@@ -1,3 +1,0 @@
-EXPORTS
-	?NewDatabaseL@StorageFactory@@SAPAVCCpStorage@@XZ @ 1 NONAME ; class CCpStorage * StorageFactory::NewDatabaseL(void)
-

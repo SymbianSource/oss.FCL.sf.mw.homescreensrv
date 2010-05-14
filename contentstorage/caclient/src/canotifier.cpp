@@ -19,6 +19,7 @@
 #include "canotifier_p.h"
 #include "canotifierfilter.h"
 #include "caclientnotifierproxy.h"
+#include "caobserver.h"
 
 /*!
  \class CaNotifier.
@@ -89,6 +90,22 @@
  */
 
 /*!
+ \var CaNotifierPrivate::m_q
+ Points to the CaNotifier instance that uses
+ this private implementation.
+ */
+
+/*!
+ \var CaNotifierPrivate::mNotifierFilter
+ Own.
+ */
+
+/*!
+ \var CaNotifierPrivate::mNotifierProxy
+ Not own.
+ */
+
+/*!
  Constructor.
  \param entryPrivate pointer to private implementation.
  */
@@ -104,7 +121,14 @@ CaNotifier::CaNotifier(CaNotifierPrivate *const notifierPrivate) :
  */
 CaNotifier::~CaNotifier()
 {
-    m_d->makeDisconnect();
+    m_d->unregisterNotifier(
+                        CaNotifierPrivate::EntryChangedWithIdNotifierType);
+    m_d->unregisterNotifier(
+                        CaNotifierPrivate::EntryChangedWithEntryNotifierType);
+    m_d->unregisterNotifier(
+                        CaNotifierPrivate::EntryTouchedNotifierType);
+    m_d->unregisterNotifier(
+                        CaNotifierPrivate::GroupContentChangedNotifierType);
     delete m_d;
 }
 
@@ -193,11 +217,13 @@ void CaNotifier::disconnectNotify(const char *signal)
  \param notifierFilter descrbies entries to observe.
  */
 CaNotifierPrivate::CaNotifierPrivate(
-    const CaNotifierFilter &notifierFilter) :
+    const CaNotifierFilter &notifierFilter, 
+    CaClientNotifierProxy *notifierProxy) :
     m_q(NULL),
-    mNotifierFilter(NULL),
-    mNotifierProxy(NULL)
+    mNotifierFilter(NULL), 
+    mObserver(NULL)
 {
+    mNotifierProxy = notifierProxy;
     mNotifierFilter = new CaNotifierFilter(notifierFilter);
 }
 
@@ -217,7 +243,6 @@ CaNotifierPrivate::~CaNotifierPrivate()
                                            GroupContentChangedNotifierType);
     }
     delete mNotifierFilter;
-    delete mNotifierProxy;
 }
 /*!
  Registers notifier
@@ -229,7 +254,7 @@ int CaNotifierPrivate::registerNotifier(NotifierType notifierType)
         return mNotifierProxy->registerNotifier(
                    mNotifierFilter,
                    notifierType,
-                   mNotifierProxy);
+                   mObserver);
     }
     return 0;
 }
@@ -251,48 +276,23 @@ void CaNotifierPrivate::unregisterNotifier(NotifierType notifierType)
 void CaNotifierPrivate::makeConnect()
 {
     if (m_q) {
-        if (!mNotifierProxy) {
-            mNotifierProxy = new CaClientNotifierProxy();
-        }
-        m_q->connect(mNotifierProxy,
+        mObserver = new CaObserver();
+        m_q->connect(mObserver,
                      SIGNAL(signalEntryChanged(int,ChangeType)),
                      m_q,
                      SIGNAL(entryChanged(int,ChangeType)));
-        m_q->connect(mNotifierProxy,
+        m_q->connect(mObserver,
                      SIGNAL(signalEntryChanged(const CaEntry &,ChangeType)),
                      m_q,
                      SIGNAL(entryChanged(const CaEntry &,ChangeType)));
-        m_q->connect(mNotifierProxy,
+        m_q->connect(mObserver,
                      SIGNAL(signalEntryTouched(int)),
                      m_q,
                      SIGNAL(entryTouched(int)));
-        m_q->connect(mNotifierProxy,
+        m_q->connect(mObserver,
                      SIGNAL(signalGroupContentChanged(int)),
                      m_q,
                      SIGNAL(groupContentChanged(int)));
     }
 }
-/*!
- Disconnects this Notifier
- */
-void CaNotifierPrivate::makeDisconnect()
-{
-    if (m_q && mNotifierProxy) {
-        m_q->disconnect(mNotifierProxy,
-                        SIGNAL(signalEntryChanged(int,ChangeType)),
-                        m_q,
-                        SIGNAL(entryChanged(int,ChangeType)));
-        m_q->disconnect(mNotifierProxy,
-                        SIGNAL(signalEntryChanged(const CaEntry &,ChangeType)),
-                        m_q,
-                        SIGNAL(entryChanged(const CaEntry &,ChangeType)));
-        m_q->disconnect(mNotifierProxy,
-                        SIGNAL(signalEntryTouched(int)),
-                        m_q,
-                        SIGNAL(entryTouched(int)));
-        m_q->disconnect(mNotifierProxy,
-                        SIGNAL(signalGroupContentChanged(int)),
-                        m_q,
-                        SIGNAL(groupContentChanged(int)));
-    }
-}
+

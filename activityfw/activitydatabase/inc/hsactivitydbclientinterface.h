@@ -17,24 +17,10 @@
 #ifndef HSACTIVITYDBCLIENTINTERFACE_H
 #define HSACTIVITYDBCLIENTINTERFACE_H
 #include <qvariant.h>
-
+#include <activitycmd.h>
 /**
  * Enumerate supported functions
  */
-enum ClientFunctions {
-    AddActivity =0,
-    UpdateActivity,
-    RemoveActivity,
-    RemoveApplicationActivities,
-    RequestedActivityName,
-    Activities,
-    ApplicationActivities,
-    WaitActivity,
-    LaunchActivity,
-    GetThumbnail,
-    GetData,
-    CancelWait
-};
 
 const char ActivityApplicationKeyword [] = ":ApplicationId";
 const char ActivityActivityKeyword [] = ":ActivityName";

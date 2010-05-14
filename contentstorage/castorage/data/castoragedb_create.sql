@@ -90,7 +90,8 @@ CREATE VIEW COLLECTION
     "" AS "COLLECTION_NAME",
     "" AS "COL_LOCNAME",
     "" AS "COL_APP_GROUP_NAME", 
-    "" AS "ICON";
+    "" AS "ICON",
+    "" AS "FLAGS";
     
 SELECT "  CREATE TRIGGER collection_insert" AS " ";
 CREATE TRIGGER collection_insert INSTEAD OF INSERT ON COLLECTION 
@@ -103,7 +104,7 @@ BEGIN
       (IC_FILENAME IS NULL OR (SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = new.ICON AND ICON_ID <> last_insert_rowid()) IS NOT NULL);   
   -- INSERT ENTRY
     INSERT INTO CA_ENTRY (EN_TEXT, EN_ROLE, EN_TYPE_NAME, EN_FLAGS, EN_ICON_ID ) 
-    VALUES ( new.COLLECTION_NAME , 2, "collection",  4, (SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = new.ICON ));
+    VALUES ( new.COLLECTION_NAME , 2, "collection",  new.FLAGS, (SELECT ICON_ID FROM CA_ICON WHERE IC_FILENAME = new.ICON ));
     -- LOCALIZATION 
     INSERT INTO CA_LOCALIZATION_TEXT ( LT_TABLE_NAME, LT_ATTRIBUTE_NAME, LT_STRING_ID, LT_ROW_ID ) 
     VALUES ( 'CA_ENTRY', 'EN_TEXT', new.COL_LOCNAME, ( SELECT last_insert_rowid() ) );
@@ -177,7 +178,7 @@ CREATE VIEW WIDGET_TO_COLLECTION
     "" AS "LIBRARY",
     "" AS "LONG_NAME",
     "" AS "URI",
-    "" AS "COLLECTION_NAME"	;
+    "" AS "COLLECTION_NAME";
 
 SELECT "  CREATE TRIGGER insert_widget_to_collection" AS " ";
 CREATE TRIGGER item_to_collection_insert_widget INSTEAD OF INSERT ON WIDGET_TO_COLLECTION WHEN new.ITEM_TYPE="widget"
@@ -214,7 +215,7 @@ VALUES ( 'Version', '00001' );
 INSERT INTO CA_DB_PROPERTIES ( DB_PROPERTY, DB_VALUE ) 
 VALUES ( 'Language', '' );
 INSERT INTO CA_DB_PROPERTIES ( DB_PROPERTY, DB_VALUE ) 
-VALUES ( 'QMfile', 'db_textmap_' );
+VALUES ( 'QMfile', 'contentstorage_' );
 
 -- insert neccessary items
 SELECT "INSERT menucollections ENTRY" AS " ";

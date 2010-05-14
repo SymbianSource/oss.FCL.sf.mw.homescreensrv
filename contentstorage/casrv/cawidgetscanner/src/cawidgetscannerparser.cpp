@@ -24,6 +24,7 @@
 #include <xmlengdocument.h>
 #include <utf.h>
 
+#include "cadef.h"
 #include "cawidgetscannerparser.h"
 #include "widgetscannerutils.h"
 
@@ -46,7 +47,11 @@ _LIT8(KTitle, "title" );
 _LIT8(KDescription, "description" );
 _LIT8(KHidden, "hidden" );
 _LIT8(KIconUri, "iconuri" );
+_LIT8(KWidgetProvider, "widgetprovider");
 
+_LIT8(KWidgetManifest, "hswidgetmanifest");
+_LIT8(KIcon, "icon");
+_LIT8(KServiceXml, "servicexml");
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -105,6 +110,7 @@ CCaWidgetScannerParser* CCaWidgetScannerParser::NewLC( RFs& aFs )
 //
 CCaWidgetScannerParser::~CCaWidgetScannerParser()
     {
+    delete iWidgetDescriptor;
     iImportPath.Close();
     iWidgets.ResetAndDestroy();
     iDomImpl.Close();
@@ -200,23 +206,102 @@ void CCaWidgetScannerParser::ParseManifestFileL(
     User::LeaveIfError(parser.Open(iDomImpl));
     RXmlEngDocument doc = parser.ParseFileL(aFilePath, KChunkSize);
     CleanupClosePushL(doc);
-    TXmlEngElement docElement = doc.AsElement();
-    TXmlEngElement element;
-    RXmlEngNodeList<TXmlEngElement> elementList;
-    CleanupClosePushL(elementList);
+    TXmlEngElement docElement = doc.DocumentElement();
 
-    element = docElement.FirstChild().AsElement();
-    element.GetElementsByTagNameL(elementList, KWidget);
+    if (docElement.Name() == KWidgetProvider) {
+        TXmlEngElement element;
+        RXmlEngNodeList<TXmlEngElement> elementList;
+        CleanupClosePushL(elementList);
+        docElement.GetElementsByTagNameL(elementList, KWidget);
 
-    while (elementList.HasNext())
-        {
-        element = elementList.Next();
-        if ( element.HasAttributes() )
+        while (elementList.HasNext())
             {
-            ParseWidgetL( aFilePath, element, aPackageUid );
+            element = elementList.Next();
+            if ( element.HasAttributes() )
+                {
+                ParseWidgetL( aFilePath, element, aPackageUid );
+                }
             }
-        }
-    CleanupStack::PopAndDestroy(&elementList);
+        CleanupStack::PopAndDestroy(&elementList);
+    } else if (docElement.Name() == KWidgetManifest) {
+
+        delete iWidgetDescriptor;
+        iWidgetDescriptor = NULL;
+        iWidgetDescriptor = CCaWidgetDescription::NewL();
+        iWidgetDescriptor->SetPackageUidL(aPackageUid);
+        iWidgetDescriptor->SetVisible(ETrue);
+
+
+        SetMmcIdL( iWidgetDescriptor );
+
+        RXmlEngNodeList<TXmlEngElement> childElementList;
+        CleanupClosePushL(childElementList);
+        docElement.GetChildElements(childElementList);
+        TXmlEngElement element;
+        while (childElementList.HasNext())
+          {
+          element = childElementList.Next();
+          if (element.Name() == KUri)
+              {
+              ParseUriL(element);
+              }
+          else if (element.Name() == KTitle)
+              {
+              ParseTitleL(element);
+              }
+          else if (element.Name() == KIcon)
+              {
+              ParseIconL(element,aPackageUid);
+              }
+          else if (element.Name() == KDescription)
+              {
+              ParseDescriptionL(element);
+              }
+          else if (element.Name() == KHidden)
+              {
+              ParseHiddenL(element);
+              }
+          else if (element.Name() == KServiceXml)
+              {
+              ParseServiceXmlL(element);
+              }
+           }
+        CleanupStack::PopAndDestroy(&childElementList);
+
+        //set path for hs to use, trim last 2 chars (doubleslash)
+        HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid );
+        iWidgetDescriptor->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
+        CleanupStack::PopAndDestroy(libraryPath);
+        
+        HBufC *libraryPath2 = GetManifestDirectoryPathLC( aPackageUid );
+        libraryPath2 = libraryPath2->ReAllocL(libraryPath2->Length() + iWidgetDescriptor->GetUri().Length());
+        CleanupStack::Pop(1);
+        CleanupStack::PushL(libraryPath2);
+        libraryPath2->Des().Append(iWidgetDescriptor->GetUri());
+        iWidgetDescriptor->SetLibraryL(*libraryPath2);
+        CleanupStack::PopAndDestroy(libraryPath2);
+        
+                
+        TTime modificationTime;
+        iFs.Modified( aFilePath, modificationTime);
+        TInt64 modificationIntTime = modificationTime.Int64();
+        RBuf16 rBuf;
+        rBuf.CleanupClosePushL();
+        rBuf.CreateL( KModificationTimeLength );
+        rBuf.AppendNum( modificationIntTime );
+        iWidgetDescriptor->SetModificationTimeL( rBuf );
+        CleanupStack::PopAndDestroy( &rBuf );
+
+        TInt index = iWidgets.Find( iWidgetDescriptor, CCaWidgetDescription::Compare );
+        if ( index != KErrNotFound )
+            {
+            delete iWidgets[index];
+            iWidgets.Remove( index );
+            }
+        iWidgets.AppendL( iWidgetDescriptor );//ownership transfer
+        iWidgetDescriptor = NULL;
+    }
+
     CleanupStack::PopAndDestroy(&doc);
     CleanupStack::PopAndDestroy(&parser);
     }
@@ -364,6 +449,10 @@ void CCaWidgetScannerParser::SetVisibilityL(
         {
         aWidget->SetVisible( EFalse );
         }
+    else
+        {
+        aWidget->SetVisible( ETrue );
+        }
     CleanupStack::PopAndDestroy( hidden );
 }
 
@@ -403,9 +492,21 @@ void CCaWidgetScannerParser::SetMmcIdL( CCaWidgetDescription * widget )
     User::LeaveIfError( DriveInfo::GetDefaultDrive(
                 DriveInfo::EDefaultRemovableMassStorage, removableDrive ) );
 
+    TChar massStorageDrive;
+    User::LeaveIfError( DriveInfo::GetDefaultDrive(
+                DriveInfo::EDefaultMassStorage, massStorageDrive ) );
     if( iCurrentDriveLetter == removableDrive )
         {
-        widget->SetMmcId( WidgetScannerUtils::CurrentMmcId( iFs ) );
+        RBuf mmcId;
+        mmcId.CreateL(KMassStorageIdLength);
+        mmcId.CleanupClosePushL();
+        WidgetScannerUtils::CurrentMmcId( iFs, mmcId );
+        widget->SetMmcIdL( mmcId );
+        CleanupStack::PopAndDestroy( &mmcId );
+        }
+    else if( iCurrentDriveLetter == massStorageDrive )
+        {
+        widget->SetMmcIdL( KCaMassStorage );
         }
 }
 
@@ -429,7 +530,8 @@ CDir* CCaWidgetScannerParser::GetDirectoriesLC( )
 //
 HBufC* CCaWidgetScannerParser::FullPathLC( )
     {
-    HBufC* result = HBufC16::NewLC( iImportPath.Length() + KDriveLetterLength );
+    HBufC* result =
+        HBufC16::NewLC( iImportPath.Length() + KDriveLetterLength );
     TPtr modifier( result->Des() );
     modifier.Append( iCurrentDriveLetter );
     modifier.Append( KColen );
@@ -454,4 +556,79 @@ HBufC* CCaWidgetScannerParser::GetManifestDirectoryPathLC(
     return result;
     }
 
+void CCaWidgetScannerParser::ParseUriL(TXmlEngElement & aElement)
+    {
+    if (aElement.Text().Length())
+        {
+        HBufC *utf16 =
+            CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
+        CleanupStack::PushL( utf16 );
+        iWidgetDescriptor->SetUriL( *utf16 );
+        CleanupStack::PopAndDestroy( utf16 );
+        }
+
+    }
+void CCaWidgetScannerParser::ParseTitleL(TXmlEngElement & aElement)
+    {
+    if (aElement.Text().Length())
+        {
+        HBufC *utf16 =
+            CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
+        CleanupStack::PushL( utf16 );
+        iWidgetDescriptor->SetTitleL( *utf16 );
+        CleanupStack::PopAndDestroy( utf16 );
+        }
+    }
+void CCaWidgetScannerParser::ParseIconL(TXmlEngElement & aElement,
+    const TDesC & aPackageUid )
+    {
+    HBufC *utf16 =
+        CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
+    CleanupStack::PushL( utf16 );
+    if ( utf16->Compare( KNullDesC ) )
+        {
+        HBufC* iconUriPath = GetManifestDirectoryPathLC( aPackageUid );
+        iconUriPath = iconUriPath->ReAllocL( iconUriPath->Length() + utf16->Length() );
+        CleanupStack::Pop(1);
+        CleanupStack::PushL(iconUriPath);
+        TPtr iconUriPathModifier( iconUriPath->Des() );
+        iconUriPathModifier.Append( *utf16 );
+        iWidgetDescriptor->SetIconUriL( *iconUriPath );
+        CleanupStack::PopAndDestroy( iconUriPath );
+        }
+
+    CleanupStack::PopAndDestroy( utf16 );
+    }
+
+void CCaWidgetScannerParser::ParseDescriptionL(TXmlEngElement & aElement)
+    {
+    HBufC *desc =
+        CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
+    CleanupStack::PushL( desc );
+
+    if( desc->Compare( KNullDesC ) != 0 )
+       {
+       iWidgetDescriptor->SetDescriptionL( *desc );
+       }
+    CleanupStack::PopAndDestroy( desc );
+    }
+void CCaWidgetScannerParser::ParseHiddenL( TXmlEngElement& aElement )
+    {
+    if( aElement.Text().Compare( _L8("true") ) == 0 )
+        {
+        iWidgetDescriptor->SetVisible( EFalse );
+        }
+
+    }
+void CCaWidgetScannerParser::ParseServiceXmlL( TXmlEngElement& aElement )
+    {
+    HBufC *serviceXml = CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
+    CleanupStack::PushL( serviceXml );
+       
+    if (serviceXml->Compare(KNullDesC) != 0)
+        {
+        iWidgetDescriptor->SetServiceXmlL( *serviceXml );
+        }
+    CleanupStack::PopAndDestroy( serviceXml );
+    }
 //  End of File

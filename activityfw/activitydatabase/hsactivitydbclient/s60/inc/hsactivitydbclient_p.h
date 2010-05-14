@@ -72,12 +72,6 @@ public:
 
     /**
      * Interface implementation.
-     * @see int HsActivityDbClientInterface::requestedActivityName(QString &, const QVariantHash &);
-     */
-    int requestedActivityName(QString &, const QVariantHash &);
-
-    /**
-     * Interface implementation.
      * @see int HsActivityDbClientInterface::activities(QList<QVariantHash> &);
      */
     int activities(QList<QVariantHash> &);
@@ -93,6 +87,8 @@ public:
      * @see int HsActivityDbClientInterface::waitActivity(const QVariantHash &)
      */
     int waitActivity(const QVariantHash &activity);
+    
+    int getThumbnail(QSize size, QString imagePath, QString  mimeType, void *userDdata);
 
     /**
      * Interface implementation.
@@ -106,20 +102,13 @@ public:
      */
     int cancelWaitActivity();
     
-    /**
-     * Read thumbnail from file
-     * @param dst - destination QPixmap instance
-     * @param src - thumbnail file path
-     * @return 0 on success, error code otherwise
-     */
-    int getThumbnail(QPixmap &dst, const QString & src);
-
 public:
     /**
      * Function get cached data from server
+     * @param taskId - request task id
      * @param dst - destination, preallocated buffer
      */
-    void getData(RBuf8 &dst);
+    void getData(int taskId, RBuf8 &dst);
 
     /**
      * Function initialize aync request
@@ -128,6 +117,13 @@ public:
      * @param status - request status
      */
     void sendDataAsync(int func,const TIpcArgs &data, TRequestStatus &status);
+    
+//    void emitActivityRequested();
+//    void emitThumbnailRequested();
+    
+public:
+    void PushL(HsActivityDbAsyncRequestPrivate * task);
+    void Pop(HsActivityDbAsyncRequestPrivate *task);
 
 private:
     /**
@@ -175,12 +171,15 @@ private:
                                 const QVariantHash &cond);
 
     void waitActivityL(const QVariantHash &activity);
+    
+    void getThumbnailL(QSize size, QString imagePath, QString  mimeType, void *userDdata);
 private:
     /**
      * Async request handler
      * Own
      */
     HsActivityDbAsyncRequestPrivate *mAsyncDataHandler;
-
+    RPointerArray<HsActivityDbAsyncRequestPrivate> mAsyncTasks;
+    HsActivityDbAsyncRequestObserver& mObserver;
 };
 #endif // HSACTIVITYDBCLIENTPRIVATE_H

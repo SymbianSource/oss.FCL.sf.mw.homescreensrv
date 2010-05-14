@@ -15,14 +15,13 @@
 *
 */
 
-#include "hbactivityplugininterface.h"
 #include "hbactivityplugin.h"
 
 #include <qservicemanager.h>
 
 QTM_USE_NAMESPACE
 
-HbActivityPlugin::HbActivityPlugin(QObject *parent) : HbActivityPluginInterface(parent), mActivityClient(0)
+HbActivityPlugin::HbActivityPlugin(QObject *parent) : QObject(parent), mActivityClient(0)
 {
     QServiceManager serviceManager;
 

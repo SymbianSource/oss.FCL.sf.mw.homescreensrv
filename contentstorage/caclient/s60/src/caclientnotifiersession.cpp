@@ -102,10 +102,27 @@ void RCaClientNotifierSession::Close()
 //
 // -----------------------------------------------------------------------------
 //
+void RCaClientNotifierSession::ConnectAllL()
+{
+    if( !CreateSession(KCaSrvName, Version(), KDefaultMessageSlots) )
+        {
+        RHashMap<TKey, RCaClientSubSession*>::TIter iter(iSubsessions);
+        while(iter.NextValue()) 
+            {
+            (*iter.CurrentValue())->CreateL();
+            }
+        }
+}
+
+// -----------------------------------------------------------------------------
+//
+//
+// -----------------------------------------------------------------------------
+//
 TInt RCaClientNotifierSession::RegisterNotifier(
         CCaInnerNotifierFilter* innerNotifierFilter,
         const TAny* notifierFilter,
-        const CaClientNotifierProxy* notifierProxy)
+        const IDataObserver* notifierProxy)
 {
     TRAPD(error, RegisterNotifierL(innerNotifierFilter,
                     notifierFilter,
@@ -121,7 +138,7 @@ TInt RCaClientNotifierSession::RegisterNotifier(
 void RCaClientNotifierSession::RegisterNotifierL(
         CCaInnerNotifierFilter* innerNotifierFilter,
         const TAny* notifierFilter,
-        const CaClientNotifierProxy *notifierProxy)
+        const IDataObserver *notifierProxy)
 {
     RCaClientSubSession* subsession = new RCaClientSubSession(this,
             notifierProxy, innerNotifierFilter);

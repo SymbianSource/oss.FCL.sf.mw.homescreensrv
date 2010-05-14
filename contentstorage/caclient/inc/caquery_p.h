@@ -66,9 +66,6 @@ public:
 
 private:
 
-    /**
-     * Points to the CaQuery instance that uses this private implementation.
-     */
     CaQuery *const m_q;
 
     EntryRoles mEntryRoles;

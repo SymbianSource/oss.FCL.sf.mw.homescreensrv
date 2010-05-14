@@ -20,6 +20,7 @@
 #include <QObject>
 #include <QVariant>
 #include <QList>
+#include <QSize>
 #include "applicationlauncher.h"
 
 class ActivityManager;
@@ -38,9 +39,7 @@ public slots:
     QList<QVariantHash> activitiesList();
     void launchActivity(const QString &uri);
     void launchActivity(int applicationId, const QString &activityId);
-    void removeActivity(int applicationId, const QString &activityId);
-    void removeApplicationActivities(int applicationId);
-    void getThumbnail(const QString &thumbnailId, void *);
+    void getThumbnail(QSize resolution,const QString &thumbnailPath, void *data);
 
 private:
     ActivityManager *q_ptr;

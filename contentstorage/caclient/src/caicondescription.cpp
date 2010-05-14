@@ -59,6 +59,16 @@
  */
 
 /*!
+ \var CaIconDescriptionPrivate::m_q
+ Points to the CaEntry instance that uses this private implementation.
+ */
+
+/*!
+ \var CaIconDescriptionPrivate::mId
+ Id.
+ */
+
+/*!
  Default constructor.
  */
 CaIconDescription::CaIconDescription() :

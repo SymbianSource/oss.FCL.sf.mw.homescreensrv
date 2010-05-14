@@ -19,7 +19,7 @@
 #define HOMESCREEN_DOMAIN_PS_KEYS_H
 
 /**
- * P&S Key path for all Home Screen state information keys provided by this API.
+ * P&S Key path for all Home Screen information keys provided by this API.
  */
 const char HsStatePSKeyPath[] = "/homescreen";
 
@@ -30,6 +30,18 @@ const char HsStatePSKeyPath[] = "/homescreen";
  * @see EPSHsState
  */
 const char HsStatePSKeySubPath[] = "state";
+
+/**
+ * Home Screen P&S category Uid for pure Symbian usage.
+ */
+const TUid KHsCategoryUid = { 0x20022F35 };
+
+/**
+ * P&S Key to represent the state of the Home Screen for pure Symbian usage.
+ * This property is updated when Home screen state is changed. Valid values 
+ * are defined by the enum EPSHsState.
+ */
+const TUint KHsCategoryStateKey = 0x1;
 
 /**
  * Home screen state.

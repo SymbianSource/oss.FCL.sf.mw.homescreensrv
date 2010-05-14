@@ -57,10 +57,6 @@ private:
 
 private:
 
-    /*!
-     * Points to the CaNotifierFilter instance that uses
-     *  this private implementation.
-     */
     CaNotifierFilter *const m_q;
 
 };

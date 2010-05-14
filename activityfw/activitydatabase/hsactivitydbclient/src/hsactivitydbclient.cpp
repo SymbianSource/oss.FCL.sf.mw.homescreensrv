@@ -68,6 +68,24 @@ void HsActivityDbClient::asyncRequestCompleated(int result,
 //
 // -----------------------------------------------------------------------------
 //
+void HsActivityDbClient::asyncRequestCompleated(int result,
+                                                int requestType, 
+                                                const QPixmap& pixmap,
+                                                void* userData)
+{
+    switch (requestType) {
+        case GetThumbnail:
+            if (KErrNone == result) {
+                emit thumbnailRequested(pixmap, userData);
+            }
+            break;
+    }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 int HsActivityDbClient::addActivity(const QVariantHash &activity)
 {
     return d_ptr->addActivity(activity);
@@ -141,7 +159,8 @@ int HsActivityDbClient::launchActivity(const QVariantHash &activity)
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityDbClient::getThumbnail(QPixmap &dst, const QString & src)
+//int HsActivityDbClient::getThumbnail(const QVariantHash &condition)
+int HsActivityDbClient::getThumbnail(QSize size, QString imagePath, QString mimeType, void* userDdata)
 {
-    return d_ptr->getThumbnail(dst, src);
+    return d_ptr->getThumbnail(size, imagePath, mimeType, userDdata);
 }

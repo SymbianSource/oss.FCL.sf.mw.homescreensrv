@@ -168,6 +168,13 @@ private:
      * @param aWidget widget to set value
      */
     void SetMmcIdL( CCaWidgetDescription * aWidget );
+    
+    void ParseUriL(TXmlEngElement & aElement);
+    void ParseTitleL(TXmlEngElement & aElement);
+    void ParseIconL(TXmlEngElement & aElement,  const TDesC & aPackageUid);
+    void ParseDescriptionL(TXmlEngElement & aElement);
+    void ParseHiddenL(TXmlEngElement & aElement);
+    void ParseServiceXmlL(TXmlEngElement & aElement);
 
 private:
 
@@ -207,6 +214,8 @@ private:
      * Own.
      */
     RXmlEngDOMImplementation iDomImpl;
+    
+    CCaWidgetDescription* iWidgetDescriptor;
 
     };
 

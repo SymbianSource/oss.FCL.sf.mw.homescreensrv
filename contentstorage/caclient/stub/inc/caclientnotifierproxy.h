@@ -27,42 +27,9 @@
 
 class CaEntry;
 class CaNotifierFilter;
+class CaObserver;
 
-/**
- *  IDataObserver
- *
- */
-class IDataObserver
-{
-public:
-    /**
-     * Method invoked when entry is changed.
-     * @param entryId entry id.
-     * @param changeType change type.
-     */
-    virtual void entryChanged(int entryId,
-                              ChangeType changeType) const = 0;
 
-    /**
-     * Method invoked when entry is changed.
-     * @param entry entry.
-     * @param changeType change type.
-     */
-    virtual void entryChanged(const CaEntry &entry,
-                              ChangeType changeType) const = 0;
-
-    /**
-     * Method invoked when entry was changed.
-     * @param entryId entry id.
-     */
-    virtual void entryTouched(int id) const = 0;
-
-    /**
-     * Method invoked when entry was changed.
-     * @param groupId group id.
-     */
-    virtual void groupContentChanged(int groupId) const = 0;
-};
 
 
 class CACLIENT_EXPORT CaClientNotifierProxy: public QObject
@@ -83,33 +50,6 @@ public:
     ~CaClientNotifierProxy();
 
     /**
-     * Method invoked when entry is changed.
-     * @param entryId entry id.
-     * @param changeType change type.
-     */
-    virtual void entryChanged(int entryId, ChangeType changeType) const;
-
-    /**
-     * Method invoked when entry is changed.
-     * @param entry entry.
-     * @param changeType change type.
-     */
-    virtual void entryChanged(const CaEntry &entry,
-                              ChangeType changeType) const;
-
-    /**
-     * Method invoked when entry was changed.
-     * @param entryId entry id.
-     */
-    virtual void entryTouched(int id) const;
-
-    /**
-     * Method invoked when entry was changed.
-     * @param groupId group id.
-     */
-    virtual void groupContentChanged(int groupId) const;
-
-    /**
      * Method for registering notifier
      *
      * @param notifierFilter notifierFilter used to register notifier.
@@ -119,7 +59,7 @@ public:
     int registerNotifier(
         const CaNotifierFilter *notifierFilter,
         CaNotifierPrivate::NotifierType notifierType,
-        const CaClientNotifierProxy *notifierProxy);
+        const CaObserver *observer);
 
     /**
      * Method for unregistering notifier.
@@ -131,18 +71,14 @@ public:
         const CaNotifierFilter &notifierFilter,
         CaNotifierPrivate::NotifierType notifierType);
 
-signals:
 
-    void signalEntryChanged(int entryId, ChangeType changeType) const;
-    void signalEntryChanged(const CaEntry &entry,
-                            ChangeType changeType) const;
-    void signalEntryTouched(int id) const;
-    void signalGroupContentChanged(int groupId) const;
+    /**
+     * Reconnect all sessions when server was terminated
+     *
+     */
+    void connectSessions();
 
 private:
-
-    // Mutex to serialize registering/unregistering for notifications.
-    QMutex mMutex;
 
     Q_DISABLE_COPY(CaClientNotifierProxy)
 };

@@ -122,13 +122,15 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
             if (err2 == KErrNone) {
                 QString fileName = XQConversions::s60DescToQString(
                         fileNameFromApparc->Des());
-                if (fileName.contains(QString(".mif"))) {
+                if (fileName.contains(QString(".mif")) || fileName.contains(QString(".mbm"))) {
                     
                     TPtr ptr(fileNameFromApparc->Des());
                     CaMenuIconMifUtility::GetPixmapByFilenameL(ptr,size,pixmap);
         
                     pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
                     icon = HbIcon(QIcon(pixmap));
+                } else {
+                    icon = HbIcon(fileName);
                 }
             }
             CleanupStack::Pop(fileNameFromApparc);

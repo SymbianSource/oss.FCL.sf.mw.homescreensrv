@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.12 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#10.1.14 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -24,7 +24,7 @@
 
 
 // database version
-_LIT( KCaDbVersion, "00001" ); 
+_LIT( KCaDbVersion, "00001" );
 
 
 
@@ -56,6 +56,14 @@ enum TEntryFlag
     ENative = 32,
     EMissing = 64
     };
+
+enum TItemAppearance
+    {
+    EItemAppearanceNotChanged,
+    EItemDisappeared,
+    EItemAppeared
+    };
+
 // Ca - Application
 
 _LIT( KCaTypeMenuCollections, "menucollections" );
@@ -82,6 +90,8 @@ _LIT( KCaAttrAppSettingsPlugin, "app_settings_plugin");
 _LIT( KCaAttrJavaAppSettingsPluginValue,
         "/resource/qt/plugins/appsettings/javaapplicationsettingsview.qtplugin");
 _LIT( KCaAttrAppWidgetUri, "widget:uri");
+_LIT( KCaAttrAppWidgetServiceXml, "widget:servicexml");
+
 _LIT( KCaAttrAppWidgetUriCWRTValue, "wrtwidgetuiplugin");
 _LIT( KCaAttrAppWidgetParamWebAppId, "widgetparam:webAppId");
 
@@ -96,13 +106,15 @@ const TInt KCaMaxAttrLenght = 255;
 _LIT( KCaAttrMmcId, "mmc_id" );
 _LIT( KCaMassStorage, "mass_storage" );
 _LIT( KCaMmcHistoryFname, "mmchistory" );
+// max(KCaMassStorage.Length(), KUidChars)
+const TInt KMassStorageIdLength = 12;
 
 //Ca constants
 // ---------------------------------------------------------
 
 
 // CONSTANTS
-    
+
 const TUid KSatUid =
     {
     0x101F4CE0
@@ -113,14 +125,14 @@ const TUid KHsAppUid =
     0x20022F35
     };
 
-const TUid KMidletApplicationTypeUid = 
+const TUid KMidletApplicationTypeUid =
     {
-    0x10210E26        
+    0x10210E26
     };
 
-const TUid KCWRTApplicationTypeUid = 
+const TUid KCWRTApplicationTypeUid =
     {
-    0x200267DC       
+    0x200267DC
     };
 
 const TInt KCenRepBufferSize = 255;
@@ -150,7 +162,7 @@ _LIT8( KCaCmdClose, "close" ); ///< Close item.
 
 _LIT( KCaDbPropVersion, "Version" ); /// db version
 _LIT( KCaDbPropLanguage, "Language" ); // language of ca strings in db
-_LIT( KCaDbPropQMfile, "QMfile" ); // prefix of qm file used in translation 
+_LIT( KCaDbPropQMfile, "QMfile" ); // prefix of qm file used in translation
 
 
 

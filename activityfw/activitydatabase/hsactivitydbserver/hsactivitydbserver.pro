@@ -11,46 +11,10 @@
 #
 # Contributors:
 #
-# Description: 
+# Description:
 #
 
-TEMPLATE = app
-TARGET = hsactivitydbserver 
+TEMPLATE = subdirs
 
-QT        += core \
-             gui \
-             sql 
-
-HEADERS   += ../inc/hsactivitydbclientinterface.h \
-             inc/hsactivity.h \
-             inc/hsactivityserver.h \
-             inc/hsactivitystorage.h \
-			 inc/hsactivitystorage_p.h
-
-SOURCES   += src/hsactivityserver.cpp \
-			 src/hsactivitystorage.cpp \
-             src/hsactivitystorage_p.cpp
-
-symbian{
-TARGET.UID3 = 0x200267B4
-HEADERS   += ../s60/inc/hsactivityglobals.h \
-             ../s60/inc/hsserializer.h \
-             s60/inc/hsactivityserver_p.h \
-             s60/inc/hsactivitysession_p.h
-			 
-
-SOURCES   += s60/src/main.cpp \
-             ../s60/src/hsserializer.cpp \
-             s60/src/hsactivityserver_p.cpp \
-			 s60/src/hsactivitysession_p.cpp
-
-LIBS += -lcone -lavkon -leikcore -leiksrv -lapparc -lws32 -lapgrfx
-             
-TARGET.CAPABILITY = ALL -TCB
-
-myrssrules = \
-"hidden = KAppIsHidden;"
-RSS_RULES += myrssrules
+BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include \"group/bld.inf\""
     
-}
-

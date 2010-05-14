@@ -16,6 +16,8 @@
 
 include(./../../../common.pri)
 
+CONFIG += symbian_i18n hb
+
 TRANSLATIONS=contentstorage.ts
 
 symbian: { 
@@ -56,7 +58,6 @@ symbian: {
         -lcautils \
         -lcamenu
 }
-CONFIG += symbian_i18n
 
 exportResources(./*.qm, resource/qt/translations)
 

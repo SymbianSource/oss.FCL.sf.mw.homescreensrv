@@ -29,4 +29,3 @@ for(filename,PLATFORM_HEADERS){
   }
 
 
-BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include \"group/bld.inf\""

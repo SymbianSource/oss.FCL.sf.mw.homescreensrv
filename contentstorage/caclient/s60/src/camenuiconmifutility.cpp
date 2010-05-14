@@ -31,28 +31,25 @@ void CaMenuIconMifUtility::GetPixmapByFilenameL(TDesC& fileName,
 {
     CFbsBitmap *bitamp(0);
     CFbsBitmap *mask(0);
-    
-    if ( AknIconUtils::IsMifFile(fileName)) {
-        // SVG icon
-        // SVG always has only one icon
-        TInt bitmapIndex = 0;
-        TInt maskIndex = 1;
-        AknIconUtils::ValidateLogicalAppIconId( fileName,
-                bitmapIndex, maskIndex );
 
-        AknIconUtils::CreateIconLC( bitamp, mask, fileName,
+    TInt bitmapIndex = 0;
+    TInt maskIndex = 1;    
+    // it will change bitmap ids if it is mif (checking inside)
+    AknIconUtils::ValidateLogicalAppIconId( fileName,
                 bitmapIndex, maskIndex );
-        }
+    AknIconUtils::CreateIconLC( bitamp, mask, fileName,
+            bitmapIndex, maskIndex );
 
-    AknIconUtils::DisableCompression(bitamp);
-    AknIconUtils::SetSize(bitamp, TSize(size.width(), size.height()),
-                    EAspectRatioPreservedAndUnusedSpaceRemoved);
+    if (AknIconUtils::IsMifFile(fileName)) {
+        AknIconUtils::DisableCompression(bitamp);
+        AknIconUtils::SetSize(bitamp, TSize(size.width(), size.height()),
+                        EAspectRatioPreservedAndUnusedSpaceRemoved);
     
-    AknIconUtils::DisableCompression(mask);
-    AknIconUtils::SetSize(mask, TSize(size.width(), size.height()),
-                    EAspectRatioPreservedAndUnusedSpaceRemoved);
-    
-    CaBitmapAdapter::fromBitmapAndMaskToPixmapL(bitamp, mask, pixmap);
+        CaBitmapAdapter::fromBitmapAndMaskToPixmapL(bitamp, mask, pixmap);
+    } else {
+        CaBitmapAdapter::fromBitmapAndMaskToPixmapL(bitamp, mask, pixmap);
+        pixmap.scaled(size);
+    }
     
     // bitmap and icon, AknsUtils::CreateIconLC doesn't specify the order
     CleanupStack::Pop(2);

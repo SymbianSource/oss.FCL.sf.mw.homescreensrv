@@ -222,33 +222,38 @@ void CCaSrvAppScanner::UpdateApplicationEntryL(
 void CCaSrvAppScanner::UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId )
     {
     TBool toUpdate = HandleMmcAttrUpdateL( aEntry, aMmcId );
-    toUpdate = HandleHiddenFlagUpdateL( aEntry ) || toUpdate;
-    toUpdate = HandleMissingFlagUpdate( aEntry ) || toUpdate;
+    TBool missingVisibleFlagChanged =
+        HandleMissingVisibleFlagsUpdate( aEntry );
+    toUpdate = missingVisibleFlagChanged || toUpdate;
     toUpdate = HandleLockDeleteFlagUpdateL( aEntry ) || toUpdate;
     toUpdate = SetApaAppInfoL( aEntry ) || toUpdate;
-
+    
     if( iInstalledPackages.Find( aEntry->GetUid() ) != KErrNotFound )
         {
         AddEntryToDownloadedCollectionL( aEntry->GetId() );
-        toUpdate = HandleUsedFlagUpdateL( aEntry ) || toUpdate;
+        toUpdate = HandleUsedFlagUpdate( aEntry ) || toUpdate;
+        AddEntryToPredefinedCollectionL( aEntry, ETrue );
         }
     if( toUpdate )
         {
         //update app in storage
-        iCaStorageProxy.AddL( aEntry );
+        TItemAppearance itemAppearanceChange = EItemAppearanceNotChanged;
+        if( missingVisibleFlagChanged )
+            {
+            itemAppearanceChange = EItemAppeared;
+            }
+        iCaStorageProxy.AddL( aEntry, EFalse, itemAppearanceChange );
         RemoveFromInstalledPackages( aEntry->GetUid() );
-        AddEntryToPredefinedCollectionL( aEntry, ETrue );
         }
     }
 // ---------------------------------------------------------
-// CCaSrvAppScanner::HandleHiddenFlagUpdateL
+//
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::HandleHiddenFlagUpdateL( CCaInnerEntry* aItem )
+TBool CCaSrvAppScanner::HandleVisibleFlagUpdate( CCaInnerEntry* aItem )
     {
     TBool toChange( EFalse );
-    TBool itemHidden = ( 0 == ( aItem->GetFlags() & EVisible ) );
-    if( itemHidden )
+    if( !( aItem->GetFlags() & EVisible ) )
         {
         aItem->SetFlags( aItem->GetFlags() | EVisible );
         toChange = ETrue;
@@ -257,20 +262,18 @@ TBool CCaSrvAppScanner::HandleHiddenFlagUpdateL( CCaInnerEntry* aItem )
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::HandleUsedFlagUpdateL
+//
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::HandleUsedFlagUpdateL( CCaInnerEntry* aItem )
+TBool CCaSrvAppScanner::HandleUsedFlagUpdate( CCaInnerEntry* aItem )
     {
+    TBool changed( EFalse );
     if( aItem->GetFlags() & EUsed )
         {
         aItem->SetFlags( aItem->GetFlags() & ~EUsed );
-        return ETrue;
+        changed = ETrue;
         }
-    else
-        {
-        return EFalse;
-        }
+    return changed;
     }
 
 // ---------------------------------------------------------
@@ -391,18 +394,17 @@ TBool CCaSrvAppScanner::HandleLockDeleteFlagUpdateL( CCaInnerEntry* aItem )
 // CCaSrvAppScanner::HandleMissingFlagUpdateL
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::HandleMissingFlagUpdate( CCaInnerEntry* aItem )
+TBool CCaSrvAppScanner::HandleMissingVisibleFlagsUpdate( CCaInnerEntry* aItem )
     {
-    if( aItem->GetFlags() & EMissing )
+    TBool ret( EFalse );
+    if( aItem->GetFlags() & EMissing ||
+        !( aItem->GetFlags() & EVisible ) )
         {
-        //application found so we unset "missing" flag
-        aItem->SetFlags( aItem->GetFlags() & ~EMissing );
-        return ETrue;
+        //application found so we unset "missing" and set "visible" flags
+        aItem->SetFlags( aItem->GetFlags() & ~EMissing | EVisible );
+        ret = ETrue;
         }
-    else
-        {
-        return EFalse;
-        }
+    return ret;
     }
 
 // ---------------------------------------------------------
@@ -449,17 +451,20 @@ void CCaSrvAppScanner::HandleHsAppEntryL( RPointerArray<CCaInnerEntry>& aArray )
             appEntry, TIdentityRelation<CCaInnerEntry>( UidMatch ) );
 
     if ( index != KErrNotFound )
-        { // hs app already in storage - ensure it is hidden and remove from resultArray
-        if ( ( aArray[index]->GetFlags() & EVisible ) != 0 )
+        {
+        // hs app already in storage - ensure it is hidden
+        // and remove from resultArray
+        if ( aArray[index]->GetFlags() & EVisible )
             {
             aArray[index]->SetFlags( aArray[index]->GetFlags() & ~EVisible);
-            iCaStorageProxy.AddL( aArray[index] );
+            iCaStorageProxy.AddL( aArray[index], EFalse, EItemDisappeared );
             }
         delete aArray[index];
         aArray.Remove( index );
         }
     else
-        { // if not found add as not visible to the storage
+        {
+        // if not found add as not visible to the storage
         appEntry->SetEntryTypeNameL( KCaTypeApp );
         appEntry->SetFlags( 0 );
         appEntry->SetRole( EItemEntryRole );
@@ -556,7 +561,7 @@ TInt CCaSrvAppScanner::GetAllCollectionIdL()
         typenameArray->AppendL( KCaTypeMenuCollections );
         getAllCollectionIdQuery->SetEntryTypeNames( typenameArray );
         CleanupStack::Pop( typenameArray );
-        
+
         RArray<TInt> idArray;
         CleanupClosePushL( idArray );
         iCaStorageProxy.GetEntriesIdsL( getAllCollectionIdQuery,
@@ -676,8 +681,8 @@ void CCaSrvAppScanner::NotifyL( TInt aAppUid )
     RPointerArray<CCaInnerEntry> resultArray;
     CleanupResetAndDestroyPushL( resultArray );
     GetCaAppEntriesL( aAppUid, resultArray );
-    if( resultArray.Count() )
-        {
+    if( resultArray.Count() && ( resultArray[0]->GetFlags() & EVisible ) )
+        {//TODO: this only for icons. This functionality should be change 
         iCaStorageProxy.AddL( resultArray[0] );
         }
     CleanupStack::PopAndDestroy( &resultArray );
@@ -715,10 +720,10 @@ void CCaSrvAppScanner::AddEntryToPredefinedCollectionL(
         {
         // appgroup_name is defined for this app. Find or create folder.
         CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
-        innerQuery->SetRole( CCaInnerQuery::Group );          
+        innerQuery->SetRole( CCaInnerQuery::Group );
         innerQuery->AddAttributeL( KCaAppGroupName,
                 capability().iGroupName );
-        
+
         // get entries by attributes
         RPointerArray<CCaInnerEntry> resultArrayItems;
         CleanupResetAndDestroyPushL( resultArrayItems );
@@ -730,10 +735,10 @@ void CCaSrvAppScanner::AddEntryToPredefinedCollectionL(
         entryIds.AppendL( entryId );
         TCaOperationParams organizeParams;
         organizeParams.iBeforeEntryId = 0;
-        
+
         if( resultArrayItems.Count() )
             {
-            // collection with appgroup_name exist - add entry 
+            // collection with appgroup_name exist - add entry
             // to this collection
             organizeParams.iGroupId = resultArrayItems[0]->GetId();
             }
@@ -742,29 +747,29 @@ void CCaSrvAppScanner::AddEntryToPredefinedCollectionL(
             // create new collection
             TInt predefinedCollectionId = CreatePredefinedCollectionL(
                     capability().iGroupName );
-            
+
             organizeParams.iGroupId = predefinedCollectionId;
 
-            // add new collection to all collection   
+            // add new collection to all collection
             AddCollectionToAllCollectionL( predefinedCollectionId );
-            
+
             if( aUpdate )
                 {
                 organizeParams.iOperationType = TCaOperationParams::EAppend;
                 iCaStorageProxy.OrganizeL( entryIds, organizeParams );
                 }
             }
-        
+
         if( !aUpdate )
             {
             organizeParams.iOperationType = TCaOperationParams::EAppend;
             iCaStorageProxy.OrganizeL( entryIds, organizeParams );
             }
-        
+
         CleanupStack::PopAndDestroy( &entryIds );
         CleanupStack::PopAndDestroy( &resultArrayItems );
         CleanupStack::PopAndDestroy( innerQuery );
-        } 
+        }
     }
 
 // ---------------------------------------------------------
@@ -787,7 +792,7 @@ TInt CCaSrvAppScanner::CreatePredefinedCollectionL( const TDesC& aGroupName )
     // Get new collection Id
     TInt newCollectionId = innerEntry->GetId();
     CleanupStack::PopAndDestroy( innerEntry );
-    
+
     return newCollectionId;
     }
 
@@ -800,7 +805,7 @@ void CCaSrvAppScanner::AddCollectionToAllCollectionL( TInt aCollectionId )
     RArray<TInt> entryIds;
     CleanupClosePushL( entryIds );
     entryIds.AppendL( aCollectionId );
-    
+
     TCaOperationParams organizeParams;
     organizeParams.iBeforeEntryId = 0;
     organizeParams.iOperationType = TCaOperationParams::EAppend;
@@ -862,9 +867,9 @@ void CCaSrvAppScanner::AddAppEntryL( TUint aUid, TUint aCurrentMmcId )
     HandleMmcAttrUpdateL( appEntry, aCurrentMmcId );
 
     iCaStorageProxy.AddL( appEntry );
-    
+
     AddEntryToPredefinedCollectionL( appEntry );
-    
+
     if( iInstalledPackages.Find( aUid ) != KErrNotFound )
         {
         AddEntryToDownloadedCollectionL( appEntry->GetId() );
@@ -920,7 +925,7 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 aEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueJava );
                 aEntry->AddAttributeL( KCaAttrAppSettingsPlugin, KCaAttrJavaAppSettingsPluginValue );
                 }
-            else if (appTypeUid == KCWRTApplicationTypeUid) 
+            else if (appTypeUid == KCWRTApplicationTypeUid)
                 {
                 aEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueCWRT );
                 aEntry->AddAttributeL( KCaAttrAppWidgetUri, KCaAttrAppWidgetUriCWRTValue );
@@ -948,34 +953,32 @@ void CCaSrvAppScanner::HandleMissingItemsL(
     for( TInt i = 0; i < aCaEntries.Count(); i++ )
         {
         const TInt id = aCaEntries[i]->GetId();
-        TUint mmcId = 0;
         RBuf attrVal;
         attrVal.CleanupClosePushL();
         attrVal.CreateL( KCaMaxAttrValueLen );
         if( aCaEntries[i]->FindAttribute( KCaAttrMmcId(), attrVal ) )
             {
+            TUint mmcId = 0;
             MenuUtils::GetTUint( attrVal, mmcId );
-            if( mmcId && KErrNotFound != iMmcHistory->Find( mmcId )
-                    && mmcId != CurrentMmcId() )
+            if( ( mmcId && KErrNotFound != iMmcHistory->Find( mmcId )
+                    && mmcId != CurrentMmcId() ) ||
+                    ( attrVal == KCaMassStorage() &&
+                    IsDriveInUse( DriveInfo::EDefaultMassStorage ) ) )
                 {
-                // This item is on an MMC which is currently in the MMC history.
+                // This item is on an MMC which is currently
+                // in the MMC history or on a mass storage in use.
                 // Set it "missing" but keep it.
-                AddObjectFlagL( aCaEntries[i], EMissing );
-                }
-            else if ( attrVal == KCaMassStorage()
-                    && IsDriveInUse( DriveInfo::EDefaultMassStorage ) )
-                {
-                AddObjectFlagL( aCaEntries[i], EMissing );
+                SetMissingFlagL( aCaEntries[i] );
                 }
             else
                 {
-                //RemoveAppL( aCaEntries[i] );
-                AddObjectFlagL( aCaEntries[i], EMissing );
+                aCaEntries[i]->RemoveAttributeL(KCaAttrMmcId());
+                ClearVisibleFlagL( aCaEntries[i] );
                 }
             }
         else
             {
-            AddObjectFlagL( aCaEntries[i], EMissing );
+            ClearVisibleFlagL( aCaEntries[i] );
             }
         CleanupStack::PopAndDestroy( &attrVal );
         }
@@ -995,17 +998,28 @@ void CCaSrvAppScanner::RemoveAppL( CCaInnerEntry* aAppEntry )
     }
 
 // ---------------------------------------------------------
-// CCaSrvAppScanner::AddObjectFlagL
+//
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::AddObjectFlagL(
-        CCaInnerEntry* aEntry, const TInt& aFlags )
+void CCaSrvAppScanner::SetMissingFlagL( CCaInnerEntry* aEntry )
     {
-    TBool itemFlagPresent = ( 0 != ( aEntry->GetFlags() & aFlags ) );
-    if( !itemFlagPresent )
+    if( !( aEntry->GetFlags() & EMissing ) )
         {
-        aEntry->SetFlags( aEntry->GetFlags() | aFlags );
-        iCaStorageProxy.AddL( aEntry );
+        aEntry->SetFlags( aEntry->GetFlags() | EMissing );
+        iCaStorageProxy.AddL( aEntry, EFalse, EItemDisappeared );
+        }
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CCaSrvAppScanner::ClearVisibleFlagL( CCaInnerEntry* aEntry )
+    {
+    if( aEntry->GetFlags() & EVisible )
+        {
+        aEntry->SetFlags( aEntry->GetFlags() & ~EVisible & ~EMissing & ~EUsed );
+        iCaStorageProxy.AddL( aEntry, EFalse, EItemDisappeared );
         }
     }
 
@@ -1181,15 +1195,16 @@ void CCaSrvAppScanner::MakeCollectionVisibleIfHasVisibleEntryL(
     if( resultEntriesArray.Count() )
         {
         // set collection visible if hidden
-        if( HandleHiddenFlagUpdateL( aEntry ) )
+        if( HandleVisibleFlagUpdate( aEntry ) )
             {
             // update here this collection
-            iCaStorageProxy.AddL( aEntry, ETrue );
+            iCaStorageProxy.AddL( aEntry );
             }
         }
     CleanupStack::PopAndDestroy( visibleEntriesQuery );
     CleanupStack::PopAndDestroy( &resultEntriesArray );
     }
+
 
 // ==================== MEMBER FUNCTIONS ====================
 

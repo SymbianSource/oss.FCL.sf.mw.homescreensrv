@@ -62,6 +62,12 @@ public:
 
     /**
      * Interface implementation.
+     * @see int HsActivityDbAsyncRequestObserver::asyncRequestCompleated(int, int, QPixmap&)
+     */
+    void asyncRequestCompleated(int, int, const QPixmap&, void*);
+
+    /**
+     * Interface implementation.
      * @see int HsActivityDbClientInterface::saveActivity(const QVariantHash&)
      */
     int addActivity(const QVariantHash &);
@@ -110,12 +116,9 @@ public:
     int launchActivity(const QVariantHash &);
     
     /**
-     * Read thumbnail from file
-     * @param dst - destination QPixmap instance
-     * @param src - thumbnail file path
-     * @return 0 on success, error code otherwise
      */
-    int getThumbnail(QPixmap &dst, const QString & src);
+    //getThumbnail(resolution, thumbnailPath, "image/png", data)
+    int getThumbnail(QSize size, QString imagePath, QString mimeType, void* userDdata);
 
 signals:
     /**
@@ -123,12 +126,21 @@ signals:
      * @param activityId - requested activity name
      */
     void activityRequested(const QString &activityId);
+
+    /**
+     * Function notify about runtime activity change
+     * @param thumbnailPixmap - requested thumbnail
+     */
+    void thumbnailRequested(QPixmap thumbnailPixmap, void *userData);
+    
 private:
     /**
      * Private client implementation.
      * Own.
      */
     HsActivityDbClientPrivate *d_ptr;
+    
+    friend class HsActivityDbClientPrivate;
 };
 
 #endif //HSACTIVITYDBCLIENT_H
