@@ -22,7 +22,7 @@ CONFIG += plugin
 CONFIG += mobility
 MOBILITY = serviceframework
 
-HEADERS +=  hbactivityplugininterface.h \
+HEADERS +=  hbactivityplugininterface_p.h \
             hbactivityplugin.h \
 
 SOURCES +=  hbactivityplugin.cpp \

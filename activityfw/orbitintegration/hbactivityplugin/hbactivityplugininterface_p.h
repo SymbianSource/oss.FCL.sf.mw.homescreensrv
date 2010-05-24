@@ -15,22 +15,19 @@
 *
 */
 
-#ifndef HBACTIVITYPLUGININTERFACE_H
-#define HBACTIVITYPLUGININTERFACE_H
+#ifndef HBACTIVITYPLUGININTERFACE_P_H
+#define HBACTIVITYPLUGININTERFACE_P_H
 
 #include <QtPlugin>
-#include <QObject>
 #include <QVariant>
 #include <QString>
 #include <QList>
 #include <QVariantHash>
 
-class HbActivityPluginInterface : public QObject
+class HbActivityPluginInterface
 {
-    Q_OBJECT
-
 public:
-    HbActivityPluginInterface(QObject *parent = 0) : QObject(parent) {}
+    virtual ~HbActivityPluginInterface() {}
 
 public:
     virtual bool addActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters) = 0;
@@ -42,10 +39,10 @@ public:
     virtual QVariantHash parseCommandLine(const QStringList &commandLineParams) = 0;
 
 signals:
+    // signal must be re-declared in the plugin implementation
     void activityRequested(const QString &activityId);
-
 };
 
 Q_DECLARE_INTERFACE(HbActivityPluginInterface, "HbActivityPluginInterface/1.0")
 
-#endif // HBACTIVITYPLUGININTERFACE_H
+#endif // HBACTIVITYPLUGININTERFACE_P_H
