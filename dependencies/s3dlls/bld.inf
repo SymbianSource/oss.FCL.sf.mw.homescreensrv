@@ -1,4 +1,44 @@
 PRJ_EXPORTS
 
+abclient.dll		/epoc32/release/winscw/udeb/abclient.dll
+aiwdialdata.dll		/epoc32/release/winscw/udeb/aiwdialdata.dll
+AknLayout2Scalable.dll		/epoc32/release/winscw/udeb/AknLayout2Scalable.dll
 aknphysics.dll		/epoc32/release/winscw/udeb/aknphysics.dll
+AKNSKINSRV.dll		/epoc32/release/winscw/udeb/AKNSKINSRV.dll	
+akntransitionutils.dll		/epoc32/release/winscw/udeb/akntransitionutils.dll
+CdlEngine.dll		/epoc32/release/winscw/udeb/CdlEngine.dll
+customapi.dll		/epoc32/release/winscw/udeb/customapi.dll
+disknotifyhandler.dll		/epoc32/release/winscw/udeb/disknotifyhandler.dll
+DrmRightsInfo.dll		/epoc32/release/winscw/udeb/DrmRightsInfo.dll
+DrmServerInterfaces.dll		/epoc32/release/winscw/udeb/DrmServerInterfaces.dll
+fbscli.dll		/epoc32/release/winscw/udeb/fbscli.dll
+featmgr.dll		/epoc32/release/winscw/udeb/featmgr.dll	
+gsecomplugin.dll		/epoc32/release/winscw/udeb/gsecomplugin.dll
+gsframework.dll		/epoc32/release/winscw/udeb/gsframework.dll	
+gslauncher.dll		/epoc32/release/winscw/udeb/gslauncher.dll
+gslistbox.dll		/epoc32/release/winscw/udeb/gslistbox.dll	
+javaregistryclient.dll		/epoc32/release/winscw/udeb/javaregistryclient.dll
+keylockpolicyapi.dll		/epoc32/release/winscw/udeb/keylockpolicyapi.dll
+liwServiceHandler.dll		/epoc32/release/winscw/udeb/liwServiceHandler.dll
+networkhandling.dll		/epoc32/release/winscw/udeb/networkhandling.dll	
+peninputClient.dll		/epoc32/release/winscw/udeb/peninputClient.dll
+phoneclient.dll		/epoc32/release/winscw/udeb/phoneclient.dll
+ProfileEng.dll		/epoc32/release/winscw/udeb/ProfileEng.dll
+SatClient.dll		/epoc32/release/winscw/udeb/SatClient.dll
+
+sisregistryclient.dll		/epoc32/release/winscw/udeb/sisregistryclient.dll
 ssmcmn.dll			/epoc32/release/winscw/udeb/ssmcmn.dll
+sssettings.dll		/epoc32/release/winscw/udeb/sssettings.dll
+SVGEngine.dll		/epoc32/release/winscw/udeb/SVGEngine.dll
+SWInstCli.dll		/epoc32/release/winscw/udeb/SWInstCli.dll
+sysversioninfo.dll		/epoc32/release/winscw/udeb/sysversioninfo.dll
+WidgetRegistryClient.dll		/epoc32/release/winscw/udeb/WidgetRegistryClient.dll
+
+
+
+
+// Missing files:
+//scppnwdl.dll		/epoc32/release/winscw/udeb/scppnwdl.dll
+// xmldom.dll		/epoc32/release/winscw/udeb/xmldom.dll
+// xmlparser.dll		/epoc32/release/winscw/udeb/xmlparser.dll
+// Source: PDK 3.0.i winscw udeb binaries
