@@ -92,6 +92,7 @@ GSFWViewUIDs.h     MW_LAYER_PLATFORM_EXPORT_PATH(gsfwviewuids.h)
 GSListBox.h     MW_LAYER_PLATFORM_EXPORT_PATH(gslistbox.h)
 gsframeworkrsc.rsg	gsframeworkrsc.rsg
 gsfwicon.mbg		gsfwicon.mbg
+profileapp.loc      profileapp.loc
 
 profileapp.loc  platform/app/loc/profileapp.loc
 profileapp_01.loc  platform/app/loc/01/profileapp_01.loc
@@ -107,6 +108,7 @@ dtd_installer.pl +/tools/dtd_installer.pl
 
 #include "extended_skin_api/bld.inf"
 #include "S3libs/bld.inf"
+#include "s3dlls/bld.inf"
 
 #include "xcfw/bld.inf"
 // #include "kernel/bld.inf"

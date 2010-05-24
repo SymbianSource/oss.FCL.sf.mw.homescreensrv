@@ -47,12 +47,17 @@ CAiUiControllerManager::CAiUiControllerManager()
 void CAiUiControllerManager::LoadMainControllerL(
     CRepository& aCenRepConfig )
     {
+    
     TInt value( 0 );
     
     // Main UI Controller must be configured correctly
+    // Gives old controller, because of wrong value in cenrep.
     User::LeaveIfError( aCenRepConfig.Get( KAiMainUIController, value ) );
     
-    CAiUiController* controller = CAiUiController::NewL( TUid::Uid( value ) );
+    // Correct controller implementation uid
+    TInt value1( 0x2001952C );
+    
+    CAiUiController* controller = CAiUiController::NewL( TUid::Uid( value1 ) );
     
     iCreatedUICList.Append( value );
     CleanupStack::PushL( controller );

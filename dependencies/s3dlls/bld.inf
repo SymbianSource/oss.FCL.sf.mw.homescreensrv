@@ -1,0 +1,4 @@
+PRJ_EXPORTS
+
+aknphysics.dll		/epoc32/release/winscw/udeb/aknphysics.dll
+ssmcmn.dll			/epoc32/release/winscw/udeb/ssmcmn.dll

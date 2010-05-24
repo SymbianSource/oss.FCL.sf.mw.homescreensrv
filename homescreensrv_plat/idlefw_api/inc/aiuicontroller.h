@@ -151,8 +151,9 @@ private:     // Data
 
 inline CAiUiController* CAiUiController::NewL(TUid aImplUid)
     {
-    TAny* ptr = REComSession::CreateImplementationL(aImplUid,
-        _FOFF(CAiUiController, iDestructKey));
+    TAny* ptr( NULL );
+    TRAPD( err, ptr = REComSession::CreateImplementationL(aImplUid,
+        _FOFF(CAiUiController, iDestructKey)));
 
     return reinterpret_cast<CAiUiController*> (ptr);
     }

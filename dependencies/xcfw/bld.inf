@@ -11,9 +11,3 @@ gmxmlconstants.h            gmxmlconstants.h
 gmxmldomconstants.h         gmxmldomconstants.h
 gmxmlparser.h               gmxmlparser.h
 gmxmldummydtd.h             gmxmldummydtd.h
-
-winscw/xmldom.dll           /epoc32/release/winscw/udeb/xmldom.dll
-winscw/xmldom.lib           /epoc32/release/winscw/udeb/xmldom.lib
-
-winscw/xmlparser.dll        /epoc32/release/winscw/udeb/xmlparser.dll
-winscw/xmlparser.lib        /epoc32/release/winscw/udeb/xmlparser.lib
