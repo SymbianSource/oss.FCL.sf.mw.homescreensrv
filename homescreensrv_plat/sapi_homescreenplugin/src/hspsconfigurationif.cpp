@@ -1193,23 +1193,31 @@ void CHSPSConfigurationIf::RestoreConfigurationsL(
         }
     
     TLiwVariant inParamVariant = inParam->Value();
-    TPtrC8 restore( inParamVariant.AsData() );
-    
-    TBool restoreAll = EFalse;            
-    if( restore.CompareF( KHspsLiwRestoreAll ) == 0 )
+    TPtrC8 restorePtr( inParamVariant.AsData() );
+            
+    CHspsPersonalisationService::TRestore operation( CHspsPersonalisationService::EDefault );              
+    if( restorePtr.CompareF( KHspsLiwRestoreDefault ) == 0 )
         {
-        restoreAll = ETrue;
+        operation = CHspsPersonalisationService::EDefault;
         }
-    else if( restore.CompareF( KHspsLiwRestoreActive ) != 0 )
+    else if( restorePtr.CompareF( KHspsLiwRestoreRom ) == 0 )
+        {
+        operation = CHspsPersonalisationService::ERom;
+        }
+    else if( restorePtr.CompareF( KHspsLiwRestoreViews ) == 0 )
+        {
+        operation = CHspsPersonalisationService::EViews;
+        }        
+    else
         {
         User::Leave( KErrArgument );
-        }           
+        }        
     
     // Get client application's uid
     TInt appUid;
     iHspsConfigurationService->GetAppUidL( appUid );
         
-    iHspsPersonalisationService->RestoreConfigurationsL( appUid, restoreAll );
+    iHspsPersonalisationService->RestoreConfigurationsL( appUid, operation );
 
     // Invalidate ODT.
     iHspsConfigurationService->InvalidateODT();

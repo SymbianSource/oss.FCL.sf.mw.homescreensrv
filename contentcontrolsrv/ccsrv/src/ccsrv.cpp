@@ -50,7 +50,7 @@ const TUint8 KCcPolicyAction[KCcRangeCount] =
 // Requested capabilities
 const CPolicyServer::TPolicyElement KCcCapability[] = 
         {
-        {_INIT_SECURITY_POLICY_C2( ECapabilityReadUserData, ECapabilityWriteUserData ), CPolicyServer::EFailClient}
+        {_INIT_SECURITY_POLICY_C2( ECapabilityReadDeviceData, ECapabilityWriteDeviceData ), CPolicyServer::EFailClient}
         };
 
 const CPolicyServer::TPolicy KCcPolicy =

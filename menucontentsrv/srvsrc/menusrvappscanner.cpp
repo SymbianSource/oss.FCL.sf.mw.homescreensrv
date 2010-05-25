@@ -27,12 +27,12 @@
 #include "mcssathandler.h"
 #include "menusrvengutils.h"
 #include "bautils.h"
+#include "menuutil.h"
 
 _LIT( KMenuOne, "1" );
 _LIT( KMenuAttrMmcId, "mmc_id" );
 _LIT( KMenuMassStorage, "mass_storage" );
 _LIT( KMenuMmcHistoryFname, "mmchistory" );
-_LIT( KZDrive, "Z" );
 
 // ==================== LOCAL FUNCTIONS ====================
 
@@ -54,9 +54,11 @@ LOCAL_C TBool IdMatch( const TMenuItem& aLeft, const TMenuItem& aRight )
 // CMenuSrvAppScanner::NewL
 // ---------------------------------------------------------
 //
-CMenuSrvAppScanner* CMenuSrvAppScanner::NewL( CMenuEng& aEng )
+CMenuSrvAppScanner* CMenuSrvAppScanner::NewL(
+        CMenuEng& aEng, CMenuSrvEngUtils& aSrvEngUtils  )
     {
-    CMenuSrvAppScanner* scanner = new (ELeave) CMenuSrvAppScanner( aEng );
+    CMenuSrvAppScanner* scanner = new (ELeave) CMenuSrvAppScanner(
+            aEng, aSrvEngUtils );
     CleanupStack::PushL( scanner );
     scanner->ConstructL();
     CleanupStack::Pop( scanner );
@@ -70,13 +72,11 @@ CMenuSrvAppScanner* CMenuSrvAppScanner::NewL( CMenuEng& aEng )
 CMenuSrvAppScanner::~CMenuSrvAppScanner()
     {
     Cancel();
-    iApaLsSession.Close();
     delete iMcsSatNotifier;
     delete iNotifier;
     iEng.DequeueOperation( *this );
     delete iMmcHistory;
     iFs.Close();
-	iWidgetSession.Close();
 
     if( iCenRepNotifyHandlerHiddenApps )
         {
@@ -104,8 +104,10 @@ CMenuSrvAppScanner::~CMenuSrvAppScanner()
 // CMenuSrvAppScanner::CMenuSrvAppScanner
 // ---------------------------------------------------------
 //
-CMenuSrvAppScanner::CMenuSrvAppScanner( CMenuEng& aEng )
-: CActive( CActive::EPriorityStandard ), iEng( aEng )
+CMenuSrvAppScanner::CMenuSrvAppScanner(
+        CMenuEng& aEng, CMenuSrvEngUtils& aSrvEngUtils )
+: CActive( CActive::EPriorityStandard ), iEng( aEng ),
+  iSrvEngUtils( aSrvEngUtils )
     {
     CActiveScheduler::Add( this );
     }
@@ -135,9 +137,6 @@ void CMenuSrvAppScanner::ConstructL()
     // The notifier has its own session to apparc, instead of taking
     // it as argument... :(
     iNotifier = CApaAppListNotifier::NewL( this, CActive::EPriorityStandard );
-    User::LeaveIfError( iApaLsSession.Connect() );
-    User::LeaveIfError( iApaLsSession.GetAllApps() ); // This is async.
-	User::LeaveIfError( iWidgetSession.Connect() );
 
    	iCenRepSession = CRepository::NewL( KCRUidMenu );
 
@@ -161,9 +160,9 @@ void CMenuSrvAppScanner::ConstructL()
 
 	iFreeSpaceObserver = CMcsFreeSpaceObserver::NewL( *this );
 
-    iApaLsSession.RegisterListPopulationCompleteObserver( iStatus );
-    SetActive();
-    iOpStatus = ETrue;
+    //SetActive();
+	ScheduleScan();
+    //iOpStatus = ETrue;
     }
 
 // ---------------------------------------------------------
@@ -175,7 +174,14 @@ void CMenuSrvAppScanner::RunL()
     User::LeaveIfError( iStatus.Int() ); // Handle errors in RunL.
     // AppArc app scan complete, we have the app list.
     // Now queue this operation to be executed by the Engine.
-    iEng.QueueOperationL( *this );
+    if ( !MenuUtil::BackupInProgressL() )
+        {
+        iEng.QueueOperationL( *this );
+        }
+    else
+        {
+        iOpStatus = EFalse;
+        }
     }
 
 // ---------------------------------------------------------
@@ -184,7 +190,6 @@ void CMenuSrvAppScanner::RunL()
 //
 void CMenuSrvAppScanner::DoCancel()
     {
-    iApaLsSession.CancelListPopulationCompleteObserver();
     }
 
 // ---------------------------------------------------------
@@ -478,13 +483,13 @@ void CMenuSrvAppScanner::RunMenuEngOperationL()
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::UpdateApplicationItemL(
-		RArray<TMenuItem>& aMcsItems, const TAppAtributes& aApaItem,
+		RArray<TMenuItem>& aMcsItems, const CMenuSrvAppAttributes& aApaItem,
 		TUint aMmcId, TBool isLegacy)
     {
     RArray<TMenuItem> mcsUidItems;
     CleanupClosePushL( mcsUidItems );
-    TInt appuid = aApaItem.GetUid();
-    GetMcsAppItemsL( isLegacy, appuid, mcsUidItems );
+    TUid appuid = aApaItem.GetUid();
+    GetMcsAppItemsL( isLegacy, appuid.iUid, mcsUidItems );
     TBool isApaItemHidden( aApaItem.IsHidden() );
 
     // This app is not in the menu, add it now.
@@ -492,19 +497,19 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
     // do not display Menu app
     if ( !mcsUidItems.Count()
     		&& !isApaItemHidden
-    		&& appuid !=  KMmUid3.iUid  )
+    		&& appuid !=  KMmUid3  )
         {
-        if( appuid == KSatUid.iUid )
+        if( appuid == KSatUid )
             {
             if( CMcsSatHandler::CheckVisibility() )
              	{
-              	AddAppItemL( appuid, aMmcId );
+              	AddAppItemL( aApaItem, aMmcId );
                	}
             }
         else
           	{
-          	AddAppItemL( appuid, aMmcId );
-            GetMcsAppItemsL( isLegacy, appuid, mcsUidItems );
+          	AddAppItemL( aApaItem, aMmcId );
+            GetMcsAppItemsL( isLegacy, appuid.iUid, mcsUidItems );
            	}
         }//if
 
@@ -518,7 +523,7 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
        		CMenuEngObject& object =
       		                iEng.ModifiableObjectL( mcsUidItems[j].Id() );
             TBuf<KUidChars> uidString;
-            MenuSrvUtil::UidToStringL( appuid, uidString, EFalse, EHex );
+            MenuSrvUtil::UidToStringL( appuid.iUid, uidString, EFalse, EHex );
        	    object.SetAttributeL( KMenuAttrUid(), uidString, EFalse );
        		}//for
         }//else if
@@ -530,17 +535,17 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
         //we need to handle first run of appscanner,
         //there might be some incorrect data in content xml file
         //if this will have impact on performance we may run this methods only at start up
-       	HandleMmcAttrUpdateL( item, appuid, aMmcId );
-		HandleNativeAttrUpdateL( item, appuid );
+       	HandleMmcAttrUpdateL( item, aApaItem, aMmcId );
+		HandleNativeAttrUpdateL( item, aApaItem );
 
         // "hidden" flag handling.
-        HandleHiddenFlagUpdateL( item, appuid, isApaItemHidden );
+        HandleHiddenFlagUpdateL( item, aApaItem );
 
         // "missing" flag handling
         HandleMissingFlagUpdateL( item );
 
         //"lock_delete" flag handling
-        HandleLockDeleteFlagUpdateL(item, appuid);
+        HandleLockDeleteFlagUpdateL(item, aApaItem );
         // if item was just added to MCS  it is not present in aMcsItems
         // so we cannot remove it
         TInt index = aMcsItems.Find( item, TIdentityRelation<TMenuItem>( IdMatch ) );
@@ -557,10 +562,10 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::HandleHiddenFlagUpdateL( const TMenuItem & aItem,
-		TInt & aAppUid, TBool aApaItemHidden )
+        const CMenuSrvAppAttributes& aApaItem )
 	{
 	TBool itemHidden = (0 != (aItem.Flags() & TMenuItem::EHidden));
-	if (aAppUid == KSatUid.iUid)
+	if ( aApaItem.GetUid() == KSatUid )
 		{
 		if (itemHidden == CMcsSatHandler::CheckVisibility())
 			{
@@ -568,10 +573,10 @@ void CMenuSrvAppScanner::HandleHiddenFlagUpdateL( const TMenuItem & aItem,
 				SetFlags( TMenuItem::EHidden, !CMcsSatHandler::CheckVisibility());
 			}
 		}
-	else if (itemHidden != aApaItemHidden)
+	else if ( itemHidden != aApaItem.IsHidden() )
 		{
 		iEng.ModifiableObjectL(aItem.Id(), RMenuNotifier::EItemsAddedRemoved).
-			SetFlags( TMenuItem::EHidden, aApaItemHidden );
+			SetFlags( TMenuItem::EHidden, aApaItem.IsHidden() );
 		}
 	}
 
@@ -580,15 +585,13 @@ void CMenuSrvAppScanner::HandleHiddenFlagUpdateL( const TMenuItem & aItem,
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::HandleNativeAttrUpdateL(
-		const TMenuItem& aItem, TInt aUid )
+		const TMenuItem& aItem, const CMenuSrvAppAttributes& aApaItem )
 	{
     //we need this to delete uninstalled java app item
-	if( ( IsMidlet( TUid::Uid( aUid ) )
-	        || iWidgetSession.IsWidget( TUid::Uid( aUid ) ) )
-    		&& iEng.ObjectL( aItem.Id() ).GetNative() )
+    if( aApaItem.GetAppType() != iEng.ObjectL( aItem.Id() ).GetAppType() )
     	{
     	iEng.ModifiableObjectL( aItem.Id(),
-    			RMenuNotifier::EItemsNone ).SetNative( EFalse );
+    			RMenuNotifier::EItemsNone ).SetAppType( aApaItem.GetAppType() );
     	}
 	}
 
@@ -598,9 +601,9 @@ void CMenuSrvAppScanner::HandleNativeAttrUpdateL(
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::HandleMmcAttrUpdateL(
-		const TMenuItem& aItem, TInt aUid, TUint aMmcId )
+		const TMenuItem& aItem, const CMenuSrvAppAttributes& aApaItem, TUint aMmcId )
 	{
-    if ( IsMmcApp( TUid::Uid( aUid ) ) )
+    if ( IsInMmc( aApaItem ) )
     	{
     	//app is instaled on mmc - KMenuAttrMmcId attribute update
     	TBuf<KUidChars> uidString;
@@ -608,8 +611,8 @@ void CMenuSrvAppScanner::HandleMmcAttrUpdateL(
         iEng.ModifiableObjectL( aItem.Id(), RMenuNotifier::EItemsAddedRemoved ).
 			SetAttributeL( KMenuAttrMmcId, uidString, EFalse );
     	}
-    else if ( IsMassStorageApp( TUid::Uid( aUid ) )
-    		&& IsMidlet( TUid::Uid( aUid ) ) )
+    else if ( IsInMassStorage( aApaItem )
+    		&& aApaItem.GetAppType() == CMenuEngObject::EWidgetApp )
     	{
     	//its java app installed on mass storage, we need to leave it in xml
     	//in case of connecting usb in mass storage mode
@@ -634,24 +637,21 @@ void CMenuSrvAppScanner::UpdateApplicationItemsL()
     RArray<TMenuItem> mcsItems;
     CleanupClosePushL( mcsItems );
     GetMcsAppItemsL( mcsItems );
-    RArray<TAppAtributes> apaAndCrItems;
-    CleanupClosePushL( apaAndCrItems );
-    GetApaItemsL( apaAndCrItems );
-    GetCrItemsL( apaAndCrItems );
+    iSrvEngUtils.ReloadApaItemsL();
+    GetCrItemsL( iSrvEngUtils.GetAppItemsL() );
     TBool isLegacy = iEng.GetOnceLegacyFormat();
 
 
     //for every item in apaAndCrItems array
-    for ( TInt i = ( apaAndCrItems.Count() - 1 ); i >= 0 ; i-- )
+    for ( TInt i = ( iSrvEngUtils.GetAppItemsL().Count() - 1 ); i >= 0 ; i-- )
         {
         // if there was leave for any item we ignore it
         // and proceed to the next one
         TRAP_IGNORE(UpdateApplicationItemL(
-        		mcsItems, apaAndCrItems[i], currentMmcId, isLegacy));
+        		mcsItems, *iSrvEngUtils.GetAppItemsL()[i], currentMmcId, isLegacy));
         }
     // Here the big list contains menu items that refer to missing apps.
     HandleMissingItemsL( mcsItems );
-    CleanupStack::PopAndDestroy( &apaAndCrItems );
     CleanupStack::PopAndDestroy( &mcsItems );
     }
 
@@ -660,11 +660,11 @@ void CMenuSrvAppScanner::UpdateApplicationItemsL()
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::HandleLockDeleteFlagUpdateL(
-		const TMenuItem& aItem, TInt aUid )
+		const TMenuItem& aItem, const CMenuSrvAppAttributes& aApaItem )
 	{
 	TBool isHidden = ( ( iEng.ObjectL( aItem.Id() )
 							.Flags() & TMenuItem::EHidden ) != 0 );
-	if ( !isHidden && IsInRomL( aUid ) )
+	if ( !isHidden && IsInRomL( aApaItem ) )
 		{
 		if ( ( aItem.Flags() & TMenuItem::ELockDelete ) == 0 )
 			{
@@ -698,33 +698,10 @@ void CMenuSrvAppScanner::HandleMissingFlagUpdateL( const TMenuItem& aItem )
 	}
 
 // ---------------------------------------------------------
-// CMenuSrvAppScanner::IsInRomL
-// ---------------------------------------------------------
-//
-TBool CMenuSrvAppScanner::IsInRomL( TInt aUid )
-    {
-    TBool inROM = EFalse;
-    TApaAppInfo appInfo;
-    if( iApaLsSession.GetAppInfo( appInfo, TUid::Uid( aUid ) ) == KErrNone )
-        {
-        RBuf path;
-        CleanupClosePushL( path );
-        path.CreateL( appInfo.iFullName );
-        path.Replace( 0, 1, KZDrive );
-        if( BaflUtils::FileExists( iFs, path ) )
-            {
-            inROM = ETrue;
-            }
-        CleanupStack::PopAndDestroy( &path );
-        }
-    return inROM;
-    }
-
-// ---------------------------------------------------------
 // CMenuSrvAppScanner::GetCrItemsL
 // ---------------------------------------------------------
 //
-void CMenuSrvAppScanner::GetCrItemsL( RArray<TAppAtributes>& aArray )
+void CMenuSrvAppScanner::GetCrItemsL( RPointerArray<CMenuSrvAppAttributes>& aArray )
     {
  	TBuf<KCenRepBufferSize> buf;
 	iCenRepSession->Get( KMenuHideCPApplication, buf );
@@ -738,7 +715,7 @@ void CMenuSrvAppScanner::GetCrItemsL( RArray<TAppAtributes>& aArray )
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::ParseUidsL( const TDesC& aHiddenApplications,
-                                        RArray<TAppAtributes>& aArray )
+                                        RPointerArray<CMenuSrvAppAttributes>& aArray )
     {
     TLex input( aHiddenApplications );
     TLexMark startMark;
@@ -755,10 +732,10 @@ void CMenuSrvAppScanner::ParseUidsL( const TDesC& aHiddenApplications,
         input.Inc();
         notEmpty = ETrue;
         }
-        if ( notEmpty )
-            {
-            SetHidden(input.MarkedToken( startMark ), aArray);
-            }
+	if ( notEmpty )
+		{
+		SetHidden(input.MarkedToken( startMark ), aArray);
+		}
 
 
     }
@@ -767,50 +744,28 @@ void CMenuSrvAppScanner::ParseUidsL( const TDesC& aHiddenApplications,
 // CMenuSrvAppScanner::SetHidden
 // ---------------------------------------------------------
 //
-void CMenuSrvAppScanner::SetHidden( const TDesC& aHiddenAppUid,
-                                            RArray<TAppAtributes>& aArray )
+void CMenuSrvAppScanner::SetHidden(
+        const TDesC& aHiddenAppUid, RPointerArray<CMenuSrvAppAttributes>& aArray )
     {
     TLex appUidDescriptor(aHiddenAppUid);
     TUint hiddenAppUid( 0 );
     appUidDescriptor.Val( hiddenAppUid, EHex );
     if ( hiddenAppUid )
-       {
-       //all applications in descriptor are hidden
-       TAppAtributes appAtributes( hiddenAppUid,  ETrue );
-       TInt id = aArray.Find(appAtributes, TAppAtributes::MatchItems );
-       if ( id != KErrNotFound )
-           {
-           aArray[id].SetHidden( ETrue );
-           }
-       }
-    }
-
-// ---------------------------------------------------------
-// CMenuSrvAppScanner::GetApaItemsL
-// ---------------------------------------------------------
-//
-void CMenuSrvAppScanner::GetApaItemsL( RArray<TAppAtributes>& aArray )
-    {
-    TApaAppInfo appInfo;
-    TApaAppCapabilityBuf appCap;
-    TInt screenNumber;
-
-    User::LeaveIfError( iApaLsSession.GetAllApps() );
-    // for every application get uid, hidden and missing attribute
-    // and add to aArray.
-    while ( KErrNone == iApaLsSession.GetNextApp( appInfo ) )
         {
-        User::LeaveIfError( iApaLsSession.GetAppCapability
-            ( appCap, appInfo.iUid ) );
-        User::LeaveIfError( iApaLsSession.GetDefaultScreenNumber
-            ( screenNumber, appInfo.iUid ) );
-        // "Hidden" status according to AppArc.
-        TBool appHidden = appCap().iAppIsHidden || screenNumber != 0;
-
-        TAppAtributes appAtributes( appInfo.iUid.iUid,  appHidden );
-        aArray.AppendL( appAtributes );
+        TApaAppCapabilityBuf capability;
+        TApaAppInfo appInfo;
+        appInfo.iUid = TUid::Uid( hiddenAppUid );
+        CMenuSrvAppAttributes* attribute = CMenuSrvAppAttributes::NewLC( capability, appInfo );
+        TInt index = aArray.Find( attribute,
+                TIdentityRelation<CMenuSrvAppAttributes>( CMenuSrvAppAttributes::MatchItems ) );
+        if( index >= 0 && !aArray[index]->IsHidden() )
+            {
+            aArray[index]->SetHidden( ETrue );
+            }
+        CleanupStack::PopAndDestroy( attribute );
         }
     }
+
 
 // ---------------------------------------------------------
 // CMenuSrvAppScanner::GetMcsItemsL
@@ -884,12 +839,12 @@ void CMenuSrvAppScanner::HandleAppListEvent( TInt /*aEvent*/ )
 void CMenuSrvAppScanner::HandleNotifyString( TUint32 aKey,
         const TDesC16& /*aNewValue*/ )
     {
-    if((aKey ==KMenuHideApplication )||(aKey == KMenuHideCPApplication))
+    if((aKey == KMenuHideApplication )||(aKey == KMenuHideCPApplication))
         {
         if ( !IsActive() && !iOpStatus )
             {
             iOpStatus = ETrue;
-           TRequestStatus* ownStatus = &iStatus;
+            TRequestStatus* ownStatus = &iStatus;
             *ownStatus = KRequestPending;
             SetActive();
             User::RequestComplete( ownStatus, KErrNone );
@@ -926,18 +881,14 @@ void CMenuSrvAppScanner::ScheduleScan()
 // CMenuSrvAppScanner::CreateInstallFolderL
 // ---------------------------------------------------------
 //
-TInt CMenuSrvAppScanner::CreateInstallFolderL( TUint aUid )
+TInt CMenuSrvAppScanner::CreateInstallFolderL( const CMenuSrvAppAttributes& aApaItem )
 	{
     // Find a folder for this app.
     TInt folder(0);
-
-    TApaAppCapabilityBuf capability;
-    User::LeaveIfError(iApaLsSession.GetAppCapability( capability, TUid::Uid( aUid )));
-
-    if ( capability().iGroupName.Length() )
+    if ( aApaItem.GetGroupName().Length() )
         {
         // appgroup_name is defined for this app. Find or create folder.
-        AppGroupFolderL( capability().iGroupName, folder );
+        AppGroupFolderL( aApaItem.GetGroupName(), folder );
         }
     else
         {
@@ -957,60 +908,38 @@ TInt CMenuSrvAppScanner::CreateInstallFolderL( TUint aUid )
 // ---------------------------------------------------------
 //
 void CMenuSrvAppScanner::AddAppItemL(
-        TUint aUid,
+        const CMenuSrvAppAttributes& aApaItem,
         TUint aCurrentMmcId )
     {
-    TInt folder = CreateInstallFolderL( aUid );
+    TInt folder = CreateInstallFolderL( aApaItem );
     // Now add the app item.
     CMenuEngObject* object = iEng.NewObjectL( KMenuTypeApp() );
     CleanupStack::PushL( object );
     TBuf<KUidChars> uidString;
     _LIT(KHexFormat, "0x%X");
-    uidString.Format( KHexFormat, aUid );
+    uidString.Format( KHexFormat, aApaItem.GetUid().iUid );
 
     object->SetAttributeL( KMenuAttrUid(), uidString, EFalse );
-    if ( aCurrentMmcId && IsMmcApp( TUid::Uid( aUid ) ) )
+    if ( aCurrentMmcId && IsInMmc( aApaItem ) )
         {
         // This app is on the MMC, set the "mmc_id" attribute.
         uidString.Format( KHexFormat, aCurrentMmcId );
         object->SetAttributeL( KMenuAttrMmcId, uidString, EFalse );
         }
-    if( IsMidlet( TUid::Uid( aUid ) ) 
-	    || iWidgetSession.IsWidget( TUid::Uid( aUid ) ) )
+    if( aApaItem.GetAppType() == CMenuEngObject::EWidgetApp )
     	{
     	//we need this to delete uninstalled java or wrt widget app item
-    	object->SetNative( EFalse );
-    	if ( !IsMmcApp( TUid::Uid( aUid ) )
-    			&& IsMassStorageApp( TUid::Uid( aUid ) ) )
+    	if ( !IsInMmc( aApaItem )
+    			&& IsInMassStorage( aApaItem ) )
     		{
     		object->SetAttributeL( KMenuAttrMmcId, KMenuMassStorage, EFalse );
     		}
     	}
+    object->SetAppType( aApaItem.GetAppType() );
     EnsureFolderWritableL( folder );
     iEng.AddL( *object, folder, 0 );
     CleanupStack::Pop( object );
     }
-
-// ---------------------------------------------------------------------------
-// CMenuSrvAppScanner::IsMidletL
-// Checks if given app is midlet by reading the apptype uid (2nd uid)
-// ---------------------------------------------------------------------------
-//
-TBool CMenuSrvAppScanner::IsMidlet( const TUid aAppUid )
-	{
-    const TUid KMidletType = { 0x10210E26 };
-    TUid typeuid = KNullUid;
-
-    if ( KErrNone == iApaLsSession.GetAppType( typeuid, aAppUid  ) )
-        {
-        if ( typeuid == KMidletType )
-            {
-            return ETrue;
-            }
-        }
-    return EFalse;
-	}
-
 
 // ---------------------------------------------------------
 // CMenuSrvAppScanner::AppGroupFolderL
@@ -1142,7 +1071,7 @@ void CMenuSrvAppScanner::HandleMissingItemsL
             // history. Hide the item.
             SetObjectFlagsL( EFalse, aItems[i], TMenuItem::ELockDelete );
 
-			if( iEng.ObjectL( id ).GetNative() )
+			if( iEng.ObjectL( id ).GetAppType() != CMenuEngObject::EWidgetApp )
             	{
             	SetObjectFlagsL( ETrue, aItems[i], TMenuItem::EHidden,
 						RMenuNotifier::EItemsAddedRemoved );
@@ -1235,19 +1164,16 @@ TBool CMenuSrvAppScanner::IsFileInDrive(
     return EFalse;
     }
 
-
 // ---------------------------------------------------------
 // CMenuSrvAppScanner::IsAppInDrive
 // ---------------------------------------------------------
 //
 TBool CMenuSrvAppScanner::IsAppInDrive(
-		const TUid aUid,
+        const CMenuSrvAppAttributes& aApaItem,
 		const DriveInfo::TDefaultDrives& aDefaultDrive ) const
     {
     TBool ret( EFalse );
-    TApaAppInfo info;
-    TInt err = iApaLsSession.GetAppInfo( info, aUid );
-    if ( !err && IsFileInDrive( info.iFullName, aDefaultDrive ) )
+    if ( IsFileInDrive( aApaItem.GetFullName(), aDefaultDrive ) )
     	{
     	ret = ETrue;
     	}
@@ -1255,21 +1181,30 @@ TBool CMenuSrvAppScanner::IsAppInDrive(
     }
 
 // ---------------------------------------------------------
-// CMenuSrvAppScanner::IsMmcApp
+// CMenuSrvAppScanner::IsInMmc
 // ---------------------------------------------------------
 //
-TBool CMenuSrvAppScanner::IsMmcApp( const TUid aUid ) const
+TBool CMenuSrvAppScanner::IsInMmc( const CMenuSrvAppAttributes& aApaItem ) const
     {
-    return IsAppInDrive( aUid, DriveInfo::EDefaultRemovableMassStorage );
+    return IsAppInDrive( aApaItem, DriveInfo::EDefaultRemovableMassStorage );
     }
 
 // ---------------------------------------------------------
-// CMenuSrvAppScanner::IsMassStorageApp
+// CMenuSrvAppScanner::IsInMassStorage
 // ---------------------------------------------------------
 //
-TBool CMenuSrvAppScanner::IsMassStorageApp( const TUid aUid ) const
+TBool CMenuSrvAppScanner::IsInMassStorage( const CMenuSrvAppAttributes& aApaItem ) const
     {
-    return IsAppInDrive( aUid, DriveInfo::EDefaultMassStorage );
+    return IsAppInDrive( aApaItem, DriveInfo::EDefaultMassStorage );
+    }
+
+// ---------------------------------------------------------
+// CMenuSrvAppScanner::IsInRomL
+// ---------------------------------------------------------
+//
+TBool CMenuSrvAppScanner::IsInRomL( const CMenuSrvAppAttributes& aApaItem ) const
+    {
+    return IsAppInDrive( aApaItem, DriveInfo::EDefaultRom );
     }
 
 // ---------------------------------------------------------
@@ -1296,63 +1231,5 @@ TBool CMenuSrvAppScanner::IsDriveInUse(
 
 	return inUse;
     }
-
-// ==================== MEMBER FUNCTIONS ====================
-
-// ---------------------------------------------------------
-// TAppAtributes::TAppAtributes
-// ---------------------------------------------------------
-//
-TAppAtributes::TAppAtributes ( TUint aUid, TBool aHidden/*, TBool aMissing*/)
-    {
-    iUid = aUid;
-    iHidden = aHidden;
-    /*iMissing = aMissing;*/
-    }
-
-// ---------------------------------------------------------
-// TAppAtributes::GetUid
-// ---------------------------------------------------------
-//
-TUint TAppAtributes::GetUid() const
-    {
-    return iUid;
-    }
-
-// ---------------------------------------------------------
-// TAppAtributes::IsHidden
-// ---------------------------------------------------------
-//
-TBool TAppAtributes::IsHidden() const
-    {
-    return iHidden;
-    }
-// ---------------------------------------------------------
-// TAppAtributes::SetHidden
-// ---------------------------------------------------------
-//
-void TAppAtributes::SetHidden( TBool aHidden )
-    {
-    iHidden = aHidden;
-    }
-
-// ---------------------------------------------------------
-// TAppAtributes::MatchItems
-// ---------------------------------------------------------
-//
-TBool TAppAtributes::MatchItems(const TAppAtributes& item1,
-                                        const TAppAtributes& item2)
-    {
-    TBool result( EFalse );
-    TUint uid1(item1.GetUid());
-    TUint uid2(item2.GetUid());
-    if ( uid1 == uid2 )
-        {
-        result = ETrue;
-        }
-    return result;
-    }
-
-
 
 //  End of File

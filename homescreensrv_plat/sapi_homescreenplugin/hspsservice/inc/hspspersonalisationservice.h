@@ -44,7 +44,14 @@ class ChspsDomNode;
 class CHspsPersonalisationService : public CBase, public MhspsThemeManagementServiceObserver
     {
     public: // Constructor and destructor
-
+    
+        enum TRestore
+            {            
+            EDefault,            
+            ERom,
+            EViews
+            };    
+    
         /**
          * Two-phased constructor.
          * 
@@ -243,19 +250,14 @@ class CHspsPersonalisationService : public CBase, public MhspsThemeManagementSer
             const TDesC8& aConfUid );
         
         /**
-         * Restores plugin configurations by either removing all plugins
-         * from the active view or by removing all extra views.
-         * In latter case, the first locked view is emptied. If there are 
-         * no locked views then the first view will remain while others
-         * are removed.
+         * Restores plugin configurations according to the input.
          * @since S60 5.2
          * @param aAppUid Application uid
-         * @param aResetAllViews False if only the active view should be fixed,
-         *                       True if also all extra views should removed                
+         * @param aOperation Operation to be executed                
          */
         IMPORT_C void RestoreConfigurationsL(
             const TInt aAppUid, 
-            const TBool aResetAllViews );
+            const TRestore aOperation );
 
     private: // Methods
     

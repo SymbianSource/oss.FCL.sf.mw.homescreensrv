@@ -65,20 +65,20 @@ EXPORTS
 	_ZNK9CMenuItem4TypeEv @ 64 NONAME
 	_ZNK9CMenuItem5FlagsEv @ 65 NONAME
 	_ZNK9CMenuItem6ParentEv @ 66 NONAME
-	_ZTI12CMenuHandler @ 67 NONAME ; #<TI>#
-	_ZTI18TMenuSrvAttrFilter @ 68 NONAME ; #<TI>#
-	_ZTI18TMenuSrvTypeFilter @ 69 NONAME ; #<TI>#
-	_ZTI22RMcsDrmObserverManager @ 70 NONAME ; #<TI>#
-	_ZTI22TMenuSrvTypeAttrFilter @ 71 NONAME ; #<TI>#
-	_ZTI23TMenuSrvHiddenAppFilter @ 72 NONAME ; #<TI>#
-	_ZTI24TMenuSrvAttrExistsFilter @ 73 NONAME ; #<TI>#
-	_ZTI28TMenuSrvTypeAttrExistsFilter @ 74 NONAME ; #<TI>#
-	_ZTV12CMenuHandler @ 75 NONAME ; #<VT>#
-	_ZTV18TMenuSrvAttrFilter @ 76 NONAME ; #<VT>#
-	_ZTV18TMenuSrvTypeFilter @ 77 NONAME ; #<VT>#
-	_ZTV22RMcsDrmObserverManager @ 78 NONAME ; #<VT>#
-	_ZTV22TMenuSrvTypeAttrFilter @ 79 NONAME ; #<VT>#
-	_ZTV23TMenuSrvHiddenAppFilter @ 80 NONAME ; #<VT>#
-	_ZTV24TMenuSrvAttrExistsFilter @ 81 NONAME ; #<VT>#
-	_ZTV28TMenuSrvTypeAttrExistsFilter @ 82 NONAME ; #<VT>#
+	_ZTI12CMenuHandler @ 67 NONAME
+	_ZTI18TMenuSrvAttrFilter @ 68 NONAME
+	_ZTI18TMenuSrvTypeFilter @ 69 NONAME
+	_ZTI22RMcsDrmObserverManager @ 70 NONAME
+	_ZTI22TMenuSrvTypeAttrFilter @ 71 NONAME
+	_ZTI23TMenuSrvHiddenAppFilter @ 72 NONAME
+	_ZTI24TMenuSrvAttrExistsFilter @ 73 NONAME
+	_ZTI28TMenuSrvTypeAttrExistsFilter @ 74 NONAME
+	_ZTV12CMenuHandler @ 75 NONAME
+	_ZTV18TMenuSrvAttrFilter @ 76 NONAME
+	_ZTV18TMenuSrvTypeFilter @ 77 NONAME
+	_ZTV22RMcsDrmObserverManager @ 78 NONAME
+	_ZTV22TMenuSrvTypeAttrFilter @ 79 NONAME
+	_ZTV23TMenuSrvHiddenAppFilter @ 80 NONAME
+	_ZTV24TMenuSrvAttrExistsFilter @ 81 NONAME
+	_ZTV28TMenuSrvTypeAttrExistsFilter @ 82 NONAME
 

@@ -42,6 +42,17 @@ NONSHARABLE_CLASS( CMenuEngObject ): public CGECODefaultObject
 public:     // construction
 
     /**
+    * Enum indicating type of application.
+    */
+    enum TAppType
+        {
+        ENoTypeApp,
+        ENativeApp,
+        EJavaApp,
+        EWidgetApp
+        };
+
+    /**
     * Destructor.
     */
     IMPORT_C virtual ~CMenuEngObject();
@@ -144,19 +155,19 @@ public:     // new methods
         const TDesC& aAttrName,
         const TDesC& aAttrValue,
         TBool aLocalized ); // Set attribute value.
-    
+
     /**
     * Method to set iNative for apps.
     */
-    IMPORT_C void SetNative( TBool aNative );
+    IMPORT_C void SetAppType( TAppType aNative );
 
     /**
     * Method to get iNative for apps.
     * @return ETrue if app is native.
     */
-    IMPORT_C TBool GetNative() const;
+    IMPORT_C TAppType GetAppType() const;
 
-    
+
     /**
     * Remove attribute.
     * @param aAttrName Name.
@@ -197,30 +208,30 @@ private:    // from CGECOObjectBase
     * @return Type identifier.
     */
     const TDesC& TypeIdentifier();
-    
-    /** 
+
+    /**
      * Updates flags with hidden flag from central repository if nececerry.
      * @param aFlags flags.
-     */ 
+     */
     void UpdateCrHiddenFlagL( TUint32& aFlags ) const;
 
-    /** 
+    /**
      * Parses descriptor containing folders hidden in central repository.
      * @param aHiddenFolders descriptor containing folders hidden in central repository.
      * @param aHiddenFoldersArray array to fill with names of folders hidden in central repository.
-     */ 
-    void ParseHiddenFoldersL( 
-                const TDesC& aHiddenFolders, 
+     */
+    void ParseHiddenFoldersL(
+                const TDesC& aHiddenFolders,
                 RArray<TPtrC>& aHiddenFoldersArray ) const;
 
-    /** 
+    /**
      * Checks wether folder name is in Central Repository.
      * @param aFolderName descriptor containing name of a folder.
      * @return ETrue if folder is in array, EFalse otherwise.
-     */ 
+     */
     TBool IsInCrL( const TDesC& aFolderName ) const;
 
-    
+
 
 private:    // data
 
@@ -229,7 +240,7 @@ private:    // data
     RBuf iType; /// Type. Own.
     RMenuEngObjectAttrArray iAttributes; ///< Attributes. Own.
     TUint32 iFlags; ///< Flags.
-    TBool iNative;	///< app is not of midlet/java type
+    TAppType iAppType;	///< app type
 
     };
 

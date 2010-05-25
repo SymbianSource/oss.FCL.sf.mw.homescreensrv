@@ -81,7 +81,8 @@ CMenuEngObject* CMenuEngObject::NewL
 // CMenuEngObject::CMenuEngObject
 // ---------------------------------------------------------
 //
-CMenuEngObject::CMenuEngObject( CMenuEng& aEng ): iEng( aEng ), iNative( ETrue )
+CMenuEngObject::CMenuEngObject( CMenuEng& aEng ): iEng( aEng ),
+        iAppType( ENoTypeApp )
     {
     }
 
@@ -143,30 +144,30 @@ void CMenuEngObject::UpdateCrHiddenFlagL( TUint32& aFlags ) const
 // CMenuEngObject::ParseHiddenFoldersL
 // ---------------------------------------------------------
 //
-void CMenuEngObject::ParseHiddenFoldersL( 
-            const TDesC& aHiddenFolders, 
+void CMenuEngObject::ParseHiddenFoldersL(
+            const TDesC& aHiddenFolders,
             RArray<TPtrC>& aHiddenFoldersArray ) const
     {
     TLex input( aHiddenFolders );
     TLexMark startMark;
-    input.Mark( startMark ); 
+    input.Mark( startMark );
     TBool notEmpty = EFalse;
     while ( !input.Eos() )
         {
         if( input.Peek() == ',')
             {
             User::LeaveIfError( aHiddenFoldersArray.
-                            Append( input.MarkedToken( startMark )  ) );            
+                            Append( input.MarkedToken( startMark )  ) );
             input.Inc();
             input.Mark( startMark );
             }
-        input.Inc();     
-        notEmpty = ETrue;       
+        input.Inc();
+        notEmpty = ETrue;
         }
 	if ( notEmpty )
 		{
 		User::LeaveIfError( aHiddenFoldersArray.
-						Append( input.MarkedToken( startMark )  ) );            
+						Append( input.MarkedToken( startMark )  ) );
 		}
    }
 
@@ -179,15 +180,15 @@ TBool CMenuEngObject::IsInCrL( const TDesC& aFolderName ) const
 	RBuf hiddenCRFolders;
 	CleanupClosePushL( hiddenCRFolders );
 	hiddenCRFolders.CreateL( KCenRepBufferSize );
-    
+
     CRepository* cenRepSession = CRepository::NewLC( KCRUidMenu );
     cenRepSession->Get( KMenuHideCPFolder, hiddenCRFolders );
 	CleanupStack::PopAndDestroy( cenRepSession );
-	
+
 	RArray<TPtrC> hiddenFoldersArray;
     CleanupClosePushL( hiddenFoldersArray );
 	ParseHiddenFoldersL( hiddenCRFolders, hiddenFoldersArray );
-    
+
     TBool result(EFalse);
     TInt id = hiddenFoldersArray.Find(aFolderName);
     if (KErrNotFound != id )
@@ -199,7 +200,7 @@ TBool CMenuEngObject::IsInCrL( const TDesC& aFolderName ) const
             result = ETrue;
             }
         }
-    
+
 	CleanupStack::PopAndDestroy( &hiddenFoldersArray );
 	CleanupStack::PopAndDestroy( &hiddenCRFolders );
 
@@ -278,10 +279,10 @@ EXPORT_C void CMenuEngObject::SetFlags( TUint32 aMask, TBool aOn )
 
 // ----------------------------------------------------------------------------
 // CMenuEngObject::SetAttributeL
-// Menu item lock flags are checked (e.g. can rename), but only when the 
+// Menu item lock flags are checked (e.g. can rename), but only when the
 // current SetAttributeL call is not made from the object factories.
 // If it is called from there, no flags checking is made.
-// This method is called from object factories when the engine is in 
+// This method is called from object factories when the engine is in
 // ELoadRamFile or ELoadRomFile states.
 // ----------------------------------------------------------------------------
 //
@@ -297,12 +298,12 @@ void CMenuEngObject::SetInitialAttributeL
 ( const TDesC& aAttrName, const TDesC& aAttrValue, TBool aLocalized )
     {
     CheckAttrNameL( aAttrName );
-    
-    if ( iEng.State() != CMenuEng::ELoadRamFile && 
+
+    if ( iEng.State() != CMenuEng::ELoadRamFile &&
          iEng.State() != CMenuEng::ELoadRomFile &&
-         Flags() & TMenuItem::ELockName && 
-         ( 0 == aAttrName.Compare( KMenuAttrShortName ) || 
-           0 == aAttrName.Compare( KMenuAttrLongName ) || 
+         Flags() & TMenuItem::ELockName &&
+         ( 0 == aAttrName.Compare( KMenuAttrShortName ) ||
+           0 == aAttrName.Compare( KMenuAttrLongName ) ||
            0 == aAttrName.Compare( KMenuAttrTitleName ) ) )
         {
         User::Leave( KErrAccessDenied );
@@ -329,18 +330,18 @@ void CMenuEngObject::SetInitialAttributeL
 // CMenuEngObject::SetNative
 // ---------------------------------------------------------
 //
-EXPORT_C void CMenuEngObject::SetNative( TBool aNative )
+EXPORT_C void CMenuEngObject::SetAppType( TAppType aAppType )
     {
-    iNative = aNative;
+    iAppType = aAppType;
     }
 
 // ---------------------------------------------------------
 // CMenuEngObject::GetNative
 // ---------------------------------------------------------
 //
-EXPORT_C TBool CMenuEngObject::GetNative() const
+EXPORT_C CMenuEngObject::TAppType CMenuEngObject::GetAppType() const
     {
-    return iNative;
+    return iAppType;
     }
 
 // ---------------------------------------------------------
@@ -395,4 +396,4 @@ const TDesC& CMenuEngObject::TypeIdentifier()
     return iType;
     }
 
-//  End of File  
+//  End of File

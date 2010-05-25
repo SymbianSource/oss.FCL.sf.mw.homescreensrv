@@ -817,7 +817,15 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
                 ChspsDomDocument& aAppDom,
                 ChspsDomNode& aMissingPluginNode,
                 const TInt aPluginUid );
-
+                                
+        /**
+         * Restores plug-ins by reinstallation.
+         * @since S60 5.2          
+         * @param aInstallUdaEmmc Set if UDA and eMMC drives should used 
+         */
+        void HandleReinstallationL(
+                const TBool aInstallUdaEmmc );
+                                
         /**
          * Removes all plugins from the plugins node and related 
          * resources from the resource array.

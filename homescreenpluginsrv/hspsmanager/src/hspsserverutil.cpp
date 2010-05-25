@@ -1853,7 +1853,8 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
  TInt hspsServerUtil::FindFile(
          RFs& aFs,
          const TDesC& aPath,
-         const TDesC& aFilename,         
+         const TDesC& aFilename,        
+         const TBool aFindFromUdaEmmcDrives,
          TFileName& aDrivePathName )
      {   
      TInt err = KErrNotFound;
@@ -1875,7 +1876,14 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
          TFindFile fileFinder( aFs );
          fileFinder.SetFindMask( 
              KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
-         aFs.SetSessionToPrivate( EDriveE );
+         if( aFindFromUdaEmmcDrives )
+             {
+             aFs.SetSessionToPrivate( EDriveE );
+             }
+         else 
+             {
+             aFs.SetSessionToPrivate( EDriveZ );
+             }
          err = fileFinder.FindByDir( filename, path );
          aFs.SetSessionToPrivate( EDriveC );     
          if( !err )          

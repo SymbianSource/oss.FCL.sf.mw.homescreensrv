@@ -209,6 +209,12 @@ class ChspsInstallationHandler : public CBase,
          */
         void DisableNotifications();
         
+        /**
+         * Disables installation of UDA and eMMC content.
+         * @since S60 5.2
+         */
+        void DisableUdaEmmcInstallations();
+        
     public: // Functions from base classes
 
         /**
@@ -797,6 +803,9 @@ class ChspsInstallationHandler : public CBase,
 
         // Set if installation files are located in ROM or in UDA, validation is not required
         TBool iTrustedInstallation;
+        
+        // Set if installation files should be searched from UDA and eMMC drives
+        TBool iInstallFromUDAEmmc;
         
         // Set if widget mutliinstance flag
         TInt32 iMultiInstance;

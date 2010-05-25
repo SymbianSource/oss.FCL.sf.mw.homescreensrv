@@ -432,10 +432,24 @@ EXPORT_C void CHspsPersonalisationService::ReplacePluginL(
 // -----------------------------------------------------------------------------
 EXPORT_C void CHspsPersonalisationService::RestoreConfigurationsL(
     const TInt aAppUid, 
-    const TBool aResetAllViews )
+    const TRestore aOperation )
     {        
+    ThspsRestore operation( EhspsRestoreAll );
+    if( aOperation == EDefault )
+        {
+        operation = EhspsRestoreAll; 
+        }    
+    else if( aOperation == ERom )
+        {
+        operation = EhspsRestoreRom;
+        }    
+    else if( aOperation == EViews )
+        {
+        operation = EhspsRestoreViews;
+        }
+            
     ThspsServiceCompletedMessage ret = 
-        iHspsClient->hspsRestoreConfigurations( aAppUid, aResetAllViews );            
+        iHspsClient->hspsRestoreConfigurations( aAppUid, operation );            
     if( ret != EhspsRestoreConfigurationsSuccess )
         {
         // Get error code from the server process

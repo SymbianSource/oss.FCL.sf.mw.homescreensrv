@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  
-*  Version     : %version: sa1spcx1#11.1.7.1.6 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: sa1spcx1#11.1.7.1.7 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -56,6 +56,7 @@ SOURCE          menusrvbuf.cpp
 SOURCE          menusrvstream.cpp
 SOURCE          menusrveng.cpp
 SOURCE          menusrvengutils.cpp
+SOURCE          menusrvappattributes.cpp
 SOURCE          timeout.cpp
 SOURCE          menusrvappscanner.cpp
 SOURCE          menusrvfoldercrnotifier.cpp
@@ -72,23 +73,24 @@ SOURCE          menusrvattr.cpp
 SOURCE          mcsdrmobserver.cpp
 SOURCE          mcsdrmscanner.cpp
 SOURCE          mcsdrmobservermanager.cpp
-SOURCE			mcschildrenhandler.cpp
-SOURCE			mcschildrenscanner.cpp 
+SOURCE          mcschildrenhandler.cpp
+SOURCE          mcschildrenscanner.cpp 
+SOURCE          menusrvtypefilters.cpp 
 
-SOURCE			mcsmmcobserver.cpp
+SOURCE          mcsmmcobserver.cpp
 SOURCE          mcsfreespaceobserver.cpp
-SOURCE			mcsinstallnotifier.cpp
-SOURCE			mcssuiteobjectattr.cpp 
-SOURCE			mcssuiteobject.cpp 
-SOURCE			mcssuiteobjectfactory.cpp 
-SOURCE			mcssuiteparser.cpp
-SOURCE			menusvrsuite.cpp 
-SOURCE			mcssuitehandler.cpp
+SOURCE          mcsinstallnotifier.cpp
+SOURCE          mcssuiteobjectattr.cpp 
+SOURCE          mcssuiteobject.cpp 
+SOURCE          mcssuiteobjectfactory.cpp 
+SOURCE          mcssuiteparser.cpp
+SOURCE          menusvrsuite.cpp 
+SOURCE          mcssuitehandler.cpp
 
 SOURCE          mcsgetlistcreatorinterface.cpp
 SOURCE          mcsgetlisthandler.cpp
-SOURCE			mcsgetlistflatcreator.cpp
-SOURCE			mcsgetlisttreecreator.cpp
+SOURCE          mcsgetlistflatcreator.cpp
+SOURCE          mcsgetlisttreecreator.cpp
 
 
 USERINCLUDE     ../inc
@@ -127,4 +129,5 @@ LIBRARY         WidgetRegistryClient.lib
 LIBRARY         featmgr.lib 
 LIBRARY         liwServiceHandler.lib
 LIBRARY         xcfw.lib
+
 

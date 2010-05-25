@@ -49,24 +49,14 @@ class ChspsRomInstaller : public CActive
         * @since S60 5.0
         * @param aThemeServer is a reference to theme server instance
         * @param aFsSession is a reference to file server instance
+        * @param aInstallUdaEmmc is set if UDA and eMMC drives should be utilized
         * @return A pointer to the created instance of ChspsRomInstaller.
         */
         static ChspsRomInstaller* NewL( 
         		ChspsThemeServer& aThemeServer,
-        		RFs& aFsSession );
+        		RFs& aFsSession,
+        		const TBool aInstallUdaEmmc = ETrue );
 
-        /**
-        * NewLC.
-        * Two-phased constructor.
-        * Creates a ChspsClinet object using two phase construction,
-        * and return a pointer to the created object.
-        * @since S60 5.0
-        * @param aObserver The object to be used to handle updates from the server.
-        * @return a pointer to the created instance of ChspsRomInstaller.
-        */
-        static ChspsRomInstaller* NewLC( 
-        		ChspsThemeServer& aThemeServer,
-        		RFs& aFsSession );
 
         /**
         * ~ChspsRomInstaller.
@@ -80,7 +70,8 @@ class ChspsRomInstaller : public CActive
         
         
         /**
-         * Installs all plugin configurations which can be found from ROM and C drives (UDA).         
+         * Installs all plugin configurations which can be found from the 
+         * internal drives.         
          * @since S60 5.2         
          */
         void InstallL();
@@ -145,10 +136,12 @@ class ChspsRomInstaller : public CActive
         * @since S60 5.0
         * @param aObserver The object to be used to handle updates from the server.
         * @param aFsSession is a reference to file server instance
+        * @param aInstallUdaEmmc is set if UDA and eMMC drives should be utilized
         */
         ChspsRomInstaller( 
                 ChspsThemeServer& aThemeServer,
-                RFs& aFsSession );
+                RFs& aFsSession,
+                const TBool aInstallUdaEmmc );
 
         /**
         * ConstructL.
@@ -158,9 +151,10 @@ class ChspsRomInstaller : public CActive
         void ConstructL();           
                         
         /**         
-         * Retrieves manifest files from both Z and C drives located in
+         * Retrieves manifest files from all internal drives in 
          * \\private\200159C0\install\ paths.
-         * @since S60 5.0
+         * @since S60 5.0         
+         * @param aFileArray An array of file names
          */
         void FindInstallationFilesL(  
                 RPointerArray<HBufC>& aFileArray );
@@ -202,6 +196,9 @@ class ChspsRomInstaller : public CActive
          */        
         ChspsLogBus* iLogBus;
 #endif        
+        
+        // Set if plug-ins should be installed from UDA and eMMC drives 
+        TBool iInstallUdaEmmc;
      };
 
 

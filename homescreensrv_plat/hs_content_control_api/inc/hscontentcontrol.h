@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
  * under the terms of "Eclipse Public License v1.0"
@@ -25,31 +25,32 @@
 // Forward declarations
 
 /**
- *  Content control interface
+ *  Content control interface to notify observers about installation and 
+ *  uninstallation of Home screen configurations
  *
- *
- *  @code
- *
- *  @endcode
- *
- *  @lib hscontentcontrol.lib
- *  @since S60 v5.0
+ *  @since S60 v5.2
  */
 class MHsContentControl
     {
 public:
     /**
+     * Notify changes in widget installations
      *
+     * @since S60 v5.2
      */
     virtual void NotifyWidgetListChanged() = 0;
 
     /**
+     * Notify changes in view installations
      *
+     * @since S60 v5.2
      */
     virtual void NotifyViewListChanged() = 0;
 
     /**
+     * Notify changes in application configuration installations
      *
+     * @since S60 v5.2
      */
     virtual void NotifyAppListChanged() = 0;
 

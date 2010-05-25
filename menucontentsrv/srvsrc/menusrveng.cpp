@@ -94,10 +94,12 @@ CMenuSrvEng* CMenuSrvEng::NewL
 CMenuSrvEng::~CMenuSrvEng()
     {
     __ASSERT_DEBUG( !iSessions.Count(), User::Invariant() );
+    //TODO iCMenuSrvEngUtils
     delete iGetlistHandler;
     delete iDrmHander;
     delete iChildrenHandler;
     delete iTimedClose;
+    delete iCacheHandler;
     delete iCMenuSrvEngUtils;
     iSessions.Close();
     iContentName.Close();
@@ -105,7 +107,6 @@ CMenuSrvEng::~CMenuSrvEng()
     delete iFolderNotifier;
     delete iMcsSatMonitor;
     delete iRunningAppsHandler;
-    delete iCacheHandler;
     delete iSuiteHandler;
     delete iEng;
     iMenuSrv.EngineDeleted();
@@ -130,35 +131,33 @@ void CMenuSrvEng::ConstructL( const TDesC& aContentName )
         // A name is required - only dead engines have empty name.
         User::Leave( KErrArgument );
         }
-    
+
     iContentName.CreateL( aContentName );
     iTimedClose = CTimeout::NewL
         ( CActive::EPriorityStandard, TCallBack( CloseSrvEng, (TAny*)this ) );
     iEng = CMenuEng::NewL( iContentName, *this );
-    if (iContentName.Length())
+    if ( iContentName.Length() )
         {
-        iCacheHandler = CMcsCacheHandler::NewL( *iEng, *iCMenuSrvEngUtils );
-        
-        iMcsSatMonitor = CMcsSatMonitor::NewL( *iEng );
-        
         iCMenuSrvEngUtils = CMenuSrvEngUtils::NewL( *iEng );
+
+        iCacheHandler = CMcsCacheHandler::NewL( *iEng, *iCMenuSrvEngUtils );
+
+        iMcsSatMonitor = CMcsSatMonitor::NewL( *iEng );
     #ifndef __TEST_DISABLE_APPSCAN
-        iAppScanner = CMenuSrvAppScanner::NewL( *iEng ); // Start automatic update.
-        iFolderNotifier =  CMenuSrvFolderCrNotifier::NewL( *iEng ); // Start automatic update.
+        // Start automatic update.
+        iAppScanner = CMenuSrvAppScanner::NewL( *iEng, *iCMenuSrvEngUtils );
+        // Start automatic update.
+        iFolderNotifier =  CMenuSrvFolderCrNotifier::NewL( *iEng );
     #endif
-        
-        iRunningAppsHandler = CMcsRunningAppsHandler::NewL( *iEng, 
-        		*iCacheHandler );
-        
-        iDrmHander = CMcsDrmHandler::NewL( 
-            *this,
-            *iCMenuSrvEngUtils, 
-            *iCacheHandler );
-        iChildrenHandler = CMcsChildrenHandler::NewL(
-            *this,
-            *iCacheHandler);
+        iRunningAppsHandler = CMcsRunningAppsHandler::NewL(
+                *iEng, *iCacheHandler );
+
+        iDrmHander = CMcsDrmHandler::NewL(
+                *this, *iCMenuSrvEngUtils, *iCacheHandler );
+
+        iChildrenHandler = CMcsChildrenHandler::NewL( *this, *iCacheHandler);
         iSuiteHandler = CMcsSuiteHandler::NewL(*iEng, iContentName);
-        
+
         iTimedClose->Cancel();
         iTimedClose->After( TTimeIntervalMicroSeconds32( KMenuSrvExitDelay ) );
         }
@@ -223,9 +222,9 @@ void CMenuSrvEng::EngineEvents( TInt aFolder, TInt aEvents )
         {
         iSessions[i]->EngineEvents( aFolder, aEvents );
         }
-    if (iDrmHander) 
+    if (iDrmHander)
         {
-        iDrmHander->EngineEvents( aFolder, aEvents );    
+        iDrmHander->EngineEvents( aFolder, aEvents );
         }
     if (iChildrenHandler)
     	{
@@ -234,7 +233,7 @@ void CMenuSrvEng::EngineEvents( TInt aFolder, TInt aEvents )
     if (iRunningAppsHandler)
     	{
     	iRunningAppsHandler->EngineEvents( aFolder, aEvents );
-    	}    
+    	}
     if( iCacheHandler && iCacheHandler->iAttrCache.Count() > 0 )
         {
         iCacheHandler->EngineEvents( aEvents );
@@ -268,7 +267,7 @@ void CMenuSrvEng::EngineError( TInt aErr )
     delete iFolderNotifier; iFolderNotifier = NULL;
     delete iSuiteHandler; iSuiteHandler = NULL;
     delete iEng; iEng = NULL;
-    
+
     iContentName.Close();
     iTimedClose->Cancel();
     iTimedClose->After( TTimeIntervalMicroSeconds32( KMenuSrvExitDelay ) );
@@ -288,9 +287,9 @@ void CMenuSrvEng::GetAttributeListL(
 		  TInt aId,
 		  RArray<TPtrC>& aList )
     {
-	  
+
     const CMenuEngObject& obj = iEng->ObjectL(aId);
-    
+
     TPtrC name, value;
     TBool localized;
     for ( TInt ndx = 0; obj.GetAttribute( ndx, name, value, localized ); ndx++ )
@@ -302,8 +301,8 @@ void CMenuSrvEng::GetAttributeListL(
             || name.Compare( KMenuAttrIconSkinMinorId ) == KErrNone ))
             {
             aList.AppendL(name);
-            }  
-        }      
+            }
+        }
 
     AppendExtendedAttrributesL( obj.Type() , aList );
     }
@@ -321,14 +320,14 @@ void CMenuSrvEng::GetAttributeL(
     {
     TBool dummy;
     TPtrC val(KNullDesC);
-    
+
     aAttrExists = iEng->ObjectL(aId).FindAttribute( aAttrName, val, dummy);
-    
+
     if( !aAttrExists )
         {
         aAttrExists = iCacheHandler->iAttrCache.Find( aId, aAttrName, aAttrVal );
         }
-    
+
     if ( aAttrExists && val!=KNullDesC() )
         {
         aAttrVal = val;
@@ -342,7 +341,7 @@ void CMenuSrvEng::GetAttributeL(
 // ---------------------------------------------------------
 // CMenuSrvEng::InstalledSuiteExist
 // ---------------------------------------------------------
-// 
+//
 TBool CMenuSrvEng::InstalledSuiteExist(const TDesC& aSuiteName)
 	{
 	return iSuiteHandler->HaveSuite(aSuiteName);
@@ -351,18 +350,18 @@ TBool CMenuSrvEng::InstalledSuiteExist(const TDesC& aSuiteName)
 // ---------------------------------------------------------
 // CMenuSrvEng::GetSuiteAttributeL
 // ---------------------------------------------------------
-// 
-void CMenuSrvEng::GetSuiteAttribute( const TDesC& aSuiteName, const TDesC& aAttrName, 
+//
+void CMenuSrvEng::GetSuiteAttribute( const TDesC& aSuiteName, const TDesC& aAttrName,
            TBool& aAttrExists, TDes& aAttrVal )
 	{
-	iSuiteHandler->GetAttribute(aSuiteName, aAttrName, 
+	iSuiteHandler->GetAttribute(aSuiteName, aAttrName,
 			aAttrExists, aAttrVal);
 	}
 
 // ---------------------------------------------------------
 // CMenuSrvEng::GetRunningAppsL()
 // ---------------------------------------------------------
-// 
+//
 void CMenuSrvEng::GetRunningAppsL( RArray<TUid>& aArray )
     {
 	iRunningAppsHandler->GetRunningAppsL( aArray );
@@ -371,15 +370,15 @@ void CMenuSrvEng::GetRunningAppsL( RArray<TUid>& aArray )
 // ---------------------------------------------------------
 // CMenuSrvEng::GetRunningAppsL()
 // ---------------------------------------------------------
-// 
-void CMenuSrvEng::GetExtendedAttributesL(TInt aId, 
+//
+void CMenuSrvEng::GetExtendedAttributesL(TInt aId,
     const TDesC& aAttrName, TBool& aAttrExists,
     TDes& aAttrVal )
     {
     TBool captionInfo(aAttrName.Compare( KMenuAttrShortName ) == KErrNone ||
     aAttrName.Compare( KMenuAttrLongName ) == KErrNone ||
     aAttrName.Compare( KMenuAttrTitleName ) == KErrNone );
-    
+
     TBool addToCache( ETrue );
     if ( captionInfo )
         {
@@ -420,8 +419,36 @@ void CMenuSrvEng::GetExtendedAttributesL(TInt aId,
 void CMenuSrvEng::ApplicationNativeAttributeL(
 		TInt aId, TBool & aAttrExists, TDes & aAttrVal )
 	{
-	const CMenuEngObject & obj = iEng->ObjectL(aId);
-	iCMenuSrvEngUtils->IsNative(obj, aAttrExists, aAttrVal);
+	const CMenuEngObject & aEngObj = iEng->ObjectL(aId);
+
+    aAttrExists = EFalse;
+    if( aEngObj.Type().CompareF( KMenuTypeApp ) == KErrNone )
+        {
+        TInt err;
+        TUid uid;
+        err = iCMenuSrvEngUtils->GetAppUid( aEngObj, uid );
+        if( err == KErrNone )
+            {
+            TBool native(EFalse);
+            err = iCMenuSrvEngUtils->IsNativeL( uid, native );
+            if( !err )
+                {
+                aAttrExists = ETrue;
+                if( native )
+                    {
+                    aAttrVal = KMenuTrue();
+                    }
+                else
+                    {
+                    aAttrVal = KMenuFalse();
+                    }
+                }
+            }
+        }
+    if( !aAttrExists )
+        {
+        aAttrVal = KNullDesC();
+        }
 	}
 
 // ---------------------------------------------------------
@@ -437,20 +464,20 @@ void CMenuSrvEng::AddToCacheL( TInt aId, const TDesC& aAttrName,
     iCacheHandler->iAttrCache.AppendL( attr );
     CleanupStack::Pop( attr );
     }
- 
+
 // ---------------------------------------------------------
 // CMenuSrvEng::CaptionInfoL
 // Functions only for KMenuTypeApp type.
 // ---------------------------------------------------------
 //
-void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName, 
+void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
     TBool& aExists, TDes& aAttrVal )
     {
     const CMenuEngObject& obj = iEng->ObjectL(aId);
     if ( obj.Type().Compare( KMenuTypeFolder ) == KErrNone )
         {
         TBool localized;
-        TPtrC attrvalue; 
+        TPtrC attrvalue;
         TBool attrExists = obj.FindAttribute( KMenuAttrAppGroupName, attrvalue, localized );
         if ( attrExists )
             {
@@ -529,9 +556,9 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
  TPtrC CMenuSrvEng::AppCaptionInfoL( const CMenuEngObject& aEngObj,
      const TDesC& aAttrName, TBool& aExists )
      {
-     TApaAppInfo info; 
+     TApaAppInfo info;
      TPtrC val( KNullDesC );
-     if( KErrNone == iCMenuSrvEngUtils->GetAppInfo( aEngObj, info ) )
+     if( KErrNone == iCMenuSrvEngUtils->GetAppInfoL( aEngObj, info ) )
          {
          aExists = ETrue;
          if( aAttrName.Compare( KMenuAttrTitleName ) == KErrNone ||
@@ -554,7 +581,7 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
          }
      return val;
      }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEng::FolderChildrenCountL
  // ---------------------------------------------------------
@@ -562,22 +589,22 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
  void CMenuSrvEng::FolderChildrenCountL( TInt aId, TBool& aExists, TDes& aAttrVal )
 	 {
 	 const CMenuEngObject& obj = iEng->ObjectL(aId);
-	 
+
 	 if( obj.Type().CompareF( KMenuTypeFolder ) == KErrNone )
 	     {
 	     TUint32 childrenCount (0);
 		 RArray<TMenuItem> childrenArray;
 		 CleanupClosePushL( childrenArray );
-	     
+
 		 CMenuFilter* appFilter = CMenuFilter::NewLC();
 		 appFilter->SetFlags(0, TMenuItem::EMissing | TMenuItem::EHidden);
 		 TMenuSrvObjectFilter engFilter( *appFilter );
 		 iEng->GetItemsL(childrenArray, aId, &engFilter, EFalse);
 		 childrenCount = childrenArray.Count();
-		 
+
 		 CleanupStack::PopAndDestroy( appFilter );
 		 CleanupStack::PopAndDestroy( &childrenArray );
-	     
+
          aAttrVal.Num(childrenCount, EDecimal);
          aExists = ETrue;
 	     }
@@ -587,7 +614,7 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
 	     aExists = EFalse;
 	     }
 	 }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEngUtils::GetAppRunningL
  // ---------------------------------------------------------
@@ -604,7 +631,7 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
 		 aAttrVal.Append(KNullDesC());
 		 }
 	 }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEng::GetChildrenCount
  // ---------------------------------------------------------
@@ -616,20 +643,20 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
 	 RBuf attrVal;
 	 attrVal.CleanupClosePushL();
 	 attrVal.CreateL(KMenuMaxAttrValueLen);
-	 
+
 	 // Get folder children count
 	 FolderChildrenCountL(aId, attrExists, attrVal);
-	 
+
 	 if (attrExists)
 		 {
 		 TLex lex(attrVal);
 		 User::LeaveIfError( lex.Val(count) );
 		 }
 	 CleanupStack::PopAndDestroy( &attrVal );
-	 
+
 	 return count;
 	 }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEng::GetlistSizeL
  // ---------------------------------------------------------
@@ -638,11 +665,11 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
 	 {
 	 delete iGetlistHandler;
 	 iGetlistHandler = NULL;
-	 
+
 	 iGetlistHandler = CMcsGetlistHandler::NewL( *this );
 	 return iGetlistHandler->GetListSizeL( aSerializedInput );
 	 }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEng::CloseOutputBuffer
  // ---------------------------------------------------------
@@ -660,7 +687,7 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
 	 {
 	 iCacheHandler->iAttrCache.ResetAndDestroy();
 	 }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEng::GetlistSizeL
  // ---------------------------------------------------------
@@ -669,55 +696,55 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
 	 {
 	 return iGetlistHandler->GetListDataL( );
 	 }
- 
+
  // ---------------------------------------------------------
  // CMenuSrvEng::AppendExtendedAttrributesL
  // ---------------------------------------------------------
  //
  void CMenuSrvEng::AppendExtendedAttrributesL(
- 		const TDesC& aType,  
+ 		const TDesC& aType,
  		RArray<TPtrC>& aList )
 	 {
-	 
+
     if ( KErrNone == aType.Compare( KMenuTypeApp ) )
         {
         if( KErrNotFound == aList.Find( KMenuAttrTitleName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrTitleName ) );	
+        	aList.AppendL( TPtrC( KMenuAttrTitleName ) );
         	}
         if( KErrNotFound == aList.Find( KMenuAttrShortName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrShortName ) );	
+        	aList.AppendL( TPtrC( KMenuAttrShortName ) );
         	}
         if( KErrNotFound == aList.Find( KMenuAttrLongName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrLongName ) );	
+        	aList.AppendL( TPtrC( KMenuAttrLongName ) );
         	}
         if( KErrNotFound == aList.Find( KMenuAttrDrmProtection(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrDrmProtection ) );	
+        	aList.AppendL( TPtrC( KMenuAttrDrmProtection ) );
         	}
         }
     else if ( KErrNone == aType.Compare( KMenuTypeFolder ) )
         {
         if( KErrNotFound == aList.Find( KMenuAttrTitleName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrTitleName ) );	
+        	aList.AppendL( TPtrC( KMenuAttrTitleName ) );
         	}
         if( KErrNotFound == aList.Find( KMenuAttrShortName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrShortName ) );	
+        	aList.AppendL( TPtrC( KMenuAttrShortName ) );
         	}
         if( KErrNotFound == aList.Find( KMenuAttrLongName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KMenuAttrLongName ) );	
+        	aList.AppendL( TPtrC( KMenuAttrLongName ) );
         	}
         if( KErrNotFound == aList.Find( KChildrenCount(), TIdentityRelation<TPtrC>( CmpAttrName )) )
         	{
-        	aList.AppendL( TPtrC( KChildrenCount ) );	
+        	aList.AppendL( TPtrC( KChildrenCount ) );
         	}
         }
 	 }
 
- 
-//  End of File  
+
+//  End of File

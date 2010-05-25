@@ -11,8 +11,8 @@
 *
 * Contributors:
 *
-* Description:  This class maintains a list of the running apps, and listen 
-*  for changes in the running apps. It calls the observer if there is such a 
+* Description:  This class maintains a list of the running apps, and listen
+*  for changes in the running apps. It calls the observer if there is such a
 *  change.
 *
 *
@@ -37,6 +37,103 @@ class CMcsRunningAppsFswMonitor;
 class CMcsRunningAppsHiddenAttrScanner;
 class CMcsRunningAppsAddRemoveHandler;
 
+
+/*
+*
+*/
+class TRunningAppsAttr
+    {
+public:
+    /*
+    *
+    */
+    TRunningAppsAttr ( TUid aUid, TBool aFswHidden = EFalse,
+        TBool aHidden = EFalse, TBool aIsRunning = EFalse )
+        {
+        iUid = aUid;
+        iHidden = aHidden;
+        iFswHidden = aFswHidden;
+        iIsRunning = aIsRunning;
+        }
+
+    /*
+    *
+    */
+    TUid GetUid() const
+        {
+        return iUid;
+        }
+
+    /*
+    *
+    */
+    TBool IsHidden() const
+        {
+        return iHidden;
+        }
+
+    /*
+    *
+    */
+    void SetHidden( TBool aHidden )
+        {
+        iHidden = aHidden;
+        }
+
+    /*
+    *
+    */
+    TBool IsFswHidden() const
+        {
+        return iFswHidden;
+        }
+
+    /*
+    *
+    */
+    void SetFswHidden( TBool aFswHidden )
+        {
+        iFswHidden = aFswHidden;
+        }
+
+
+    /*
+    *
+    */
+    TBool IsRunning() const
+        {
+        return iIsRunning;
+        }
+
+    /*
+    *
+    */
+    void SetRunning( TBool aIsRunning )
+        {
+        iIsRunning = aIsRunning;
+        }
+
+    /*
+    *
+    */
+    static TBool MatchByUid( const TRunningAppsAttr& aArg1,
+            const TRunningAppsAttr& aArg2)
+        {
+        return aArg1.GetUid() == aArg2.GetUid();
+        }
+
+private:    // data
+
+    TUid iUid;
+    TBool iHidden;
+    TBool iFswHidden;
+    TBool iIsRunning;
+
+    };
+
+
+
+
 /**
  * Interface for updating RunningApps list stored in CMcsRunningAppsHandler class
  *
@@ -52,21 +149,21 @@ public:
     	EHiddenApps
     	};
     /*
-	 * Called by HiddenAttr scanner, FSW monitor or WindowsGroup 
+	 * Called by HiddenAttr scanner, FSW monitor or WindowsGroup
 	 * Monitor.
      * @param aArray an array containing UIDs of running, hidden or
-     * 	fsw apps  
-     * @param aType type of data stored in aArray   
+     * 	fsw apps
+     * @param aType type of data stored in aArray
 	 */
-    virtual void HandleListUpdateL(const RArray<TUid>& aArray, 
+    virtual void HandleListUpdateL(const RArray<TUid>& aArray,
     		TArrayDataType aType ) = 0;
-    
+
 	/*
 	 * Called by AddRemoveHandler
 	 * @param aFolder id of folder for which the method was invoked
 	 */
     virtual void HandleAddRemoveRunningAppL( TInt aFolder ) = 0;
-    
+
     };
 
 /*
@@ -81,7 +178,7 @@ NONSHARABLE_CLASS( CMcsRunningAppsHandler ): public CBase, MMcsRunningAppsHandle
 	/**
 	*   Factory method.
 	*/
-    static CMcsRunningAppsHandler* NewL( 
+    static CMcsRunningAppsHandler* NewL(
 		CMenuEng& aEng,
     	CMcsCacheHandler& aCacheHandler );
 
@@ -89,7 +186,7 @@ NONSHARABLE_CLASS( CMcsRunningAppsHandler ): public CBase, MMcsRunningAppsHandle
     *   Destructor.
     */
     ~CMcsRunningAppsHandler();
-    
+
     /**
      * Called by EngineEvents method
      * @param aFolder folder id
@@ -103,7 +200,7 @@ NONSHARABLE_CLASS( CMcsRunningAppsHandler ): public CBase, MMcsRunningAppsHandle
      * @param aEvents events
      */
     void EngineEvents( TInt aFolder, TInt aEvents );
-    
+
     /**
      * Fills aArray with UIDs of running apps
      * @param aArray array to be filled with UIDs of running apps
@@ -114,18 +211,18 @@ NONSHARABLE_CLASS( CMcsRunningAppsHandler ): public CBase, MMcsRunningAppsHandle
      * Returns running status of an item
      * @param aItemId id of the item
      * @return running status of an item
-     */    
+     */
     TBool GetRunningStatusL( TInt aItemId );
 
-    
+
 // from MMcsRunningAppsHandler
-    
+
     /*
-	 * Called by HiddenAttr scanner, FSW monitor or WindowsGroup 
+	 * Called by HiddenAttr scanner, FSW monitor or WindowsGroup
 	 * Monitor.
      * @param aArray an array containing UIDs of running, hidden or
-     * 	fsw apps  
-     * @param aType type of data stored in aArray   
+     * 	fsw apps
+     * @param aType type of data stored in aArray
 	 */
     void HandleListUpdateL(const RArray<TUid>& aArray, TArrayDataType aType );
 
@@ -133,14 +230,14 @@ NONSHARABLE_CLASS( CMcsRunningAppsHandler ): public CBase, MMcsRunningAppsHandle
 	 * Called by AddRemoveHandler
 	 * @param id of folder for which the method was invoked
 	 */
-	void HandleAddRemoveRunningAppL( TInt aFolder );    
+	void HandleAddRemoveRunningAppL( TInt aFolder );
 
 private:
 	/**
 	*   Constructor.
 	*/
-	CMcsRunningAppsHandler( 
-		CMenuEng& aEng, 
+	CMcsRunningAppsHandler(
+		CMenuEng& aEng,
 	    CMcsCacheHandler& aCacheHandler );
 
 	/**
@@ -165,7 +262,7 @@ private:
     * @param aArray array with UIDs of hidden apps
     */
 	void HandleHiddenAppsChangedL(const RArray<TUid>& aArray );
-	
+
 	/**
 	 * Sends AttributeChange notification for item and parents of the item
 	 * it it is necessary, it is also responsible for removing data from cache
@@ -181,7 +278,7 @@ private:
 	 * @param aAppUid uid of items with changed running status attribute
 	 */
 	void HandleNotificationL( TUid aAppUid );
-	
+
 	/**
 	 * Gets list of items with secified uid
 	 * @param aAppUid items uid
@@ -196,13 +293,13 @@ private:
 	 */
 	void UpdateFolderRunningStatusL( TInt aFolderId, TBool aNewRunningStatus );
 
-	
+
 	/**
 	 * Updates array containing folders with running status.
 	 * It is called at startup and it scans all folders
 	 */
 	void UpdateFoldersRunningStatusL( );
-	
+
 	/**
 	 * Gets running status for CMenuEngObject
 	 * @param aEngObj object to be checked
@@ -213,19 +310,19 @@ private:
 	/**
 	 * Gets previous Folder running status
 	 * @param aId id of the folder
-	 * @return previous running status of a folder (stored in 
+	 * @return previous running status of a folder (stored in
 	 * 	iRunningFolderStatus array )
 	 */
 	TBool GetFolderPreviousRunningStatusL( TInt aId );
 
-	
+
 	/**
 	 * Gets current folder running status
 	 * @param aId id of the folder
 	 * @return running status of a folder
 	 */
 	TBool GetFolderRunningStatusL( TInt aId );
-	
+
 	/**
 	 * Gets current application running status
 	 * @param aUid UID of an application
@@ -233,14 +330,14 @@ private:
 	 */
 	TBool GetAppRunningStatusL( TUid aUid );
 
-private:    
+private:
 
     CMenuEng& iEng ; ///< Engine. not own
 
     /** not own
     */
     CMcsCacheHandler& iCacheHandler;
-    
+
     /*
     * own
     */
@@ -250,26 +347,26 @@ private:
     * own
     */
     CMcsRunningAppsFswMonitor* iFswMonitor;
-    
+
     /*
      * own
      */
-    CMcsRunningAppsHiddenAttrScanner* iHiddenAttrScanner;    
-    
+    CMcsRunningAppsHiddenAttrScanner* iHiddenAttrScanner;
+
     /*
-     * own 
+     * own
      */
     CMcsRunningAppsAddRemoveHandler* iAddRemoveHandler;
-    
+
     /*
     * own
     */
     RArray<TRunningAppsAttr> iRunningApps;
-    
+
     /*
     * own
     */
     RArray<TInt> iRunningFolderStatus;
     };
-	
+
 #endif // __MCSRUNNINGAPPSHANDLER_H__

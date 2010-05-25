@@ -4646,65 +4646,64 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
         {
         User::Leave( KErrArgument );
         }
-    // Enable modification of owned configurations only
+    if( params.restore != EhspsRestoreAll 
+        && params.restore != EhspsRestoreRom
+        && params.restore != EhspsRestoreViews )
+        {
+        User::Leave( KErrArgument );
+        }
+    
+    // Enable modification of plug-in configurations which the client owns
     if( messagePtr.SecureId().iId != params.appUid )
         {
         User::Leave( KErrAccessDenied );
         }
     
     TInt err = KErrNone;
+        
+    // Lock the Plugin Repository (a.k.a. Def.rep)
     if( iDefinitionRepository.Locked() )
         {
         // Repository locked
-        err = KErrAccessDenied;
+        User::Leave( KErrAccessDenied );
+        }   
+    iDefinitionRepository.Lock();                                
+    CleanupStack::PushL( TCleanupItem( UnlockRepository, &iDefinitionRepository ) );
+                    
+    if( params.restore == EhspsRestoreAll 
+        || params.restore == EhspsRestoreRom )
+        {
+        TBool installUdaEmmc = ETrue;
+        if( params.restore == EhspsRestoreRom )
+            {
+            installUdaEmmc = EFalse;
+            }        
+        TRAP( err, HandleReinstallationL( installUdaEmmc ) );
+        iThemeServer.SetResourceFileCopyRequired( params.appUid );
         }
-            
+                
+    // Get active root configuration for the client application
+    ChspsODT* appODT = ChspsODT::NewL();
+    CleanupStack::PushL( appODT );
+    
+    iThemeServer.GetActivateAppConfigurationL( 
+                    params.appUid,
+                    *appODT );        
+                                            
+    // As a backup if the re-installations failed or client panics due to 
+    // an updated data plug-in then remove all but one view and empty it
+    if ( err || params.restore == EhspsRestoreViews )
+        {                        
+        // Remove all views but the 1st locked one and reset active view,
+        // if none were found then leave the first view only
+        RemoveUnlockedViewsL( *appODT );
+        
+        // Remove all widgets from the active view
+        err = RestoreActiveViewL( *appODT );
+        }                       
+        
     if( !err )
         {
-        // Lock the Plugin Repository (a.k.a. Def.rep)
-        iDefinitionRepository.Lock();                                
-        CleanupStack::PushL( TCleanupItem( UnlockRepository, &iDefinitionRepository ) );
-        
-        // Get active root configuration for the client application
-        ChspsODT* appODT = ChspsODT::NewL();
-        CleanupStack::PushL( appODT );    
-
-#ifdef HSPS_LOG_ACTIVE                
-        if( iLogBus )
-            {
-            iLogBus->LogText( 
-                _L( "ChspsMaintenanceHandler::ServiceRestoreConfigurationsL(): - Dump before the changes:" ) 
-                );                
-            ChspsOdtDump::Dump( *appODT, *iLogBus );
-            }
-#endif
-        
-        TInt err = KErrNone;
-        if ( !params.restoreAll )
-            {
-            // reinstall all widgets
-            TRAP( err, iThemeServer.InstallWidgetsL();
-                       iThemeServer.InstallUDAWidgetsL() );
-            
-            // Force updating of the header cache
-            iThemeServer.UpdateHeaderListCacheL();          
-            }  
-        
-        iThemeServer.GetActivateAppConfigurationL( 
-                params.appUid,
-                *appODT );
-        
-        // As a backup, if restoration of the active view fails,  
-        // or if all views but the locked view should be removedc
-        if ( err || params.restoreAll )
-            {                        
-            // Remove all views but the locked one and reset active view            
-            RemoveUnlockedViewsL( *appODT );
-            
-            // Remove all widgets from the active view
-            err = RestoreActiveViewL( *appODT );
-            }       
-
 #ifdef HSPS_LOG_ACTIVE                
         if( iLogBus )
             {
@@ -4714,19 +4713,16 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
             ChspsOdtDump::Dump( *appODT, *iLogBus );
             }
 #endif
-        if( !err )
-            {
-            // Stores the new application configuration into the repository
-            err = iDefinitionRepository.SetOdtL( *appODT );
-            ret = EhspsRestoreConfigurationsSuccess;
-            }
-        
-        CleanupStack::PopAndDestroy( appODT );        
-
-        // Unlock after the changes have been done
-        iDefinitionRepository.Unlock();
-        CleanupStack::Pop(&iDefinitionRepository);                               
+        // Stores the new application configuration into the repository
+        err = iDefinitionRepository.SetOdtL( *appODT );
+        ret = EhspsRestoreConfigurationsSuccess;
         }
+        
+    CleanupStack::PopAndDestroy( appODT );
+                            
+    // Unlock after the changes have been done
+    iDefinitionRepository.Unlock();
+    CleanupStack::Pop(&iDefinitionRepository);                               
                           
     // Error handling
     iResult->iXuikonError = err;    
@@ -4735,6 +4731,26 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
     CompleteRequest( ret, messagePtr );
     }
 
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::HandleReinstallationL
+// -----------------------------------------------------------------------------
+//
+void ChspsMaintenanceHandler::HandleReinstallationL(
+        const TBool aInstallUdaEmmc ) 
+    {       
+    // Install plug-in configurations from the "install" directories
+    iThemeServer.InstallWidgetsL( aInstallUdaEmmc );
+    if( aInstallUdaEmmc )
+        {
+        // Install plug-in configurations from the "import" directories in C and E
+        iThemeServer.InstallUDAWidgetsL( KImportDirectoryC );
+        iThemeServer.InstallUDAWidgetsL( KImportDirectoryE );
+        }
+    
+    // Force updating of the header cache
+    iThemeServer.UpdateHeaderListCacheL();   
+    }                    
+    
 // -----------------------------------------------------------------------------
 // ChspsMaintenanceHandler::RestoreActiveViewL
 // -----------------------------------------------------------------------------

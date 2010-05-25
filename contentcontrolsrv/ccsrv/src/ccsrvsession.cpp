@@ -524,39 +524,27 @@ void CCcSrvSession::ReceiveMsgL(
         // Complete request
         req->Message().Complete( KErrNone );
 
-        if (  aMessage.DataSize() )
-            {
-            // Store request data to be read later
-            // with GetMsgData()
-            req->SetTrId( aMessage.TrId() );
-            req->SetData( aMessage.Data() );
-            iRequests.AppendL( req );
-            CleanupStack::Pop( req );
-            }
-        else
-            {
-            CleanupStack::PopAndDestroy( req );
-            }
+        CleanupStack::PopAndDestroy( req );
         }
-    else
+    
+    // Store message to enable message data requesting later or
+    // to wait receiver to be ready to receive request
+    if ( found && aMessage.DataSize() ||
+         !found && ( aMessage.Function() == ECcApiReq ||
+             aMessage.Function() == ECcApiNtf ) )
         {
-        if ( aMessage.Function() == ECcApiReq ||
-             aMessage.Function() == ECcApiNtf )
-            {
-            // Store message to handled later
-            CCcSrvMsg* msg = CCcSrvMsg::NewL();
-            CleanupStack::PushL( msg );
-            msg->SetFunction( aMessage.Function() );
-            msg->SetSender( aMessage.Sender() );
-            msg->SetReceiver( aMessage.Receiver() );
-            msg->SetMsgId( aMessage.MsgId() );
-            msg->SetTrId( aMessage.TrId() );
-            msg->SetStatus( aMessage.Status() );
-            msg->SetData( aMessage.Data() );
-            iRequests.AppendL( msg );
-            CleanupStack::Pop( msg );
-            }
-        // ECcApiResp are ignored
+        // Store message to handled later
+        CCcSrvMsg* msg = CCcSrvMsg::NewL();
+        CleanupStack::PushL( msg );
+        msg->SetFunction( aMessage.Function() );
+        msg->SetSender( aMessage.Sender() );
+        msg->SetReceiver( aMessage.Receiver() );
+        msg->SetMsgId( aMessage.MsgId() );
+        msg->SetTrId( aMessage.TrId() );
+        msg->SetStatus( aMessage.Status() );
+        msg->SetData( aMessage.Data() );
+        iRequests.AppendL( msg );
+        CleanupStack::Pop( msg );
         }    
     }
 

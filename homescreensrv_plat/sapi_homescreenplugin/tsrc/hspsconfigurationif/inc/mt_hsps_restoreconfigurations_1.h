@@ -35,27 +35,27 @@ Test steps
 
 Test step 1:
 •   Input:
-    RestoreConfigurations(“active”)
+    RestoreConfigurations(“default”)
 •   Expected output:
-    Restoring succeeded
+    Restoring from eMMC/UDA/ROM succeeded
     
 Test step 2:
 •   Input:
     GetActiveAppConf    
 •   Expected output:
-    ROM configuration is restored and returned.
+    Default configuration is restored and returned.
 
 Test step 3:
 •   Input:
     GetPluginConf(“Typical - View1”)    
 •   Expected output:
-    ROM view configuration is returned.     
+    ROM's view configuration from is returned.     
  
 Test step 4:
 •   Input:
-    RestoreConfigurations(“all”)
+    RestoreConfigurations(“views”)
 •   Expected output:
-    Restoring succeeded
+    Restoring of the views succeeded
     
 Test step 5:
 •   Input:
@@ -101,9 +101,9 @@ const TUint8 restoreconfigurations_1_ts_1_input[] = {
 //     - Variant value
 10,
 5,
-6,0,0,0,
-26,
-'a','c','t','i','v','e'
+7,0,0,0,
+30,
+'d','e','f','a','u','l','t'
 };
 
 // Test step 1 output:
@@ -1883,9 +1883,9 @@ const TUint8 restoreconfigurations_1_ts_4_input[] = {
 //     - Variant value
 10,
 5,
-3,0,0,0,
-14,
-'a','l','l'
+5,0,0,0,
+22,
+'v','i','e','w','s'
 };
 
 // Test step 4 output:

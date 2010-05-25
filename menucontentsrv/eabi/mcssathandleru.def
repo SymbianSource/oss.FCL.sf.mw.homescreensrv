@@ -4,6 +4,6 @@ EXPORTS
 	_ZN14CMcsSatHandler7GetNameER6TDes16 @ 3 NONAME
 	_ZN14CMcsSatHandler9LoadIconLEv @ 4 NONAME
 	_ZN15CMcsSatNotifier4NewLEP23MMcsSATNotifierCallback4TUidj @ 5 NONAME
-	_ZTI15CMcsSatNotifier @ 6 NONAME ; #<TI>#
-	_ZTV15CMcsSatNotifier @ 7 NONAME ; #<VT>#
+	_ZTI15CMcsSatNotifier @ 6 NONAME
+	_ZTV15CMcsSatNotifier @ 7 NONAME
 

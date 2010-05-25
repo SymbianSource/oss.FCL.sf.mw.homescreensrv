@@ -22,6 +22,7 @@
 #include <ecom/implementationproxy.h>
 #include <contentharvesterpluginuids.hrh>
 #include <liwservicehandler.h>
+#include <driveinfo.h>
 
 #include "cpglobals.h"
 #include "chswiusbhandler.h"
@@ -75,6 +76,7 @@ void CCHSwiPlugin::ConstructL()
     User::LeaveIfError( iApaLsSession.Connect() );
     User::LeaveIfError( iFs.Connect() );
     
+    iMassMemoryAvailable = InternalMassMemoryAvailable();
     iUsbHandler = CCHSwiUsbHandler::NewL( this, iFs );
     
     iUsbObserver = CCHSwiUsbObserver::NewL( iUsbHandler, iFs );
@@ -280,7 +282,45 @@ void CCHSwiPlugin::SetMassStorageMode( TBool aMode )
 //
 TBool CCHSwiPlugin::IsMassStorageMode()
 	{
-	return iMassStorageMode;
+    if (iMassMemoryAvailable)
+    	{
+    	return iMassStorageMode;
+    	}
+    else
+    	{
+    	return EFalse;
+    	}
 	}
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+TBool CCHSwiPlugin::InternalMassMemoryAvailable( )
+    {
+    TBool result(EFalse);
+    // List all drives in the system
+    TDriveList driveList;
+    TInt error = iFs.DriveList( driveList );
+    
+    if ( KErrNone == error )
+        {
+        for ( TInt driveNumber = EDriveY;
+              driveNumber >= EDriveA;
+              driveNumber-- )
+            {
+            TUint status( 0 );
+            TInt error = DriveInfo::GetDriveStatus( iFs, driveNumber, status );
+            if( (KErrNone == error) && ( status & DriveInfo::EDriveExternallyMountable ) 
+            		&& ( status & DriveInfo::EDriveInternal ) )
+                {
+                // Internal Memory
+                result = ETrue;
+                break;
+                }
+            }
+        }
+    return result;
+    }
 
 //  End of File  

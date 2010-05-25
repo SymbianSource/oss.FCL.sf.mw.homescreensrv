@@ -127,6 +127,7 @@ ChspsInstallationHandler::ChspsInstallationHandler( ChspsThemeServer& aThemeServ
     iInstallationMode = EServiceHandler;
     iTrustedInstallation = EFalse;
 	iInstallationType = EInstallationTypeNew;
+	iInstallFromUDAEmmc = ETrue;
 	iFamilyMask = 0;
     }
     
@@ -1987,6 +1988,7 @@ void ChspsInstallationHandler::OnEndElementL( const RTagInfo& aElement, TInt /*a
                     iFsSession,                    
                     iThemeFilePath, 
                     nameBuf->Des(),
+                    iInstallFromUDAEmmc,
                     fullName );
             delete nameBuf;
             nameBuf = NULL;
@@ -2187,6 +2189,15 @@ void ChspsInstallationHandler::DisableNotifications()
     }
 
 // -----------------------------------------------------------------------------
+// Disables eclipsing from UDA and eMMC drives
+// -----------------------------------------------------------------------------
+//
+void ChspsInstallationHandler::DisableUdaEmmcInstallations()
+    {
+    iInstallFromUDAEmmc = EFalse;
+    }
+
+// -----------------------------------------------------------------------------
 // Finds locale specific subdirectories and DTD resources and appends those
 // into the resource array 
 // Should be executed prior to the CheckHeader method!
@@ -2343,73 +2354,81 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
 //
 void ChspsInstallationHandler::AddLocalesL(
         const TDesC& aPath )
-    {           
-    // Find all locale specific subfolders
-    TFindFile fileFinder( iFsSession );
-    _LIT( KFilter, "*" );
-    CDir* fileList( NULL );    
-    fileFinder.FindWildByDir( KFilter, aPath, fileList );
-    if ( fileList )
+    {
+    // Retrieve phone supported language.
+    CArrayFixFlat<TInt>* languageCodes = NULL;
+    hspsServerUtil::GetInstalledLanguagesL( languageCodes );
+    CleanupStack::PushL( languageCodes );     
+    
+    // Ensure that path contains '\' at the end.
+    TFileName xuikonPath;
+    xuikonPath.Copy( aPath );
+    if( xuikonPath.Length() > KPathDelim().Length() )
         {
-        CleanupStack::PushL( fileList );
-        TFileName localePath;
-        for( TInt i = 0; i < fileList->Count(); i++ )       
+        if( xuikonPath.Mid( xuikonPath.Length() -
+                            KPathDelim().Length()
+                            ).Compare( KPathDelim ) != 0 )
             {
-            const TEntry& entry = (*fileList)[i];                        
-            if ( entry.IsDir() )
-                {
-                TInt languageIndex = 0;
-                TLex lex( entry.iName );
-                TInt error = lex.Val( languageIndex );    
-                                
-                // See enumarations from e32lang.h
-                if( !error && languageIndex >= ELangTest )
-                    {                   
-                
-                    // Process only supported languages
-                    CArrayFixFlat<TInt>* languageCodes = NULL;
-                    hspsServerUtil::GetInstalledLanguagesL( languageCodes );
-                    CleanupStack::PushL( languageCodes );                    
-                    TBool isSupported = EFalse;
-                    for( TInt i=0; i<languageCodes->Count(); i++ )
-                        {
-                        if( languageCodes->At( i ) == languageIndex )
-                            {
-                            isSupported = ETrue;
-                            break;
-                            }
-                        }
-                    CleanupStack::PopAndDestroy( languageCodes );                                       
-                    if( !isSupported )
-                        {
-                        continue;
-                        }          
-                
-                    // If we found the first language specification          
-                    if ( !iDefaultSpecificationSet )
-                        {
-                        // Assume this is the default language shown incase 
-                        // there is no locale for the active UI language
-                        iDefaultSpecification = (TLanguage)languageIndex;
-                        iDefaultSpecificationSet = ETrue;
-                        }                                                            
-                                                            
-                    // Setup a path to the subdirectory 
-                    localePath.Copy( aPath );
-                    localePath.Append( entry.iName );
-                    localePath.Append( KPathDelim );
-                    
-                    // Find localized resources 
-                    AddLocalizedResourcesL( 
-                        localePath,
-                        (TLanguage)languageIndex );
-                    }                                       
-                }
-                        
-            }        
-        CleanupStack::PopAndDestroy( fileList );
-        fileList = NULL;
+            xuikonPath.Append( KPathDelim );
+            }
         }
+            
+    _LIT( KFormatting, "%02d" );    
+    TFileName localePath;
+    
+    for( TInt i = 0; i < languageCodes->Count(); i++ )
+        {                       
+        const TInt languageCode = languageCodes->At( i );
+
+        // Construct locale path using two digit minium
+        // width and zero as padding.
+        
+        localePath.Copy( xuikonPath );
+        localePath.AppendFormat( KFormatting, languageCode );        
+        localePath.Append( KPathDelim );
+
+        // Check if folder for supported language exists.        
+        TBool exists = EFalse;
+        
+        if( BaflUtils::FolderExists( iFsSession, localePath ) )
+            {
+            exists = ETrue;
+            }
+        
+        // Support also one digit type folder naming.
+        if( !exists && languageCode < 10 )
+            {
+            localePath.Copy( xuikonPath );
+            localePath.AppendNum( languageCode );        
+            localePath.Append( KPathDelim );
+            
+            if( BaflUtils::FolderExists( iFsSession, localePath ) )
+                {
+                exists = ETrue;
+                }            
+            }
+
+        if( exists )
+            {
+            // If we found the first language specification          
+            if ( !iDefaultSpecificationSet )
+                {
+                // Assume this is the default language shown incase 
+                // there is no locale for the active UI language
+                iDefaultSpecification = (TLanguage)languageCode;
+                iDefaultSpecificationSet = ETrue;
+                }                                                            
+        
+        
+            // Find and add localized resources 
+            AddLocalizedResourcesL( 
+                    localePath,
+                    (TLanguage)languageCode );            
+            }        
+        }
+    
+    CleanupStack::PopAndDestroy( languageCodes );
+    languageCodes = NULL;
     }
 
 // -----------------------------------------------------------------------------
@@ -2461,6 +2480,7 @@ void ChspsInstallationHandler::AddLocalizedResourcesL(
     // Find localized files from the provided directory
     RArray<TInt> driveArray;
     CleanupClosePushL( driveArray );   
+    driveArray.Append( EDriveE );
     driveArray.Append( EDriveC );
         
     FindResourceFilesL( aPath, EFalse, driveArray, NULL );

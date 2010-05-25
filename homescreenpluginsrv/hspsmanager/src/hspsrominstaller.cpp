@@ -69,26 +69,17 @@ static void CleanupResetAndDestroyPushL(T& aArray)
 // -----------------------------------------------------------------------------
 ChspsRomInstaller* ChspsRomInstaller::NewL( 
 		ChspsThemeServer& aThemeServer,
-		RFs& aFsSession )
-    {
-    ChspsRomInstaller* self = NewLC( aThemeServer, aFsSession );
+		RFs& aFsSession,
+		const TBool aInstallUdaEmmc )
+    {    
+    ChspsRomInstaller* self = 
+            new ( ELeave ) ChspsRomInstaller( aThemeServer, aFsSession, aInstallUdaEmmc );
+    CleanupStack::PushL( self );
+    self->ConstructL();
     CleanupStack::Pop( self );
     return( self ) ;
     }
 
-// -----------------------------------------------------------------------------
-// ChspsRomInstaller::NewLC()
-// Two-phased constructor.
-// -----------------------------------------------------------------------------
-ChspsRomInstaller* ChspsRomInstaller::NewLC( 
-		ChspsThemeServer& aThemeServer,
-		RFs& aFsSession)
-    {
-    ChspsRomInstaller* self = new ( ELeave ) ChspsRomInstaller( aThemeServer, aFsSession );
-    CleanupStack::PushL( self );
-    self->ConstructL();
-    return self;
-    }
 
 // -----------------------------------------------------------------------------
 // ChspsRomInstaller::ConstructL()
@@ -101,6 +92,12 @@ void ChspsRomInstaller::ConstructL()
     
     // Prevent notifications from ROM based installations
     iInstallationHandler->DisableNotifications();
+    
+    // Skip UDA and eMMC drives if restoring plug-ins
+    if( !iInstallUdaEmmc )
+        {
+        iInstallationHandler->DisableUdaEmmcInstallations();
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -109,11 +106,13 @@ void ChspsRomInstaller::ConstructL()
 // -----------------------------------------------------------------------------
 ChspsRomInstaller::ChspsRomInstaller(
 		ChspsThemeServer& aThemeServer,
-        RFs& aFsSession )
-		: CActive(EPriorityStandard), 
-		    iThemeServer(aThemeServer), 
-		    iFsSession(aFsSession),
-		    iRet(EhspsInstallThemeFailed)
+        RFs& aFsSession,
+        const TBool aInstallUdaEmmc )
+		: CActive( EPriorityStandard ), 
+		    iThemeServer( aThemeServer ), 
+		    iFsSession( aFsSession ),
+		    iRet( EhspsInstallThemeFailed ),
+            iInstallUdaEmmc( aInstallUdaEmmc )
     {
     CActiveScheduler::Add( this );
     }
@@ -138,7 +137,7 @@ void ChspsRomInstaller::InstallL()
     RPointerArray<HBufC> fileArray;
     CleanupResetAndDestroyPushL( fileArray );
             
-    // Find UDA and ROM widgets to be installed     
+    // Find the manifest files     
     FindInstallationFilesL( fileArray );
             
     // Install the manifest files    
@@ -174,8 +173,14 @@ void ChspsRomInstaller::FindInstallationFilesL(
     {
     __ASSERT_DEBUG( aFileArray.Count() == 0, User::Leave( KErrArgument ) );
                     
-    DoFindInstallationFilesL( aFileArray, KPrivateInstallE );
-    DoFindInstallationFilesL( aFileArray, KPrivateInstallC );    
+    if( iInstallUdaEmmc )
+        {
+        // Handle installation of the imaker exports 
+        DoFindInstallationFilesL( aFileArray, KPrivateInstallE );    
+        DoFindInstallationFilesL( aFileArray, KPrivateInstallC );  
+        }
+    
+    // ROM
     DoFindInstallationFilesL( aFileArray, KPrivateInstallZ );    
     }
 

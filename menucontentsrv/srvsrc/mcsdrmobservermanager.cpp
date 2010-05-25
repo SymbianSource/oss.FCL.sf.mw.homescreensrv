@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -70,10 +70,10 @@ void RMcsDrmObserverManager::Remove( CMcsDrmObserver* aObserver )
 
 // ---------------------------------------------------------------------------
 //
-// ---------------------------------------------------------------------------    
-void RMcsDrmObserverManager::RemoveMissingObservers( 
+// ---------------------------------------------------------------------------
+void RMcsDrmObserverManager::RemoveMissingObservers(
 	const RArray<TUid>& aDrmProtectedArray )
-    {   
+    {
     TInt index = 0;
     while (index < iObservers.Count() )
         {
@@ -85,8 +85,8 @@ void RMcsDrmObserverManager::RemoveMissingObservers(
         else
             {
             index++;
-            }       
-        }           
+            }
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -109,43 +109,40 @@ TInt RMcsDrmObserverManager::FindUid( TUid aUid )
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
-void RMcsDrmObserverManager::CreateObserversL( 
-	const RArray<TUid>& aDrmArray, 
-	TDRMEventType aMask,
-    MMcsDrmObserver& aObserver )
-	{
-	for (TInt i = 0; i < aDrmArray.Count(); i++)
-		{
-		if (FindUid(aDrmArray[i]) == KErrNotFound)
-			{
-			TApaAppInfo info;
-			iUtils.GetApaAppInfo(aDrmArray[i], info);
+void RMcsDrmObserverManager::CreateObserversL(
+        const RArray<TUid>& aDrmArray,
+        TDRMEventType aMask,
+        MMcsDrmObserver& aObserver )
+    {
+    for (TInt i = 0; i < aDrmArray.Count(); i++)
+        {
+        if (FindUid(aDrmArray[i]) == KErrNotFound)
+            {
+            CMcsDrmObserver* observer= NULL;
+            if ( iUtils.IsMiddlet( aDrmArray[i] ) )
+                {
+                TBuf<KMaxFileName> contentId;
+                iUtils.GetJavaContentIdL( aDrmArray[i], contentId );
 
-			CMcsDrmObserver* observer= NULL;
-			if (CMenuSrvEngUtils::IsMiddlet(info) )
-				{
-				TBuf<KMaxFileName> contentId;
-				CMenuSrvEngUtils::GetJavaContentIdL(info.iUid, contentId);
-				
-				observer = CMcsDrmObserver::NewL(aObserver, contentId,
-										aDrmArray[i], aMask);
-				
-				TInt err = iObservers.Append(observer);
-				if( err != KErrNone)
-					{
-					delete observer;
-					User::Leave( err );
-					}
-				}
-			}
-		}
-	}
+                observer = CMcsDrmObserver::NewL(aObserver, contentId,
+                                    aDrmArray[i], aMask);
+
+                TInt err = iObservers.Append(observer);
+                if( err != KErrNone)
+                    {
+                    delete observer;
+                    User::Leave( err );
+                    }
+                }
+            }
+        }
+    }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
-void RMcsDrmObserverManager::CreateObserversL( 
-	const RArray<TUid>& aDrmProtectedArray, 
+void RMcsDrmObserverManager::CreateObserversL(
+	const RArray<TUid>& aDrmProtectedArray,
     MMcsDrmObserver& aObserver )
     {
     CreateObserversL(aDrmProtectedArray, KEventModify,
@@ -155,9 +152,9 @@ void RMcsDrmObserverManager::CreateObserversL(
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
-void RMcsDrmObserverManager::RefreshObserverL( 
-		const RArray<TUid>& aDrmProtectedArray, 
-		TUid aUid, 
+void RMcsDrmObserverManager::RefreshObserverL(
+		const RArray<TUid>& aDrmProtectedArray,
+		TUid aUid,
 		MMcsDrmObserver& aObserver )
     {
     TInt index = FindUid( aUid );

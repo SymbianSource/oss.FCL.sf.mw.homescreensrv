@@ -33,11 +33,11 @@
 // FORWARD DECLARATION
 
 class CMenuEng;
-class TAppAtributes;
+class CMenuSrvAppAttributes;
 class CMenuSrvMmcHistory;
 class CRepository;
 class CCenRepNotifyHandler;
-class RWidgetRegistryClientSession;
+class CMenuSrvEngUtils;
 
 /**
 * Application scanner.
@@ -78,8 +78,9 @@ public:     // Constructor
     * Two-phased constructor.
     * @param aEng Engine.
     */
-    static CMenuSrvAppScanner* NewL( CMenuEng& aEng );
-
+    static CMenuSrvAppScanner* NewL(
+            CMenuEng& aEng,
+            CMenuSrvEngUtils& aSrvEngUtils );
 
 private:    // Constructors and destructor
 
@@ -87,7 +88,7 @@ private:    // Constructors and destructor
     * Constructor.
     * @param aEng Engine.
     */
-    CMenuSrvAppScanner( CMenuEng& aEng );
+    CMenuSrvAppScanner( CMenuEng& aEng, CMenuSrvEngUtils& aSrvEngUtils );
 
     /**
     * Second phased constructor.
@@ -166,7 +167,8 @@ private:    // new methods
 
     /**
     */
-    void HandleLockDeleteFlagUpdateL( const TMenuItem& aItem,TInt aUid );
+    void HandleLockDeleteFlagUpdateL(
+            const TMenuItem& aItem, const CMenuSrvAppAttributes& aApaItem );
 
     /**
     * Updates application's missing attribute.
@@ -182,17 +184,16 @@ private:    // new methods
     * @param aApaItemHidden Application's hidden status from ApaLsSession.
     */
     void HandleHiddenFlagUpdateL(
-    		const TMenuItem & aItem,
-    		TInt & aAppUid,
-    		TBool aApaItemHidden );
+            const TMenuItem & aItem,
+            const CMenuSrvAppAttributes& aApaItem );
     /**
     * Updates native attribute.
     * @param aItem menu item.
     * @param aUid Application's uid.
     */
     void HandleNativeAttrUpdateL(
-    		const TMenuItem& aItem,
-    		TInt aUid );
+            const TMenuItem& aItem,
+            const CMenuSrvAppAttributes& aApaItem );
 
     /**
     * Updates mmc attribute.
@@ -201,32 +202,24 @@ private:    // new methods
     * @param aMmcId MMC ID of currently inserted MMC, or 0.
     */
     void HandleMmcAttrUpdateL(
-    		const TMenuItem& aItem,
-    		TInt aUid,
-    		TUint aMmcId );
-
-
-    /**
-    */
-    TBool IsInRomL( TInt aUid );
+            const TMenuItem& aItem,
+            const CMenuSrvAppAttributes& aApaItem,
+            TUint aMmcId );
 
     /**
     */
-    void GetCrItemsL( RArray<TAppAtributes>& aArray );
+    void GetCrItemsL( RPointerArray<CMenuSrvAppAttributes>& aArray );
 
 
     /**
     */
     void ParseUidsL( const TDesC& aHiddenApplications,
-                                        RArray<TAppAtributes>& aArray );
-    /**
-    */
-    void GetApaItemsL( RArray<TAppAtributes>& aArray );
+                                        RPointerArray<CMenuSrvAppAttributes>& aArray );
 
     /**
     */
     void SetHidden( const TDesC& aHiddenAppUid,
-                                RArray<TAppAtributes>& aArray );
+                                RPointerArray<CMenuSrvAppAttributes>& aArray );
 
     /**
     */
@@ -245,16 +238,10 @@ private:    // new methods
     * @param aCurrentMmcId MMC ID of currently inserted MMC, or 0.
     */
     void AddAppItemL(
-        TUint aUid,
-        TUint aCurrentMmcId );
+            const CMenuSrvAppAttributes& aApaItem,
+            TUint aCurrentMmcId );
 
-    TInt CreateInstallFolderL( TUint aUid );
-
-    /**
-    * @param aAppUid application UID
-    * @return TBool
-    */
-    TBool IsMidlet( const TUid aAppUid );
+    TInt CreateInstallFolderL( const CMenuSrvAppAttributes& aApaItem );
 
 
     /**
@@ -295,10 +282,10 @@ private:    // new methods
     * @param aEvent menu item's event for engine.
     */
     void SetObjectFlagsL(
-    		TBool aFlagValue,
-    		const TMenuItem& aItem,
-    		const TMenuItem::TFlags& aFlag,
-    		const RMenuNotifier::TEvent& aEvent = RMenuNotifier::EItemAttributeChanged );
+            TBool aFlagValue,
+            const TMenuItem& aItem,
+            const TMenuItem::TFlags& aFlag,
+            const RMenuNotifier::TEvent& aEvent = RMenuNotifier::EItemAttributeChanged );
 
     /**
     * Check currently inserted MMC card, update and save MMC history.
@@ -318,8 +305,8 @@ private:    // new methods
     * @return ETrue if aFileName is on given default drive type.
     */
     TBool IsFileInDrive(
-			const TDesC& aFileName,
-			const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
+            const TDesC& aFileName,
+            const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
 
     /**
     * Check if application is installed on given drive type.
@@ -327,23 +314,30 @@ private:    // new methods
     * @param aDefaultDrive drive type.
     * @return ETrue if app is installed on given drive type.
     */
-	TBool IsAppInDrive(
-			const TUid aUid,
-			const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
+    TBool IsAppInDrive(
+            const CMenuSrvAppAttributes& aApaItem,
+            const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
 
     /**
     * Check if application is installed on MMC.
     * @param aUid app uid.
     * @return ETrue if app is installed on MMC.
     */
-    TBool IsMmcApp( const TUid aUid ) const;
+    TBool IsInMmc( const CMenuSrvAppAttributes& aApaItem ) const;
 
     /**
     * Check if application is installed on mass storage.
     * @param aUid app uid.
     * @return ETrue if app is installed on mass storage.
     */
-    TBool IsMassStorageApp( const TUid aUid ) const;
+    TBool IsInMassStorage( const CMenuSrvAppAttributes& aApaItem ) const;
+
+    /**
+    * Check if application is installed on ROM.
+    * @param aUid app uid.
+    * @return ETrue if app is installed on ROM.
+    */
+    TBool IsInRomL( const CMenuSrvAppAttributes& aApaItem ) const;
 
     /**
     * Check if drive's status is EDriveInUse.
@@ -393,7 +387,7 @@ private:    // new methods
     */
     void UpdateApplicationItemL(
     		RArray<TMenuItem>& aMcsItems,
-            const TAppAtributes& aApaItem,
+            const CMenuSrvAppAttributes& aApaItem,
             TUint aMmcId,
             TBool isLegacy );
 
@@ -415,12 +409,11 @@ private:    // new methods
 
 private:    // data
 
-    CMenuEng& iEng ; ///< Engine.
-    RApaLsSession iApaLsSession; ///< AppArc session. Own.
+    CMenuEng& iEng; ///< Engine.
+    CMenuSrvEngUtils& iSrvEngUtils; ///< Server engine utils.
     CApaAppListNotifier* iNotifier; ///< Change notifier. Own.
     CMenuSrvMmcHistory* iMmcHistory; ///< MMC history. Own.
     RFs iFs; ///< File Server Session. Own.
-	RWidgetRegistryClientSession iWidgetSession;///<Own.
 
     /*
     * Sat change notifier. Own
@@ -430,7 +423,7 @@ private:    // data
     /*
     * Central repository session
     */
-	CRepository* iCenRepSession;
+    CRepository* iCenRepSession;
 
     /*
     * Central repository change handler for Hidden Apps
@@ -453,43 +446,6 @@ private:    // data
     CMcsFreeSpaceObserver* iFreeSpaceObserver;
 
     TBool iOpStatus;
-    };
-
-
-class TAppAtributes
-    {
-
-public:
-    /*
-    *
-    */
-    TAppAtributes ( TUint aUid, TBool aHidden /*,TBool aMissing*/);
-
-    /*
-    *
-    */
-    TUint GetUid() const;
-
-    /*
-    *
-    */
-    TBool IsHidden() const;
-
-    /*
-    *
-    */
-    void SetHidden( TBool aHidden );
-
-    /*
-    *
-    */
-    static TBool MatchItems(const TAppAtributes& item1,
-                                        const TAppAtributes& item2);
-
-private:    // data
-
-    TUint iUid;
-    TBool iHidden;
     };
 
 #endif // __MENUSRVAPPSCANNER_H__

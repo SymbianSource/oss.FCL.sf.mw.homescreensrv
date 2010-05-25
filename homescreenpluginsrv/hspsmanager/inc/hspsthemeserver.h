@@ -175,6 +175,12 @@
 
 #include "hsps_builds_cfg.hrh"
 
+// C-Drive directory for the SISX installation files
+_LIT( KImportDirectoryC, "c:\\private\\200159c0\\import\\" );
+
+// E-Drive directory for the SISX installation files
+_LIT( KImportDirectoryE, "e:\\private\\200159c0\\import\\" );
+
 /** hspsThemeServer name: */
 _LIT(KhspsThemeServerName,"hspsthemeserver");
 
@@ -637,14 +643,17 @@ public: // public functions
    /**
     * Installs widgets located at \private\200159C0\install\ directories.
     * @since S60 5.0 
+    * @param aInstallUdaEmmc True if widgets should be installed from C and E drives
     */
-   void InstallWidgetsL();   
+   void InstallWidgetsL( 
+           const TBool aInstallUdaEmmc = ETrue );   
    
    /**
     * Install all widgets from uda
+    * @param aImportDirectory import directory path
     * @since S60 5.2
     */
-   void InstallUDAWidgetsL();   
+   void InstallUDAWidgetsL( const TDesC& aImportDirectory );   
    
 public: // from MhspsFileChangeObserver
 	

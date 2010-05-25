@@ -14,118 +14,15 @@
 * Description:
 *
 */
+
 #include <mcsmenuutils.h>
-#include <AknIconUtils.h>
-#include <avkon.mbg>
 #include <javaregistry.h>
 #include <javaregistryentry.h>
 #include <drmrightsinfo.h>
-#include <e32property.h>
-#include <satdomainpskeys.h>
-#include <AknTaskList.h> 
-#include <mmf/common/mmfcontrollerpluginresolver.h>
-#include <widgetregistryclient.h>
 
 #include "menusrvengutils.h"
-
 #include "mcsdef.h"
-#include "mcsmenu.h"
-#include "mcsmenuitem.h"
-#include "mcsmenufilter.h"
 #include "mcssathandler.h"
-#include "menusrvappscanner.h"
-
-_LIT( KMidletPostfix, ".fakeapp" );
-
-// ================= LOCAL FUNCTIONS ========================
-
-// ---------------------------------------------------------
-// GetAppUid
-// ---------------------------------------------------------
-//
-TInt CMenuSrvEngUtils::GetAppUid( const CMenuEngObject& aEngObj, TUid& aAppUid )
-    {
-    TInt err( 0 );
-    TPtrC attrVal;
-    TBool attrExists( EFalse );
-    TBool localized( EFalse );//
-    attrExists = aEngObj.FindAttribute(KMenuAttrUid, attrVal, localized);
-    if ( !attrExists ) 
-    	{
-    	err = KErrNotFound;
-    	}
-    else
-        {
-        TUint appUid;
-        err = MenuUtils::GetTUint( attrVal, appUid );
-        if ( !err )
-            {
-            aAppUid = TUid::Uid( appUid );
-            }
-        }
-    return err;
-    }
-    
-// ---------------------------------------------------------
-// GetApaAppInfo
-// ---------------------------------------------------------
-//
-TInt CMenuSrvEngUtils::GetApaAppInfo( 
-    const CMenuEngObject& aEngObj, 
-    TApaAppInfo& aInfo ) const
-    {
-    TUid uid;
-    TInt err;
-    err = CMenuSrvEngUtils::GetAppUid( aEngObj, uid );
-    if ( err == KErrNone )
-        {
-        err = GetApaAppInfo( uid, aInfo );
-        }
-        
-    return err;
-    }
-
-// ---------------------------------------------------------
-// GetApaAppInfo
-// ---------------------------------------------------------
-//
-TInt CMenuSrvEngUtils::GetApaAppInfo( 
-    TUid aUid, 
-    TApaAppInfo& aInfo ) const
-    {   
-    return iApaLsSession.GetAppInfo( aInfo, aUid );
-    }
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetJavaContentIdL
-// ---------------------------------------------------------
-//
-void CMenuSrvEngUtils::GetJavaContentIdL( TUid aUid, TDes& aContentId )
-	{
-	Java::CJavaRegistry* javaRegistry;
-	Java::CJavaRegistryEntry* regEntry = NULL;
-
-    javaRegistry = Java::CJavaRegistry::NewL();
-    CleanupStack::PushL( javaRegistry );
-
-    //regEntry will be NULL if there is no Java application 
-    //corresponding to the specified aUid
-    regEntry = javaRegistry->RegistryEntryL( aUid );
-    
-    //DrmContentId() will return reference to NULL when
-    //Java application is not DRM protected
-    if( regEntry && ( &regEntry->DrmContentId() ) )
-    	{
-   		aContentId.Copy( regEntry->DrmContentId() );
-    	}
-    else
-    	{
-    	aContentId.Copy( KNullDesC );
-    	}
-    
-    delete regEntry;
-    CleanupStack::PopAndDestroy( javaRegistry );
-	}
-
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -139,6 +36,7 @@ CMenuSrvEngUtils::~CMenuSrvEngUtils()
     iApaLsSession.Close();
     iWidgetSession.Close();
     iWsSession.Close();
+    iAppAttributes.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------
@@ -179,7 +77,7 @@ void CMenuSrvEngUtils::ConstructL()
 // CMenuSrvEngUtils::GetAppInfo
 // ---------------------------------------------------------
 //
-TInt CMenuSrvEngUtils::GetAppInfo( const CMenuEngObject& aEngObj, TApaAppInfo& aAppInfo ) const
+TInt CMenuSrvEngUtils::GetAppInfoL( const CMenuEngObject& aEngObj, TApaAppInfo& aAppInfo ) const
     {
     TUid appUid;
     TInt err = GetAppUid( aEngObj, appUid );
@@ -191,96 +89,15 @@ TInt CMenuSrvEngUtils::GetAppInfo( const CMenuEngObject& aEngObj, TApaAppInfo& a
             }
         else
             {
-            err = iApaLsSession.GetAppInfo( aAppInfo, appUid );
+            aAppInfo.iUid = appUid;
+            err = GetAppInfoFromArrayL( aAppInfo );
+            if( err )
+                {
+                err = iApaLsSession.GetAppInfo( aAppInfo, appUid );
+                }
             }
         }
     return err;
-    }
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetAppInfo
-// ---------------------------------------------------------
-//
-TInt CMenuSrvEngUtils::GetAppInfoL( TInt aItemId, TApaAppInfo& aAppInfo ) const
-    {
-    TInt err( 0 );
-    const CMenuEngObject& obj = iEng.ObjectL( aItemId );
-    err = GetAppInfo( obj, aAppInfo );
-    return err;
-    }
-
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetFolderIcon
-// Knowing that in case of folders there is no way to query 
-// folder's icon file from APPARC, the responsibility of handling this is
-// transferred to the caller of this method, so that he may show some default or
-// display error etc.
-// ---------------------------------------------------------
-//
-TInt CMenuSrvEngUtils::GetFolderIcon( const CMenuEngObject& /*aEngObj*/, 
-                                 HBufC*& aFullFileName,
-                                 TInt& /*aBitmapId*/,
-                                 TInt& /*aMaskId*/ ) const
-    {
-    __ASSERT_ALWAYS( !aFullFileName, User::Invariant() );
-    
-    return KErrNotFound;
-    }
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetFolderIcon
-// ---------------------------------------------------------
-//
-TInt CMenuSrvEngUtils::GetFolderIconL( TInt aItemId, 
-                                 HBufC*& aFullFileName,
-                                 TInt& aBitmapId,
-                                 TInt& aMaskId ) const
-    {
-    __ASSERT_ALWAYS( !aFullFileName, User::Invariant() );
-
-    TInt err( 0 );
-    const CMenuEngObject& obj = iEng.ObjectL( aItemId );
-    err = GetFolderIcon( obj, aFullFileName, aBitmapId, aMaskId );
-    return err;
-    }
-
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::IsNative
-// ---------------------------------------------------------
-//
-void CMenuSrvEngUtils::IsNative( const CMenuEngObject& aEngObj, 
-    TBool& aAttrExists, TDes& aAttrVal )
-    {
-    aAttrExists = EFalse;
-    if( aEngObj.Type().CompareF( KMenuTypeApp ) == KErrNone )
-        {
-        TInt err;
-        TUid uid;
-        err = GetAppUid( aEngObj, uid );
-        if( err == KErrNone )
-            {
-            TBool native(EFalse);
-            err = IsNative( uid, native );
-        	if( !err )
-        		{
-        		aAttrExists = ETrue;
-                if( native )
-                    {
-                    aAttrVal = KMenuTrue();
-                    }
-                else
-                    {
-                    aAttrVal = KMenuFalse();
-                    }
-        		}
-            }
-        }
-    if( !aAttrExists )
-        {
-        aAttrVal = KNullDesC();
-        }
     }
 
 // ---------------------------------------------------------
@@ -288,18 +105,29 @@ void CMenuSrvEngUtils::IsNative( const CMenuEngObject& aEngObj,
 // ---------------------------------------------------------
 //
 
-TInt CMenuSrvEngUtils::IsNative( TUid aAppUid, TBool& aIsNative )
+TInt CMenuSrvEngUtils::IsNativeL( TUid aAppUid, TBool& aIsNative )
 	{
-	TInt error(KErrNotFound);
-	TApaAppInfo appInfo;
-	
-	error = iApaLsSession.GetAppInfo( appInfo, aAppUid );
-	if( error == KErrNone )
-		{
-		error = iApaLsSession.IsProgram( appInfo.iFullName, aIsNative );
-		}
-	
-	return error;
+    TInt error( KErrNotFound );
+    CMenuEngObject::TAppType aType;
+    error = GetAppTypeFromArrayL( aAppUid, aType );
+    if ( error == KErrNone && aType == CMenuEngObject::ENativeApp )
+        {
+        aIsNative = ETrue;
+        }
+    else if( error != KErrNone )
+        {
+        TApaAppInfo appInfo;
+        error = iApaLsSession.GetAppInfo( appInfo, aAppUid );
+        if( error == KErrNone )
+            {
+            error = iApaLsSession.IsProgram( appInfo.iFullName, aIsNative );
+            }
+        }
+    else
+        {
+        aIsNative = EFalse;
+        }
+    return error;
 	}
 
 // ---------------------------------------------------------
@@ -341,41 +169,35 @@ TInt CMenuSrvEngUtils::GetDrmProtectionByContentIdL(const TDesC& aContentId,
     		}
     	}
     }
-
     CleanupStack::PopAndDestroy( drmInfo );
-    return err;    
+    return err;
     }
 
-		
+
 // ---------------------------------------------------------
 // CMenuSrvEngUtils::GetDrmProtection
 // ---------------------------------------------------------
 //
-TInt CMenuSrvEngUtils::GetDrmProtectionL( 
-    const TUid aAppUid, 
-    TDRMProtectionInfo& aProtectionInfo ) const
+TInt CMenuSrvEngUtils::GetDrmProtectionL(
+        const TUid aAppUid, TDRMProtectionInfo& aProtectionInfo ) const
     {
     TInt err( KErrNone );
-    
+
     TApaAppInfo info;
-    
+
     aProtectionInfo = EDRMUnknownProtection;
-    
-    err = GetApaAppInfo( aAppUid, info );
-    if ( err == KErrNone )
+    CMenuEngObject::TAppType aType;
+    err = GetAppTypeFromArrayL( aAppUid, aType );
+    if( ( !err && aType == CMenuEngObject::EJavaApp )
+            || ( err && IsMiddlet( aAppUid ) ) )
         {
-        if( IsMiddlet( info ) )
-        	{
-        	TBuf<KMaxFileName> contentId;
-        	GetJavaContentIdL( info.iUid, contentId );
-        	if ( contentId != KNullDesC ) 
-        		{
-        		GetDrmProtectionByContentIdL( contentId, aProtectionInfo );
-        		}
-	        }
+        TBuf<KMaxFileName> contentId;
+        GetJavaContentIdL( aAppUid, contentId );
+        if ( contentId != KNullDesC )
+            {
+            GetDrmProtectionByContentIdL( contentId, aProtectionInfo );
+            }
         }
-
-
     return err;
     }
 
@@ -383,12 +205,12 @@ TInt CMenuSrvEngUtils::GetDrmProtectionL(
 // CMenuSrvEngUtils::GetDrmProtection
 // ---------------------------------------------------------
 //
-TInt CMenuSrvEngUtils::GetDrmProtectionL( 
-    const CMenuEngObject& aEngObj, 
+TInt CMenuSrvEngUtils::GetDrmProtectionL(
+    const CMenuEngObject& aEngObj,
     TDRMProtectionInfo& aProtectionInfo ) const
     {
     TInt err( KErrNone );
-    
+
     if ( aEngObj.Type().CompareF( KMenuTypeApp ) == 0 )
         {
         TUid uid;
@@ -419,100 +241,6 @@ TInt CMenuSrvEngUtils::GetDrmProtectionL(TInt aItemId,
     err = GetDrmProtectionL( obj, aProtectionInfo );
     return err;
     }
-/*
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetDrmProtection
-// ---------------------------------------------------------
-//
-TBool CMenuSrvEngUtils::GetAppRunningL( TInt aItemId )
-    {
-    TInt err( 0 );
-    const CMenuEngObject& obj = iEng.ObjectL( aItemId );
-    err = GetAppRunningL( obj );
-    return err;
-    }
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetDrmProtection
-// ---------------------------------------------------------
-//
-TBool CMenuSrvEngUtils::GetAppRunningL( const CMenuEngObject& aEngObj )
-    {
-    TBool runningApp( EFalse );
-    if ( aEngObj.Type().CompareF( KMenuTypeApp ) == KErrNone )
-        {
-        TUid appUid;
-        TInt errorUid = GetAppUid( aEngObj, appUid );
-        
-        if( !errorUid )
-            {
-            CheckAppRunningL( appUid , runningApp );
-            }
-        else 
-            {
-            return EFalse;
-            }
-        }
-    else if( aEngObj.Type().CompareF( KMenuTypeFolder ) == KErrNone )
-        {
-        GetChildrenRunningAppL( aEngObj.Id(), runningApp );
-        }
-
-    return runningApp;
-    }
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::GetChildrenRunningAppL
-// ---------------------------------------------------------
-//
-void CMenuSrvEngUtils::GetChildrenRunningAppL( TInt id, 
-        TBool& aRunningApp )
-    {
-    TMenuSrvTypeFilter filter;
-    filter.SetType( KMenuTypeApp() );
-    
-    RArray<TMenuItem> aItemArray;
-    CleanupClosePushL(aItemArray);
-    iEng.GetItemsL( aItemArray , id , &filter, ETrue );
-    for( TInt i = 0; i < aItemArray.Count(); i++)
-        {
-        const CMenuEngObject& obj = iEng.ObjectL( aItemArray[i].Id() );
-        TUid appUid;
-        TInt errorUid = GetAppUid( obj, appUid );
-        
-        if( !errorUid &&  
-                !(obj.Flags() & TMenuItem::EHidden) )
-            {
-            CheckAppRunningL(  appUid , aRunningApp );
-            }
-        if( aRunningApp )
-            {
-            break;
-            }
-        }
-    CleanupStack::PopAndDestroy( &aItemArray );
-    }
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::CheckAppRunning
-// ---------------------------------------------------------
-//
-void CMenuSrvEngUtils::CheckAppRunningL( TUid aUid, TBool& aRunningApp )
-    {
-    if ( iWidgetSession.IsWidget( aUid ) )
-        {
-        aRunningApp = iWidgetSession.IsWidgetRunning( aUid );        
-        }
-    else
-        {
-        CAknTaskList* taskList = CAknTaskList::NewLC( iWsSession );
-        
-        TApaTask task = taskList->FindRootApp( aUid );
-        aRunningApp = task.Exists();
-        
-        CleanupStack::PopAndDestroy( taskList );
-        }
-    }*/
 
 // ---------------------------------------------------------
 // CMenuSrvEngUtils::GetSatAppInfo
@@ -531,13 +259,179 @@ TInt CMenuSrvEngUtils::GetSatAppInfo( TApaAppInfo& aAppInfo ) const
     }
 
 // ---------------------------------------------------------
-// MenuSrvUtil::SetValueSkinMajorId
+// CMenuSrvEngUtils::IsMiddlet
 // ---------------------------------------------------------
 //
-void CMenuSrvEngUtils::SetValueSkinId( TDes& aAttrName, TInt aValue )
+TBool CMenuSrvEngUtils::IsMiddlet( const TUid aAppUid ) const
 	{
-	MenuUtils::SetTUint( aAttrName, aValue );
+    const TUid KMidletType = { 0x10210E26 };
+    TUid typeuid = KNullUid;
+
+    if ( KErrNone == iApaLsSession.GetAppType( typeuid, aAppUid  ) )
+        {
+        if ( typeuid == KMidletType )
+            {
+            return ETrue;
+            }
+        }
+    return EFalse;
 	}
+
+// ---------------------------------------------------------
+// GetAppUid
+// ---------------------------------------------------------
+//
+TInt CMenuSrvEngUtils::GetAppUid( const CMenuEngObject& aEngObj, TUid& aAppUid )
+    {
+    TInt err( 0 );
+    TPtrC attrVal;
+    TBool attrExists( EFalse );
+    TBool localized( EFalse );//
+    attrExists = aEngObj.FindAttribute( KMenuAttrUid, attrVal, localized );
+    if ( !attrExists )
+        {
+        err = KErrNotFound;
+        }
+    else
+        {
+        TUint appUid;
+        err = MenuUtils::GetTUint( attrVal, appUid );
+        if ( !err )
+            {
+            aAppUid = TUid::Uid( appUid );
+            }
+        }
+    return err;
+    }
+
+// ---------------------------------------------------------
+// CMenuSrvEngUtils::GetJavaContentIdL
+// ---------------------------------------------------------
+//
+void CMenuSrvEngUtils::GetJavaContentIdL( TUid aUid, TDes& aContentId )  const
+    {
+    Java::CJavaRegistry* javaRegistry;
+    Java::CJavaRegistryEntry* regEntry = NULL;
+
+    javaRegistry = Java::CJavaRegistry::NewL();
+    CleanupStack::PushL( javaRegistry );
+
+    //regEntry will be NULL if there is no Java application
+    //corresponding to the specified aUid
+    regEntry = javaRegistry->RegistryEntryL( aUid );
+
+    //DrmContentId() will return reference to NULL when
+    //Java application is not DRM protected
+    if( regEntry && ( &regEntry->DrmContentId() ) )
+        {
+        aContentId.Copy( regEntry->DrmContentId() );
+        }
+    else
+        {
+        aContentId.Copy( KNullDesC );
+        }
+
+    delete regEntry;
+    CleanupStack::PopAndDestroy( javaRegistry );
+    }
+
+// ---------------------------------------------------------
+// CMenuSrvAppScanner::GetApaItemsL
+// ---------------------------------------------------------
+//
+void CMenuSrvEngUtils::ReloadApaItemsL()
+    {
+    iAppAttributes.ResetAndDestroy();
+    TApaAppInfo appInfo;
+    TApaAppCapabilityBuf appCap;
+
+    User::LeaveIfError( iApaLsSession.GetAllApps( 0 ) );
+    // for every application get uid, hidden and missing attribute
+    // and add to aArray.
+    while ( KErrNone == iApaLsSession.GetNextApp( appInfo ) )
+        {
+        User::LeaveIfError(
+                iApaLsSession.GetAppCapability( appCap, appInfo.iUid ) );
+        // "Hidden" status according to AppArc.
+        TBool appHidden = appCap().iAppIsHidden;
+
+        CMenuSrvAppAttributes* appAtributes = CMenuSrvAppAttributes::NewLC( appCap, appInfo );
+        if( IsMiddlet( appInfo.iUid ) )
+            {
+            appAtributes->SetAppType( CMenuEngObject::EJavaApp );
+            }
+        else if( iWidgetSession.IsWidget( appInfo.iUid ) )
+            {
+            appAtributes->SetAppType( CMenuEngObject::EWidgetApp );
+            }
+        else
+            {
+            //TODO: it is really necessary?
+            TBool isNative( EFalse );
+            iApaLsSession.IsProgram( appInfo.iFullName, isNative );
+            if( isNative )
+                {
+                appAtributes->SetAppType( CMenuEngObject::ENativeApp );
+                }
+            }
+
+        iAppAttributes.AppendL( appAtributes );
+        CleanupStack::Pop( appAtributes );
+        }
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TInt CMenuSrvEngUtils::GetAppInfoFromArrayL( TApaAppInfo& aAppInfo ) const
+    {
+    TApaAppCapabilityBuf capability;
+    CMenuSrvAppAttributes* attribute = CMenuSrvAppAttributes::NewLC( capability, aAppInfo );
+    TInt index = iAppAttributes.Find( attribute,
+            TIdentityRelation<CMenuSrvAppAttributes>( CMenuSrvAppAttributes::MatchItems ) );
+    if( index >= 0 )
+        {
+        aAppInfo.iCaption = iAppAttributes[index]->GetCaption();
+        aAppInfo.iFullName = iAppAttributes[index]->GetFullName();
+        aAppInfo.iShortCaption = iAppAttributes[index]->GetShortCaption();
+        index = KErrNone;
+        }
+    CleanupStack::PopAndDestroy( attribute );
+    return index;
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TInt CMenuSrvEngUtils::GetAppTypeFromArrayL( const TUid& aAppUid,
+        CMenuEngObject::TAppType& aType  ) const
+    {
+    TApaAppCapabilityBuf capability;
+    TApaAppInfo appInfo;
+    appInfo.iUid = aAppUid;
+    CMenuSrvAppAttributes* attribute = CMenuSrvAppAttributes::NewLC( capability, appInfo );
+    TInt index = iAppAttributes.Find( attribute,
+            TIdentityRelation<CMenuSrvAppAttributes>( CMenuSrvAppAttributes::MatchItems ) );
+    if( index >= 0 )
+        {
+        aType = iAppAttributes[index]->GetAppType();
+        index = KErrNone;
+        }
+
+    CleanupStack::PopAndDestroy( attribute );
+    return index;
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+RPointerArray<CMenuSrvAppAttributes>& CMenuSrvEngUtils::GetAppItemsL()
+    {
+    return iAppAttributes;
+    }
 
 // ---------------------------------------------------------
 // MenuSrvUtil::UidToStringL
@@ -547,141 +441,17 @@ void MenuSrvUtil::UidToStringL( TUint aUid, TDes& aResult,
      TBool aLegacy, TRadix aRadix )
     {
     aResult.Zero();
-    
+
     TBuf<KUidChars> number;
     if( !aLegacy )
         {
         if (aRadix == EHex)
             {
-            aResult.Append( KHex );   
+            aResult.Append( KHex );
             }
         }
     number.AppendNum( aUid, aRadix );
     number.UpperCase();
-  
+
     aResult.Append( number );
-   
     }
-
-// ---------------------------------------------------------
-// TMenuSrvTypeFilter::MatchesObject
-// ---------------------------------------------------------
-//
-TBool TMenuSrvTypeFilter::MatchesObject
-( const CMenuEngObject& aObject ) const
-    {
-    return iType == aObject.Type();
-    }
-
-// ==================== MEMBER FUNCTIONS ====================
-
-// ---------------------------------------------------------
-// TMenuSrvTypeAttrFilter::MatchesObject
-// ---------------------------------------------------------
-//
-TBool TMenuSrvTypeAttrFilter::MatchesObject
-( const CMenuEngObject& aObject ) const
-    {
-    if ( TMenuSrvTypeFilter::MatchesObject( aObject ) )
-        {
-        TPtrC val;
-        TBool dummy;
-        if( aObject.FindAttribute( iAttrName, val, dummy ) )
-            {
-            if( !val.CompareF( iAttrValue ) )
-                {
-                return ETrue; // Match.
-                }
-            }
-        }
-    return EFalse;
-    }
-
-// ---------------------------------------------------------
-// TMenuSrvAttrFilter::MatchesObject
-// ---------------------------------------------------------
-//
-TBool TMenuSrvAttrFilter::MatchesObject
-( const CMenuEngObject& aObject ) const
-    {
-    TPtrC val;
-    TBool dummy;
-    if( aObject.FindAttribute( iAttrName, val, dummy ) )
-        {
-        if( !val.CompareF( iAttrValue ) )
-            {
-            return ETrue; // Match.
-            }
-        }
-    return EFalse;
-    }
-
-// ==================== MEMBER FUNCTIONS ====================
-
-// ---------------------------------------------------------
-// TMenuSrvTypeAttrFilter::MatchesObject
-// ---------------------------------------------------------
-//
-TBool TMenuSrvTypeAttrExistsFilter::MatchesObject
-( const CMenuEngObject& aObject ) const
-    {
-    if ( TMenuSrvTypeFilter::MatchesObject( aObject ) )
-        {
-        TPtrC val;
-        TBool dummy;
-        if( aObject.FindAttribute( iAttrName, val, dummy ) )
-            {
-            return ETrue; // Match.
-            }
-        }
-    return EFalse;
-    }    
-
-// ---------------------------------------------------------
-// TMenuSrvTypeAttrFilter::MatchesObject
-// ---------------------------------------------------------
-//
-TBool TMenuSrvAttrExistsFilter::MatchesObject
-( const CMenuEngObject& aObject ) const
-    {
-    TPtrC val;
-    TBool dummy;
-    if( aObject.FindAttribute( iAttrName, val, dummy ) )
-        {
-        return ETrue; // Match.
-        }
-    return EFalse;
-    }    
-
-// ---------------------------------------------------------
-// TMenuSrvHiddenAppFilter::MatchesObject
-// ---------------------------------------------------------
-//
-TBool TMenuSrvHiddenAppFilter::MatchesObject
-( const CMenuEngObject& aObject ) const
-    {
-    if (KMenuTypeApp() == aObject.Type())
-    	{
-    	if( aObject.Flags() & TMenuItem::EHidden )
-    		{
-	    	return ETrue; // Match.
-    		}
-    	}
-    return EFalse;
-    } 
-
-// ---------------------------------------------------------
-// CMenuSrvEngUtils::IsMiddlet
-// ---------------------------------------------------------
-//
-TBool CMenuSrvEngUtils::IsMiddlet( const TApaAppInfo& aInfo )
-	{
-	TBool ret( EFalse ); 
-	if( aInfo.iFullName.Right( KMidletPostfix().Length() ).
-		CompareF( KMidletPostfix ) == 0 )
-		{
-		ret = ETrue;
-		}
-	return ret;
-	}
-

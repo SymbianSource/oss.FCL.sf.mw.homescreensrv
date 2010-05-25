@@ -1028,16 +1028,20 @@ struct ThspsParamSetPluginSettings
     TBool storingStatus;            // storing status telling if modified plugin settings are needed to stored its reference.
     };
 
+enum ThspsRestore
+    {
+    EhspsRestoreAll = 0,            // restores plug-ins from eMMC, UDA and ROM    
+    EhspsRestoreRom,                // restores plug-ins from ROM
+    EhspsRestoreViews               // removes extra views and empties them
+    };
+
 /**
  * Input parameter for the RestoreActiveAppConf service 
  */
 struct ThspsParamRestoreConfigurations
     {
     TInt appUid;                    // uid of the application
-    TBool restoreAll;               // false: if all widget plugins should be removed from the active view,
-                                    // true: if all widget plugins should be removed from the first locked view
-                                    //       (or if locked views were not found then from first unlocked view) 
-                                    //       and if all other views should be removed
+    ThspsRestore restore;           // operation               
     };
 
 

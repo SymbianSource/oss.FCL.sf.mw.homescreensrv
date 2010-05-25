@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -30,53 +30,66 @@ class CHsContentInfo;
 /**
  *  Content data
  *
- *
- *  @code
- *
- *  @endcode
- *
- *  @lib hscontentcontrol.lib
- *  @since S60 v5.0
+ *  @lib hscontentinfo.lib
+ *  @since S60 v5.2
  */
 class CHsContentInfoArray : public CBase
     {
     public:
     /**
      * Two-phased constructor.
+     *
+     * @since S60 v5.2
      */
     IMPORT_C static CHsContentInfoArray* NewL();
     
     /**
      * Two-phased constructor.
+     *
+     * @since S60 v5.2
      */
     IMPORT_C static CHsContentInfoArray* NewL( RReadStream& aStream );    
 
     /**
      * Destructor.
+     *
+     * @since S60 v5.2
      */
     virtual ~CHsContentInfoArray();
     
     /**
      * Externalizes the array into the stream.
+     *
+     * @since S60 v5.2
      */
     IMPORT_C void ExternalizeL( RWriteStream& aStream );
     
+    /**
+     * Returns reference to content info array
+     *
+     * @since S60 v5.2
+     * @return Content info array
+     */
     IMPORT_C RPointerArray< CHsContentInfo >& Array();
 
     /**
      * Internalizes the array from the stream.
+     *
+     * @since S60 v5.2
      */
     IMPORT_C void InternalizeL( RReadStream& aStream );
     
     /**
      * Returns size of a descriptor needed to externalize the class
+     *
+     * @since S60 v5.2
      */
     IMPORT_C TInt Size();
 
     /**
      * Marshals Content Info array to a descriptor
      * 
-     * @since S60 5.0
+     * @since S60 5.2
      * @return Descriptor containing the externalized Content Info array data
      */
     IMPORT_C HBufC8* MarshalL();

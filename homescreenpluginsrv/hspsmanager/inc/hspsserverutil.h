@@ -534,6 +534,8 @@ class hspsServerUtil
 	     * @param aFs is a reference to open file server session handle
 	     * @param aPath is path of the file
 	     * @param aFilename is name and extension of the file
+	     * @param aFindFromUdaEmmcDrives is true if files should be searched from 
+	     *                               the UDA/eMMC drives 
 	     * @param aDrivePathName Full path with a drive letter to the 
          *                       resource file (output)
 	     */
@@ -541,6 +543,7 @@ class hspsServerUtil
 	             RFs& aFs,
 	             const TDesC& aPath,
 	             const TDesC& aFilename,         
+	             const TBool aFindFromUdaEmmcDrives,
 	             TFileName& aDrivePathName );
 
       /**

@@ -54,9 +54,6 @@
 
 // CONSTANTS
 
-// Directory for the SISX installation files
-_LIT( KImportDirectoryC, "c:\\private\\200159c0\\import\\" );
-
 // Directories for backup folders
 _LIT( KBackupThemesDirectoryC, "c:\\private\\200159c0\\backup\\themes\\" );
 
@@ -2611,13 +2608,13 @@ TInt ChspsThemeServer::GetConfigurationL(
 // ChspsThemeServer::InstallUDAWidgetsL()
 // -----------------------------------------------------------------------------
 //
-void ChspsThemeServer::InstallUDAWidgetsL()
+void ChspsThemeServer::InstallUDAWidgetsL( const TDesC& aImportDirectory )
     {
     //Get list of uda dir's
     TPtrC filter( KFilterAllPluginImportsV1 );
     CDir* importDir( NULL );           
     TFindFile fileFinder( iFsSession );
-    fileFinder.FindWildByDir( filter, KImportDirectoryC, importDir );    
+    fileFinder.FindWildByDir( filter, aImportDirectory, importDir );    
     CleanupStack::PushL( importDir );
     
     if ( importDir && importDir->Count() > 0 )
@@ -2631,7 +2628,7 @@ void ChspsThemeServer::InstallUDAWidgetsL()
             // Get manifest path
             HBufC* manifestBuf = GetManifestFromImportLC( 
                     udaName, 
-                    KImportDirectoryC );
+                    aImportDirectory );
             
             //install
             TRAPD( err, installer->InstallConfigurationL( *manifestBuf ) );
@@ -2684,8 +2681,9 @@ void ChspsThemeServer::HandleRomInstallationsL()
         // Install widgets from \private\200159C0\install\ directories (ROM and UDA image)
         InstallWidgetsL();
 
-        // Install widgets from \private\200159C0\imports\ directory (UDA image)
-        InstallUDAWidgetsL();
+        // Install widgets from \private\200159C0\imports\ directory (UDA image) C & E
+        InstallUDAWidgetsL( KImportDirectoryC );
+        InstallUDAWidgetsL( KImportDirectoryE );
         
         // Post RFS installations have been done, prevent re-installations at next startup
         // by reading firmware version and saving it to cenrep.
@@ -2765,10 +2763,11 @@ void ChspsThemeServer::HandleRomInstallationsL()
 // ChspsThemeServer::InstallWidgetsL()
 // -----------------------------------------------------------------------------
 //
-void ChspsThemeServer::InstallWidgetsL()
+void ChspsThemeServer::InstallWidgetsL(
+        const TBool aInstallUdaEmmc )
     {    
     __ASSERT_DEBUG( !iRomInstaller, User::Leave( KErrGeneral) );	
-	iRomInstaller = ChspsRomInstaller::NewL( *this, iFsSession );	
+	iRomInstaller = ChspsRomInstaller::NewL( *this, iFsSession, aInstallUdaEmmc );	
 #ifdef HSPS_LOG_ACTIVE            	
 	iRomInstaller->SetLogBus( iLogBus );
 #endif
@@ -2779,8 +2778,7 @@ void ChspsThemeServer::InstallWidgetsL()
 	iRomInstaller = 0;
 	
 	// Force updating of the header cache
-    ThspsRepositoryInfo info( EhspsCacheUpdate );
-    iDefinitionRepository->RegisterNotification( info );
+	TRAP_IGNORE( UpdateHeaderListCacheL() );
 	}
 
 // -----------------------------------------------------------------------------

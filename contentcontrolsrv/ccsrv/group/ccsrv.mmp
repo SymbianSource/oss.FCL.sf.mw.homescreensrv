@@ -23,7 +23,7 @@ TARGET          ccserver.exe
 TARGETTYPE      exe
 
 UID             0x1000008d 0x20026f53
-CAPABILITY      ALL -TCB -DRM
+CAPABILITY      CAP_SERVER
 VENDORID        VID_DEFAULT
 SECUREID        0x20026f53
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2005-2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -21,6 +21,7 @@
 #include "ainetworkinfolistener.h"
 #include <activeidle2domainpskeys.h>
 #include <e32property.h>
+#include <featmgr.h>
 
 #include <startupdomainpskeys.h>
 
@@ -49,6 +50,7 @@ CAiSimRegPublisher::CAiSimRegPublisher()
 
 void CAiSimRegPublisher::ConstructL()
     {
+    FeatureManager::InitializeLibL();
     iListener = CAiNetworkInfoListener::InstanceL();
     }
 
@@ -65,6 +67,7 @@ CAiSimRegPublisher* CAiSimRegPublisher::NewL()
 
 CAiSimRegPublisher::~CAiSimRegPublisher()
     {
+    FeatureManager::UnInitializeLib();
     if( iListener )
         {
         iListener->RemoveObserver( *this );
@@ -174,6 +177,15 @@ void CAiSimRegPublisher::HandleNetworkInfoChange(
             default:
                 break;
             }
+         }
+    else if ( FeatureManager::FeatureSupported( KFeatureIdFfManualSelectionPopulatedPlmnList )
+              && aMessage ==
+                  static_cast<MNWMessageObserver::TNWMessages>( KErrGsmMMNetworkFailure ) )
+        {
+        iContentObserver->Publish( *iExtension,
+                                   EAiDeviceStatusContentNetRegStatus,
+                                   EAiDeviceStatusResourceNetRegFail,
+                                   0 );
         }
     }
 

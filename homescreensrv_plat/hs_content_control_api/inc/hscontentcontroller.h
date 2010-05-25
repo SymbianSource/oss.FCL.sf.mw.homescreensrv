@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -28,7 +28,7 @@ class CHsContentInfoArray;
 // Constants
 
 /**
- * unable to add widget because active page is full.
+ * Unable to add widget because active page is full.
  * No widgets can be added to this page before removing some first.
  */
 const TInt KHsErrorViewFull = -87001;
@@ -40,7 +40,7 @@ const TInt KHsErrorViewFull = -87001;
 const TInt KHsErrorMaxInstanceCountExceeded = -87002; 
 
 /**
- * unable to add widget because widget is too large to fit.
+ * Unable to add widget because widget is too large to fit.
  * A smaller widget might fit though.
  */
 const TInt KHsErrorDoesNotFit = -87003;
@@ -48,21 +48,18 @@ const TInt KHsErrorDoesNotFit = -87003;
 
 
 /**
- *  Content controller interface
+ *  Content controller interface defining the interface to modify
+ *  Home screen content.
  *
- *
- *  @code
- *
- *  @endcode
- *
- *  @lib hscontentcontrol.lib
- *  @since S60 v5.0
+ *  @since S60 v5.2
  */
 class MHsContentController
     {
 public:
     /**
      * Returns the list of available Home screen widgets
+     *
+     * @since S60 v5.2
      * @param aArray List of widgets
      * @return KErrNone on success, any of system wide error codes
      */
@@ -71,6 +68,8 @@ public:
     /**
      * Returns the list of Home screen widgets included in an application 
      * configuration or a view
+     *
+     * @since S60 v5.2
      * @param aInfo Content info defining the application configuration 
      *              or the view which widget list is requested
      * @param aArray List of widgets
@@ -80,6 +79,8 @@ public:
 
     /**
      * Returns the list of available Home screen views
+     *
+     * @since S60 v5.2
      * @param aArray List of views
      * @return KErrNone on success, any of system wide error codes
      */
@@ -88,6 +89,8 @@ public:
     /**
      * Returns the list of available Home screen views included in an
      * application configuration
+     *
+     * @since S60 v5.2
      * @param aInfo Content info defining the application configuration
      * @param aArray List of views
      * @return KErrNone on success, any of system wide error codes
@@ -96,6 +99,8 @@ public:
 
     /**
      * Returns the list of available Home screen application configurations
+     *
+     * @since S60 v5.2
      * @param aArray List of application configurations
      * @return KErrNone on success, any of system wide error codes
      */
@@ -103,6 +108,8 @@ public:
 
     /**
      * Adds a widget to the active Home screen view.
+     *
+     * @since S60 v5.2
      * @param aInfo Widget request to be added
      * @return KErrNone on success, any of system wide error codes,
      *         KHsErrorViewFull, KHsErrorMaxInstanceCountExceeded or
@@ -112,6 +119,8 @@ public:
 
     /**
      * Removes a widget from the configuration.
+     *
+     * @since S60 v5.2
      * @param aInfo Widget request to be removed
      * @return KErrNone on success, any of system wide error codes
      */
@@ -119,6 +128,8 @@ public:
 
     /**
      * Adds a view to the active Home screen application configuration.
+     *
+     * @since S60 v5.2
      * @param aInfo View request to be added
      * @return KErrNone on success, any of system wide error codes
      */
@@ -126,6 +137,8 @@ public:
 
     /**
      * Removes a view from the configuration.
+     *
+     * @since S60 v5.2
      * @param aInfo View request to be removed
      * @return KErrNone on success, any of system wide error codes
      */
@@ -133,6 +146,8 @@ public:
 
     /**
      * Activates the Home screen view
+     *
+     * @since S60 v5.2
      * @param aInfo View request to be activated
      * @return KErrNone on success, any of system wide error codes
      */
@@ -140,6 +155,8 @@ public:
 
     /**
      * Activates the Home screen application configuration
+     *
+     * @since S60 v5.2
      * @param aInfo Application configuration request to be activated
      * @return KErrNone on success, any of system wide error codes
      */
@@ -147,6 +164,8 @@ public:
 
     /**
      * Returns the active Home screen view
+     *
+     * @since S60 v5.2
      * @param aInfo Active view
      * @return KErrNone on success, any of system wide error codes
      */
@@ -154,6 +173,8 @@ public:
 
     /**
      * Returns the active Home screen application configuration
+     *
+     * @since S60 v5.2
      * @param aInfo Active application configuration
      * @return KErrNone on success, any of system wide error codes
      */

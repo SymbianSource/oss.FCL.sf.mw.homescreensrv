@@ -896,13 +896,13 @@ EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsRestoreActiveAppConf(
 //
 EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsRestoreConfigurations(
     const TInt aAppUid,
-    const TBool aReinstall )
+    const ThspsRestore aRestore )
     {
     ThspsServiceCompletedMessage ret = EhspsRestoreConfigurationsFailed;
     
     ThspsParamRestoreConfigurations params;
     params.appUid = aAppUid;
-    params.restoreAll = aReinstall;
+    params.restore = aRestore;
 
     ret = ( ThspsServiceCompletedMessage )iSession.RestoreConfigurations( iResultData, params );
     

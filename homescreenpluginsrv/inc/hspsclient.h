@@ -445,20 +445,15 @@ class ChspsClient : public CActive, public MhspsInstallationService, public Mhsp
                 const TInt aConfUid );
         
         /**
-        * Restores plugin configurations by either removing all plugins
-        * from the active view or by removing all extra views.
-        * In latter case, the first locked view is emptied. If there are 
-        * no locked views then the first view will remain while others
-        * are removed.
+        * Restores plugin configurations according to the input.
         * @since S60 5.2
         * @param aAppUid Application uid
-        * @param aReinstall  False if only the active view should be fixed,
-        *                    True if also all extra views should removed                         
+        * @param aRestore Operation to be executed
         * @return ThspsServiceCompletedMessage expressing the result of the call.
         */
         IMPORT_C ThspsServiceCompletedMessage hspsRestoreConfigurations(
             const TInt aAppUid,
-            const TBool aReinstall );
+            const ThspsRestore aRestore );
         
     protected: // Functions from base classes
 

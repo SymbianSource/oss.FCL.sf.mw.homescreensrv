@@ -25,7 +25,7 @@ EXPORTS
 	_ZN11ChspsClient22hspsCancelInstallThemeEv @ 24 NONAME
 	_ZN11ChspsClient24hspsCancelGetListHeadersEv @ 25 NONAME
 	_ZN11ChspsClient24hspsRestoreActiveAppConfEii @ 26 NONAME
-	_ZN11ChspsClient25hspsRestoreConfigurationsEii @ 27 NONAME
+	_ZN11ChspsClient25hspsRestoreConfigurationsEi12ThspsRestore @ 27 NONAME
 	_ZN11ChspsClient4NewLER35MhspsThemeManagementServiceObserver @ 28 NONAME
 	_ZN11ChspsClient5NewLCER35MhspsThemeManagementServiceObserver @ 29 NONAME
 	_ZN11ChspsClient9SetLogBusEPv @ 30 NONAME

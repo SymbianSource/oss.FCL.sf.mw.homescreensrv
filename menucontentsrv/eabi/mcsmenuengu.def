@@ -1,9 +1,9 @@
 EXPORTS
-	_ZN14CMenuEngObject13SetAttributeLERK7TDesC16S2_i @ 1 NONAME
-	_ZN14CMenuEngObject15RemoveAttributeERK7TDesC16 @ 2 NONAME
-	_ZN14CMenuEngObject5ResetEv @ 3 NONAME
-	_ZN14CMenuEngObject8SetFlagsEmi @ 4 NONAME
-	_ZN14CMenuEngObject9SetNativeEi @ 5 NONAME
+	_ZN14CMenuEngObject10SetAppTypeENS_8TAppTypeE @ 1 NONAME
+	_ZN14CMenuEngObject13SetAttributeLERK7TDesC16S2_i @ 2 NONAME
+	_ZN14CMenuEngObject15RemoveAttributeERK7TDesC16 @ 3 NONAME
+	_ZN14CMenuEngObject5ResetEv @ 4 NONAME
+	_ZN14CMenuEngObject8SetFlagsEmi @ 5 NONAME
 	_ZN14CMenuEngObjectD0Ev @ 6 NONAME
 	_ZN14CMenuEngObjectD1Ev @ 7 NONAME
 	_ZN14CMenuEngObjectD2Ev @ 8 NONAME
@@ -21,12 +21,12 @@ EXPORTS
 	_ZN8CMenuEngD0Ev @ 20 NONAME
 	_ZN8CMenuEngD1Ev @ 21 NONAME
 	_ZN8CMenuEngD2Ev @ 22 NONAME
-	_ZNK14CMenuEngObject12GetAttributeEiR7TPtrC16S1_Ri @ 23 NONAME
-	_ZNK14CMenuEngObject13FindAttributeERK7TDesC16R7TPtrC16Ri @ 24 NONAME
-	_ZNK14CMenuEngObject2IdEv @ 25 NONAME
-	_ZNK14CMenuEngObject4TypeEv @ 26 NONAME
-	_ZNK14CMenuEngObject5FlagsEi @ 27 NONAME
-	_ZNK14CMenuEngObject9GetNativeEv @ 28 NONAME
+	_ZNK14CMenuEngObject10GetAppTypeEv @ 23 NONAME
+	_ZNK14CMenuEngObject12GetAttributeEiR7TPtrC16S1_Ri @ 24 NONAME
+	_ZNK14CMenuEngObject13FindAttributeERK7TDesC16R7TPtrC16Ri @ 25 NONAME
+	_ZNK14CMenuEngObject2IdEv @ 26 NONAME
+	_ZNK14CMenuEngObject4TypeEv @ 27 NONAME
+	_ZNK14CMenuEngObject5FlagsEi @ 28 NONAME
 	_ZNK8CMenuEng11RootFolderLERi @ 29 NONAME
 	_ZNK8CMenuEng13ParentFolderLEiRi @ 30 NONAME
 	_ZNK8CMenuEng15TraverseFolderLEiR15MMenuEngVisitor @ 31 NONAME

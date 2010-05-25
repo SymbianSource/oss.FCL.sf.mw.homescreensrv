@@ -99,7 +99,13 @@ private:
 	void RemoveWidgetL( const TDesC& aType, 
         const TDesC& aPublisherId );
 	
-
+    /**
+     * Checks if mass memory is available
+     * @return ETrue if internal mass memory is available in this device
+     *     EFalse if not
+     */
+    TBool InternalMassMemoryAvailable( );
+    
 private:
     
     /**
@@ -140,6 +146,13 @@ private:
      * Mass storage mode flag.
      */
     TBool iMassStorageMode;
+    
+    /*
+     * Flag indicating if mass memory is available on this hardware
+     */
+    TBool iMassMemoryAvailable;
+    
+
 	};
 
 
