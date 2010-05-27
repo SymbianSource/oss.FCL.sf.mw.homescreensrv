@@ -154,12 +154,14 @@ void CCaSrv::ConstructL()
     iSessionCount = 0;
     iStorageProxy = CCaStorageProxy::NewL();
     iSrvEngUtils = CCaSrvEngUtils::NewL();
-    TRAPD( err, iSrvManager = CCaSrvManager::NewL(
-            *iStorageProxy, iSrvEngUtils ) );
-    if( KSqlErrNotDb <= err && err <= KSqlErrGeneral )
+    iSrvManager = CCaSrvManager::NewL(*iStorageProxy, iSrvEngUtils);
+    TInt errCode = iSrvManager->LoadOperationErrorCodeL();
+    if( KSqlErrNotDb <= errCode && errCode <= KSqlErrGeneral )
         {
         //problem in loading one of plugins, probably data base is corrupted
         //lets load it from ROM and try again
+        delete iSrvManager;
+        iSrvManager = NULL;
         iStorageProxy->LoadDataBaseFromRomL();
         iSrvManager = CCaSrvManager::NewL( *iStorageProxy, iSrvEngUtils );
         }

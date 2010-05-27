@@ -60,6 +60,13 @@ public:
     IMPORT_C void LocalizeEntryL( CCaLocalizationEntry& aLocalization );
 
     /**
+     * Add localization row to the storage
+     *
+     * @param aLocalization entry containing localization row to be added
+     */
+    IMPORT_C void AddLocalizationL(const CCaLocalizationEntry& aLocalization);
+    
+    /**
      * Fetches localization data from database
      *
      * @param aResultContainer Target for results.

@@ -47,6 +47,8 @@ void ActivityDataProviderTask::ExecuteL(MActivityTaskStorage& storage,
 void ActivityDataProviderTask::ProvideDataL(const RMessage2& msg, 
                                             const CActivityTask& src)
 {
-    msg.WriteL(KResponseDataOffset, src.Data());
-    msg.Complete(KErrNone);
+    if (EFalse ==msg.IsNull()) {
+        msg.WriteL(KResponseDataOffset, src.Data());
+        msg.Complete(KErrNone);
+    }
 }

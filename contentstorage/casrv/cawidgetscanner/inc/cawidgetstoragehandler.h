@@ -24,8 +24,10 @@ class CCaWidgetDescription;
 
 //  INCLUDES
 #include <e32base.h>
+#include <usif/scr/scr.h>
 #include "cawidgetdescription.h"
 #include "castorage_global.h"
+
 // CONSTANTS
 
 // FORWARD DECLARATIONS
@@ -129,6 +131,16 @@ private:
      */
     TBool MassStorageNotInUse();
 
+    /**
+     * Adds or updates component id attribute in entry based on SCR provided data
+     * @param aPackageUid uid of the package which the widget represented by aEntry
+     * is delivered with
+     * @param aEntry widget entry being updated with component id attribute.
+     */
+    void UpdateComponentIdL( const TDesC& aManifestFilePathName, 
+        CCaInnerEntry& aEntry ) const;
+
+
 private:
     // Data
 
@@ -151,8 +163,9 @@ private:
      * Indexes updated during last add operation. Own.
      */
     RArray<TInt> iUpdatedIndexes;
+    
 
-
+    Usif::RSoftwareComponentRegistry iSoftwareRegistry;
     };
 
 #endif      // C_WIDGETSTORAGEHANDLER_H

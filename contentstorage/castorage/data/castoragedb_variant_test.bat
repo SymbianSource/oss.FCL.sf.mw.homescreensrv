@@ -18,4 +18,5 @@
 del castorage.db
 sqlite3 castorage.db ".read castoragedb_create.sql"
 sqlite3 castorage.db ".genfkey --exec"
+sqlite3 castorage.db ".read castoragedb_variant.sql"
 sqlite3 castorage.db ".read castoragedb_variant_test.sql"

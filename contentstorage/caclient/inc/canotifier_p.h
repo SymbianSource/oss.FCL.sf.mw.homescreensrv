@@ -18,10 +18,13 @@
 #ifndef CANOTIFIER_PRIVATE_H
 #define CANOTIFIER_PRIVATE_H
 
+#include <QSharedPointer>
+
 class CaClientNotifierProxy;
 class CaNotifier;
 class CaNotifierFilter;
 class CaObserver;
+class CaService;
 
 class CaNotifierPrivate
 {
@@ -52,6 +55,8 @@ private:
     const CaObserver *mObserver;
 
     CaClientNotifierProxy *mNotifierProxy;
+
+    QSharedPointer<CaService> mCaService;
 
     friend class CaNotifier;
 

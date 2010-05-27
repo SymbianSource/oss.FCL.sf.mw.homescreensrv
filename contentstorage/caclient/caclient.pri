@@ -15,5 +15,15 @@
 #
 
 HEADERS += ./inc/*.h \
-    ../../homescreensrv_plat/contentstorage_api/*.h
+    ./../homescreensrv_plat/contentstorage_api/caclient_global.h \
+    ./../homescreensrv_plat/contentstorage_api/cadefs.h \
+    ./../homescreensrv_plat/contentstorage_api/caentry.h \
+    ./../homescreensrv_plat/contentstorage_api/caicondescription.h \
+    ./../homescreensrv_plat/contentstorage_api/caitemmodel.h \
+    ./../homescreensrv_plat/contentstorage_api/camenuiconutility.h \
+    ./../homescreensrv_plat/contentstorage_api/canotifier.h \
+    ./../homescreensrv_plat/contentstorage_api/canotifierfilter.h \
+    ./../homescreensrv_plat/contentstorage_api/caquery.h \
+    ./../homescreensrv_plat/contentstorage_api/caservice.h
+    
 SOURCES += ./src/*.cpp

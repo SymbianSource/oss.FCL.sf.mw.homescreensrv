@@ -20,7 +20,7 @@
 #include "hsactivityglobals.h"
 #include "hsserializer.h"
 #include <qvariant.h>
-#include <xqconversions>
+#include <XQConversions>
 
 
 // -----------------------------------------------------------------------------
@@ -30,8 +30,7 @@
 HsActivityDbClientPrivate::HsActivityDbClientPrivate(HsActivityDbAsyncRequestObserver &observer):
     mObserver(observer)
 {
-    mAsyncDataHandler = HsActivityDbAsyncRequestPrivate::newWaitActivityL(
-            observer, *this);
+    
 }
 
 // -----------------------------------------------------------------------------
@@ -41,7 +40,6 @@ HsActivityDbClientPrivate::HsActivityDbClientPrivate(HsActivityDbAsyncRequestObs
 HsActivityDbClientPrivate::~HsActivityDbClientPrivate()
 {
     mAsyncTasks.ResetAndDestroy();
-    delete mAsyncDataHandler;
     Close();
 }
 
@@ -156,6 +154,16 @@ int HsActivityDbClientPrivate::getThumbnail(QSize size, QString imagePath, QStri
 //
 // -----------------------------------------------------------------------------
 //
+int HsActivityDbClientPrivate::notifyDataChange()
+{
+    TRAPD(errNo,HsActivityDbAsyncRequestPrivate::notifyDataChangeLD(mObserver, *this);)
+    return errNo;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 int HsActivityDbClientPrivate::launchActivity(const QVariantHash &activity)
 {
     TRAPD(errNo, execSimpleRequestL(LaunchActivity, activity);)
@@ -169,6 +177,15 @@ int HsActivityDbClientPrivate::launchActivity(const QVariantHash &activity)
 int HsActivityDbClientPrivate::cancelWaitActivity()
 {
     return SendReceive(CancelWait, TIpcArgs());
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClientPrivate::cancelNotifyDataChange()
+{
+    return SendReceive(CancelNotify, TIpcArgs());
 }
 
 // -----------------------------------------------------------------------------
@@ -295,11 +312,7 @@ void HsActivityDbClientPrivate::applicationActivitiesL(QList<QVariantHash>& resu
 //
 void HsActivityDbClientPrivate::waitActivityL(const QVariantHash &activity)
 {
-    if (mAsyncDataHandler->IsActive()) {
-        User::Leave(KErrServerBusy);
-    } else {
-        mAsyncDataHandler->waitActivity(activity);
-    }
+    HsActivityDbAsyncRequestPrivate::waitActivityLD(mObserver,*this, activity);
 }
 
 // -----------------------------------------------------------------------------

@@ -712,10 +712,6 @@ void CaItemModelPrivate::updateItemData(int id)
            && ids.indexOf(id) == mEntries.indexOf(id)) {
         emit m_q->dataChanged(index(mEntries.indexOf(id)), index(
                                   mEntries.indexOf(id)));
-    } else if (ids.indexOf(id) < 0){
-        removeItem(id);
-    } else if (mEntries.indexOf(id) < 0){
-        addItem(id);
     } else if (mParentEntry && id == mParentEntry->id()) {
         updateParentEntry();
         m_q->reset();
@@ -737,9 +733,17 @@ void CaItemModelPrivate::addItem(int id)
     //we use beginInsertRows and endInsertRows to emit proper signal
     //(see Qt documentation of QAbstractItemModel)
     if (mEntries.indexOf(id) < 0 && row >= 0) {
-        m_q->beginInsertRows(QModelIndex(), row, row);
-        mEntries.insert(row, id);
+        if (row > mEntries.count()) {
+        	m_q->beginInsertRows(QModelIndex(), mEntries.count(), mEntries.count());
+        	mEntries.insert(mEntries.count(), id);
+        } else {
+			m_q->beginInsertRows(QModelIndex(), row , row);
+        	mEntries.insert(row, id);
+        }
         m_q->endInsertRows();
+    } else if (row == -1) {
+        //we udpade whole model because we do not know parent collecion for given item
+        updateModel();
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::addItem");
 }

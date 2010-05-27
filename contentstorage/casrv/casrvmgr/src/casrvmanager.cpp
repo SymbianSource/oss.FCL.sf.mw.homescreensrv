@@ -85,6 +85,15 @@ void CCaSrvManager::ConstructL( CCaStorageProxy& aCaStorageProxy,
     }
 
 // ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TInt CCaSrvManager::LoadOperationErrorCodeL()
+    {
+    return iErrorCode;
+    }
+
+// ---------------------------------------------------------------------------
 // CASpaPluginManager::LoadPluginsL
 // Load plugins implementations
 // ---------------------------------------------------------------------------
@@ -106,7 +115,12 @@ void CCaSrvManager::LoadPluginsL()
         {
         // Slice off first sub-section in the data section
         TUid current_plugin = infoArray[i]->ImplementationUid();
-        plug = CCaSrvPlugin::NewL( current_plugin, iPluginParams );
+        TRAPD(err, plug = CCaSrvPlugin::NewL( current_plugin, iPluginParams ));
+        if( KErrNone==iErrorCode )
+        	{
+        	// remember error code only if it wasn't set yet
+        	iErrorCode = err;
+        	}
         CleanupStack::PushL( plug );
         TInt32 key = current_plugin.iUid;
         iPluginMap.InsertL( key, plug );
@@ -115,5 +129,6 @@ void CCaSrvManager::LoadPluginsL()
         }
     CleanupStack::PopAndDestroy( &infoArray );
     }
+
 
 // End of file

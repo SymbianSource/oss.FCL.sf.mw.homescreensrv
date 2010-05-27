@@ -18,9 +18,6 @@
 #include <e32property.h>
 #include <f32file.h>
 #include <badesca.h>
-#include <usif/sif/sif.h>
-#include <usif/scr/scr.h>
-#include <usif/sif/sifcommon.h>
 
 #include "causifscanner.h"
 #include "cainnerentry.h"
@@ -83,12 +80,12 @@ void CCaUsifScanner::ConstructL()
 //
 CCaUsifScanner::~CCaUsifScanner()
     {
-    delete iMmcWatcher;
-    delete iSystemInstallNotifier;
-    delete iUsifUninstallNotifier;
-    delete iJavaInstallNotifier;
-    iFs.Close();
     iSoftwareRegistry.Close();
+    delete iMmcWatcher;
+    iFs.Close();
+    delete iJavaInstallNotifier;
+    delete iUsifUninstallNotifier;
+    delete iSystemInstallNotifier;
     }
 
 // ---------------------------------------------------------------------------
@@ -198,12 +195,12 @@ void CCaUsifScanner::AddPackageL()
     CleanupResetAndDestroyPushL( resultUsifArray );
     GetUsifPackageEntriesL( resultUsifArray );
 
-    for( TInt idx(0); idx < resultUsifArray.Count(); idx++ )
+    for( TInt i(0); i < resultUsifArray.Count(); i++ )
         {
-        if( PackageExistL( entries, resultUsifArray[idx] ) == KErrNotFound )
+        if( PackageExists( entries, resultUsifArray[i] ) == KErrNotFound )
             {
             CCaInnerEntry *caEntry = CCaInnerEntry::NewLC();
-            CreateCaEntryFromEntryL( resultUsifArray[idx], caEntry );
+            CreateCaEntryFromEntryL( resultUsifArray[i], caEntry );
             iStorageProxy.AddL( caEntry );
             CleanupStack::PopAndDestroy( caEntry );
             }
@@ -242,7 +239,8 @@ void CCaUsifScanner::GetCaPackageEntriesL(
         RPointerArray<CCaInnerEntry>& aArray )
     {
     CCaInnerQuery* allAppQuery = CCaInnerQuery::NewLC();
-    CDesC16ArrayFlat* appType = new ( ELeave ) CDesC16ArrayFlat( 1 );
+    CDesC16ArrayFlat* appType =
+            new ( ELeave ) CDesC16ArrayFlat( KGranularityOne );
     CleanupStack::PushL( appType );
     appType->AppendL( KCaTypePackage );
     allAppQuery->SetEntryTypeNames( appType );
@@ -270,8 +268,7 @@ void CCaUsifScanner::GetUsifPackageEntriesL(
 
     // Iterate over the matching components
     //The ownership is transferred to the calling client.
-    CComponentEntry* entry = scrView.NextComponentL();
-    while( entry )
+    while( CComponentEntry* entry = scrView.NextComponentL() )
         {
         CleanupStack::PushL( entry );
         if( iSoftwareRegistry.IsComponentPresentL( entry->ComponentId() ) )
@@ -283,7 +280,6 @@ void CCaUsifScanner::GetUsifPackageEntriesL(
             {
             CleanupStack::PopAndDestroy( entry );
             }
-        entry = scrView.NextComponentL();
         }
     CleanupStack::PopAndDestroy( &scrView );
     CleanupStack::PopAndDestroy( filter );
@@ -293,24 +289,24 @@ void CCaUsifScanner::GetUsifPackageEntriesL(
 //
 // ---------------------------------------------------------------------------
 //
-TInt CCaUsifScanner::PackageExistL( RPointerArray<CCaInnerEntry>& aArray,
+TInt CCaUsifScanner::PackageExists( RPointerArray<CCaInnerEntry>& aArray,
         const CComponentEntry* aEntry )
     {
-    for( TInt idx( 0 ); idx < aArray.Count(); idx++ )
+    TInt retVal( KErrNotFound );
+    for( TInt i( 0 ); i < aArray.Count(); i++ )
         {
         TBuf<KMaxUnits> compIdDes;
-        if( aArray[idx]->FindAttribute( KCaAttrComponentId, compIdDes ) )
+        if( aArray[i]->FindAttribute( KCaAttrComponentId, compIdDes ) )
             {
             TLex lex( compIdDes );
             TUint uint( 0 );
-            User::LeaveIfError( lex.Val( uint ) );
-            if( aEntry->ComponentId() == uint )
+            if( lex.Val( uint ) == KErrNone && aEntry->ComponentId() == uint )
                 {
-                return idx;
+                retVal = i;
                 }
             }
         }
-    return KErrNotFound;
+    return retVal;
     }
 
 // ---------------------------------------------------------------------------
@@ -321,10 +317,10 @@ void CCaUsifScanner::FindDeletedEntriesL(
         RPointerArray<CCaInnerEntry>& aCaArray, const RPointerArray<
                 CComponentEntry>& aUsifArray )
     {
-    for( TInt idx( aCaArray.Count() - 1 ); idx >= 0; idx-- )
+    for( TInt i( aCaArray.Count() - 1 ); i >= 0; i-- )
         {
         TBuf<KMaxUnits> compIdDes;
-        if( aCaArray[idx]->FindAttribute( KCaAttrComponentId, compIdDes ) )
+        if( aCaArray[i]->FindAttribute( KCaAttrComponentId, compIdDes ) )
             {
             TLex lex( compIdDes );
             TUint uint( 0 );
@@ -335,8 +331,8 @@ void CCaUsifScanner::FindDeletedEntriesL(
                 if( aUsifArray[k]->ComponentId() == uint
                         && iSoftwareRegistry.IsComponentPresentL( uint ) )
                     {
-                    delete aCaArray[idx];
-                    aCaArray.Remove( idx );
+                    delete aCaArray[i];
+                    aCaArray.Remove( i );
                     break;
                     }
                 }

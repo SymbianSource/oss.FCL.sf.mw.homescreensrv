@@ -1,0 +1,50 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#include "tsapplicationtask.h"
+
+#include <apgtask.h>
+#include <eikenv.h>
+#include <akndef.h>
+
+#include "tsfswentry.h"
+
+TsApplicationTask::TsApplicationTask(CTsFswEntry* entry) : TsTask(entry)
+{
+}
+
+void TsApplicationTask::open()
+{
+    TApaTaskList taskList(CEikonEnv::Static()->WsSession());
+    TApaTask task = taskList.FindApp(mEntry->AppUid());
+    task.BringToForeground();
+}
+
+void TsApplicationTask::close()
+{
+    RWsSession wsSession;
+    if (wsSession.Connect() == KErrNone) {
+        CleanupClosePushL<RWsSession>(wsSession);
+    
+        TWsEvent event;
+        event.SetTimeNow();
+        event.SetType(KAknShutOrHideApp);
+        wsSession.SendEventToWindowGroup(mEntry->WgId(), event);
+
+        CleanupStack::PopAndDestroy(&wsSession);
+    }
+}

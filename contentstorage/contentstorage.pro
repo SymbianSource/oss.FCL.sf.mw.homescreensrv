@@ -23,4 +23,5 @@ SUBDIRS  += casrv/calocalizerscanner
 SUBDIRS  += cahandler
 }
 SUBDIRS  += caclient
+SUBDIRS  += casoftwareregistry
 CONFIG  += ordered

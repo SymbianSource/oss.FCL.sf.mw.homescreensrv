@@ -38,7 +38,9 @@ enum ActivityCmd {
     LaunchActivity,
     GetThumbnail,
     GetData,
-    CancelWait
+    NotifyChange,
+    CancelWait,
+    CancelNotify
 };
 
 #endif  //ACTIVITYCMD_H

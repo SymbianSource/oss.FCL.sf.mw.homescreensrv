@@ -42,6 +42,7 @@ file=ABI_DIR\BUILD_DIR\casathandler.dll     SHARED_LIB_DIR\casathandler.dll
 file=ABI_DIR\BUILD_DIR\castorage.dll     SHARED_LIB_DIR\castorage.dll
 file=ABI_DIR\BUILD_DIR\MenuInterface.dll     SHARED_LIB_DIR\MenuInterface.dll
 file=ABI_DIR\BUILD_DIR\casrvmanager.dll     SHARED_LIB_DIR\casrvmanager.dll
+file=ABI_DIR\BUILD_DIR\casoftwareregistry.dll     SHARED_LIB_DIR\casoftwareregistry.dll
 ECOM_PLUGIN( casatmonitor.dll, casatmonitor.rsc )
 ECOM_PLUGIN( caappscanner.dll, caappscanner.rsc )
 ECOM_PLUGIN( cawidgetscanner.dll, cawidgetscanner.rsc )

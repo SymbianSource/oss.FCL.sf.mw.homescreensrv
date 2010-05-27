@@ -34,32 +34,32 @@ public:
     
     enum TAsyncRequest{
         EWaitActivity = WaitActivity,
-        EWaitGetThumbnail = GetThumbnail
+        EWaitGetThumbnail = GetThumbnail,
+        ENotifyDataChange = NotifyChange
     };
     
 private:
-    /**
-     * First step constructor
-     */
     static HsActivityDbAsyncRequestPrivate*
-    NewL(HsActivityDbAsyncRequestObserver &, 
-         HsActivityDbClientPrivate &,
-         TAsyncRequest,
-         void* userData = 0);
+    NewLC(HsActivityDbAsyncRequestObserver &, 
+          HsActivityDbClientPrivate &,
+          TAsyncRequest,
+          void* userData = 0);
     
 public:
     
-    static HsActivityDbAsyncRequestPrivate*
-    newWaitActivityL(HsActivityDbAsyncRequestObserver &, 
-            HsActivityDbClientPrivate &);
+    static void waitActivityLD(HsActivityDbAsyncRequestObserver &, 
+                               HsActivityDbClientPrivate &,
+                               const QVariantHash &);
     
-    static void
-    getThumbnailLD(HsActivityDbAsyncRequestObserver &observer,
-         HsActivityDbClientPrivate &session, 
-         QSize size, 
-         QString imagePath, 
-         QString  mimeType, 
-         void *userDdata);
+    static void notifyDataChangeLD(HsActivityDbAsyncRequestObserver &, 
+                                   HsActivityDbClientPrivate &);
+    
+    static void getThumbnailLD(HsActivityDbAsyncRequestObserver &,
+                               HsActivityDbClientPrivate &, 
+                               QSize, 
+                               const QString&, 
+                               const QString&, 
+                               void *);
     
 
     /**
@@ -67,20 +67,18 @@ public:
      */
     ~HsActivityDbAsyncRequestPrivate();
 
+private:
     /**
      * Function create subscription to current ativity changes
      * @param condition - activity filetering rules
      */
     void waitActivity(const QVariantHash &condition);
-private:
+    
     /**
      */
     void getThumbnail(QSize size, QString imagePath, QString  mimeType);
-
-    /**
-     */
-    QPixmap copyPixmap(CFbsBitmap* bitmap);
     
+    void notifyDataChange();
 protected:
     /**
      * Interface implementation.

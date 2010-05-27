@@ -17,6 +17,7 @@
 // INCLUDE FILES
 
 #include <badesca.h>
+#include <usif/scr/screntries.h>
 #include "widgetscannerutils.h"
 #include "cawidgetstoragehandler.h"
 #include "cadef.h"
@@ -24,6 +25,8 @@
 #include "cainnerquery.h"
 #include "castorageproxy.h"
 #include "caarraycleanup.inl"
+
+using namespace Usif;
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -47,6 +50,7 @@ CCaWidgetStorageHandler::CCaWidgetStorageHandler(
 //
 void CCaWidgetStorageHandler::ConstructL()
     {
+    User::LeaveIfError( iSoftwareRegistry.Connect() );
     }
 
 // -----------------------------------------------------------------------------
@@ -83,6 +87,7 @@ CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewLC(
 //
 CCaWidgetStorageHandler::~CCaWidgetStorageHandler()
     {
+    iSoftwareRegistry.Close();
     iWidgets.ResetAndDestroy();
     iUpdatedIndexes.Close();
     }
@@ -105,6 +110,7 @@ void CCaWidgetStorageHandler::SynchronizeL( const RWidgetArray& aWidgets )
 void CCaWidgetStorageHandler::AddL( const CCaWidgetDescription* aWidget )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
+    UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
     iStorage->AddL( entry );
     if( entry->GetFlags() & ERemovable )
         {
@@ -121,6 +127,7 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
         TUint aEntryId )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
+    UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
     entry->SetId( aEntryId );
     if( !aWidget->IsMissing() && aWidget->IsUsed() )
         {
@@ -330,5 +337,53 @@ TBool CCaWidgetStorageHandler::MassStorageNotInUse()
         }
     return massStorageNotInUse;
     }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+
+void CCaWidgetStorageHandler::UpdateComponentIdL( 
+    const TDesC& aManifestFilePathName, 
+    CCaInnerEntry& aEntry ) const
+    {
+    RArray<TComponentId> componentIds;
+    CleanupClosePushL( componentIds );
+    
+    CComponentFilter* const fileNameFilter = CComponentFilter::NewLC();
+    fileNameFilter->SetFileL( aManifestFilePathName );
+    iSoftwareRegistry.GetComponentIdsL( componentIds, fileNameFilter );
+
+    CleanupStack::PopAndDestroy( fileNameFilter );
+    
+    if ( componentIds.Count() == 1 )
+        {
+        RBuf newComponentId;
+        newComponentId.CleanupClosePushL();
+        newComponentId.CreateL( sizeof(TComponentId) + 1 );
+        newComponentId.AppendNum( componentIds[0] );
+        
+        RBuf oldComponentId;
+        oldComponentId.CleanupClosePushL();
+        oldComponentId.CreateL( KCaMaxAttrValueLen );
+        
+        const TBool componentIdAttributeFound = 
+            aEntry.FindAttribute( KCaComponentId, oldComponentId );
+              
+        if ( !componentIdAttributeFound 
+            || oldComponentId.Compare( newComponentId ) != 0 )
+            {
+            // 'add' or 'update' the component id attribute value
+            aEntry.AddAttributeL( KCaComponentId, 
+                newComponentId );
+            }
+        
+        CleanupStack::PopAndDestroy( &oldComponentId );
+        CleanupStack::PopAndDestroy( &newComponentId );
+        }
+
+    CleanupStack::PopAndDestroy( &componentIds );
+    }
+
 
 //  End of File

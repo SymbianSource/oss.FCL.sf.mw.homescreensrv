@@ -272,6 +272,16 @@ EXPORT_C void CCaStorageProxy::LocalizeEntryL(
 //
 // ---------------------------------------------------------------------------
 //
+EXPORT_C void CCaStorageProxy::AddLocalizationL(
+		const CCaLocalizationEntry& aLocalization)
+	{
+	iStorage->AddLocalizationL(aLocalization);
+	}
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 EXPORT_C void CCaStorageProxy::DbPropertyL( const TDesC& aProperty,
         TDes& aPropertyValue )
     {

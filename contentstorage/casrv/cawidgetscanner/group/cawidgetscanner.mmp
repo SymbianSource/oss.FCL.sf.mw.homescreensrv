@@ -52,12 +52,13 @@ MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
 LIBRARY         efsrv.lib
-LIBRARY			bafl.lib
+LIBRARY         bafl.lib
 LIBRARY         ecom.lib
 LIBRARY         cautils.lib
 LIBRARY         camenu.lib
 LIBRARY         platformenv.lib
 LIBRARY         charconv.lib
 LIBRARY         xmlengineDOM.lib
+LIBRARY         scrclient.lib
 
 // End of file

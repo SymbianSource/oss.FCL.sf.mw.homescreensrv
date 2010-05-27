@@ -96,4 +96,6 @@ EXPORTS
 	_ZNK22CCaInnerNotifierFilter12GetTypeNamesEv @ 95 NONAME
 	_ZNK22CCaInnerNotifierFilter15GetNotifierTypeEv @ 96 NONAME
 	_ZNK22CCaInnerNotifierFilter6GetIdsEv @ 97 NONAME
+	_ZN20CCaLocalizationEntry14SetQmFilenameLERK7TDesC16 @ 98 NONAME
+	_ZNK20CCaLocalizationEntry13GetQmFilenameEv @ 99 NONAME
 

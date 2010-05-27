@@ -21,9 +21,10 @@
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 //
-CGraphicsSalingHandler::CGraphicsSalingHandler(MImageReadyCallBack &aNotify, 
-                                               const TSize &aNewSize, 
-                                               TKindOfScaling aKindOfScaling):
+CGraphicsSalingHandler::CGraphicsSalingHandler(MImageReadyCallBack &aNotify,
+                            const TSize &aNewSize,
+                            TKindOfScaling aKindOfScaling
+                            /* = CGraphicsSalingHandler::EIgnoreAspectRatio*/) :
     CActive(EPriorityNormal),
     mNotify(aNotify),
     mNewSize(aNewSize),
@@ -48,17 +49,18 @@ CGraphicsSalingHandler::~CGraphicsSalingHandler()
 // -----------------------------------------------------------------------------
 //
 CGraphicsSalingHandler* CGraphicsSalingHandler::NewL(MImageReadyCallBack &aNotify,
-                                                     RFs &aFs,
-                                                     const TDesC &aFileName,
-                                                     const TDesC8& aMimeType,
-                                                     const TSize &aNewSize,
-                                                     TKindOfScaling aKindOfScaling)
+                                RFs &aFs,
+                                const TDesC &aFileName,
+                                const TDesC8& aMimeType,
+                                const TSize &aNewSize,
+                                TKindOfScaling aKindOfScaling
+                                /* = CGraphicsSalingHandler::EIgnoreAspectRatio*/)
 {
-    CGraphicsSalingHandler *self = CGraphicsSalingHandler::NewLC(aNotify, 
-                                                                 aFs, 
-                                                                 aFileName, 
-                                                                 aMimeType, 
-                                                                 aNewSize, 
+    CGraphicsSalingHandler *self = CGraphicsSalingHandler::NewLC(aNotify,
+                                                                 aFs,
+                                                                 aFileName,
+                                                                 aMimeType,
+                                                                 aNewSize,
                                                                  aKindOfScaling);
     CleanupStack::Pop();
     return self;
@@ -68,15 +70,19 @@ CGraphicsSalingHandler* CGraphicsSalingHandler::NewL(MImageReadyCallBack &aNotif
 // -----------------------------------------------------------------------------
 //
 CGraphicsSalingHandler* CGraphicsSalingHandler::NewLC(MImageReadyCallBack &aNotify,
-                                              RFs &aFs,
-                                              const TDesC &aFileName,
-                                              const TDesC8& aMimeType,
-                                              const TSize &aNewSize,
-                                              TKindOfScaling aKindOfScaling)
+                                RFs &aFs,
+                                const TDesC &aFileName,
+                                const TDesC8& aMimeType,
+                                const TSize &aNewSize,
+                                TKindOfScaling aKindOfScaling
+                                /* = CGraphicsSalingHandler::EIgnoreAspectRatio*/)
 {
-    CGraphicsSalingHandler *self = new (ELeave) CGraphicsSalingHandler(aNotify, 
-                                                                       aNewSize, 
+    CGraphicsSalingHandler *self = new (ELeave) CGraphicsSalingHandler(aNotify,
+                                                                       aNewSize,
                                                                        aKindOfScaling);
+
+    
+
     CleanupStack::PushL(self);
     self->ConstructL(aFs, aFileName, aMimeType);
     return self;
@@ -87,12 +93,20 @@ CGraphicsSalingHandler* CGraphicsSalingHandler::NewLC(MImageReadyCallBack &aNoti
 //
 void CGraphicsSalingHandler::ConstructL(RFs &aFs, const TDesC &aFileName, const TDesC8& aMimeType)
 {
-    CActiveScheduler::Add(this);
-
     if (aFileName.Length() == 0
         || aFs.IsValidName(aFileName) == EFalse) {
         User::Leave(KErrPathNotFound);
     }
+
+    if (aMimeType.Length() == 0) {
+        User::Leave(KErrBadName);
+    }
+
+    if(0>=mNewSize.iWidth || 0>=mNewSize.iHeight) {
+       User::Leave(KErrCorrupt);
+    }
+
+    CActiveScheduler::Add(this);
 
     mBitmapScaler = CBitmapScaler::NewL();
     mBitmapScaler->SetQualityAlgorithm(CBitmapScaler::EMaximumQuality);
@@ -103,7 +117,7 @@ void CGraphicsSalingHandler::ConstructL(RFs &aFs, const TDesC &aFileName, const 
     const TFrameInfo frameInfo(mImageDecoder->FrameInfo(0));
     User::LeaveIfError(mBitmapFromFile->Create(frameInfo.iOverallSizeInPixels, 
                                                frameInfo.iFrameDisplayMode));
-    
+
     mImageDecoder->Convert(&iStatus, *mBitmapFromFile, 0);
     mCurrentOperation = EConvertBitmapFromFile;
     SetActive();
@@ -149,13 +163,17 @@ void CGraphicsSalingHandler::RunL()
         }
     case EScale: {
             mCurrentOperation = ENone;
-            
+
             delete mBitmapScaler;
             mBitmapScaler = 0;
             
             delete mBitmapFromFile;
             mBitmapFromFile = 0;
-            
+
+            if (mKindOfScaling == CGraphicsSalingHandler::EKeepAspectRatioByExpanding) {
+                User::LeaveIfError(mBitmapOutput->Resize(mNewSize));
+            }
+
             mNotify.ImageReadyCallBack(iStatus.Int(), mBitmapOutput);
             break;
         }
@@ -170,7 +188,9 @@ TSize CGraphicsSalingHandler::Scaling()
    TSize originalSize = mBitmapFromFile->SizeInPixels();
    float widthFactor = mNewSize.iWidth / (float)originalSize.iWidth;
    float heightFactor = mNewSize.iHeight / (float)originalSize.iHeight;
+
    TSize retSize(mNewSize);
+
    if (mKindOfScaling == CGraphicsSalingHandler::EKeepAspectRatio) {
        retSize = (widthFactor < heightFactor) ?
                  TSize(mNewSize.iWidth, widthFactor * originalSize.iHeight) :

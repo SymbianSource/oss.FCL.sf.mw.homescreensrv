@@ -75,14 +75,7 @@ void CActivityThumbnailTask::ConstructL(RFs& session)
     mMsg.ReadL(2, path);
     mime.CreateL(mMsg.GetDesLengthL(3));
     mMsg.ReadL(3, mime);
-    if(0 >= width() || 
-       0 >=height() ||
-       0 >= path.Length() ||
-       0 >= mime.Length()
-       ) {
-       User::Leave(KErrCorrupt);
-    }
-    
+
     mService = CGraphicsSalingHandler::NewL(*this, 
                                             session, 
                                             path, 
@@ -100,12 +93,15 @@ void CActivityThumbnailTask::ConstructL(RFs& session)
 //
 void CActivityThumbnailTask::ImageReadyCallBack(TInt error,const CFbsBitmap *bitmap)
 {
-    if (KErrNone == error) {
+    if (EFalse == mMsg.IsNull() &&
+        KErrNone == error) {
         mMsg.Write(0, TPckgBuf<int>(const_cast<CFbsBitmap*>(bitmap)->Handle()));
         mMsg.Write(1, TPckgBuf<void *>(this));
         mMsg.Complete(error);
     } else {
-        mMsg.Complete(error);
+        if (EFalse == mMsg.IsNull()) {
+         mMsg.Complete(error);
+        }
         mStorage.Pop(this);
         delete this;
     }
@@ -124,7 +120,7 @@ const TDesC8& CActivityThumbnailTask::Data() const
 //
 // -----------------------------------------------------------------------------
 //
-void CActivityThumbnailTask::BroadcastReceivedL(const RMessage2& )
+void CActivityThumbnailTask::BroadcastReceivedL(const RMessage2&)
 {
 }
 

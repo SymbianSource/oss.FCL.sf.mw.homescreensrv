@@ -22,6 +22,7 @@ SUBDIRS  += appfoundation \
             homescreensrv_plat \
             tsrc
 symbian:SUBDIRS += activityfw
+symbian:SUBDIRS += tstaskmonitor
 symbian:SUBDIRS += hsappkeyhandler
 
 

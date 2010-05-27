@@ -26,7 +26,45 @@ LOCAL_D const TInt KCaMmcHistoryLength = 2;
 // ==================== MEMBER FUNCTIONS ====================
 
 // ---------------------------------------------------------
-// CMenuSrvMmcHistory::LoadL
+//
+// ---------------------------------------------------------
+//
+CCaSrvMmcHistory::CCaSrvMmcHistory()
+	{
+	}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CCaSrvMmcHistory::ConstructL()
+	{
+	}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+EXPORT_C CCaSrvMmcHistory* CCaSrvMmcHistory::NewL()
+     {
+     CCaSrvMmcHistory* self = new (ELeave) CCaSrvMmcHistory();
+     CleanupStack::PushL( self );
+     self->ConstructL();
+     CleanupStack::Pop( self );
+     return self;
+     }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+CCaSrvMmcHistory::~CCaSrvMmcHistory()
+    {
+    iMmcList.Close();
+    }
+
+// ---------------------------------------------------------
+//
 // ---------------------------------------------------------
 //
 EXPORT_C void CCaSrvMmcHistory::LoadL( RFs& aFs, const TDesC& aFname )

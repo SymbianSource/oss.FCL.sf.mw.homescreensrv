@@ -23,7 +23,9 @@ _LIT(KUnsupportedStorageSyncTask, "Unsupported sync storage task");
 //
 // -----------------------------------------------------------------------------
 //
-void ActivityStorageSyncTask::ExecuteL(CActivityStorage& dataStorage, const RMessage2& msg)
+void ActivityStorageSyncTask::ExecuteL(MActivityTaskStorage& observers,
+                                       CActivityStorage& dataStorage, 
+                                       const RMessage2& msg)
 {
     switch (msg.Function()) {
     case AddActivity: 
@@ -43,6 +45,7 @@ void ActivityStorageSyncTask::ExecuteL(CActivityStorage& dataStorage, const RMes
         User::Panic(KUnsupportedStorageSyncTask, KErrGeneral);
     };
     msg.Complete(KErrNone);
+    NotifyChangeL(observers, msg);
 }
 
 // -----------------------------------------------------------------------------
@@ -123,4 +126,17 @@ void ActivityStorageSyncTask::DeleteApplicationActivitiesL(CActivityStorage& dat
     TPckgBuf<TInt> appId;
     msg.ReadL(KRequestAppIdOffset, appId);
     dataStorage.DeleteActivitiesL(appId());
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void ActivityStorageSyncTask::NotifyChangeL(MActivityTaskStorage& observers,
+                          const RMessage2& msg)
+{
+    const RPointerArray<CActivityTask> &table(observers.StorageData());
+    for (TInt iter(table.Count() - 1); 0 <= iter; --iter) {
+        table[iter]->BroadcastReceivedL(msg);
+    }
 }

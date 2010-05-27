@@ -15,6 +15,8 @@
  *
  */
 
+#include <caservice.h>
+
 #include "canotifier.h"
 #include "canotifier_p.h"
 #include "canotifierfilter.h"
@@ -52,6 +54,10 @@
  QSharedPointer<CaService> service = CaService::instance();
  CaNotifierFilter notifierFilter();
  CaNotifier * notifier = service->createNotifier(notifierfilter);
+
+CaService instance is a singleton and is deleted when nothing references
+it but CaNotifier contains a member referencing it,
+so, CaService instance is not deleted before notifier is deleted.
 
  // Connections cause that notifier is registered to server distributed
  // notifications while data changes.
@@ -221,7 +227,8 @@ CaNotifierPrivate::CaNotifierPrivate(
     CaClientNotifierProxy *notifierProxy) :
     m_q(NULL),
     mNotifierFilter(NULL), 
-    mObserver(NULL)
+    mObserver(NULL),
+    mCaService(CaService::instance())
 {
     mNotifierProxy = notifierProxy;
     mNotifierFilter = new CaNotifierFilter(notifierFilter);

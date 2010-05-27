@@ -574,31 +574,14 @@ void CaSqlQueryCreator::CreateTouchQueryL(
 //
 // ---------------------------------------------------------------------------
 //
-void CaSqlQueryCreator::CreateLocalizeEntryQueryL( CCaSqlQuery* aSqlQuery )
+void CaSqlQueryCreator::CreateLocalizationTableQueryL( CCaSqlQuery* aSqlQuery,
+        const TDesC& aStatement)
     {
-    DEBUG(("_CA_:CASqlQueryCreator::CreateLocalizeEntryQueryL"));
-    RBuf query;
-    
-    query.CleanupClosePushL();
-    query.CreateL( KSQLLocalizeEntry().Length() );
-    query.Append( KSQLLocalizeEntry );
-    
-    aSqlQuery->SetQueryL( query );
-    CleanupStack::PopAndDestroy( &query );
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CaSqlQueryCreator::CreateGetLocalizationsQueryL( CCaSqlQuery* aSqlQuery )
-    {
-    DEBUG(("_CA_:CASqlQueryCreator::CreateGetLocalizationsQueryL"));
+    DEBUG(("_CA_:CASqlQueryCreator::CreateLocalizationTableQueryL"));
     RBuf query;
     query.CleanupClosePushL();
-    query.CreateL( KSQLGetLocalizations().Length() );
-    query.Append( KSQLGetLocalizations );
-    
+    query.CreateL( aStatement.Length() );
+    query.Append( aStatement );
     aSqlQuery->SetQueryL( query );
     CleanupStack::PopAndDestroy( &query );
     }

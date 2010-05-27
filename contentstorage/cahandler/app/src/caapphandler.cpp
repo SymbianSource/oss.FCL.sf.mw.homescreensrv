@@ -29,7 +29,6 @@
 
 #include "caapphandler.h"
 #include "cainnerentry.h"
-#include "cauninstalloperation.h"
 #include "causifuninstalloperation.h"
 #include "catasklist.h"
 
@@ -45,7 +44,6 @@ using namespace Usif;
 //
 CCaAppHandler::~CCaAppHandler()
 {
-    delete iUninstallOperation;
     delete iUsifUninstallOperation;
 }
 
@@ -69,7 +67,6 @@ CCaAppHandler *CCaAppHandler::NewL()
 CCaAppHandler::CCaAppHandler()
 {
     iEikEnv = CEikonEnv::Static();
-    iUninstallOperation = NULL;
     iUsifUninstallOperation = NULL;
 }
 
@@ -226,31 +223,21 @@ void CCaAppHandler::CloseApplicationL( CCaInnerEntry &aEntry )
 // ---------------------------------------------------------------------------
 //
 void CCaAppHandler::HandleRemoveL( CCaInnerEntry &aEntry )
-{
-    if (!( aEntry.GetFlags() & ERemovable ) )
+    {
+    if( !( aEntry.GetFlags() & ERemovable ) )
         {
         User::Leave( KErrAccessDenied );
         }
-    if ( aEntry.GetEntryTypeName() == KCaTypeApp() )
-        {
-        TComponentId componentId( GetComponentIdL( aEntry,KSoftwareTypeJava ) );
-        if ( componentId != KErrNotFound )
-            {
-            StartUsifUninstallL( componentId );
-            }
-        else
-            {
-            StartSwiUninstallL( aEntry );
-            }
-        }
-    else if ( aEntry.GetEntryTypeName() == KCaTypeWidget() )
-        {
-        StartSwiUninstallL( aEntry );
-        }
-    else if( aEntry.GetEntryTypeName() == KCaTypePackage() )
+    
+    const TPtrC entryTypeName(aEntry.GetEntryTypeName());
+    
+    if( entryTypeName == KCaTypeApp()  ||
+        entryTypeName == KCaTypePackage() ||
+        entryTypeName == KCaTypeWidget() )
         {
         TPtrC componentId;
-        if ( aEntry.FindAttribute( KCaAttrComponentId, componentId ) )
+        TBool result = aEntry.FindAttribute( KCaAttrComponentId, componentId );
+        if( result )
             {
             TInt32 id ;
             TLex idDesc;
@@ -258,12 +245,16 @@ void CCaAppHandler::HandleRemoveL( CCaInnerEntry &aEntry )
             User::LeaveIfError( idDesc.Val( id ) );
             StartUsifUninstallL( id );
             }
+         else
+            {
+            User::Leave( KErrNotFound );
+            }
         }
     else
         {
         User::Leave( KErrNotSupported );
         }
-}
+    }
 
 // ---------------------------------------------------------------------------
 //
@@ -307,17 +298,3 @@ void CCaAppHandler::StartUsifUninstallL( TInt aComponentId )
     iUsifUninstallOperation = CCaUsifUninstallOperation::NewL( aComponentId );
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CCaAppHandler::StartSwiUninstallL(CCaInnerEntry &aEntry )
-{
-    if ( iUninstallOperation && iUninstallOperation->IsActive() )
-        {
-        User::Leave( KErrInUse );
-        }
-    delete iUninstallOperation;
-    iUninstallOperation = NULL;
-    iUninstallOperation = CCaUninstallOperation::NewL( aEntry );
-}

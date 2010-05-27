@@ -20,7 +20,7 @@
 #include <QBitmap>
 #include <QDebug>
 #include <AknIconUtils.h> // avkon
-#include <APGICNFL.H> // fbsbitmap
+#include <apgicnfl.h> // fbsbitmap
 
 #include "cabitmapadapter.h"
 #include "camenuiconmifutility.h"

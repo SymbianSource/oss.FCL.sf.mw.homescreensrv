@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/" >
-        <file alias="activityserviceplugin.xml">../../activityserviceplugin/activityserviceplugin.xml</file>
+        <file alias="activityserviceplugin.xml">../../activityserviceplugin/data/activityserviceplugin.xml</file>
     </qresource>
 </RCC> 

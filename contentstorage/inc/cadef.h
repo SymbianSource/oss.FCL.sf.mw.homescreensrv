@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: ou1s60ui#10.1.14 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.16 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -97,6 +97,8 @@ _LIT( KCaAttrAppWidgetParamWebAppId, "widgetparam:webAppId");
 
 _LIT( KCaAppGroupName, "appgroup_name" );
 
+_LIT( KCollectionIconFileName, "qtg_large_applications_user");
+
 const TInt KGranularityOne = 1;
 const TInt KUidChars = 10;
 const TInt KDefaultGranularity = 5;
@@ -146,6 +148,7 @@ const TInt KCenRepBufferSize = 255;
 // Menu clients always need to check that the necessary attributes are present.
 //
 _LIT( KCaAttrLongName, "long_name" ); ///< Long name.
+_LIT( KCaComponentId, "component_id" ); ///< Long name.
 
 // Built-in types and attributes.
 //

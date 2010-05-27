@@ -20,39 +20,6 @@
 //
 // -----------------------------------------------------------------------------
 //
-RBuf8 &operator <<(RBuf8 &dst, const QPixmap &src)
-{
-    QByteArray buffer;
-    QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-    QT_TRYCATCH_LEAVING(stream << src);
-    const int dataLength(buffer.length());
-    const unsigned char *dataPtr(reinterpret_cast<const unsigned char *>(buffer.constData()));
-    if (dst.MaxLength() < dataLength) {
-        dst.ReAllocL(dataLength);
-    }
-    dst.Copy(dataPtr, dataLength);
-    return dst;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-QPixmap &operator <<(QPixmap &dst, const TDesC8 &src)
-{
-    QByteArray buffer(QByteArray::fromRawData(reinterpret_cast<const char *>(src.Ptr()),
-                                              src.Length()) );
-
-    QDataStream stream(&buffer, QIODevice::ReadOnly);
-    QT_TRYCATCH_LEAVING(stream >> dst);
-    return dst;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
 RBuf8 &operator <<(RBuf8 &dst, const QVariantHash &src)
 {
     QByteArray buffer;
@@ -79,24 +46,6 @@ QVariantHash &operator <<(QVariantHash &dst, const TDesC8 &src)
 
     QDataStream stream(&buffer, QIODevice::ReadOnly);
     QT_TRYCATCH_LEAVING(stream >> dst);
-    return dst;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-RBuf8 &operator <<(RBuf8 &dst, const QList<QVariantHash>& src)
-{
-    QByteArray buffer;
-    QDataStream stream(&buffer, QIODevice::WriteOnly);
-
-    QT_TRYCATCH_LEAVING(stream << src);
-
-    if (dst.MaxLength() < buffer.length()) {
-        dst.ReAllocL(buffer.length());
-    }
-    dst.Copy(reinterpret_cast<const TUint8 *>(buffer.data()), buffer.length());
     return dst;
 }
 
