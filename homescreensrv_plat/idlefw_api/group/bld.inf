@@ -32,3 +32,5 @@ PRJ_EXPORTS
 ../inc/aifwdefs.h                MW_LAYER_PLATFORM_EXPORT_PATH(aifwdefs.h)
 ../inc/aifwpublisherinfo.h       MW_LAYER_PLATFORM_EXPORT_PATH(aifwpublisherinfo.h)
 ../inc/aifwpublisherinfo.inl     MW_LAYER_PLATFORM_EXPORT_PATH(aifwpublisherinfo.inl)
+
+../../../inc/aisystemuids.hrh              MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
