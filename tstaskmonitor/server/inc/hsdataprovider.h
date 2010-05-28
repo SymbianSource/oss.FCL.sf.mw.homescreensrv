@@ -14,11 +14,10 @@
 * Description:
 *
 */
-#ifndef DATAPROVIDR_H
-#define DATAPROVIDR_H
+#ifndef DATAPROVIDER_H
+#define DATAPROVIDER_H
 
 #include <e32base.h>
-
 class MHsDataProvider {
 public:
     virtual const TDesC8& Data() const = 0;

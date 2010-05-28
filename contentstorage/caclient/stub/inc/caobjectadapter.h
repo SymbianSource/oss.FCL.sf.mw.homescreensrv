@@ -21,6 +21,8 @@
 // INCLUDES
 #include <QPixmap>
 
+#include <cadefs.h>
+
 class QSize;
 class CaEntry;
 class CaIconDescription;
@@ -59,6 +61,12 @@ public:
      */
     static void setId(CaIconDescription &iconDescription,
                       int id);
+                      
+    /**
+     * Converts symbian error code to error code (used in QT code).
+     */
+    static ErrorCode convertErrorCode(
+        int internalErrorCode);
 
 };
 

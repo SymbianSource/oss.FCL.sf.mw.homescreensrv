@@ -19,20 +19,12 @@
 #ifndef TSFSWDATALIST_H
 #define TSFSWDATALIST_H
 
-#define __E32SVR_H__
-#include <e32event.h>
-#include <f32file.h>
-
 #include <e32base.h>
-#include <e32hashtab.h>
-#include <fbs.h>
 #include <apgcli.h>
 #include <w32std.h>
 #include "tsfswentry.h"
-#include "tsfswobservers.h"
+#include "tsdataobserver.h"
 
-class CTsFswEngine;
-class CTsFswIconCache;
 class CApaWindowGroupName;
 class CFbsBitmap;
 
@@ -47,7 +39,7 @@ public:
      *
      * @param aParent
      */
-    static CTsFswDataList* NewL( CTsFswEngine& aEngine );
+    static CTsFswDataList* NewL(MHsDataObserver& observer);
 
     /*
      * Destructor
@@ -58,7 +50,7 @@ private:
     /**
      * Constructor.
      */
-    CTsFswDataList( CTsFswEngine& aEngine );
+    CTsFswDataList(MHsDataObserver& observer);
 
     /**
      * Performs 2nd phase construction.
@@ -79,117 +71,62 @@ public:
      * @return   TBool   ETrue if the content iData has been modified
      */
     TBool CollectTasksL();
-
-
-    /**
-     * Set flag iTaskListDirty;
-     */
-    void SetDirty();
-
-    /**
-     * Set flag iAppDataRefreshNeeded
-     */
-    void SetAppDataRefreshNeeded();
-
-
-    /**
-     * Moves entry on given window app/widget id to 
-     * the first position on conten data list
-     */
-    void MoveEntryAtStart( TInt aAppId, TBool aWidget );
-    
-    
-    /**
-     * Finds out the app uid for the given window group id.
-     * @param   aWgId   a valid window group id
-     * @param   aUid   	requested uid
-     * @return  error code
-     */
-    TInt AppUidForWgId( TInt aWgId, TUid& aUid );
-    
-    /**
-     * Finds out the app uid for the given window group id.
-     * @param   aWgId   a valid window group id
-     * @return  application uid
-     */
-    TUid AppUidForWgIdL( TInt aWgId );
     
     /**
      * Checks if given uid is on hidden list
      * @param   aUid uid to be checked
-     * @return  ETrue if aUid is on hidden list
+     * @return  ETrue if uid is on hidden list
      */    
-    TBool IsHiddenUid( TUid aUid );
+    TBool IsHiddenUid( TUid uid );
 
+    /**
+     * Set screenshot 
+     */
+    TBool SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority, TInt wgId);
+    
+    /**
+     * Removes screenshot 
+     */    
+    TBool RemoveScreenshotL(TInt wgId);
+    
 private:
     /**
      * Adds running apps to the list.
-     * @param   aAppsList    array to add to
+     * @param   appsList    array to add to
      */
-    void CollectAppsL( RTsFswArray& aAppsList );
+    void CollectAppsL( RTsFswArray& appsList );
 
     /**
      * Called from CollectTasksL for each entry in the task list.
-     * @param   aWgId       window group id
-     * @param   aAppUid     application uid
-     * @param   aWgName     window group name or NULL
-     * @param   aNewList    list to add to
-     * @param   aIsWidget   true if the entry corresponds to a web widget
-     * @return  TBool   ETrue if it was really a new entry in the list
+     * @param   key       entry key
+     * @param   appUid     application uid
+     * @param   wgName     window group name or NULL
+     * @param   newList    list to add to
      */
-    TBool AddEntryL( TInt aWgId, 
-			const TUid& aAppUid,
-            CApaWindowGroupName* aWgName,
-			RTsFswArray& aNewList,
-            TBool aIsWidget );
+    void AddEntryL( const TTsEntryKey& key, 
+			const TUid& appUid,
+            CApaWindowGroupName* wgName,
+			RTsFswArray& newList );
 
     /**
      * Checks if there is an entry for same app in the content list.
      * If yes then it takes some of the data for the entry that
      * will correspond to the same app in the refreshed content list.
-     * In case of widget, update window group field in content list.
-     * @param   aEntry      new entry in content list
-     * @param   aAppUid     application uid
-     * @param   aChanged    ref to change-flag, set to ETrue if it is sure
-     * that the new content list will be different from the previous one
-     * @param   aNewList    ref to new content list
+     * @param   key      new key in content list
      * @return  ETrue if app was found
      */
-    TBool ConsiderOldDataL( CTsFswEntry& aEntry,
-        const TUid& aAppUid,
-        TBool& aChanged,
-        RTsFswArray& aNewList );
-
-    /**
-     * Adds running widgets to the list.
-     * @param   aWidgetsList    array to add to
-     */
-    void CollectWidgetsL( RTsFswArray& aWidgetsList );
-
-    /**
-     * Returns the parent's wg id or KErrNotFound.
-     * @param   aWgId   a valid window group id
-     * @return parent wg id or KErrNotFound if there is no parent
-     */
-    TInt FindParentWgId( TInt aWgId );
-
-    /**
-     * Returns the most top parent's wg id or KErrNotFound.
-     * @param   aWgId   a valid window group id
-     * @return parent wg id or KErrNotFound if there is no parent
-     */
-    TInt FindMostTopParentWgId( TInt aWgId );
+    TBool ConsiderOldDataL( const TTsEntryKey& key );
 
     /**
      * Finds out the application name.
-     * @param   aWindowName window group name or NULL
-     * @param   aAppUId     application uid
-     * @param   aWgId       window group id
+     * @param   windowName window group name or NULL
+     * @param   appUId     application uid
+     * @param   wgId       window group id
      * @return  application name, ownership transferred to caller
      */
-    HBufC* FindAppNameLC( CApaWindowGroupName* aWindowName,
-            	const TUid& aAppUid,
-				TInt aWgId );
+    HBufC* FindAppNameLC(CApaWindowGroupName* windowName,
+                         const TUid& appUid,
+                         TInt wgId );
 
 
     /**
@@ -197,60 +134,67 @@ private:
      * Data is being changed with application type consideration that is based 
      * on aConsiderWidgets param. 
      * Function removes or add entries into data depend on given list.
-     * @param   aListToFit          list with actual data 
-     * @param   aConsiderWidgets    application type 
+     * @param   listToFit          list with actual data  
      * @return  ETrue if change occours on data list, EFalse otherwise   
      */
-    TBool FitDataToListL( RTsFswArray& aListToFit, TBool aConsiderWidgets );
+    TBool FitDataToListL( RTsFswArray& listToFit);
 
     /**
      * Checks if there is an entry for same app in the given list.
-     * @param   aEntry      entry
-     * @param   aNewList    ref to list
+     * @param   entry      entry
+     * @param   newList    ref to list
      * @return  ETrue if app was found
      */
-    TBool CheckIfExists( const CTsFswEntry& aEntry,
-            const RTsFswArray& aNewList ) const;
+    TBool CheckIfExists( const CTsFswEntry& entry,
+            const RTsFswArray& newList ) const;
             
     /**
      * Retrieves the bitmap/mask for the icon of the given app.
-     * @param   aAppUid application uid
-     * @param   aBitmap bitmap ptr, ownership transferred to caller, or NULL
-     * @param   aMask   mask ptr, ownership transferred to caller, or NULL
+     * @param   appUid application uid
+     * @param   bitmapArg bitmap ptr, ownership transferred to caller, or NULL
+     * @param   maskArg   mask ptr, ownership transferred to caller, or NULL
      */
-    void GetAppIconL( const TUid& aAppUid,
-        CFbsBitmap*& aBitmap, CFbsBitmap*& aMask );            
+    void GetAppIconL(const TUid& appUid,
+                     CFbsBitmap*& bitmapArg, 
+                     CFbsBitmap*& maskArg);
+
+    /**
+     * Finds entry in array
+     * @param   list list to find
+     * @param   key finding key
+     * @return   position or KErrNotFound
+     */
+    TInt FindEntry(const RTsFswArray& list, const TTsEntryKey& key ) const;
+
+    /**
+     * Establish entry order accridung to aKeyList, all keys MUST be in iData
+     * @param   keyList reference key list
+     * @return   ETrue if changes occured
+     */
+    TBool EstablishOrder(const RArray<TTsEntryKey>& keyList);
+    
+    /**
+     * Gets allowed uids, tries to filter non GUI application 
+     */
+    void GetAllowedUidsL();
     
 
 private:
-    CTsFswEngine& iEngine;
-
-    RTsFswArray iData; // current fsw content, i.e. the task list
+    MHsDataObserver &mObserver;
+    
+    RTsFswArray mData; // current fsw content, i.e. the task list
 
     // window server session
-    RWsSession iWsSession;
+    RWsSession mWsSession;
 
     // apparc session
-    RApaLsSession iAppArcSession;
-
-
-
-
-    // when true CollectTasksL will call GetAllApps etc.
-    // which is slow and need not be done normally, except
-    // during startup and perhaps when new applications are installed
-    TBool iAppDataRefreshNeeded;
-
-    // Dirty flag, indicates that iData is not up-to-date because
-    // there were no subscribed clients during a previous possible
-    // change of the task list.
-    TBool iTaskListDirty;
-    
-    // if ETrue application order has been changed
-    TBool iOrderChanged;
+    RApaLsSession mAppArcSession;
     
     // list of hidden uids
-    RArray<TUid> iHiddenUids;
+    RArray<TUid> mHiddenUids;
+    
+    // list of allowed uids
+    RArray<TUid> mAllowedUids;
     };
 
 #endif //TSFSWDATALIST_H

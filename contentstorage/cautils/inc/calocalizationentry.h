@@ -100,7 +100,7 @@ public:
     IMPORT_C void SetRowId( TUint aRowId );
     
     /**
-
+      Sets localization id
      */
     IMPORT_C void SetTextId( TUint aId );
     
@@ -197,7 +197,7 @@ private:
     RBuf iLocalName;
     
     /*
-     * Translated string.
+     * Qm filename.
      * Own.
      */
     RBuf iQmFilename;

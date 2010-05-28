@@ -38,8 +38,7 @@
 //----------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------
-CaClientProxy::CaClientProxy():
-    mCommandHandler(new CaHandlerProxy(new CaQtSfHandlerLoader()))
+CaClientProxy::CaClientProxy()
 {
 }
 
@@ -161,20 +160,6 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
     TRAPD(error, getEntryIdsL(query, sourceIdList));
 
     USE_QDEBUG_IF(error) << "CaClientProxy::getEntryIds - Error ("
-                         << error << ")";
-
-    return CaObjectAdapter::convertErrorCode(error);
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
-                                        const QString &command)
-{
-    TInt error = mCommandHandler->execute(entry, command);
-
-    USE_QDEBUG_IF(error) << "CaClientProxy::executeCommand - Error ("
                          << error << ")";
 
     return CaObjectAdapter::convertErrorCode(error);

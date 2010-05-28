@@ -232,6 +232,24 @@ public:
     TPtrC GetServiceXml() const;
     
     /*
+    /*
+    * Localizes title and description, fill string id fields
+    */
+    void LocalizeTextsL();
+    
+    /*
+     * StringIdDescription time getter
+     * @return StringIdDescription
+     */
+    TPtrC GetStringIdDescription() const;
+    
+    /*
+     * StringIdTitle time getter
+     * @return widget StringIdTitle
+     */
+    TPtrC GetStringIdTitle() const;
+    
+     /*
      * Set manifest file path name.
      * @param aServiceXml Manifest file path name.
      */
@@ -242,8 +260,12 @@ public:
      * @return Manifest file path name.
      */
     TPtrC GetManifestFilePathName() const;
-private:
 
+    void SetStringIdDescriptionL( const TDesC& aStringIdDescription );
+
+    void SetStringidTitleL( const TDesC& aStringIdTitle );
+
+private:
     /*
      * Library name getter
      * @return libraru name
@@ -336,6 +358,14 @@ private:
      * Manifest file path name.
      */
     RBuf iManifestFilePathName;
+    /*
+     * Strign id of title
+     */
+    RBuf iStringIdTitle;
+    /*
+     * Strign id of description
+     */
+    RBuf iStringIdDescription;
     };
 
 typedef RPointerArray<CCaWidgetDescription> RWidgetArray;

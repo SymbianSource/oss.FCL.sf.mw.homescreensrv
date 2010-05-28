@@ -16,7 +16,7 @@
 */
 #include "tstask.h"
 
-#include <xqconversions>
+#include <XQConversions>
 
 #include "tsfswentry.h"
 
@@ -41,6 +41,11 @@ QPixmap TsTask::icon() const
     // @todo QPixmap::setAlphaChannel() is deprecated, change to code using QPainter
     pixmap.setAlphaChannel(mask);
     return pixmap;
+}
+
+QPixmap TsTask::screenshot() const
+{
+    return QPixmap::fromSymbianCFbsBitmap(mEntry->Screenshot());
 }
 
 QString TsTask::name() const

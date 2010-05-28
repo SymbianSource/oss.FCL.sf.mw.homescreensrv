@@ -43,13 +43,6 @@ public:
     static CFbsBitmap *copyBitmapLC(CFbsBitmap *input);
     
     /**
-     * Convert bitmap
-     * @param input bitmap.
-     * @return qPixmap.
-     */
-    static QPixmap fromSymbianCFbsBitmap(CFbsBitmap *aBitmap);
-    
-    /**
      * Convert from bitmap and mask to qpixmap
      * @param input bitmap.
      * @param pixmap to prepare.

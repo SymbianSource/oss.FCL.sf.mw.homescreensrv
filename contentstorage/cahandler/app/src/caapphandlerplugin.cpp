@@ -23,7 +23,6 @@
 #include "cahandlerloader.h"
 #include "caapphandler.h"
 #include "caapphandlerplugin.h"
-#include "cas60apphandleradapter.h"
 
 /*!
     \class CaAppHandlerPlugin
@@ -35,7 +34,7 @@
     \param descriptor Service descriptor.
     \param context Ignored.
     \param session Ignored.
-    \return An instance of the CaS60HandlerAdapter<CCaAppHandler> when descriptor interface name
+    \return An instance of the CaS60HandlerAdapter<CaAppHandler> when descriptor interface name
     is "com.nokia.homescreen.ICommandHandler", NULL otherwise.
 */
 QObject *CaAppHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &descriptor,
@@ -47,7 +46,7 @@ QObject *CaAppHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
 
     if (descriptor.interfaceName() ==
             "com.nokia.homescreen.ICommandHandler") {
-        return new CaS60AppHandlerAdapter();
+        return new CaAppHandler();
     } else {
         return 0;
     }

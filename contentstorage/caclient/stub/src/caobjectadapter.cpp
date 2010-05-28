@@ -60,3 +60,20 @@ void CaObjectAdapter::setId(CaIconDescription &iconDescription,
     iconDescription.setId(id);
 }
 
+//----------------------------------------------------------------------------
+//
+//----------------------------------------------------------------------------
+ErrorCode CaObjectAdapter::convertErrorCode(int internalErrorCode)
+{
+    ErrorCode error(NoErrorCode);
+    switch (internalErrorCode) {
+    case 0:
+        error = NoErrorCode;
+        break;
+    default:
+        error = UnknownErrorCode;
+        break;
+    }
+    return error;
+}
+

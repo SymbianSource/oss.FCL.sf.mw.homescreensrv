@@ -23,10 +23,9 @@
 
 #include "caentry.h"
 #include "catapphandler.h"
-#include "cainnerentry.h"
 #include "caclient_defines.h"
 
-_LIT(hsitemLaunchUri, "item:launchuri");
+static const QString hsitemLaunchUri("item:launchuri");
 
 QTM_USE_NAMESPACE
 
@@ -61,22 +60,27 @@ CaTappHandler::~CaTappHandler()
  \param command Description of the command.
  \return Error code described in QSERVICEMANAGER.H
  */
-int CaTappHandler::execute(CCaInnerEntry& innerEntry, const QString& command)
+int CaTappHandler::execute(const CaEntry& entry, const QString& command)
 {
-    int error = 0; // this returns Error enum from QSERVICEMANAGER.H
+    // this returns Error enum from QSERVICEMANAGER.H
+    int error = 0;
     if (command == caCmdOpen) {
-        TPtrC attribute;
-        innerEntry.FindAttribute(hsitemLaunchUri, attribute);
-
-        // e.g. QUrl url ("application://101F7AE7?");
-        QUrl url(QString::fromUtf16(attribute.Ptr(), attribute.Length()));
-        QScopedPointer<XQAiwRequest> request(mAiwMgr->create(url, false));
-        if (!request.isNull()) {
-            bool res = request->send();
-            if (!res) {
-                error = request->lastError();
+        QString attribute = entry.attribute(hsitemLaunchUri);
+        if (!attribute.isNull()) {
+            // e.g. QUrl("appto://101F7AE7?");
+            QScopedPointer<XQAiwRequest> request(mAiwMgr->create(QUrl(attribute),
+                false));
+            if (!request.isNull()) {
+                bool res = request->send();
+                if (!res) {
+                    error = request->lastError();
+                }
             }
         }
+    } else {
+        // TODO: error code cleanning and appropriate conversion (in other classes too).
+        static const int NotSupportedErrorCode = 100;
+        error = NotSupportedErrorCode;
     }
     return error;
 }

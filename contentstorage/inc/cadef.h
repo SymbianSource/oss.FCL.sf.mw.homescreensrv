@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.16 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: ou1s60ui#10.1.19 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -94,10 +94,16 @@ _LIT( KCaAttrAppWidgetServiceXml, "widget:servicexml");
 
 _LIT( KCaAttrAppWidgetUriCWRTValue, "wrtwidgetuiplugin");
 _LIT( KCaAttrAppWidgetParamWebAppId, "widgetparam:webAppId");
+_LIT( KCaScrPropertyAppId, "AppID");
+_LIT( KCaScrPropertyIsMiniviewSupported, "isMiniviewSupported");
 
 _LIT( KCaAppGroupName, "appgroup_name" );
 
 _LIT( KCollectionIconFileName, "qtg_large_applications_user");
+
+_LIT(KLocalizationFilepathZ, "z:/resource/qt/translations");
+_LIT(KLocalizationFilepathC, "c:/resource/qt/translations");
+_LIT(KLocalizationFilepath, ":/resource/qt/translations");
 
 const TInt KGranularityOne = 1;
 const TInt KUidChars = 10;
@@ -134,7 +140,7 @@ const TUid KMidletApplicationTypeUid =
 
 const TUid KCWRTApplicationTypeUid =
     {
-    0x200267DC
+    0x10282821 
     };
 
 const TInt KCenRepBufferSize = 255;

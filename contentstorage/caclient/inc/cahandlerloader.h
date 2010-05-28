@@ -14,24 +14,19 @@
  * Description:
  *
  */
-#ifndef CA_HANDLER_H
-#define CA_HANDLER_H
 
-#include <QObject>
-#include <cadefs.h>
-#include <caclient_global.h>
+#ifndef CAHANDLERLOADER_H
+#define CAHANDLERLOADER_H
 
-class CCaInnerEntry;
 class QString;
+class CaHandler;
 
-class CaHandler
+class CaHandlerLoader
 {
 public:
-    virtual ~CaHandler() {}
-    virtual int execute(CCaInnerEntry &innerEntry,
-                        const QString &commandName) = 0;
+    virtual ~CaHandlerLoader();
+    virtual CaHandler *loadHandler(const QString &entryTypeName,
+                                   const QString &commandName) = 0;
 };
 
-Q_DECLARE_INTERFACE(CaHandler, "com.nokia.homescreen.ICommandHandler")
-
-#endif
+#endif // CAHANDLERLOADER_H

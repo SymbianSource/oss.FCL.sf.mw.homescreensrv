@@ -40,8 +40,8 @@ symbian: {
 	
 	LIBS += -lxqservice \
             -lxqutils \
-            -lcautils
-#        -lhsutils
+            -lcautils \
+            -lcaclient
 
 }
 

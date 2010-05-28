@@ -40,7 +40,8 @@ LIBS += -leuser \
         -lbafl \
         -lestor \
         -lscrclient \
-        -lxqutils
+        -lxqutils \
+        -lPlatformEnv
         
 include(casoftwareregistry_s60.pri)
 }

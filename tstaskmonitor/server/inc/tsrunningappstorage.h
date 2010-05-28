@@ -21,8 +21,9 @@
 #include <e32std.h>
 #include <e32base.h>
 
-#include "hsdataobserver.h"
+#include "tsdataobserver.h"
 #include "hsdataprovider.h"
+#include "tsdatastorage.h"
 
 class CTsFswEngine;
 class CTsFswMonitor;
@@ -32,8 +33,8 @@ class CTsFswMonitor;
  */
 class CRunningAppStorage : public CBase,
                            public MHsDataProvider, 
-                           public MHsDataObserver
-                          
+                           public MHsDataObserver,
+                           public MTsDataStorage 
 {
 public:
     /**
@@ -51,6 +52,10 @@ public: //MHsDataObserver
     
     //MHsDataChangeProvider
     void DataChanged();
+    
+    void UpdateL(TInt key,const CFbsBitmap& data, TInt param, TInt priority);
+    
+    void RemoveL(TInt key, TInt param);
 
 private:
     /**

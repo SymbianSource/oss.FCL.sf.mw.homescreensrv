@@ -20,14 +20,14 @@
 #include "tstaskmonitorclient.h"
 #include "tstaskmonitorclientimpl.h"
 
-EXPORT_C CTsTaskMonitorClient *CTsTaskMonitorClient::NewL()
+CTsTaskMonitorClient *CTsTaskMonitorClient::NewL()
 {
     CTsTaskMonitorClient* self = NewLC();
     CleanupStack::Pop(self);
     return self;
 }
 
-EXPORT_C CTsTaskMonitorClient *CTsTaskMonitorClient::NewLC()
+CTsTaskMonitorClient *CTsTaskMonitorClient::NewLC()
 {
     CTsTaskMonitorClient* self = new (ELeave) CTsTaskMonitorClient;
     CleanupStack::PushL(self);
@@ -44,7 +44,7 @@ CTsTaskMonitorClient::CTsTaskMonitorClient()
 {
 }
 
-EXPORT_C CTsTaskMonitorClient::~CTsTaskMonitorClient()
+CTsTaskMonitorClient::~CTsTaskMonitorClient()
 {
     delete iImpl;
 }

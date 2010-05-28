@@ -22,6 +22,7 @@
 #include <usif/scr/scr.h>
 #include <usif/scr/screntries.h>
 #include <xqconversions.h>
+#include <driveinfo.h>
 
 #include "casoftwareregistry.h"
 #include "casoftwareregistry_p.h"
@@ -39,6 +40,9 @@ struct RClassDeleter
 
 typedef QScopedPointer<RSoftwareComponentRegistry, 
     RClassDeleter<RSoftwareComponentRegistry> > ScrScopedPointer;
+    
+typedef QScopedPointer<RFs, 
+    RClassDeleter<RFs> > RFSScopedPointer;
 /*!
  Constructor
  \param servicePublic Pointer to object of the public class.
@@ -67,7 +71,8 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
     CaSoftwareRegistry::DetailMap result;
 
     if (componentId >= 1) {
-        ScrScopedPointer scr(new RSoftwareComponentRegistry);
+        RSoftwareComponentRegistry softwareComponentRegistry;
+        ScrScopedPointer scr(&softwareComponentRegistry);
         QT_TRAP_THROWING(User::LeaveIfError(scr->Connect()));
         
         QScopedPointer<CComponentEntry> entry;
@@ -99,13 +104,52 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
         XQConversions::s60DescToQString(entry.Vendor());
         
     QString drives;
+    TChar drive;
+    
     const TInt driveListLen(entry.InstalledDrives().Length());
     for (TInt i( 0 ); i < driveListLen; ++i) {
         if (entry.InstalledDrives()[i] != '\0') {
+            
             if (!drives.isEmpty()) {
                 drives = drives.append(",");
-             }
-            drives = drives.append(QChar('A'+ i)).append(":");
+             }  
+            
+            if(DriveInfo::GetDefaultDrive(DriveInfo::EDefaultPhoneMemory, drive ) == KErrNone 
+                    && QChar('A'+ i) == QChar(drive))
+                {
+                drives = drives.append(QChar('A'+ i)).append(":").append(
+                        " txt_applib_dialog_1_device_memory");
+                }
+            else if(DriveInfo::GetDefaultDrive(DriveInfo::EDefaultMassStorage, drive ) == KErrNone 
+                    && QChar('A'+ i) == QChar(drive))
+                {
+                drives = drives.append(QChar('A'+ i)).append(":").append(
+                        " txt_applib_dialog_1_mass_storage");
+                }
+            else if(DriveInfo::GetDefaultDrive(DriveInfo::EDefaultRemovableMassStorage, drive ) == KErrNone 
+                    && QChar('A'+ i) == QChar(drive))
+                {
+                RFs fs;
+                RFSScopedPointer fSPointer(&fs);
+                qt_symbian_throwIfError(fs.Connect());
+
+                TInt driveNumber;
+                TVolumeInfo tv;
+                DriveInfo::GetDefaultDrive(DriveInfo::EDefaultRemovableMassStorage, driveNumber );
+                
+                qt_symbian_throwIfError(fs.Volume(tv, driveNumber));
+                if(tv.iName.Length()) {
+                    drives = drives.append(QChar('A'+ i)).append(": ").append(
+                                XQConversions::s60DescToQString(tv.iName));                
+                }
+                else {
+                    drives = drives.append(QChar('A'+ i)).append(":").append(
+                        " txt_applib_dialog_1_memory_card");                
+                }
+            }
+            else {
+                drives = drives.append(QChar('A'+ i)).append(":");   
+            }
         }
     }
     

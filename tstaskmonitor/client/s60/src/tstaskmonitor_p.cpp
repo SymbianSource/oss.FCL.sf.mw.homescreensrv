@@ -32,6 +32,7 @@ TsTaskMonitorPrivate::TsTaskMonitorPrivate(TsTaskMonitor *q) : q_ptr(q), mClient
 TsTaskMonitorPrivate::~TsTaskMonitorPrivate()
 {
     mClient->CancelSubscribe();
+    delete mClient;
 }
 
 QList< QSharedPointer<TsTask> > TsTaskMonitorPrivate::taskList()

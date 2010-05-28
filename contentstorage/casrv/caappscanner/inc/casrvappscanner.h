@@ -416,12 +416,10 @@ private:
     
     /**
      * Adds or updates component id attribute in entry based on SCR provided data
-     * @param appInfo application data carrying full path name of application file.
      * @param aEntry entry being updated with component id attribute.
      * @return ETrue when component id attribute of the entry has been added or changed.
      */
-    TBool UpdateComponentIdL( TApaAppInfo& appInfo, 
-        CCaInnerEntry& aEntry ) const;
+    TBool UpdateComponentIdL( CCaInnerEntry& aEntry ) const;
 
     /**
      * Schedule appscanner run.

@@ -18,10 +18,12 @@ TARGET          hsactivitydbserver.exe
 TARGETTYPE      exe
 UID             0 0x200267B4
 
-SYSTEMINCLUDE   /epoc32/include
+MW_LAYER_SYSTEMINCLUDE 
+APP_LAYER_SYSTEMINCLUDE 
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
+USERINCLUDE     ../../../../inc
 
 SOURCEPATH      ../src
 SOURCE          main.cpp
@@ -33,7 +35,6 @@ SOURCE          activitybroadcasttask.cpp
 SOURCE          activitystoragesynctask.cpp
 SOURCE          activitystorageasynctask.cpp
 SOURCE          activityobservertask.cpp
-SOURCE          activitygraphicfilescaling.cpp
 SOURCE          activitythumbnailtask.cpp
 
 LIBRARY        euser.lib 
@@ -44,6 +45,7 @@ LIBRARY        bafl.lib
 LIBRARY        fbscli.lib
 LIBRARY        bitmaptransforms.lib
 LIBRARY        imageconversion.lib
+LIBRARY        tsutils.lib
 
 CAPABILITY     ALL -TCB
 EPOCHEAPSIZE   0x100000 0x600000 // 1MB - 6MB

@@ -21,15 +21,16 @@
 // -----------------------------------------------------------------------------
 //
 CTsGraphicFileScalingHandler::CTsGraphicFileScalingHandler(MImageReadyCallBack &aNotify,
-                            const TSize &aNewSize,
-                            TKindOfScaling aKindOfScaling
-                            /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/) :
+                                const TSize &aNewSize,
+                                TKindOfScaling aKindOfScaling
+                                /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/) :
     CActive(EPriorityNormal),
     mNotify(aNotify),
     mNewSize(aNewSize),
     mKindOfScaling(aKindOfScaling),
     mCurrentOperation(ENone)
 {
+    CActiveScheduler::Add(this);
 }
 
 // -----------------------------------------------------------------------------
@@ -38,8 +39,8 @@ CTsGraphicFileScalingHandler::CTsGraphicFileScalingHandler(MImageReadyCallBack &
 EXPORT_C CTsGraphicFileScalingHandler::~CTsGraphicFileScalingHandler()
 {
     Cancel();
-    delete mBitmapFromFile;
-    delete mBitmapOutput;
+    delete mInputBitmap;
+    delete mOutputBitmap;
     delete mImageDecoder;
     delete mBitmapScaler;
 }
@@ -48,19 +49,19 @@ EXPORT_C CTsGraphicFileScalingHandler::~CTsGraphicFileScalingHandler()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CTsGraphicFileScalingHandler* CTsGraphicFileScalingHandler::NewL(MImageReadyCallBack &aNotify,
-                                RFs &aFs,
-                                const TDesC &aFileName,
-                                const TDesC8& aMimeType,
-                                const TSize &aNewSize,
-                                TKindOfScaling aKindOfScaling
-                                /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/)
+                                                RFs &aFs,
+                                                const TDesC &aFileName,
+                                                const TDesC8& aMimeType,
+                                                const TSize &aNewSize,
+                                                TKindOfScaling aKindOfScaling
+                                                /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/)
 {
     CTsGraphicFileScalingHandler *self = CTsGraphicFileScalingHandler::NewLC(aNotify,
-                                                                 aFs,
-                                                                 aFileName,
-                                                                 aMimeType,
-                                                                 aNewSize,
-                                                                 aKindOfScaling);
+                                                                        aFs,
+                                                                        aFileName,
+                                                                        aMimeType,
+                                                                        aNewSize,
+                                                                        aKindOfScaling);
     CleanupStack::Pop();
     return self;
 }
@@ -69,16 +70,16 @@ EXPORT_C CTsGraphicFileScalingHandler* CTsGraphicFileScalingHandler::NewL(MImage
 // -----------------------------------------------------------------------------
 //
 EXPORT_C CTsGraphicFileScalingHandler* CTsGraphicFileScalingHandler::NewLC(MImageReadyCallBack &aNotify,
-                                RFs &aFs,
-                                const TDesC &aFileName,
-                                const TDesC8& aMimeType,
-                                const TSize &aNewSize,
-                                TKindOfScaling aKindOfScaling
-                                /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/)
+                                                RFs &aFs,
+                                                const TDesC &aFileName,
+                                                const TDesC8& aMimeType,
+                                                const TSize &aNewSize,
+                                                TKindOfScaling aKindOfScaling
+                                                /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/)
 {
     CTsGraphicFileScalingHandler *self = new (ELeave) CTsGraphicFileScalingHandler(aNotify,
-                                                                       aNewSize,
-                                                                       aKindOfScaling);
+                                                                                aNewSize,
+                                                                                aKindOfScaling);
 
     CleanupStack::PushL(self);
     self->ConstructL(aFs, aFileName, aMimeType);
@@ -99,24 +100,63 @@ void CTsGraphicFileScalingHandler::ConstructL(RFs &aFs, const TDesC &aFileName, 
         User::Leave(KErrBadName);
     }
 
-    if(0>=mNewSize.iWidth || 0>=mNewSize.iHeight) {
+    if (0>=mNewSize.iWidth || 0>=mNewSize.iHeight) {
        User::Leave(KErrCorrupt);
     }
 
-    CActiveScheduler::Add(this);
+    mInputBitmap = new(ELeave)CFbsBitmap();
+    DecodingOperationL(aFs, aFileName, aMimeType);
+    SetActive();
+}
 
-    mBitmapScaler = CBitmapScaler::NewL();
-    mBitmapScaler->SetQualityAlgorithm(CBitmapScaler::EMaximumQuality);
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+EXPORT_C CTsGraphicFileScalingHandler* CTsGraphicFileScalingHandler::NewL(MImageReadyCallBack &aNotify,
+                                        const CFbsBitmap &aImputFbsBitmap,
+                                        const TSize &aNewSize,
+                                        TKindOfScaling aKindOfScaling
+                                        /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/)
+{
+    CTsGraphicFileScalingHandler *self = CTsGraphicFileScalingHandler::NewLC(aNotify,
+                                                                        aImputFbsBitmap,
+                                                                        aNewSize,
+                                                                        aKindOfScaling);
+    CleanupStack::Pop();
+    return self;
+}
 
-    // convert *.png to bitmap
-    mImageDecoder = CImageDecoder::FileNewL(aFs, aFileName, aMimeType);
-    mBitmapFromFile = new(ELeave)CFbsBitmap();
-    const TFrameInfo frameInfo(mImageDecoder->FrameInfo(0));
-    User::LeaveIfError(mBitmapFromFile->Create(frameInfo.iOverallSizeInPixels, 
-                                               frameInfo.iFrameDisplayMode));
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+EXPORT_C CTsGraphicFileScalingHandler* CTsGraphicFileScalingHandler::NewLC(MImageReadyCallBack &aNotify,
+                                                const CFbsBitmap &aImputFbsBitmap,
+                                                const TSize &aNewSize,
+                                                TKindOfScaling aKindOfScaling
+                                                /* = CTsGraphicFileScalingHandler::EIgnoreAspectRatio*/)
+{
+    CTsGraphicFileScalingHandler *self = new (ELeave) CTsGraphicFileScalingHandler(aNotify,
+                                                                                aNewSize,
+                                                                                aKindOfScaling);
 
-    mImageDecoder->Convert(&iStatus, *mBitmapFromFile, 0);
-    mCurrentOperation = EConvertBitmapFromFile;
+    CleanupStack::PushL(self);
+    self->ConstructL(aImputFbsBitmap);
+    return self;
+}
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void CTsGraphicFileScalingHandler::ConstructL(const CFbsBitmap &aImputFbsBitmap)
+{
+    if (0>=mNewSize.iWidth || 0>=mNewSize.iHeight) {
+       User::Leave(KErrCorrupt);
+    }
+
+    mInputBitmap = new(ELeave)CFbsBitmap();
+    User::LeaveIfError(mInputBitmap->Duplicate(aImputFbsBitmap.Handle()));
+
+    ScalingOperationL();
     SetActive();
 }
 
@@ -147,11 +187,8 @@ void CTsGraphicFileScalingHandler::RunL()
     case EConvertBitmapFromFile: {
             delete mImageDecoder;
             mImageDecoder = 0;
-            
-            mBitmapOutput = new (ELeave)CFbsBitmap();
-            User::LeaveIfError(mBitmapOutput->Create(Scaling(), mBitmapFromFile->DisplayMode()));
-            mBitmapScaler->Scale(&iStatus, *mBitmapFromFile, *mBitmapOutput, EFalse);
-            mCurrentOperation = EScale;
+
+            ScalingOperationL();
             SetActive();
             break;
         }
@@ -161,14 +198,14 @@ void CTsGraphicFileScalingHandler::RunL()
             delete mBitmapScaler;
             mBitmapScaler = 0;
             
-            delete mBitmapFromFile;
-            mBitmapFromFile = 0;
+            delete mInputBitmap;
+            mInputBitmap = 0;
 
             if (mKindOfScaling == CTsGraphicFileScalingHandler::EKeepAspectRatioByExpanding) {
-                User::LeaveIfError(mBitmapOutput->Resize(mNewSize));
+                User::LeaveIfError(mOutputBitmap->Resize(mNewSize));
             }
 
-            mNotify.ImageReadyCallBack(iStatus.Int(), mBitmapOutput);
+            mNotify.ImageReadyCallBack(iStatus.Int(), mOutputBitmap);
             break;
         }
     }
@@ -177,9 +214,51 @@ void CTsGraphicFileScalingHandler::RunL()
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 //
-TSize CTsGraphicFileScalingHandler::Scaling()
+void CTsGraphicFileScalingHandler::DecodingOperationL(RFs &aFs, const TDesC &aFileName, const TDesC8& aMimeType)
 {
-   TSize originalSize = mBitmapFromFile->SizeInPixels();
+    // convert *.png to bitmap
+    mImageDecoder = CImageDecoder::FileNewL(aFs, aFileName, aMimeType);
+    const TFrameInfo frameInfo(mImageDecoder->FrameInfo(0));
+    mInputBitmap->Reset();
+    User::LeaveIfError(mInputBitmap->Create(frameInfo.iOverallSizeInPixels, 
+                                               frameInfo.iFrameDisplayMode));
+
+    mImageDecoder->Convert(&iStatus, *mInputBitmap, 0);
+    mCurrentOperation = EConvertBitmapFromFile;
+}
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void CTsGraphicFileScalingHandler::ScalingOperationL()
+{
+    mBitmapScaler = CBitmapScaler::NewL();
+    mBitmapScaler->SetQualityAlgorithm(CBitmapScaler::EMaximumQuality);
+
+    FixForDisplayModeNotSupportedByScalingOperation();
+
+    mOutputBitmap = new (ELeave)CFbsBitmap();
+    User::LeaveIfError(mOutputBitmap->Create(NewSizeToScalingOperation(), mInputBitmap->DisplayMode()));
+    mBitmapScaler->Scale(&iStatus, *mInputBitmap, *mOutputBitmap, EFalse);
+    mCurrentOperation = EScale;
+}
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+void CTsGraphicFileScalingHandler::FixForDisplayModeNotSupportedByScalingOperation()
+{
+    if (EColor16MAP == mInputBitmap->DisplayMode()) {
+        mInputBitmap->SetDisplayMode(EColor16MA);
+    }
+}
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+//
+TSize CTsGraphicFileScalingHandler::NewSizeToScalingOperation()
+{
+   TSize originalSize = mInputBitmap->SizeInPixels();
    float widthFactor = mNewSize.iWidth / (float)originalSize.iWidth;
    float heightFactor = mNewSize.iHeight / (float)originalSize.iHeight;
 

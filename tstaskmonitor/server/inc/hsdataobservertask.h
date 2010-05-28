@@ -16,7 +16,7 @@
 */
 #ifndef DATAOBSERVERTASK_H
 #define DATAOBSERVERTASK_H
-#include "hsdataobserver.h"
+#include "tsdataobserver.h"
 #include <e32base.h>
 class CHsDataObserverTask: public CHsDataObserver
 {

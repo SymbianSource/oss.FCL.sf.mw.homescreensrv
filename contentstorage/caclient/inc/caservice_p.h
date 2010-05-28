@@ -27,6 +27,7 @@ class CaQuery;
 class CaService;
 class CaNotifier;
 class CaClientNotifierProxy;
+class CaHandlerProxy;
 
 class CaServicePrivate
 {
@@ -68,6 +69,9 @@ public:
 private:
 
     CaService *const m_q;
+
+    // Command handler.
+    QSharedPointer<CaHandlerProxy> mCommandHandler;
 
     CaClientProxy *mProxy;
  

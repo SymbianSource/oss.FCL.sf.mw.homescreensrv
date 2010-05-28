@@ -58,5 +58,3 @@ LIBRARY         efsrv.lib
 LIBRARY         sisregistryclient.lib
 LIBRARY         platformenv.lib
 LIBRARY         scrclient.lib
-// temporary till cWRT will be in SCR
-LIBRARY         WidgetRegistryClient.lib

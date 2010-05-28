@@ -130,16 +130,6 @@ public:
                           QList<int> &sourceIdList);
 
     /**
-     * Method for executing command
-     *
-     * @param entry entry on wchich command will be executed
-     * @param command command to execute
-     * @return error code
-     */
-    ErrorCode executeCommand(const CaEntry &entry,
-                             const QString &command);
-
-    /**
      * Method for touching entry.
      *
      * @param aEntry entry to touch
@@ -234,9 +224,6 @@ private:
     // Session to server.
     // Own.
     RCaClientSession mSession;
-
-    // Command handler.
-    QSharedPointer<CaHandlerProxy> mCommandHandler;
 
     // Mutex to serialize access to mSessions.
     QMutex mMutex;

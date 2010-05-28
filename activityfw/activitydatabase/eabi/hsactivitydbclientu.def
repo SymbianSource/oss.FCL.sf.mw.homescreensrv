@@ -35,4 +35,8 @@ EXPORTS
 	_ZThn8_N18HsActivityDbClient14updateActivityERK5QHashI7QString8QVariantE @ 34 NONAME
 	_ZThn8_N18HsActivityDbClient21applicationActivitiesER5QListI5QHashI7QString8QVariantEERKS4_ @ 35 NONAME
 	_ZThn8_N18HsActivityDbClient27removeApplicationActivitiesERK5QHashI7QString8QVariantE @ 36 NONAME
+	_ZN18HsActivityDbClient11dataChangedEv @ 37 NONAME
+	_ZN18HsActivityDbClient16notifyDataChangeEv @ 38 NONAME
+	_ZN18HsActivityDbClient22asyncRequestCompleatedEii @ 39 NONAME
+	_ZThn12_N18HsActivityDbClient22asyncRequestCompleatedEii @ 40 NONAME
 

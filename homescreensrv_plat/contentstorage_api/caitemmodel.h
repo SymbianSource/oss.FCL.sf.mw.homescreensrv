@@ -81,6 +81,7 @@ public:
 
     void scrollTo(int row, QAbstractItemView::ScrollHint hint =
         QAbstractItemView::EnsureVisible);
+    void empty(bool value);
 
 protected:
     // data

@@ -20,6 +20,11 @@
 file=ABI_DIR\BUILD_DIR\tstaskmonitorclient.dll              SHARED_LIB_DIR\tstaskmonitorclient.dll
 file=ABI_DIR\BUILD_DIR\hsrunningappmonitor.exe              PROGRAMS_DIR\hsrunningappmonitor.exe
 
+file=ABI_DIR\BUILD_DIR\tsbackstepping.dll                   SHARED_LIB_DIR\tsbackstepping.dll
+
+
+ECOM_PLUGIN( tsscreenshotplugin.dll, tsscreenshotplugin.rsc )
+
 // stub sis
 data=ZSYSTEM/install/taskmonitor_stub.sis                  system/install/taskmonitor_stub.sis
 

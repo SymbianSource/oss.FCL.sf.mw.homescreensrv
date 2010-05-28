@@ -17,11 +17,14 @@
 TEMPLATE = subdirs
 
 CONFIG += ordered
-
-symbian {
-    SUBDIRS += server
-}
-
 SUBDIRS += client
+symbian {
+    SUBDIRS += backstepping \
+               server \
+               screenshotplugin
+               
+    BLD_INF_RULES.prj_exports +=    "inc\tstaskmonitorglobals.h"
+    
+}
 
 symbian:include(rom.pri)

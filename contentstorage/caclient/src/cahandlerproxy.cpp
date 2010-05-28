@@ -16,10 +16,10 @@
  */
 
 #include <caentry.h>
+
 #include "cahandler.h"
 #include "cahandlerproxy.h"
 #include "cahandlerloader.h"
-#include "cainnerentry.h"
 #include "caobjectadapter.h"
 
 /*!
@@ -42,7 +42,7 @@ CaHandlerProxy::~CaHandlerProxy()
   Constructs handler proxy.
   \param loader Provides handler implementations. It has to be pointer to a valid object.
 */
-CaHandlerProxy::CaHandlerProxy(CaHandlerLoader *loader):
+CaHandlerProxy::CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader):
     mLoader(loader)
 {
     Q_ASSERT(!mLoader.isNull());
@@ -55,21 +55,14 @@ CaHandlerProxy::CaHandlerProxy(CaHandlerLoader *loader):
   \return KErrNone (i.e. 0) on succes, error code otherwise.
   \sa e32err.h for KErrNone definition.
 */
-TInt CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName)
+ErrorCode CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName)
 {
     CaHandler *const handler = getHandler(entry, commandName);
+    ErrorCode result = NotFoundErrorCode;
 
-    TInt result = KErrNotFound;
-
-    if (handler != NULL) {
-        QScopedPointer<CCaInnerEntry> innerEntry(NULL);
-        TRAP(result,
-            innerEntry.reset(CCaInnerEntry::NewL());
-            CaObjectAdapter::convertL(entry, *innerEntry);
-            )
-        if (result == KErrNone) {
-            result = handler->execute(*innerEntry, commandName);
-        }
+    if (handler) {
+            result = CaObjectAdapter::convertErrorCode(
+                handler->execute(entry, commandName));
     }
     return result;
 }

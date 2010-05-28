@@ -53,6 +53,10 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
     if (icon.isNull() || !(icon.size().isValid())) {
         icon = HbIcon(QDir(".").absoluteFilePath("resource/application.png"));
     }
+    if (entry.entryTypeName() == "widget") {
+        icon.addBadge(Qt::AlignBottom | Qt::AlignLeft,
+                    HbIcon("qtg_small_homescreen"));
+    }
     return icon;
 }
 

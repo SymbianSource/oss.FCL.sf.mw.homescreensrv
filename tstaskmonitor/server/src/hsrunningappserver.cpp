@@ -18,6 +18,8 @@
 #include "hsrunningappserver.h"
 #include "hsrunningappsession.h"
 #include "tsrunningappstorage.h"
+#include "tsscreenshotprovider.h"
+#include "tsbackstepping.h"
 
 _LIT(KErrObserverExists, "Observer already exists");
 // -----------------------------------------------------------------------------
@@ -37,6 +39,8 @@ CServer2(EPriorityStandard)
 //
 CRunningAppServer::~CRunningAppServer()
 {
+    delete mBacksteppingEngine;
+    delete mScreenshotProviderStarter;
     delete mStorage;
     mObservers.ResetAndDestroy();
 }
@@ -60,7 +64,10 @@ CRunningAppServer* CRunningAppServer::NewLC()
 void CRunningAppServer::ConstructL()
 {
     StartL(KRunningAppServerName);
+    User::LeaveIfError(mWsSession.Connect());
     mStorage = CRunningAppStorage::NewL(*this);
+    TRAP_IGNORE(mScreenshotProviderStarter = CTsScreenshotProvider::NewL(*mStorage);
+    mBacksteppingEngine = CTsBackstepping::NewL(mWsSession);)
 }
 
 // -----------------------------------------------------------------------------
@@ -70,6 +77,7 @@ void CRunningAppServer::ConstructL()
 CSession2* CRunningAppServer::NewSessionL(const TVersion &, const RMessage2&) const
 {
     return CRunningAppSession::NewL(*const_cast<CRunningAppServer *>(this),
+                                    *const_cast<CRunningAppServer *>(this)->mStorage,
                                     *const_cast<CRunningAppServer *>(this)->mStorage);
 }
 

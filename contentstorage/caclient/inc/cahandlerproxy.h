@@ -15,13 +15,13 @@
  *
  */
 
-#ifndef CA_HANDLER_PROXY_H
-#define CA_HANDLER_PROXY_H
+#ifndef CAHANDLERPROXY_H
+#define CAHANDLERPROXY_H
 
-#include <e32def.h>
 #include <QMap>
 #include <QString>
 #include <QSharedPointer>
+
 #include <cadefs.h>
 
 #include "cahandlerloader.h"
@@ -34,9 +34,9 @@ public:
 
     ~CaHandlerProxy();
 
-    explicit CaHandlerProxy(CaHandlerLoader *loader);
+    explicit CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader);
 
-    TInt execute(const CaEntry &entry, const QString &commandName);
+    ErrorCode execute(const CaEntry &entry, const QString &commandName);
 
 private:
     CaHandler *getHandler(const CaEntry &entry,
@@ -49,4 +49,4 @@ private:
     ImplementationMap mImplementationMap;
 };
 
-#endif
+#endif // CAHANDLERPROXY_H

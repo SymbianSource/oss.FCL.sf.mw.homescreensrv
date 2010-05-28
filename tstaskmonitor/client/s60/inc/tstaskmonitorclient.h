@@ -27,9 +27,9 @@ class CTsTaskMonitorClientImpl;
 NONSHARABLE_CLASS( CTsTaskMonitorClient ) : public CBase
 {
 public:
-    IMPORT_C static CTsTaskMonitorClient* NewL();
-    IMPORT_C static CTsTaskMonitorClient* NewLC();
-    IMPORT_C ~CTsTaskMonitorClient();
+    static CTsTaskMonitorClient* NewL();
+    static CTsTaskMonitorClient* NewLC();
+    ~CTsTaskMonitorClient();
 
 public:
     void TaskListL(RTsFswArray& tasks);

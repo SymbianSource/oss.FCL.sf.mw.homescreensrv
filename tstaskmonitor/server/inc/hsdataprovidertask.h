@@ -14,8 +14,8 @@
 * Description:
 *
 */
-#ifndef DATAPROVIDER_H
-#define DATAPROVIDER_H
+#ifndef DATAPROVIDERTASK_H
+#define DATAPROVIDERTASK_H
 
 #include "hsdataprovider.h"
 

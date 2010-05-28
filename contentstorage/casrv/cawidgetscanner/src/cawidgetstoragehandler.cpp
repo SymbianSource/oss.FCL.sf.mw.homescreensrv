@@ -25,8 +25,13 @@
 #include "cainnerquery.h"
 #include "castorageproxy.h"
 #include "caarraycleanup.inl"
+#include "calocalizationentry.h"
+
+#include "cawidgetscannerdef.h"
+
 
 using namespace Usif;
+
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -112,6 +117,9 @@ void CCaWidgetStorageHandler::AddL( const CCaWidgetDescription* aWidget )
     CCaInnerEntry* entry = aWidget->GetEntryLC();
     UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
     iStorage->AddL( entry );
+
+    SetLocalizationsL( aWidget, entry->GetId() );
+    
     if( entry->GetFlags() & ERemovable )
         {
         AddWidgetToDownloadCollectionL( entry );
@@ -141,6 +149,9 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
         }
     entry->SetFlags( entry->GetFlags() & ~EMissing | EVisible );
     iStorage->AddL( entry, EFalse, itemAppearanceChange );
+    
+    SetLocalizationsL( aWidget, entry->GetId() );
+    
     if( !aWidget->IsMissing() )
         {
         AddWidgetToDownloadCollectionL( entry );
@@ -157,6 +168,7 @@ void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
     iUpdatedIndexes.Reset();
     for( TInt i = 0; i < aWidgets.Count(); i++ )
         {
+        aWidgets[i]->LocalizeTextsL();
         TInt index = iWidgets.Find(
                 aWidgets[i], CCaWidgetDescription::Compare );
         if( index != KErrNotFound )
@@ -211,7 +223,10 @@ void CCaWidgetStorageHandler::RemoveWidgetsL()
             else
                 {
                 //item was uninstalled so we remove its mmc id
-                ClearVisibleFlagL( iWidgets[i] );
+                if ( iWidgets[i]->IsVisible() )
+                    {
+                    ClearVisibleFlagL( iWidgets[i] );
+                    }
                 }
             }
         }
@@ -269,6 +284,7 @@ void CCaWidgetStorageHandler::FetchWidgetsL()
     RPointerArray<CCaInnerEntry> entries;
     CleanupResetAndDestroyPushL( entries );
     iStorage->GetEntriesL( query, entries );
+       
     iWidgets.ResetAndDestroy();
     for( TInt i = 0; i < entries.Count(); i++ )
         {
@@ -308,13 +324,10 @@ void CCaWidgetStorageHandler::SetMissingFlagL(
 void CCaWidgetStorageHandler::ClearVisibleFlagL(
         const CCaWidgetDescription* aWidget )
     {
-    if( aWidget->IsVisible() )
-        {
-        CCaInnerEntry* entry = aWidget->GetEntryLC();
-        entry->SetFlags( entry->GetFlags() & ~EVisible & ~EMissing & ~EUsed );
-        iStorage->AddL( entry, EFalse, EItemDisappeared );
-        CleanupStack::PopAndDestroy( entry );
-        }
+    CCaInnerEntry* entry = aWidget->GetEntryLC();
+    entry->SetFlags( entry->GetFlags() & ~EVisible & ~EMissing & ~EUsed );
+    iStorage->AddL( entry, EFalse, EItemDisappeared );
+    CleanupStack::PopAndDestroy( entry );
     }
 
 // ----------------------------------------------------------------------------
@@ -336,6 +349,52 @@ TBool CCaWidgetStorageHandler::MassStorageNotInUse()
             }
         }
     return massStorageNotInUse;
+    }
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+
+void CCaWidgetStorageHandler::SetLocalizationsL(  const CCaWidgetDescription* aWidget,
+        TInt aEntryId  )
+    {
+    RBuf filename;
+    filename.Create( aWidget->GetUri().Length() + 1 ); //1 for _
+    CleanupClosePushL( filename );
+    filename.Copy( aWidget->GetUri() );
+    filename.Append( KWidgetScannerUnderline );
+    
+    // prepare localizations
+    if ( aWidget->GetTitle().Length() > 0 &&
+            aWidget->GetTitle().Compare( aWidget->GetStringIdTitle() ) )
+        // lets do not add localization when key and value are identical
+        {
+        CCaLocalizationEntry* titleEntry = CCaLocalizationEntry::NewL();
+        CleanupStack::PushL( titleEntry );
+        titleEntry->SetTableNameL( KWidgetScannerCaEntry );
+        titleEntry->SetAttributeNameL( KWidgetScannerEnText );
+        titleEntry->SetStringIdL( aWidget->GetStringIdTitle() );
+        titleEntry->SetQmFilenameL( filename );
+        titleEntry->SetRowId( aEntryId );
+        iStorage->AddLocalizationL( *titleEntry );
+        CleanupStack::PopAndDestroy( titleEntry );
+        }
+    if ( aWidget->GetDescription().Length() > 0 &&
+            aWidget->GetDescription().Compare(
+                    aWidget->GetStringIdDescription() ) )
+        // lets do not add localization when key and value are identical
+        {
+        CCaLocalizationEntry* descEntry = CCaLocalizationEntry::NewL();
+        CleanupStack::PushL( descEntry );
+        descEntry->SetTableNameL( KWidgetScannerCaEntry );
+        descEntry->SetAttributeNameL( KWidgetScannerEnDescription );
+        descEntry->SetStringIdL( aWidget->GetStringIdDescription() );
+        descEntry->SetQmFilenameL( filename );
+        descEntry->SetRowId( aEntryId );
+        iStorage->AddLocalizationL( *descEntry );
+        CleanupStack::PopAndDestroy( descEntry );
+        }
+    CleanupStack::PopAndDestroy( &filename );
     }
 
 // ----------------------------------------------------------------------------

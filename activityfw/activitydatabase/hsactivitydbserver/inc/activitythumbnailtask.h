@@ -27,7 +27,7 @@
 
 #include "activitytask.h"
 #include "activitytaskstorage.h"
-#include "activitygraphicfilescaling.h"
+#include "tsgraphicfilescalinghandler.h"
 
 class CFbsBitmap;
 

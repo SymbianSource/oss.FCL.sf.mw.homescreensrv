@@ -19,16 +19,19 @@
 
 #include "hsdataobservertask.h"
 #include "hsdataprovidertask.h"
+#include "tsdatatask.h"
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 CRunningAppSession::CRunningAppSession(MHsDataObserverStorage& observerStorage,
-                                       const MHsDataProvider& dataProvider)
+                                       const MHsDataProvider& dataProvider,
+                                       MTsDataStorage& dataStorage)
 :
     mObserverStorage(observerStorage),
-    mDataProvider(dataProvider)
+    mDataProvider(dataProvider),
+    mDataStorage(dataStorage)
 {
     // No implementation required
 }
@@ -46,9 +49,12 @@ CRunningAppSession::~CRunningAppSession()
 // -----------------------------------------------------------------------------
 //
 CRunningAppSession* CRunningAppSession::NewL(MHsDataObserverStorage& observerStorage, 
-                                             const MHsDataProvider& dataProvider)
+                                             const MHsDataProvider& dataProvider,
+                                             MTsDataStorage& dataStorage)
 {
-    CRunningAppSession* self = new (ELeave) CRunningAppSession(observerStorage, dataProvider);
+    CRunningAppSession* self = new (ELeave) CRunningAppSession(observerStorage, 
+                                                               dataProvider,
+                                                               dataStorage);
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
@@ -81,6 +87,11 @@ void CRunningAppSession::ServiceL(const RMessage2& message)
     case GetRunningAppInfo:
     case FlushData:
         HsDataProviderTask::ExecuteL(mDataProvider, message);
+        break;
+        
+    case RegisterScreenshotMessage:
+    case UnregisterScreenshotMessage:
+        TsDataTask::ExecuteL(mDataStorage, message);
         break;
     
     default:

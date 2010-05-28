@@ -22,11 +22,9 @@
 #include "cawidgetdescription.h"
 #include "cainnerentry.h"
 #include "widgetscannerutils.h"
+#include "hbtextresolversymbian.h"
 
-// CONST
-const TInt KNoId = -1;
-_LIT( KDoubleSlash, "\\" );
-
+#include "cawidgetscannerdef.h"
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -143,6 +141,8 @@ CCaWidgetDescription::~CCaWidgetDescription()
     iMmcId.Close();
     iServiceXml.Close();
     iManifestFilePathName.Close();
+    iStringIdTitle.Close();
+    iStringIdDescription.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -311,6 +311,26 @@ void CCaWidgetDescription::SetModificationTimeL( const TDesC& aModificationTime 
 //
 // -----------------------------------------------------------------------------
 //
+void CCaWidgetDescription::SetStringIdDescriptionL( const TDesC& aStringIdDescription )
+    {
+    iStringIdDescription.Close();
+    iStringIdDescription.CreateL( aStringIdDescription );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetStringidTitleL( const TDesC& aStringIdTitle )
+    {
+    iStringIdTitle.Close();
+    iStringIdTitle.CreateL( aStringIdTitle );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TInt CCaWidgetDescription::GetEntryId( ) const
     {
     return iEntryId;
@@ -325,6 +345,24 @@ TPtrC CCaWidgetDescription::GetMmcId( ) const
     return iMmcId;
     }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetStringIdDescription() const
+    {
+    return iStringIdDescription;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+
+TPtrC CCaWidgetDescription::GetStringIdTitle() const
+    {
+    return iStringIdTitle;
+    }
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -552,6 +590,74 @@ TPtrC CCaWidgetDescription::GetServiceXml() const
     {
     return iServiceXml;
     }
+
+void CCaWidgetDescription::LocalizeTextsL()
+	{
+    
+    
+	if( iUri.Length() )
+		{
+	    RBuf uri;
+	    uri.Create( iUri.Length() + 1 );
+	    CleanupClosePushL( uri );
+	    uri.Copy( iUri );
+	    uri.Append( KWidgetScannerUnderline );
+	       
+	    
+	    if( !HbTextResolverSymbian::Init( uri, KLocalizationFilepathC ) )
+	      {
+	      if( !HbTextResolverSymbian::Init( uri, KLocalizationFilepathZ ) )
+	          {
+	          // this should not be called too often 
+              TChar currentDriveLetter;
+	          TDriveList driveList;
+	          RFs fs;
+	          User::LeaveIfError( fs.Connect() );
+	          User::LeaveIfError( fs.DriveList( driveList ) );
+
+	          RBuf path;
+	          path.Create( KLocalizationFilepath().Length() + 1 );
+	          CleanupClosePushL( path );
+	          
+  	          for ( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
+	              {
+	              if ( driveList[driveNr] )
+	                  {
+	                  User::LeaveIfError( fs.DriveToChar( driveNr,
+	                          currentDriveLetter ) );
+	                  path.Append( currentDriveLetter );
+	                  path.Append( KLocalizationFilepath );
+	                  if( HbTextResolverSymbian::Init( uri, path ) )
+	                      {
+	                      break;
+	                      }
+	                  }
+	              path.Zero();
+	              }
+  	          CleanupStack::PopAndDestroy( &path );
+  	          fs.Close();
+	          }
+	       }
+	    
+	    HBufC* tmp;
+	    
+	    if( iTitle.Length() )
+	    	{
+	        SetStringidTitleL( iTitle );
+	        tmp = HbTextResolverSymbian::LoadLC( iTitle );
+	        SetTitleL( *tmp );
+	        CleanupStack::PopAndDestroy( tmp );
+	    	}
+	    if( iDescription.Length() )
+	    	{
+	        SetStringIdDescriptionL( iDescription );
+	        tmp = HbTextResolverSymbian::LoadLC( iDescription );
+	        SetDescriptionL( *tmp );
+	        CleanupStack::PopAndDestroy( tmp );
+	    	}
+	    CleanupStack::PopAndDestroy( &uri );
+		}
+	}
 
 /*
  * Set manifest file path name

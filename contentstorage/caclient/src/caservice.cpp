@@ -30,6 +30,8 @@
 
 #include "caclientproxy.h"
 #include "caclientnotifierproxy.h"
+#include "cahandlerproxy.h"
+#include "caqtsfhandlerloader.h"
 #include "caobjectadapter.h"
 #include "caclienttest_global.h"
 
@@ -89,7 +91,6 @@ QWeakPointer<CaService> CaService::m_instance = QWeakPointer<CaService>();
 CaService::CaService(QObject *parent) :
     QObject(parent), m_d(new CaServicePrivate(this))
 {
-
 }
 
 /*!
@@ -944,7 +945,10 @@ ErrorCode CaService::lastError() const
  \param servicePublic pointer to public service
  */
 CaServicePrivate::CaServicePrivate(CaService *servicePublic) :
-    m_q(servicePublic), mProxy(new CaClientProxy), 
+    m_q(servicePublic),
+    mCommandHandler(new CaHandlerProxy(QSharedPointer<CaHandlerLoader>
+        (new CaQtSfHandlerLoader()))),
+    mProxy(new CaClientProxy()),
     mNotifierProxy(NULL)
 {
     const ErrorCode connectionResult = mProxy->connect();
@@ -1338,7 +1342,7 @@ bool CaServicePrivate::executeCommand(const CaEntry &entry,
         touch(entry);
     }
 
-    mErrorCode = mProxy->executeCommand(entry, command);
+    mErrorCode = mCommandHandler->execute(entry, command);
 
     qDebug() << "CaServicePrivate::executeCommand mErrorCode on return:"
              << mErrorCode;

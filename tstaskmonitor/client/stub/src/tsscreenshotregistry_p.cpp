@@ -14,24 +14,15 @@
 * Description: 
 *
 */
-#ifndef TSTASKMONITORSESSION_H
-#define TSTASKMONITORSESSION_H
+#include "tsscreenshotregistry_p.h"
 
-#include <e32base.h>
-
-#include "tsfswentry.h"
-
-NONSHARABLE_CLASS( RTsTaskMonitorSession ) : public RSessionBase
+bool TsScreenshotRegistryPrivate::registerScreenshot(const QPixmap &screenshot)
 {
-public:
-    TInt Connect();
+    Q_UNUSED(screenshot);
+    return true;
+}
 
-    void TaskListL(RTsFswArray& tasks);
-    void Subscribe(TRequestStatus& aStatus);
-    void CancelSubscribe();
-
-private:
-    TInt StartServer();
-};
-
-#endif  // TSTASKMONITORSESSION_H
+bool TsScreenshotRegistryPrivate::unregisterScreenshot()
+{
+    return true;
+}

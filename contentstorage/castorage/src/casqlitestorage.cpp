@@ -214,8 +214,17 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
 void CCaSqLiteStorage::LocalizeEntryL( CCaLocalizationEntry& aLocalization )
     {
     CCaSqlQuery* sqlLocalizeEntryQuery = CCaSqlQuery::NewLC( iSqlDb );
-    CaSqlQueryCreator::CreateLocalizationTableQueryL(sqlLocalizeEntryQuery,
-            KSQLLocalizeEntry);
+    if( aLocalization.GetAttributeName().Compare( KColumnEnText ) == 0 )
+        {
+        CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
+            KSQLLocalizeTextEntry );
+        }
+    else if ( aLocalization.GetAttributeName().Compare(
+            KColumnEnDescription ) == 0 )
+        {
+        CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
+            KSQLLocalizeDescriptionEntry );
+        }
     sqlLocalizeEntryQuery->PrepareL();
     sqlLocalizeEntryQuery->BindValuesForLocalizeL( aLocalization );
     sqlLocalizeEntryQuery->ExecuteL( );

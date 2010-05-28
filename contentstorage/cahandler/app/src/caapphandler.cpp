@@ -15,6 +15,8 @@
  *
  */
 
+#include <QString>
+#include <e32base.h>
 #include <w32std.h>
 #include <apgtask.h>
 #include <apgcli.h>
@@ -27,102 +29,86 @@
 #include <usif/usifcommon.h>
 #include <usif/scr/scr.h>
 
+#include <cadefs.h>
+#include <caentry.h>
+
 #include "caapphandler.h"
 #include "cainnerentry.h"
 #include "causifuninstalloperation.h"
 #include "catasklist.h"
-
 #include "cautils.h"
+#include "caclient_defines.h"
 #include "cadef.h"
 
-// ======== MEMBER FUNCTIONS ========
 using namespace Usif;
+
+static const char caTypeApp[] = "application";
+static const char caTypePackage[] = "package";
+static const char caTypeWidget[] = "widget";
+static const char caAttrView[] = "view";
+static const char caCmdClose[] = "close";
+static const char caAttrWindowGroupId[] = "window_group_id";
+static const char caAttrComponentId[] = "component_id";
+static const char caCmdRemove[] = "remove";
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+CaAppHandler::CaAppHandler(QObject *parent):
+    iEikEnv(CEikonEnv::Static()),
+    iUsifUninstallOperation(NULL)
+{
+    Q_UNUSED(parent);
+}
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-CCaAppHandler::~CCaAppHandler()
+CaAppHandler::~CaAppHandler()
 {
     delete iUsifUninstallOperation;
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-CCaAppHandler *CCaAppHandler::NewL()
+int CaAppHandler::execute(const CaEntry &entry, const QString &command)
 {
-    CCaAppHandler *handler = new(ELeave) CCaAppHandler();
-    CleanupStack::PushL( handler );
-    handler->ConstructL();
-    CleanupStack::Pop( handler );
-    return handler;
-}
-
-// ---------------------------------------------------------
-// CCaAppHandler::CCaAppHandler
-// ---------------------------------------------------------
-//
-CCaAppHandler::CCaAppHandler()
-{
-    iEikEnv = CEikonEnv::Static();
-    iUsifUninstallOperation = NULL;
-}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CCaAppHandler::ConstructL()
-{
-}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CCaAppHandler::HandleCommandL(
-        CCaInnerEntry &aEntry, const TDesC8 &aCommand )
-{
-
-    if( aCommand == KCaCmdOpen()
-            && aEntry.GetEntryTypeName() == KCaTypeApp() )
-        {
-        TInt viewId(-1);
-        TPtrC viewIdValue;
-        if( aEntry.FindAttribute( KCaAttrView(), viewIdValue ) )
-            {
-            if( MenuUtils::GetTUint( viewIdValue, (TUint &) viewId )
-                    != KErrNone )
-                {
-                User::Leave( KErrCorrupt );
-                }
-            }
-        LaunchApplicationL(
-                TUid::Uid( aEntry.GetUid() ), KNullDesC8(), viewId );
+    int result(KErrGeneral);
+    if (command == caCmdOpen && entry.entryTypeName() == caTypeApp) {
+        QString viewIdValue = entry.attribute(caAttrView);
+        bool viewIdIsCorrect(true);
+        int viewId(-1);
+        if (!viewIdValue.isNull()) {
+            viewId = viewIdValue.toInt(&viewIdIsCorrect, 0);
         }
-    else if ( aCommand == KCaCmdClose()
-            && aEntry.GetEntryTypeName() == KCaTypeApp() )
-        {
-        CloseApplicationL( aEntry );
+        if (viewIdIsCorrect) {
+            QString uidValue =
+                entry.attribute(APPLICATION_UID_ATTRIBUTE_NAME);
+            int uid = uidValue.toInt();
+            TRAP(result, launchApplicationL(TUid::Uid(uid), viewId));
         }
-    else if ( aCommand == KCaCmdRemove() )
-        {
-        HandleRemoveL(aEntry);
+    } else if (command == caCmdClose && entry.entryTypeName() == caTypeApp ) {
+        QString windowGroupId = entry.attribute(caAttrWindowGroupId);
+        if (!windowGroupId.isNull()) {
+            result = closeApplication(entry.flags(), windowGroupId.toInt());
         }
-    else
-        {
-        User::Leave( KErrNotSupported );
-        }
+    } else if (command == caCmdRemove) {
+        QString componentId(entry.attribute(caAttrComponentId));
+        result = handleRemove(entry.flags(),
+            entry.entryTypeName(),
+            componentId);
+    } else {
+        result = KErrNotSupported;
+    }
+
+    return result;
 }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaAppHandler::LaunchApplicationL(
-        const TUid aUid, const TDesC8 &aParam, TInt aViewId )
+void CaAppHandler::launchApplicationL(const TUid aUid, TInt aViewId)
 {
     if( aViewId > 0 && iEikEnv )
         {
@@ -172,7 +158,7 @@ void CCaAppHandler::LaunchApplicationL(
                 cmdLine->SetCommandL( EApaCommandRun );
                 }
 
-            cmdLine->SetTailEndL( aParam );
+            cmdLine->SetTailEndL( KNullDesC8 );
 
             User::LeaveIfError( appArcSession.StartApp( *cmdLine ) );
 
@@ -188,113 +174,70 @@ void CCaAppHandler::LaunchApplicationL(
 //
 // ---------------------------------------------------------------------------
 //
-void CCaAppHandler::CloseApplicationL( CCaInnerEntry &aEntry )
+int CaAppHandler::closeApplication(const EntryFlags &flags, int windowGroupId)
 {
-    RWsSession wsSession;
-    User::LeaveIfError( wsSession.Connect() );
-    CleanupClosePushL<RWsSession>( wsSession );
+    int result(KErrNone);
+    if (flags.testFlag(RunningEntryFlag)
+        && !( flags.testFlag(SystemEntryFlag))
+        && windowGroupId > 0) {
+        RWsSession wsSession;
+        result = wsSession.Connect();
+        if (result==KErrNone) {
+            TWsEvent event;
+            event.SetTimeNow();
+            event.SetType( KAknShutOrHideApp );
+            wsSession.SendEventToWindowGroup( windowGroupId, event );
+        }
+        wsSession.Close();
+    }
+    return result;
+}
 
-    if( ( aEntry.GetFlags() & ERunning )
-            && !( aEntry.GetFlags() & ESystem ) )
-        {
-        RBuf value;
-        CleanupClosePushL( value );
-        value.CreateL( KCaMaxAttrValueLen );
-        if( aEntry.FindAttribute( KCaAttrWindowGroupId, value ) )
-            {
-            TInt wgId( KErrNotFound );
-            TLex16 parser( value );
-            if( KErrNone == parser.Val( wgId ) && wgId > 0 )
-                {
-                TWsEvent event;
-                event.SetTimeNow();
-                event.SetType( KAknShutOrHideApp );
-                wsSession.SendEventToWindowGroup( wgId, event );
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+int CaAppHandler::handleRemove(const EntryFlags &flags,
+    const QString &typeName,
+    const QString &componentId)
+{
+    int result(KErrNone);
+    if (flags.testFlag(RemovableEntryFlag)) {
+        if (typeName == caTypeApp
+            || typeName == caTypePackage
+            || typeName == caTypeWidget) {
+            if(componentId.isNull()) {
+                result = KErrNotFound;
+            } else {
+                bool convertStatus(false);
+                int id = componentId.toInt(&convertStatus);
+                if (convertStatus) {
+                    TRAP(result, startUsifUninstallL(id));
+                } else {
+                    result = KErrGeneral;
                 }
             }
-        CleanupStack::PopAndDestroy( &value );
+        }
+        else {
+            result = KErrNotSupported;
+        }
+    } else {
+        result = KErrAccessDenied;
     }
-
-    CleanupStack::PopAndDestroy( &wsSession );
+    return result;
 }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaAppHandler::HandleRemoveL( CCaInnerEntry &aEntry )
-    {
-    if( !( aEntry.GetFlags() & ERemovable ) )
-        {
-        User::Leave( KErrAccessDenied );
-        }
-    
-    const TPtrC entryTypeName(aEntry.GetEntryTypeName());
-    
-    if( entryTypeName == KCaTypeApp()  ||
-        entryTypeName == KCaTypePackage() ||
-        entryTypeName == KCaTypeWidget() )
-        {
-        TPtrC componentId;
-        TBool result = aEntry.FindAttribute( KCaAttrComponentId, componentId );
-        if( result )
-            {
-            TInt32 id ;
-            TLex idDesc;
-            idDesc.Assign( componentId );
-            User::LeaveIfError( idDesc.Val( id ) );
-            StartUsifUninstallL( id );
-            }
-         else
-            {
-            User::Leave( KErrNotFound );
-            }
-        }
-    else
-        {
-        User::Leave( KErrNotSupported );
-        }
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-TInt CCaAppHandler::GetComponentIdL( const CCaInnerEntry &aEntry,
-        const TDesC& aSoftwareType )
+void CaAppHandler::startUsifUninstallL(TInt aComponentId)
 {
-    TInt id(KErrNotFound);
-    RSoftwareComponentRegistry scr;
-    CleanupClosePushL(scr);
-    User::LeaveIfError(scr.Connect());
-    CComponentFilter* compFilter = CComponentFilter::NewLC();
-    compFilter->AddPropertyL(_L("Uid"), aEntry.GetUid());
-    compFilter->SetSoftwareTypeL(aSoftwareType);
-    RArray<TComponentId> componentIdList;
-    CleanupClosePushL(componentIdList);
-    scr.GetComponentIdsL(componentIdList, compFilter);
-    if (componentIdList.Count() > 0)
-        {
-        id = componentIdList[0];
-        }
-    CleanupStack::PopAndDestroy(&componentIdList);
-    CleanupStack::PopAndDestroy(compFilter);
-    CleanupStack::PopAndDestroy(&scr);
-    return id;
-}
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CCaAppHandler::StartUsifUninstallL( TInt aComponentId )
-{
-    if ( iUsifUninstallOperation && iUsifUninstallOperation->IsActive() )
-        {
+    if (iUsifUninstallOperation && iUsifUninstallOperation->IsActive()) {
         User::Leave( KErrInUse );
-        }
+    }
     delete iUsifUninstallOperation;
     iUsifUninstallOperation = NULL;
-    iUsifUninstallOperation = CCaUsifUninstallOperation::NewL( aComponentId );
+    iUsifUninstallOperation = CCaUsifUninstallOperation::NewL(aComponentId);
 }
 

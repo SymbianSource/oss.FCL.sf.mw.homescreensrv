@@ -15,9 +15,14 @@
  *
  */
 
+#ifndef CACLIENT_DEFINES_H
+#define CACLIENT_DEFINES_H
+
 const char APPLICATION_UID_ATTRIBUTE_NAME[]  = "application:uid";
 const char APPLICATION_ENTRY_TYPE_NAME[] = "application";
 const char WIDGET_ENTRY_TYPE_NAME[] = "widget";
 const char URL_ENTRY_TYPE_NAME[] = "url";
 const char PACKAGE_ENTRY_TYPE_NAME[] = "package";
 const char TEMPLATED_APPLICATION_ENTRY_TYPE_NAME[] = "templatedApplication";
+
+#endif //CACLIENT_DEFINES_H

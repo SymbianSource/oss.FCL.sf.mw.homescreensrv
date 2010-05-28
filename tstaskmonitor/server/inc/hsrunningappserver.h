@@ -20,8 +20,8 @@
 // INCLUDES
 #include <e32std.h>
 #include <e32base.h>
-
-#include "hsdataobserver.h"
+#include <w32std.h>
+#include "tsdataobserver.h"
 
 class CRunningAppStorage;
 /**
@@ -69,7 +69,10 @@ private:
     CSession2* NewSessionL(const TVersion& version, const RMessage2& message) const;
 private:
     RPointerArray<CHsDataObserver> mObservers;
+    RWsSession mWsSession;
     CRunningAppStorage* mStorage;
+    CBase *mScreenshotProviderStarter;
+    CBase *mBacksteppingEngine;
 };
 
 #endif // RUNNINGAPPSERVER_H

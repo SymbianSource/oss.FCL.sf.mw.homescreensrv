@@ -23,6 +23,7 @@ data=\epoc32\data\z\resource\qt\plugins\activityserviceplugin.qtplugin    resour
 file=ABI_DIR\BUILD_DIR\hsactivitydbserver.exe                            PROGRAMS_DIR\hsactivitydbserver.exe
 
 file=ABI_DIR\BUILD_DIR\hsactivitydbclient.dll					       SHARED_LIB_DIR\hsactivitydbclient.dll
+file=ABI_DIR\BUILD_DIR\tsutils.dll					       SHARED_LIB_DIR\tsutils.dll
 
 file=ABI_DIR\BUILD_DIR\hbactivityplugin.dll					       SHARED_LIB_DIR\hbactivityplugin.dll
 data=\epoc32\data\z\resource\qt\plugins\hbactivityplugin.qtplugin    resource\qt\plugins\hbactivityplugin.qtplugin

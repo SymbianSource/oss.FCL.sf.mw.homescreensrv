@@ -84,6 +84,7 @@ private:
     void connectSlots();
     void disconnectSlots();
     void reconnectSlots();
+    void emitEmpty(int previousCount);
 
 private slots:
 
