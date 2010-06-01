@@ -114,3 +114,17 @@ const RPointerArray<CActivityTask>& CActivityServer::StorageData() const
 {
     return mObservers;
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CActivityServer::RemoveNotValidTasks(const CSession2* session)
+{
+	for (TInt i=mObservers.Count()-1; i>=0; --i) {
+		if( mObservers[i]->IsSessionTask(session) ) {
+			delete mObservers[i];
+			mObservers.Remove(i);
+		}
+	}
+}

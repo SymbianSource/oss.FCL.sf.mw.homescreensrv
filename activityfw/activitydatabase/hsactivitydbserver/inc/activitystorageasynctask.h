@@ -95,6 +95,11 @@ private:
      * @param msg - destination message
      */
     void WriteResponseL(const RMessage2& msg);
+    
+    /**
+     * Returns ETrue if task is related with session argument
+     */
+    TBool IsSessionTask(const CSession2* session);
 
 private:
     RBuf8 mData;

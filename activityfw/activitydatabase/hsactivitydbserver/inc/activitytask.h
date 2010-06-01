@@ -30,6 +30,11 @@ public:
      * @param msg - broadcast message
      */
     virtual void BroadcastReceivedL(const RMessage2& msg) =0;
+    
+    /**
+     * Returns ETrue if task is related with session argument
+     */
+    virtual TBool IsSessionTask(const CSession2* session) =0;
 };
 
 #endif  //ACTIVITYTASK_H

@@ -63,6 +63,7 @@ public:
      * @see MActivityTaskStorage::StorageData()
      */
     const RPointerArray<CActivityTask>& StorageData() const;
+    
 
 private:
 
@@ -81,7 +82,12 @@ private:
      * @see CServer2::NewSessionL(const TVersion&, const RMessage2&)
      */
     CSession2* NewSessionL(const TVersion& version, const RMessage2& message) const;
-
+    
+    /**
+     * Removes not valid task
+     */
+    void RemoveNotValidTasks(const CSession2* session);
+    
 private:
     RFs mFsSession;
     CActivityStorage* mStorage;

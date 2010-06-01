@@ -74,6 +74,11 @@ private:
      * Write response data to requested message 
      */
     void WriteResponseL();
+    
+    /**
+     * Returns ETrue if task is related with session argument
+     */
+    TBool IsSessionTask(const CSession2* session);
 
 private:
     MActivityTaskStorage& mGlobalStorage;

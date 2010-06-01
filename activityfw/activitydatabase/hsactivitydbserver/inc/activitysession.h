@@ -71,6 +71,11 @@ public:
      * @see MActivityTaskStorage::StorageData()
      */
     const RPointerArray<CActivityTask>& StorageData() const;
+    
+    /**
+     * Removes not valid task
+     */
+    void RemoveNotValidTasks(const CSession2* session);
 private:
 
     /**

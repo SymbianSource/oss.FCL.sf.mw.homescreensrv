@@ -124,3 +124,11 @@ void CActivityThumbnailTask::BroadcastReceivedL(const RMessage2&)
 {
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CActivityThumbnailTask::IsSessionTask(const CSession2* session)
+{
+	return mMsg.Session() == session ? ETrue : EFalse;
+}
