@@ -225,7 +225,8 @@ private: // data
         ERegistrationStatusReceived       = 0x00000010,
         ENetworkInfoChangeReceived        = 0x00000020,
         EProgrammableOperatorInfoReceived = 0x00000040,
-        EProgrammableOperatorInfoReceivedOk = 0x00000080
+        EProgrammableOperatorInfoReceivedOk = 0x00000080,
+        ECSRegistrationNotOk              = 0x00000100 
         };
         
 	/**

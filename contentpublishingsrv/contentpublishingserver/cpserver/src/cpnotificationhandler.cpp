@@ -255,6 +255,11 @@ void CCPNotificationHandler::SendNotificationL( CLiwDefaultList* aListOfMaps )
     else
         {
         //notification cannot be sent in this moment
+        //append KDataMap if exists
+        if( iDataMapCache.TypeId() == EVariantTypeDesC8 )
+            {
+            TRAP_IGNORE( AppendDataMapL( aListOfMaps ) );
+            }
         aListOfMaps->IncRef( );
         iNotifications.AppendL( aListOfMaps );
         }
@@ -264,7 +269,6 @@ void CCPNotificationHandler::SendNotificationL( CLiwDefaultList* aListOfMaps )
 //
 // ----------------------------------------------------------------------------
 //
-
 const CLiwGenericParamList* CCPNotificationHandler::GetPointerToChangeInfoList()
     {
     return iChangeInfoList;
@@ -552,3 +556,57 @@ TBool CCPNotificationHandler::CheckRegistryTypeL( const CLiwMap& aMap,
     CleanupStack::PopAndDestroy( &type );
     return result;
     }    
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCPNotificationHandler::AppendDataMapL( CLiwDefaultList* aListOfMaps )
+    {
+    CP_DEBUG( _L8("CCPNotificationHandler::SendChangeInfoListL()") );
+    //for every observer in session
+    THashMapIter<TInt32, CCPLiwMap*> iter( iFilters );
+    const CCPLiwMap*const* filter = iter.NextValue( );
+    while( filter )
+        {
+        TInt count = aListOfMaps->Count( );
+        //for every item in the input list
+        for ( TInt j = 0; j < count; j++ )
+            {
+            TLiwVariant variant;
+            variant.PushL( );
+            aListOfMaps->AtL( j, variant );
+            if ( variant.TypeId() == EVariantTypeMap )
+                {
+                const CLiwMap* map = variant.AsMap();
+                if ( IsProperForFilterL( *map, **filter ) )
+                    {
+                    if (iExtendedFlags.FindL(*iter.CurrentKey())
+                            && (iDataMapCache.TypeId() == EVariantTypeDesC8))
+                        {
+                        //extended notifications - append data map
+                        CLiwDefaultMap* extendedMap = CLiwDefaultMap::NewLC();
+                        TInt count = map->Count();
+                        for(TInt i=0; i<count;i++)
+                            {
+                            TLiwVariant temporary;
+                            temporary.PushL();
+                            TBuf8<KMaxKeyLength> key;
+                            map->AtL(i,key);
+                            map->FindL(key, temporary);
+                            extendedMap->InsertL(key,temporary);
+                            CleanupStack::PopAndDestroy(&temporary);
+                            }
+                        extendedMap->InsertL( KDataMap,iDataMapCache );
+                        aListOfMaps->Remove( j );
+                        aListOfMaps->AppendL( TLiwVariant( extendedMap ) );
+                        CleanupStack::PopAndDestroy(extendedMap);
+                        }
+                    }
+
+                }
+            CleanupStack::PopAndDestroy( &variant );
+            }
+        filter = iter.NextValue( );
+        }
+    }

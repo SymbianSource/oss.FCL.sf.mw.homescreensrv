@@ -534,6 +534,16 @@ public: // public functions
         TInt& aPos );
     
     /**
+     * Erases resource files from plug-in specific subdirectories under
+     * the client's private path.
+	 * Plug-ins that belong to an active application configuration will 
+	 * be processed.
+     * @since S60 5.2
+     * @param aAppODT is an application configuration to be checked	 
+     */
+    void ResetResourcesL( ChspsODT& aAppODT );
+    
+    /**
      * Localizes an ODT.
      * Testing: change first two digits from \epoc32\RELEASE\WINSCW\udeb\
      * Z\resource\BootData\Languages.txt file and reboot the emulator.     
@@ -1028,6 +1038,7 @@ private:
     TBool iHeaderListPending;
            
     RFs iFsSession;
+    CFileMan* iFileMan;
     ChspsDefinitionRepository* iDefinitionRepository;
     CRepository* iCentralRepository;
     ChspsSecurityEnforcer* iSecurityEnforcer;

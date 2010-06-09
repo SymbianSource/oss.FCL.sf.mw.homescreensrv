@@ -84,7 +84,7 @@ CWrtDataPlugin* CWrtDataPlugin::NewL()
 // ----------------------------------------------------------------------------
 //
 CWrtDataPlugin::CWrtDataPlugin()
-    : iNetworkStatus( EUnknown ), iPluginState( ENone ) 
+    : iNetworkStatus( EUnknown ), iPluginState( EStopped ) 
     {
     }
     
@@ -138,7 +138,7 @@ CWrtDataPlugin::~CWrtDataPlugin()
 //
 void CWrtDataPlugin::Start( TStartReason aReason )
     {
-    iStopped = EFalse;
+    iPluginState = EStarted;
     
     if( aReason == ESystemStartup || 
         aReason == EPluginStartup )
@@ -155,13 +155,13 @@ void CWrtDataPlugin::Start( TStartReason aReason )
 //
 void CWrtDataPlugin::Stop( TStopReason aReason )
     {
+    iPluginState = EStopped;
+    
     if( aReason == EPluginShutdown ||
         aReason == ESystemShutdown )
         {
         TRAP_IGNORE(iData->NotifyPublisherL( KDeActive ));
         }
-    
-    iStopped = ETrue;
     }
 
 // ----------------------------------------------------------------------------
@@ -171,7 +171,7 @@ void CWrtDataPlugin::Stop( TStopReason aReason )
 //
 void CWrtDataPlugin::Resume( TResumeReason aReason )
     {
-    if ( aReason == EForeground && !iStopped )
+    if ( aReason == EForeground && iPluginState != EStopped )
         {
         iPluginState = EResume;
 
@@ -186,7 +186,7 @@ void CWrtDataPlugin::Resume( TResumeReason aReason )
 //
 void CWrtDataPlugin::Suspend( TSuspendReason aReason )
     {    
-    if ( aReason == EBackground && !iStopped )
+    if ( aReason == EBackground && iPluginState != EStopped )
         {
         iPluginState = ESuspend;
         
@@ -201,7 +201,7 @@ void CWrtDataPlugin::Suspend( TSuspendReason aReason )
 //
 void CWrtDataPlugin::SetOnline()
     {    
-    if ( !iStopped )
+    if ( iPluginState != EStopped )
         {
         iNetworkStatus = EOnline;
         TRAP_IGNORE( iData->NotifyPublisherL( KOnLine ));                
@@ -215,7 +215,7 @@ void CWrtDataPlugin::SetOnline()
 //
 void CWrtDataPlugin::SetOffline()
     {
-    if ( !iStopped )
+    if ( iPluginState != EStopped )
         {   
         iNetworkStatus = EOffline;
         TRAP_IGNORE( iData->NotifyPublisherL( KOffLine ));
@@ -239,13 +239,6 @@ void CWrtDataPlugin::SubscribeL( MAiContentObserver& aObserver )
 //
 void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     {
-    if( iDataCount > 0 )
-        {
-        // We own the array so destroy it
-         aSettings.ResetAndDestroy();
-         return;
-        }
-    
     RAiSettingsItemArray contentItemsArr;
     RAiSettingsItemArray configurationItemsArr;
     TInt count( aSettings.Count() );
@@ -265,63 +258,58 @@ void CWrtDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
         }
     
     iDataCount = contentItemsArr.Count();
+ 
+    // Create the content Model
+    HBufC16* contentId = HBufC16::NewLC( 
+        KAiContentIdMaxLength + KAiPluginNameMaxLength );
     
-    if ( iDataCount > 0 )
+    iContentModel = new TAiContentItem[iDataCount];
+    
+    for( TInt i = 0; i < iDataCount; i++ )
         {
-        // Create the content Model
-        HBufC16* contentId = HBufC16::NewLC( 
-            KAiContentIdMaxLength + KAiPluginNameMaxLength );
+        MAiPluginContentItem& contentItem( 
+            contentItemsArr[i]->AiPluginContentItem() );
         
-        iContentModel = new TAiContentItem[iDataCount];
-        
-        for( TInt i = 0; i < iDataCount; i++ )
+        iContentModel[i].id = i;
+        if( contentItem.Type() == KText() )
             {
-            MAiPluginContentItem& contentItem( 
-                contentItemsArr[i]->AiPluginContentItem() );
-            
-            iContentModel[i].id = i;
-            if( contentItem.Type() == KText() )
-                {
-                // text
-                iContentModel[i].type = KAiContentTypeText;
-                }
-            if( contentItem.Type() == KImage() || 
-        		contentItem.Type() == KAnimation() )
-                {
-                // image
-                iContentModel[i].type = KAiContentTypeBitmap;
-                }
-            
-            contentId->Des().Copy( contentItem.Name() );
-            contentId->Des().Delete( 0, 
-                contentId->Des().LocateReverse( KPluginNameSeprator ) + 1 );
-  
-            TInt sizeOfContentId( contentId->Des().Size()+sizeof( wchar_t ) );
-            
-            iContentModel[i].cid = 
-                static_cast< const wchar_t* >( User::Alloc( sizeOfContentId ) );
-                
-            Mem::Copy( ( TAny* )iContentModel[i].cid, 
-                contentId->Des().PtrZ(), sizeOfContentId );
-            
-            contentId->Des().Delete( 0, contentId->Des().Length() );
-            }    
+            // text
+            iContentModel[i].type = KAiContentTypeText;
+            }
+        if( contentItem.Type() == KImage() || 
+            contentItem.Type() == KAnimation() )
+            {
+            // image
+            iContentModel[i].type = KAiContentTypeBitmap;
+            }
         
-        CleanupStack::PopAndDestroy( contentId );
-        iContent = AiUtility::CreateContentItemArrayIteratorL( 
-                iContentModel, iDataCount );
-                       
-        // Configurations 
-        iData->ConfigureL( configurationItemsArr );
+        contentId->Des().Copy( contentItem.Name() );
+        contentId->Des().Delete( 0, 
+            contentId->Des().LocateReverse( KPluginNameSeprator ) + 1 );
 
-        iPluginState = ESuspend;
-
-        // Register for notifications
-        iData->RegisterL();
+        TInt sizeOfContentId( contentId->Des().Size()+sizeof( wchar_t ) );
         
-        // Activate the publisher 
-        iData->NotifyPublisherL( KActive );
-        }
+        iContentModel[i].cid = 
+            static_cast< const wchar_t* >( User::Alloc( sizeOfContentId ) );
+            
+        Mem::Copy( ( TAny* )iContentModel[i].cid, 
+            contentId->Des().PtrZ(), sizeOfContentId );
+        
+        contentId->Des().Delete( 0, contentId->Des().Length() );
+        }    
+    
+    CleanupStack::PopAndDestroy( contentId );
+    iContent = AiUtility::CreateContentItemArrayIteratorL( 
+            iContentModel, iDataCount );
+                   
+    // Configurations 
+    iData->ConfigureL( configurationItemsArr );
+
+    // Register for notifications
+    iData->RegisterL();
+    
+    // Activate the publisher 
+    iData->NotifyPublisherL( KActive );
     
     contentItemsArr.Reset();
     configurationItemsArr.Reset();
@@ -375,7 +363,17 @@ void CWrtDataPlugin::HandleEvent( const TDesC& aEventName,
 //
 TBool CWrtDataPlugin::IsActive() const
     {
-    return iPluginState == EResume && !iStopped;
+    return iPluginState == EResume;
+    }
+
+// ----------------------------------------------------------------------------
+// CWrtDataPlugin::IsStopped
+//
+// ----------------------------------------------------------------------------
+//
+TBool CWrtDataPlugin::IsStopped() const
+    {
+    return iPluginState == EStopped;
     }
 
 // ----------------------------------------------------------------------------

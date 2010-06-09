@@ -263,9 +263,9 @@ void MT_CHSPSConfigurationIf::Teardown()
     // Remove test configuration resource files
     TRAP( err, RemoveResourceFilesL( iFileserver ) );
     if ( err != KErrNone )
-    	{    	
-    	EUNIT_FAIL_TEST( "Teardown failed." );
-    	}
+        {        
+        EUNIT_FAIL_TEST( "Teardown failed." );
+        }
     }
 
 //------------------------------------------------------------------------------
@@ -2640,6 +2640,211 @@ void MT_CHSPSConfigurationIf::RequestNotify_6_L()
     EUNIT_PRINT( _L8( "Test step passed" ) );       
     }
 
+
+//------------------------------------------------------------------------------
+// Test case: SisxUpgrade(1)
+//------------------------------------------------------------------------------
+void MT_CHSPSConfigurationIf::SisxUpgrade_1_L()
+   {
+    // Pre conditions        
+
+    // Attach to HSPS 
+    EUNIT_PRINT( _L8( "Pre conditions: Attach to HSPS service IConfiguration interface" ) );
+    AttachServiceL( KHSPS, KHSPSConfigurationIf, KHSPSTestAppUid );
+
+    // Test step 1: 
+    EUNIT_PRINT( _L8( "Test step 1: simulate installation of a SISX package" ) );
+
+    CFileMan* fileManager = CFileMan::NewL( iFileserver );
+    CleanupStack::PushL( fileManager );
+
+    // Copy installation files to c\private\200159c0\import
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\0\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\0\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\1\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\1\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\9\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\9\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\widgetconfiguration.xml" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\" ),
+        CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\manifest.dat" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\" ),
+        CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\plugin_0998_101FB657_2000B133_1.0.dat" ),
+        _L( "c:\\private\\200159c0\\import\\" ),
+        CFileMan::EOverWrite ) );
+            
+    // Wait until configuration is installed
+    User::After( 4000000 );
+    
+    // Make sure "InstalledWidget" is installed
+    if ( !BaflUtils::FileExists( iFileserver, _L( "c:\\private\\200159c0\\themes\\2456\\270513751\\536916275\\1.0\\InstallWidgetConf.o0000" ) ) )
+        {
+        // Installation failed - remove imports to be able to re-run the test again
+        // The ChspsThemeServer::HandleConfigurationImportsL does handle newly
+        // added files only
+        User::LeaveIfError( fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) ) );
+        fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133.dat" ),
+            0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+        User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
+        
+        // Leave - the test was not successfull
+        User::Leave( KErrGeneral );
+        }
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+
+    // Test step 1: 
+    EUNIT_PRINT( _L8( "Test step 2: simulate upgrade to v2 of a SISX package" ) );
+    // Copy installation files to c\private\200159c0\import
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget_v2\\0\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\2.0\\0\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget_v2\\1\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\2.0\\1\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget_v2\\9\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\2.0\\9\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget_v2\\widgetconfiguration.xml" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\2.0\\" ),
+        CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget_v2\\manifest.dat" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\2.0\\" ),
+        CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget_v2\\plugin_0998_101FB657_2000B133_2.0.dat" ),
+        _L( "c:\\private\\200159c0\\import\\" ),
+        CFileMan::EOverWrite ) );
+            
+    // Wait until configuration is installed
+    User::After( 4000000 );
+    
+    // Make sure "InstalledWidget v1" is removed
+    if ( BaflUtils::FileExists( iFileserver, _L( "c:\\private\\200159c0\\themes\\2456\\270513751\\536916275\\1.0\\InstallWidgetConf.o0000" ) ) )
+        {
+        // Installation failed - remove imports to be able to re-run the test again
+        // The ChspsThemeServer::HandleConfigurationImportsL does handle newly
+        // added files only
+        User::LeaveIfError( fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) ) );
+        fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ),
+            0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+        fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_2.0.dat" ),
+            0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+
+        User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
+        User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_2.0.dat" ) ) );     
+        // Leave - the test was not successfull
+        User::Leave( KErrGeneral );
+        }
+    
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+
+
+    // Test step 3: 
+    EUNIT_PRINT( _L8( "Test step 3: simulate uninstalation of a SISX package" ) );
+    // Remove installation files to c\private\200159c0\import
+    User::LeaveIfError( fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) ) );
+    fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ),
+        0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+    fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_2.0.dat" ),
+        0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.        
+    User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
+    User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_2.0.dat" ) ) );     
+        
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+    User::After( 4000000 );
+    
+    // check
+    // Copy installation files to c\private\200159c0\import
+    EUNIT_PRINT( _L8( "Test step 4: simulate installation of a SISX package" ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\0\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\0\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\1\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\1\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\9\\" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\9\\" ),
+        CFileMan::ERecurse|CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\widgetconfiguration.xml" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\" ),
+        CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\manifest.dat" ),
+        _L( "c:\\private\\200159c0\\import\\0998\\101FB657\\2000B133\\1.0\\" ),
+        CFileMan::EOverWrite ) );
+    User::LeaveIfError( fileManager->Copy(
+        _L( "c:\\data\\mt_hsps\\installed_widget\\plugin_0998_101FB657_2000B133_1.0.dat" ),
+        _L( "c:\\private\\200159c0\\import\\" ),
+        CFileMan::EOverWrite ) );
+            
+    // Wait until configuration is installed
+    User::After( 4000000 );
+    
+    // Make sure "InstalledWidget" is installed
+    if ( !BaflUtils::FileExists( iFileserver, _L( "c:\\private\\200159c0\\themes\\2456\\270513751\\536916275\\1.0\\InstallWidgetConf.o0000" ) ) )
+        {
+        // Installation failed - remove imports to be able to re-run the test again
+        // The ChspsThemeServer::HandleConfigurationImportsL does handle newly
+        // added files only
+        User::LeaveIfError( fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) ) );
+        fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ),
+            0, KEntryAttReadOnly, TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+        User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
+
+        // Leave - the test was not successfull
+        User::Leave( KErrGeneral );
+        }
+    
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+        
+    // Test step 2: 
+    EUNIT_PRINT( _L8( "Test step 5: simulate un-installation of the SISX package" ) );
+    
+    // Remove installation files from c\private\200159c0\import
+    User::LeaveIfError( fileManager->RmDir( _L( "c:\\private\\200159c0\\import\\0998\\" ) ) );
+    fileManager->Attribs( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133.dat" ),
+                          0,
+                          KEntryAttReadOnly,
+                          TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+    User::LeaveIfError( fileManager->Delete( _L( "c:\\private\\200159c0\\import\\plugin_0998_101FB657_2000B133_1.0.dat" ) ) );     
+    // Removing of *.dat file causes configuration uninstallation
+    // Wait until configuration is uninstalled
+    User::After( 4000000 );
+
+    // Make sure "InstalledWidget" is uninstalled
+    if ( BaflUtils::FileExists( iFileserver, _L( "c:\\private\\200159c0\\themes\\2456\\270513751\\536916275\\1.0\\InstallWidgetConf.o0000" ) ) )
+        {
+        User::Leave( KErrGeneral );
+        }
+
+    EUNIT_PRINT( _L8( "Test step passed" ) );
+
+    CleanupStack::PopAndDestroy( fileManager );
+    };
+
+
+
+
 //------------------------------------------------------------------------------
 // Test case: SisxInstallation(1)
 //------------------------------------------------------------------------------
@@ -3423,11 +3628,11 @@ EUNIT_BEGIN_TEST_TABLE(
        SetupL, SetPluginSettings_6_L, Teardown )
 
     EUNIT_TEST(
-	   "GetPluginSettings(1)",
-	   "IConfiguration",
-	   "GetPluginSettings",
-	   "FUNCTIONALITY",
-	   SetupL, GetPluginSettings_1_L, Teardown )
+       "GetPluginSettings(1)",
+       "IConfiguration",
+       "GetPluginSettings",
+       "FUNCTIONALITY",
+       SetupL, GetPluginSettings_1_L, Teardown )
 
     EUNIT_TEST(
        "GetPluginSettings(2)",
@@ -3569,13 +3774,20 @@ EUNIT_BEGIN_TEST_TABLE(
        "FUNCTIONALITY",
        SetupL, RequestNotify_6_L, Teardown )
 
-	EUNIT_TEST(
+    EUNIT_TEST(
+       "SisxUpgrade(1)",
+       "IConfiguration",
+       "SisxUpgrade",
+       "FUNCTIONALITY",
+       SetupL, SisxUpgrade_1_L, Teardown )       
+      
+    EUNIT_TEST(
        "SisxInstallation(1)",
        "IConfiguration",
        "SisxInstallation",
        "FUNCTIONALITY",
        SetupL, SisxInstallation_1_L, Teardown )       
-       
+              
     EUNIT_TEST(   
        "NativeInstallation(1)",
        "IConfiguration",

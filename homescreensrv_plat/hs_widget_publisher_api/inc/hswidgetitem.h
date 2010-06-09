@@ -62,13 +62,21 @@ public:
     /**
      */
     bool isStringValue();
-
+    
+    /**
+     */
+    void triggerAdded();
+    
+    /**
+     */
+    bool isTriggerAdded();
     
 private:
     std::string mItemName;
     std::string mItemString;
     int 		mItemInt;
     bool 		mIsString;
+    bool        mTrigger;
     };
 }
 

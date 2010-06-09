@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  The API supports item information that is not supported by 
+* Description:  The API supports item information that is not supported by
 *                the MCS server itself
 *
 */
@@ -26,51 +26,6 @@
 class CLiwDefaultList;
 class CLiwDefaultMap;
 class CMenuSrvEng;
-
-
-/**
- * CMcsGetAttrStrategy
- * Abstract class for sttribute getting strategy
- * @since S60 v5.0
- */
-NONSHARABLE_CLASS( CMcsGetAttrStrategy ): public CBase
-	{
-public:
-
-	/**
-	 * Constructor.
-	 */
-	CMcsGetAttrStrategy( CMenuSrvEng& aEng );
-
-	/**
-	 * Destructor.
-	 */
-	virtual ~CMcsGetAttrStrategy();
-
-
-	/**
-	 * TODO: add comment
-	 */
-	virtual void PrepareL(TInt aId) = 0;
-
-	/**
-	 * Get attribute value.
-	 * @since S60 v5.0
-	 * @param aAttrName Attribute name.
-	 * @param aAttrExists Will be set to indicate whether attribute exists
-	 * or not.
-	 * @return Attribute value. Empty string if attribute does not exist.
-	 */
-	virtual void GetAttributeL(const TDesC& aAttrName,
-	        TBool& aAttrExists, TDes& aAttrVal ) = 0;
-
-protected:
-	/**
-	 * Engine. not own
-	 */
-	CMenuSrvEng& iEng;
-	};
-
 
 /**
  *  Interface for creating list containg result for getlist operation
@@ -195,15 +150,13 @@ protected:
 	/*
 	 * Sets actual attribute getting strategy for give item id.
 	 */
-	void SetGetterStrategyL(TInt aId);
+	void SetItemIdL(TInt aId);
 
 protected:
 	/**
 	 * Engine. not own
 	 */
 	CMenuSrvEng& iEng ;
-	CMcsGetAttrStrategy* iActualGetter; ///< Actual strategy for item.
-	CMcsGetAttrStrategy* iSuiteGetter;  ///< Get strategy for suite. Own.
-	CMcsGetAttrStrategy* iNormalGetter; ///< Get strategy for not suite. Own.
+    TInt iId; ///< a id of an item.
     };
 #endif __MCSGETLISTCREATORINTERFACE_H__

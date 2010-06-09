@@ -339,21 +339,23 @@ void CCPServerSession::ExecuteMultipleActionsL(const RMessage2& aMessage)
     const TLiwGenericParam* param = NULL;
     TInt pos(0);
     param = genericList->FindFirst(pos, KFilters);
-    const CLiwList* maps = param->Value().AsList();
-    CLiwDefaultList* cpMaps = CheckValidityLC(maps);
-    //execute actions
-    for (TInt i = 0; i < cpMaps->Count(); i++)
+    if( param && pos!= KErrNotFound )
         {
-        TLiwVariant mapVariant;
-        mapVariant.PushL();
-        cpMaps->AtL(i, mapVariant);
-        const CCPLiwMap* map =
-                static_cast<const CCPLiwMap*> (mapVariant.AsMap());
-        TRAP_IGNORE(ExecuteActionL(map, ETrue, options));
-        CleanupStack::PopAndDestroy(&mapVariant);
+        const CLiwList* maps = param->Value().AsList();
+        CLiwDefaultList* cpMaps = CheckValidityLC(maps);
+        //execute actions
+        for (TInt i = 0; i < cpMaps->Count(); i++)
+            {
+            TLiwVariant mapVariant;
+            mapVariant.PushL();
+            cpMaps->AtL(i, mapVariant);
+            const CCPLiwMap* map =
+                    static_cast<const CCPLiwMap*> (mapVariant.AsMap());
+            TRAP_IGNORE(ExecuteActionL(map, ETrue, options));
+            CleanupStack::PopAndDestroy(&mapVariant);
+            }
+        CleanupStack::PopAndDestroy(cpMaps);
         }
-
-    CleanupStack::PopAndDestroy(cpMaps);
     CleanupStack::PopAndDestroy(genericList);
     }
 

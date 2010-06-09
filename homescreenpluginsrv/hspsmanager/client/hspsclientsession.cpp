@@ -24,6 +24,9 @@
 #include "hspsthemeserver.h"
 #include "hspsclientsession.h"
 
+const TInt KRetryMax = 256;
+const TInt KRetryInterval = 100000; // 100ms
+
 // Standard server startup code
 static TInt StartServer()
     {
@@ -72,28 +75,37 @@ static TInt StartServer()
 // -----------------------------------------------------------------------------
 //
 EXPORT_C TInt RhspsClientSession::Connect()
-    {
-    TVersion ver = TVersion(KhspsThemeServerMajorVersionNumber,KhspsThemeServerMinorVersionNumber,
-                                                             KhspsThemeServerBuildVersionNumber);    
-    TInt retry=2;
-    for (;;)
+    {     
+    TVersion ver = TVersion( KhspsThemeServerMajorVersionNumber,
+                             KhspsThemeServerMinorVersionNumber,
+                             KhspsThemeServerBuildVersionNumber);
+    
+    TInt retry = KRetryMax;
+    
+    for(;;)
         {
-        TInt r=CreateSession(KhspsThemeServerName, ver, KDefaultMessageSlots);
+        TInt r = CreateSession( KhspsThemeServerName, ver, KDefaultMessageSlots );
   
-        if (r!=KErrNotFound && r!=KErrServerTerminated)
+        if( r != KErrNotFound && r != KErrServerTerminated )
             {
             return r;
-            }
+            }        
+
+        retry--;
+        if( retry == 0 )
+            {
+            return r;
+            }        
         
-        if (--retry==0)
+        r = StartServer();
+        if( r != KErrNone && r != KErrAlreadyExists )
             {
             return r;
-            }
+            }        
         
-        r=StartServer();
-        if (r!=KErrNone && r!=KErrAlreadyExists)
+        if( r == KErrAlreadyExists )
             {
-            return r;
+            User::After( KRetryInterval );
             }
         }
     }

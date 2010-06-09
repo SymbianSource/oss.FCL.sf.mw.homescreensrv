@@ -149,7 +149,7 @@ void CSapiDataPlugin::PublishL()
     }
 
 // ---------------------------------------------------------------------------
-// Publish a specific text of the widget  
+// Publish a specific text to the widget  
 // ---------------------------------------------------------------------------
 //
 void CSapiDataPlugin::PublishTextL(MAiContentObserver* aObserver, 
@@ -174,7 +174,7 @@ void CSapiDataPlugin::PublishTextL(MAiContentObserver* aObserver,
     }
 
 // ---------------------------------------------------------------------------
-// Publish a specific image of the widget  
+// Publish a specific image to the widget  
 // ---------------------------------------------------------------------------
 //
 void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver,
@@ -270,11 +270,11 @@ void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver,
     }
 
 // ---------------------------------------------------------------------------
-// Publish a image of the widget  
+// Publish a image to the widget  
 // ---------------------------------------------------------------------------
 //
 void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver, 
-        TInt& aContentId, TInt aHandle, TInt aMaskHandle )
+    TInt& aContentId, TInt aHandle, TInt aMaskHandle )
     {
     if ( aObserver->CanPublish( *this, aContentId , aContentId ) )
         {
@@ -303,7 +303,20 @@ void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver,
                 aObserver->Clean( *this, aContentId, aContentId );
                 }
             }
-          }
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// Publish a data to the widget  
+// ---------------------------------------------------------------------------
+//
+void CSapiDataPlugin::PublishData( MAiContentObserver* aObserver, 
+    TInt& aContentId, const TDesC8& aData )
+    {
+    if ( aObserver->CanPublish( *this, aContentId, aContentId ) )
+        {                
+        aObserver->Publish( *this, aContentId, aData, aContentId );
+        }    
     }
 
 // ---------------------------------------------------------------------------
@@ -342,6 +355,10 @@ const TDesC& CSapiDataPlugin::GetTypeL(TDesC& aObjectId )
 				 {
 				 return KImage();
 				 }
+			 else if ( iContentModel[i].type == KAiContentTypeData )
+			     {
+                 return KData();
+			     }
 			 }
 		}
 	
@@ -570,15 +587,11 @@ void CSapiDataPlugin::SubscribeL( MAiContentObserver& aObserver )
 //
 void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     {
-    if ( iDataCount > 0 )
-        {
-        // We own the array so destroy it
-        aSettings.ResetAndDestroy();
-        return;
-        }
-    
     RAiSettingsItemArray contentItemsArr;    
+    CleanupClosePushL( contentItemsArr );
+    
     RAiSettingsItemArray configurationItemsArr;
+    CleanupClosePushL( configurationItemsArr );
     
     TInt count( aSettings.Count() );
     
@@ -598,68 +611,67 @@ void CSapiDataPlugin::ConfigureL( RAiSettingsItemArray& aSettings )
     
     iDataCount = contentItemsArr.Count();
     
-    if ( iDataCount > 0 )
+    // Create the content Model
+    HBufC* contentId = HBufC::NewLC( 
+        KAiContentIdMaxLength + KAiPluginNameMaxLength );
+    
+    iContentModel = new TAiContentItem[iDataCount];
+    
+    for ( TInt i = 0; i < iDataCount; i++ )
         {
-        // Create the content Model
-        HBufC* contentId = HBufC::NewLC( 
-            KAiContentIdMaxLength + KAiPluginNameMaxLength );
+        MAiPluginContentItem& contentItem( 
+            contentItemsArr[i]->AiPluginContentItem() );
         
-        iContentModel = new TAiContentItem[iDataCount];
+        iContentModel[i].id = i;
         
-        for ( TInt i = 0; i < iDataCount; i++ )
+        const TDesC& type( contentItem.Type() );
+        
+        if ( type == KText() || type == KNewsTicker() ||                 
+            type == KTextEditor() )            
             {
-            MAiPluginContentItem& contentItem( 
-                contentItemsArr[i]->AiPluginContentItem() );
-            
-            iContentModel[i].id = i;
-            
-            if( contentItem.Type() == KText() || 
-                contentItem.Type() == KNewsTicker() ||
-                contentItem.Type() == KTextEditor() )            
-                {
-                // text
-                iContentModel[i].type = KAiContentTypeText;
-                }
-            if( contentItem.Type() == KImage() )
-                {
-                // image
-                iContentModel[i].type = KAiContentTypeBitmap;
-                }
-            
-            contentId->Des().Copy( contentItem.Name() );
-            contentId->Des().Delete( 0, 
-                contentId->Des().LocateReverse( KPluginNameSeprator ) + 1 );
-  
-            TInt sizeOfContentId( contentId->Des().Size() + sizeof( wchar_t ) );
-            
-            iContentModel[i].cid = 
-                static_cast< const wchar_t* >( User::Alloc( sizeOfContentId ) );
-                
-            Mem::Copy( ( TAny* )iContentModel[i].cid, 
-                contentId->Des().PtrZ(), sizeOfContentId );
-            
-            contentId->Des().Delete( 0, contentId->Des().Length() );
-            }    
+            // text
+            iContentModel[i].type = KAiContentTypeText;
+            }
+        else if ( type == KImage() )
+            {
+            // image
+            iContentModel[i].type = KAiContentTypeBitmap;
+            }
+        else if ( type == KData() )
+            {
+            // data stream 
+            iContentModel[i].type = KAiContentTypeData;
+            }
         
-        CleanupStack::PopAndDestroy( contentId );
+        contentId->Des().Copy( contentItem.Name() );
+        contentId->Des().Delete( 0, 
+            contentId->Des().LocateReverse( KPluginNameSeprator ) + 1 );
 
-        iContent = AiUtility::CreateContentItemArrayIteratorL( 
-            iContentModel, iDataCount );
-    
-        iData->SetContentIdL( PublisherInfo().Namespace() );
+        TInt sizeOfContentId( contentId->Des().Size() + sizeof( wchar_t ) );
         
-        // Configurations 
-        iData->ConfigureL( configurationItemsArr );
-
-        // Listen the publisher content update
-        iData->RegisterContentObserverL();              
-        }
+        iContentModel[i].cid = 
+            static_cast< const wchar_t* >( User::Alloc( sizeOfContentId ) );
+            
+        Mem::Copy( ( TAny* )iContentModel[i].cid, 
+            contentId->Des().PtrZ(), sizeOfContentId );
+        
+        contentId->Des().Delete( 0, contentId->Des().Length() );
+        }    
     
-    contentItemsArr.Reset();
-    configurationItemsArr.Reset();
-   
-    // We own the array so destroy it
-    aSettings.ResetAndDestroy();    
+    CleanupStack::PopAndDestroy( contentId );
+
+    iContent = AiUtility::CreateContentItemArrayIteratorL( 
+        iContentModel, iDataCount );
+
+    iData->SetContentIdL( PublisherInfo().Namespace() );
+    
+    // Configurations 
+    iData->ConfigureL( configurationItemsArr );
+
+    // Listen the publisher content update
+    iData->RegisterContentObserverL();              
+
+    CleanupStack::PopAndDestroy( 2, &contentItemsArr ); // configurationItemsArr
     }
 
 // ----------------------------------------------------------------------------
@@ -720,6 +732,16 @@ TBool CSapiDataPlugin::IsActive() const
     }
 
 // ----------------------------------------------------------------------------
+// CSapiDataPlugin::IsStopped
+//
+// ----------------------------------------------------------------------------
+//
+TBool CSapiDataPlugin::IsStopped() const
+    {
+    return iPluginState == EStopped;
+    }
+
+// ----------------------------------------------------------------------------
 // CSapiDataPlugin::Data
 //
 // ----------------------------------------------------------------------------
@@ -740,3 +762,4 @@ CSapiDataPlugin::TPluginNetworkStatus CSapiDataPlugin::NetworkStatus() const
     }
 
 // End of file
+

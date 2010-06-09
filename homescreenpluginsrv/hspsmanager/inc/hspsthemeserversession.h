@@ -315,21 +315,7 @@ private:
     void FindWidgetUidsL(
         ChspsODT& aAppODT,
         RArray<TInt>& aUidArray );
-    
-    /**
-     * Handles copying of widget resources to a destination folder.
-     * @since S60 5.0.1
-     * @param aAppODT Application configuration
-     * @param aFilemanager File manager
-     * @param aConfUid Widget which is to be processed
-     * @param aDestination Target path where the files should be copied to
-     */
-    TInt DoCopyResourceFilesL(
-        ChspsODT& aAppODT,        
-        CFileMan& aFilemanager,
-        const TInt aConfUid,
-        const TDesC& aDestination );
-    
+            
 private:
     RFs iFs;
     ChspsInstallationHandler* iInstallationHandler;    

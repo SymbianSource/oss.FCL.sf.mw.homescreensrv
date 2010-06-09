@@ -221,11 +221,12 @@ private:
     
     /**
      * Get bookmark data item
+     * @param aUid, used for bookmark uid
      * @param aView, used for bookmark url
      * @param aParam, used for bookmark name
      * @param aData, is filled with appropriate values
      */
-    void GetBkmDataL( const TDesC8& aView, const TDesC8& aParam, CMCSData& aData );
+    void GetBkmDataL( const TDesC8& aUid, const TDesC8& aView, const TDesC8& aParam, CMCSData& aData );
 
     /**
      * Get folder data item

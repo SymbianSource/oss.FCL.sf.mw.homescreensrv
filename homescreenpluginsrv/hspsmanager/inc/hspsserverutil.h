@@ -138,7 +138,41 @@ class hspsServerUtil
         static TPtrC8 FindConfigurationAttrL( 
             const ChspsODT& aOdt,
             const TDesC8& aAttr );
+
+        /**
+         * Removes plug-in resources from the client app.
+         * @since S60 5.2
+         * @param aFilemanager  File manager instance
+         * @param aAppUid       UID of the application configuration 
+         * @param aPluginODT    Plugin configuration
+         */
+        static void RemoveResourceFilesL(        
+                CFileMan& aFilemanager,
+                RFs& aFs,
+                const TInt aAppUid,
+                const ChspsODT& aPluginODT );
         
+        /**
+         * Finds language specific resources from a plug-in and handles copying  
+         * of the resources to a destination folder.         
+         * @since S60 5.0
+         * @param aAppODT Application configuration
+         * @param aFs           Reference to OPEN file server session handle.
+         * @param aFilemanager  File manager instance
+         * @param aDeviceLanguage Device language
+         * @param aConfUid      Idenifies the plug-in which is to be processed
+         * @param aDestination  Target path where the files should be copied to
+         * @param aIsRelevant   Set if the source file should be copied without the checks
+         */
+        static TInt CopyResourceFilesL(
+            ChspsODT& aAppODT,
+            RFs& aFs,
+            CFileMan& aFilemanager,
+            const TInt aDeviceLanguage,
+            const TInt aConfUid,
+            const TDesC& aDestination,
+            const TBool aIsRelevant = EFalse );        
+                        
         /**
          * Copies a file to a target path when neccessary.
          * Target path is created if it's missing.
@@ -149,13 +183,15 @@ class hspsServerUtil
          * @param aFilemanager  Referemce to file manager instance
          * @param aTargetPath   Path where the file should be copied to
          * @param aFilename     Path and name of the file to be copied
+         * @param aIsRelevant   Set if the source file should be copied without the checks         
          * @return error code
          */
         static TInt CopyResourceFileL(
                 RFs& aFs,
                 CFileMan& aFilemanager,
                 const TPath& aTargetPath,
-                const TFileName& aSourceFile );
+                const TFileName& aSourceFile,
+                const TBool aIsRelevant = EFalse );
         
         /**
          * Checks:
@@ -473,7 +509,8 @@ class hspsServerUtil
                 TFileName& aFilename );
 
         /**
-         * Resolve resource files that need to be copied.
+         * Resolve resource files that need to be copied,
+         * plug-in may not have requested localization.
          * 
          * @since S60 5.1
          * 
@@ -484,7 +521,7 @@ class hspsServerUtil
          *                          of resources if any applicable.
          *                          Ownership of given resources is not transferred!
          */
-        static void GetValidResourcesL(
+        static void GetResourcesForLanguageL(
                 ChspsODT& aODT,        
                 const TInt aConfUid,
                 const TLanguage aActiveLanguage,

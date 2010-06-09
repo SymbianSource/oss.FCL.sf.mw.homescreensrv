@@ -158,11 +158,6 @@ void CMCSPlugin::PublishLItemL( MAiContentObserver& aObserver,
         }
 
     CMenuItem* item = iEngine->FetchMenuItemL( aData );
-    if ( !item )
-        {
-        User::Leave( KErrNotFound );
-        }
-
     CleanupStack::PushL( item );
     
     // One widget item has iDataCount number of elements

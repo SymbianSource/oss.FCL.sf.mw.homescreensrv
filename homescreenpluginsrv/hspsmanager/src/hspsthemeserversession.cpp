@@ -796,81 +796,6 @@ void ChspsThemeServerSession::FindWidgetUidsL(
     }
 
 // -----------------------------------------------------------------------------
-// ChspsThemeServerSession::DoCopyResourceFilesL
-// -----------------------------------------------------------------------------
-TInt ChspsThemeServerSession::DoCopyResourceFilesL(
-        ChspsODT& aAppODT,        
-        CFileMan& aFilemanager,
-        const TInt aConfUid,
-        const TDesC& aDestination )
-    {
-    TInt error( KErrNone );
-    RPointerArray<ChspsResource> widgetResources; // Objects are not owned.
-    CleanupClosePushL( widgetResources );
-    
-    // Get resources that need to be copied.
-    hspsServerUtil::GetValidResourcesL( aAppODT,
-            aConfUid,
-            Server().DeviceLanguage(),
-            widgetResources );
-        
-    // Copy the resources found    
-    for( TInt i = 0; ( i < widgetResources.Count() && !error ); i++ )
-        {      
-        ChspsResource* resource = widgetResources[i];
-        if( !resource )
-            {
-            continue;
-            }
-                
-        // Get relative path under the themes folder 
-        TPath relativePath;
-        hspsServerUtil::GetRelativeResourcePath( 
-                resource->FileName(),
-                relativePath );
-        
-        // Strip language indicator from the relative path                                       
-        hspsServerUtil::GetLocaleIndependentResourcePath( 
-                resource->Language(),                            
-                relativePath );   
-        
-        // Finalize target path
-        TPath targetPath;
-        targetPath.Copy( aDestination );
-        targetPath.Append( relativePath );        
-             
-        // Create missing target path and copy files when needed only
-        error = hspsServerUtil::CopyResourceFileL(
-                iFs,
-                aFilemanager, 
-                targetPath,
-                resource->FileName() );
-        if ( !error )
-            {
-#ifdef HSPS_LOG_ACTIVE
-            if ( iLogBus )
-                {
-                iLogBus->LogText( 
-                        _L( "hspsServerUtil::DoCopyResourceFilesL(): - %S was copied" ), 
-                        &targetPath 
-                        );
-                } 
-#endif
-            }
-        if ( error == KErrAlreadyExists )
-            {
-            error = KErrNone;
-            }
-        
-        } // copy loop       
-        
-    widgetResources.Reset();
-    CleanupStack::PopAndDestroy( 1, &widgetResources );
-
-    return error;
-    }
-
-// -----------------------------------------------------------------------------
 // ChspsThemeServerSession::CopyResourceFilesL
 // (other items were commented in a header).
 // -----------------------------------------------------------------------------
@@ -918,31 +843,33 @@ void ChspsThemeServerSession::CopyResourceFilesL(const RMessage2& aMessage)
  		{
  		phaseCounter++;
  		 		
-        RArray<TInt> widgetArray;
-        CleanupClosePushL( widgetArray );
+        RArray<TInt> uidArray;
+        CleanupClosePushL( uidArray );
         
         // Find unique configuration UIDs from the resource array
-        FindWidgetUidsL( *odt, widgetArray );
+        FindWidgetUidsL( *odt, uidArray );
  		        
         CFileMan* fileManager = NULL;
  		fileManager = CFileMan::NewL( iFs );
  		CleanupStack::PushL( fileManager );
  		                        
         // Loop widgets belonging to the root configuration
-        const TInt uidCount = widgetArray.Count();
+        const TInt uidCount = uidArray.Count();        
 	    for( TInt i = 0; i < uidCount && !error; i++ )
 	    	{	    		    	
 	    	// Copy widget's resources to client's private folder	    	
-	    	error = DoCopyResourceFilesL(
-                        *odt,
-                        *fileManager, 
-                        widgetArray[i],
-                        destinationPath );	    
+	    	error = hspsServerUtil::CopyResourceFilesL(
+                    *odt,
+                    iFs,
+                    *fileManager,
+                    Server().DeviceLanguage(),                     
+                    uidArray[i],
+                    destinationPath );	    
     		}
 	    
-	    widgetArray.Reset();
+	    uidArray.Reset();
 	    
-	    CleanupStack::PopAndDestroy( 2, &widgetArray ); // fileManager, widgetArray    	           
+	    CleanupStack::PopAndDestroy( 2, &uidArray ); // fileManager, uidArray    	           
  		} // KErrNone
  	
  	//Tidy-up

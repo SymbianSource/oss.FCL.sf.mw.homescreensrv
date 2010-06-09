@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  
+* Description:
 *
 */
 
@@ -21,166 +21,12 @@
 #include "mcsgetlistcreatorinterface.h"
 #include "menusrveng.h"
 
-_LIT( KMenuAttrSuiteName, "suite_name" );
-
-/**
- * Class for getting attributes for installed suite items
- * @since S60 v5.0
- */
-NONSHARABLE_CLASS( CMcsSuiteGetAttrStrategy ) :
-	public CMcsGetAttrStrategy
-	{
-public:
-
-	/**
-	 * Constructor.
-	 */
-	CMcsSuiteGetAttrStrategy( CMenuSrvEng& aEng );
-
-	/**
-	 * Destructor.
-	 */
-	virtual ~CMcsSuiteGetAttrStrategy();
-
-	/**
-	 * TODO: add comments
-	 */
-	void PrepareL(TInt aId);
-
-	/**
-	 * GetAttributeL.
-	 */
-	void GetAttributeL(const TDesC& aAttrName,
-		        TBool& aAttrExists, TDes& aAttrVal );
-
-private:
-	RBuf iSuiteName; ///< Name of a suite for actual strategy. Own.
-	};
-
-/**
- * Class for getting attributes for non suite items / not installed suite items
- * @since S60 v5.0
- */
-NONSHARABLE_CLASS( CMcsMainGetAttrStrategy ) :
-	public CMcsGetAttrStrategy
-	{
-public:
-
-	/**
-	 * Constructor.
-	 */
-	CMcsMainGetAttrStrategy ( CMenuSrvEng& aEng );
-
-	/**
-	 * TODO: add comments
-	 */
-	void PrepareL(TInt aId);
-
-	/**
-	 * GetAttributeL.
-	 */
-	void GetAttributeL(const TDesC& aAttrName,
-		        TBool& aAttrExists, TDes& aAttrVal );
-
-private:
-	TInt iId; ///< a id of an item for actual strategy.
-	};
-
-
-// ---------------------------------------------------------
-// CMcsGetAttrStrategy::CMcsGetAttrStrategy
-// ---------------------------------------------------------
-//
-CMcsGetAttrStrategy::CMcsGetAttrStrategy( CMenuSrvEng& aEng ) :
-	iEng(aEng)
-	{
-	}
-
-
-// ---------------------------------------------------------
-// CMcsGetAttrStrategy::~CMcsGetAttrStrategy
-// ---------------------------------------------------------
-//
-CMcsGetAttrStrategy::~CMcsGetAttrStrategy()
-	{
-	}
-
-// ---------------------------------------------------------
-// CMcsSuiteGetAttrStrategy::CMcsGetSuiteAttributeStrategy
-// ---------------------------------------------------------
-//
-CMcsSuiteGetAttrStrategy::CMcsSuiteGetAttrStrategy( CMenuSrvEng& aEng ) :
-	CMcsGetAttrStrategy(aEng)
-	{
-	}
-
-// ---------------------------------------------------------
-// CMcsSuiteGetAttrStrategy::~CMcsSuiteGetAttrStrategy
-// ---------------------------------------------------------
-//
-CMcsSuiteGetAttrStrategy::~CMcsSuiteGetAttrStrategy()
-	{
-	iSuiteName.Close();
-	}
-
-// ---------------------------------------------------------
-// CMcsSuiteGetAttrStrategy::Prepare
-// ---------------------------------------------------------
-//
-void CMcsSuiteGetAttrStrategy::PrepareL(TInt aId)
-	{
-	TBool suiteNameExists;
-	iSuiteName.Close();
-	iSuiteName.CreateL( KMenuMaxAttrValueLen );
-	iEng.GetAttributeL(aId, KMenuAttrSuiteName, suiteNameExists, iSuiteName);
-	}
-
-// ---------------------------------------------------------
-// CMcsSuiteGetAttrStrategy::GetAttributeL
-// ---------------------------------------------------------
-//
-void CMcsSuiteGetAttrStrategy::GetAttributeL(const TDesC& aAttrName,
-        TBool& aAttrExists, TDes& aAttrVal )
-	{
-	iEng.GetSuiteAttribute(iSuiteName, aAttrName, aAttrExists, aAttrVal);
-	}
-
-// ---------------------------------------------------------
-// CMcsSuiteGetAttrStrategy::CMcsGetSuiteAttributeStrategy
-// ---------------------------------------------------------
-//
-CMcsMainGetAttrStrategy::CMcsMainGetAttrStrategy( CMenuSrvEng& aEng ) :
-	CMcsGetAttrStrategy(aEng)
-	{
-	}
-
-// ---------------------------------------------------------
-// CMcsMainGetAttrStrategy::Prepare
-// ---------------------------------------------------------
-//
-void CMcsMainGetAttrStrategy::PrepareL(TInt aId)
-	{
-	iId = aId;
-	}
-
-// ---------------------------------------------------------
-// CMcsGetSuiteAttributeStrategy::GetAttributeL
-// ---------------------------------------------------------
-//
-void CMcsMainGetAttrStrategy::GetAttributeL(const TDesC& aAttrName,
-        TBool& aAttrExists, TDes& aAttrVal )
-	{
-	iEng.GetAttributeL (iId, aAttrName, aAttrExists, aAttrVal);
-	}
-
 // ---------------------------------------------------------
 // CMcsGetListCreatorInterface::~CMcsGetListCreatorInterface
 // ---------------------------------------------------------
 //
 CMcsGetListCreatorInterface::~CMcsGetListCreatorInterface()
     {
-    delete iNormalGetter;
-    delete iSuiteGetter;
     }
 
 // ---------------------------------------------------------
@@ -198,9 +44,6 @@ CMcsGetListCreatorInterface::CMcsGetListCreatorInterface( CMenuSrvEng& aEng ):
 //
 void CMcsGetListCreatorInterface::ConstructL()
     {
-    iActualGetter = NULL;
-    iSuiteGetter = new(ELeave) CMcsSuiteGetAttrStrategy(iEng);
-    iNormalGetter = new(ELeave) CMcsMainGetAttrStrategy(iEng);
     }
 
 // ---------------------------------------------------------
@@ -211,7 +54,7 @@ void CMcsGetListCreatorInterface::BuildMapL(
 		const TMenuItem& aMenuItem, CDesC16Array* aRequiredAttributes,
 		CDesC16Array* aIgnoredAttributes, CLiwDefaultMap* aMap )
 	{
-	SetGetterStrategyL( aMenuItem.Id() );
+	SetItemIdL( aMenuItem.Id() );
 	AddFundamentalAttributesL( aMenuItem, aMap );
 
 	if( aRequiredAttributes->MdcaCount() &&
@@ -300,7 +143,7 @@ void CMcsGetListCreatorInterface::AddRequiredAttributesL( const TMenuItem& aMenu
 	        if ( aMenuItem.Type() == KMenuTypeApp() ||
 	        		aMenuItem.Type() == KMenuTypeFolder() )
 	            {
-	            iActualGetter->GetAttributeL( KRunningStatus, exists, attrvalue );
+	            iEng.GetAttributeL( iId, KRunningStatus, exists, attrvalue );
 	            aMap->InsertL( KRunning, TLiwVariant( exists ) );
 	            }
 	        }
@@ -314,8 +157,9 @@ void CMcsGetListCreatorInterface::AddRequiredAttributesL( const TMenuItem& aMenu
 	        }
 	    else
 	        {
-	        iActualGetter->GetAttributeL(
-	        		aRequiredAttributes->MdcaPoint(i), exists, attrvalue );
+            iEng.GetAttributeL(
+                    iId, aRequiredAttributes->MdcaPoint(i), exists, attrvalue );
+
 	        if( exists )
 	            {
 	            TBuf8<KMenuMaxAttrNameLen> attrname;
@@ -355,7 +199,7 @@ void CMcsGetListCreatorInterface::AddAttributesWithoutIgnoredL(	const TMenuItem&
         running.Copy( KRunning );
         if( aIgnoredAttributes->Find( running, pos ) != KErrNone )
             {
-            iActualGetter->GetAttributeL(KRunningStatus, exists, attrvalue );
+            iEng.GetAttributeL( iId, KRunningStatus, exists, attrvalue );
             aMap->InsertL( KRunning, TLiwVariant( exists ) );
             }
         }
@@ -368,7 +212,7 @@ void CMcsGetListCreatorInterface::AddAttributesWithoutIgnoredL(	const TMenuItem&
         {
         if( aIgnoredAttributes->Find( attrNameList[i], pos ) != KErrNone )
             {
-            iActualGetter->GetAttributeL(attrNameList[i], exists, attrvalue );
+            iEng.GetAttributeL( iId, attrNameList[i], exists, attrvalue );
             if( exists )
                 {
                 TBuf8<KMenuMaxAttrNameLen> attrname;
@@ -425,7 +269,7 @@ void CMcsGetListCreatorInterface::AddRequiredAttributesWithoutIgnoredL(
             {
             if ( aMenuItem.Type() == KMenuTypeApp() || aMenuItem.Type() == KMenuTypeFolder() )
                 {
-                iActualGetter->GetAttributeL( KRunningStatus, exists, attrvalue );
+                iEng.GetAttributeL( iId, KRunningStatus, exists, attrvalue );
                 aMap->InsertL( KRunning, TLiwVariant( exists ) );
                 }
             }
@@ -441,7 +285,8 @@ void CMcsGetListCreatorInterface::AddRequiredAttributesWithoutIgnoredL(
             }
         else if( aIgnoredAttributes->Find( aRequiredAttributes->MdcaPoint(i), pos ) != KErrNone )
             {
-            iActualGetter->GetAttributeL( aRequiredAttributes->MdcaPoint(i), exists, attrvalue );
+            iEng.GetAttributeL(
+                    iId, aRequiredAttributes->MdcaPoint(i), exists, attrvalue );
             if( exists )
                 {
                 TBuf8<KMenuMaxAttrNameLen> attrname;
@@ -475,7 +320,7 @@ void CMcsGetListCreatorInterface::AddAllAttributesL(
 	if ( aMenuItem.Type() == KMenuTypeApp() ||
 			aMenuItem.Type() == KMenuTypeFolder() )
 	    {
-        iActualGetter->GetAttributeL( KRunningStatus, exists, attrvalue );
+        iEng.GetAttributeL( iId, KRunningStatus, exists, attrvalue );
         aMap->InsertL( KRunning, TLiwVariant( exists ) );
 	    }
 	RArray<TPtrC> attrNameList;
@@ -486,7 +331,7 @@ void CMcsGetListCreatorInterface::AddAllAttributesL(
 	    {
 	    TBuf8<KMenuMaxAttrNameLen> attrname;
 	    attrname.Copy( attrNameList[i] );
-        iActualGetter->GetAttributeL( attrNameList[i], exists, attrvalue );
+        iEng.GetAttributeL( iId, attrNameList[i], exists, attrvalue );
 	    if(exists)
 	        {
 	        attrname.Copy(attrNameList[i]);
@@ -499,7 +344,6 @@ void CMcsGetListCreatorInterface::AddAllAttributesL(
    	CleanupStack::PopAndDestroy( iconAttrMap );
 	CleanupStack::PopAndDestroy(&attrNameList);
 	CleanupStack::PopAndDestroy( &attrvalue );
-
 	}
 
 // ---------------------------------------------------------
@@ -538,7 +382,7 @@ void CMcsGetListCreatorInterface::AppendAttrL(
 	RBuf attrvalue;
     attrvalue.CreateL( KMenuMaxAttrValueLen );
 	CleanupClosePushL( attrvalue );
-	iActualGetter->GetAttributeL(aAttrName, exists, attrvalue );
+    iEng.GetAttributeL( iId, aAttrName, exists, attrvalue );
 	if ( exists )
 		{
 		attrName.Copy( aAttrName );
@@ -551,23 +395,8 @@ void CMcsGetListCreatorInterface::AppendAttrL(
 // CMcsGetListCreatorInterface::SetGetterStrategyL
 // ---------------------------------------------------------
 //
-void CMcsGetListCreatorInterface::SetGetterStrategyL(TInt aId)
+void CMcsGetListCreatorInterface::SetItemIdL( TInt aId )
 	{
-	TBool suiteNameExists;
-	RBuf name;
-	name.CreateL( KMenuMaxAttrValueLen );
-	CleanupClosePushL( name );
-
-	iEng.GetAttributeL(aId, KMenuAttrSuiteName, suiteNameExists, name);
-	if (suiteNameExists && iEng.InstalledSuiteExist(name))
-		{
-		iActualGetter = iSuiteGetter;
-		}
-	else
-		{
-		iActualGetter = iNormalGetter;
-		}
-	iActualGetter->PrepareL(aId);
-	CleanupStack::PopAndDestroy(&name);
+	iId = aId;
 	}
 //  End of File

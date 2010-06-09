@@ -25,7 +25,9 @@ using namespace Hs;
 // ---------------------------------------------------------------------------
 //
 HsWidgetItem::HsWidgetItem(std::string& aItemName, std::string& aValue):
-	mItemName(aItemName), mItemString(aValue), mItemInt(0), mIsString(true)
+	mItemName(aItemName), mItemString(aValue), mItemInt(0), 
+	mIsString(true),mTrigger(false)
+	
 	{
 	}
 
@@ -102,5 +104,20 @@ bool HsWidgetItem::isStringValue()
 	return mIsString;
 	}
 
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void HsWidgetItem::triggerAdded()
+    {
+    mTrigger = true;
+    }
 
-
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+bool HsWidgetItem::isTriggerAdded()
+    {
+    return mTrigger;
+    }

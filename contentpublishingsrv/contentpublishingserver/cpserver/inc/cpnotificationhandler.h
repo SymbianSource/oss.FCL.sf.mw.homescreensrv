@@ -170,6 +170,13 @@ private:
     TBool CheckRegistryTypeL( const CLiwMap& aMap,
     		const CCPLiwMap& aFilter );
 
+    /**
+     * Appends KDataMap for notification list if needed
+     *
+     * @param aMap Map with notifications
+     */
+    void AppendDataMapL( CLiwDefaultList* aListOfMaps );
+
 private:
     // data
 

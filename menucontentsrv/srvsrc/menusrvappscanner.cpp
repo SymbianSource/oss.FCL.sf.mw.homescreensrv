@@ -32,6 +32,7 @@
 _LIT( KMenuOne, "1" );
 _LIT( KMenuAttrMmcId, "mmc_id" );
 _LIT( KMenuMassStorage, "mass_storage" );
+_LIT( KMenuPredefinedWidget, "predefined_widget" );
 _LIT( KMenuMmcHistoryFname, "mmchistory" );
 
 // ==================== LOCAL FUNCTIONS ====================
@@ -1035,51 +1036,61 @@ void CMenuSrvAppScanner::EnsureFolderWritableL( TInt aFolder )
 // CMenuSrvAppScanner::HandleMissingItemsL
 // ---------------------------------------------------------
 //
-void CMenuSrvAppScanner::HandleMissingItemsL
-( const RArray<TMenuItem>& aItems )
+TMenuItem::TFlags CMenuSrvAppScanner::GetProperFlagL( const TMenuItem& aItem )
+    {
+    TMenuItem::TFlags flags = TMenuItem::ENoFlag;
+
+    TUint mmcId = 0;
+    TPtrC val;
+    TBool dummy;
+    if( iEng.ObjectL( aItem.Id() ).FindAttribute( KMenuAttrMmcId(), val, dummy ) )
+        {
+        MenuUtils::GetTUint( val, mmcId );
+        if ( mmcId && KErrNotFound != iMmcHistory->Find( mmcId ) )
+            {
+            // This item is on an MMC which is currently in the MMC history.
+            // Set it "missing" but keep it.
+            flags = TMenuItem::EMissing;
+            }
+        else if ( val == KMenuMassStorage()
+                    && IsDriveInUse( DriveInfo::EDefaultMassStorage ) )
+            {
+            flags = TMenuItem::EMissing;
+            }
+        else if ( iEng.ObjectL( aItem.Id() ).FindAttribute(
+                KMenuPredefinedWidget(), val, dummy ) )
+            {
+            flags = TMenuItem::EMissing;
+            }
+        }
+    else if( iEng.ObjectL( aItem.Id() ).GetAppType()
+                != CMenuEngObject::EWidgetApp
+            || iEng.ObjectL( aItem.Id() ).FindAttribute(
+                    KMenuPredefinedWidget(), val, dummy ) )
+        {
+        flags = TMenuItem::EHidden;
+        }
+    return flags;
+    }
+
+// ---------------------------------------------------------
+// CMenuSrvAppScanner::HandleMissingItemsL
+// ---------------------------------------------------------
+//
+void CMenuSrvAppScanner::HandleMissingItemsL(
+        const RArray<TMenuItem>& aItems )
     {
     for ( TInt i = 0; i < aItems.Count(); i++ )
         {
-        const TInt id = aItems[i].Id();
-        TUint mmcId = 0;
-        TPtrC val;
-        TBool dummy;
-        if( iEng.ObjectL( id ).FindAttribute( KMenuAttrMmcId(), val, dummy ) )
+        TMenuItem::TFlags flags = GetProperFlagL( aItems[i] );
+        if( flags == TMenuItem::ENoFlag )
             {
-            MenuUtils::GetTUint( val, mmcId );
-			if ( mmcId && KErrNotFound != iMmcHistory->Find( mmcId ) )
-				{
-				// This item is on an MMC which is currently in the MMC history.
-				// Set it "missing" but keep it.
-				SetObjectFlagsL( ETrue, aItems[i], TMenuItem::EMissing,
-						RMenuNotifier::EItemsAddedRemoved );
-				}
-			else if ( val == KMenuMassStorage()
-						&& IsDriveInUse( DriveInfo::EDefaultMassStorage ) )
-				{
-				SetObjectFlagsL( ETrue, aItems[i], TMenuItem::EMissing,
-						RMenuNotifier::EItemsAddedRemoved );
-				}
-			else
-				{
-				iEng.RemoveL( id );
-				}
+            iEng.RemoveL( aItems[i].Id() );
             }
         else
             {
-            // This item is not on MMC or its MMC has been purged from the MMC
-            // history. Hide the item.
-            SetObjectFlagsL( EFalse, aItems[i], TMenuItem::ELockDelete );
-
-			if( iEng.ObjectL( id ).GetAppType() != CMenuEngObject::EWidgetApp )
-            	{
-            	SetObjectFlagsL( ETrue, aItems[i], TMenuItem::EHidden,
-						RMenuNotifier::EItemsAddedRemoved );
-            	}
-            else
-            	{
-               	iEng.RemoveL( id );
-            	}
+            SetObjectFlagsL( ETrue, aItems[i], flags,
+                    RMenuNotifier::EItemsAddedRemoved );
             }
         }
     }

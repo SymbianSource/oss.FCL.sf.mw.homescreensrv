@@ -443,15 +443,18 @@ void CSapiData::PublishDataL(MAiContentObserver* aObserver, CLiwDefaultMap* aDat
 		TLiwVariant variant;
 		HBufC8* itemName = CnvUtfConverter::ConvertFromUnicodeToUtf8L(*iItemList[pIndex]->iName);
 		CleanupStack::PushL( itemName );
+		
 		if ( aDataMap->FindL( *itemName, variant ) )
-		    {
-			TPtrC valPtr;
-			if(  iItemList[pIndex]->iType->Des() == KText )
+		    {			
+            const TDesC& type( *iItemList[pIndex]->iType );
+            TPtrC valPtr;
+            
+			if ( type == KText )
 				{
 				valPtr.Set( variant.AsDes() );
 				iPlugin->PublishTextL( aObserver, iItemList[pIndex]->iId, valPtr  );
 				}
-			else if( iItemList[pIndex]->iType->Des() == KImage )
+			else if( type == KImage )
 				{
 				TInt handle = KErrBadHandle;
                 TUint uintHandle = 0;
@@ -494,9 +497,18 @@ void CSapiData::PublishDataL(MAiContentObserver* aObserver, CLiwDefaultMap* aDat
 					iPlugin->PublishImageL(aObserver, iItemList[pIndex]->iId, handle, maskHandle );
 					}
 				}
+			else if ( type == KData )
+			    {
+                TPtrC8 ptr;
+                
+                ptr.Set( variant.AsData() );
+                                
+                iPlugin->PublishData( aObserver, iItemList[pIndex]->iId, ptr );                
+			    }
 		    }
-			variant.Reset();
-			CleanupStack::PopAndDestroy( itemName );
+		
+        variant.Reset();
+        CleanupStack::PopAndDestroy( itemName );
 	    }
     }
 // ---------------------------------------------------------------------------
@@ -749,7 +761,7 @@ void CSapiData::TriggerActiveL()
 //
 void CSapiData::UpdatePublisherStatusL( TDesC& aPublisher )
 	{
-	 if ( aPublisher == iPublisher )
+	 if ( aPublisher == iPublisher  && !iPlugin->IsStopped() )
         {
        // Resend the plugin status to publisher
         CLiwDefaultList* actionsToLaunch = CLiwDefaultList::NewLC();

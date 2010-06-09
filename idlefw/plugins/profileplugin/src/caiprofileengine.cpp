@@ -137,6 +137,9 @@ void CAiProfileEngine::ConstructL()
 //
 CAiProfileEngine::~CAiProfileEngine()
     {
+    delete iOfflineQueryDialog;
+    iOfflineQueryDialog = NULL;
+    
     iSSSettings.CancelAll( *this );
     iSSSettings.Close();
     
@@ -276,9 +279,12 @@ TBool CAiProfileEngine::ShowOfflineMessageL()
 		}
 	else
 		{
-		CAknQueryDialog* dlg = CAknQueryDialog::NewL();
-		
-		result = dlg->ExecuteLD( R_AI_LEAVE_OFFLINE_MODE_QUERY );	
+		if ( iOfflineQueryDialog == NULL )
+			{
+        	iOfflineQueryDialog = CAknQueryDialog::NewL();
+			result = iOfflineQueryDialog->ExecuteLD( R_AI_LEAVE_OFFLINE_MODE_QUERY );
+			iOfflineQueryDialog = NULL;
+			}
 		}
        
 	return result;
@@ -665,6 +671,13 @@ void CAiProfileEngine::HandleProfileNameArrayModificationL()
 //
 void CAiProfileEngine::HandleProfileActivatedL( TInt /*aProfileId*/ )
     {
+    // prevents duplicate offline notes on the screen.
+    if ( iOfflineQueryDialog )
+        {
+        delete iOfflineQueryDialog;
+        iOfflineQueryDialog = NULL;
+        }
+
     DetermineTimedAndSilentStatesL();
     
     NotifyContentUpdate();

@@ -22,6 +22,7 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../inc/aisystemuids.hrh          MW_LAYER_PLATFORM_EXPORT_PATH(aisystemuids.hrh)
 ../inc/aiuicontrolleruid.hrh     MW_LAYER_PLATFORM_EXPORT_PATH(aiuicontrolleruid.hrh)
 ../inc/aiconsts.h                MW_LAYER_PLATFORM_EXPORT_PATH(aiconsts.h)
 ../inc/aifweventhandler.h        MW_LAYER_PLATFORM_EXPORT_PATH(aifweventhandler.h)

@@ -370,7 +370,7 @@ CMCSData* CMCSPluginData::GetMenuDataL(
     CleanupStack::PushL( data );
     if( type == KProperValueBookmark )
         {
-        GetBkmDataL( view, param, *data );
+        GetBkmDataL( uid, view, param, *data );
         }
     else if( type == KProperValueFolder )
         {
@@ -392,9 +392,26 @@ CMCSData* CMCSPluginData::GetMenuDataL(
 // Creates bookmark data item.
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginData::GetBkmDataL( const TDesC8& aView, const TDesC8& aParam, CMCSData& aData )
+void CMCSPluginData::GetBkmDataL( const TDesC8& aUid, const TDesC8& aView, const TDesC8& aParam, CMCSData& aData )
     {
     TMenuItem item;
+        
+    if( aUid.Length() > 0 )
+        {
+        CMenuFilter* filter = CMenuFilter::NewLC();
+        HBufC* name( NULL );
+        HBufC* value( NULL );
+        name = AiUtility::CopyToBufferL( name, KProperNameUid );
+        CleanupStack::PushL( name );
+        value = AiUtility::CopyToBufferL( value, aUid );
+        CleanupStack::PushL( value );
+        filter->HaveAttributeL( *name, *value );  
+        CleanupStack::PopAndDestroy( value );
+        CleanupStack::PopAndDestroy( name );
+        item = iEngine.FindMenuItemL( *filter );
+        CleanupStack::PopAndDestroy( filter );    
+        }
+    
     item.SetType( KMenuTypeUrl );
     aData.SetMenuItem( item );
 

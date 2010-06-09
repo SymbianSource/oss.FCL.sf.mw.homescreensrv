@@ -59,9 +59,10 @@ public:
      */
     enum TPluginStates
         {
-        ENone,
+        EStopped,
+        EStarted,
         EResume,
-        ESuspend
+        ESuspend    
         };
     
     /**
@@ -187,6 +188,14 @@ public:
     * @return boolean (ETrue/EFalse)
     */
     TBool IsActive() const;
+    
+    /**
+    * Is plugin stopped 
+    *
+    * @param void 
+    * @return boolean (ETrue/EFalse)
+    */
+    TBool IsStopped() const;    
     
     /**
     * Publish a specific text of the widget  
@@ -341,8 +350,6 @@ private:
     RFs iRfs;
     /** Timer for initial data republishing, owned */
     CPeriodic* iTimer;
-    /** Flag to indicate if this plugin is stopped */
-    TBool iStopped;
     };
 
 #endif // WRTDATAPLUGIN_H

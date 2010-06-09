@@ -31,13 +31,13 @@ const TUid KUidDataPlugin = { KImplUidDataPlugin };
 /**
  * Content Model type identifier
  */
-_LIT(KText ,"text");
+_LIT(KText, "text");
 _LIT(KImage, "image");
-_LIT(KPlugin, "plugin");
-
-_LIT(KNewsTicker ,"newsticker");
+_LIT(KNewsTicker, "title");
 _LIT(KTextEditor, "texteditor");
+_LIT(KData, "data");
 
+_LIT(KPlugin, "plugin");
 
 // CPS Constants
 _LIT(KService,         "service");

@@ -221,6 +221,14 @@ public:
     TBool IsActive() const;
     
     /**
+    * Is plugin stopped 
+    *
+    * @param void 
+    * @return boolean (ETrue/EFalse)
+    */
+    TBool IsStopped() const;
+    
+    /**
 	* Publish a specific text of the widget  
 	*
 	* @param aObserver observer
@@ -253,6 +261,17 @@ public:
     */
     void PublishImageL(MAiContentObserver* aObserver,
             TInt aContentId, TDesC& aPath );
+
+    /**
+    * Publish a data stream to the widget  
+    *
+    * @param aObserver observer
+    * @param aContentId content model id
+    * @param aData data stream 
+    * @return void
+    */    
+    void PublishData( MAiContentObserver* aObserver, 
+        TInt& aContentId, const TDesC8& aData );
     
     /**
     * Cleans a data from the widget

@@ -38,10 +38,9 @@ class CMcsDrmHandler;
 class CMcsCacheHandler;
 class CMcsChildrenHandler;
 class CMcsRunningAppsHandler;
-class CMcsSuiteHandler;
 class CMcsGetlistHandler;
 /**
-* In release code the macro must be undefined and application 
+* In release code the macro must be undefined and application
 * scanning must be enabled!
 * Define the macro only for testing purposes!
 */
@@ -126,20 +125,20 @@ public:     // new methods
     * self-deletion is scheduled.
     */
     void RemoveSession( CMenuSrvSession* aSession );
-    
-    
+
+
     /**
     * Get attribute name list.
     * @since S60 v5.0
     * @param aList Attribute name list.
     * @throws System-wide error codes if an error occurs.
     * @panic None.
-    * 
+    *
     */
     void GetAttributeListL(
   		  TInt aId,
   		  RArray<TPtrC>& aList );
-    
+
     /**
     * Get attribute value.
     * @since S60 v5.0
@@ -150,28 +149,21 @@ public:     // new methods
     */
     TPtrC GetAttributeL( TInt aId, const TDesC& aAttrName, TBool& aAttrExists );
 
-    void GetAttributeL( TInt aId, const TDesC& aAttrName, 
+    void GetAttributeL( TInt aId, const TDesC& aAttrName,
         TBool& aAttrExists, TDes& aAttrVal );
 
-    //TODO: Add comment
-    TBool InstalledSuiteExist( const TDesC& aSuiteName );
-    
-    //TODO: Add comment
-    void GetSuiteAttribute( const TDesC& aSuiteName, const TDesC& aAttrName, 
-            TBool& aAttrExists, TDes& aAttrVal );
-    
      /**
-     * Get array of running apps 
-     * 
+     * Get array of running apps
+     *
      */
     void GetRunningAppsL(  RArray<TUid>& aArray );
 
-    
+
     /**
      * Fetches children count for a folder
      */
     TUint GetChildrenCountL( TInt aId );
-    
+
     /**
     * Builds output list for GetList operation and returns result
     * @param aSerializedInput serialized list with input parameters
@@ -185,12 +177,12 @@ public:     // new methods
     * @return serialized output list
     */
     TPtrC8 GetListDataL( );
-    
+
     /**
     * Closes output buffer.
     */
     void CloseOutputBuffer( );
-    
+
     /**
     * Cleans attribute cache. Used in case of no memory.
     */
@@ -199,23 +191,23 @@ public:     // new methods
 private:    // from MMenuEngObserver
 
 
-    void GetExtendedAttributesL( TInt aId, const TDesC& aAttrName, 
+    void GetExtendedAttributesL( TInt aId, const TDesC& aAttrName,
         TBool& aAttrExists, TDes& aAttrVal );
-    
+
     void AddToCacheL( TInt aId, const TDesC& aAttrName, TDes& aAttrVal );
-    
+
 
     /**
-    * Fetches an application native attribute value. 
+    * Fetches an application native attribute value.
     * @param aId item id.
     * @param aAttrExists ETrue if attribute exist.
     * @param aAttrVal attribute value.
     */
     void ApplicationNativeAttributeL(
-    		TInt aId, 
+    		TInt aId,
     		TBool & aAttrExists,
     		TDes & aAttrVal );
-    
+
     /**
     * Engine event. Dispatch events to all dependent sessions.
     * @param aFolder Events relate to this folder. May be 0.
@@ -228,7 +220,7 @@ private:    // from MMenuEngObserver
     * @param aErr Error code.
     */
     void EngineError( TInt aErr );
-    
+
     /**
      * Engine tree reload event.
      * Run appscanner again.
@@ -237,20 +229,20 @@ private:    // from MMenuEngObserver
     /**
     * Fetches an attribute value from the caption info attributes
     */
-    void CaptionInfoL( TInt aId, const TDesC& aAttrName, 
+    void CaptionInfoL( TInt aId, const TDesC& aAttrName,
         TBool& aExists, TDes& aAttrVal );
-    
-	
+
+
     /**
     * Fetches an attribute value from the skin icon info attributes
     */
     void SkinInfoL( TInt aId, TInt aSelect, TBool& aExists, TDes& aAttrVal  );
-    
+
     /**
     * Fetches the DRM protection attribute value
     */
     void AppDrmProtectionL( TInt aId, TBool& aExists, TDes& aAttrVal );
-    
+
     /**
     * Fetches an attribute value from the caption info attributes for application
     */
@@ -261,17 +253,17 @@ private:    // from MMenuEngObserver
      * Fetches the children_count attribute value (for folders)
      */
     void FolderChildrenCountL( TInt aId, TBool& aExists, TDes& aAttrVal );
-    
+
     /**
     * Fetches the running status for application and folder
     */
     void GetAppRunningL( TInt aId, TBool& aExists, TDes& aAttrVal );
-    
+
     /**
     * Appends extended attributes to attributes list
     */
     void AppendExtendedAttrributesL(
-    		const TDesC& aType,  
+    		const TDesC& aType,
     		RArray<TPtrC>& aList );
 
 
@@ -290,7 +282,6 @@ private:    // Data
     CMcsRunningAppsHandler* iRunningAppsHandler;//own
     CMcsCacheHandler* iCacheHandler;
     CMcsChildrenHandler* iChildrenHandler;
-    CMcsSuiteHandler* iSuiteHandler;
     CMcsGetlistHandler* iGetlistHandler;
     };
 

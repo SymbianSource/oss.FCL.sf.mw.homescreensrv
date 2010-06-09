@@ -58,7 +58,8 @@ public:
 	    EActivate   = 1, ///< Activation event: Means that widget has been added to HS as content.
 	    EDeactivate = 2, ///< Deactivation event: Means that widget has been removed frm.
 	    ESuspend    = 3, ///< Suspension event: Means that HS reading widget data is suspended.
-	    EResume     = 4  ///< Resume event. Means that HS reading widget data is resumed.
+	    EResume     = 4,  ///< Resume event. Means that HS reading widget data is resumed.
+	    EPluginshutdown = 5 ///< Plugin Shutdown event. Means widget is removed from HS.
 	    };
     
 	/**

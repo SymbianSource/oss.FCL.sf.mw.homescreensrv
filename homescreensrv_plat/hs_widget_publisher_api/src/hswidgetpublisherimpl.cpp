@@ -96,8 +96,8 @@ HsWidget& HsWidgetPublisherImpl::CreateWidget( std::string& aTemplateName,
 	mWidgets.push_back( widget);
 	TInt err( KErrNone );
 	TRAP( err, 
+	    RegisterNotificationL( *widget );
 		PublishWidgetActionsL( *widget );
-        RegisterNotificationL( *widget );
 		)
 	if( err != KErrNone )
 		{
@@ -139,11 +139,7 @@ TInt HsWidgetPublisherImpl::HandleNotifyL(
              if ( changeMapsList->AtL(index, variant) ) 
             	 {
                  const CLiwMap* map  = variant.AsMap();
-                 HsWidget* widget = GetWidgetL( map );
-                 if( !widget )
-                	 {
-                	 break;
-                	 }
+                 variant.Reset();
                  if ( map->FindL(KOperation, variant) )
                      {// Check what triggered a notification
                      variant.Get(operation);
@@ -155,11 +151,19 @@ TInt HsWidgetPublisherImpl::HandleNotifyL(
 						 {
 						 variant.Get(trigger );
 						 }
-                	 if( !HandleWidgetActionL( trigger, *widget ) )
-                		 {
-                		 break;
-                		 }
-                	 HandleWidgetItemActionL( trigger, *widget );
+                     HsWidget* widget = GetWidgetL( map );
+                     if( !widget )
+                         {
+                         break;
+                         }
+                      variant.Reset();
+                      if ( !map->FindL( KContentId, variant ) )
+                           {
+                           User::Leave( KErrNotFound );
+                           }
+                	  HandleWidgetActionL( trigger, variant.AsDes(), *widget );
+                	  HandleWidgetItemActionL( trigger, *widget );
+                	  variant.Reset();
                 	 }
                  }
             }
@@ -172,12 +176,39 @@ TInt HsWidgetPublisherImpl::HandleNotifyL(
 // 
 // ---------------------------------------------------------------------------
 //
-int HsWidgetPublisherImpl::HandleWidgetActionL( const TDesC8& aActionDes,
-	HsWidget& aWidget )
+void HsWidgetPublisherImpl::HandleWidgetActionL( const TDesC8& aActionDes, 
+        const TDesC& aContentIdDes, HsWidget& aWidget )
 	{
-	int ret( 1 );//not found
 	IHsDataObserver::EEvent action( IHsDataObserver::EUnknown );
 	TranslateObserverAction( aActionDes, action );
+	switch( action )
+	    {
+	    case IHsDataObserver::EActivate:
+	        {
+            // add / update the Instance Id
+            std::wstring contentId( ToWideStringL( aContentIdDes ) );
+            mWidgetContentIds[aWidget.getIdentifier()] = contentId;  
+	        };
+            break;
+	    case IHsDataObserver::EDeactivate:
+	        {
+	        mWidgetContentIds.erase( aWidget.getIdentifier() );
+	        };
+            break;
+	    case IHsDataObserver::EPluginshutdown:
+	        {
+	        // remove widget data when widget removed from screen
+            CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
+            InsertWidgetDataIdentifiersL( aWidget, cpdatamap );
+            // removal may fail if the client has already removed the data
+            TRAP_IGNORE( RemoveFromCpsL( cpdatamap, KCpData ) );
+            CleanupStack::PopAndDestroy( cpdatamap );
+	        };
+            break;
+	    default :
+	        break;
+	    };
+	
 	if( action == IHsDataObserver::EActivate ||
 		action == IHsDataObserver::EDeactivate ||
 		action == IHsDataObserver::EResume ||
@@ -193,22 +224,8 @@ int HsWidgetPublisherImpl::HandleWidgetActionL( const TDesC8& aActionDes,
 			{
 			observerError = exception.getReason();
 			}
-		
-		if ( action == IHsDataObserver::EDeactivate )
-		    {
-		    // remove widget data when widget removed from screen
-		    CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
-		    InsertWidgetDataIdentifiersL( aWidget, cpdatamap );
-		    // removal may fail if the client has already removed the data
-		    TRAP_IGNORE( RemoveFromCpsL( cpdatamap, KCpData ) );
-		    mWidgetContentIds.erase( aWidget.getIdentifier() );
-		    CleanupStack::PopAndDestroy( cpdatamap );
-		    }
-		
 		User::LeaveIfError( observerError );
-		ret = 0;
 		}
-	return ret;
 	}
 
 // ---------------------------------------------------------------------------
@@ -222,6 +239,10 @@ void HsWidgetPublisherImpl::TranslateObserverAction( const TDesC8& aActionDes,
 		{
 		aAction = IHsDataObserver::EActivate;
 		}
+	if( !aActionDes.Compare( KPluginshutdown() ) )
+        {
+        aAction = IHsDataObserver::EPluginshutdown;
+        }
 	if( !aActionDes.Compare( KDeActive() ) )
 		{
 		aAction = IHsDataObserver::EDeactivate;
@@ -426,16 +447,8 @@ void HsWidgetPublisherImpl::PublishWidgetDataL( HsWidget& aWidget )
 	cpdatamap->InsertL( KDataMap, TLiwVariant( datamap ) );
 	InsertWidgetACLL( cpdatamap );
 	
-	int count = aWidget.itemsCount();
-	if( count > 0 )
-		{
-		CLiwDefaultMap* triggermap = CLiwDefaultMap::NewLC();
-		InsertItemsTriggersL( aWidget, triggermap );
-		cpdatamap->InsertL( KActionMap, TLiwVariant( triggermap ) );
-		CleanupStack::PopAndDestroy( triggermap );
-		}
-
-        // add to CPS
+	
+    // add to CPS
 	TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ));	    
 	inParam->AppendL( item );
 	mServiceInterface->ExecuteCmdL( KAdd,
@@ -450,6 +463,15 @@ void HsWidgetPublisherImpl::PublishWidgetDataL( HsWidget& aWidget )
 	outParam->Reset();
 	inParam->Reset();
 	User::LeaveIfError( ret );
+    
+    int count = aWidget.itemsCount();
+    for ( TInt itemIndex = 0; itemIndex< count; itemIndex++)
+        {
+        if ( ! aWidget.getWidgetItem(itemIndex)->isTriggerAdded() )
+            {
+            AddItemsActionsL( aWidget, itemIndex );
+            }
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -666,32 +688,14 @@ HsWidget* HsWidgetPublisherImpl::GetWidgetL( const CLiwMap* aMap )
     std::string strIdentifier( GetWidgetIdentifierFromPublisherNameL(
             *publisherName ) );
     CleanupStack::PopAndDestroy( publisherName );
-    publisherName = 0;
-    
-	TBuf<KSAPIContentNameMaxLength> contentIdDesc;
-    if ( !aMap->FindL( KContentId, variant ) )
-         {
-         User::Leave( KErrNotFound );
-         }
-    variant.Get( contentIdDesc );
     CleanupStack::PopAndDestroy( &variant );
-    std::wstring contentId( ToWideStringL( contentIdDesc ) );
-	
+    
 	std::string strTemplate;
 	std::string strWidgetName;
-		
 	if( CheckIfWidgetExist(strTemplate, strWidgetName, strIdentifier, ETrue) )
 		{
 		ret = &GetWidget( strTemplate, strWidgetName, strIdentifier);
-		
-		// verify that content id does not change
-		__ASSERT_DEBUG( !mWidgetContentIds.count( ret->getIdentifier() ) ||
-		        mWidgetContentIds[ret->getIdentifier()] == contentId,
-		        User::Invariant() );
-
-		mWidgetContentIds[ret->getIdentifier()] = contentId;
 		}
-	
 	return ret;
 	}
 
@@ -774,7 +778,17 @@ void HsWidgetPublisherImpl::InsertWidgetIdentifiersL( HsWidget& aWidget,
 // ---------------------------------------------------------------------------
 //
 void HsWidgetPublisherImpl::InsertWidgetDataIdentifiersL( HsWidget& aWidget,
-	CLiwDefaultMap* aDataMap )
+    CLiwDefaultMap* aDataMap )
+    {
+    InsertWidgetDataIdentifiersL( aWidget, aDataMap, KAll );
+    }
+	
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+void HsWidgetPublisherImpl::InsertWidgetDataIdentifiersL( HsWidget& aWidget,
+	CLiwDefaultMap* aDataMap, const TDesC& aContentType )
     {
     WidgetContentIdMapType::const_iterator contentIdIter =
             mWidgetContentIds.find( aWidget.getIdentifier() );
@@ -788,7 +802,7 @@ void HsWidgetPublisherImpl::InsertWidgetDataIdentifiersL( HsWidget& aWidget,
     HBufC* publisherName = StdStringToUnicodeLC( GetPublisherNameL( aWidget ) );
     
     aDataMap->InsertL( KPublisherId, TLiwVariant( *publisherName ) );
-    aDataMap->InsertL( KContentType, TLiwVariant( KAll ) );
+    aDataMap->InsertL( KContentType, TLiwVariant( aContentType ) );
     aDataMap->InsertL( KContentId, TLiwVariant( contentId ) );
     
     CleanupStack::PopAndDestroy( publisherName );
@@ -938,29 +952,56 @@ TInt HsWidgetPublisherImpl::TranslateServiceError( TInt32 aServiceErrorCode )
 // 
 // ---------------------------------------------------------------------------
 //
-void HsWidgetPublisherImpl::InsertItemsTriggersL( HsWidget& aWidget,
-	CLiwDefaultMap* aTriggerMap )
+void HsWidgetPublisherImpl::AddItemsActionsL(HsWidget& aWidget, TInt aItemIndex )
 	{
-	int count = aWidget.itemsCount();
-	CLiwDefaultMap* activateAction = CLiwDefaultMap::NewLC();
-	activateAction->InsertL( KPluginId, TLiwVariant( KCASpaAppLauncherPlugin ) );
-	
+    HsWidgetItem* widgetItem = aWidget.getWidgetItem(aItemIndex);
+    TPtrC8 itemName = ((TUint8*)widgetItem->getItemName().c_str());
+    
+    CLiwGenericParamList* inParam = &(mServiceHandler->InParamListL());
+    CLiwGenericParamList* outParam = &(mServiceHandler->OutParamListL());
+        
+
+    TLiwGenericParam type(KType, TLiwVariant(KCpData));
+    inParam->AppendL(type);
+    
+    CLiwDefaultMap* cpdatamap = CLiwDefaultMap::NewLC();
+    HBufC* itemName16 = Utf8ToUnicodeLC(itemName );
+    InsertWidgetDataIdentifiersL( aWidget, cpdatamap, itemName16->Des() );
+    CleanupStack::PopAndDestroy( itemName16 );
+    
+    CLiwDefaultMap* mapAction = CLiwDefaultMap::NewLC();
+    CLiwDefaultMap* activateAction = CLiwDefaultMap::NewLC();
 	CLiwDefaultMap* activate = CLiwDefaultMap::NewLC();
 	activate->InsertL( KType, TLiwVariant( KActionValueLaunchApplication ) );
 	activate->InsertL( KLaunchMethod, TLiwVariant( KLaunchMethodValueCmdLine ) );
 	activate->InsertL( KApplicationUid, TLiwVariant( iWidgetUid ) );
 	activate->InsertL( KApaCommand, TLiwVariant( KApaCommandBackground ) );
-	
+
+	activateAction->InsertL( KPluginId, TLiwVariant( KCASpaAppLauncherPlugin ) );
 	activateAction->InsertL( KData, TLiwVariant( activate ) );
-	
-	for (int index = 0; index < count; index++)
-		{
-		HsWidgetItem* const item = aWidget.getWidgetItem( index );
-		TPtrC8 itemName = ((TUint8*)item->getItemName().c_str());
-		aTriggerMap->InsertL( itemName, TLiwVariant( activateAction ));
-		}
 	CleanupStack::PopAndDestroy( activate );
-	CleanupStack::PopAndDestroy( activateAction );
+    
+    mapAction->InsertL(itemName, TLiwVariant( activateAction ));
+    CleanupStack::PopAndDestroy( activateAction );
+    cpdatamap->InsertL( KActionMap, TLiwVariant( mapAction ) );
+    CleanupStack::PopAndDestroy( mapAction );
+    
+    InsertWidgetACLL( cpdatamap );
+    
+    TLiwGenericParam item( KItem, TLiwVariant( cpdatamap ));        
+    inParam->AppendL( item );
+        
+    mServiceInterface->ExecuteCmdL( KAdd, *inParam, *outParam );
+    TInt ret= ObtainErrorCode( *outParam );
+    
+    CleanupStack::PopAndDestroy( cpdatamap );
+    item.Reset();
+    type.Reset();
+    outParam->Reset();
+    inParam->Reset();
+    User::LeaveIfError( ret );
+    
+    widgetItem->triggerAdded();
 	}
 
 // ---------------------------------------------------------------------------

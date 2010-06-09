@@ -324,6 +324,14 @@ TMenuItem CMCSPluginEngine::FindMenuItemL( CMenuFilter& aFilter )
 CMenuItem* CMCSPluginEngine::FetchMenuItemL( CMCSData& aData )
     {
     CMenuItem* item = NULL;
+    
+    TRAP_IGNORE( item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() ) );
+    
+    if( item )
+        {
+        return item; 
+        }
+    
     if( aData.MenuItem().Type() == KMenuTypeUrl )
         {
         item = CreateBkmItemL( aData );
@@ -331,10 +339,6 @@ CMenuItem* CMCSPluginEngine::FetchMenuItemL( CMCSData& aData )
     else if( aData.MenuItem().Type() == KMenuTypeMailbox )
         {
         item = CreateMailboxItemL( aData);
-        }
-    else
-        {        
-        item = CMenuItem::OpenL( iMenu, aData.MenuItem().Id() );
         }
     
     return item;

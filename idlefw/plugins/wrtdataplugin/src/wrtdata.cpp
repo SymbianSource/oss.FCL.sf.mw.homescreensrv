@@ -130,29 +130,32 @@ void CWrtData::RegisterL()
 //
 void CWrtData::UpdatePublisherStatusL()
     {
-     // Resent the plugin status to publisher
-    CLiwDefaultList* actions= CLiwDefaultList::NewLC();
-    actions->AppendL( TLiwVariant( KActive ));
-     if ( iPlugin->IsActive() )
-         {
-         actions->AppendL( TLiwVariant( KResume ) );
-         }
-     else
-         {
-         actions->AppendL( TLiwVariant( KSuspend ));
-         }
-      // forward the network status if it uses.
-    if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOnline )
+    if ( !iPlugin->IsStopped() )
         {
-        actions->AppendL( TLiwVariant( KOnLine ));
+         // Resent the plugin status to publisher
+        CLiwDefaultList* actions= CLiwDefaultList::NewLC();
+        actions->AppendL( TLiwVariant( KActive ));
+         if ( iPlugin->IsActive() )
+             {
+             actions->AppendL( TLiwVariant( KResume ) );
+             }
+         else
+             {
+             actions->AppendL( TLiwVariant( KSuspend ));
+             }
+          // forward the network status if it uses.
+        if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOnline )
+            {
+            actions->AppendL( TLiwVariant( KOnLine ));
+            }
+        else if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOffline )
+            {
+            actions->AppendL( TLiwVariant(  KOffLine));
+            }
+    
+        ReSendNotificationL( actions );
+        CleanupStack::PopAndDestroy( actions );
         }
-    else if ( iPlugin->NetworkStatus() == CWrtDataPlugin::EOffline )
-        {
-        actions->AppendL( TLiwVariant(  KOffLine));
-        }
-
-    ReSendNotificationL( actions );
-    CleanupStack::PopAndDestroy( actions );
     }
 
 // ---------------------------------------------------------------------------

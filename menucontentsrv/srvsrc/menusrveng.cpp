@@ -34,7 +34,6 @@
 #include "mcsrunningappshandler.h"
 #include "mcsgetlisthandler.h"
 #include "menusrvobjectfilter.h"
-#include "mcssuitehandler.h"
 #include <mcsdef.h>
 #include <mcsmenufilter.h>
 
@@ -107,7 +106,6 @@ CMenuSrvEng::~CMenuSrvEng()
     delete iFolderNotifier;
     delete iMcsSatMonitor;
     delete iRunningAppsHandler;
-    delete iSuiteHandler;
     delete iEng;
     iMenuSrv.EngineDeleted();
     }
@@ -156,7 +154,6 @@ void CMenuSrvEng::ConstructL( const TDesC& aContentName )
                 *this, *iCMenuSrvEngUtils, *iCacheHandler );
 
         iChildrenHandler = CMcsChildrenHandler::NewL( *this, *iCacheHandler);
-        iSuiteHandler = CMcsSuiteHandler::NewL(*iEng, iContentName);
 
         iTimedClose->Cancel();
         iTimedClose->After( TTimeIntervalMicroSeconds32( KMenuSrvExitDelay ) );
@@ -265,7 +262,6 @@ void CMenuSrvEng::EngineError( TInt aErr )
     delete iRunningAppsHandler; iRunningAppsHandler = NULL;
     delete iAppScanner; iAppScanner = NULL;
     delete iFolderNotifier; iFolderNotifier = NULL;
-    delete iSuiteHandler; iSuiteHandler = NULL;
     delete iEng; iEng = NULL;
 
     iContentName.Close();
@@ -337,26 +333,6 @@ void CMenuSrvEng::GetAttributeL(
     	GetExtendedAttributesL( aId, aAttrName, aAttrExists, aAttrVal );
     	}
     }
-
-// ---------------------------------------------------------
-// CMenuSrvEng::InstalledSuiteExist
-// ---------------------------------------------------------
-//
-TBool CMenuSrvEng::InstalledSuiteExist(const TDesC& aSuiteName)
-	{
-	return iSuiteHandler->HaveSuite(aSuiteName);
-	}
-
-// ---------------------------------------------------------
-// CMenuSrvEng::GetSuiteAttributeL
-// ---------------------------------------------------------
-//
-void CMenuSrvEng::GetSuiteAttribute( const TDesC& aSuiteName, const TDesC& aAttrName,
-           TBool& aAttrExists, TDes& aAttrVal )
-	{
-	iSuiteHandler->GetAttribute(aSuiteName, aAttrName,
-			aAttrExists, aAttrVal);
-	}
 
 // ---------------------------------------------------------
 // CMenuSrvEng::GetRunningAppsL()

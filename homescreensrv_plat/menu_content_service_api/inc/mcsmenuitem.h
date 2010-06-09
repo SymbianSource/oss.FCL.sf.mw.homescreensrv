@@ -40,6 +40,7 @@ public:
 
     enum TFlags ///< Item flags.
         {
+        ENoFlag = 0x0, ///< Item has no flags.
         ELockDelete = 0x1, ///< Item cannot be deleted.
         ELockName = 0x2, ///< Item cannot be renamed.
         ELockIcon = 0x4, ///< Icon cannot be changed.

@@ -124,10 +124,15 @@ void CMCSExecuteAction::DoCancel()
 void CMCSExecuteAction::RunL()
 	{
 	TInt err = iStatus.Int();
+
     if ( err == KErrNone )
         {
-        ExecuteL( iItemId, iAction );
-        }
+        TRAP( err, ExecuteL( iItemId, iAction ) );
+        }   
+    if(err != KErrNone)
+    	{
+    	NotifyRequestResult( err );
+    	}
 	}
 
 // ---------------------------------------------------------------------------
@@ -137,6 +142,10 @@ void CMCSExecuteAction::RunL()
 TInt CMCSExecuteAction::RunError(TInt aError)
 	{
     NotifyRequestResult( aError );
+    if ( (aError != KErrDiskFull) && (aError != KErrNoMemory))
+    	{
+    	aError = KErrNone;
+    	}    
 	return aError; 
 	}
 

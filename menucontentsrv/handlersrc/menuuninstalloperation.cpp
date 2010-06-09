@@ -265,6 +265,7 @@ TBool CMenuUninstallOperation::GetInstallPkgUidL( const TDesC& aAppFullName, TUi
 	                found = ETrue;
 	                }
 	            }
+	        packageFiles.ResetAndDestroy();
 	        CleanupStack::PopAndDestroy( &packageEntry );    
         	}
         }

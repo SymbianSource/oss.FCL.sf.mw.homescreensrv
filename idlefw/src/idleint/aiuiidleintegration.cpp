@@ -26,6 +26,7 @@
 #include <ctsydomainpskeys.h>
 #include <apgtask.h>
 
+
 // User includes
 #include <aisystemuids.hrh>
 #include <aiutility.h>
@@ -106,7 +107,9 @@ void CAiUiIdleIntegrationImpl::ConstructL(
     
     iEikEnv.SetSystem( ETrue );
              
-    TInt wgId( iEikEnv.RootWin().Identifier() );
+    RWindowGroup& windowGroup = iEikEnv.RootWin();
+    windowGroup.AutoForeground(EFalse);
+    TInt wgId( windowGroup.Identifier() );
     TInt focusWgId( iEikEnv.WsSession().GetFocusWindowGroup() );
     
     if ( focusWgId == wgId )
@@ -218,6 +221,8 @@ void CAiUiIdleIntegrationImpl::HandleWsEventL( const TWsEvent& aEvent,
 //
 void CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL()
 	{
+    __PRINTS( "*** CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL" );
+    
     if( !iIncallBubbleAllowed )
     	{
         TInt callStatus( 0 );
@@ -229,8 +234,11 @@ void CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL()
         // Call ongoing => show bubble
 	  	if( err == KErrNone && callStatus > EPSCTsyCallStateNone )
 	      	{
-	       	iIncallBubble->SetIncallBubbleAllowedInIdleL( ETrue );                	
-	       	iIncallBubbleAllowed = ETrue;
+			__PRINTS( "*** CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL - enable" );
+
+            iIncallBubble->SetIncallBubbleAllowedInUsualL( ETrue );
+            iIncallBubble->SetIncallBubbleAllowedInIdleL( ETrue );
+            iIncallBubbleAllowed = ETrue;
 	       	}    
     	}
 	}
@@ -241,11 +249,16 @@ void CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL()
 //
 void CAiUiIdleIntegrationImpl::ClearCallBubbleL()
 	{
+    __PRINTS( "*** CAiUiIdleIntegrationImpl::ClearCallBubbleL" );
+
 	 if( iIncallBubbleAllowed )
     	{
+         __PRINTS( "*** CAiUiIdleIntegrationImpl::ClearCallBubbleL - disable" );
+
     	iIncallBubble->SetIncallBubbleAllowedInIdleL( EFalse );
+    	iIncallBubble->SetIncallBubbleAllowedInUsualL( EFalse );
     	iIncallBubbleAllowed = EFalse;
-    	}        
+    	}
 	}
     
 // ----------------------------------------------------------------------------
@@ -279,34 +292,16 @@ TInt CAiUiIdleIntegrationImpl::HandleCallEvent( TAny* aPtr )
 	if ( err == KErrNone )
 		{
 		// Call ongoing => show bubble if not showing already
-		TBool allowed = EFalse;
-		
 		if ( !self->iIncallBubbleAllowed &&
 		     self->iForeground &&
 		    ( callStatus > EPSCTsyCallStateNone ) )
 			{
-			allowed = ETrue;
-    		
-			TRAP( err, 
-                self->iIncallBubble->SetIncallBubbleAllowedInIdleL( allowed ) );
-			            		
-			if ( err == KErrNone )
-    		    {
-    			self->iIncallBubbleAllowed = allowed;
-    		    }
+            TRAP_IGNORE( self->SetCallBubbleIfNeededL() );
 			}
 		// No call ongoing => hide if bubble is visible			
 		else if ( self->iIncallBubbleAllowed && callStatus <= EPSCTsyCallStateNone )
 			{
-			allowed = EFalse;
-			
-    		TRAP( err, 
-                self->iIncallBubble->SetIncallBubbleAllowedInIdleL( allowed ) );
-    		
-    		if ( err == KErrNone )
-    		    {
-    			self->iIncallBubbleAllowed = allowed;
-    		    }
+    		TRAP_IGNORE( self->ClearCallBubbleL() );
 			}
 		}
 	

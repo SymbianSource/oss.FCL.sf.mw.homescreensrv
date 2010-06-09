@@ -37,6 +37,7 @@ _LIT(KSourcesFolder, "\\sources\\");
 _LIT( KThemesFolder, "\\themes\\" );
 _LIT( KDoubleBackSlash, "\\" );
 _LIT8( KHexPrefix8, "0x" );
+_LIT( KClientSources, "c:\\private\\%x\\%D\\%D\\%D\\%S\\sources\\%S" );
 
 // -----------------------------------------------------------------------------
 // hspsServerUtil::GenerateConfigurationAttributesL
@@ -558,6 +559,110 @@ TPtrC8 hspsServerUtil::FindConfigurationAttrL(
     }    
 
 // -----------------------------------------------------------------------------
+// hspsServerUtil::RemoveResourceFilesL
+// -----------------------------------------------------------------------------
+void hspsServerUtil::RemoveResourceFilesL(        
+        CFileMan& aFilemanager,
+        RFs& aFs,
+        const TInt aAppUid,
+        const ChspsODT& aPluginODT )
+    {                           
+    // Remove all plug-in resources
+    for( TInt i=0; i< aPluginODT.ResourceCount(); i++ )
+        {
+        ChspsResource& r = aPluginODT.ResourceL( i );       
+        if( r.FileName().Find( KSourcesFolder ) > 0 )
+            {      
+            TPtrC id( GetFixedOdtName( r.ResourceId() ) );
+            const TDesC& ver( aPluginODT.ThemeVersion() );
+            TFileName resource;
+            resource.Format( 
+                    KClientSources,
+                    aAppUid,
+                    aPluginODT.RootUid(),
+                    aPluginODT.ProviderUid(),
+                    aPluginODT.ThemeUid(),
+                    &ver,
+                    &id );
+            if( BaflUtils::FileExists( aFs, resource ) )
+                {
+                aFilemanager.Delete( resource, 0 );
+                }            
+            }
+        }
+    }
+
+
+// -----------------------------------------------------------------------------
+// hspsServerUtil::CopyResourceFilesL
+// -----------------------------------------------------------------------------
+TInt hspsServerUtil::CopyResourceFilesL(
+        ChspsODT& aAppODT,
+        RFs& aFs,
+        CFileMan& aFilemanager,
+        const TInt aDeviceLanguage,
+        const TInt aConfUid,
+        const TDesC& aDestination,
+        const TBool aIsRelevant )
+    {
+    TInt error( KErrNone );
+    RPointerArray<ChspsResource> widgetResources; // Objects are not owned.
+    CleanupClosePushL( widgetResources );
+    
+    // Find resources for the language or common to all languages or test resources    
+    // if others couldn't be found
+    GetResourcesForLanguageL( 
+        aAppODT,
+        aConfUid,
+        (TLanguage)aDeviceLanguage,
+        widgetResources );
+        
+    // Copy the resources found    
+    for( TInt i = 0; ( i < widgetResources.Count() && !error ); i++ )
+        {      
+        ChspsResource* resource = widgetResources[i];
+        if( !resource )
+            {
+            continue;
+            }
+                
+        // Get relative path under the themes folder 
+        TPath relativePath;
+        GetRelativeResourcePath( 
+                resource->FileName(),
+                relativePath );
+        
+        // Strip language indicator from the relative path                                       
+        GetLocaleIndependentResourcePath( 
+                resource->Language(),                            
+                relativePath );   
+        
+        // Finalize target path
+        TPath targetPath;
+        targetPath.Copy( aDestination );
+        targetPath.Append( relativePath );        
+             
+        // Create target path and copy files when required
+        error = CopyResourceFileL(
+                aFs,
+                aFilemanager, 
+                targetPath,
+                resource->FileName(),
+                aIsRelevant );        
+        if ( error == KErrAlreadyExists )
+            {
+            error = KErrNone;
+            }
+        
+        } // copy loop       
+        
+    widgetResources.Reset();
+    CleanupStack::PopAndDestroy( 1, &widgetResources );
+
+    return error;
+    }  
+
+// -----------------------------------------------------------------------------
 // hspsServerUtil::CopyResourceFileL
 // -----------------------------------------------------------------------------
 //
@@ -565,7 +670,8 @@ TInt hspsServerUtil::CopyResourceFileL(
         RFs& aFs,
         CFileMan& aFilemanager,
         const TPath& aTargetPath,
-        const TFileName& aSourceFile )
+        const TFileName& aSourceFile,
+        const TBool aIsRelevant )
     {
     // Construct target file with full path.
     TFileName targetFile;
@@ -587,10 +693,11 @@ TInt hspsServerUtil::CopyResourceFileL(
 
     TInt error = KErrNone;
     
-    if ( hspsServerUtil::ResourceCopyIsRelevantL( 
-            aSourceFile,
-            targetFile,
-            aFs ) 
+    if ( aIsRelevant 
+            || hspsServerUtil::ResourceCopyIsRelevantL( 
+                aSourceFile,
+                targetFile,
+                aFs ) 
         )
         {
         // Make target folder
@@ -616,7 +723,17 @@ TInt hspsServerUtil::CopyResourceFileL(
                 aTargetPath,
                 0,
                 KEntryAttReadOnly,
-                TTime( 0 ) ); // TTime(0) = preserve original time stamp.                                                                      
+                TTime( 0 ) ); // TTime(0) = preserve original time stamp.
+                        
+#ifdef HSPS_LOG_ACTIVE
+            if ( iLogBus )
+                {
+                iLogBus->LogText( 
+                        _L( "hspsServerUtil::CopyResourceFileL(): - %S was copied" ), 
+                        &aTargetPath 
+                        );
+                } 
+#endif            
             }        
         }                
     
@@ -1702,9 +1819,9 @@ TBool hspsServerUtil::IsLogoFile(
     }
 
 // -----------------------------------------------------------------------------
-// hspsServerUtil::GetValidResourcesL
+// hspsServerUtil::GetResourcesForLanguageL
 // -----------------------------------------------------------------------------
-void hspsServerUtil::GetValidResourcesL(
+void hspsServerUtil::GetResourcesForLanguageL(
         ChspsODT& aODT,        
         const TInt aConfUid,
         const TLanguage aActiveLanguage,
@@ -1780,7 +1897,8 @@ TInt hspsServerUtil::EnoughDiskSpaceAvailableL(
     RPointerArray<ChspsResource> widgetResources; // Objects are not owned.
     CleanupClosePushL( widgetResources );
     
-    GetValidResourcesL( aODT,
+    GetResourcesForLanguageL( 
+        aODT,
         aODT.ThemeUid(),
         aActiveLanguage,
         widgetResources );
@@ -2049,6 +2167,9 @@ void hspsServerUtil::FindResourcesL(
         } // driveIndex    
     }
 
+// -----------------------------------------------------------------------------
+// hspsServerUtil::GetInstalledLanguagesL
+// -----------------------------------------------------------------------------
 void hspsServerUtil::GetInstalledLanguagesL(
         CArrayFixFlat<TInt>*& aLanguages )
     {

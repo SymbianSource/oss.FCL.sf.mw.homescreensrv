@@ -577,19 +577,23 @@ class ChspsInstallationHandler : public CBase,
         /**
          * Finds locale specific subdirectories and resources and appends those
          * into the resource array
+         * 
          * @since S60 5.0
-         * @param aPath is a directory where the locale specific subdirectories exits
+         * @param aPath             is a directory where the locale specific subdirectories exits
+         * @param aProcessOnlyDTD   If ETrue, then only DTD files are processed.
          */
         void AddLocalesL(
-                const TDesC& aPath );
+                const TDesC& aPath,
+                const TBool aProcessOnlyDTD );
         
         /**
-         * Adds localized resources from the provided subdirectory
+         * Adds localized dtd resources from the provided subdirectory
+         * 
          * @since S60 5.0
-         * @param aLanguage is name of the subdirectory
-         * @param aPath is path to the subdirectory where the locale specific resources can be found                  
+         * @param aPath     Path to the subdirectory where the locale specific resources can be found
+         * @param aLanguage Name of the subdirectory                  
          */
-        void AddLocalizedResourcesL(
+        void AddDtdFileL(
                 const TDesC& aPath,
                 const TLanguage aLanguage );
         
@@ -599,17 +603,7 @@ class ChspsInstallationHandler : public CBase,
          * @return path to a Xuikon etc folder or an empty string
          */
         TFileName GetInterfacePath();
-                
-        /**
-         * Add DTD files from the HSPS folder.
-         */
-        void AddHspsLocalesV2L(
-                const TDesC& aPath );
-        
-        void AddLocalizedResourcesDTDV2L(
-                const TDesC& aPath,
-                const TLanguage aLanguage );
-        
+                                
         /**
          * Finds all language specific folders and resources  
          * under the interface path in ROM or UDA drive.

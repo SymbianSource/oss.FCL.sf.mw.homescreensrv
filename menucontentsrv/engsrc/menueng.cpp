@@ -567,7 +567,7 @@ EXPORT_C CMenuEngObject& CMenuEng::ModifiableObjectL( TInt aId , TInt aEvent)
     }
 
 
-	
+
 // ---------------------------------------------------------
 // CMenuEng::AppendNotifyL
 // ---------------------------------------------------------
@@ -591,17 +591,19 @@ EXPORT_C void CMenuEng::AppendNotifyL( TInt aFolder, TInt aEvents )
 //
 EXPORT_C TBool CMenuEng::Exist( TInt aId ) const
     {
-    MXCFWNode* node = NULL;
+    TBool exists(EFalse);
     const RNodeArray& nodes = iTree->Nodes();
     for ( TInt i = 0; i < nodes.Count(); i++ )
         {
-        node = nodes[i];
-        if ( aId == Object( *node ).Id() )
+        CMenuEngObject& object = Object( *nodes[i] );
+        if ( aId == object.Id()
+                && !( ( object.Flags() & TMenuItem::EHidden )
+                        || ( object.Flags() & TMenuItem::EMissing ) ) )
             {
-            return ETrue;
+            exists = ETrue;
             }
         }
-    return EFalse;
+    return exists;
     }
 // ---------------------------------------------------------
 // CMenuEng::RunL
@@ -718,13 +720,13 @@ TInt CMenuEng::RunError( TInt aError )
             if ( iActiveWait->IsStarted() )
                 {
                 iActiveWait->AsyncStop();
-                }  
-                
+                }
+
             iState = EDead;
             iObserver.EngineError( aError );
             // Can't delete the tree now, XCFW Engine keeps a pointer to it
             // and still uses it even after reporting the error. :(
-         
+
             break;
             }
 
@@ -785,9 +787,9 @@ void CMenuEng::HandleEngineEventL( TXCFWEngineEvent aEvent )
             if ( iActiveWait->IsStarted() )
                 {
                 iActiveWait->AsyncStop();
-                }         
-            
-            TBool legacyFormat = iObjectFactory->IsLegacyFormat();                        
+                }
+
+            TBool legacyFormat = iObjectFactory->IsLegacyFormat();
             // Reset object factory in all cases.
             iObjectFactory->Reset();
             // Tree is up (maybe unsaved yet).
@@ -1130,7 +1132,7 @@ void CMenuEng::InitIdManagerL( MXCFWNode& aRootNode )
     TraverseNodeL( aRootNode, idManagerInit );
     // Make sure all nodes have ID.
     TMenuEngIdSetter idSetter( *iIdManager );
-    TraverseNodeL( aRootNode, idSetter ); 
+    TraverseNodeL( aRootNode, idSetter );
     }
 
 // ---------------------------------------------------------
@@ -1220,7 +1222,7 @@ void CMenuEng::LoadRamFileL()
     __ASSERT_DEBUG( !iTree, User::Invariant() );
     iTree = CXCFWTree::NewL();
     // Legacy xml format supported only if the xml is from rom:
-    iObjectFactory->SupportLegacyFormat( EFalse ); 
+    iObjectFactory->SupportLegacyFormat( EFalse );
     iEngine->LoadL( *iTree, iRamFileName );
     }
 
@@ -1238,7 +1240,7 @@ void CMenuEng::LoadRomFileL()
     delete iTree; iTree = NULL;
     iTree = CXCFWTree::NewL();
     // Legacy xml format supported only if the xml is from rom:
-    iObjectFactory->SupportLegacyFormat( ETrue ); 
+    iObjectFactory->SupportLegacyFormat( ETrue );
     iEngine->LoadL( *iTree, fname );
     }
 
@@ -1378,4 +1380,4 @@ void CMenuEng::SaveChangesL()
         }
     }
 
-//  End of File  
+//  End of File

@@ -155,8 +155,8 @@ TBool CAiNetworkInfoListener::MessageReceived( MNWMessageObserver::TNWMessages a
 
 void CAiNetworkInfoListener::HandleNetworkMessage( const TNWMessages aMessage )
     {
-    __PRINTS("XAI: Handle NW message");
-	//Insert message into the message cache. Only one messsage of one type.
+    __PRINT(__DBG_FORMAT("XAI: Handle NW message %d"), aMessage );
+    //Insert message into the message cache. Only one messsage of one type.
     TRAPD( err, iMessageCache->InsertIsqL( aMessage, iKeyProperties ) );
     if( err == KErrAlreadyExists )
         {
@@ -249,8 +249,8 @@ TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMes
     // Registration status and network information must have been received.
     // Operator name information must have been received.
     // Device must be camped to a network.
+    // CS registration should be completed (only valid in AT&T NW)
 
-    TBool csAlphaFlag( EFalse );
 	switch ( aMessage )
     	{
         case MNWMessageObserver::ENWMessageNetworkInfoChange:
@@ -296,7 +296,13 @@ TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMes
                     if ( !( RPacketService::KCapsRxCSCall & 
                             iInfo.iDynamicCapsFlags ) )
                         {
-                        csAlphaFlag = ETrue;
+                        __PRINTS("XAI: CS registration failed");
+                        iReceivedMessageFlags |= ECSRegistrationNotOk;
+                        }
+                    else
+                        {
+                        __PRINTS("XAI: CS registration ok");
+                        iReceivedMessageFlags &= ~ECSRegistrationNotOk;
                         }
                     }
                 FeatureManager::UnInitializeLib();
@@ -316,6 +322,7 @@ TBool CAiNetworkInfoListener::NotAllowedToDisplayOperatorIndicator( const TNWMes
     	( ENetworkInfoChangeReceived  & iReceivedMessageFlags ) && 
         ( ERegistrationStatusReceived & iReceivedMessageFlags ) &&
         ( iInfo.iStatus == ENWStatusCurrent ) );  
+    TBool csAlphaFlag( ECSRegistrationNotOk & iReceivedMessageFlags );
       
   	return
         !serviceProviderNameFetched ||

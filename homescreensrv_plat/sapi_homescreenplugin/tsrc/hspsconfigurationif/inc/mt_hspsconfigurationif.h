@@ -409,6 +409,11 @@ NONSHARABLE_CLASS( MT_CHSPSConfigurationIf ) : public MT_CHSPS
          */
         void RequestNotify_6_L();
         /**
+         * Test case function for test case SisxUpgrade(1)
+         * See HSPS module test specification
+         */
+        void SisxUpgrade_1_L();
+        /**
          * Test case function for test case SisxInstallation(1)
          * See HSPS module test specification
          */

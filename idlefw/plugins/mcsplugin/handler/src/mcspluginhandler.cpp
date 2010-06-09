@@ -44,6 +44,7 @@ _LIT( KMenuAttrParamLogs, "logs:dialed" );
 _LIT( KMenuAttrParam, "param" );
 
 #define KMCSCmailUidValue 0x2001E277
+#define KMCSCmailMailboxDefaultViewIdValue 0x1
 #define KMCSCmailMailboxViewIdValue 0x2
 #define KMCSCmailMtmUidValue 0x2001F406
 
@@ -211,7 +212,10 @@ void CMCSPluginHandler::LaunchShortcutL( CMenuItem& aItem )
             }
         else
             {
-            iVwsSession->StartApp( TUid::Uid( KMCSCmailUidValue ) );
+            const TVwsViewId viewId( TUid::Uid( KMCSCmailUidValue ), 
+                    TUid::Uid( KMCSCmailMailboxDefaultViewIdValue ) );
+            iVwsSession->CreateActivateViewEvent( viewId, 
+                    TUid::Uid( KMCSCmailUidValue ), KNullDesC8() );
             }
 
         }

@@ -145,7 +145,7 @@ public:     // new methods
     * @return Current state.
     */
 	inline TState State() const;
-	
+
 	/*
 	* Gets legacy format
 	* @return legacy format
@@ -264,15 +264,18 @@ public:     // data manipulation (write access).
     IMPORT_C CMenuEngObject& ModifiableObjectL( TInt aId,
     		TInt aEvent = RMenuNotifier::EItemAttributeChanged );
 
-    
+
     /**
     * Append new notification to the list of pending notifications.
     * @param aFolder Folder.
     * @param aEvents Events.
     */
     IMPORT_C void AppendNotifyL( TInt aFolder, TInt aEvents );
-    
-    
+
+    /**
+    * Checks if object exists and is not hidden nor missing.
+    * @param aId item id.
+    */
     IMPORT_C TBool Exist( TInt aId ) const;
 
 private:    // from CActive
@@ -306,7 +309,7 @@ private:    // from MXCFWEngineObserver
     * Called when there's an error during parsing / saving.
     * @param aErrorCode Error code
     */
-    void HandleEngineErrorL( TInt aErrorCode );        
+    void HandleEngineErrorL( TInt aErrorCode );
 
 private:    // types
 
@@ -493,7 +496,7 @@ private:    // data
 // -----------------------------------------------------------------------------
 // CMenuEng::State
 // -----------------------------------------------------------------------------
-// 
+//
 CMenuEng::TState CMenuEng::State() const
     {
     return iState;

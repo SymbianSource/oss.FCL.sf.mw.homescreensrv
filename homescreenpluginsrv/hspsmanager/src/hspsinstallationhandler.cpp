@@ -520,28 +520,28 @@ TFileName ChspsInstallationHandler::GetInterfacePath()
 //
 void ChspsInstallationHandler::FinalizeParsingL()
     {               
-    // Check resources
+    // Add resources
     TFileName interfacePath( GetInterfacePath() );       
     if ( interfacePath.Length() )        
-       {
-       // If name of the DTD file was specified in the manifest
-       if ( iDtdFile )
-          { 
-          TParse pathParser;
-          pathParser.Set( iThemeFilePath, NULL, NULL );                               
-          pathParser.PopDir(); // pop locale specific folder
-          
-          // Find locale specific DTD file
-          AddHspsLocalesV2L( pathParser.FullName() );
-          }
-       
-       // Find Xuikon resources of each locale 
-       AddInterfaceResourcesV2L( interfacePath );
+        {
+        // If name of the DTD file was specified in the manifest
+        if ( iDtdFile )
+            { 
+            TParse pathParser;
+            pathParser.Set( iThemeFilePath, NULL, NULL );                               
+            pathParser.PopDir(); // pop locale specific folder
+            
+            // Find locale specific DTD file
+            AddLocalesL( pathParser.FullName(), ETrue );
+            }
+        
+        // Find Xuikon resources of each locale 
+        AddInterfaceResourcesV2L( interfacePath );
        }
     else
        {
        // Find DTD files and locale specific resources from subdirectories under the installation path
-       AddLocalesL( iThemeFilePath );                       
+       AddLocalesL( iThemeFilePath, EFalse );                       
        }       
           
    // Validate other input from the manifest
@@ -2198,126 +2198,6 @@ void ChspsInstallationHandler::DisableUdaEmmcInstallations()
     }
 
 // -----------------------------------------------------------------------------
-// Finds locale specific subdirectories and DTD resources and appends those
-// into the resource array 
-// Should be executed prior to the CheckHeader method!
-// -----------------------------------------------------------------------------
-//
-void ChspsInstallationHandler::AddHspsLocalesV2L(
-        const TDesC& aPath )
-    {           
-    // Find all locale specific subfolders
-    TFindFile fileFinder( iFsSession );
-    _LIT( KFilter, "*" );
-    CDir* fileList( NULL );    
-    fileFinder.FindWildByDir( KFilter, aPath, fileList );
-    if ( fileList )
-        {
-        CleanupStack::PushL( fileList );
-        TFileName localePath;
-        for( TInt i = 0; i < fileList->Count(); i++ )       
-            {
-            const TEntry& entry = (*fileList)[i];                        
-            if ( entry.IsDir() )
-                {
-                TInt languageIndex = 0;
-                TLex lex( entry.iName );
-                TInt error = lex.Val( languageIndex );    
-                                
-                // See enumarations from e32lang.h
-                if( !error && languageIndex >= ELangTest )
-                    {
-                
-                    // Process only supported languages
-                    CArrayFixFlat<TInt>* languageCodes = NULL;
-                    hspsServerUtil::GetInstalledLanguagesL( languageCodes );
-                    CleanupStack::PushL( languageCodes );                    
-                    TBool isSupported = EFalse;
-                    for( TInt i=0; i<languageCodes->Count(); i++ )
-                        {
-                        if( languageCodes->At( i ) == languageIndex )
-                            {
-                            isSupported = ETrue;
-                            break;
-                            }
-                        }
-                    CleanupStack::PopAndDestroy( languageCodes );                                       
-                    if( !isSupported )
-                        {
-                        continue;
-                        }           
-                    
-                    // If we found the first language specification          
-                    if ( !iDefaultSpecificationSet )
-                        {
-                        // Assume this is the default language shown incase 
-                        // there is no locale for the active UI language
-                        iDefaultSpecification = (TLanguage)languageIndex;
-                        iDefaultSpecificationSet = ETrue;
-                        }
-                    
-                    // Setup a path to the subdirectory 
-                    localePath.Copy( aPath );
-                    localePath.Append( entry.iName );
-                    localePath.Append( KPathDelim );
-                    
-                    // Find localized resources 
-                    AddLocalizedResourcesDTDV2L( 
-                        localePath,
-                        (TLanguage)languageIndex );
-                    }                                       
-                }
-                        
-            }        
-        CleanupStack::PopAndDestroy( fileList );
-        fileList = NULL;
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// Adds localized resources from the provided subdirectory
-// -----------------------------------------------------------------------------
-//
-void ChspsInstallationHandler::AddLocalizedResourcesDTDV2L(
-        const TDesC& aPath,
-        const TLanguage aLanguage )
-    {
-    // Append path with the default name of DTD files
-    const TInt len = aPath.Length() + iDtdFile->Des().Length();
-    HBufC* dtdPath = HBufC::NewLC( len );
-    dtdPath->Des().Copy( aPath );    
-    dtdPath->Des().Append( *iDtdFile );
-        
-    // Check whether the file exists
-    if( !BaflUtils::FileExists( iFsSession, *dtdPath ) )
-        {
-#ifdef HSPS_LOG_ACTIVE  
-        if( iLogBus )
-            {
-            iLogBus->LogText( _L( "ChspsInstallationHandler::AddLocalizedResourcesDTDV2L(): - DTD file was not found '%S'" ),
-                    &dtdPath );
-            }
-#endif            
-        iFileNotFound = ETrue;
-        iResult->iXuikonError = KErrDtdFileNotFound;
-        User::Leave( KErrNotFound );
-        }
-        
-    // Store locale specific DTD files into the resource array
-    TPtrC8 mediaType;
-    TPtrC8 tags;
-    AddResourceL(
-        *iResourceList,
-        *dtdPath,
-        aLanguage,
-        EResourceDTD,
-        mediaType,
-        tags );                                
-    
-    CleanupStack::PopAndDestroy( dtdPath );
-    }
-
-// -----------------------------------------------------------------------------
 // ChspsInstallationHandler::AddInterfaceResourcesV2L
 // -----------------------------------------------------------------------------
 //
@@ -2353,7 +2233,8 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
 // -----------------------------------------------------------------------------
 //
 void ChspsInstallationHandler::AddLocalesL(
-        const TDesC& aPath )
+        const TDesC& aPath,
+        const TBool aProcessOnlyDTD )
     {
     // Retrieve phone supported language.
     CArrayFixFlat<TInt>* languageCodes = NULL;
@@ -2361,19 +2242,32 @@ void ChspsInstallationHandler::AddLocalesL(
     CleanupStack::PushL( languageCodes );     
     
     // Ensure that path contains '\' at the end.
-    TFileName xuikonPath;
-    xuikonPath.Copy( aPath );
-    if( xuikonPath.Length() > KPathDelim().Length() )
+    TFileName pathBase;
+    pathBase.Copy( aPath );
+    if( pathBase.Length() > KPathDelim().Length() )
         {
-        if( xuikonPath.Mid( xuikonPath.Length() -
-                            KPathDelim().Length()
-                            ).Compare( KPathDelim ) != 0 )
+        if( pathBase.Mid( pathBase.Length() -
+                          KPathDelim().Length()
+                         ).Compare( KPathDelim ) != 0 )
             {
-            xuikonPath.Append( KPathDelim );
+            pathBase.Append( KPathDelim );
             }
         }
             
-    _LIT( KFormatting, "%02d" );    
+    TParsePtrC driveParser( pathBase );
+    TInt driveEnum = KErrNotFound;
+    
+    if( !aProcessOnlyDTD )
+        {
+        if( driveParser.DrivePresent() && driveParser.Drive().Length() > 0 )
+            {
+            User::LeaveIfError(
+                    RFs::CharToDrive( ( driveParser.Drive() )[0],
+                            driveEnum ) );
+            }
+        }
+    
+    _LIT( KFormatNN, "%02d" );    
     TFileName localePath;
     
     for( TInt i = 0; i < languageCodes->Count(); i++ )
@@ -2383,8 +2277,15 @@ void ChspsInstallationHandler::AddLocalesL(
         // Construct locale path using two digit minium
         // width and zero as padding.
         
-        localePath.Copy( xuikonPath );
-        localePath.AppendFormat( KFormatting, languageCode );        
+        localePath.Copy( pathBase );
+        if( languageCode < 10 )
+            {
+            localePath.AppendFormat( KFormatNN, languageCode );
+            }
+        else
+            {
+            localePath.AppendNum( languageCode );
+            }
         localePath.Append( KPathDelim );
 
         // Check if folder for supported language exists.        
@@ -2395,10 +2296,10 @@ void ChspsInstallationHandler::AddLocalesL(
             exists = ETrue;
             }
         
-        // Support also one digit type folder naming.
+        // Support also one digit type folder naming possibly used by the imports.
         if( !exists && languageCode < 10 )
             {
-            localePath.Copy( xuikonPath );
+            localePath.Copy( pathBase );
             localePath.AppendNum( languageCode );        
             localePath.Append( KPathDelim );
             
@@ -2418,12 +2319,24 @@ void ChspsInstallationHandler::AddLocalesL(
                 iDefaultSpecification = (TLanguage)languageCode;
                 iDefaultSpecificationSet = ETrue;
                 }                                                            
-        
-        
-            // Find and add localized resources 
-            AddLocalizedResourcesL( 
-                    localePath,
-                    (TLanguage)languageCode );            
+                
+            // Add dtd file if existing.
+            AddDtdFileL( localePath, (TLanguage)languageCode );
+            
+            if( !aProcessOnlyDTD )
+                {
+                // Find localized files from the provided directory
+                RArray<TInt> driveArray;
+                CleanupClosePushL( driveArray );                
+                driveArray.Append( driveEnum );
+                
+                FindResourceFilesL( localePath,
+                                    EFalse,
+                                    driveArray,
+                                    NULL );
+                
+                CleanupStack::PopAndDestroy(); // driveArray
+                }
             }        
         }
     
@@ -2432,13 +2345,13 @@ void ChspsInstallationHandler::AddLocalesL(
     }
 
 // -----------------------------------------------------------------------------
-// Adds localized resources from the provided subdirectory
+// Adds localized dtd resources from the provided subdirectory
 // -----------------------------------------------------------------------------
 //
-void ChspsInstallationHandler::AddLocalizedResourcesL(
+void ChspsInstallationHandler::AddDtdFileL(
         const TDesC& aPath,
         const TLanguage aLanguage )
-    {
+    {    
     // If FileDTD was declared
     if ( iDtdFile && iDtdFile->Des().Length() )
         {    
@@ -2475,17 +2388,7 @@ void ChspsInstallationHandler::AddLocalizedResourcesL(
             tagsPtr );
         
         CleanupStack::PopAndDestroy( dtdPath );
-        }
-    
-    // Find localized files from the provided directory
-    RArray<TInt> driveArray;
-    CleanupClosePushL( driveArray );   
-    driveArray.Append( EDriveE );
-    driveArray.Append( EDriveC );
-        
-    FindResourceFilesL( aPath, EFalse, driveArray, NULL );
-    
-    CleanupStack::PopAndDestroy(); // driveArray        
+        }          
     }
 
 // -----------------------------------------------------------------------------

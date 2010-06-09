@@ -177,6 +177,8 @@ TInt32 CCpStorageEngine::AddL( const CLiwMap* aMap )
         iDataMapCache.Reset();
         map->FindL(KDataMap, iDataMapCache);
         iCallback->HandleChangeL( listOfMaps );
+        //data cache must be cleaned here, otherwise it can mess up other requests.
+        iDataMapCache.Reset();
         CleanupStack::PopAndDestroy( listOfMaps ) ;
         }
     else

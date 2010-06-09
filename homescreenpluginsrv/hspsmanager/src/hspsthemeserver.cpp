@@ -75,6 +75,8 @@ _LIT( KUpgradePluginWild, "upgrade_plugin_*.dat" );
 // prevent ROM installation on every boot up
 _LIT( KDummyVersionInfo, "dummyversioninfo" );
 
+_LIT( KProcessFindString, "hspsthemeserver*" ); 
+
 const TUint KAppId_hspsAS =  270486738; //  0x101F4CD2 from S60 3.1 Xuikon AppShell in 3.1 product.
 const TUint KAppId_hspsAI =  271012080 ; // 0x102750F0 support for Xuikon-based ActiveIdle 
 const TUint KAppId_LE =    270551469 ; // 0x102049AD LayoutTest
@@ -177,7 +179,20 @@ static void RunServerL()
 // -----------------------------------------------------------------------------
 //
 TInt E32Main()
-    {
+    {                   
+    TFindProcess processFinder( KProcessFindString );
+    TFullName fullName;
+    TInt count = 0;
+    while( processFinder.Next( fullName ) == KErrNone )
+        {
+        count++;
+        }
+    if( count > 1 )
+        {
+        return KErrAlreadyExists;
+        }
+    fullName = KNullDesC();
+    
     RAllocator* iAllocator = MemoryManager::SwitchToFastAllocator();
     
     __UHEAP_MARK;
@@ -333,11 +348,7 @@ void ChspsThemeServer::ConstructL()
     
     // Find header files from the Plug-in Repository
 	UpdateHeaderListCacheL();  
-    
-    // Adds the server with the specified name to the active scheduler, and issues the 
-    // first request for messages, and leaves if the operation fails
-    StartL( KhspsThemeServerName );
-    
+       
     // Initialize remove index
     iThemeIndexToRemove = KErrNotFound;
                            
@@ -386,6 +397,10 @@ void ChspsThemeServer::ConstructL()
     iShutdown = CShutdown::NewL( *this );
 #endif // _hsps_SERVER_SHUTDOWN_ENABLED_
     
+    // Adds the server with the specified name to the active scheduler, and issues the 
+    // first request for messages, and leaves if the operation fails
+    StartL( KhspsThemeServerName );
+        
 #ifdef HSPS_LOG_ACTIVE	
     iLogBus->LogText( _L( "hspsThemeServer: server fully constructed" ) );
     iLogBus->LogText( _L( "--------------------------------------------------------" ) );
@@ -436,6 +451,7 @@ void ChspsThemeServer::Cleanup()
     iLogBus->LogText( _L( "hspsThemeServer: server is shutting down" ) );
 #endif    
             
+    delete iFileMan;
     if( iDefinitionRepository )
         {
         iDefinitionRepository->UnregisterObserver( *this );
@@ -482,7 +498,7 @@ void ChspsThemeServer::Cleanup()
     delete iBRHandler;
 
     iCacheMask = NULL;
-    
+        
     iFsSession.Close();    
     }
 
@@ -1456,6 +1472,12 @@ TBool ChspsThemeServer::RunAutoInstaller( TAutoInstallerStates aState )
                     {
                     started = ETrue;
                     }
+                else
+                    {
+                    delete iInstalledSisxThemes[ iThemeIndexToRemove ];
+                    iInstalledSisxThemes[ iThemeIndexToRemove ] = NULL;
+                    iInstalledSisxThemes.Remove( iThemeIndexToRemove );
+                    }
                 }
             }
             break;
@@ -2142,16 +2164,13 @@ void ChspsThemeServer::HandleLanguageChangeL()
 #ifdef HSPS_LOG_ACTIVE          
         iLogBus->LogText( _L( "ChspsThemeServer::HandleLanguageChangeL()") );
 #endif
-        
-	// Set key for fetching previously used language from the cenrep
-	const TInt KCenrepLangKey = 100000001;
-	
+        	
 	// The key should already exist
 	const TUint32 fullMask = 0xFFFFFFFF;
 	RArray<TUint32> res;	
 	CleanupClosePushL( res );
 	
-	iCentralRepository->FindL( KCenrepLangKey, fullMask, res );
+	iCentralRepository->FindL( KCenrepKeyLang, fullMask, res );
    	if ( res.Count() == 0 )
    		{
 #ifdef HSPS_LOG_ACTIVE   		
@@ -2163,16 +2182,18 @@ void ChspsThemeServer::HandleLanguageChangeL()
 	
    	// Check the cenrep key's value
 	TInt prevLanguage = ELangNone;
-    iCentralRepository->Get( KCenrepLangKey, prevLanguage );
+    iCentralRepository->Get( KCenrepKeyLang, prevLanguage );
     
     // If the language has been changed
     if( iDeviceLanguage != prevLanguage )
     	{
     	// Update all the ODTs so that the localized configurations can be fetched    	
     	LocalizeConfigurationsL();
+    	
+    	UpdateHeaderListCacheL();
     		
     	// Finally, update the cenrep with the new language
-    	TInt errorCode = iCentralRepository->Set( KCenrepLangKey, iDeviceLanguage );
+    	TInt errorCode = iCentralRepository->Set( KCenrepKeyLang, iDeviceLanguage );
     	if ( errorCode  )
     		{
 #ifdef HSPS_LOG_ACTIVE    		
@@ -2257,6 +2278,57 @@ void ChspsThemeServer::LocalizeConfigurationsL()
 	}
 
 // -----------------------------------------------------------------------------
+// ChspsThemeServer::ResetResourcesL()
+// -----------------------------------------------------------------------------
+//
+void ChspsThemeServer::ResetResourcesL(
+        ChspsODT& aAppODT )
+    {
+    // If active configuration
+    TInt confUid = -1;
+    iCentralRepository->Get( aAppODT.RootUid(), confUid );        
+    if( confUid == aAppODT.ThemeUid() )
+        {
+        if( !iFileMan )
+            {
+            iFileMan= CFileMan::NewL( iFsSession );
+            }
+                        
+        // Find unique plug-in UIDs from the app configuration
+        RArray<TInt> uidArray;
+        CleanupClosePushL( uidArray );
+        hspsServerUtil::FindUniquePluginsL( aAppODT, uidArray );
+        
+        // Remove old copies from the client path, localized copies will be  
+        // restored when the app configuration is fetched again        
+        for( TInt i=0; i < uidArray.Count(); i++ )
+            {                    
+            ChspsODT* pluginODT = ChspsODT::NewL();
+            CleanupStack::PushL( pluginODT );
+            
+            GetConfigurationL(
+                0, 
+                uidArray[i],
+                *pluginODT );
+            
+            if( pluginODT->ThemeUid() )
+                {
+                hspsServerUtil::RemoveResourceFilesL(                               
+                    *iFileMan,
+                    iFsSession,
+                    aAppODT.RootUid(),
+                    *pluginODT );
+                }
+            
+            CleanupStack::PopAndDestroy();            
+            }
+        
+        uidArray.Reset();
+        CleanupStack::PopAndDestroy( &uidArray );             
+        }
+    }
+
+// -----------------------------------------------------------------------------
 // ChspsThemeServer::LocalizeL()
 // -----------------------------------------------------------------------------
 //
@@ -2286,6 +2358,8 @@ TBool ChspsThemeServer::LocalizeL(
     	            aEngine, 
     	            aOdt,
     	            requestedLanguage );
+    	                            
+            ResetResourcesL( aOdt );
     	    }
     	else
     	    {	    

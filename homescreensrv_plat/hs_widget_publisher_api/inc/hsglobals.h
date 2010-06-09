@@ -80,6 +80,8 @@ _LIT8( KErrorCode, "ErrorCode" );
 
 _LIT8( KActive, "active" );
 _LIT8( KDeActive, "deactive" );
+_LIT8( KPluginshutdown, "pluginshutdown");
+
 _LIT8( KSuspend, "suspend" );
 _LIT8( KResume, "resume" );
 _LIT8( KSelected, "selected" );

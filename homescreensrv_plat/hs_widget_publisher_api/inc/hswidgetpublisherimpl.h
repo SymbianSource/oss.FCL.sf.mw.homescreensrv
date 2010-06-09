@@ -33,6 +33,7 @@
 namespace Hs {
 
 class HsWidget;
+class HsWidgetItem;
 
 typedef std::map<std::string, std::wstring> WidgetContentIdMapType;
 
@@ -137,8 +138,8 @@ private:
 
     /**
      */
-    int HandleWidgetActionL( const TDesC8& aActionDes,
-        HsWidget& aWidget );
+    void HandleWidgetActionL( const TDesC8& aActionDes,
+            const TDesC& aContentIdDes, HsWidget& aWidget );
 
     /**
      */
@@ -172,6 +173,11 @@ private:
     
     /**
      */
+    void InsertWidgetDataIdentifiersL( HsWidget& aWidget, 
+            CLiwDefaultMap* aDataMap, const TDesC& aContentType );
+    
+    /**
+     */
     void InsertWidgetInfoL( HsWidget& aWidget, 
 		CLiwDefaultMap* aDataMap );
     
@@ -190,8 +196,7 @@ private:
     
     /**
      */    
-    void InsertItemsTriggersL( HsWidget& aWidget,
-    	CLiwDefaultMap* aTriggerMap );
+    void AddItemsActionsL( HsWidget& aWidgetItem, TInt aItemIndex  );
 
     /**
      */     

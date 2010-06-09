@@ -37,6 +37,7 @@ class MProEngNotifyHandler;
 class MProEngProfileNameArray;
 
 class RSSSettings;
+class CAknQueryDialog;
 
 /**
  *  @ingroup group_profileplugin
@@ -190,6 +191,8 @@ private:
     TBool iTimed;
     /** Flag to indicate whether active profile is silent */
     TBool iSilent;
+    /** Offline query dialog */
+    CAknQueryDialog* iOfflineQueryDialog;
     };
 
 #endif // CAIPROFILEENGINE_H

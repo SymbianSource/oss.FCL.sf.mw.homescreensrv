@@ -275,6 +275,13 @@ private:    // new methods
     void HandleMissingItemsL( const RArray<TMenuItem>& aItems );
 
     /**
+    * Returns proper flag to be set for missing or hidden item.
+    * @param aItem menu item.
+    * @return item proper flags for hidding.
+    */
+    TMenuItem::TFlags GetProperFlagL( const TMenuItem& aItem );
+
+    /**
     * Updates objects flags to aFlagPresent if needed.
     * @param aFlagValue value for flag.
     * @param aItem menu item.
