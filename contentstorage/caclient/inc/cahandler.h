@@ -14,25 +14,24 @@
  * Description:
  *
  */
+#ifndef CAHANDLER_H
+#define CAHANDLER_H
 
-#ifndef CA_S60_APP_HANDLER_ADAPTER_H
-#define CA_S60_APP_HANDLER_ADAPTER_H
-
+#include <QObject>
 #include <cadefs.h>
-#include <QString>
+#include <caclient_global.h>
 
-#include "cahandler.h"
+class QString;
+class CaEntry;
 
-class CCaInnerEntry;
-
-class CaS60AppHandlerAdapter: public QObject, public CaHandler
+class CaHandler // move this header to caclient/inc
 {
-    Q_OBJECT
-    Q_INTERFACES(CaHandler)
-
 public:
-    int execute(CCaInnerEntry &innerEntry, const QString &commandName);
-
+    virtual ~CaHandler() {}
+    virtual int execute(const CaEntry &entry,
+                        const QString &commandName) = 0;
 };
 
-#endif // CA_S60_APP_HANDLER_ADAPTER_H
+Q_DECLARE_INTERFACE(CaHandler, "com.nokia.homescreen.ICommandHandler")
+
+#endif //CAHANDLER_H

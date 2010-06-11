@@ -25,12 +25,15 @@ symbian {
     dll.sources = tstaskmonitorclient.dll
     dll.path = $$SHARED_LIB_DIR
     DEPLOYMENT += dll
+    LIBS += -ltsutils
 
     BLD_INF_RULES.prj_exports +=    "s60\inc\tstaskmonitorclient.h" \
                                     "s60\inc\tstaskmonitorobserver.h" \
                                     "inc\tstaskmonitor.h" \
                                     "inc\tstask.h" \
                                     "inc\tstaskmonitor_global.h" \
+                                    "s60\inc\tsscreenshotclient.h" \
+                                    "inc\tsscreenshotregistry.h" \
 
     TARGET.UID3 = 0x200267AF    
     TARGET.CAPABILITY = ALL -TCB

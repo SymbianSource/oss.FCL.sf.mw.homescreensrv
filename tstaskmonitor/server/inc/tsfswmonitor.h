@@ -18,13 +18,11 @@
 
 #ifndef TSFSWMONITOR_H
 #define TSFSWMONITOR_H
-#define __E32SVR_H__
 
-#include <e32event.h>
 #include <e32debug.h>
 #include <w32std.h>
 
-class MTsFswTaskListObserver;
+class MHsDataObserver;
 class MTsFswResourceObserver;
 
 /**
@@ -39,16 +37,16 @@ public:
     
     
 
-static CTsFswMonitor* NewL(MTsFswTaskListObserver& aTaskListObserver);
-static CTsFswMonitor* NewLC(MTsFswTaskListObserver& aTaskListObserver);
+static CTsFswMonitor* NewL(MHsDataObserver& taskListObserver);
+static CTsFswMonitor* NewLC(MHsDataObserver& taskListObserver);
 
 protected:
-    CTsFswMonitor(MTsFswTaskListObserver& aTaskListObserver);
+    CTsFswMonitor(MHsDataObserver& taskListObserver);
     void ConstructL();
     
     // from CActive
     void RunL();
-    TInt RunError( TInt aError );
+    TInt RunError( TInt error );
     void DoCancel();
 
 
@@ -56,14 +54,13 @@ private:
     void Subscribe();        
     void ConstractObserverL();
 private:
-    MTsFswTaskListObserver* iTaskListObserver; // not own
+    MHsDataObserver* mTaskListObserver; // not own
     
     // window server session
-    RWsSession iWsSession;
-    /**
-       * Window group.
-       */
-   RWindowGroup iWg;
+    RWsSession mWsSession;
+    
+    // Window group.
+    RWindowGroup mWg;
     };
 
 #endif //TSFSWMONITOR_H

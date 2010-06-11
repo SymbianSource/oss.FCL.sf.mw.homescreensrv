@@ -33,4 +33,7 @@
 :"Nokia"
 
 "" - "Z:\sys\bin\tstaskmonitorclient.dll"
-""    - "Z:\sys\bin\hsrunningappmonitor.exe"
+"" - "Z:\sys\bin\hsrunningappmonitor.exe"
+"" - "Z:\sys\bin\tsscreenshotplugin.dll"
+"" - "Z:\resource\plugins\tsscreenshotplugin.rsc"
+"" - "Z:\sys\bin\tsbackstepping.dll"

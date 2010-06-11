@@ -156,9 +156,10 @@ private:
 private:
 
     /**
-     * Contains uid of application that was started to uninstall.
+     * Contains uninstallation status of application 
+     * that was started to uninstall.
      */
-    TInt iAppUid;
+    TInt iUninstallStatus;
 
     };
 

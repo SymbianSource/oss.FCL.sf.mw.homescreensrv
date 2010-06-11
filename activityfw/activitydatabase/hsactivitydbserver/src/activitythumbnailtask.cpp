@@ -76,12 +76,12 @@ void CActivityThumbnailTask::ConstructL(RFs& session)
     mime.CreateL(mMsg.GetDesLengthL(3));
     mMsg.ReadL(3, mime);
 
-    mService = CGraphicsSalingHandler::NewL(*this, 
-                                            session, 
-                                            path, 
-                                            mime, 
-                                            TSize(width(), height()), 
-                                            CGraphicsSalingHandler::EKeepAspectRatio);
+    mService = CTsGraphicFileScalingHandler::NewL(*this, 
+                                    session, 
+                                    path, 
+                                    mime, 
+                                    TSize(width(), height()), 
+                                    CTsGraphicFileScalingHandler::EKeepAspectRatio);
     
     CleanupStack::PopAndDestroy(&mime);
     CleanupStack::PopAndDestroy(&path);
@@ -124,3 +124,11 @@ void CActivityThumbnailTask::BroadcastReceivedL(const RMessage2&)
 {
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CActivityThumbnailTask::IsSessionTask(const CSession2* session)
+{
+	return mMsg.Session() == session ? ETrue : EFalse;
+}

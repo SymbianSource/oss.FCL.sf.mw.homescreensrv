@@ -36,6 +36,7 @@ public:
     
     TSTASKMONITOR_EXPORT bool isClosable() const;
     TSTASKMONITOR_EXPORT QPixmap icon() const;
+    TSTASKMONITOR_EXPORT QPixmap screenshot() const;
     TSTASKMONITOR_EXPORT QString name() const;
     
 protected:

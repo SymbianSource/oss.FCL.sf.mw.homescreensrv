@@ -21,11 +21,16 @@
 
 #include <e32base.h>
 #include <e32cmn.h>
+#include <tsgraphicfilescalinghandler.h>
+
+#include "tsentrykey.h"
+#include "tstaskmonitorglobals.h"
 
 class CTsFswEntry;
 class RReadStream;
 class RWriteStream;
 class CFbsBitmap;
+class MHsDataObserver;
 
 typedef RPointerArray<CTsFswEntry> RTsFswArray;
 
@@ -39,11 +44,16 @@ enum TAppType
 /**
  * An entry in the task list.
  */
-NONSHARABLE_CLASS( CTsFswEntry ) : public CBase
+NONSHARABLE_CLASS( CTsFswEntry ) : public CBase,
+                                   private MImageReadyCallBack
     {
 public:
     static CTsFswEntry* NewL();
     static CTsFswEntry* NewLC();
+    
+    static CTsFswEntry* NewL(const TTsEntryKey& key, MHsDataObserver* observer =0);
+    static CTsFswEntry* NewLC(const TTsEntryKey& key, MHsDataObserver* observer =0);
+    
     ~CTsFswEntry();
 
     /**
@@ -80,15 +90,31 @@ public:
     
     /**
      * Application icon mask.
-     * @see AppIconBitmapHandle
      */
     CFbsBitmap* AppIconMask() const;
+    
+    /**
+     * Application screenshot.
+     */
+    CFbsBitmap* Screenshot() const;
+    
+    /**
+     * Priority.
+     */
+    UpdatePriority Priority() const;
+    
+    /**
+     * Entry's key
+     */
+    const TTsEntryKey& Key() const;
 
 
-    void SetWgId( TInt aWgId );
-    void SetAppUid( const TUid& aUid );
-    void SetAppNameL( const TDesC& aAppName );
-    void SetCloseableApp( TBool aValue );
+    void SetWgId( TInt wgId );
+    void SetAppUid( const TUid& uid );
+    void SetAppNameL( const TDesC& appName );
+    void SetCloseableApp( TBool value );
+    TBool SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority);
+    TBool RemoveScreenshot();
     
     // takes ownership of bitmaps
     void SetAppIcon( CFbsBitmap* aBitmap, CFbsBitmap* aMask );
@@ -101,12 +127,23 @@ public:
         RTsFswArray& aArray );
 
 private:
-    TInt iWgId;
-    TUid iAppUid;
-    HBufC* iAppName;
-    TBool iCloseableApp;
-    CFbsBitmap* iAppIconBitmap;
-    CFbsBitmap* iAppIconMask;  
+    //constructors
+    CTsFswEntry();
+    CTsFswEntry(const TTsEntryKey& aKey, MHsDataObserver* observer);
+    void ImageReadyCallBack(TInt error, const CFbsBitmap *bitmap );
+    
+private:
+    TInt mWgId;
+    TUid mAppUid;
+    HBufC* mAppName;
+    TBool mCloseableApp;
+    CFbsBitmap* mAppIconBitmap;
+    CFbsBitmap* mAppIconMask;
+    CFbsBitmap* mScreenshot;
+    TTsEntryKey mKey;
+    UpdatePriority mPriority;
+    MHsDataObserver* mObserver;
+    CTsGraphicFileScalingHandler* mImgTool;
     };
 
 #endif

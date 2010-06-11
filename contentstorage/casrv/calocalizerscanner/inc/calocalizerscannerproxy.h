@@ -91,6 +91,9 @@ private:
      */
     const TDesC& GetEntryText(
             const RPointerArray<CCaInnerEntry>& aEntries, TInt aId );
+    
+    const TDesC& GetEntryDescription(
+            const RPointerArray<CCaInnerEntry>& aEntries, TInt aId );
 
 private:
 	

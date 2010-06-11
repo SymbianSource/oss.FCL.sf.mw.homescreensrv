@@ -128,3 +128,12 @@ void CActivityStorageAsyncTask::WriteResponseL(const RMessage2& msg)
                    TPckgBuf<CBase*>(this));//task identyfier
     }
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CActivityStorageAsyncTask::IsSessionTask(const CSession2* /*session*/)
+{
+	return EFalse;
+}

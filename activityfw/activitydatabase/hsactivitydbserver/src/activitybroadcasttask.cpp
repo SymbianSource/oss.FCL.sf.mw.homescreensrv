@@ -27,5 +27,7 @@ void ActivityBroadcastTask::ExecuteL(MActivityTaskStorage& storage,
     for (TInt iter(tasks.Count() - 1); iter >= 0 ; --iter ) {
         (tasks[iter])->BroadcastReceivedL(msg);
     }
-    msg.Complete(KErrNone);
+    if(EFalse == msg.IsNull()) {
+        msg.Complete(KErrNone);
+    }
 }

@@ -37,6 +37,11 @@ QPixmap TsTask::icon() const
     return QPixmap();
 }
 
+QPixmap TsTask::screenshot() const
+{
+    return QPixmap();
+}
+
 QString TsTask::name() const
 {
     return QString();

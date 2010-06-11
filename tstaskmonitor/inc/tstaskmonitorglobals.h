@@ -30,6 +30,8 @@ enum RunningAppCmd {
     UpdateScreenshot,
     FlushData,
     CancelSubscribeRunningAppChanges,
+    RegisterScreenshotMessage,
+    UnregisterScreenshotMessage,
 };
 
 enum UpdatePriority {
@@ -37,5 +39,13 @@ enum UpdatePriority {
     Normal,
     High
 };
+
+enum ScreenshotMessageOffsets {
+    ScreenshotHandle = 0,
+    WindowsGroup,
+    AdditionalParameters,
+    Priority
+};
+
 #endif  //RUNNINGAPPGLOBALS_H
 

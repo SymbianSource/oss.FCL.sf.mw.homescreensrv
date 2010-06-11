@@ -20,9 +20,7 @@
 
 ActivityClient::ActivityClient(QObject *parent) : QObject(parent)
 {
-    qDebug("[JCH] activity client creation started");
     d_ptr = new ActivityClientPrivate(this);
-    qDebug("[JCH] activity client creation stopped");
 }
 
 ActivityClient::~ActivityClient()

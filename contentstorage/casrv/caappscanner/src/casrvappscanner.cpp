@@ -21,7 +21,6 @@
 #include <swi/sisregistryentry.h>
 #include <swi/sisregistrypackage.h>
 #include <usif/scr/screntries.h>
-#include <WidgetRegistryClient.h>
 
 #include "cadef.h"
 #include "casrvappscanner.h"
@@ -924,7 +923,7 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
             }
         
         
-        if ( UpdateComponentIdL( *info, *aEntry ) )
+        if ( UpdateComponentIdL( *aEntry ) )
             {
             changed = ETrue;
             }
@@ -944,24 +943,37 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                         KCaAttrAppSettingsPlugin,
                         KCaAttrJavaAppSettingsPluginValue );
                 }
-            else if (appTypeUid == KCWRTApplicationTypeUid)
+            else if ( appTypeUid == KCWRTApplicationTypeUid )
                 {
                 aEntry->AddAttributeL(
                         KCaAttrAppType,
                         KCaAttrAppTypeValueCWRT );
-                aEntry->AddAttributeL(
-                        KCaAttrAppWidgetUri,
-                        KCaAttrAppWidgetUriCWRTValue );
-                // web id should be taken from SCR when supported
-                RWidgetRegistryClientSession wrtSession;
-                CleanupClosePushL(wrtSession);
-                User::LeaveIfError( wrtSession.Connect());
-                TFileName bundleId;
-                wrtSession.GetWidgetBundleId(info->iUid, bundleId);
-                aEntry->AddAttributeL(
-                        KCaAttrAppWidgetParamWebAppId,
-                        bundleId );
-                CleanupStack::PopAndDestroy(&wrtSession);
+                TComponentId compId = 
+                        iSoftwareRegistry.GetComponentIdForAppL( info->iUid );
+                CPropertyEntry* isMiniview = 
+                                        iSoftwareRegistry.GetComponentPropertyL( compId,
+                                                KCaScrPropertyIsMiniviewSupported );
+                CleanupStack::PushL( isMiniview );
+                // check first if we support mini view
+                if (isMiniview && isMiniview->PropertyType() == CPropertyEntry::EIntProperty &&
+                        static_cast<CIntPropertyEntry*>(isMiniview)->IntValue())
+                    {
+                    CPropertyEntry* appId = 
+                        iSoftwareRegistry.GetComponentPropertyL( compId, KCaScrPropertyAppId );
+                    CleanupStack::PushL( appId );
+                    if ( appId && 
+                         appId->PropertyType() == CPropertyEntry::ELocalizedProperty ) 
+                        {
+                        aEntry->AddAttributeL(
+                                            KCaAttrAppWidgetUri,
+                                            KCaAttrAppWidgetUriCWRTValue );
+                        aEntry->AddAttributeL(
+                                            KCaAttrAppWidgetParamWebAppId,
+                                            static_cast<CLocalizablePropertyEntry*>(appId)->StrValue() );
+                        }
+                    CleanupStack::PopAndDestroy( appId );
+                    }                
+                CleanupStack::PopAndDestroy( isMiniview );
                 }
             }
         }
@@ -1245,33 +1257,23 @@ void CCaSrvAppScanner::MakeCollectionVisibleIfHasVisibleEntryL(
 // ---------------------------------------------------------
 //
 // ---------------------------------------------------------//
-TBool CCaSrvAppScanner::UpdateComponentIdL( TApaAppInfo& appInfo, 
-    CCaInnerEntry& aEntry ) const
+TBool CCaSrvAppScanner::UpdateComponentIdL( CCaInnerEntry& aEntry ) const
     {
     TBool updated( EFalse );
     
-    CComponentFilter* const fileNameFilter = CComponentFilter::NewLC();
-
-    fileNameFilter->SetFileL( appInfo.iFullName );
-
-    RArray<TComponentId> componentIds;
-    CleanupClosePushL( componentIds );
-    iSoftwareRegistry.GetComponentIdsL( componentIds, fileNameFilter );
+    TUid uid;
+    TInt err(KErrNone);
+    TComponentId componentId( 0 );
+    TRAP(err, componentId = 
+            iSoftwareRegistry.GetComponentIdForAppL(
+            uid.Uid( aEntry.GetUid() ) ) )
     
-    if ( componentIds.Count() == 0 )
-    {
-        CComponentFilter* const uidFilter = CComponentFilter::NewLC();
-        uidFilter->AddPropertyL(_L("Uid"), aEntry.GetUid());
-        iSoftwareRegistry.GetComponentIdsL( componentIds, uidFilter );
-        CleanupStack::PopAndDestroy( uidFilter );
-    }
-    
-    if ( componentIds.Count() == 1 )
+    if ( componentId > 0 && err == KErrNone )
         {
         RBuf newComponentId;
         newComponentId.CleanupClosePushL();
         newComponentId.CreateL( sizeof(TComponentId) + 1 );
-        newComponentId.AppendNum( componentIds[0] );
+        newComponentId.AppendNum( componentId );
         
         RBuf oldComponentId;
         oldComponentId.CleanupClosePushL();
@@ -1293,9 +1295,5 @@ TBool CCaSrvAppScanner::UpdateComponentIdL( TApaAppInfo& appInfo,
         CleanupStack::PopAndDestroy( &oldComponentId );
         CleanupStack::PopAndDestroy( &newComponentId );
         }
-
-    CleanupStack::PopAndDestroy( &componentIds );
-    CleanupStack::PopAndDestroy( fileNameFilter );
-    
     return updated;
     }

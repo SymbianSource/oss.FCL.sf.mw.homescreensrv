@@ -38,6 +38,7 @@
 ""    - "Z:\sys\bin\hsactivitydbserver.exe"
 
 ""    - "Z:\sys\bin\hsactivitydbclient.dll"
+""    - "Z:\sys\bin\tsutils.dll"
 
 ""    - "Z:\sys\bin\hbactivityplugin.dll"
 "" -  "Z:\resource\qt\plugins\hbactivityplugin.qtplugin"

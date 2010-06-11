@@ -37,6 +37,11 @@ public:
      * List of registered tasks
      */
     virtual const RPointerArray<CActivityTask>& StorageData() const =0;
+
+    /**
+     * Removes not valid task
+     */
+    virtual void RemoveNotValidTasks(const CSession2* session) =0;
 };
 
 #endif  //ACTIVITYTASKSTORAGE_H

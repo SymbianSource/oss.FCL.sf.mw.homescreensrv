@@ -18,15 +18,15 @@ TARGET          hsrunningappmonitor.exe
 TARGETTYPE      exe
 UID             0 0x200267B0
 
-SYSTEMINCLUDE   /epoc32/include
-
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
+USERINCLUDE     ../../../inc
 USERINCLUDE     ../../utils/inc
-SYSTEMINCLUDE   /epoc32/include
-SYSTEMINCLUDE   /epoc32/include/mw
-SYSTEMINCLUDE   /epoc32/include/platform/mw
-SYSTEMINCLUDE   /epoc32/include/platform 
+USERINCLUDE     ../../backstepping/inc
+
+MW_LAYER_SYSTEMINCLUDE 
+APP_LAYER_SYSTEMINCLUDE 
+
 
 SOURCEPATH      ../src
 SOURCE          main.cpp
@@ -34,37 +34,31 @@ SOURCE          hsrunningappserver.cpp
 SOURCE          hsrunningappsession.cpp
 SOURCE          hsdataobservertask.cpp
 SOURCE          hsdataprovidertask.cpp
+SOURCE          tsdatatask.cpp
 
 SOURCE          tsrunningappstorage.cpp
 SOURCE          tsfswdatalist.cpp
 SOURCE          tsfswengine.cpp
 SOURCE          tsfswmonitor.cpp
+SOURCE          tsscreenshotprovider.cpp
 
 SOURCEPATH      ../../utils/src
+SOURCE          tsentrykey.cpp
+SOURCE          tsentrykeygenerator.cpp
 SOURCE          tsfswentry.cpp
 
 
-LIBRARY        euser.lib 
-LIBRARY        estor.lib
-LIBRARY eikcore.lib
-LIBRARY cone.lib
-LIBRARY ws32.lib
-LIBRARY        efsrv.lib
-LIBRARY        fbscli.lib
-LIBRARY avkon.lib
-LIBRARY apgrfx.lib
-LIBRARY flogger.lib
+LIBRARY         euser.lib 
+LIBRARY         estor.lib
+LIBRARY         apparc.lib
+LIBRARY         ws32.lib
+LIBRARY         apgrfx.lib
+LIBRARY         fbscli.lib
+LIBRARY         bitgdi.lib
+LIBRARY         aknicon.lib
+LIBRARY         tsutils.lib
+LIBRARY         tsbackstepping.lib
 
-LIBRARY apparc.lib
-LIBRARY ws32.lib
-LIBRARY apgrfx.lib
-LIBRARY fbscli.lib
-LIBRARY bitgdi.lib
-LIBRARY aknicon.lib
-LIBRARY aknskins.lib
-LIBRARY egul.lib
-LIBRARY featmgr.lib
-LIBRARY bitmaptransforms.lib
 CAPABILITY     ALL -TCB
 EPOCHEAPSIZE   0x100000 0x600000 // 1MB - 6MB
 

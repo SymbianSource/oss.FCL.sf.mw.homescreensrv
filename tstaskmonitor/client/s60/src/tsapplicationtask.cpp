@@ -19,7 +19,7 @@
 
 #include <apgtask.h>
 #include <eikenv.h>
-#include <akndef.h>
+#include <AknDef.h>
 
 #include "tsfswentry.h"
 

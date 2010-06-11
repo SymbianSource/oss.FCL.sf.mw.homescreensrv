@@ -1,92 +1,89 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  ws monitor implementation
+ * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
-*/
-
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:  ws monitor implementation
+ *
+ */
 
 #include "tsfswmonitor.h"
-#include "tsfswobservers.h"
+#include "tsdataobserver.h"
 
 // --------------------------------------------------------------------------
 // CTsFswMonitor::~CTsFswMonitor
 // --------------------------------------------------------------------------
 //
 CTsFswMonitor::~CTsFswMonitor()
-    {
+{
     Cancel();
-    iWg.Close();
-    iWsSession.Close();
-    }
+    mWg.Close();
+    mWsSession.Close();
+}
 
 // --------------------------------------------------------------------------
 // CTsFswMonitor::CTsFswMonitor
 // --------------------------------------------------------------------------
 //
-CTsFswMonitor::CTsFswMonitor(MTsFswTaskListObserver& aTaskListObserver) : CActive( EPriorityStandard ),
-    iTaskListObserver(&aTaskListObserver)
-    {
-    }
+CTsFswMonitor::CTsFswMonitor(MHsDataObserver& taskListObserver) :
+    CActive(EPriorityStandard), mTaskListObserver(&taskListObserver)
+{
+}
 
 // --------------------------------------------------------------------------
 // CTsFswMonitor::NewL
 // --------------------------------------------------------------------------
 //        
-CTsFswMonitor* CTsFswMonitor::NewL(MTsFswTaskListObserver& aTaskListObserver)
-    {
-    CTsFswMonitor* self = NewLC(aTaskListObserver);
-    CleanupStack::Pop( self );
+CTsFswMonitor* CTsFswMonitor::NewL(MHsDataObserver& taskListObserver)
+{
+    CTsFswMonitor* self = NewLC(taskListObserver);
+    CleanupStack::Pop(self);
     return self;
-    }
+}
 
 // --------------------------------------------------------------------------
 // CTsFswMonitor::NewLC
 // --------------------------------------------------------------------------
 //
-CTsFswMonitor* CTsFswMonitor::NewLC(MTsFswTaskListObserver& aTaskListObserver)
-    {
-    CTsFswMonitor* self = new ( ELeave ) CTsFswMonitor(aTaskListObserver);
-    CleanupStack::PushL( self );
+CTsFswMonitor* CTsFswMonitor::NewLC(MHsDataObserver& taskListObserver)
+{
+    CTsFswMonitor* self = new (ELeave) CTsFswMonitor(taskListObserver);
+    CleanupStack::PushL(self);
     self->ConstructL();
     return self;
-    }
-    
+}
+
 // --------------------------------------------------------------------------
 // CTsFswMonitor::ConstructL
 // --------------------------------------------------------------------------
 //
 void CTsFswMonitor::ConstructL()
-    {
-    CActiveScheduler::Add( this );
+{
+    CActiveScheduler::Add(this);
     //Create window server observer
     ConstractObserverL();
     Subscribe();
-    }
-
+}
 
 // -----------------------------------------------------------------------------
 // Subscribe
 // -----------------------------------------------------------------------------
 //
 void CTsFswMonitor::Subscribe()
-    {
-    if( !IsActive() )
-        {
-        iWsSession.EventReady( &iStatus );
+{
+    if (!IsActive()) {
+        mWsSession.EventReady(&iStatus);
         SetActive();
-        }
     }
+}
 
 // -----------------------------------------------------------------------------
 // ConstractObserverL
@@ -94,35 +91,32 @@ void CTsFswMonitor::Subscribe()
 //
 void CTsFswMonitor::ConstractObserverL()
 {
-    User::LeaveIfError( iWsSession.Connect() );
-    iWg = RWindowGroup( iWsSession );
-    User::LeaveIfError( iWg.Construct( 
-                        reinterpret_cast<TUint32>( &iWg ) ) );
-    iWg.DisableFocusChangeEvents();
-    iWg.DisableModifierChangedEvents();
-    iWg.DisableOnEvents();
-    iWg.DisableScreenChangeEvents();
+    User::LeaveIfError(mWsSession.Connect());
+    mWg = RWindowGroup(mWsSession);
+    User::LeaveIfError(mWg.Construct(reinterpret_cast<TUint32> (&mWg)));
+    mWg.DisableFocusChangeEvents();
+    mWg.DisableModifierChangedEvents();
+    mWg.DisableOnEvents();
+    mWg.DisableScreenChangeEvents();
 
     //enable notifications about group lists
-    User::LeaveIfError( iWg.EnableGroupListChangeEvents() );
+    User::LeaveIfError(mWg.EnableGroupListChangeEvents());
 }
 
 void CTsFswMonitor::RunL()
 {
-    User::LeaveIfError( iStatus.Int() );
+    User::LeaveIfError(iStatus.Int());
     TWsEvent event;
-    iWsSession.GetEvent( event );
+    mWsSession.GetEvent(event);
     Subscribe();//new subscribtion has to be called after picking event
-    if( EEventWindowGroupListChanged == event.Type() /*|| EEventFocusGroupChanged == event.Type()*/ )
-        {
-        if ( iTaskListObserver )
-            {
-            iTaskListObserver->UpdateTaskList(); 
-            }
+    if (EEventWindowGroupListChanged == event.Type() /*|| EEventFocusGroupChanged == event.Type()*/) {
+        if (mTaskListObserver) {
+            mTaskListObserver->DataChanged();
         }
+    }
 }
 
-TInt CTsFswMonitor::RunError( TInt /*aError*/ )
+TInt CTsFswMonitor::RunError(TInt /*aError*/)
 {
     Subscribe();
     return KErrNone;
@@ -130,10 +124,9 @@ TInt CTsFswMonitor::RunError( TInt /*aError*/ )
 
 void CTsFswMonitor::DoCancel()
 {
-    if( IsActive() )
-        {
-        iWsSession.EventReadyCancel();
-        }
+    if (IsActive()) {
+        mWsSession.EventReadyCancel();
+    }
 }
 
 // end of file

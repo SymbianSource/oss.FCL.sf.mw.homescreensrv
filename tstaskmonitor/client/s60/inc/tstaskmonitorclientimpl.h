@@ -20,7 +20,7 @@
 #include <e32base.h>
 
 #include "tsfswentry.h"
-#include "tstaskmonitorsession.h"
+#include "tssession.h"
 
 class MTsTaskMonitorObserver;
 
@@ -45,7 +45,7 @@ private:
     CTsTaskMonitorClientImpl();
     void ConstructL();
 
-    RTsTaskMonitorSession iSession;
+    RTsSession iSession;
     MTsTaskMonitorObserver* iObserver; // not owned
 };
 

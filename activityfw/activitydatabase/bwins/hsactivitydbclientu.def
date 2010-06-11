@@ -25,4 +25,7 @@ EXPORTS
 	?activityRequested@HsActivityDbClient@@IAEXABVQString@@@Z @ 24 NONAME ; void HsActivityDbClient::activityRequested(class QString const &)
 	?updateActivity@HsActivityDbClient@@UAEHABV?$QHash@VQString@@VQVariant@@@@@Z @ 25 NONAME ; int HsActivityDbClient::updateActivity(class QHash<class QString, class QVariant> const &)
 	?removeActivity@HsActivityDbClient@@UAEHABV?$QHash@VQString@@VQVariant@@@@@Z @ 26 NONAME ; int HsActivityDbClient::removeActivity(class QHash<class QString, class QVariant> const &)
+	?dataChanged@HsActivityDbClient@@IAEXXZ @ 27 NONAME ; void HsActivityDbClient::dataChanged(void)
+	?notifyDataChange@HsActivityDbClient@@QAEHXZ @ 28 NONAME ; int HsActivityDbClient::notifyDataChange(void)
+	?asyncRequestCompleated@HsActivityDbClient@@UAEXHH@Z @ 29 NONAME ; void HsActivityDbClient::asyncRequestCompleated(int, int)
 

@@ -125,3 +125,12 @@ void CActivityObserverTask::WriteResponseL()
     mMsg.WriteL(KResponseDataSizeOffset, TPckgBuf<TInt>(mData.Length()));//write data size
     mMsg.WriteL(KResponseIdOffset, TPckgBuf<CBase*>(this));//task identyfier
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TBool CActivityObserverTask::IsSessionTask(const CSession2* session)
+{
+	return mMsg.Session() == session ? ETrue : EFalse;
+}

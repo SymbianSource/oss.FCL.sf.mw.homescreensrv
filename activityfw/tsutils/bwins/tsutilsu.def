@@ -1,5 +1,7 @@
 EXPORTS
 	?NewLC@CTsGraphicFileScalingHandler@@SAPAV1@AAVMImageReadyCallBack@@AAVRFs@@ABVTDesC16@@ABVTDesC8@@ABVTSize@@W4TKindOfScaling@1@@Z @ 1 NONAME ; class CTsGraphicFileScalingHandler * CTsGraphicFileScalingHandler::NewLC(class MImageReadyCallBack &, class RFs &, class TDesC16 const &, class TDesC8 const &, class TSize const &, enum CTsGraphicFileScalingHandler::TKindOfScaling)
 	?NewL@CTsGraphicFileScalingHandler@@SAPAV1@AAVMImageReadyCallBack@@AAVRFs@@ABVTDesC16@@ABVTDesC8@@ABVTSize@@W4TKindOfScaling@1@@Z @ 2 NONAME ; class CTsGraphicFileScalingHandler * CTsGraphicFileScalingHandler::NewL(class MImageReadyCallBack &, class RFs &, class TDesC16 const &, class TDesC8 const &, class TSize const &, enum CTsGraphicFileScalingHandler::TKindOfScaling)
-	??1CTsGraphicFileScalingHandler@@UAE@XZ @ 3 NONAME ; CTsGraphicFileScalingHandler::~CTsGraphicFileScalingHandler(void)
+	?NewLC@CTsGraphicFileScalingHandler@@SAPAV1@AAVMImageReadyCallBack@@ABVCFbsBitmap@@ABVTSize@@W4TKindOfScaling@1@@Z @ 3 NONAME ; class CTsGraphicFileScalingHandler * CTsGraphicFileScalingHandler::NewLC(class MImageReadyCallBack &, class CFbsBitmap const &, class TSize const &, enum CTsGraphicFileScalingHandler::TKindOfScaling)
+	?NewL@CTsGraphicFileScalingHandler@@SAPAV1@AAVMImageReadyCallBack@@ABVCFbsBitmap@@ABVTSize@@W4TKindOfScaling@1@@Z @ 4 NONAME ; class CTsGraphicFileScalingHandler * CTsGraphicFileScalingHandler::NewL(class MImageReadyCallBack &, class CFbsBitmap const &, class TSize const &, enum CTsGraphicFileScalingHandler::TKindOfScaling)
+	??1CTsGraphicFileScalingHandler@@UAE@XZ @ 5 NONAME ; CTsGraphicFileScalingHandler::~CTsGraphicFileScalingHandler(void)
 

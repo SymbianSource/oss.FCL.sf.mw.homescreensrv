@@ -20,8 +20,9 @@
 // INCLUDES
 #include <e32std.h>
 #include <e32base.h>
-#include "hsdataobserver.h"
+#include "tsdataobserver.h"
 #include "hsdataprovider.h"
+#include "tsdatastorage.h"
 /**
  *  CActivitySession
  * 
@@ -43,7 +44,8 @@ public:
      * @param storage - data storage
      */
     static CRunningAppSession* NewL(MHsDataObserverStorage& observerStorage, 
-                                    const MHsDataProvider& dataProvider);
+                                    const MHsDataProvider& dataProvider,
+                                    MTsDataStorage& dataStorage);
 
 private:
 
@@ -51,7 +53,8 @@ private:
      * Constructor for performing 1st stage construction
      */
     CRunningAppSession(MHsDataObserverStorage& observerStorage, 
-                       const MHsDataProvider& dataProvider);
+                       const MHsDataProvider& dataProvider,
+                       MTsDataStorage& dataStorage);
 
     /**
      * EPOC default constructor for performing 2nd stage construction
@@ -68,6 +71,7 @@ private:
 private:
     MHsDataObserverStorage& mObserverStorage;
     const MHsDataProvider& mDataProvider;
+    MTsDataStorage& mDataStorage;
 };
 
 #endif // RUNNINGAPPSESSION_H

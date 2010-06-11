@@ -955,6 +955,7 @@ void CaItemModelPrivate::reconnectSlots()
 void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModelItem");
+    int previousCount = rowCount();
     switch (changeType) {
     case AddChangeType:
         addItem(id);
@@ -966,6 +967,7 @@ void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
         updateItemData(id);
         break;
     }
+    emitEmpty(previousCount);
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelItem");
 }
 
@@ -976,6 +978,8 @@ void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
 void CaItemModelPrivate::updateModelContent(int id)
 {
     Q_UNUSED(id);
+    int previousCount = rowCount();
+
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModelContent");
     QList<int> ids = mService->getEntryIds(mQuery);
 
@@ -984,5 +988,20 @@ void CaItemModelPrivate::updateModelContent(int id)
     } else {
         removeItems(ids);
     }
+    emitEmpty(previousCount);
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelContent");
+}
+
+/*!
+ Emits empty signal if model state was changed
+ \param id of parent
+ */
+void CaItemModelPrivate::emitEmpty(int previousCount)
+{
+    if ( previousCount && !rowCount()) {
+        emit m_q->empty(true);
+    }
+    if ( !previousCount && rowCount()) {
+        emit m_q->empty(false);
+    }
 }

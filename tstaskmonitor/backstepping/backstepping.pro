@@ -11,12 +11,10 @@
 #
 # Contributors:
 #
-# Description: 
+# Description:
 #
 
 TEMPLATE = subdirs
-CONFIG += ordered
-
-SUBDIRS +=  testapp
-SUBDIRS +=  t_tsrunningappstorage
-           
+symbian {
+    BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include \"group/bld.inf\""
+    }

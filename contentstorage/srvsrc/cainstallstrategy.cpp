@@ -18,6 +18,7 @@
 #include <SWInstallerInternalPSKeys.h>
 #include <javadomainpskeys.h>
 #include "cainstallstrategy.h"
+#include <swi/swispubsubdefs.h>
 
 // ---------------------------------------------------------------------------
 //
@@ -140,16 +141,16 @@ CCaUsifUninstallStrategy* CCaUsifUninstallStrategy::NewL(
 void CCaUsifUninstallStrategy::NotifyListenerL(
 		RProperty& aProperty, MCaInstallListener& aListener )
     {
-    TInt appUid;
-    User::LeaveIfError( aProperty.Get( KPSUidSWInstallerUiNotification,
-            KSWInstallerUninstallation, appUid ) );
-    // if there is some value!=0 in iAppUid and appUid==0 that means
-    // application with uid==iAppUid was uninstalled, so we notify aListener
-    if( iAppUid && !appUid )
+    TInt status;
+    // TODO: Temporary solution for incorrect USIF notifications     
+    User::LeaveIfError( aProperty.Get( KUidSystemCategory,
+            Swi::KUidSoftwareInstallKey, status ) );
+    //if( status == ( Swi::ESwisStatusSuccess | Swi::ESwisUninstall ) )
+    if( iUninstallStatus == Swi::ESwisUninstall && !status )
         {
-        aListener.HandleInstallNotifyL( iAppUid );
-        }
-    iAppUid = appUid;
+        aListener.HandleInstallNotifyL( iUninstallStatus );
+        }    
+    iUninstallStatus = status;
     }
 
 // ---------------------------------------------------------------------------
@@ -158,8 +159,7 @@ void CCaUsifUninstallStrategy::NotifyListenerL(
 //
 CCaUsifUninstallStrategy::CCaUsifUninstallStrategy( RProperty& aProperty )
     {
-	aProperty.Attach(
-			KPSUidSWInstallerUiNotification, KSWInstallerUninstallation );
+	aProperty.Attach( KUidSystemCategory, Swi::KUidSoftwareInstallKey );
     }
 
 // ---------------------------------------------------------------------------

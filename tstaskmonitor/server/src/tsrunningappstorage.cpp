@@ -19,7 +19,7 @@
 #include "tsfswmonitor.h"
 #include "tsfswentry.h"
 #include <s32strm.h>
-#include <S32MEM.H>
+#include <s32mem.h>
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -84,13 +84,12 @@ void CRunningAppStorage::DataChanged()
     {
         mObserver.DataChanged();
     }
-    
-    int a=8;
-    if( a==9)
-    {
-        CActiveScheduler::Stop();
-    }
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CRunningAppStorage::DataChangedL()
 {
     RTsFswArray taskList = mEngine->FswDataL();
@@ -110,6 +109,24 @@ void CRunningAppStorage::DataChangedL()
     
 
     CleanupStack::PopAndDestroy(buf);
-    CleanupStack::PopAndDestroy(entry); 
- 
+    CleanupStack::PopAndDestroy(entry);  
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CRunningAppStorage::UpdateL(TInt key, const CFbsBitmap& data, TInt /*param*/, TInt priority)
+    {
+    UpdatePriority newpriority = static_cast<UpdatePriority>(priority);
+    mEngine->SetScreenshotL(&data, newpriority, key);
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CRunningAppStorage::RemoveL(TInt key, TInt /*param*/)
+    {
+    mEngine->RemoveScreenshotL(key);
+    }

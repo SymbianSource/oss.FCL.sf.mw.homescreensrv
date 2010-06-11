@@ -70,7 +70,7 @@ enum ErrorCode
     UnknownErrorCode
 };
 
-const QString caCmdOpen("open");
+static const QString caCmdOpen("open");
 
 #ifndef QT_NO_DEBUG_OUTPUT
 #   define USE_QDEBUG_IF(predicate) if (!predicate) {} else qDebug()

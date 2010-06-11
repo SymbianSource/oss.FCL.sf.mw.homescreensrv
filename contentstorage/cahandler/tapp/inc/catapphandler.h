@@ -35,11 +35,11 @@ public:
     ~CaTappHandler();
 
     Q_INVOKABLE
-    int execute(CCaInnerEntry& innerEntry, const QString& command);
+    int execute(const CaEntry &entry, const QString &command);
 
 private:
-    XQApplicationManager* mAiwMgr;
+    XQApplicationManager *mAiwMgr;
 
 };
 
-#endif
+#endif // CATAPPHANDLER_H

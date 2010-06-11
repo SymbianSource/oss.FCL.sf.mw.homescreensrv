@@ -61,4 +61,11 @@ LIBRARY         charconv.lib
 LIBRARY         xmlengineDOM.lib
 LIBRARY         scrclient.lib
 
+
+// HB LIBRARIES
+SYSTEMINCLUDE		/epoc32/include/mw/hb/hbcore
+LIBRARY		HbCore.lib
+
+
+
 // End of file

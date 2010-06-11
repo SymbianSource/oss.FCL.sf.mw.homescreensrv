@@ -48,7 +48,7 @@ mStorage(storage)
 //
 CActivitySession::~CActivitySession()
 {
-    mRunningTasks.ResetAndDestroy();
+	RemoveNotValidTasks(this);
 }
 
 // -----------------------------------------------------------------------------
@@ -149,4 +149,14 @@ void CActivitySession::Pop(CActivityTask *task)
 const RPointerArray<CActivityTask>& CActivitySession::StorageData() const
 {
     return mRunningTasks;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CActivitySession::RemoveNotValidTasks(const CSession2* session)
+{
+    mRunningTasks.ResetAndDestroy();
+    mTasksStorage.RemoveNotValidTasks(this);
 }

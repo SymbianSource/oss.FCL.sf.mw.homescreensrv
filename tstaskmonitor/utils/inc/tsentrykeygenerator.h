@@ -11,25 +11,26 @@
 *
 * Contributors:
 *
-* Description:  Observer interfaces to get notifications from appui and from engine
+* Description:  Task list entry
  *
 */
 
 
-#ifndef TSFSWOBSERVERS_H
-#define TSFSWOBSERVERS_H
+#ifndef TSENTRYKEYGENERATOR_H
+#define TSENTRYKEYGENERATOR_H
 
-/**
- * Interface to get notifications from appui when window groups
- * have changed.
- */
-class MTsFswTaskListObserver
-    {
+#include <e32base.h>
+#include <e32cmn.h>
+#include <w32std.h>
+
+#include "tsentrykey.h"
+
+
+class TsEntryKeyGeneraror
+{
 public:
-    /**
-     * Function called by AppUi to notify about possible
-     * changes in task list
-     */
-    virtual void UpdateTaskList() = 0;
-    };
-#endif
+    static TTsEntryKey GenerateL(TInt windowGroupId, 
+                                 const TArray<RWsSession::TWindowGroupChainInfo>& groupChain);
+};
+
+#endif //TSENTRYKEYGENERATOR_H

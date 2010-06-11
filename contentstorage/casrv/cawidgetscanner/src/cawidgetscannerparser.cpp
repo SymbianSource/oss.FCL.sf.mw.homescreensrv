@@ -28,30 +28,8 @@
 #include "cawidgetscannerparser.h"
 #include "widgetscannerutils.h"
 
-// CONSTANTS
+#include "cawidgetscannerdef.h"
 
-const TInt KChunkSize = 8192;
-const TInt KDriveLetterLength = 2;
-const TInt KModificationTimeLength = 17;
-
-_LIT( KManifest, ".manifest");
-_LIT( KColen, ":" );
-_LIT( KImportDir, "\\private\\20022F35\\import\\widgetregistry\\" );
-//_LIT( KImportDir, "import\\widgetregistry\\" );
-_LIT( KDoubleSlash, "\\" );
-_LIT( KTrue, "true" );
-_LIT8(KWidget, "widget" );
-_LIT8(KUri, "uri" );
-_LIT8(KLibrary, "library" );
-_LIT8(KTitle, "title" );
-_LIT8(KDescription, "description" );
-_LIT8(KHidden, "hidden" );
-_LIT8(KIconUri, "iconuri" );
-_LIT8(KWidgetProvider, "widgetprovider");
-
-_LIT8(KWidgetManifest, "hswidgetmanifest");
-_LIT8(KIcon, "icon");
-_LIT8(KServiceXml, "servicexml");
 
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -182,7 +160,7 @@ void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName )
             RBuf fullFilePath;
             CleanupClosePushL( fullFilePath );
             fullFilePath.CreateL( manifestDirectoryPath->Length() +
-                    (*fileList)[i].iName.Length());
+                    (*fileList)[i].iName.Length() );
             fullFilePath.Append( *manifestDirectoryPath );
             fullFilePath.Append( (*fileList)[i].iName );
             //if file is corrupted we go to the next one
@@ -233,11 +211,12 @@ void CCaWidgetScannerParser::ParseManifestFileL(
         iWidgetDescriptor->SetManifestFilePathNameL( aFilePath );
 
         SetMmcIdL( iWidgetDescriptor );
-
+        
         RXmlEngNodeList<TXmlEngElement> childElementList;
         CleanupClosePushL(childElementList);
         docElement.GetChildElements(childElementList);
         TXmlEngElement element;
+        
         while (childElementList.HasNext())
           {
           element = childElementList.Next();

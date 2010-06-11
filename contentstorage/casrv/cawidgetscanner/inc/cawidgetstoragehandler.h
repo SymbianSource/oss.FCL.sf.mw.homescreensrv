@@ -112,6 +112,14 @@ private:
      * @param aWidget widget.
      */
     void ClearVisibleFlagL( const CCaWidgetDescription* aWidget );
+    
+    /**
+    * Set localizations for widget in db
+    * @param aWidget widget.
+    * @param aEntryId of widget.
+    */    
+    void SetLocalizationsL( const CCaWidgetDescription* aWidget,
+            TInt aEntryId );
 
 private:
 

@@ -1,9 +1,11 @@
 EXPORTS
 	_ZN28CTsGraphicFileScalingHandler4NewLER19MImageReadyCallBackR3RFsRK7TDesC16RK6TDesC8RK5TSizeNS_14TKindOfScalingE @ 1 NONAME
-	_ZN28CTsGraphicFileScalingHandler5NewLCER19MImageReadyCallBackR3RFsRK7TDesC16RK6TDesC8RK5TSizeNS_14TKindOfScalingE @ 2 NONAME
-	_ZN28CTsGraphicFileScalingHandlerD0Ev @ 3 NONAME
-	_ZN28CTsGraphicFileScalingHandlerD1Ev @ 4 NONAME
-	_ZN28CTsGraphicFileScalingHandlerD2Ev @ 5 NONAME
-	_ZTI28CTsGraphicFileScalingHandler @ 6 NONAME
-	_ZTV28CTsGraphicFileScalingHandler @ 7 NONAME
+	_ZN28CTsGraphicFileScalingHandler4NewLER19MImageReadyCallBackRK10CFbsBitmapRK5TSizeNS_14TKindOfScalingE @ 2 NONAME
+	_ZN28CTsGraphicFileScalingHandler5NewLCER19MImageReadyCallBackR3RFsRK7TDesC16RK6TDesC8RK5TSizeNS_14TKindOfScalingE @ 3 NONAME
+	_ZN28CTsGraphicFileScalingHandler5NewLCER19MImageReadyCallBackRK10CFbsBitmapRK5TSizeNS_14TKindOfScalingE @ 4 NONAME
+	_ZN28CTsGraphicFileScalingHandlerD0Ev @ 5 NONAME
+	_ZN28CTsGraphicFileScalingHandlerD1Ev @ 6 NONAME
+	_ZN28CTsGraphicFileScalingHandlerD2Ev @ 7 NONAME
+	_ZTI28CTsGraphicFileScalingHandler @ 8 NONAME
+	_ZTV28CTsGraphicFileScalingHandler @ 9 NONAME
 

@@ -27,7 +27,7 @@
 
 #include "activitytask.h"
 #include "activitytaskstorage.h"
-#include "activitygraphicfilescaling.h"
+#include "tsgraphicfilescalinghandler.h"
 
 class CFbsBitmap;
 
@@ -67,6 +67,11 @@ private:
     const TDesC8& Data()const;
 
     void BroadcastReceivedL(const RMessage2& );
+    
+    /**
+     * Returns ETrue if task is related with session argument
+     */
+    TBool IsSessionTask(const CSession2* session);
 
 private:
     MActivityTaskStorage& mStorage; 

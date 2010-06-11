@@ -21,8 +21,6 @@ CONFIG += plugin
 include(activityserviceplugin.pri)
 
 INCLUDEPATH += ./inc \
-             #../cautils/inc \
-             #../extinc \
 
 HEADERS +=  ./inc/activityserviceplugin.h \
             ./inc/activitydatastorage.h \
@@ -45,7 +43,7 @@ symbian {
 
     SOURCES += ./s60/src/applicationlauncher_p.cpp
     
-    HEADERS += ./s60/src/applicationlauncher_p.h
+    HEADERS += ./s60/inc/applicationlauncher_p.h
 
     LIBS += -lapparc \
             -lapgrfx \
@@ -76,4 +74,8 @@ symbian {
     xml.path = $$RESOURCE_FILES_DIR/activity
     
     DEPLOYMENT += xml
+
+    #temporary workaround
+    BLD_INF_RULES.prj_exports += "data/activityserviceplugin.xml z:/resource/activity/activityserviceplugin.xml"
+    
 }

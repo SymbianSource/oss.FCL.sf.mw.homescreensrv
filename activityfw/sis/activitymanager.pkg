@@ -32,6 +32,7 @@
 "/epoc32/release/armv5/urel/hsactivitydbserver.exe"    - "!:\sys\bin\hsactivitydbserver.exe"
 
 "/epoc32/release/armv5/urel/hsactivitydbclient.dll"    - "!:\sys\bin\hsactivitydbclient.dll"
+"/epoc32/release/armv5/urel/tsutils.dll"    - "!:\sys\bin\tsutils.dll"
 
 "/epoc32/release/armv5/urel/hbactivityplugin.dll"    - "!:\sys\bin\hbactivityplugin.dll"
 "/epoc32/data/z/resource/qt/plugins/hbactivityplugin.qtplugin"-"!:\resource\qt\plugins\hbactivityplugin.qtplugin"
