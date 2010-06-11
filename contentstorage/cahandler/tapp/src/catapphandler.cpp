@@ -58,7 +58,7 @@ CaTappHandler::~CaTappHandler()
  Uses XQApplicationManager
  \param entry Subject of the \a command.
  \param command Description of the command.
- \return Error code described in QSERVICEMANAGER.H
+ \retval Error code described in QSERVICEMANAGER.H
  */
 int CaTappHandler::execute(const CaEntry& entry, const QString& command)
 {
@@ -78,7 +78,7 @@ int CaTappHandler::execute(const CaEntry& entry, const QString& command)
             }
         }
     } else {
-        // TODO: error code cleanning and appropriate conversion (in other classes too).
+        // TODO: error code cleanning and an appropriate conversion (in other classes too).
         static const int NotSupportedErrorCode = 100;
         error = NotSupportedErrorCode;
     }

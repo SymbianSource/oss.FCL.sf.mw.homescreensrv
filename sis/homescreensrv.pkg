@@ -143,14 +143,6 @@
 "/epoc32/data/z/private/20022F90/castorage.db" - "c:/private/20022F90/castorage.db"
 "/epoc32/data/z/resource/plugins/castockhandlerplugins.rsc"-"c:/resource/plugins/castockhandlerplugins.rsc"
 
-; ---- appfoundation --------------------------------------------
-
-; -------- statemodel
-"/epoc32/release/armv5/urel/statemodel.dll" - "c:/sys/bin/statemodel.dll"
-
-; -------- appruntimemodel
-"/epoc32/release/armv5/urel/appruntimemodel.dll" - "c:/sys/bin/appruntimemodel.dll"
-
 ; ----  hswidgetmodel --------------------------------------------
 "/epoc32/release/armv5/urel/hswidgetmodel.dll" - "c:/sys/bin/hswidgetmodel.dll"
 

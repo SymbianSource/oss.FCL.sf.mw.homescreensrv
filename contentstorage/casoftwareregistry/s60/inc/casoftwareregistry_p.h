@@ -15,13 +15,17 @@
  *
  */
 
-#ifndef CA_SOFTWARE_REGISTRY_PRIVATE_H
-#define CA_SOFTWARE_REGISTRY_PRIVATE_H
+#ifndef CASOFTWAREREGISTRY_P_H
+#define CASOFTWAREREGISTRY_P_H
 
 #include <QHash>
 #include <QString>
 
+#include <usif/usifcommon.h>
+
+class QStringList;
 class CaSoftwareRegistry;
+
 namespace Usif 
 {
     class CComponentEntry;
@@ -37,13 +41,28 @@ public:
         CaSoftwareRegistry *softwareRegistryPublic);
     ~CaSoftwareRegistryPrivate();
 
+    bool getUninstallDetails(int componentId,
+        QString &componentName,
+        QStringList &applicationsUids,
+        QString &confirmationMessage);
+    
+    bool getApplicationsUids(int componentId,
+        QStringList &appUids);
+
     DetailMap entryDetails(int componentId) const;
     
     DetailMap entryDetails(
         const Usif::CComponentEntry& entry) const;
 private:
+    void getUninstallDetailsL(int componentId,
+        QString &componentName,
+        QStringList &appUids,
+        QString &confirmationMessage);
+    void getApplicationsUidsL(int componentId,
+        QStringList &appUids);
+private:
     CaSoftwareRegistry *const m_q;
 
 };
 
-#endif // CA_SOFTWARE_REGISTRY_PRIVATE_H
+#endif // CASOFTWAREREGISTRY_P_H

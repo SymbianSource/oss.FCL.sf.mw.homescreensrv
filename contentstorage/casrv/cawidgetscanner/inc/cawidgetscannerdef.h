@@ -25,12 +25,13 @@ const TInt KDriveLetterLength = 2;
 const TInt KModificationTimeLength = 17;
 const TInt KNoId = -1;
 
+const TInt KPackageUidPosition = 9; // position in path from end
+const TInt KPackageUidLength = 8;
+
+
 // LIT
 _LIT( KDoubleSlash, "\\" );
 _LIT( KWidgetScannerUnderline, "_" );
-_LIT( KWidgetScannerCaEntry, "CA_ENTRY" );
-_LIT( KWidgetScannerEnText, "EN_TEXT" );
-_LIT( KWidgetScannerEnDescription, "EN_DESCRIPTION" );
 
 
 _LIT( KManifest, ".manifest");
@@ -48,7 +49,16 @@ _LIT8(KWidgetProvider, "widgetprovider");
 
 _LIT8(KWidgetManifest, "hswidgetmanifest");
 _LIT8(KIcon, "icon");
+_LIT8( KPreviewImageElementName, "previewimage" );
 _LIT8(KServiceXml, "servicexml");
 
+// CONSTANTS
+_LIT(KAttrWidgetPath, "widget:path");
+_LIT(KAttrWidgetLibrary, "widget:library");
+_LIT(KAttrWidgetUri, "widget:uri");
+_LIT(KAttrWidgetServiceXml, "widget:servicexml");
+_LIT(KSlash, "/");
+_LIT(KDllExt, ".dll");
+_LIT(KNoLibrary, "NoLibrary");
 
 #endif // CA_WIDGETSCANNERDEF_H

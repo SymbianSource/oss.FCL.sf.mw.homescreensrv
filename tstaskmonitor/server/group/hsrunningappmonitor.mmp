@@ -38,8 +38,6 @@ SOURCE          tsdatatask.cpp
 
 SOURCE          tsrunningappstorage.cpp
 SOURCE          tsfswdatalist.cpp
-SOURCE          tsfswengine.cpp
-SOURCE          tsfswmonitor.cpp
 SOURCE          tsscreenshotprovider.cpp
 
 SOURCEPATH      ../../utils/src

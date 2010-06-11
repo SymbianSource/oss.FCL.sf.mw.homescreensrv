@@ -72,6 +72,8 @@ EXPORT_C void CCaInnerEntry::ExternalizeL( RWriteStream& aStream ) const
     aStream.WriteL( iDescription, iDescription.Length() );
     aStream.WriteUint32L( iEntryTypeName.Length() );
     aStream.WriteL( iEntryTypeName, iEntryTypeName.Length() );
+    aStream.WriteUint32L( iTextLocalized );
+    aStream.WriteUint32L( iDescriptionLocalized );
     iAttributes.ExternalizeL( aStream );
     iIcon->ExternalizeL( aStream );
     aStream.CommitL();
@@ -99,6 +101,8 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
     iEntryTypeName.Close();
     iEntryTypeName.CreateL( length );
     aStream.ReadL( iEntryTypeName, length );
+    iTextLocalized = aStream.ReadUint32L();
+    iDescriptionLocalized = aStream.ReadUint32L();
     iAttributes.InternalizeL( aStream );
     iIcon->InternalizeL( aStream );
     }
@@ -110,6 +114,8 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
 void CCaInnerEntry::ConstructL()
     {
     iIcon = CCaInnerIconDescription::NewL();
+    iTextLocalized = EFalse;
+    iDescriptionLocalized = EFalse;
     }
 
 // ---------------------------------------------------------------------------
@@ -224,20 +230,23 @@ EXPORT_C void CCaInnerEntry::SetId( TUint aId )
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CCaInnerEntry::SetTextL( const TDesC& aText )
+EXPORT_C void CCaInnerEntry::SetTextL( const TDesC& aText, TBool localized )
     {
     iText.Close();
     iText.CreateL( aText );
+    iTextLocalized = localized;
     }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C void CCaInnerEntry::SetDescriptionL( const TDesC& aText )
+EXPORT_C void CCaInnerEntry::SetDescriptionL( 
+        const TDesC& aText, TBool localized )
     {
     iDescription.Close();
     iDescription.CreateL( aText );
+    iDescriptionLocalized = localized;
     }
 
 // ---------------------------------------------------------------------------
@@ -344,3 +353,23 @@ EXPORT_C void CCaInnerEntry::SetIconId( TInt aIconId )
     {
     iIcon->SetId( aIconId );
     }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TBool CCaInnerEntry::isLocalized(TLocalizedType aLocalized) const
+    {
+    if(aLocalized == EDescriptionLocalized)
+        {
+        return iDescriptionLocalized;
+        }
+    if(aLocalized == ENameLocalized)
+        {
+        return iTextLocalized;
+        }
+    else 
+        return EFalse;
+    }
+
+

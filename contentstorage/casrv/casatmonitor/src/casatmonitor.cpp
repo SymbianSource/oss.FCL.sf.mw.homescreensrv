@@ -115,7 +115,7 @@ void CCaSatMonitor::SatChangeL()
         resultArray[0]->SetRole( EItemEntryRole );
         resultArray[0]->SetEntryTypeNameL( KCaTypeApp );
         resultArray[0]->SetTextL( satName );
-        resultArray[0]->AddAttributeL( KCaAttrLongName, satName );
+        resultArray[0]->AddAttributeL( KCaAttrShortName, satName );
         resultArray[0]->SetFlags( resultArray[0]->GetFlags() | EVisible );
 
         iCaStorageProxy.AddL( resultArray[0] );

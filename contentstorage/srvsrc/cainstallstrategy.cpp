@@ -146,9 +146,10 @@ void CCaUsifUninstallStrategy::NotifyListenerL(
     User::LeaveIfError( aProperty.Get( KUidSystemCategory,
             Swi::KUidSoftwareInstallKey, status ) );
     //if( status == ( Swi::ESwisStatusSuccess | Swi::ESwisUninstall ) )
-    if( iUninstallStatus == Swi::ESwisUninstall && !status )
+    // notify subscribers on begenning and at the end of uninstallation
+    if( status == Swi::ESwisUninstall || iUninstallStatus == Swi::ESwisUninstall /*&& !status*/ )
         {
-        aListener.HandleInstallNotifyL( iUninstallStatus );
+        aListener.HandleInstallNotifyL( status );
         }    
     iUninstallStatus = status;
     }

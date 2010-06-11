@@ -18,36 +18,42 @@
 #ifndef HOMESCREEN_DOMAIN_PS_KEYS_H
 #define HOMESCREEN_DOMAIN_PS_KEYS_H
 
-/**
- * P&S Key path for all Home Screen information keys provided by this API.
- */
+
+/*!
+    \file homescreendomainpskeys.h
+    \brief 
+*/
+
+/*!
+    P&S Key path for all Home Screen information keys provided by this API.
+*/
 const char HsStatePSKeyPath[] = "/homescreen";
 
-/**
- * P&S Key sub path to represent the state of the Home Screen. This property is updated when
- * Home screen state is changed. Valid values are defined by the enum EPSHsState.
- *
- * @see EPSHsState
- */
+/*!
+    P&S Key sub path to represent the state of the Home Screen. This property is updated when
+    Home screen state is changed. Valid values are defined by the enum EPSHsState.
+    
+    @see EPSHsState
+*/
 const char HsStatePSKeySubPath[] = "state";
 
 #ifdef Q_OS_SYMBIAN
-/**
- * Home Screen P&S category Uid for pure Symbian usage.
- */
+/*!
+    Home Screen P&S category Uid for pure Symbian usage.
+*/
 const TUid KHsCategoryUid = { 0x20022F35 };
 
-/**
- * P&S Key to represent the state of the Home Screen for pure Symbian usage.
- * This property is updated when Home screen state is changed. Valid values
- * are defined by the enum EPSHsState.
- */
+/*!
+    P&S Key to represent the state of the Home Screen for pure Symbian usage.
+    This property is updated when Home screen state is changed. Valid values
+    are defined by the enum EPSHsState.
+*/
 const TUint KHsCategoryStateKey = 0x1;
 #endif //Q_OS_SYMBIAN
 
-/**
- * Home screen state.
- */
+/*!
+    Home screen state.
+*/
 enum EPSHsState
      {
      /**

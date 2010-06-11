@@ -15,12 +15,13 @@
  *
  */
 
-#ifndef CA_SOFTWARE_REGISTRY_PRIVATE_H
-#define CA_SOFTWARE_REGISTRY_PRIVATE_H
+#ifndef CASOFTWAREREGISTRY_P_H
+#define CASOFTWAREREGISTRY_P_H
 
 #include <QHash>
 #include <QString>
 
+class QStringList;
 class CaSoftwareRegistry;
 
 class CaSoftwareRegistryPrivate
@@ -32,6 +33,14 @@ public:
         CaSoftwareRegistry *softwareRegistryPublic);
     ~CaSoftwareRegistryPrivate();
 
+    bool getApplicationsUids(int componentId,
+        QStringList &applicationsUids);
+
+    bool getUninstallDetails(int componentId,
+        QString &componentName,
+        QStringList &applicationsUids,
+        QString &confirmationMessage);
+
     DetailMap entryDetails(int componentId) const;
 private:
 
@@ -39,4 +48,4 @@ private:
 
 };
 
-#endif // CA_SOFTWARE_REGISTRY_PRIVATE_H
+#endif // CASOFTWAREREGISTRY_P_H

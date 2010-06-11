@@ -34,6 +34,7 @@ enum ActivityCmd {
     RemoveApplicationActivities,
     Activities,
     ApplicationActivities,
+    ApplicationActivity,
     WaitActivity,
     LaunchActivity,
     GetThumbnail,

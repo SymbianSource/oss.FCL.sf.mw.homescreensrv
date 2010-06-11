@@ -44,11 +44,6 @@ public:
     QVariantHash parseCommandLine(const QStringList &commandLineParams) const;
 
 private:
-    void registerThumbnail(const QString &, QVariantHash&);
-    QString thumbnailName(const QString &) const;
-
-private:
-    ActivityDataStorage *mDataStorage;
     HsActivityDbClient *mServerClient;
     bool mIsconnected;
 };

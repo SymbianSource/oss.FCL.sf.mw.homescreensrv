@@ -19,28 +19,25 @@
 #define __CBACKSTEPPING_H
 
 #include <w32std.h>
+#include <tswindowgroupsobserver.h>
 
 
-
-class CTsBackstepping : public CActive
+class CTsBackstepping : public CTsWindowGroupsObserver
 {
 public:
-    IMPORT_C static CTsBackstepping* NewL(RWsSession &);
-    IMPORT_C static CTsBackstepping* NewLC(RWsSession &);
+    IMPORT_C static CTsBackstepping* NewL(MTsWindowGroupsMonitor &);
+    IMPORT_C static CTsBackstepping* NewLC(MTsWindowGroupsMonitor &);
     IMPORT_C virtual ~CTsBackstepping();
 
 private:
-    CTsBackstepping(RWsSession&);
+    CTsBackstepping(MTsWindowGroupsMonitor &);
     void ConstructL();
-    void RunL();
-    TInt RunError(TInt error);
-    void DoCancel();
-    void Subscribe();
-    void AnalyseWindowStackL();
 
-private:
-    RWsSession &mWsSession;
-    RWindowGroup mWg;
+    void HandleWindowGroupChanged(MTsResourceManager &, 
+                                  const TArray<RWsSession::TWindowGroupChainInfo> &);
+                                  
+    void HandleWindowGroupChangedL(MTsResourceManager &, 
+                                  const TArray<RWsSession::TWindowGroupChainInfo> &);
 };
 
 #endif // __CBACKSTEPPING_H

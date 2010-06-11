@@ -145,7 +145,7 @@ void CaIconCache::insert(const CaEntry &entry, const QSize &size,
 void CaIconCache::remove(const CaEntry &entry, ChangeType changeType)
 {
     CACLIENTTEST_FUNC_ENTRY("CaIconCache::remove");
-    if (changeType != AddChangeType) {
+    if (changeType != AddChangeType && !(entry.flags() & UninstallEntryFlag)) {
         QString entryKey = key(entry);
         entryKey.append(separator);
         QList<QString> keys = mCache.keys();

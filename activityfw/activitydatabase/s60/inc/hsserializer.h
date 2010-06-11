@@ -16,8 +16,8 @@
 */
 #ifndef HSSERIALIZER_H
 #define HSSERIALIZER_H
+
 #include <qvariant.h>
-#include <qpixmap.h>
 
 /**
  * Operator serialize VarinatHash to RBuf8
@@ -29,8 +29,4 @@ RBuf8 &operator <<(RBuf8 &dst, const QVariantHash &src);
  */
 QVariantHash &operator <<(QVariantHash &dst, const TDesC8 &src);
 
-/**
- * Operator deserialize RBuf8 to QList<QVariantHash>
- */
-QList<QVariantHash>& operator <<(QList<QVariantHash>& dst, const TDesC8 &src);
 #endif

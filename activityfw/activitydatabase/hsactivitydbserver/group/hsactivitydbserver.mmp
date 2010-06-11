@@ -23,19 +23,23 @@ APP_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
+USERINCLUDE     ../../s60/inc
 USERINCLUDE     ../../../../inc
 
 SOURCEPATH      ../src
 SOURCE          main.cpp
-SOURCE          activityserver.cpp
-SOURCE          activitysession.cpp
-SOURCE          activitystorage.cpp
-SOURCE          activitydataprovidertask.cpp
-SOURCE          activitybroadcasttask.cpp
-SOURCE          activitystoragesynctask.cpp
-SOURCE          activitystorageasynctask.cpp
-SOURCE          activityobservertask.cpp
-SOURCE          activitythumbnailtask.cpp
+SOURCE          afserver.cpp
+SOURCE          afsession.cpp
+SOURCE          afstorage.cpp
+SOURCE          afdataprovidertask.cpp
+SOURCE          afbroadcasttask.cpp
+SOURCE          afstoragesynctask.cpp
+SOURCE          afstorageasynctask.cpp
+SOURCE          afobservertask.cpp
+SOURCE          afthumbnailtask.cpp
+
+SOURCEPATH      ../../s60/src
+SOURCE          afentry.cpp
 
 LIBRARY        euser.lib 
 LIBRARY        estor.lib
@@ -43,6 +47,7 @@ LIBRARY        edbms.lib
 LIBRARY        efsrv.lib
 LIBRARY        bafl.lib
 LIBRARY        fbscli.lib
+LIBRARY        hash.lib 
 LIBRARY        bitmaptransforms.lib
 LIBRARY        imageconversion.lib
 LIBRARY        tsutils.lib

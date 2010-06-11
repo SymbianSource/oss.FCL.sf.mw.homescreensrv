@@ -56,7 +56,8 @@ symbian: {
     LIBS += -leuser \
         -lecom \
         -lcautils \
-        -lcamenu
+        -lcamenu \
+        -lefsrv
 }
 
 exportResources(./*.qm, resource/qt/translations)

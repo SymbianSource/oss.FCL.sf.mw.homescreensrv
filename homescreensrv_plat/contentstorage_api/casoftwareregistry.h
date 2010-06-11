@@ -26,6 +26,7 @@
 #include "caclient_global.h"
 
 //FORWARD DECLARATIONS
+class QStringList;
 class CaSoftwareRegistryPrivate;
 
 /**
@@ -45,6 +46,13 @@ public:
     static QSharedPointer<CaSoftwareRegistry> create();
     
     typedef QHash<QString, QString> DetailMap;
+    
+    bool getUninstallDetails(int componentId,
+        QString &componentName,
+        QStringList &applicationsUids,
+        QString &confirmationMessage);
+    
+    bool getApplicationsUids(int componentId, QStringList &applicationsUids);
     
     DetailMap entryDetails(int componentId) const;
     

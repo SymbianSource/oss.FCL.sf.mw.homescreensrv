@@ -15,8 +15,8 @@
  *
  */
 #include <QtGlobal>
-#include <QMetaType>
 #include <QString>
+#include <QStringList>
 
 
 #include "casoftwareregistry.h"
@@ -94,6 +94,53 @@ CaSoftwareRegistry::~CaSoftwareRegistry()
 }
 
 /*!
+ Provides details needed for uninstalling process of Java applications.
+ \code
+ QSharedPointer<CaSoftwareRegistry> service = CaSoftwareRegistry::create();
+ int componentId(20);
+ QString &componentName,
+ QStringList applicationsUids;
+ QString confirmationMessage;
+ CaSoftwareRegistry::DetailMap detailMap = service->getUninstallDetails(
+    componentId,
+    componentName,
+    applicationsUids,
+    confirmationMessage);
+ \endcode
+ \param[in] componentId component id of an application to be uninstalled.
+ \param[out] componentName a name of the component.
+ \param[out] applicationsUids a list of uids of applications in the package
+      of the given component id.
+ \param[out] confirmationMessage optional deletion confirmation message,
+      null string means the lack of the message.
+ \retval true if there is no error.
+ */
+bool CaSoftwareRegistry::getUninstallDetails(int componentId,
+    QString &componentName,
+    QStringList &applicationsUids,
+    QString &confirmationMessage)
+{
+    return m_d->getUninstallDetails(componentId,
+        componentName,
+        applicationsUids,
+        confirmationMessage);
+}
+
+/*!
+ Provides a list of uids of applications installed by the given package.
+ \param[in] componentId component id of an application to be uninstalled.
+ \param[out] applicationsUids a list of uids of applications in the package
+      of the given component id.
+ \retval true if there is no error.
+ */
+
+bool CaSoftwareRegistry::getApplicationsUids(int componentId,
+    QStringList &applicationsUids)
+{
+    return m_d->getApplicationsUids(componentId, applicationsUids);
+}
+
+/*!
  The method provides component details from USIF for a given component id.
  \code
  QSharedPointer<CaSoftwareRegistry> service = CaSoftwareRegistry::create();
@@ -164,6 +211,4 @@ QString CaSoftwareRegistry::componentTypeKey()
     static const QString key("type");
     return key;
 }
-
-
 

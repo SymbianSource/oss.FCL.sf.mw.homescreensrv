@@ -49,12 +49,16 @@ static const char caAttrView[] = "view";
 static const char caCmdClose[] = "close";
 static const char caAttrWindowGroupId[] = "window_group_id";
 static const char caAttrComponentId[] = "component_id";
-static const char caCmdRemove[] = "remove";
 
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
+/*!
+ *  Command handler for application entries.
+ *
+ *  \lib caclient.lib
+ */
+
+/*!
+ * Constructor.
+ */
 CaAppHandler::CaAppHandler(QObject *parent):
     iEikEnv(CEikonEnv::Static()),
     iUsifUninstallOperation(NULL)
@@ -62,15 +66,20 @@ CaAppHandler::CaAppHandler(QObject *parent):
     Q_UNUSED(parent);
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+ * Destructor.
+ */
 CaAppHandler::~CaAppHandler()
 {
     delete iUsifUninstallOperation;
 }
 
+/*!
+ * Execute a given command.
+ * \param entry a reference to a CaEntry instance.
+ * \param command a given command.
+ * \retval an error code.
+ */
 int CaAppHandler::execute(const CaEntry &entry, const QString &command)
 {
     int result(KErrGeneral);
@@ -104,99 +113,93 @@ int CaAppHandler::execute(const CaEntry &entry, const QString &command)
     return result;
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CaAppHandler::launchApplicationL(const TUid aUid, TInt aViewId)
+/*!
+ * Launch application
+ * \param uid UID of the application to launch.
+ * \param viewId id of the view the application is to start in.
+ */
+void CaAppHandler::launchApplicationL(const TUid uid, TInt viewId)
 {
-    if( aViewId > 0 && iEikEnv )
-        {
-        TUid viewId = TUid::Uid( aViewId );
-        TVwsViewId view( aUid, viewId );
+    if (viewId > 0 && iEikEnv) {
+        TVwsViewId view(uid, TUid::Uid(viewId));
         iEikEnv->EikAppUi()->ActivateViewL( view );
-        }
-    else
-        {
+    } else {
         RWsSession wsSession;
-        User::LeaveIfError( wsSession.Connect() );
-        CleanupClosePushL<RWsSession>( wsSession );
+        User::LeaveIfError(wsSession.Connect());
+        CleanupClosePushL<RWsSession>(wsSession);
 
-        CCaTaskList* taskList = CCaTaskList::NewLC( wsSession );
-        TApaTask task = taskList->FindRootApp( aUid );
-        CleanupStack::PopAndDestroy( taskList );
+        CCaTaskList* taskList = CCaTaskList::NewLC(wsSession);
+        TApaTask task = taskList->FindRootApp(uid);
+        CleanupStack::PopAndDestroy(taskList);
 
-        if( task.Exists() )
-            {
+        if (task.Exists()) {
             task.BringToForeground();
-            }
-        else
-            {
+        } else {
             // TApaAppInfo size is greater then 1024 bytes
             // so its instances should not be created on the stack.
-            TApaAppInfo* appInfo = new( ELeave ) TApaAppInfo;
-            CleanupStack::PushL( appInfo );
+            TApaAppInfo* appInfo = new(ELeave) TApaAppInfo;
+            CleanupStack::PushL(appInfo);
             TApaAppCapabilityBuf capabilityBuf;
             RApaLsSession appArcSession;
-            User::LeaveIfError( appArcSession.Connect() );
-            CleanupClosePushL<RApaLsSession>( appArcSession );
+            User::LeaveIfError(appArcSession.Connect());
+            CleanupClosePushL<RApaLsSession>(appArcSession);
 
-            User::LeaveIfError( appArcSession.GetAppInfo( *appInfo, aUid ) );
-            User::LeaveIfError( appArcSession.GetAppCapability(
-                                   capabilityBuf, aUid ) );
+            User::LeaveIfError(appArcSession.GetAppInfo(*appInfo, uid));
+            User::LeaveIfError(appArcSession.GetAppCapability(
+               capabilityBuf, uid));
 
             TApaAppCapability &caps = capabilityBuf();
             CApaCommandLine *cmdLine = CApaCommandLine::NewLC();
-            cmdLine->SetExecutableNameL( appInfo->iFullName );
+            cmdLine->SetExecutableNameL(appInfo->iFullName);
 
-            if( caps.iLaunchInBackground )
-                {
-                cmdLine->SetCommandL( EApaCommandBackground );
-                }
-            else
-                {
-                cmdLine->SetCommandL( EApaCommandRun );
-                }
+            if (caps.iLaunchInBackground) {
+                cmdLine->SetCommandL(EApaCommandBackground);
+            } else {
+                cmdLine->SetCommandL(EApaCommandRun);
+            }
 
-            cmdLine->SetTailEndL( KNullDesC8 );
+            cmdLine->SetTailEndL(KNullDesC8);
 
-            User::LeaveIfError( appArcSession.StartApp( *cmdLine ) );
+            User::LeaveIfError(appArcSession.StartApp(*cmdLine));
 
-            CleanupStack::PopAndDestroy( cmdLine );
-            CleanupStack::PopAndDestroy( &appArcSession );
-            CleanupStack::PopAndDestroy( appInfo );
+            CleanupStack::PopAndDestroy(cmdLine);
+            CleanupStack::PopAndDestroy(&appArcSession);
+            CleanupStack::PopAndDestroy(appInfo);
         }
         CleanupStack::PopAndDestroy( &wsSession );
     }
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+ * Closes application.
+ * \param flags an entry flags.
+ * \param windowGroupId window group id.
+ * \retval an error code.
+ */
 int CaAppHandler::closeApplication(const EntryFlags &flags, int windowGroupId)
 {
     int result(KErrNone);
-    if (flags.testFlag(RunningEntryFlag)
-        && !( flags.testFlag(SystemEntryFlag))
-        && windowGroupId > 0) {
+    if (flags.testFlag(RunningEntryFlag) && windowGroupId > 0) {
         RWsSession wsSession;
         result = wsSession.Connect();
         if (result==KErrNone) {
             TWsEvent event;
             event.SetTimeNow();
-            event.SetType( KAknShutOrHideApp );
-            wsSession.SendEventToWindowGroup( windowGroupId, event );
+            event.SetType(KAknShutOrHideApp);
+            wsSession.SendEventToWindowGroup(windowGroupId, event);
         }
         wsSession.Close();
     }
     return result;
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
+/*!
+ * Uninstall application.
+ * \param flags flags of the application which is to uninstall.
+ * \param typeName type name of the entry.
+ * \param componentId component id.
+ * \retval an error code.
+ */
 int CaAppHandler::handleRemove(const EntryFlags &flags,
     const QString &typeName,
     const QString &componentId)
@@ -227,17 +230,17 @@ int CaAppHandler::handleRemove(const EntryFlags &flags,
     return result;
 }
 
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CaAppHandler::startUsifUninstallL(TInt aComponentId)
+/*!
+ * Start uninstall operation via usif.
+ * \param componentId component id.
+ */
+void CaAppHandler::startUsifUninstallL(TInt componentId)
 {
     if (iUsifUninstallOperation && iUsifUninstallOperation->IsActive()) {
         User::Leave( KErrInUse );
     }
     delete iUsifUninstallOperation;
     iUsifUninstallOperation = NULL;
-    iUsifUninstallOperation = CCaUsifUninstallOperation::NewL(aComponentId);
+    iUsifUninstallOperation = CCaUsifUninstallOperation::NewL(componentId);
 }
 

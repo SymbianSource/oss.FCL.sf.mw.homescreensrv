@@ -1,65 +1,59 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:
+ * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
-*/
-
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:
+ *
+ */
 
 // INCLUDE FILES
 
 #include <driveinfo.h>
-#include <xmlengnodelist.h>
-#include <xmlengdomparser.h>
-#include <xmlengdocument.h>
+#include <xml/dom/xmlengnodelist.h>
+#include <xml/dom/xmlengdomparser.h>
+#include <xml/dom/xmlengdocument.h>
+#include <xml/dom/xmlengelement.h>
 #include <utf.h>
+#include <e32base.h>
 
 #include "cadef.h"
 #include "cawidgetscannerparser.h"
 #include "widgetscannerutils.h"
-
 #include "cawidgetscannerdef.h"
-
 
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
-// CCaWidgetScannerParser::CCaWidgetScannerParser
-// C++ default constructor can NOT contain any code, that
-// might leave.
+//
 // -----------------------------------------------------------------------------
 //
-CCaWidgetScannerParser::CCaWidgetScannerParser( RFs& aFs ):
+CCaWidgetScannerParser::CCaWidgetScannerParser( RFs& aFs ) :
     iFs( aFs )
     {
     }
 
 // -----------------------------------------------------------------------------
-// CCaWidgetScannerParser::ConstructL
-// Symbian 2nd phase constructor can leave.
+// 
 // -----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::ConstructL( )
+void CCaWidgetScannerParser::ConstructL()
     {
     iImportPath.CreateL( KMaxPath );
-    //iFs.PrivatePath( iImportPath );
     iImportPath.Append( KImportDir );
     iDomImpl.OpenL();
     }
 
 // -----------------------------------------------------------------------------
-// CCaWidgetScannerParser::NewL
-// Two-phased constructor.
+// 
 // -----------------------------------------------------------------------------
 //
 CCaWidgetScannerParser* CCaWidgetScannerParser::NewL( RFs& aFs )
@@ -70,25 +64,23 @@ CCaWidgetScannerParser* CCaWidgetScannerParser::NewL( RFs& aFs )
     }
 
 // -----------------------------------------------------------------------------
-// CCaWidgetScannerParser::NewLC
-// Two-phased constructor.
+// 
 // -----------------------------------------------------------------------------
 //
 CCaWidgetScannerParser* CCaWidgetScannerParser::NewLC( RFs& aFs )
     {
-    CCaWidgetScannerParser* self = new( ELeave ) CCaWidgetScannerParser( aFs );
+    CCaWidgetScannerParser* self = new ( ELeave ) CCaWidgetScannerParser( aFs );
     CleanupStack::PushL( self );
-    self->ConstructL( );
+    self->ConstructL();
     return self;
     }
 
 // -----------------------------------------------------------------------------
-// Destructor
+// 
 // -----------------------------------------------------------------------------
 //
 CCaWidgetScannerParser::~CCaWidgetScannerParser()
     {
-    delete iWidgetDescriptor;
     iImportPath.Close();
     iWidgets.ResetAndDestroy();
     iDomImpl.Close();
@@ -98,39 +90,44 @@ CCaWidgetScannerParser::~CCaWidgetScannerParser()
 //
 // ----------------------------------------------------------------------------
 //
-RWidgetArray& CCaWidgetScannerParser::WidgetsScanL( )
+RWidgetArray& CCaWidgetScannerParser::WidgetsScanL(
+        const RWidgetArray& aWidgets )
     {
     TDriveList driveList;
+    TChar currentDriveLetter;
     User::LeaveIfError( iFs.DriveList( driveList ) );
     iWidgets.ResetAndDestroy();
 
-    for ( TInt driveNumber=EDriveZ; driveNumber >= EDriveA; driveNumber-- )
+    iFetchedWidgets = aWidgets;
+
+    for ( TInt driveNumber = EDriveZ; driveNumber >= EDriveA; driveNumber-- )
         {
         if ( driveList[driveNumber] )
             {
             User::LeaveIfError( iFs.DriveToChar( driveNumber,
-                    iCurrentDriveLetter ) );
-            ScanOnDriveL( );
+                    currentDriveLetter ) );
+            ScanOnDriveL( currentDriveLetter );
             }
         }
+    
+    
     return iWidgets;
     }
 
-
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::ScanOnDriveL( )
+void CCaWidgetScannerParser::ScanOnDriveL( TChar& aDrive )
     {
-    CDir* directories = GetDirectoriesLC( );
+    CDir* directories = GetDirectoriesLC( aDrive );
     if ( directories )
         {
-        for ( TInt i(0); i<directories->Count( ); i++ )
+        for ( TInt i( 0 ); i < directories->Count(); i++ )
             {
-            if((*directories)[i].IsDir())
+            if ( ( *directories )[i].IsDir() )
                 {
-                ParseDirectoryL((*directories)[i].iName);
+                ParseDirectoryL( ( *directories )[i].iName, aDrive );
                 }
             }
         }
@@ -141,30 +138,66 @@ void CCaWidgetScannerParser::ScanOnDriveL( )
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName )
+void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName,
+        TChar& aDrive )
     {
-    HBufC* manifestDirectoryPath =
-        GetManifestDirectoryPathLC( aDirectoryName );
+    HBufC* manifestDirectoryPath = GetManifestDirectoryPathLC( aDirectoryName,
+            aDrive );
 
     CDir* fileList = NULL;
 
     User::LeaveIfError( iFs.GetDir( *manifestDirectoryPath,
-                         KEntryAttMatchExclude|KEntryAttDir,
-                         ESortByDate, fileList ) );
+            KEntryAttMatchExclude | KEntryAttDir, ESortByDate, fileList ) );
     CleanupStack::PushL( fileList );
 
-    for ( TInt i = 0; i<fileList->Count( ); i++ )
+    for ( TInt i = 0; i < fileList->Count(); i++ )
         {
-        if( (*fileList)[i].iName.Find( KManifest ) != KErrNotFound )
+        if ( ( *fileList )[i].iName.Find( KManifest ) != KErrNotFound )
             {
             RBuf fullFilePath;
             CleanupClosePushL( fullFilePath );
-            fullFilePath.CreateL( manifestDirectoryPath->Length() +
-                    (*fileList)[i].iName.Length() );
+            fullFilePath.CreateL( manifestDirectoryPath->Length()
+                    + ( *fileList )[i].iName.Length() );
             fullFilePath.Append( *manifestDirectoryPath );
-            fullFilePath.Append( (*fileList)[i].iName );
-            //if file is corrupted we go to the next one
-            TRAP_IGNORE(ParseManifestFileL( fullFilePath, aDirectoryName ));
+            fullFilePath.Append( ( *fileList )[i].iName );
+          
+            TPtrC packageUidPtr = manifestDirectoryPath->Mid(
+                    manifestDirectoryPath->Length() - KPackageUidPosition,
+                    KPackageUidLength); 
+            TUint packageUid;            
+            TLex lexer( packageUidPtr );
+            User::LeaveIfError( lexer.Val( packageUid, EHex ) );
+
+            CCaWidgetDescription* compareWidget = NULL;
+            for ( TInt j = 0; j < iFetchedWidgets.Count(); j++ )
+                {
+                if ( iFetchedWidgets[j]->GetPackageUidL() ==  packageUid )
+                    {
+                    compareWidget = iFetchedWidgets[j];
+                    compareWidget->SetValid( ETrue ); //do not remove from db
+                    break; // once found we dont iterate anymore
+                    }
+                }
+
+            if ( compareWidget )
+                {
+                TTime modificationTime = ( *fileList )[i].iModified;
+                TInt64 modificationIntTime = modificationTime.Int64();
+                TLex lex( compareWidget->GetModificationTime() );
+                TInt64 uintTimeDB( 0 );
+                User::LeaveIfError( lex.Val( uintTimeDB ) );
+
+                if ( uintTimeDB != modificationIntTime )
+                    {
+                    TRAP_IGNORE( ParseManifestFileL( fullFilePath,
+                                    aDirectoryName, aDrive ) );
+                    }
+                }
+            else
+                {
+                TRAP_IGNORE( ParseManifestFileL( fullFilePath, aDirectoryName,
+                                aDrive ) );
+                }
             CleanupStack::PopAndDestroy( &fullFilePath );
             }
         }
@@ -176,144 +209,125 @@ void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName )
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::ParseManifestFileL(
-        const TDesC& aFilePath, const TDesC& aPackageUid )
+void CCaWidgetScannerParser::ParseManifestFileL( const TDesC& aFilePath,
+        const TDesC& aPackageUid, TChar& aDrive )
     {
     RXmlEngDOMParser parser;
-    CleanupClosePushL(parser);
-    User::LeaveIfError(parser.Open(iDomImpl));
-    RXmlEngDocument doc = parser.ParseFileL(aFilePath, KChunkSize);
-    CleanupClosePushL(doc);
+    CleanupClosePushL( parser );
+    User::LeaveIfError( parser.Open( iDomImpl ) );
+    RXmlEngDocument doc = parser.ParseFileL( aFilePath, KChunkSize );
+    CleanupClosePushL( doc );
     TXmlEngElement docElement = doc.DocumentElement();
 
-    if (docElement.Name() == KWidgetProvider) {
+    if ( docElement.Name() == KWidgetProvider )
+        {
         TXmlEngElement element;
         RXmlEngNodeList<TXmlEngElement> elementList;
-        CleanupClosePushL(elementList);
-        docElement.GetElementsByTagNameL(elementList, KWidget);
+        CleanupClosePushL( elementList );
+        docElement.GetElementsByTagNameL( elementList, KWidget );
 
-        while (elementList.HasNext())
+        while ( elementList.HasNext() )
             {
             element = elementList.Next();
             if ( element.HasAttributes() )
                 {
-                ParseWidgetL( aFilePath, element, aPackageUid );
+                ParseWidgetL( aFilePath, element, aPackageUid, aDrive );
                 }
             }
-        CleanupStack::PopAndDestroy(&elementList);
-    } else if (docElement.Name() == KWidgetManifest) {
+        CleanupStack::PopAndDestroy( &elementList );
+        }
+    else if ( docElement.Name() == KWidgetManifest )
+        {
+        CCaWidgetDescription* widgetDescriptor = CCaWidgetDescription::NewL();
+        widgetDescriptor->SetPackageUidL( aPackageUid );
+        widgetDescriptor->SetFlag( EVisible, ETrue );
+        widgetDescriptor->SetManifestFilePathNameL( aFilePath );
 
-        delete iWidgetDescriptor;
-        iWidgetDescriptor = NULL;
-        iWidgetDescriptor = CCaWidgetDescription::NewL();
-        iWidgetDescriptor->SetPackageUidL(aPackageUid);
-        iWidgetDescriptor->SetVisible(ETrue);
-        iWidgetDescriptor->SetManifestFilePathNameL( aFilePath );
+        SetMmcIdL( widgetDescriptor, aDrive );
 
-        SetMmcIdL( iWidgetDescriptor );
-        
         RXmlEngNodeList<TXmlEngElement> childElementList;
-        CleanupClosePushL(childElementList);
-        docElement.GetChildElements(childElementList);
+        CleanupClosePushL( childElementList );
+        docElement.GetChildElements( childElementList );
         TXmlEngElement element;
         
-        while (childElementList.HasNext())
-          {
-          element = childElementList.Next();
-          if (element.Name() == KUri)
-              {
-              ParseUriL(element);
-              }
-          else if (element.Name() == KTitle)
-              {
-              ParseTitleL(element);
-              }
-          else if (element.Name() == KIcon)
-              {
-              ParseIconL(element,aPackageUid);
-              }
-          else if (element.Name() == KDescription)
-              {
-              ParseDescriptionL(element);
-              }
-          else if (element.Name() == KHidden)
-              {
-              ParseHiddenL(element);
-              }
-          else if (element.Name() == KServiceXml)
-              {
-              ParseServiceXmlL(element);
-              }
-           }
-        CleanupStack::PopAndDestroy(&childElementList);
+        while ( childElementList.HasNext() )
+            {
+            element = childElementList.Next();
+            if ( element.Name() == KUri )
+                {
+                ParseUriL( element, widgetDescriptor );
+                }
+            else if ( element.Name() == KTitle )
+                {
+                ParseTitleL( element, widgetDescriptor );
+                }
+            else if ( element.Name() == KIcon )
+                {
+                ParseIconL( element, aPackageUid, widgetDescriptor, aDrive );
+                }
+            else if ( element.Name() == KDescription )
+                {
+                ParseDescriptionL( element, widgetDescriptor );
+                }
+            else if ( element.Name() == KHidden )
+                {
+                ParseHiddenL( element, widgetDescriptor );
+                }
+            else if ( element.Name() == KServiceXml )
+                {
+                ParseServiceXmlL( element, widgetDescriptor );
+                }
+            else if ( element.Name() == KPreviewImageElementName )
+                {
+                ParsePreviewImageNameL( element, aPackageUid, widgetDescriptor, aDrive );
+                }
+            }
+        CleanupStack::PopAndDestroy( &childElementList );
 
-        //set path for hs to use, trim last 2 chars (doubleslash)
-        HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid );
-        iWidgetDescriptor->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
-        CleanupStack::PopAndDestroy(libraryPath);
-        
-        HBufC *libraryPath2 = GetManifestDirectoryPathLC( aPackageUid );
-        libraryPath2 = libraryPath2->ReAllocL(libraryPath2->Length() + iWidgetDescriptor->GetUri().Length());
-        CleanupStack::Pop(1);
-        CleanupStack::PushL(libraryPath2);
-        libraryPath2->Des().Append(iWidgetDescriptor->GetUri());
-        iWidgetDescriptor->SetLibraryL(*libraryPath2);
-        CleanupStack::PopAndDestroy(libraryPath2);
-        
-                
-        TTime modificationTime;
-        iFs.Modified( aFilePath, modificationTime);
-        TInt64 modificationIntTime = modificationTime.Int64();
-        RBuf16 rBuf;
-        rBuf.CleanupClosePushL();
-        rBuf.CreateL( KModificationTimeLength );
-        rBuf.AppendNum( modificationIntTime );
-        iWidgetDescriptor->SetModificationTimeL( rBuf );
-        CleanupStack::PopAndDestroy( &rBuf );
+        HBufC *libraryPath2 = GetManifestDirectoryPathLC( aPackageUid, aDrive );
+        libraryPath2 = libraryPath2->ReAllocL( libraryPath2->Length()
+                + widgetDescriptor->GetUri().Length() );
+        libraryPath2->Des().Append( widgetDescriptor->GetUri() );
+        widgetDescriptor->SetLibraryL( *libraryPath2 );
+        CleanupStack::PopAndDestroy( libraryPath2 );
 
-        TInt index = iWidgets.Find( iWidgetDescriptor, CCaWidgetDescription::Compare );
+        SetModificationTimeL( aFilePath, widgetDescriptor );
+
+        TInt index = iWidgets.Find( widgetDescriptor,
+                CCaWidgetDescription::Compare );
         if ( index != KErrNotFound )
             {
             delete iWidgets[index];
             iWidgets.Remove( index );
             }
-        iWidgets.AppendL( iWidgetDescriptor );//ownership transfer
-        iWidgetDescriptor = NULL;
-    }
+        iWidgets.AppendL( widgetDescriptor );//ownership transfer
+        widgetDescriptor = NULL;
+        }
 
-    CleanupStack::PopAndDestroy(&doc);
-    CleanupStack::PopAndDestroy(&parser);
+    CleanupStack::PopAndDestroy( &doc );
+    CleanupStack::PopAndDestroy( &parser );
     }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::ParseWidgetL(
-        const TDesC& aFilePath, TXmlEngElement aElement,
-        const TDesC& aPackageUid )
+void CCaWidgetScannerParser::ParseWidgetL( const TDesC& aFilePath,
+        TXmlEngElement& aElement, const TDesC& aPackageUid, TChar& aDrive )
     {
     CCaWidgetDescription* widget = CCaWidgetDescription::NewLC();
 
     SetUriL( aElement, widget );
-    SetLibraryL( aElement, aPackageUid, widget);
+    SetLibraryL( aElement, aPackageUid, widget, aDrive );
     SetTitleL( aElement, widget );
     SetDescriptionL( aElement, widget );
     SetVisibilityL( aElement, widget );
-    SetIconUriL( aElement, aPackageUid, widget);
+    SetIconUriL( aElement, aPackageUid, widget, aDrive );
     widget->SetPackageUidL( aPackageUid );
     widget->SetManifestFilePathNameL( aFilePath );
-    SetMmcIdL( widget );
+    SetMmcIdL( widget, aDrive );
 
-    TTime modificationTime;
-    iFs.Modified( aFilePath, modificationTime);
-    TInt64 modificationIntTime = modificationTime.Int64();
-    RBuf16 rBuf;
-    rBuf.CleanupClosePushL();
-    rBuf.CreateL( KModificationTimeLength );
-    rBuf.AppendNum( modificationIntTime );
-    widget->SetModificationTimeL( rBuf );
-    CleanupStack::PopAndDestroy( &rBuf );
+    SetModificationTimeL( aFilePath, widget );
 
     TInt index = iWidgets.Find( widget, CCaWidgetDescription::Compare );
     if ( index != KErrNotFound )
@@ -325,45 +339,40 @@ void CCaWidgetScannerParser::ParseWidgetL(
     CleanupStack::Pop( widget );
     }
 
-
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetUriL(
-    TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
-{
+void CCaWidgetScannerParser::SetUriL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidget )
+    {
     HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
-        aElement.AttributeValueL( KUri ) );
+            aElement.AttributeValueL( KUri ) );
     CleanupStack::PushL( attributeValue );
 
-    if( attributeValue->Compare( KNullDesC ) != 0 )
+    if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
         aWidget->SetUriL( *attributeValue );
         }
     CleanupStack::PopAndDestroy( attributeValue );
-}
+    }
 
 // ----------------------------------------------------------------------------
-//    keep in mind that setLibrary also setsPath
+//   
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
-    const TDesC & aPackageUid, CCaWidgetDescription * aWidget )
-{
+void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement& aElement,
+        const TDesC& aPackageUid, CCaWidgetDescription* aWidget, TChar& aDrive )
+    {
     HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
-        aElement.AttributeValueL( KLibrary ) );
+            aElement.AttributeValueL( KLibrary ) );
     CleanupStack::PushL( attributeValue );
 
-    if( attributeValue->Compare( KNullDesC ) != 0 )
+    if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
-        HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid );
+        HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid, aDrive );
 
-        //set path for hs to use, trim last 2 chars (doubleslash)
-        aWidget->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
-
-        libraryPath->ReAllocL(
-            libraryPath->Length() + attributeValue->Length());
+        libraryPath->ReAllocL( libraryPath->Length() + attributeValue->Length() );
 
         TPtr libraryPathModifier( libraryPath->Des() );
         libraryPathModifier.Append( *attributeValue );
@@ -376,82 +385,81 @@ void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement & aElement,
         aWidget->SetLibraryL( KNoLibrary );
         }
     CleanupStack::PopAndDestroy( attributeValue );
-}
+    }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetTitleL(
-    TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
-{
+void CCaWidgetScannerParser::SetTitleL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidget )
+    {
     HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
-                aElement.AttributeValueL( KTitle ) );
+            aElement.AttributeValueL( KTitle ) );
     CleanupStack::PushL( attributeValue );
 
-    if( attributeValue->Compare( KNullDesC ) != 0 )
+    if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
         aWidget->SetTitleL( *attributeValue );
         }
     CleanupStack::PopAndDestroy( attributeValue );
-}
+    }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetDescriptionL(
-    TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
-{
+void CCaWidgetScannerParser::SetDescriptionL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidget )
+    {
     HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
-                aElement.AttributeValueL( KDescription ) );
+            aElement.AttributeValueL( KDescription ) );
     CleanupStack::PushL( attributeValue );
 
-    if( attributeValue->Compare( KNullDesC ) != 0 )
+    if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
         aWidget->SetDescriptionL( *attributeValue );
         }
     CleanupStack::PopAndDestroy( attributeValue );
-}
+    }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetVisibilityL(
-    TXmlEngElement & aElement, CCaWidgetDescription * aWidget )
-{
+void CCaWidgetScannerParser::SetVisibilityL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidget )
+    {
     HBufC *hidden = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
-                aElement.AttributeValueL( KHidden ) );
+            aElement.AttributeValueL( KHidden ) );
     CleanupStack::PushL( hidden );
 
-    if( hidden->Compare( KTrue ) == 0 )
+    if ( hidden->Compare( KTrue ) == 0 )
         {
-        aWidget->SetVisible( EFalse );
+        aWidget->SetFlag( EVisible, EFalse );
         }
     else
         {
-        aWidget->SetVisible( ETrue );
+        aWidget->SetFlag( EVisible, ETrue );
         }
     CleanupStack::PopAndDestroy( hidden );
-}
+    }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetIconUriL( TXmlEngElement & aElement,
-    const TDesC & aPackageUid, CCaWidgetDescription * aWidget )
-{
+void CCaWidgetScannerParser::SetIconUriL( TXmlEngElement& aElement,
+        const TDesC& aPackageUid, CCaWidgetDescription* aWidget, TChar& aDrive )
+    {
     HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
-                aElement.AttributeValueL( KIconUri ) );
+            aElement.AttributeValueL( KIconUri ) );
     CleanupStack::PushL( attributeValue );
 
-    if( attributeValue->Compare( KNullDesC ) != 0 )
+    if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
-        HBufC* iconUriPath = GetManifestDirectoryPathLC( aPackageUid );
-        iconUriPath->ReAllocL(
-            iconUriPath->Length() + attributeValue->Length() );
+        HBufC* iconUriPath = GetManifestDirectoryPathLC( aPackageUid, aDrive );
+        iconUriPath->ReAllocL( iconUriPath->Length() + attributeValue->Length() );
 
         TPtr iconUriPathModifier( iconUriPath->Des() );
         iconUriPathModifier.Append( *attributeValue );
@@ -460,44 +468,62 @@ void CCaWidgetScannerParser::SetIconUriL( TXmlEngElement & aElement,
         CleanupStack::PopAndDestroy( iconUriPath );
         }
     CleanupStack::PopAndDestroy( attributeValue );
-}
+    }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetScannerParser::SetMmcIdL( CCaWidgetDescription * widget )
-{
+void CCaWidgetScannerParser::SetMmcIdL( CCaWidgetDescription* aWidget,
+        TChar& aDrive )
+    {
     TChar removableDrive;
     User::LeaveIfError( DriveInfo::GetDefaultDrive(
-                DriveInfo::EDefaultRemovableMassStorage, removableDrive ) );
+            DriveInfo::EDefaultRemovableMassStorage, removableDrive ) );
 
     TChar massStorageDrive;
     User::LeaveIfError( DriveInfo::GetDefaultDrive(
-                DriveInfo::EDefaultMassStorage, massStorageDrive ) );
-    if( iCurrentDriveLetter == removableDrive )
+            DriveInfo::EDefaultMassStorage, massStorageDrive ) );
+    if ( aDrive == removableDrive )
         {
         RBuf mmcId;
-        mmcId.CreateL(KMassStorageIdLength);
         mmcId.CleanupClosePushL();
+        mmcId.CreateL( KMassStorageIdLength );
         WidgetScannerUtils::CurrentMmcId( iFs, mmcId );
-        widget->SetMmcIdL( mmcId );
+        aWidget->SetMmcIdL( mmcId );
         CleanupStack::PopAndDestroy( &mmcId );
         }
-    else if( iCurrentDriveLetter == massStorageDrive )
+    else if ( aDrive == massStorageDrive )
         {
-        widget->SetMmcIdL( KCaMassStorage );
+        aWidget->SetMmcIdL( KCaMassStorage );
         }
-}
+    }
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::SetModificationTimeL( const TDesC& aFilePath,
+        CCaWidgetDescription* aWidgetDescriptor )
+    {
+    TTime modificationTime;
+    iFs.Modified( aFilePath, modificationTime );
+    TInt64 modificationIntTime = modificationTime.Int64();
+    RBuf16 rBuf;
+    rBuf.CleanupClosePushL();
+    rBuf.CreateL( KModificationTimeLength );
+    rBuf.AppendNum( modificationIntTime );
+    aWidgetDescriptor->SetModificationTimeL( rBuf );
+    CleanupStack::PopAndDestroy( &rBuf );
+    }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-CDir* CCaWidgetScannerParser::GetDirectoriesLC( )
+CDir* CCaWidgetScannerParser::GetDirectoriesLC( TChar& aDrive )
     {
     CDir* result = NULL;
-    HBufC* path = FullPathLC( );
+    HBufC* path = FullPathLC( aDrive );
     iFs.GetDir( *path, KEntryAttDir, ESortByName, result );
     CleanupStack::PopAndDestroy( path );
     CleanupStack::PushL( result );
@@ -508,12 +534,11 @@ CDir* CCaWidgetScannerParser::GetDirectoriesLC( )
 //
 // ----------------------------------------------------------------------------
 //
-HBufC* CCaWidgetScannerParser::FullPathLC( )
+HBufC* CCaWidgetScannerParser::FullPathLC( TChar& aDrive ) const
     {
-    HBufC* result =
-        HBufC16::NewLC( iImportPath.Length() + KDriveLetterLength );
+    HBufC* result = HBufC16::NewLC( iImportPath.Length() + KDriveLetterLength );
     TPtr modifier( result->Des() );
-    modifier.Append( iCurrentDriveLetter );
+    modifier.Append( aDrive );
     modifier.Append( KColen );
     modifier.Append( iImportPath );
     return result;
@@ -524,11 +549,11 @@ HBufC* CCaWidgetScannerParser::FullPathLC( )
 // ----------------------------------------------------------------------------
 //
 HBufC* CCaWidgetScannerParser::GetManifestDirectoryPathLC(
-        const TDesC& aDirectoryName )
+        const TDesC& aDirectoryName, TChar& aDrive ) const
     {
     HBufC* result = HBufC16::NewLC( KMaxPath );
     TPtr modifier( result->Des() );
-    HBufC* path = FullPathLC( );
+    HBufC* path = FullPathLC( aDrive );
     modifier.Append( *path );
     CleanupStack::PopAndDestroy( path );
     modifier.Append( aDirectoryName );
@@ -536,79 +561,160 @@ HBufC* CCaWidgetScannerParser::GetManifestDirectoryPathLC(
     return result;
     }
 
-void CCaWidgetScannerParser::ParseUriL(TXmlEngElement & aElement)
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseUriL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidgetDescriptor )
     {
-    if (aElement.Text().Length())
-        {
-        HBufC *utf16 =
-            CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
-        CleanupStack::PushL( utf16 );
-        iWidgetDescriptor->SetUriL( *utf16 );
-        CleanupStack::PopAndDestroy( utf16 );
-        }
-
-    }
-void CCaWidgetScannerParser::ParseTitleL(TXmlEngElement & aElement)
-    {
-    if (aElement.Text().Length())
-        {
-        HBufC *utf16 =
-            CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
-        CleanupStack::PushL( utf16 );
-        iWidgetDescriptor->SetTitleL( *utf16 );
-        CleanupStack::PopAndDestroy( utf16 );
-        }
-    }
-void CCaWidgetScannerParser::ParseIconL(TXmlEngElement & aElement,
-    const TDesC & aPackageUid )
-    {
-    HBufC *utf16 =
-        CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
-    CleanupStack::PushL( utf16 );
-    if ( utf16->Compare( KNullDesC ) )
-        {
-        HBufC* iconUriPath = GetManifestDirectoryPathLC( aPackageUid );
-        iconUriPath = iconUriPath->ReAllocL( iconUriPath->Length() + utf16->Length() );
-        CleanupStack::Pop(1);
-        CleanupStack::PushL(iconUriPath);
-        TPtr iconUriPathModifier( iconUriPath->Des() );
-        iconUriPathModifier.Append( *utf16 );
-        iWidgetDescriptor->SetIconUriL( *iconUriPath );
-        CleanupStack::PopAndDestroy( iconUriPath );
-        }
-
-    CleanupStack::PopAndDestroy( utf16 );
+    aWidgetDescriptor->SetUriL( *GetElementTextLC( aElement )  );
+    CleanupStack::PopAndDestroy( );
     }
 
-void CCaWidgetScannerParser::ParseDescriptionL(TXmlEngElement & aElement)
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseTitleL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidgetDescriptor )
     {
-    HBufC *desc =
-        CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
-    CleanupStack::PushL( desc );
-
-    if( desc->Compare( KNullDesC ) != 0 )
-       {
-       iWidgetDescriptor->SetDescriptionL( *desc );
-       }
-    CleanupStack::PopAndDestroy( desc );
+    aWidgetDescriptor->SetTitleL( *GetElementTextLC( aElement ) );
+    CleanupStack::PopAndDestroy( );
     }
-void CCaWidgetScannerParser::ParseHiddenL( TXmlEngElement& aElement )
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseIconL( TXmlEngElement& aElement,
+        const TDesC& aPackageUid, CCaWidgetDescription* aWidgetDescriptor,
+        TChar& aDrive )
+    {
+    aWidgetDescriptor->SetIconUriL( 
+        *GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive ) );
+   
+    CleanupStack::PopAndDestroy( );
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParsePreviewImageNameL(
+        TXmlEngElement & aElement,
+        const TDesC & aPackageUid,
+        CCaWidgetDescription* aWidgetDescriptor,
+        TChar& aDrive )
+    {
+    aWidgetDescriptor->SetPreviewImageNameL( 
+        *GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive ) );
+    
+    CleanupStack::PopAndDestroy( );
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseDescriptionL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidgetDescriptor )
+    {
+    aWidgetDescriptor->SetDescriptionL( *GetElementTextLC( aElement ) );
+    CleanupStack::PopAndDestroy();
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseHiddenL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidgetDescriptor )
     {
     if( aElement.Text().Compare( _L8("true") ) == 0 )
         {
-        iWidgetDescriptor->SetVisible( EFalse );
+        aWidgetDescriptor->SetFlag( EVisible, EFalse );
         }
+    }
 
-    }
-void CCaWidgetScannerParser::ParseServiceXmlL( TXmlEngElement& aElement )
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseServiceXmlL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidgetDescriptor )
     {
-    HBufC *serviceXml = CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
-    CleanupStack::PushL( serviceXml );
-       
-    if (serviceXml->Compare(KNullDesC) != 0)
-        {
-        iWidgetDescriptor->SetServiceXmlL( *serviceXml );
-        }
-    CleanupStack::PopAndDestroy( serviceXml );
+    aWidgetDescriptor->SetServiceXmlL( *GetElementTextLC( aElement ) );
+    CleanupStack::PopAndDestroy( );
     }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+HBufC* CCaWidgetScannerParser::GetElementTextLC( 
+    const TXmlEngElement& aElement ) const
+    {
+    HBufC* const elementText =
+        CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() );
+    CleanupStack::PushL( elementText );
+    return elementText;
+    }
+
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+HBufC* CCaWidgetScannerParser::GetThemableGraphicsNameLC(
+        const TXmlEngElement& aElement,
+        const TDesC& aPackageUid,
+        TChar& aDrive ) const
+    {
+    RBuf graphicsName;
+    graphicsName.CleanupClosePushL();
+    HBufC* result; 
+
+    
+    if ( aElement.Text() != KNullDesC8 )
+        {
+        RBuf elementText;
+        elementText.CleanupClosePushL();
+        
+        elementText.Assign( 
+            CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() ) );
+        
+        if ( TParsePtrC(elementText).Ext() != KNullDesC )
+            {
+            HBufC* const manifestDirectoryPath( 
+                GetManifestDirectoryPathLC( aPackageUid, aDrive ) );
+            
+            graphicsName.CreateL( manifestDirectoryPath->Length() + 
+                elementText.Length() );
+            graphicsName.Append( *manifestDirectoryPath );
+            
+            CleanupStack::PopAndDestroy( manifestDirectoryPath );
+            }
+        else
+            {   
+            graphicsName.CreateL( elementText.Length() );
+            }
+        
+        graphicsName.Append( elementText );
+        result = HBufC::NewL( graphicsName.Length() ) ;
+        *result = graphicsName;
+        
+        CleanupStack::PopAndDestroy( &elementText );
+        }
+    else
+    	{
+        result = HBufC::NewL( 1 ) ;
+    	}
+        CleanupStack::PopAndDestroy( &graphicsName );
+        CleanupStack::PushL( result );
+        
+        return result;
+    }
+
+
 //  End of File

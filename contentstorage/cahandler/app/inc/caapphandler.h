@@ -26,11 +26,6 @@ class CEikonEnv;
 class CCaUsifUninstallOperation;
 class CaEntry;
 
-/**
- *  Command handler for application entries.
- *
- *  @lib caclient.lib
- */
 class CaAppHandler: public QObject, public CaHandler
 {
     Q_OBJECT
@@ -40,9 +35,6 @@ public:
 
     explicit CaAppHandler(QObject *parent = 0);
 
-    /**
-     * Destructor.
-     */
     virtual ~CaAppHandler();
 
 public:
@@ -51,33 +43,15 @@ public:
 
 private:
 
-    /**
-     * Launches application
-     * @param aUid UID of the application to launch
-     * @param aParam command parameters
-     * @param aViewId id of the view the application is to start in
-     */
-    void launchApplicationL(const TUid aUid, TInt aViewId);
+    void launchApplicationL(const TUid uid, TInt viewId);
 
-    /**
-     * Closes application
-     * @param aEntry the entry represeting application to close
-     */
     int closeApplication(const EntryFlags &flags, TInt windowGroupId);
 
-    /**
-     * Uninstall application 
-     * @param aEntry the entry represeting application to uninstall
-     */
     int handleRemove(const EntryFlags &flags,
         const QString &typeName,
         const QString &componentId);
     
-    /**
-     * Start uninstall operation via usif 
-     * @param aComponentId component id
-     */
-    void startUsifUninstallL(TInt aComponentId);
+    void startUsifUninstallL(TInt componentId);
     
 private:
     CEikonEnv *iEikEnv;

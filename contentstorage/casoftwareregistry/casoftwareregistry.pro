@@ -15,7 +15,7 @@
 #
 
 TEMPLATE = lib
-
+CONFIG += hb
 DEFINES += CACLIENT_LIB
 
 include(../../common.pri)
@@ -41,7 +41,8 @@ LIBS += -leuser \
         -lestor \
         -lscrclient \
         -lxqutils \
-        -lPlatformEnv
+        -lPlatformEnv \
+        -lefsrv
         
 include(casoftwareregistry_s60.pri)
 }

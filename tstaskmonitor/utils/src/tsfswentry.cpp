@@ -319,43 +319,45 @@ TAppType CTsFswEntry::Type() const
 // CTsFswEntry::SetScreenshot
 // --------------------------------------------------------------------------
 //
-TBool CTsFswEntry::SetScreenshotL(const CFbsBitmap* bitmapArg, UpdatePriority priority)
+void CTsFswEntry::SetScreenshotL(const CFbsBitmap* bitmapArg, UpdatePriority priority)
 {
     TInt currentPriority = static_cast<TInt> (mPriority);
     TInt newPriority = static_cast<TInt> (priority);
-    if (newPriority >= currentPriority) {
-        CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
-        CleanupStack::PushL(bitmap);
-        User::LeaveIfError(bitmap->Duplicate(bitmapArg->Handle()));
-        CleanupStack::Pop(bitmap);
-
-        mPriority = priority;
-        delete mScreenshot;
-        mScreenshot = bitmap;
-
-        delete mImgTool;
-        mImgTool = 0;
-
-        mImgTool = CTsGraphicFileScalingHandler::NewL(*this, *mScreenshot, TSize(128, 128),
-            CTsGraphicFileScalingHandler::EKeepAspectRatioByExpanding);
-        return ETrue;
+    if(newPriority <currentPriority) {
+        User::Leave(KErrAccessDenied);
     }
-    return EFalse;
+    
+    CFbsBitmap* bitmap = new (ELeave) CFbsBitmap;
+    CleanupStack::PushL(bitmap);
+    User::LeaveIfError(bitmap->Duplicate(bitmapArg->Handle()));
+    CleanupStack::Pop(bitmap);
+
+    mPriority = priority;
+    delete mScreenshot;
+    mScreenshot = bitmap;
+
+    delete mImgTool;
+    mImgTool = 0;
+
+    mImgTool = CTsGraphicFileScalingHandler::NewL(*this, *mScreenshot, TSize(128, 128),
+    CTsGraphicFileScalingHandler::EKeepAspectRatioByExpanding);
 }
 
 // --------------------------------------------------------------------------
 // CTsFswEntry::RemoveScreenshot
 // --------------------------------------------------------------------------
 //
-TBool CTsFswEntry::RemoveScreenshot()
+void CTsFswEntry::RemoveScreenshotL()
 {
-    if (mScreenshot) {
-        delete mScreenshot;
-        mScreenshot = NULL;
-        mPriority = Low;
-        return ETrue;
+    if (!mScreenshot) {
+        User::Leave(KErrNotFound);
     }
-    return EFalse;
+    delete mScreenshot;
+    mScreenshot = NULL;
+    mPriority = Low;
+    if (mObserver) {
+        mObserver->DataChanged();
+    }
 }
 
 // --------------------------------------------------------------------------

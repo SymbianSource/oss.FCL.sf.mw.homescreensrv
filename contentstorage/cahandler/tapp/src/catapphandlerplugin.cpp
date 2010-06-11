@@ -18,9 +18,6 @@
 #include "catapphandlerplugin.h"
 #include "catapphandler.h"
 
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT
 /*!
     \class CaTappHandlerPlugin
     \ingroup
@@ -31,7 +28,7 @@
     \param descriptor service descriptor
     \param context ignored
     \param session ignored
-    \return An instance of the CaTapphandler object when descriptor interface name
+    \retval An instance of the CaTapphandler object when descriptor interface name
     is "com.nokia.homescreen.ICommandHandler", NULL otherwise.
 */
 QObject *CaTappHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &descriptor,
@@ -47,6 +44,10 @@ QObject *CaTappHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &
         return 0;
     }
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (QT macro)
 
 Q_EXPORT_PLUGIN2(catapphandlerplugin, CaTappHandlerPlugin)
 

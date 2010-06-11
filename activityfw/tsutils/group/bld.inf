@@ -18,6 +18,8 @@ PRJ_PLATFORMS
 DEFAULT
 
 PRJ_EXPORTS
+../inc/tsresourcemanager.h |../../../inc/tsresourcemanager.h
+../inc/tswindowgroupsobserver.h |../../../inc/tswindowgroupsobserver.h
 ../inc/tsgraphicfilescalinghandler.h |../../../inc/tsgraphicfilescalinghandler.h
 
 PRJ_MMPFILES

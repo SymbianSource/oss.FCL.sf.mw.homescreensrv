@@ -51,4 +51,12 @@ QObject *CaUrlHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
     }
 }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (QT macro)
+
 Q_EXPORT_PLUGIN2(caurlhandlerplugin, CaUrlHandlerPlugin)
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

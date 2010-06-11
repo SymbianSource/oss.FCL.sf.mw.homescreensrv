@@ -79,9 +79,12 @@ public:
      * @param aEntryIdArray list of enties ids.
      * @param aParentIdArray The result list of parents' ids
      * for a specific select.
+     * @param aCheckParentsParent falg if set to true then 
+     * search also for parent of the parent 
      */
     virtual void GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
-            RArray<TInt>& aParentIdArray ) = 0;
+            RArray<TInt>& aParentIdArray, 
+            TBool aCheckParentsParent = ETrue ) = 0;
 
     /**
      * Adds or Updates data & action to the storage.

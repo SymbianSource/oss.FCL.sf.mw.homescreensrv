@@ -16,8 +16,7 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS  += appfoundation \
-            hswidgetmodel \
+SUBDIRS  += hswidgetmodel \
             contentstorage \
             homescreensrv_plat \
             tsrc

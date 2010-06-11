@@ -34,4 +34,4 @@ public:
 
 Q_DECLARE_INTERFACE(CaHandler, "com.nokia.homescreen.ICommandHandler")
 
-#endif //CAHANDLER_H
+#endif // CAHANDLER_H

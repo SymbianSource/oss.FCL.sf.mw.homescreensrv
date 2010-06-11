@@ -30,153 +30,77 @@ class HsActivityDbClientPrivate : protected RSessionBase,
                                   public HsActivityDbClientInterface
 {
 public:
-    /**
-     * Constructor
-     */
     HsActivityDbClientPrivate(HsActivityDbAsyncRequestObserver &);
 
-    /**
-     * Destructor
-     */
     ~HsActivityDbClientPrivate();
 
-    /**
-     * Function establish connection to activity server
-     * @return 0 on succees, error code otherwise
-     */
     int connect();
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::addActivity(const QVariantHash &)
-     */
-    int addActivity(const QVariantHash &);
+    int addActivity(const QVariantHash &privateData, 
+                    const QVariantHash &publicData);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash &)
-     */
-    int updateActivity(const QVariantHash &);
+    int updateActivity(const QVariantHash &privateData, 
+                       const QVariantHash &publicData);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::removeActivity(const QVariantHash &)
-     */
     int removeActivity(const QVariantHash &activity);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::removeApplicationActivities(const QVariantHash &)
-    */
     int removeApplicationActivities(const QVariantHash &activity);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::activities(QList<QVariantHash> &);
-     */
     int activities(QList<QVariantHash> &);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::applicationActivities(QList<QVariantHash> &, const QVariantHash &)
-     */
     int applicationActivities(QList<QVariantHash>&, const QVariantHash &);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::waitActivity(const QVariantHash &)
-     */
+    int activityData(QVariant &result, const QVariantHash &activity);
+    
     int waitActivity(const QVariantHash &activity);
     
     int getThumbnail(QSize size, QString imagePath, QString  mimeType, void *userDdata);
     
     int notifyDataChange();
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::launchActivity(const QVariantHash &)
-     */
     int launchActivity(const QVariantHash &);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::cancelWaitActivity()
-     */
     int cancelWaitActivity();
-    
+
     int cancelNotifyDataChange();
-    
+
 public:
-    /**
-     * Function get cached data from server
-     * @param taskId - request task id
-     * @param dst - destination, preallocated buffer
-     */
     void getData(int taskId, RBuf8 &dst);
 
-    /**
-     * Function initialize aync request
-     * @param func - requested function
-     * @param data - request data
-     * @param status - request status
-     */
     void sendDataAsync(int func,const TIpcArgs &data, TRequestStatus &status);
-    
-//    void emitActivityRequested();
-//    void emitThumbnailRequested();
-    
+
 public:
     void PushL(HsActivityDbAsyncRequestPrivate * task);
+
     void Pop(HsActivityDbAsyncRequestPrivate *task);
 
 private:
-    /**
-     * Function start activity server process.
-     * Function can leave on failure.
-     */
     void startServerL();
 
-    /**
-     * Function establish connection to activity server.
-     * Function can leave on failure
-     */
     void connectL();
 
-    /**
-     * Function execute remote call request.
-     * @param function - remote function identyfier
-     * @param activity - remote function parameters
-     */
-    void execSimpleRequestL(int function, const QVariantHash &activity);
+    void execSimpleRequestL(int function, 
+                            const QVariantHash &privateData, 
+                            const QVariantHash &publicData);
 
-    /**
-     * Function retrieve current activity name for application.
-     * Function can leave on failure
-     * @param  result - activity name
-     * @param activity - request filtering rules
-     */
-    void requestedActivityNameL(QString &result,
-                                const QVariantHash &activity);
 
-    /**
-     * Function retrieve all stored activity
-     * Function can leave on failure
-     * @param result - list of activity
-     */
     void activitiesL(QList<QVariantHash>& result);
 
-    /**
-     * Function retrieve all stored activity
-     * Function can leave on failure
-     * @param result - list of activity
-     * @param cond - request conditions
-     */
     void applicationActivitiesL(QList<QVariantHash>& result,
                                 const QVariantHash &cond);
 
-    void waitActivityL(const QVariantHash &activity);
-    
+    void activityDataL(QVariant &result, const QVariantHash &activity);
+
+    void launchActivityL(const QVariantHash &activity);
+
     void getThumbnailL(QSize size, QString imagePath, QString  mimeType, void *userDdata);
+
+    int checkDataConstraint(int func, const QVariantHash &data);
+
+    int execute(int func, const QVariantHash &privateData, const QVariantHash &publicData);
+
+    int execute(int func, QList<QVariantHash>&dst, const QVariantHash &src);
+
 private:
     RPointerArray<HsActivityDbAsyncRequestPrivate> mAsyncTasks;
     HsActivityDbAsyncRequestObserver& mObserver;

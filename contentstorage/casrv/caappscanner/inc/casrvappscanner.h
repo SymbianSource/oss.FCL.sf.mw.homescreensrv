@@ -150,6 +150,9 @@ private:
      * @result id of download collection.
      */
     TInt GetCollectionDownloadIdL();
+    
+    //TODO temporary sollution for fake uninstall progres notification
+    void ClearUninstallFlagL();
 
     /**
      * Gets collectionId of all collection.
@@ -306,12 +309,6 @@ private:
      * @param aItems Missing items.
      */
     void HandleMissingItemsL( RPointerArray<CCaInnerEntry>& aCaEnties );
-
-    /**
-     * Removes app from storage.
-     * @param aAppEntry app to remove.
-     */
-    void RemoveAppL( CCaInnerEntry* aAppEntry );
 
     /**
      * Set "missing" flag.

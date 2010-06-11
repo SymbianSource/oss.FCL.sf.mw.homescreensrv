@@ -33,4 +33,14 @@ CaHandlerLoader::~CaHandlerLoader()
 {
 }
 
+/*!
+    \fn virtual CaHandler *loadHandler(const QString &entryTypeName,
+                                   const QString &commandName) = 0;
+    Loads handler implementations appropriate for the requested entry type name and command.
 
+    The caller takes ownership of the returned pointer.
+
+    \param entryTypeName an entry type name.
+    \param commandName a name of the command to be handled.
+    \retval a pointer to the handler serving the entry type and command if found, NULL otherwise.
+*/

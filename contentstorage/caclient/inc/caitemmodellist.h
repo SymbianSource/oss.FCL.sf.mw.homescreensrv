@@ -43,7 +43,7 @@ public:
     int count() const;
     QSharedPointer<CaEntry> at(int row) const;
     void reloadEntries(const CaQuery &query);
-    void updateEntry(int id);
+    void updateEntry(const QSharedPointer<CaEntry> &entry);
     void updateEntries(const CaQuery &query);
     int indexOf(const int &id) const;
     void insert(int row, int id);

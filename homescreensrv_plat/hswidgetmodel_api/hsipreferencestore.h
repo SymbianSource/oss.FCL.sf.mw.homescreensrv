@@ -18,11 +18,10 @@
 #ifndef HSIPREFERENCESTORE_H
 #define HSIPREFERENCESTORE_H
 
-
 class QString;
 
-/*!
-    \ingroup group_hscontentmodel group_widget_api_candidates
+
+/*DEPRECATED
     \class IHsPreferenceStore
     \brief Interface class for preference store.
 
@@ -73,8 +72,5 @@ public:
     virtual bool preferenceForKey(int id, const QString &key, QString &value) = 0;
 
 };
-
-
-
 
 #endif

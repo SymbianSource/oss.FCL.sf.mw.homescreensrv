@@ -53,7 +53,9 @@ LIBS += -lavkon \
         -lxqutils \
         -lsif \
         -lscrclient \
-        -laknicon
+        -laknicon \
+        -lapgrfx \
+        -lapparc
 
 include(caclient_s60.pri)
 }

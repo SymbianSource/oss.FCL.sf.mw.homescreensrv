@@ -320,7 +320,7 @@ void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
-        RArray<TInt>& aParentIdArray )
+        RArray<TInt>& aParentIdArray, TBool aCheckParentsParent )
     {
     CCaSqlQuery* sqlGetParentIdsQuery = CCaSqlQuery::NewLC( iSqlDb );
     CaSqlQueryCreator::CreateGetParentsIdsQueryL( aEntryIdArray,
@@ -334,7 +334,7 @@ void CCaSqLiteStorage::GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
     TInt parentCount = sqlGetParentIdsQuery->ExecuteL( aParentIdArray,
             CCaSqlQuery::EGroupTable );
     CleanupStack::PopAndDestroy( sqlGetParentIdsQuery );
-    if( parentCount > 0 )
+    if( aCheckParentsParent && parentCount > 0 )
         {
         GetParentsIdsL( aParentIdArray, aParentIdArray );
         }
@@ -909,4 +909,5 @@ void CCaSqLiteStorage::SetEntriesInProperOrderL(
             }
         }
     }
+
 

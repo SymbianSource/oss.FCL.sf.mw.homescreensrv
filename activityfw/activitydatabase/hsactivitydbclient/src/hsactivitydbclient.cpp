@@ -57,7 +57,7 @@ void HsActivityDbClient::asyncRequestCompleated(int result,
 {
     switch (requestType) {
         case WaitActivity:
-            if(KErrCancel != result) {
+            if (KErrCancel != result) {
                 waitActivity(QVariantHash());
             }            
             if (KErrNone == result) {
@@ -104,21 +104,25 @@ void HsActivityDbClient::asyncRequestCompleated(int result,int requestType)
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-int HsActivityDbClient::addActivity(const QVariantHash &activity)
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::addActivity(const QVariantHash&)
+ */
+int HsActivityDbClient::addActivity(const QVariantHash &privateData, 
+                                    const QVariantHash &publicData)
 {
-    return d_ptr->addActivity(activity);
+    return d_ptr->addActivity(privateData, publicData);
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-int HsActivityDbClient::updateActivity(const QVariantHash &activity)
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash&)
+ */
+int HsActivityDbClient::updateActivity(const QVariantHash &privateData, 
+                                       const QVariantHash &publicData)
 {
-    return d_ptr->updateActivity(activity);
+    return d_ptr->updateActivity(privateData, publicData);
 }
 
 // -----------------------------------------------------------------------------
@@ -156,6 +160,15 @@ int HsActivityDbClient::applicationActivities(QList<QVariantHash> & result,
         const QVariantHash &conditions)
 {
     return d_ptr->applicationActivities(result, conditions);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClient::activityData(QVariant &result, const QVariantHash &activity)
+{
+    return d_ptr->activityData(result, activity);
 }
 
 // -----------------------------------------------------------------------------

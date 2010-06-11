@@ -29,11 +29,13 @@ DEFINES += ACTIVITY_LIB
 symbian{
 TARGET.UID3 = 0xE467C21E
 
-HEADERS   += ../s60/inc/hsserializer.h \
+HEADERS   += ../s60/inc/afentry.h \
+             ../s60/inc/hsserializer.h \
              s60/inc/hsactivitydbclient_p.h \
 			 s60/inc/hsactivitydbasyncrequest_p.h
 
-SOURCES   += ../s60/src/hsserializer.cpp \
+SOURCES   += ../s60/src/afentry.cpp \
+             ../s60/src/hsserializer.cpp \
              s60/src/hsactivitydbclient_p.cpp \
 			 s60/src/hsactivitydbasyncrequest_p.cpp
 

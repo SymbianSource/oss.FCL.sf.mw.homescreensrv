@@ -25,15 +25,15 @@
 #include <QVariant>
 #include <QMetaType>
 
-/*!
+
+/*DEPRECATED
     \class HsWidgetToken
-    \ingroup group_hswidgetmodel group_widget_api_candidates
+    \ingroup group_hswidgetmodel_api
     \brief Represents a home screen widget that can be created. 
 
     Home screen widgets are located in widget providers. Each provider
     exposes its contained widgets as widget tokens. A token has all
     the needed information for widget selection and creation.
-
 */
 class HsWidgetToken
 {
@@ -82,7 +82,7 @@ public:
 
 class HsWidget;
 
-/*!
+/*DEPRECATED
     \class IHsWidgetProvider
     \ingroup group_hswidgetmodel group_widget_api_candidates
     \brief Defines a mechanism for retrieving a home screen widget.
@@ -114,10 +114,7 @@ public:
 
 };
 
-
-
 Q_DECLARE_METATYPE(HsWidgetToken)
 Q_DECLARE_INTERFACE(IHsWidgetProvider, "com.nokia.homescreen.iwidgetprovider/1.0")
-
 
 #endif

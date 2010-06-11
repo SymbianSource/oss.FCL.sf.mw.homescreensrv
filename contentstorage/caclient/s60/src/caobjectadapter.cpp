@@ -48,12 +48,12 @@ void CaObjectAdapter::convertL(const CaEntry &fromEntry,
     toEntry.SetId(fromEntry.id());
 
     toEntry.SetTextL(
-        XQConversions::qStringToS60Desc(fromEntry.text())->Des());
+        XQConversions::qStringToS60Desc(fromEntry.text())->Des(),
+        fromEntry.isLocalized(NameLocalized));
 
     toEntry.SetDescriptionL(
-        XQConversions::qStringToS60Desc(fromEntry.description())->Des());
-    toEntry.SetDescriptionL(
-        XQConversions::qStringToS60Desc(fromEntry.description())->Des());
+        XQConversions::qStringToS60Desc(fromEntry.description())->Des(),
+        fromEntry.isLocalized(DescriptionLocalized));
 
     toEntry.SetEntryTypeNameL(
         XQConversions::qStringToS60Desc(fromEntry.entryTypeName())->Des());
@@ -148,10 +148,12 @@ void CaObjectAdapter::convert(
 {
     toEntry.setId(fromEntry.GetId());
 
-    toEntry.setText(XQConversions::s60DescToQString(fromEntry.GetText()));
+    toEntry.setText(XQConversions::s60DescToQString(fromEntry.GetText()),
+            fromEntry.isLocalized(CCaInnerEntry::ENameLocalized));
 
     toEntry.setDescription(
-        XQConversions::s60DescToQString(fromEntry.GetDescription()));
+        XQConversions::s60DescToQString(fromEntry.GetDescription()),
+        fromEntry.isLocalized(CCaInnerEntry::EDescriptionLocalized));
     toEntry.setEntryTypeName(
         XQConversions::s60DescToQString(fromEntry.GetEntryTypeName()));
 

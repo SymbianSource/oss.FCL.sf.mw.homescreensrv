@@ -20,8 +20,7 @@
 #define TSFSWDATALIST_H
 
 #include <e32base.h>
-#include <apgcli.h>
-#include <w32std.h>
+#include <tswindowgroupsobserver.h>
 #include "tsfswentry.h"
 #include "tsdataobserver.h"
 
@@ -31,15 +30,15 @@ class CFbsBitmap;
 /**
  * Engine's data list.
  */
-NONSHARABLE_CLASS( CTsFswDataList ) : public CBase
+NONSHARABLE_CLASS( CTsFswDataList ) : public CTsWindowGroupsObserver
     {
 public:
     /**
      * Two-phased constructor.
-     *
-     * @param aParent
      */
-    static CTsFswDataList* NewL(MHsDataObserver& observer);
+    static CTsFswDataList* NewL(MTsResourceManager& resources, 
+                                MTsWindowGroupsMonitor &monitor, 
+                                MHsDataObserver& observer);
 
     /*
      * Destructor
@@ -50,7 +49,9 @@ private:
     /**
      * Constructor.
      */
-    CTsFswDataList(MHsDataObserver& observer);
+    CTsFswDataList(MTsResourceManager& resources,
+                   MTsWindowGroupsMonitor &monitor, 
+                   MHsDataObserver& observer);
 
     /**
      * Performs 2nd phase construction.
@@ -67,10 +68,11 @@ public:
     const RTsFswArray& FswDataL();
 
     /**
-     * Gets the window group list and reconstructs the fsw content.
-     * @return   TBool   ETrue if the content iData has been modified
+     * Interface implementation
+     * @see MTsWindowGroupsObserver HandleWindowGroupChanged
      */
-    TBool CollectTasksL();
+    void HandleWindowGroupChanged(MTsResourceManager &,
+                                  const TArray<RWsSession::TWindowGroupChainInfo> &);
     
     /**
      * Checks if given uid is on hidden list
@@ -82,19 +84,20 @@ public:
     /**
      * Set screenshot 
      */
-    TBool SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority, TInt wgId);
+    void SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority, TInt wgId);
     
     /**
      * Removes screenshot 
      */    
-    TBool RemoveScreenshotL(TInt wgId);
+    void RemoveScreenshotL(TInt wgId);
     
 private:
     /**
      * Adds running apps to the list.
      * @param   appsList    array to add to
      */
-    void CollectAppsL( RTsFswArray& appsList );
+    void CollectAppsL(RTsFswArray& appsList,
+                      const TArray<RWsSession::TWindowGroupChainInfo> &wgList);
 
     /**
      * Called from CollectTasksL for each entry in the task list.
@@ -103,10 +106,10 @@ private:
      * @param   wgName     window group name or NULL
      * @param   newList    list to add to
      */
-    void AddEntryL( const TTsEntryKey& key, 
-			const TUid& appUid,
-            CApaWindowGroupName* wgName,
-			RTsFswArray& newList );
+    void AddEntryL(const TTsEntryKey& key, 
+                   const TUid& appUid,
+                   CApaWindowGroupName* wgName,
+                   RTsFswArray& newList );
 
     /**
      * Checks if there is an entry for same app in the content list.
@@ -135,9 +138,8 @@ private:
      * on aConsiderWidgets param. 
      * Function removes or add entries into data depend on given list.
      * @param   listToFit          list with actual data  
-     * @return  ETrue if change occours on data list, EFalse otherwise   
      */
-    TBool FitDataToListL( RTsFswArray& listToFit);
+    void FitDataToList( RTsFswArray& listToFit);
 
     /**
      * Checks if there is an entry for same app in the given list.
@@ -176,20 +178,39 @@ private:
     /**
      * Gets allowed uids, tries to filter non GUI application 
      */
-    void GetAllowedUidsL();
+    TBool VerifyApplicationL(TUid);
     
+    /**
+     * Function generate task key using window group id
+     * @param wgId - window group id of running application
+     * @param entry key 
+     */
+    TTsEntryKey GenerateKeyL(TInt);
+    
+    /**
+     * Analyse and compress lookup table id needed
+     * @param array - lookup table that has to be checked
+     * 
+     */
+    void CompressLookupTable(RArray<TUid> &array);
+    
+    /**
+     * Change priority of an item in the lookup table
+     * @param array - look up table
+     * @param offset - index of an item in the table
+     */
+    void UpdateLookupTableL(RArray<TUid> &array, TInt offset);
 
 private:
+    /**
+     * Resource manager. Not own
+     */
+    MTsResourceManager& mResources;
+    
     MHsDataObserver &mObserver;
     
     RTsFswArray mData; // current fsw content, i.e. the task list
 
-    // window server session
-    RWsSession mWsSession;
-
-    // apparc session
-    RApaLsSession mAppArcSession;
-    
     // list of hidden uids
     RArray<TUid> mHiddenUids;
     

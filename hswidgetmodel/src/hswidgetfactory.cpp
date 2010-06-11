@@ -28,7 +28,7 @@
 
 
 
-/*!
+/*DEPRECATED
     \class HsPluginUnloader
     \ingroup group_hswidgetmodel
     \brief Unloads plugin and deletes plugin loader.
@@ -63,7 +63,7 @@ HsPluginUnloader::~HsPluginUnloader()
     }
 }
 
-/*!
+/*DEPRECATED
     \class HsWidgetFactory 
     \ingroup group_hswidgetmodel
     \brief Finds and creates home screen widgets.
