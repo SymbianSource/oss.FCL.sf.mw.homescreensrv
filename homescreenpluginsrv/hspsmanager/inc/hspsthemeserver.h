@@ -178,8 +178,8 @@
 // C-Drive directory for the SISX installation files
 _LIT( KImportDirectoryC, "c:\\private\\200159c0\\import\\" );
 
-// E-Drive directory for the SISX installation files
-_LIT( KImportDirectoryE, "e:\\private\\200159c0\\import\\" );
+// directory for the SISX installation files
+_LIT( KImportDirectory, "\\private\\200159c0\\import\\" );
 
 /** hspsThemeServer name: */
 _LIT(KhspsThemeServerName,"hspsthemeserver");

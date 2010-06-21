@@ -102,7 +102,6 @@ RESOURCE MENU_PANE r_ai_mcs_settings_menupane
 RESOURCE AVKON_VIEW r_ai_mcs_settings_view
 {
     menubar = r_ai_mcs_settings_menubar;
-    //cba = R_AVKON_SOFTKEYS_OPTIONS_BACK;
     cba = r_scut_softkeys_options_back_change;
 }
 
@@ -239,20 +238,6 @@ RESOURCE CBA r_scut_softkeys_options_back_change
     {
         CBA_BUTTON {id = EAknSoftkeyOptions;       txt = text_softkey_option; },
         CBA_BUTTON {id = EAknSoftkeyBack;          txt = text_softkey_back;   },
-        CBA_BUTTON {id = EAiScutSettingsCmdChange; txt = qtn_msk_change;      }
-    };
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-RESOURCE CBA r_scut_softkeys_options_exit_change
-{
-    buttons =
-    {
-        CBA_BUTTON {id = EAknSoftkeyOptions;       txt = text_softkey_option; },
-        CBA_BUTTON {id = EAknSoftkeyExit;          txt = text_softkey_exit;   },
         CBA_BUTTON {id = EAiScutSettingsCmdChange; txt = qtn_msk_change;      }
     };
 }

@@ -385,30 +385,33 @@ void CCcSrvSession::HandleApiRespL(
 void CCcSrvSession::HandleGetMsgDataL(
     RMessage2& aMessage )
     {
-    // Read sender and receiver of a response
+    // Read transaction id which message data is requested
     TPckgBuf<TUint32> pckg;    
     aMessage.ReadL( 0, pckg );                        
     TUint32 trId = pckg();
     
     CCcSrvMsg* req( NULL );
-    TInt index( 0 );
-    for( TInt i = 0; i < iRequests.Count() && !req; i++ )
+    TBool found( EFalse );
+    for( TInt i = 0; i < iRequests.Count() && !found; i++ )
         {
-        if ( iRequests[ i ]->TrId() == trId )
+        req = iRequests[ i ];
+        if ( req->Function() == ECcGetMsgData &&
+             req->TrId() == trId )
             {
-            req = iRequests[ i ];
-            index = i;
+            iRequests.Remove( i );
+            found = ETrue;
             }
         }
     
     TInt err( KErrNone );
-    if ( req )
+    if ( found )
         {
+        CleanupStack::PushL( req );
+        
         // Write message data
         aMessage.WriteL( 1, req->Data(), 0);
-        // Remove request
-        iRequests.Remove( index );
-        delete req;
+        
+        CleanupStack::PopAndDestroy( req );
         }
     else
         {
@@ -474,7 +477,9 @@ void CCcSrvSession::ReceiveMsgL(
             found = ETrue;
             }
         else if ( aMessage.Function() == ECcApiResp &&
-                  req->TrId() == aMessage.TrId() )
+                  req->Function() == ECcApiReq &&
+                  req->TrId() == aMessage.TrId() &&
+                  !req->Message().IsNull() )
             {
             // Pending ApiReq transaction found
             iRequests.Remove( i );
@@ -536,7 +541,14 @@ void CCcSrvSession::ReceiveMsgL(
         // Store message to handled later
         CCcSrvMsg* msg = CCcSrvMsg::NewL();
         CleanupStack::PushL( msg );
-        msg->SetFunction( aMessage.Function() );
+        if ( found && aMessage.DataSize() )
+            {
+            msg->SetFunction( ECcGetMsgData );
+            }
+        else
+            {
+            msg->SetFunction( aMessage.Function() );
+            }
         msg->SetSender( aMessage.Sender() );
         msg->SetReceiver( aMessage.Receiver() );
         msg->SetMsgId( aMessage.MsgId() );

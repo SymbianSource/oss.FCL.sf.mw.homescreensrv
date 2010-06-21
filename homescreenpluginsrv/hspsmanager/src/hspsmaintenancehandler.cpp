@@ -4737,14 +4737,28 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
 //
 void ChspsMaintenanceHandler::HandleReinstallationL(
         const TBool aInstallUdaEmmc ) 
-    {       
+    {
     // Install plug-in configurations from the "install" directories
     iThemeServer.InstallWidgetsL( aInstallUdaEmmc );
     if( aInstallUdaEmmc )
         {
-        // Install plug-in configurations from the "import" directories in C and E
+        // Install plug-in configurations from the "import" directories in C 
+        // and emmc(if exists)
         iThemeServer.InstallUDAWidgetsL( KImportDirectoryC );
-        iThemeServer.InstallUDAWidgetsL( KImportDirectoryE );
+
+        TInt drive = hspsServerUtil::GetEmmcDrivePath( 
+                iServerSession->FileSystem() );
+        if ( drive != KErrNotFound )
+            {
+            TDriveUnit unit(drive);
+            HBufC* importDirectoryE = HBufC::NewLC( 
+                    KImportDirectory().Length() + unit.Name().Length() ); 
+            importDirectoryE->Des().Append( unit.Name() );
+            importDirectoryE->Des().Append( KImportDirectory );
+            
+            iThemeServer.InstallUDAWidgetsL( *importDirectoryE );
+            CleanupStack::PopAndDestroy( importDirectoryE );
+            }
         }
     
     // Force updating of the header cache

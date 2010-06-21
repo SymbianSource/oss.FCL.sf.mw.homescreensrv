@@ -645,6 +645,7 @@ void CMenuEng::RunL()
             // Error loading ROM tree is fatal. Nothing we can do.
             User::LeaveIfError( iStatus.Int() );
             iState = ESaveFile;
+            AppendPredefinedAttributeL();
             SaveTempFileL();
             break;
             }
@@ -1198,6 +1199,25 @@ void CMenuEng::SetIdSeedL( TInt aSeed )
         object->SetAttributeL( KMenuAttrIdSeed(), buf, EFalse );
         CleanupStack::PopAndDestroy( &nodes );
         }
+    }
+
+// ---------------------------------------------------------
+// 
+// ---------------------------------------------------------
+//
+void CMenuEng::AppendPredefinedAttributeL( )
+    {
+    __ASSERT_DEBUG( iTree, User::Invariant() );
+    MXCFWNode* root = iTree->Root();
+    RNodeArray nodes;
+    CleanupClosePushL( nodes );
+    iTree->GetNodesOfTypeL(KMenuTypeApp(),nodes, root, ETrue );
+    for (TInt i = 0; i<nodes.Count(); i++)
+    	{
+        CMenuEngObject* object = &Object( *nodes[i] );
+        object->SetAttributeL( KMenuAttrPredefined(), KNullDesC(), EFalse );
+    	}
+    CleanupStack::PopAndDestroy( &nodes );
     }
 
 // ---------------------------------------------------------

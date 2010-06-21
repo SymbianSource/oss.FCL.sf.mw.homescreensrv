@@ -60,7 +60,6 @@ class CBSServer : public CServer2
         void ConstructL();
         void HandleWsEventL( const TWsEvent& aEvent,
             CCoeControl* aDestination );
-        void ForwardEventL( const TWsEvent& aEvent );
         CBSEngine* iEngine;
         };
 

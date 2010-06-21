@@ -2755,10 +2755,24 @@ void ChspsThemeServer::HandleRomInstallationsL()
         // Install widgets from \private\200159C0\install\ directories (ROM and UDA image)
         InstallWidgetsL();
 
-        // Install widgets from \private\200159C0\imports\ directory (UDA image) C & E
+        // Install widgets from \private\200159C0\imports\ directory 
+        //from c (UDA image) and from emmc
         InstallUDAWidgetsL( KImportDirectoryC );
-        InstallUDAWidgetsL( KImportDirectoryE );
-        
+                
+        TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
+        if ( drive != KErrNotFound )
+            {
+            TDriveUnit unit(drive);
+            HBufC* importDirectoryE = HBufC::NewLC( 
+                    KImportDirectory().Length() + unit.Name().Length() ); 
+            
+            importDirectoryE->Des().Append( unit.Name() );
+            importDirectoryE->Des().Append( KImportDirectory );
+            
+            InstallUDAWidgetsL( *importDirectoryE );
+            CleanupStack::PopAndDestroy( importDirectoryE );
+            }
+
         // Post RFS installations have been done, prevent re-installations at next startup
         // by reading firmware version and saving it to cenrep.
         GetFWVersion( fwVersion );

@@ -221,8 +221,6 @@ void CAiUiIdleIntegrationImpl::HandleWsEventL( const TWsEvent& aEvent,
 //
 void CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL()
 	{
-    __PRINTS( "*** CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL" );
-    
     if( !iIncallBubbleAllowed )
     	{
         TInt callStatus( 0 );
@@ -234,11 +232,8 @@ void CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL()
         // Call ongoing => show bubble
 	  	if( err == KErrNone && callStatus > EPSCTsyCallStateNone )
 	      	{
-			__PRINTS( "*** CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL - enable" );
-
-            iIncallBubble->SetIncallBubbleAllowedInUsualL( ETrue );
-            iIncallBubble->SetIncallBubbleAllowedInIdleL( ETrue );
-            iIncallBubbleAllowed = ETrue;
+	       	iIncallBubble->SetIncallBubbleAllowedInIdleL( ETrue );                	
+	       	iIncallBubbleAllowed = ETrue;
 	       	}    
     	}
 	}
@@ -249,16 +244,11 @@ void CAiUiIdleIntegrationImpl::SetCallBubbleIfNeededL()
 //
 void CAiUiIdleIntegrationImpl::ClearCallBubbleL()
 	{
-    __PRINTS( "*** CAiUiIdleIntegrationImpl::ClearCallBubbleL" );
-
 	 if( iIncallBubbleAllowed )
     	{
-         __PRINTS( "*** CAiUiIdleIntegrationImpl::ClearCallBubbleL - disable" );
-
     	iIncallBubble->SetIncallBubbleAllowedInIdleL( EFalse );
-    	iIncallBubble->SetIncallBubbleAllowedInUsualL( EFalse );
     	iIncallBubbleAllowed = EFalse;
-    	}
+    	}        
 	}
     
 // ----------------------------------------------------------------------------
@@ -292,16 +282,34 @@ TInt CAiUiIdleIntegrationImpl::HandleCallEvent( TAny* aPtr )
 	if ( err == KErrNone )
 		{
 		// Call ongoing => show bubble if not showing already
+		TBool allowed = EFalse;
+		
 		if ( !self->iIncallBubbleAllowed &&
 		     self->iForeground &&
 		    ( callStatus > EPSCTsyCallStateNone ) )
 			{
-            TRAP_IGNORE( self->SetCallBubbleIfNeededL() );
+			allowed = ETrue;
+    		
+			TRAP( err, 
+                self->iIncallBubble->SetIncallBubbleAllowedInIdleL( allowed ) );
+			            		
+			if ( err == KErrNone )
+    		    {
+    			self->iIncallBubbleAllowed = allowed;
+    		    }
 			}
 		// No call ongoing => hide if bubble is visible			
 		else if ( self->iIncallBubbleAllowed && callStatus <= EPSCTsyCallStateNone )
 			{
-    		TRAP_IGNORE( self->ClearCallBubbleL() );
+			allowed = EFalse;
+			
+    		TRAP( err, 
+                self->iIncallBubble->SetIncallBubbleAllowedInIdleL( allowed ) );
+    		
+    		if ( err == KErrNone )
+    		    {
+    			self->iIncallBubbleAllowed = allowed;
+    		    }
 			}
 		}
 	

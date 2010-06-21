@@ -39,8 +39,7 @@ const TInt KSecondTaskIndex( 1);
 CBSEngine::CBSEngine()
     {
     iEnv = CEikonEnv::Static( );
-    swap = EFalse;
-    wasPressed = EFalse;
+    iSwap = EFalse;
     }
 
 // -----------------------------------------------------------------------------
@@ -93,15 +92,6 @@ CBSEngine* CBSEngine::NewLC()
 // 
 // -----------------------------------------------------------------------------
 //
-void CBSEngine::ApplicationKeyWasPressed()
-    {
-    wasPressed = ETrue;
-    }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//
 void CBSEngine::HandleFocusChangeL( const TUid& aApp )
     {
     DEBUG(("-> HandleFocusChangeL(0x%X)", aApp.iUid ));
@@ -116,16 +106,14 @@ void CBSEngine::HandleFocusChangeL( const TUid& aApp )
     if ( fsCount > 0 && iFocusHistory[fsCount - 1] == aApp.iUid )
         {
         DEBUG(("\tIgnore the event - application already on top"));
-        swap = EFalse;
-        wasPressed = EFalse;
+        iSwap = EFalse;
         return;
         }
 
     // check if we should not reset back stepping stack
     if ( iConfiguration->IsReset( aApp ) )
         {
-        swap = EFalse;
-        wasPressed = EFalse;
+        iSwap = EFalse;
         ResetHistory( );
         }
 
@@ -138,26 +126,24 @@ void CBSEngine::HandleFocusChangeL( const TUid& aApp )
         if ( aApp.iUid == thuApps[i] )
             {
             //mark that there is a fast swap or dialog
-            swap = ETrue;
+            iSwap = ETrue;
             return;
             }
-        else
+        else if( iSwap )
             {
-            if ( swap )
+            iSwap = EFalse;
+
+            TInt pos = iFocusHistory.Count( ) - 1;
+            if ( pos >= 0 )
                 {
-                swap = EFalse;
                 TInt currentApp = aApp.iUid;
-                TInt pos = iFocusHistory.Count( ) - 1;
-                if ( pos >= 0 )
+                TInt prevApp = iFocusHistory[pos];
+                if ( currentApp != prevApp )
                     {
-                    TInt prevApp = iFocusHistory[pos];
-                    if ( currentApp != prevApp && wasPressed )
-                        {
-                        //we are here as the result of the fast swap
-                        ResetHistory( );
-                        iFocusHistory.AppendL( thuApps[i] );
-                        wasPressed = EFalse;
-                        }
+                    //we are here as the result of the fast swap
+                    ResetHistory( );
+                    iFocusHistory.AppendL( thuApps[i] );
+                    break;
                     }
                 }
             }

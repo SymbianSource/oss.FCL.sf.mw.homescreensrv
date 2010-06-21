@@ -12,6 +12,6 @@
   <app uid="0x101FD64C" reset="1" /> <!-- Active Idle -->  
   <app uid="0x102750F0" reset="1" /> <!-- Active Idle 2 -->    
   <app uid="0x10282BF6" reset="1" /> <!-- MMMenu -->  
-  <app uid="0x10207218" ignoredIfStartedFrom="1" resetIfThru="1" /> <!-- FastSwap -->  
+  <app uid="0x20016BF0" ignoredIfStartedFrom="1" resetIfThru="1" /> <!-- FastSwap -->  
   <app uid="0x100056CF" ignored="1" /> <!-- screen saver -->  
 </configuration>

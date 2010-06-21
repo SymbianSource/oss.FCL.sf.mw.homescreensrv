@@ -32,7 +32,6 @@
 _LIT( KMenuOne, "1" );
 _LIT( KMenuAttrMmcId, "mmc_id" );
 _LIT( KMenuMassStorage, "mass_storage" );
-_LIT( KMenuPredefinedWidget, "predefined_widget" );
 _LIT( KMenuMmcHistoryFname, "mmchistory" );
 
 // ==================== LOCAL FUNCTIONS ====================
@@ -1058,7 +1057,7 @@ TMenuItem::TFlags CMenuSrvAppScanner::GetProperFlagL( const TMenuItem& aItem )
             flags = TMenuItem::EMissing;
             }
         else if ( iEng.ObjectL( aItem.Id() ).FindAttribute(
-                KMenuPredefinedWidget(), val, dummy ) )
+                KMenuAttrPredefined(), val, dummy ) )
             {
             flags = TMenuItem::EMissing;
             }
@@ -1066,7 +1065,7 @@ TMenuItem::TFlags CMenuSrvAppScanner::GetProperFlagL( const TMenuItem& aItem )
     else if( iEng.ObjectL( aItem.Id() ).GetAppType()
                 != CMenuEngObject::EWidgetApp
             || iEng.ObjectL( aItem.Id() ).FindAttribute(
-                    KMenuPredefinedWidget(), val, dummy ) )
+            		KMenuAttrPredefined(), val, dummy ) )
         {
         flags = TMenuItem::EHidden;
         }

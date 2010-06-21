@@ -85,6 +85,7 @@ LIBRARY     ecom.lib // definition engine
 LIBRARY     MemMan.lib
 LIBRARY     ws32.lib    // RWsSession
 LIBRARY     SysLangUtil.lib
+LIBRARY     PlatformEnv.lib
 
 #ifdef _hsps_DEBUG_
 LIBRARY     flogger.lib

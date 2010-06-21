@@ -42,6 +42,7 @@
 #include "hspsserverutil.h"
 #include "hspsfamilylistener.h"
 
+
 #ifdef HSPS_LOG_ACTIVE
 #include <hspsodtdump.h>
 #include <hspslogbus.h>
@@ -2205,7 +2206,6 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
         const TDesC& aPath )
     {
     // Retrieve supported localizations.
-    
     CArrayFixFlat<TInt>* systemEpocLanguageCodes = NULL;
     hspsServerUtil::GetInstalledLanguagesL(
             systemEpocLanguageCodes );
@@ -2213,10 +2213,14 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
                             
     // Find all entries under the Xuikon folders that
     // match our eclipsing rules and localisations supported by phone.
-    
     RArray<TInt> driveArray;
     CleanupClosePushL( driveArray );   
-    driveArray.Append( EDriveE );
+    TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
+    if ( drive != KErrNotFound )
+        {
+        driveArray.Append( drive );
+        }
+    
     driveArray.Append( EDriveC );
     driveArray.Append( EDriveZ );     
     

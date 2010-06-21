@@ -27,8 +27,6 @@
 #include "bsdebug.h"
 #include "bsserver.h"
 
-const TInt idsArrayGranularity = 30;
-
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -174,6 +172,7 @@ void CBSServer::ThreadFunctionL()
     ui->PrepareToExit( );
 
     }
+
 // -----------------------------------------------------------------------------
 // Create and start the server.
 // -----------------------------------------------------------------------------
@@ -230,6 +229,7 @@ void CBSServer::CBSEikonEnv::ConstructL()
     SetAutoForwarding(ETrue); 
     User::SetPriorityControl(EFalse);
     }
+
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
@@ -243,12 +243,11 @@ CBSServer::CBSAppUi::~CBSAppUi()
 // -----------------------------------------------------------------------------
 //
 void CBSServer::CBSAppUi::HandleWsEventL( const TWsEvent& aEvent,
-    CCoeControl* /*aDestination*/)
+    CCoeControl* aDestination)
     {
     if ( aEvent.Type( ) == EEventFocusGroupChanged 
         || aEvent.Type( ) == EEventWindowGroupsChanged )
         {
-
         TInt windowsGroupID = iCoeEnv->WsSession().GetFocusWindowGroup( );
         CApaWindowGroupName* apaWGName = CApaWindowGroupName::NewLC(
             iCoeEnv->WsSession( ), windowsGroupID );
@@ -261,37 +260,7 @@ void CBSServer::CBSAppUi::HandleWsEventL( const TWsEvent& aEvent,
             iEngine->HandleFocusChangeL( uid );
             }
         }
-    else if( aEvent.Type( ) == EEventKeyDown ) 
-        {
-        iEngine->ApplicationKeyWasPressed( );
-        ForwardEventL( aEvent );     
-        }
-    else if( aEvent.Type( ) == EEventKeyUp )
-        {
-        ForwardEventL( aEvent );     
-        }
-    }
-
-// -----------------------------------------------------------------------------
-// 
-// -----------------------------------------------------------------------------
-//
-void CBSServer::CBSAppUi::ForwardEventL( const TWsEvent& aEvent )
-    {
-    CArrayFixFlat<TInt>* idArray = 
-                    new (ELeave) CArrayFixFlat<TInt>( idsArrayGranularity );
-    iCoeEnv->WsSession().WindowGroupList( idArray );
-    
-    TInt ownId = iCoeEnv->RootWin().Identifier();
-    for( TInt x(0); x < idArray->Count(); x++ )
-        {
-        if( (*idArray)[x] != ownId )
-            {
-            iCoeEnv->WsSession().SendEventToWindowGroup( 
-                                                    (*idArray)[x], aEvent );
-            }
-        }
-    delete idArray;
+    CEikAppUi::HandleWsEventL( aEvent, aDestination );
     }
 
 // -----------------------------------------------------------------------------
@@ -307,8 +276,6 @@ void CBSServer::CBSAppUi::ConstructL()
     iCoeEnv->RootWin().EnableGroupChangeEvents( );
     //disable notifications about layout change
     iCoeEnv->RootWin().DisableScreenChangeEvents();
-    //get notifications about application key event
-    iCoeEnv->RootWin().CaptureKeyUpAndDowns( EStdKeyApplication0, 0, 0 );
     }
 
 // ============================= LOCAL FUNCTIONS ===============================

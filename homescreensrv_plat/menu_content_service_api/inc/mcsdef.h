@@ -55,6 +55,7 @@ _LIT( KMenuAttrId, "id" ); ///< Internal attribute, cannot be accessed. Use Id()
 // Menu clients always need to check that the necessary attributes are present.
 //
 
+_LIT( KMenuAttrPredefined, "predefined" );
 _LIT( KMenuAttrTitleName, "title_name" ); ///< Title name (displayed in Title Pane).
 _LIT( KMenuAttrShortName, "short_name" ); ///< Short name.
 _LIT( KMenuAttrLongName, "long_name" ); ///< Long name.

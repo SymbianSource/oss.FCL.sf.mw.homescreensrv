@@ -30,6 +30,7 @@
 #include "bautils.h" 
 #include "sysutil.h"
 #include <syslangutil.h>
+#include <DriveInfo.h>
 
 
 _LIT(KHspsFolder, "\\200159c0\\themes\\" );
@@ -1996,7 +1997,11 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
              KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
          if( aFindFromUdaEmmcDrives )
              {
-             aFs.SetSessionToPrivate( EDriveE );
+             TInt drive = hspsServerUtil::GetEmmcDrivePath( aFs );
+             if ( drive != KErrNotFound )
+                 {
+                 aFs.SetSessionToPrivate( drive );
+                 }
              }
          else 
              {
@@ -2196,6 +2201,28 @@ void hspsServerUtil::GetInstalledLanguagesL(
     CleanupStack::Pop( aLanguages );
     }
     
+
+// -----------------------------------------------------------------------------
+// hspsServerUtil::GetEmmcDrivePathL
+// -----------------------------------------------------------------------------
+//
+TInt hspsServerUtil::GetEmmcDrivePath( RFs& aFs )
+    {
+    TInt drive = KErrNotFound;
+    if ( DriveInfo::GetDefaultDrive( 
+            DriveInfo::EDefaultMassStorage, drive ) == KErrNone )
+        {
+        TUint status;
+        if ( DriveInfo::GetDriveStatus( aFs, drive, status ) == KErrNone )
+            {
+            if ( status & DriveInfo::EDriveInternal )
+                {
+                return drive;
+                }
+            }
+        }
+    return KErrNotFound;
+    }          
 
 // -----------------------------------------------------------------------------
 // hspsServerUtil::hspsServerUtil

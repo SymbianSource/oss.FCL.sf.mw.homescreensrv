@@ -37,11 +37,6 @@ const TUid KUidScutSettingsPlugin =
     AI_UID_ECOM_IMPLEMENTATION_SETTINGS_MCSPLUGIN
 };
 
-const TUid KUidAiFwCommon =
-{
-        AI_UID3_AIFW_COMMON
-};
-
 _LIT(KMCSSettingsResourceFileName, "mcspluginsettingsres.rsc");
 
 /** Implementation table for MCS settings plug-in */
@@ -148,17 +143,6 @@ void CMCSPluginSettings::HandleCommandL(TInt aCommand)
         break;
 
     case EAknSoftkeyBack:
-        if (iAppUi->View(KGSMainViewUid))
-        {
-        // if we are in GS activate parent plugin view (standby view)...
-        iAppUi->ActivateLocalViewL(KGSPrslnPluginUid);
-        }
-        else
-        {
-            iAppUi->ActivateLocalViewL(iPrevViewId.iViewUid);
-        }
-        break;
-
     case EAknSoftkeyExit:
         iAppUi->HandleCommandL(EAknCmdExit);
         break;
@@ -176,21 +160,6 @@ void CMCSPluginSettings::HandleCommandL(TInt aCommand)
 //
 void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage)
     {
-    CEikButtonGroupContainer* cba = Cba();
-
-    if (cba)
-    {
-        if (aCustomMessageId == KUidAiFwCommon)
-        {
-            cba->SetCommandSetL(R_SCUT_SOFTKEYS_OPTIONS_EXIT_CHANGE);
-        }
-        else
-        {
-            cba->SetCommandSetL(R_SCUT_SOFTKEYS_OPTIONS_BACK_CHANGE);
-        }
-        cba->DrawDeferred();
-    }
-
     iModel->SetPluginIdL( aCustomMessage );
     iModel->UpdateAppListL( EFalse );
     iModel->UpdateBkmListL( EFalse );

@@ -629,6 +629,14 @@ class hspsServerUtil
 	     */
 	    static void GetInstalledLanguagesL(
 	            CArrayFixFlat<TInt>*& aLanguages );
+	    /**
+	     * Returns index of internal mass memory drive
+	     * @since S60 5.2 
+	     * @param aFs Reference to open file server handle.
+	     * @return index of internal mass memory drive. KErrNotFound if drive
+	     * does not exists.
+	     */
+	    static TInt GetEmmcDrivePath( RFs& aFs );
 	    
 	private:
         /**

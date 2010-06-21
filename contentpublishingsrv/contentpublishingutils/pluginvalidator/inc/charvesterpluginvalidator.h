@@ -91,7 +91,16 @@ private:
      */
     void LoadPluginL( TPluginInfo& aPluginInfo );
 
+    /**
+     * Calls UpdateL() for every plugin
+     */
+    void UpdatePluginsL();
 
+    /**
+     * Callback used for delayed update
+     */
+    static TInt UpdateCallback( TAny* aValidator );
+    
 private:
 
     /**
@@ -105,6 +114,12 @@ private:
      * Own
      */
     RProperty iInProgressProperty;
+    
+    /*
+     * Idle AO used for delayed update
+     * Own
+     */
+    CIdle* iUpdateIdle;
     };
 
 #endif // CHARVESTERPLUGINVALIDATOR_H

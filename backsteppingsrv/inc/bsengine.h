@@ -83,11 +83,6 @@ public:
      */
     void RemoveAppRecord( const TUid& aApp );
 
-    /**
-     * Marks that application was pressed
-     */
-    void ApplicationKeyWasPressed();
-
 private:
 
     CBSEngine();
@@ -130,13 +125,8 @@ private:
 
     /**
      * flag for handling fast swap events
-     */
-    TBool swap;
-
-    /**
-     * flag for application key state
-     */
-    TBool wasPressed;
+     */    
+    TBool iSwap;
 
     /**
      * Configuration of BS

@@ -421,6 +421,11 @@ private:    // new methods
     */
     void SetIdSeedL( TInt aSeed );
 
+    /**
+    * Appends predefined attribute to items in a tree
+    */
+    void AppendPredefinedAttributeL( );
+    
 private:    // state machine parts
 
     /**
