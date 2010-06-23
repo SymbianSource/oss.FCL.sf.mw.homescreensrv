@@ -52,14 +52,6 @@ ECOM_PLUGIN( causifscanner.dll, causifscanner.rsc )
 
 data=ZPRIVATE\20022F90\castorage.db          private\20022F90\castorage.db
 
-// ---- appfoundation --------------------------------------------
-
-// -------- statemodel
-file=ABI_DIR\BUILD_DIR\statemodel.dll       SHARED_LIB_DIR\statemodel.dll
-
-// -------- appruntimemodel
-file=ABI_DIR\BUILD_DIR\appruntimemodel.dll  SHARED_LIB_DIR\appruntimemodel.dll
-
 // ----  hswidgetmodel --------------------------------------------
 file=ABI_DIR\BUILD_DIR\hswidgetmodel.dll    SHARED_LIB_DIR\hswidgetmodel.dll
 

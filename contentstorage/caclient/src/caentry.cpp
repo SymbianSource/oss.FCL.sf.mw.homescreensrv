@@ -150,19 +150,20 @@ QString CaEntry::text() const
 }
 
 /*!
- Sets name of the item.
+ Sets localized name of the item.
  \param text new name of the item.
+ \param localized set to true if its localized
 
  \code
  ...
  QString entryText( QString("EntryText") );
- resultEntry->setText( entryText);
+ resultEntry->setText( entryText, true);
  ...
  \endcode
  */
-void CaEntry::setText(const QString &text)
+void CaEntry::setText(const QString &text, bool localized)
 {
-    m_d->setText(text);
+    m_d->setText(text, localized);
 }
 
 /*!
@@ -180,8 +181,9 @@ QString CaEntry::description() const
     return m_d->description();
 }
 
+
 /*!
-Sets description of the item.
+Sets localized description of the item.
 \param new description of the item.
 
 \code
@@ -191,9 +193,10 @@ resultEntry->entryDescription(entryDescription);
 ...
 \endcode
 */
-void CaEntry::setDescription(const QString &description)
+void CaEntry::setDescription(const QString &description,
+        bool localized)
 {
-    m_d->setDescription(description);
+    m_d->setDescription(description, localized);
 }
 
 /*!
@@ -472,6 +475,11 @@ EntryRole CaEntry::role() const
 }
 
 
+bool CaEntry::isLocalized(LocalizationType localized)  const
+{
+    return m_d->isLocalized(localized);  
+}
+
 /*
  Constructor
  \param entryPublic associated public entry
@@ -479,7 +487,8 @@ EntryRole CaEntry::role() const
 CaEntryPrivate::CaEntryPrivate(CaEntry *entryPublic) :
     m_q(entryPublic), mId(0), mText(), mDescription(), mIconDescription(),
     mFlags(RemovableEntryFlag|VisibleEntryFlag),mEntryTypeName(),
-    mAttributes(), mEntryRole(ItemEntryRole)
+    mAttributes(), mEntryRole(ItemEntryRole), 
+    mTextLocalized(false), mDescriptionLocalized(false)
 {
 }
 /*!
@@ -497,6 +506,8 @@ CaEntryPrivate &CaEntryPrivate::operator=(const CaEntryPrivate &entry)
     mEntryTypeName = entry.mEntryTypeName;
     mAttributes = entry.mAttributes;
     mEntryRole = entry.mEntryRole;
+    mTextLocalized = entry.mTextLocalized;
+    mDescriptionLocalized = entry.mDescriptionLocalized;
     return *this;
 }
 
@@ -524,12 +535,13 @@ QString CaEntryPrivate::text() const
 }
 
 /*!
- Sets name of the item.
+ Sets localized name of the item.
  \param text new name of the item.
  */
-void CaEntryPrivate::setText(const QString &text)
+void CaEntryPrivate::setText(const QString &text, bool localized)
 {
     mText = text;
+    mTextLocalized = localized;
 }
 
 /*!
@@ -544,9 +556,11 @@ QString CaEntryPrivate::description() const
 Sets description of the item.
 \param text new name of the item.
 */
-void CaEntryPrivate::setDescription(const QString &description)
+void CaEntryPrivate::setDescription(const QString &description,
+        bool localized)
 {
     mDescription = description;
+    mDescriptionLocalized = localized;
 }
 
 /*!
@@ -662,4 +676,19 @@ void CaEntryPrivate::setRole(const EntryRole &role)
 {
     mEntryRole = role;
 }
+
+bool CaEntryPrivate::isLocalized(LocalizationType localized)  const
+{
+    if(localized == NameLocalized)
+    {
+        return mTextLocalized;
+    }
+    if(localized == DescriptionLocalized)
+    {
+        return mDescriptionLocalized;
+    }
+    return false;
+    
+}
+
 

@@ -93,6 +93,9 @@ void CCaUsifUninstallOperation::DoCancel()
     iUninstaller.CancelOperation();
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (error ignored)
 // ---------------------------------------------------------------------------
 // CCaUsifUninstallOperation::RunError
 // ---------------------------------------------------------------------------
@@ -101,3 +104,7 @@ TInt CCaUsifUninstallOperation::RunError(TInt /* aError */)
     {
     return KErrNone;
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+

@@ -20,6 +20,7 @@
 #include <qtranslator.h>
 #include <calocalizationentry.h>
 #include <QLocale>
+#include <hbtextresolversymbian.h>
 
 //#include "cainternaltypes.h"
 #include "caarraycleanup.inl"
@@ -150,6 +151,7 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
             }
         CleanupStack::PopAndDestroy( localizedName );
         }
+    HbTextResolverSymbian::Init( _L(""), KLocalizationFilepathZ );
    
     CleanupStack::PopAndDestroy( &ids );
     CleanupStack::PopAndDestroy( &entries );

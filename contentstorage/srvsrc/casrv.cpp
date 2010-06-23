@@ -24,6 +24,7 @@
 #include "casrvengutils.h"
 #include "castorageproxy.h"
 #include "casrvmanager.h"
+#include "caprogressnotifier.h"
 
 // ==================== LOCAL FUNCTIONS ====================
 
@@ -124,6 +125,7 @@ CCaSrv::~CCaSrv()
         }
     delete iSrvManager;
     delete iSrvEngUtils;
+    delete iProgressNotifier;
     delete iStorageProxy;
     }
 
@@ -154,7 +156,8 @@ void CCaSrv::ConstructL()
     iSessionCount = 0;
     iStorageProxy = CCaStorageProxy::NewL();
     iSrvEngUtils = CCaSrvEngUtils::NewL();
-    iSrvManager = CCaSrvManager::NewL(*iStorageProxy, iSrvEngUtils);
+    iProgressNotifier = CCaProgressNotifier::NewL( *iStorageProxy );
+    iSrvManager = CCaSrvManager::NewL( *iStorageProxy, iSrvEngUtils );
     TInt errCode = iSrvManager->LoadOperationErrorCodeL();
     if( KSqlErrNotDb <= errCode && errCode <= KSqlErrGeneral )
         {

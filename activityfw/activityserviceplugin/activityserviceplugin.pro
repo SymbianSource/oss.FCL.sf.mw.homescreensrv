@@ -23,7 +23,6 @@ include(activityserviceplugin.pri)
 INCLUDEPATH += ./inc \
 
 HEADERS +=  ./inc/activityserviceplugin.h \
-            ./inc/activitydatastorage.h \
             ./inc/activityclient.h \
             ./inc/activityclient_p.h \
             ./inc/activitymanager.h \
@@ -31,7 +30,6 @@ HEADERS +=  ./inc/activityserviceplugin.h \
             ./inc/applicationlauncher.h \
 
 SOURCES +=  ./src/activityserviceplugin.cpp \
-            ./src/activitydatastorage.cpp \
             ./src/activityclient.cpp \
             ./src/activityclient_p.cpp \
             ./src/activitymanager.cpp \

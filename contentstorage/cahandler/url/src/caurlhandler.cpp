@@ -24,15 +24,27 @@
 
 static const QString caAttrUrl("url");
 
+/*!
+ * Constructor.
+ */
 CaUrlHandler::CaUrlHandler(QObject *parent)
 {
     Q_UNUSED(parent);
 }
 
+/*!
+ * Destructor.
+ */
 CaUrlHandler::~CaUrlHandler()
 {
 }
 
+/*!
+ * Execute a given command.
+ * \param entry a reference to CaEntry instance.
+ * \param command a given command.
+ * \retval an error code.
+ */
 int CaUrlHandler::execute(const CaEntry &entry, const QString &command)
 {
     int err(KErrGeneral);

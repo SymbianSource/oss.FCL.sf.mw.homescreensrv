@@ -25,7 +25,10 @@
 const char ActivityApplicationKeyword [] = ":ApplicationId";
 const char ActivityActivityKeyword [] = ":ActivityName";
 const char ActivityParametersKeyword [] = ":ActivityParams";
+const char ActivityPersistence [] = ":ActivityPersistence";
+const char ActivityVisibility [] = ":ActivityVisibility";
 const char ActivityScreenshotKeyword [] = "screenshot";
+const char ActivityDataKeyword [] = ":ActivityData";
 
 class HsActivityDbClientInterface
 {
@@ -36,14 +39,16 @@ public:
      * @param activity - activity to store
      * @return 0 on succees, error code otherwise
      */
-    virtual int addActivity(const QVariantHash &activity) =0;
+    virtual int addActivity(const QVariantHash &privateData,
+                            const QVariantHash &publicData) =0;
 
     /**
      * Function update exiting activity
      * @param activity - filtering rules
      * @return 0 on succees, error code otherwise
      */
-    virtual int updateActivity(const QVariantHash &activity) =0;
+    virtual int updateActivity(const QVariantHash &privateData,
+                               const QVariantHash &publicData) =0;
 
     /**
      * Function delete activity
@@ -75,6 +80,14 @@ public:
     virtual int applicationActivities(QList<QVariantHash>& result,
                                       const QVariantHash &activity) =0;
 
+    /**
+     * Function returns data for activity
+     * @param result - activity data
+     * @param activity - filtering rules
+     * @return 0 on succees, error code otherwise
+     */
+    virtual int activityData(QVariant &result, const QVariantHash &activity) = 0;
+                                      
     /**
      * Function subscribe to activity
      * @param  activity - filtering rules

@@ -58,7 +58,8 @@ void CaObserver::entryChanged(const CCaInnerEntry &entry,
 {
     qDebug() << "CaClientProxy::entryChanged changeType:" << changeType;
 
-    CaEntry *caEntry = new CaEntry(static_cast<EntryRole>(entry.GetRole()));
+    QSharedPointer<CaEntry> caEntry(
+        new CaEntry(static_cast<EntryRole>(entry.GetRole())));
     ChangeType entryChangeType(AddChangeType);
     CaObjectAdapter::convert(entry, *caEntry);
     CaObjectAdapter::convert(changeType, entryChangeType);

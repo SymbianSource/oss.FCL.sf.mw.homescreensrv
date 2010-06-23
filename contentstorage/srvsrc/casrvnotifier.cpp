@@ -38,6 +38,9 @@ CCaSrvNotifier::~CCaSrvNotifier()
     delete iFilter;
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (only NewLC used in code)
 // -----------------------------------------------------------------------------
 // 
 // -----------------------------------------------------------------------------
@@ -48,6 +51,9 @@ CCaSrvNotifier* CCaSrvNotifier::NewL()
     CleanupStack::Pop();
     return self;
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 // -----------------------------------------------------------------------------
 // 

@@ -1,19 +1,19 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:
-*
-*/
+ * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:
+ *
+ */
 #ifndef C_WIDGETDESCRIPTION_H
 #define C_WIDGETDESCRIPTION_H
 
@@ -49,13 +49,14 @@ public:
 
     /**
      * Static method to compare two CCaWidgetDescription objects
+     * used in Find() method
      * @param aFirst first item to compare
      * @param aSecond second item to compare
-     * @return ETrue if iLibrary value is the same in both objects,
+     * @return ETrue if widget uri value is the same in both objects,
      * otherwise returns EFalse
      */
     static TBool Compare( const CCaWidgetDescription& aFirst,
-            const CCaWidgetDescription& aSecond);
+            const CCaWidgetDescription& aSecond );
 
     /**
      * Method to compare two CCaWidgetDescription objects
@@ -77,6 +78,12 @@ public:
      */
     void SetPackageUidL( const TDesC& aPackageUid );
 
+    /*
+     * PackageUid getter
+     * @return iPackageUid - package UID
+     */
+    TUint GetPackageUidL();
+    
     /*
      * Title setter
      * @param aTitle widget title
@@ -102,107 +109,88 @@ public:
     void SetIconUriL( const TDesC& aIconUri );
 
     /*
+     * Preview image name setter.
+     * @param aPreview preview image name identifier.
+     */
+    void SetPreviewImageNameL( const TDesC& aPreviewName );
+    
+    /*
      * Library setter
      * @param aLibrary widget library
      */
     void SetLibraryL( const TDesC& aLibrary );
 
     /*
-     * Path setter
-     * @param aLibrary widget library
+     * Content storage entry id getter
+     * @return CS entry id
      */
-    void SetPathL( const TDesC& aPath );
-
-    /*
-     * Path getter
-     * @return widget library
-     */
-    TPtrC GetPath( ) const;
-
-    /*
-     * Missing flag setter
-     * @param aMissing flag
-     */
-    void SetMissing( TBool aMissing );
-
-    /*
-     * Visible flag setter
-     * @param aVisible flag
-     */
-    void SetVisible( TBool aVisible );
-
-    /*
-     * Used flag setter
-     * @param aUsed flag
-     */
-    void SetUsed( TBool aUsed );
-
-    /*
-     * Content arsenal entry id getter
-     * @return CA entry id
-     */
-    TInt GetEntryId( ) const;
+    TInt GetEntryId() const;
 
     /*
      * MMC id getter
      * @return CA entry id
      */
-    TPtrC GetMmcId( ) const;
-    
+    TPtrC GetMmcId() const;
+
     /*
      * Library getter
      * @return widget library
      */
-    TPtrC GetLibrary( ) const;
+    TPtrC GetLibrary() const;
 
     /*
      * Description getter
      * @return widget Description
      */
-    TPtrC GetDescription( ) const;
+    TPtrC GetDescription() const;
 
     /*
      * Uri getter
      * @return widget Uri
      */
-    TPtrC GetUri( ) const;
+    TPtrC GetUri() const;
 
     /*
      * IconUri getter
      * @return widget IconUri
      */
-    TPtrC GetIconUri( ) const;
+    TPtrC GetIconUri() const;
 
     /*
-     * Title getter
-     * @return widget IconUri
+     * Preview image name getter
+     * @return widget preview image name
      */
-    TPtrC GetTitle( ) const;
+    TPtrC GetPreviewImageName( ) const;
+    
+    /*
+     * Title getter
+     * @return widget title
+     */
+    TPtrC GetTitle() const;
 
     /*
      * Missing flag
      * @return ETrue if flag missing is set
      */
-    TBool IsMissing( ) const;
+    TBool IsMissing() const;
 
     /*
      * Used flag
      * @return ETrue if flag used is set
      */
-    TBool IsUsed( ) const;
-    
+    TBool IsUsed() const;
 
     /*
      * Used flag
      * @return ETrue if flag visible is set
      */
-    TBool IsVisible( ) const;
+    TBool IsVisible() const;
 
     /*
      * Entry getter
      * @return entry representing widget
      */
-    CCaInnerEntry* GetEntryLC( ) const;
+    CCaInnerEntry* GetEntryLC() const;
 
     /*
      * Modification time setter
@@ -224,53 +212,54 @@ public:
      * Set service fw xml filename
      * @param aServiceXml Service xml filename
      */
-    void SetServiceXmlL(const TDesC& aServiceXml);
+    void SetServiceXmlL( const TDesC& aServiceXml );
     /*
      * Get service fw xml filename
      * @return Service xml filename
      */
     TPtrC GetServiceXml() const;
-    
+
     /*
-    /*
-    * Localizes title and description, fill string id fields
-    */
+     /*
+     * Localizes title and description, fill string id fields
+     */
     void LocalizeTextsL();
-    
+
     /*
      * StringIdDescription time getter
      * @return StringIdDescription
      */
     TPtrC GetStringIdDescription() const;
-    
+
     /*
      * StringIdTitle time getter
      * @return widget StringIdTitle
      */
     TPtrC GetStringIdTitle() const;
-    
-     /*
+
+    /*
      * Set manifest file path name.
      * @param aServiceXml Manifest file path name.
      */
-    void SetManifestFilePathNameL(const TDesC& aManifestFilePathName);
-    
+    void SetManifestFilePathNameL( const TDesC& aManifestFilePathName );
+
     /*
      * Get manifest file path name.
      * @return Manifest file path name.
      */
     TPtrC GetManifestFilePathName() const;
 
+    /*
+     * Set logical string for description.
+     * @param aStringIdDescription logical string for description.
+     */
     void SetStringIdDescriptionL( const TDesC& aStringIdDescription );
 
-    void SetStringidTitleL( const TDesC& aStringIdTitle );
-
-private:
     /*
-     * Library name getter
-     * @return libraru name
+     * Set logical string for title.
+     * @param aStringIdTitle logical string for title.
      */
-    TPtrC GetLibraryName( ) const;
+    void SetStringidTitleL( const TDesC& aStringIdTitle );
 
     /*
      * Flag setter
@@ -279,7 +268,24 @@ private:
      */
     void SetFlag( TInt aFlag, TBool aValue );
 
-private:
+    /*
+     * Valid setter
+     * @param aVal value
+     */ 
+    void SetValid(TBool aVal);
+    
+    /*
+     * Valid getter
+     * @return valid value
+     */ 
+    TBool CCaWidgetDescription::IsValid();
+
+    /*
+     * Library name getter
+     * @return libraru name
+     */
+    TPtrC GetLibraryName() const;
+
 
     /**
      * C++ default constructor.
@@ -289,17 +295,20 @@ private:
     /**
      * By default Symbian 2nd phase constructor is private.
      */
-    void ConstructL( );
+    void ConstructL();
     void ConstructL( CCaInnerEntry* aEntry );
 
-
-private:
     // Data
 
     /*
      * Content Storage entry id
      */
     TInt iEntryId;
+    
+    /*
+     * Marks vidget as valid, used to remove widgets
+     */
+    TBool iValid;
 
     /*
      * Package UID
@@ -330,12 +339,11 @@ private:
      * Widget icon uri. Own
      */
     RBuf iIconUri;
-
+    
     /*
-     * Widget library. Own
+     * Preview name. Own
      */
-    RBuf iPath;
-
+    RBuf iPreviewImageName;
     /*
      * Widget library. Own
      */

@@ -973,7 +973,8 @@ CaServicePrivate::~CaServicePrivate()
  \param entryIdList list of entry ids
  \retval list of entries (pointers)
  */
-QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(const QList<int> &entryIdList) const
+QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(
+    const QList<int> &entryIdList) const
 {
     qDebug() << "CaServicePrivate::getEntries"
              << "entryIdList:" << entryIdList;
@@ -1338,6 +1339,10 @@ bool CaServicePrivate::executeCommand(const CaEntry &entry,
 
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::executeCommand");
 
+    if (entry.flags() & UninstallEntryFlag) {
+        return false;
+    }    
+    
     if (command == caCmdOpen) {
         touch(entry);
     }

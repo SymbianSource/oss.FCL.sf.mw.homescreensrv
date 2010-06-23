@@ -25,7 +25,7 @@ symbian {
     dll.sources = tstaskmonitorclient.dll
     dll.path = $$SHARED_LIB_DIR
     DEPLOYMENT += dll
-    LIBS += -ltsutils
+    LIBS += -ltsutils -lws32 -lapgrfx -lcone
 
     BLD_INF_RULES.prj_exports +=    "s60\inc\tstaskmonitorclient.h" \
                                     "s60\inc\tstaskmonitorobserver.h" \

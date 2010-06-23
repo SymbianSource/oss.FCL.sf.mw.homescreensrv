@@ -18,7 +18,6 @@
 //INCLUDES:
 
 #include "tsfswdatalist.h"
-#include "tsfswengine.h"
 #include "tsentrykeygenerator.h"
 #include <mmf/common/mmfcontrollerpluginresolver.h> // for CleanupResetAndDestroyPushL
 #include <apgwgnam.h>
@@ -27,7 +26,7 @@
 #include <apgicnfl.h> // fbsbitmap
 #include <AknIconSrvClient.h> 
 #include <fbs.h>
-#include <APGWGNAM.H>
+#include <apgwgnam.h>
 
 
 // size for the created app icons
@@ -37,15 +36,19 @@ const TInt KAppIconHeight = 128;
 //uids to be hidden
 const TUid KHsApplicationUid = { 0x20022F35 };
 
+const TInt KMaxLookupSize(75);
+
 // ================= MEMBER FUNCTIONS =======================
 
 // --------------------------------------------------------------------------
 // CTsFswDataList::NewL
 // --------------------------------------------------------------------------
 //
-CTsFswDataList* CTsFswDataList::NewL(MHsDataObserver &observer)
+CTsFswDataList* CTsFswDataList::NewL(MTsResourceManager& resources,
+                                     MTsWindowGroupsMonitor &monitor, 
+                                     MHsDataObserver& observer)
 {
-    CTsFswDataList* self = new (ELeave) CTsFswDataList(observer);
+    CTsFswDataList* self = new (ELeave) CTsFswDataList(resources, monitor, observer);
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(self);
@@ -56,7 +59,12 @@ CTsFswDataList* CTsFswDataList::NewL(MHsDataObserver &observer)
 // CTsFswDataList::CTsFswDataList
 // --------------------------------------------------------------------------
 //
-CTsFswDataList::CTsFswDataList(MHsDataObserver& observer) :
+CTsFswDataList::CTsFswDataList(MTsResourceManager& resources,
+                               MTsWindowGroupsMonitor &monitor, 
+                               MHsDataObserver& observer) 
+:
+    CTsWindowGroupsObserver(monitor),
+    mResources(resources),
     mObserver(observer)
 {
 }
@@ -68,8 +76,6 @@ CTsFswDataList::CTsFswDataList(MHsDataObserver& observer) :
 CTsFswDataList::~CTsFswDataList()
 {
     mData.ResetAndDestroy();
-    mAppArcSession.Close();
-    mWsSession.Close();
     mHiddenUids.Close();
     mAllowedUids.Close();
     RFbsSession::Disconnect();
@@ -82,8 +88,7 @@ CTsFswDataList::~CTsFswDataList()
 //
 void CTsFswDataList::ConstructL()
 {
-    User::LeaveIfError(mWsSession.Connect());
-    User::LeaveIfError(mAppArcSession.Connect());
+    BaseConstructL();
     mHiddenUids.AppendL(KHsApplicationUid);
     User::LeaveIfError(RFbsSession::Connect());
     RAknIconSrvClient::Connect();
@@ -102,34 +107,27 @@ const RTsFswArray& CTsFswDataList::FswDataL()
 // CTsFswDataList::CollectTasksL
 // --------------------------------------------------------------------------
 //
-TBool CTsFswDataList::CollectTasksL()
+void CTsFswDataList::HandleWindowGroupChanged(MTsResourceManager &, 
+                                              const TArray<RWsSession::TWindowGroupChainInfo> &wgList)
 {
-    TBool changed = EFalse;
-    RTsFswArray newAppsList;
-    CleanupResetAndDestroyPushL(newAppsList);
-    CollectAppsL(newAppsList);
-    changed |= FitDataToListL(newAppsList);
-    CleanupStack::PopAndDestroy(&newAppsList);
-    return changed;
+    TRAP_IGNORE(RTsFswArray newAppsList;
+                CleanupResetAndDestroyPushL(newAppsList);
+                CollectAppsL(newAppsList, wgList);
+                FitDataToList(newAppsList);
+                CleanupStack::PopAndDestroy(&newAppsList));
+    
 }
 
 // --------------------------------------------------------------------------
 // CTsFswDataList::
 // --------------------------------------------------------------------------
 //
-void CTsFswDataList::CollectAppsL(RTsFswArray& appsList)
+void CTsFswDataList::CollectAppsL(RTsFswArray& appsList, 
+                                  const TArray<RWsSession::TWindowGroupChainInfo> &wgList)
 {
-    // gets allowed uids - running apps without hidden uids, null uids, filtered uid
-    GetAllowedUidsL();
-
-    // get all window groups
-    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
-    CleanupClosePushL(allWgIds);
-    User::LeaveIfError(mWsSession.WindowGroupList(0, &allWgIds));
-
-    TInt count = allWgIds.Count();
-    for (TInt i = 0; i < count; ++i) {
-        TTsEntryKey key = TsEntryKeyGeneraror::GenerateL(allWgIds[i].iId, allWgIds.Array());
+    TInt offset(KErrNotFound);
+    for (TInt i = 0; i < wgList.Count(); ++i) {
+        TTsEntryKey key = TsEntryKeyGeneraror::GenerateL(wgList[i].iId, wgList);
         //skip this entry if it is already on list
         if (FindEntry(appsList, key) >= 0) {
             continue;
@@ -137,16 +135,22 @@ void CTsFswDataList::CollectAppsL(RTsFswArray& appsList)
 
         // get window group name
         TInt wgId = key.mParentId;
-        CApaWindowGroupName* windowName = CApaWindowGroupName::NewLC(mWsSession, wgId);
+        CApaWindowGroupName* windowName = CApaWindowGroupName::NewLC(mResources.WsSession(), wgId);
         TUid appUid = windowName->AppUid();
-
-        // add item to task list if uid is allowed
-        if (mAllowedUids.Find(appUid) >= 0) {
+        
+        //Check hidden applications
+        if (KErrNotFound != (offset = mHiddenUids.Find(appUid))) {
+            UpdateLookupTableL(mHiddenUids, offset);
+        } else if (KErrNotFound != (offset = mAllowedUids.Find(appUid))) {
+            UpdateLookupTableL(mAllowedUids, offset);
+            AddEntryL(key, appUid, windowName, appsList);
+        } else if(VerifyApplicationL(appUid)) {
             AddEntryL(key, appUid, windowName, appsList);
         }
         CleanupStack::PopAndDestroy(windowName);
     }
-    CleanupStack::PopAndDestroy(&allWgIds);
+    CompressLookupTable(mHiddenUids);
+    CompressLookupTable(mAllowedUids);
 }
 
 // --------------------------------------------------------------------------
@@ -208,7 +212,7 @@ HBufC* CTsFswDataList::FindAppNameLC(CApaWindowGroupName* windowName, const TUid
 {
     //Retrieve the app name
     TApaAppInfo info;
-    mAppArcSession.GetAppInfo(info, appUid);
+    mResources.ApaSession().GetAppInfo(info, appUid);
     TPtrC caption = info.iShortCaption;
 
     HBufC* tempName = 0;
@@ -220,7 +224,7 @@ HBufC* CTsFswDataList::FindAppNameLC(CApaWindowGroupName* windowName, const TUid
         }
         else {
             TThreadId threadId;
-            TInt err = mWsSession.GetWindowGroupClientThreadId(wgId, threadId);
+            TInt err = mResources.WsSession().GetWindowGroupClientThreadId(wgId, threadId);
             if (err == KErrNone) {
                 RThread thread;
                 CleanupClosePushL(thread);
@@ -245,7 +249,7 @@ HBufC* CTsFswDataList::FindAppNameLC(CApaWindowGroupName* windowName, const TUid
 // CTsFswDataList::FitDataToListL
 // --------------------------------------------------------------------------
 //
-TBool CTsFswDataList::FitDataToListL(RTsFswArray& listToFit)
+void CTsFswDataList::FitDataToList(RTsFswArray& listToFit)
 {
     TBool changed = EFalse;
     TInt listCount = listToFit.Count();
@@ -272,9 +276,10 @@ TBool CTsFswDataList::FitDataToListL(RTsFswArray& listToFit)
     }
     //establish order
     TBool orderChanged = EstablishOrder(allKeys);
-    changed = changed || orderChanged;
+    if (changed || orderChanged) {
+        mObserver.DataChanged();
+    }
     allKeys.Close();
-    return changed;
 }
 
 // --------------------------------------------------------------------------
@@ -302,10 +307,10 @@ void CTsFswDataList::GetAppIconL(const TUid& aAppUid, CFbsBitmap*& bitmapArg, CF
 
     TSize size(KAppIconWidth, KAppIconHeight);
     CApaMaskedBitmap* apaMaskedBitmap = CApaMaskedBitmap::NewLC();
-    TInt err = mAppArcSession.GetAppIcon(aAppUid, size, *apaMaskedBitmap);
+    TInt err = mResources.ApaSession().GetAppIcon(aAppUid, size, *apaMaskedBitmap);
     TInt iconsCount(0);
     if (err == KErrNone) {
-        err = mAppArcSession.NumberOfOwnDefinedIcons(aAppUid, iconsCount);
+        err = mResources.ApaSession().NumberOfOwnDefinedIcons(aAppUid, iconsCount);
     }
 
     if ((err == KErrNone) && (iconsCount > 0)) {
@@ -318,7 +323,7 @@ void CTsFswDataList::GetAppIconL(const TUid& aAppUid, CFbsBitmap*& bitmapArg, CF
     else {
         CleanupStack::PopAndDestroy(apaMaskedBitmap);
         HBufC* fileNameFromApparc = NULL;
-        TInt err = mAppArcSession.GetAppIcon(aAppUid, fileNameFromApparc);
+        TInt err = mResources.ApaSession().GetAppIcon(aAppUid, fileNameFromApparc);
         if (err == KErrNone) {
             CleanupStack::PushL(fileNameFromApparc);
             CFbsBitmap *bitamp(0);
@@ -378,44 +383,23 @@ TInt CTsFswDataList::FindEntry(const RTsFswArray& list, const TTsEntryKey& key) 
 // CTsFswDataList::SetScreenshotL
 // --------------------------------------------------------------------------
 //
-TBool CTsFswDataList::SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority, TInt wgId)
+void CTsFswDataList::SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority, TInt wgId)
 {
-    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
-    CleanupClosePushL(allWgIds);
-    User::LeaveIfError(mWsSession.WindowGroupList(0, &allWgIds));
-    TTsEntryKey key = TsEntryKeyGeneraror::GenerateL(wgId, allWgIds.Array());
-    TInt pos = FindEntry(mData, key);
-    TBool updated(EFalse);
-    if (pos >= 0) {
-        updated = mData[pos]->SetScreenshotL(bitmap, priority);
-    }
-    else {
-        User::Leave(KErrNotFound);
-    }
-    CleanupStack::PopAndDestroy(&allWgIds);
-    return updated;
+    TInt pos = FindEntry(mData, GenerateKeyL(wgId));
+    User::LeaveIfError(pos);
+    mData[pos]->SetScreenshotL(bitmap, priority);
 }
 
 // --------------------------------------------------------------------------
 // CTsFswDataList::RemoveScreenshotL
 // --------------------------------------------------------------------------
 //
-TBool CTsFswDataList::RemoveScreenshotL(TInt wgId)
+void CTsFswDataList::RemoveScreenshotL(TInt wgId)
 {
-    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
-    CleanupClosePushL(allWgIds);
-    User::LeaveIfError(mWsSession.WindowGroupList(0, &allWgIds));
-    TTsEntryKey key = TsEntryKeyGeneraror::GenerateL(wgId, allWgIds.Array());
-    TInt pos = FindEntry(mData, key);
-    TBool updated(EFalse);
-    if (pos >= 0) {
-        updated = mData[pos]->RemoveScreenshot();
-    }
-    else {
-        User::Leave(KErrNotFound);
-    }
-    CleanupStack::PopAndDestroy(&allWgIds);
-    return updated;
+    
+    TInt pos = FindEntry(mData, GenerateKeyL(wgId));
+    User::LeaveIfError(pos);
+    mData[pos]->RemoveScreenshotL();
 }
 
 // --------------------------------------------------------------------------
@@ -445,25 +429,65 @@ TBool CTsFswDataList::EstablishOrder(const RArray<TTsEntryKey>& keyList)
 // CTsFswDataList::GetAllowedUidsL
 // --------------------------------------------------------------------------
 //
-void CTsFswDataList::GetAllowedUidsL()
+TBool CTsFswDataList::VerifyApplicationL(TUid uid)
 {
-    mAllowedUids.Close();
-    TApaAppInfo* appInfo = new (ELeave) TApaAppInfo();
-    CleanupStack::PushL(appInfo);
+    TBool retVal(EFalse);
+    TApaAppInfo appInfo;
     TApaAppCapabilityBuf appCap;
 
-    User::LeaveIfError(mAppArcSession.GetAllApps(0));
+    User::LeaveIfError(mResources.ApaSession().GetAllApps(0));
     // for every application get uid, hidden and missing attribute
     // and add to aArray.
-    while (KErrNone == mAppArcSession.GetNextApp(*appInfo)) {
-        TUid uid = appInfo->iUid;
-        User::LeaveIfError(mAppArcSession.GetAppCapability(appCap, uid));
-        // do not add hidden app and with null uid.
-        if (!appCap().iAppIsHidden && !IsHiddenUid(uid) && uid.iUid) {
-            mAllowedUids.AppendL(uid);
+    while (KErrNone == mResources.ApaSession().GetNextApp(appInfo)) {
+        User::LeaveIfError(mResources.ApaSession().GetAppCapability(appCap, appInfo.iUid));
+        if(!appCap().iAppIsHidden) {
+            if (uid == appInfo.iUid) {
+                retVal = ETrue;
+                mAllowedUids.InsertL(appInfo.iUid, mAllowedUids.Count());
+            }
+        } else if(KErrNotFound == mHiddenUids.Find(appInfo.iUid)) {
+            mHiddenUids.InsertL(appInfo.iUid, mHiddenUids.Count());
         }
     }
-    CleanupStack::PopAndDestroy(appInfo);
+    if (EFalse == retVal && KErrNotFound == mHiddenUids.Find(uid)) {
+        mHiddenUids.InsertL(uid, mHiddenUids.Count());
+    }
+    return retVal;
 }
 
+// --------------------------------------------------------------------------
+// CTsFswDataList::GenerateKeyL(TInt)
+// --------------------------------------------------------------------------
+//
+TTsEntryKey CTsFswDataList::GenerateKeyL(TInt wgId)
+{
+    RArray<RWsSession::TWindowGroupChainInfo> allWgIds;
+   CleanupClosePushL(allWgIds);
+   User::LeaveIfError(mResources.WsSession().WindowGroupList(0, &allWgIds));
+   const TTsEntryKey key = TsEntryKeyGeneraror::GenerateL(wgId, allWgIds.Array());
+   CleanupStack::PopAndDestroy(&allWgIds);
+   return key;
+}
+
+// --------------------------------------------------------------------------
+// CTsFswDataList::CompressLookupTable(RArray<TUid> &)
+// --------------------------------------------------------------------------
+//
+void CTsFswDataList::CompressLookupTable(RArray<TUid> &array)
+{
+    while(KMaxLookupSize < array.Count()) {
+        array.Remove(0);
+    }
+}
+
+// --------------------------------------------------------------------------
+// CTsFswDataList::UpdateLookupTableL(RArray<TUid> &, TInt)
+// --------------------------------------------------------------------------
+//
+void CTsFswDataList::UpdateLookupTableL(RArray<TUid> &array, TInt offset)
+{
+    const TUid uid(array[offset]);
+    array.Remove(offset);
+    array.InsertL(uid, array.Count());
+}
 // end of file

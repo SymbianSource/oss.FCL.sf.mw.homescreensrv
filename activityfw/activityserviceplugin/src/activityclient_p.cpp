@@ -16,7 +16,6 @@
 */
 #include "activityclient_p.h"
 #include "activityclient.h"
-#include "activitydatastorage.h"
 #include <hsactivitydbclient.h>
 
 #include <QCoreApplication>
@@ -28,7 +27,6 @@
 
 ActivityClientPrivate::ActivityClientPrivate(ActivityClient *q) : QObject(q), mIsconnected(false)
 {
-    mDataStorage = new ActivityDataStorage();
     mServerClient = new HsActivityDbClient();
     mIsconnected = ( KErrNone == mServerClient->connect());
     if( mIsconnected) {
@@ -40,25 +38,20 @@ ActivityClientPrivate::ActivityClientPrivate(ActivityClient *q) : QObject(q), mI
 ActivityClientPrivate::~ActivityClientPrivate()
 {
     delete mServerClient;
-    delete mDataStorage;
 }
 
 bool ActivityClientPrivate::addActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters)
 {
     bool result(false);
     if (mIsconnected) {
-        result = mDataStorage->addActivity(activityId, data);
-        if ( result ) {
-            QVariantHash activity(parameters);
-            RProcess process;
-            registerThumbnail(activityId, activity);
-            activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-            activity.insert(ActivityActivityKeyword, activityId);
-            int error = mServerClient->addActivity(activity);
-            result = error == KErrNone ? true : false;
-        }
+        QVariantHash privateData;
+        privateData.insert(ActivityDataKeyword, data);
+        QVariantHash publicData(parameters);
+        RProcess process;
+        publicData.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+        publicData.insert(ActivityActivityKeyword, activityId);
+        result = (KErrNone == mServerClient->addActivity(privateData, publicData));
     }
-    // @todo make those operations atomic
     return result;
 }
 
@@ -66,20 +59,12 @@ bool ActivityClientPrivate::removeActivity(const QString &activityId)
 {
     bool result(false);
     if (mIsconnected) {
-        result = mDataStorage->removeActivity(activityId);
-        if ( result ) {            
-            QVariantHash activity;
-            RProcess process;
-            activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-            activity.insert(ActivityActivityKeyword, activityId);
-            int error = mServerClient->removeActivity(activity);
-            result = error == KErrNone ? true : false;
-            if (result) {
-                result = QFile::remove(thumbnailName(activityId));
-            }
-        }
+        QVariantHash activity;
+        RProcess process;
+        activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+        activity.insert(ActivityActivityKeyword, activityId);
+        result = (KErrNone == mServerClient->removeActivity(activity));
     }
-    // @todo make those operations atomic
     return result;
 }
 
@@ -87,18 +72,14 @@ bool ActivityClientPrivate::updateActivity(const QString &activityId, const QVar
 {
     bool result(false);
     if (mIsconnected) {
-        result = mDataStorage->updateActivity(activityId, data);
-        if ( result ) {
-            QVariantHash activity(parameters);
-            RProcess process;
-            registerThumbnail(activityId, activity);
-            activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-            activity.insert(ActivityActivityKeyword, activityId);
-            int error = mServerClient->updateActivity(activity);
-            result = error == KErrNone ? true : false;
-        }
+        QVariantHash privateData;
+        privateData.insert(ActivityDataKeyword, data);
+        QVariantHash publicData(parameters);
+        RProcess process;
+        publicData.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+        publicData.insert(ActivityActivityKeyword, activityId);
+        result = (KErrNone == mServerClient->updateActivity(privateData, publicData));
     }
-    // @todo make those operations atomic
     return result;
 }
 
@@ -116,7 +97,15 @@ QList<QVariantHash> ActivityClientPrivate::activities() const
 
 QVariant ActivityClientPrivate::activityData(const QString &activityId) const
 {
-    return mIsconnected ? mDataStorage->activityData(activityId) : QVariant();
+    QVariant data;
+    if (mIsconnected) {
+        QVariantHash activity;
+        RProcess process;
+        activity.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
+        activity.insert(ActivityActivityKeyword, activityId);
+        mServerClient->activityData(data, activity);
+    }
+    return data;
 }
 
 QVariantHash ActivityClientPrivate::parseCommandLine(const QStringList &commandLineParams) const
@@ -138,26 +127,3 @@ QVariantHash ActivityClientPrivate::parseCommandLine(const QStringList &commandL
     }
     return QVariantHash();
 }
-
-void ActivityClientPrivate::registerThumbnail(const QString &name, QVariantHash &activity)
-{
-    QVariantHash::const_iterator findIterator(activity.constFind(ActivityScreenshotKeyword));
-    if (activity.constEnd() != findIterator   &&
-        findIterator.value().canConvert<QPixmap>()) {
-        const QString thumbnailManagerName = thumbnailName(name);
-        if (findIterator.value().value<QPixmap>().save(thumbnailManagerName)) {
-            activity.insert(ActivityScreenshotKeyword, thumbnailManagerName);
-        } else {
-            activity.remove(ActivityScreenshotKeyword);
-        }
-    }
-}
-
-QString ActivityClientPrivate::thumbnailName(const QString &activityId) const
-{
-    return QDir::toNativeSeparators(qApp->applicationDirPath() + 
-                                    "/" + 
-                                    QString::number(qHash(activityId), 16) + 
-                                    ".png");
-}
-

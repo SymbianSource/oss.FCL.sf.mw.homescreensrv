@@ -74,17 +74,9 @@ public:
     void asyncRequestCompleated(int result,
                                 int requestType);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::saveActivity(const QVariantHash&)
-     */
-    int addActivity(const QVariantHash &);
+    int addActivity(const QVariantHash &, const QVariantHash &);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash&)
-     */
-    int updateActivity(const QVariantHash &);
+    int updateActivity(const QVariantHash &, const QVariantHash &);
 
     /**
      * Interface implementation.
@@ -111,6 +103,12 @@ public:
     int applicationActivities(QList<QVariantHash> &,
                               const QVariantHash &);
 
+    /**
+     * Interface implementation.
+     * @see int HsActivityDbClientInterface::activityData(QVariant &, const QVariantHash &)
+     */
+    int activityData(QVariant &result, const QVariantHash &activity);
+                              
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::waitActivity(const QVariantHash &)

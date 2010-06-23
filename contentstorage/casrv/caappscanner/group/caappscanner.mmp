@@ -36,7 +36,6 @@ USERINCLUDE     ../../casrvmgr/inc
 USERINCLUDE     ../../../inc
 USERINCLUDE     ../../../cautils/inc
 USERINCLUDE     ../../../srvinc
-USERINCLUDE     ../../../castorage/inc
 
 
 MW_LAYER_SYSTEMINCLUDE

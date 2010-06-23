@@ -161,7 +161,6 @@ void CCaUsifScanner::CreateCaEntryFromEntryL(
     if( aEntry->Name().Compare( KNullDesC ) )
         {
         aCaEntry->SetTextL( aEntry->Name() );
-        aCaEntry->AddAttributeL( KCaAttrLongName, aEntry->Name() );
         }
     if( !aEntry->IsHidden() )
         {

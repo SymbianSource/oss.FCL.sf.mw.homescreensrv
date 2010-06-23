@@ -14,8 +14,8 @@ INSERT INTO COLLECTION (COLLECTION_NAME, COL_APP_GROUP_NAME, ICON_FILENAME, FLAG
   VALUES ("url", 'Google', 'c:\data\Images\kqticaicons\google.png', "http://www.google.com/", 'Test Apps', '4' );
 
 -- insert example widgets
-  INSERT INTO WIDGET_TO_COLLECTION (ITEM_TYPE, ITEM_NAME, ICON_FILENAME, ICON_SKIN_ID, PACKAGE_UID, LIBRARY, LONG_NAME, URI, COLLECTION_NAME) 
-  VALUES ("widget", 'Clock', 'Z:\private\20022F35\import\widgetregistry\20022F6C\tclock.png', '4' , '20022f6c', 'Z:\private\20022F35\import\widgetregistry\20022F6C\hsclockwidgetplugin', 'Clock', 'hsclockwidgetplugin', 'Test Apps' ); 
+  INSERT INTO WIDGET_TO_COLLECTION (ITEM_TYPE, ITEM_NAME, ICON_FILENAME, ICON_SKIN_ID, PACKAGE_UID, LIBRARY, URI, COLLECTION_NAME) 
+  VALUES ("widget", 'Clock', 'Z:\private\20022F35\import\widgetregistry\20022F6C\tclock.png', '4' , '20022f6c', 'Z:\private\20022F35\import\widgetregistry\20022F6C\hsclockwidgetplugin', 'hsclockwidgetplugin', 'Test Apps' ); 
 
 
 SELECT "castoragedb_variant_test - END" AS " ";

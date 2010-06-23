@@ -26,6 +26,10 @@ const TImplementationProxy ImplementationTable[] =
     IMPLEMENTATION_PROXY_ENTRY(0x20026FAF, CCaAppScannerHandler::NewL)
     };
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (proxy for instantiation)
+
 // Function used to return an instance of the proxy table.
 EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
         TInt& aTableCount )
@@ -34,3 +38,9 @@ EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
             / sizeof(TImplementationProxy);
     return ImplementationTable;
     }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+

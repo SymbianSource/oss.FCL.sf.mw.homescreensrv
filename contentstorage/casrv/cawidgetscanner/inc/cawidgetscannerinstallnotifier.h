@@ -1,20 +1,19 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  Sis package installation event listener
+ * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
-*/
-
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:  Sis package installation event listener
+ *
+ */
 
 #ifndef C_CAWIDGETSCANNERINSTALLNOTIFIER_H
 #define C_CAWIDGETSCANNERINSTALLNOTIFIER_H
@@ -61,12 +60,12 @@ public:
      * @param aKey Key for central repository.
      */
     static CCaWidgetScannerInstallNotifier* NewL(
-        CCaWidgetScannerPlugin* aCallback, TUid aCategory, TUint aKey );
+            CCaWidgetScannerPlugin* aCallback, TUid aCategory, TUint aKey );
 
     /**
      * Destructor.
      */
-    virtual ~CCaWidgetScannerInstallNotifier ();
+    virtual ~CCaWidgetScannerInstallNotifier();
 
 private:
     /**
@@ -76,7 +75,7 @@ private:
      * @param aKey Key for central repository.
      */
     CCaWidgetScannerInstallNotifier( CCaWidgetScannerPlugin* aCallback,
-        TUid aCategory, TUint aKey );
+            TUid aCategory, TUint aKey );
 
     /**
      * Symbian 2nd phase constructor.

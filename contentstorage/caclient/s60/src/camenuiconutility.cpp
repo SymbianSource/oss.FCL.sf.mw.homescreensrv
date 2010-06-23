@@ -55,20 +55,7 @@ LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry)
     if (icon.isNull() || !(icon.size().isValid())) {
         QString fileName(entry.iconDescription().filename());
         if (!fileName.isEmpty()) {
-        
-            // TODO:
-            // work-around for HbIcon::size() method locking files if returns 
-            // default size, error id: ou1cimx1#279208 Case: mcl06HsDo07 - 
-            // "Cannot delete file" when trying to uninstall sisx file
-            
-            if (entry.entryTypeName() == XQConversions::s60DescToQString(
-                    KCaTypeWidget)) {
-                icon = QIcon(fileName);
-                qWarning("Widget icon created by QIcon, "
-                        "as work-around for HbIcon::size");
-            } else {
-                icon = HbIcon(fileName);
-            }
+            icon = HbIcon(fileName);
         }
     }
     return icon;

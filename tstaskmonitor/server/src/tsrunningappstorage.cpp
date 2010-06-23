@@ -15,8 +15,7 @@
 *
 */
 #include "tsrunningappstorage.h"
-#include "tsfswengine.h"
-#include "tsfswmonitor.h"
+#include "tsfswdatalist.h"
 #include "tsfswentry.h"
 #include <s32strm.h>
 #include <s32mem.h>
@@ -37,18 +36,19 @@ CRunningAppStorage::~CRunningAppStorage()
 {
     mData.Close();
     delete mEngine;
-    delete mMonitor;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-CRunningAppStorage* CRunningAppStorage::NewL(MHsDataObserver& observer)
+CRunningAppStorage* CRunningAppStorage::NewL(MHsDataObserver& observer,
+                                             MTsResourceManager& resources,
+                                             MTsWindowGroupsMonitor &wsMonitor)
 {
     CRunningAppStorage * self = new (ELeave)CRunningAppStorage(observer);
     CleanupStack::PushL(self);
-    self->ConstructL();
+    self->ConstructL(resources, wsMonitor);
     CleanupStack::Pop(self);
     return self;
 }
@@ -57,10 +57,15 @@ CRunningAppStorage* CRunningAppStorage::NewL(MHsDataObserver& observer)
 //
 // -----------------------------------------------------------------------------
 //
-void CRunningAppStorage::ConstructL()
+void CRunningAppStorage::ConstructL(MTsResourceManager& resources, 
+                                    MTsWindowGroupsMonitor &wsMonitor)
 {
-    mEngine = CTsFswEngine::NewL(*this) ;
-    mMonitor = CTsFswMonitor::NewL(*mEngine);
+    mEngine = CTsFswDataList::NewL(resources, wsMonitor, *this) ;
+    RArray<RWsSession::TWindowGroupChainInfo> wgList;
+    CleanupClosePushL(wgList);
+    User::LeaveIfError(resources.WsSession().WindowGroupList(&wgList));
+    mEngine->HandleWindowGroupChanged(resources, wgList.Array());
+    CleanupStack::PopAndDestroy(&wgList);
     DataChangedL();
 }
 

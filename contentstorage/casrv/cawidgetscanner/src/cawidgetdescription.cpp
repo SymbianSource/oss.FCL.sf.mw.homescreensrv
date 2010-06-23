@@ -17,13 +17,12 @@
 
 
 // INCLUDE FILES
+#include <hbtextresolversymbian.h>
 
 #include "cadef.h"
 #include "cawidgetdescription.h"
 #include "cainnerentry.h"
 #include "widgetscannerutils.h"
-#include "hbtextresolversymbian.h"
-
 #include "cawidgetscannerdef.h"
 // ============================ MEMBER FUNCTIONS ===============================
 
@@ -34,7 +33,7 @@
 // -----------------------------------------------------------------------------
 //
 CCaWidgetDescription::CCaWidgetDescription() :
-    iEntryId(KNoId), iMmcId()
+    iEntryId( KNoId ), iValid ( EFalse )
     {
     }
 
@@ -65,13 +64,17 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
         User::LeaveIfError( uidLex.Val( iPackageUid, EHex ));
         }
     iTitle.CreateL( aEntry->GetText() );
+    
     iIconUri.CreateL( aEntry->Icon()->FileName() );
+    
+    TPtrC attribute;
+    aEntry->FindAttribute( KPreviewImageAttrName, attribute );
+    iPreviewImageName.CreateL( attribute.Length() );
+    iPreviewImageName = attribute;
+    
     //library
     iLibrary.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetLibrary, iLibrary );
-    //path
-    iPath.CreateL( KCaMaxAttrValueLen );
-    aEntry->FindAttribute( KAttrWidgetPath, iPath );
     //uri
     iUri.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetUri, iUri );
@@ -131,18 +134,20 @@ CCaWidgetDescription* CCaWidgetDescription::NewLC( CCaInnerEntry* aEntry )
 //
 CCaWidgetDescription::~CCaWidgetDescription()
     {
+
+    iModificationTime.Close();
+    iServiceXml.Close();
+    iMmcId.Close();
+    iUri.Close();
+    iLibrary.Close();
+    iPreviewImageName.Close();
+    iIconUri.Close();
     iTitle.Close();
     iDescription.Close();
-    iUri.Close();
-    iIconUri.Close();
-    iLibrary.Close();
-    iPath.Close();
-    iModificationTime.Close();
-    iMmcId.Close();
-    iServiceXml.Close();
-    iManifestFilePathName.Close();
     iStringIdTitle.Close();
     iStringIdDescription.Close();
+    iManifestFilePathName.Close();
+    
     }
 
 // ----------------------------------------------------------------------------
@@ -152,14 +157,16 @@ CCaWidgetDescription::~CCaWidgetDescription()
 TBool CCaWidgetDescription::Compare(
         const CCaWidgetDescription& aFirst,const CCaWidgetDescription& aSecond)
     {
+    TBool result = EFalse;
     if( aFirst.GetUri() == aSecond.GetUri() )
         {
-        return ETrue;
+        result = ETrue;
         }
     else
         {
-        return EFalse;
+        result = EFalse;
         }
+    return result;
     }
 
 // ----------------------------------------------------------------------------
@@ -168,23 +175,27 @@ TBool CCaWidgetDescription::Compare(
 //
 TBool CCaWidgetDescription::Compare( const CCaWidgetDescription& aToCompare )
     {
+    TBool result = EFalse;
     if( aToCompare.GetLibrary() == GetLibrary() &&
             aToCompare.GetDescription() == GetDescription() &&
             aToCompare.GetUri() == GetUri() &&
             aToCompare.GetIconUri() == GetIconUri() &&
+            aToCompare.GetPreviewImageName() == GetPreviewImageName() &&
             aToCompare.GetTitle() == GetTitle() &&
             aToCompare.GetLibrary() != KNoLibrary &&
             aToCompare.GetModificationTime() == GetModificationTime() &&
             aToCompare.GetServiceXml() == GetServiceXml()
             )
         {
-        return ETrue;
+        result = ETrue;
         }
     else
         {
-        return EFalse;
+        result = EFalse;
         }
+    return result;
     }
+
 
 // -----------------------------------------------------------------------------
 //
@@ -204,6 +215,15 @@ void CCaWidgetDescription::SetPackageUidL( const TDesC& aPackageUid )
     {
     TLex lexer( aPackageUid );
     User::LeaveIfError( lexer.Val( iPackageUid,EHex));
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TUint CCaWidgetDescription::GetPackageUidL()
+    {
+    return iPackageUid;
     }
 
 // -----------------------------------------------------------------------------
@@ -248,37 +268,19 @@ void CCaWidgetDescription::SetIconUriL( const TDesC& aIconUri )
 //
 // -----------------------------------------------------------------------------
 //
+void CCaWidgetDescription::SetPreviewImageNameL( const TDesC& aPreviewName )
+    {
+    iPreviewImageName.Close();
+    iPreviewImageName.CreateL( aPreviewName );
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CCaWidgetDescription::SetLibraryL( const TDesC& aLibrary )
     {
     iLibrary.Close();
     iLibrary.CreateL(aLibrary);
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetMissing( TBool aMissing )
-    {
-    SetFlag( EMissing, aMissing );
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetVisible( TBool aVisible )
-    {
-    SetFlag( EVisible, aVisible );
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetUsed( TBool aUsed )
-    {
-    SetFlag( EUsed, aUsed );
     }
 
 // -----------------------------------------------------------------------------
@@ -375,23 +377,6 @@ TPtrC CCaWidgetDescription::GetLibrary( ) const
 //
 // -----------------------------------------------------------------------------
 //
-TPtrC CCaWidgetDescription::GetPath( ) const
-    {
-    return iPath;
-    }
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetPathL( const TDesC& aPath )
-    {
-	iPath.Close();
-	iPath.CreateL(aPath);
-    }
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
 TPtrC CCaWidgetDescription::GetDescription( ) const
     {
     return iDescription;
@@ -419,16 +404,27 @@ TPtrC CCaWidgetDescription::GetIconUri( ) const
 //
 // -----------------------------------------------------------------------------
 //
+TPtrC CCaWidgetDescription::GetPreviewImageName( ) const
+    {
+    return iPreviewImageName;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TPtrC CCaWidgetDescription::GetTitle( ) const
     {
+    TPtrC result ;
     if ( iTitle == KNullDesC )
         {
-        return GetLibraryName();
+        result.Set( GetLibraryName() );
         }
     else
         {
-        return iTitle;
+        result.Set( iTitle );
         }
+    return result;
     }
 
 // -----------------------------------------------------------------------------
@@ -504,20 +500,14 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
             entry->SetFlags( entry->GetFlags() & ~ERemovable );
             }
         }
-    if ( iPath != KNullDesC )
-        {
-        entry->AddAttributeL(KAttrWidgetPath, iPath);
-        }
     if ( iTitle != KNullDesC )
         {
         entry->SetTextL(iTitle);
-        entry->AddAttributeL(KCaAttrLongName, iTitle);
         }
     else
         {
         TPtrC libraryName( GetLibraryName() );
         entry->SetTextL( libraryName );
-        entry->AddAttributeL( KCaAttrLongName, libraryName );
         }
 
     if ( iDescription != KNullDesC )
@@ -531,9 +521,12 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     if ( iIconUri != KNullDesC)
         {
         // aSkinId and AppId not used for widgets - KNullDesC
-        entry->SetIconDataL(iIconUri, KNullDesC, KNullDesC);
+        entry->SetIconDataL( iIconUri, KNullDesC, KNullDesC );
         }
-
+    if ( iPreviewImageName != KNullDesC )
+        {
+        entry->AddAttributeL( KPreviewImageAttrName, iPreviewImageName );
+        }
     if( iModificationTime != KNullDesC )
         {
         entry->AddAttributeL( KCaAttrInstallationTime, iModificationTime );
@@ -591,6 +584,10 @@ TPtrC CCaWidgetDescription::GetServiceXml() const
     return iServiceXml;
     }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CCaWidgetDescription::LocalizeTextsL()
 	{
     
@@ -659,10 +656,28 @@ void CCaWidgetDescription::LocalizeTextsL()
 		}
 	}
 
-/*
- * Set manifest file path name
- * @param aManifestFilePt
- */
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+// 
+TBool CCaWidgetDescription::IsValid()
+    {
+    return iValid;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetValid(TBool aVal)
+    {
+    iValid = aVal;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CCaWidgetDescription::SetManifestFilePathNameL( 
     const TDesC& aManifestFilePathName )
     {
@@ -670,10 +685,10 @@ void CCaWidgetDescription::SetManifestFilePathNameL(
     iManifestFilePathName.CreateL( aManifestFilePathName );
     }
 
-/*
- * Get service fw xml filename
- * @return Service xml filename
- */
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TPtrC CCaWidgetDescription::GetManifestFilePathName() const
     {
     return iManifestFilePathName;

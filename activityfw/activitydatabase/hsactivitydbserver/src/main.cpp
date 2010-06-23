@@ -14,7 +14,7 @@
 * Description:
 *
 */
-#include "activityserver.h"
+#include "afserver.h"
 #include <e32base.h>
 
 // -----------------------------------------------------------------------------
@@ -26,7 +26,7 @@ LOCAL_C void StartActivityServerL()
     CActiveScheduler* activeScheduler = new( ELeave ) CActiveScheduler;
     CleanupStack::PushL( activeScheduler );
     CActiveScheduler::Install( activeScheduler );
-    CActivityServer* serverObject = CActivityServer::NewLC();
+    CAfServer* serverObject = CAfServer::NewLC();
     RProcess::Rendezvous( KErrNone );
     CActiveScheduler::Start();
     CleanupStack::PopAndDestroy( serverObject );

@@ -14,6 +14,7 @@
 * Description:
 *
 */
+#include <tswindowgroupsobserver.h>
 #include "tstaskmonitorglobals.h"
 #include "hsrunningappserver.h"
 #include "hsrunningappsession.h"
@@ -42,6 +43,7 @@ CRunningAppServer::~CRunningAppServer()
     delete mBacksteppingEngine;
     delete mScreenshotProviderStarter;
     delete mStorage;
+    delete mMonitor;
     mObservers.ResetAndDestroy();
 }
 
@@ -65,9 +67,11 @@ void CRunningAppServer::ConstructL()
 {
     StartL(KRunningAppServerName);
     User::LeaveIfError(mWsSession.Connect());
-    mStorage = CRunningAppStorage::NewL(*this);
+    mResources = CTsResourceManager::NewL();
+    mMonitor = CTsWindowGroupsMonitor::NewL(*mResources);
+    mStorage = CRunningAppStorage::NewL(*this, *mResources, *mMonitor);
     TRAP_IGNORE(mScreenshotProviderStarter = CTsScreenshotProvider::NewL(*mStorage);
-    mBacksteppingEngine = CTsBackstepping::NewL(mWsSession);)
+    mBacksteppingEngine = CTsBackstepping::NewL(*mMonitor);)
 }
 
 // -----------------------------------------------------------------------------

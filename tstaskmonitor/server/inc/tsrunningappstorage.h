@@ -25,8 +25,10 @@
 #include "hsdataprovider.h"
 #include "tsdatastorage.h"
 
-class CTsFswEngine;
-class CTsFswMonitor;
+class CTsFswDataList;
+class MTsResourceManager;
+class MTsWindowGroupsMonitor;
+
 /**
  *  CRunningAppServer
  * 
@@ -45,7 +47,9 @@ public:
     /**
      * Two-phased constructor.
      */
-    static CRunningAppStorage* NewL(MHsDataObserver& observer);
+    static CRunningAppStorage* NewL(MHsDataObserver& observer,
+                                    MTsResourceManager& resources,
+                                    MTsWindowGroupsMonitor &wsMonitor);
     
 public: //MHsDataObserver
     const TDesC8& Data() const; 
@@ -66,17 +70,15 @@ private:
     /**
      * Default constructor for performing 2nd stage construction
      */
-    void ConstructL();
+    void ConstructL(MTsResourceManager& resources,
+                    MTsWindowGroupsMonitor &wsMonitor);
     
     void DataChangedL();
 
 private:
     MHsDataObserver& mObserver;
     RBuf8 mData;
-    
-    CTsFswEngine* mEngine;
-    CTsFswMonitor* mMonitor;
-
+    CTsFswDataList* mEngine;
 };
 
 #endif // RUNNINGAPPSERVER_H

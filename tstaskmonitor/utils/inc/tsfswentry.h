@@ -113,8 +113,8 @@ public:
     void SetAppUid( const TUid& uid );
     void SetAppNameL( const TDesC& appName );
     void SetCloseableApp( TBool value );
-    TBool SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority);
-    TBool RemoveScreenshot();
+    void SetScreenshotL(const CFbsBitmap* bitmap, UpdatePriority priority);
+    void RemoveScreenshotL();
     
     // takes ownership of bitmaps
     void SetAppIcon( CFbsBitmap* aBitmap, CFbsBitmap* aMask );

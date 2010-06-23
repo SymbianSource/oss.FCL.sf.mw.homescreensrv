@@ -20,16 +20,23 @@ UID           0x1000008d 0x20026782
 
 CAPABILITY    CAP_GENERAL_DLL
 
+MW_LAYER_SYSTEMINCLUDE
+
 USERINCLUDE   ../inc
 
 SOURCEPATH    ../src
 SOURCE        tsgraphicfilescalinghandler.cpp
+SOURCE        tswindowgroupsmonitor.cpp
+SOURCE        tswindowgroupsobserver.cpp
+SOURCE        tsresourcemanager.cpp
 
 LIBRARY      euser.lib
 LIBRARY      bitmaptransforms.lib
 LIBRARY      imageconversion.lib
 LIBRARY      fbscli.lib
 LIBRARY      efsrv.lib
+LIBRARY      ws32.lib
+LIBRARY      apgrfx.lib
 
 //EXPORTUNFROZEN
 

@@ -24,6 +24,8 @@
 #include "tsdataobserver.h"
 
 class CRunningAppStorage;
+class CTsResourceManager;
+class CTsWindowGroupsMonitor;
 /**
  *  CRunningAppServer
  * 
@@ -70,7 +72,10 @@ private:
 private:
     RPointerArray<CHsDataObserver> mObservers;
     RWsSession mWsSession;
+    CTsResourceManager* mResources;
+    CTsWindowGroupsMonitor* mMonitor;
     CRunningAppStorage* mStorage;
+    
     CBase *mScreenshotProviderStarter;
     CBase *mBacksteppingEngine;
 };

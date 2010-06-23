@@ -145,6 +145,9 @@ void CCaSatHandler::ConstructL()
     iSatIcon.OpenL( iSatSession );
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (Icon can be created only from SIM)
 // ---------------------------------------------------------------------------
 // CCaSatHandler::GetVisibility
 // ---------------------------------------------------------------------------
@@ -192,5 +195,8 @@ CFbsBitmap* CCaSatHandler::GetBitmapL( const RIconEf& aIconEF )
         return NULL;
         }
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 //  End of File

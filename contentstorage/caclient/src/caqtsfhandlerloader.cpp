@@ -57,11 +57,11 @@ void CaQtSfHandlerLoader::registerPlugins() const
     const QString pluginPath("hsresources/plugins/commandhandler");
     const QFileInfoList drives = QDir::drives();
     
-    foreach(QFileInfo drive, drives) {
+    foreach (QFileInfo drive, drives) {
         const QString driveLetter = drive.absolutePath();
         const QString pluginAbsolutePath = driveLetter + pluginPath;
         const QDir pluginDir(pluginAbsolutePath);
-        if(QDir(pluginDir).exists()) {
+        if (QDir(pluginDir).exists()) {
             const QFileInfoList fileInfos = 
                 pluginDir.entryInfoList(QStringList("*.xml"));
             

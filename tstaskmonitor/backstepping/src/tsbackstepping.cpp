@@ -27,17 +27,16 @@
 #include "tsbackstepping.h"
 
 const TUid KHSUid = {0x20022f35};
-const int KOrdinalPositionNoZOrder(-1);
 
 
 /** 
  *  CTsBackstepping::NewL
  *  two phase constructor
  */
-EXPORT_C CTsBackstepping* CTsBackstepping::NewL(RWsSession &session)
+EXPORT_C CTsBackstepping* CTsBackstepping::NewL(MTsWindowGroupsMonitor &monitor)
   {
   RDebug::Print(_L("CTsBackstepping::NewL"));
-  CTsBackstepping* self = CTsBackstepping::NewLC(session);
+  CTsBackstepping* self = CTsBackstepping::NewLC(monitor);
   CleanupStack::Pop(self);
   return self;
   }
@@ -46,9 +45,9 @@ EXPORT_C CTsBackstepping* CTsBackstepping::NewL(RWsSession &session)
  *  CTsBackstepping::NewLC
  *  two phase constructor
  */
-EXPORT_C CTsBackstepping* CTsBackstepping::NewLC(RWsSession &session)
+EXPORT_C CTsBackstepping* CTsBackstepping::NewLC(MTsWindowGroupsMonitor &monitor)
 { 
-  CTsBackstepping* self = new (ELeave) CTsBackstepping(session);
+  CTsBackstepping* self = new (ELeave) CTsBackstepping(monitor);
   CleanupStack::PushL(self);
   self->ConstructL();
   return self;
@@ -58,11 +57,10 @@ EXPORT_C CTsBackstepping* CTsBackstepping::NewLC(RWsSession &session)
  * CTsBackstepping::CTsBackstepping
  * constructor
  */
-CTsBackstepping::CTsBackstepping(RWsSession &session)
-:CActive(EPriorityStandard),
-mWsSession(session)
+CTsBackstepping::CTsBackstepping(MTsWindowGroupsMonitor &monitor)
+:
+CTsWindowGroupsObserver(monitor)
 {
-    CActiveScheduler::Add(this);
 }
 
 
@@ -72,12 +70,6 @@ mWsSession(session)
  */
 EXPORT_C CTsBackstepping::~CTsBackstepping()
 {
-    RDebug::Print(_L("CTsBackstepping::~CTsBackstepping"));
-    // Cancel AO
-    Cancel();
-    // Close opened session
-    mWg.Close();
-    
 }
 
 /** 
@@ -87,102 +79,38 @@ EXPORT_C CTsBackstepping::~CTsBackstepping()
 void CTsBackstepping::ConstructL ()
 {
     RDebug::Print(_L("CTsBackstepping::ConstructL"));
-    // Initial window group
-    mWg = RWindowGroup (mWsSession);
-    User::LeaveIfError (mWg.Construct ((TUint32)&mWg, EFalse));
-    mWg.SetOrdinalPosition (KOrdinalPositionNoZOrder);
-    mWg.EnableReceiptOfFocus (EFalse);
-
-    // Hide window
-    CApaWindowGroupName* wn = CApaWindowGroupName::NewLC (mWsSession);
-    wn->SetHidden (ETrue);
-    wn->SetWindowGroupName (mWg);
-    CleanupStack::PopAndDestroy (wn);
-
-    // Window group change event
-    User::LeaveIfError (mWg.EnableGroupListChangeEvents());
-    
-    TRAP_IGNORE(AnalyseWindowStackL());//not critical operation
-    Subscribe();
-}
-
-/** 
- *  CTsBackstepping::RunL
- *  called for handling events from window server
- */
-void CTsBackstepping::RunL()
-{
-    User::LeaveIfError(iStatus.Int());
-    TWsEvent wsEvent;
-    mWsSession.GetEvent (wsEvent);
-    if (EEventWindowGroupListChanged == wsEvent.Type()) {
-        RDebug::Print(_L("CTsBackstepping::RunL : EEventWindowGroupListChanged"));
-        AnalyseWindowStackL ();
-    }
-    Subscribe();
-}
-
-/** 
- *  CTsBackstepping::DoCancel
- *  Handling RunL errors.
- */
-TInt CTsBackstepping::RunError(TInt error)
-{
-    if (!IsActive() && KErrCancel != error) {
-        Subscribe();
-    }
-    return KErrNone;
-}
-
-/** 
- *  CTsBackstepping::DoCancel
- *  Stopping active object
- */
-void CTsBackstepping::DoCancel ()
-{
-    if (IsActive()) {
-        mWsSession.EventReadyCancel();
-    }
-}
-
-/** 
- *  CTsBackstepping::ActivateListeningL
- *  Starts listening to Window session events
- */
-void CTsBackstepping::Subscribe()
-{
-    RDebug::Print(_L("CTsBackstepping::Subscribe"));
-    // and start listening
-    iStatus = KRequestPending;
-    mWsSession.EventReady( &iStatus );
-    SetActive();
+    BaseConstructL();
 }
 
 /** 
  * CTsBackstepping::AnalyseWindowStackL
  * Analyzes window stack and move homescreen to proper position
  */
-void CTsBackstepping::AnalyseWindowStackL ()
+void CTsBackstepping::HandleWindowGroupChanged(MTsResourceManager &resource, const TArray<RWsSession::TWindowGroupChainInfo> &windowGroups)
+{
+    TRAP_IGNORE(HandleWindowGroupChangedL(resource, windowGroups));
+}
+
+/** 
+ * CTsBackstepping::AnalyseWindowStackL
+ * Analyzes window stack and move homescreen to proper position
+ */
+void CTsBackstepping::HandleWindowGroupChangedL(MTsResourceManager &resource,
+                                                const TArray<RWsSession::TWindowGroupChainInfo> &windowGroups)
 {  
     RDebug::Print(_L("CTsBackstepping::GetWindowCaption"));
     
-    RArray<RWsSession::TWindowGroupChainInfo> windowGroups;
-    CleanupClosePushL(windowGroups);
-    
-    CApaWindowGroupName *windowGroupName = CApaWindowGroupName::NewLC(mWsSession );
-    //update window group list
-    mWsSession.WindowGroupList( &windowGroups );
+    CApaWindowGroupName *windowGroupName = CApaWindowGroupName::NewLC(resource.WsSession());
     
     TInt count(windowGroups.Count());
     TInt pos(0);
     TInt whereToJump(1);
     for (TInt i=0; i<count; i++) {//iterate through list and give debug info
-        const RWsSession::TWindowGroupChainInfo& info = windowGroups[i];
-        windowGroupName->ConstructFromWgIdL(info.iId);
+        windowGroupName->ConstructFromWgIdL(windowGroups[i].iId);
         if (windowGroupName->AppUid() != TUid::Null()) {
             // find the window group id and check that it has no parent
-            if ( info.iParentId <= 0 ) {
-                RDebug::Print( _L("CTsBackstepping::GetWindowCaption wgid:%d is standalone view"), info.iId);
+            if ( windowGroups[i].iParentId <= 0 ) {
+                RDebug::Print( _L("CTsBackstepping::GetWindowCaption wgid:%d is standalone view"), windowGroups[i].iId);
                 //check if it is homescreen 
                 if (windowGroupName->AppUid() == KHSUid) {
                     RDebug::Print(_L("CTsBackstepping::GetWindowCaption Homescreen position = %d ; list:%d/%d"), pos, i, count);
@@ -191,7 +119,7 @@ void CTsBackstepping::AnalyseWindowStackL ()
                     } else {//we should move homescreen to be second (ommit embeded views) from top
                         RDebug::Print(_L("CTsBackstepping::moving homescreen to be second from top"));
                         RDebug::Print(_L("CTsBackstepping::whereToJump = %d"), whereToJump);
-                        mWsSession.SetWindowGroupOrdinalPosition(info.iId, whereToJump);
+                        resource.WsSession().SetWindowGroupOrdinalPosition(windowGroups[i].iId, whereToJump);
                     }
                     // and break
                     break;
@@ -202,12 +130,11 @@ void CTsBackstepping::AnalyseWindowStackL ()
                 if (!pos) {
                     ++whereToJump;
                 }
-                RDebug::Print(_L("CTsBackstepping::GetWindowCaption wgid:%d is embedded view"), info.iId);
+                RDebug::Print(_L("CTsBackstepping::GetWindowCaption wgid:%d is embedded view"), windowGroups[i].iId);
             }
         }
     }
     CleanupStack::PopAndDestroy(windowGroupName);
-    CleanupStack::PopAndDestroy(&windowGroups);
 }
 
 // end of file

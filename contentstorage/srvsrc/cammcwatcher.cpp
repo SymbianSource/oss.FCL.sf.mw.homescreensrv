@@ -107,6 +107,9 @@ void CCaMmcWatcher::DoCancel()
     iFs.NotifyChangeCancel();
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (error is ignored)
 // ---------------------------------------------------------------------------
 // CCaWidgetMmcWatcher::RunError
 // ---------------------------------------------------------------------------
@@ -116,7 +119,13 @@ TInt CCaMmcWatcher::RunError( TInt /*aError*/ )
     // No need to do anything
     return KErrNone;
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (memory card removal)
 // ---------------------------------------------------------
 // CCaWidgetMmcWatcher::RunL
 // ---------------------------------------------------------
@@ -130,4 +139,6 @@ void CCaMmcWatcher::RunL()
         iObserver->MmcChangeL();
         }
     }
-
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

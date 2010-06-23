@@ -16,7 +16,7 @@
  */
 #include <QtGlobal>
 #include <QMetaType>
-#include <QString>
+#include <QStringList>
 
 
 #include "casoftwareregistry.h"
@@ -37,6 +37,45 @@ CaSoftwareRegistryPrivate::CaSoftwareRegistryPrivate(CaSoftwareRegistry *service
  */
 CaSoftwareRegistryPrivate::~CaSoftwareRegistryPrivate()
 {
+}
+
+/*!
+ Provides details needed for uninstalling process of Java applications
+ (windows stub).
+ \param[in] componentId component id of an application to be uninstalled.
+ \param[out] componentName a name of the component.
+ \param[out] applicationsUids a list of uids of applications in the package
+      of the given component id.
+ \param[out] confirmationMessage optional deletion confirmation message,
+      null string means the lack of the message.
+ \retval true if there is no error.
+ */
+bool CaSoftwareRegistryPrivate::getUninstallDetails(int componentId,
+    QString &componentName,
+    QStringList &applicationsUids,
+    QString &confirmationMessage)
+{
+    Q_UNUSED(componentId);
+    componentName.clear();
+    applicationsUids.clear();
+    confirmationMessage.clear();
+    return true;
+}
+
+/*!
+ Provides a list of uids of applications installed by the given package
+ (windows stub).
+ \param[in] componentId component id of an application to be uninstalled.
+ \param[out] applicationsUids a list of uids of applications in the package
+      of the given component id.
+ \retval true if there is no error.
+ */
+bool CaSoftwareRegistryPrivate::getApplicationsUids(int componentId,
+    QStringList &applicationsUids)
+{
+    Q_UNUSED(componentId);
+    applicationsUids.clear();
+    return true;
 }
 
 /*

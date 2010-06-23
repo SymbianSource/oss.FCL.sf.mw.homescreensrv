@@ -22,8 +22,6 @@
 #include <e32std.h>
 #include <e32base.h>
 
-#include "hbtextresolversymbian.h"
-
 #include "castorage_global.h"
 
 // FORWARD DECLARATIONS

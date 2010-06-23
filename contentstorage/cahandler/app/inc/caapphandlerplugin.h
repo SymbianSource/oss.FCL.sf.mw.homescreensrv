@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef CA_APP_HANDLER_PLUGIN_H
-#define CA_APP_HANDLER_PLUGIN_H
+#ifndef CAAPPHANDLERPLUGIN_H
+#define CAAPPHANDLERPLUGIN_H
 
 #include <QObject>
 #include <qserviceplugininterface.h>
@@ -34,4 +34,4 @@ public:
                             QAbstractSecuritySession *session);
 };
 
-#endif
+#endif // CAAPPHANDLERPLUGIN_H

@@ -48,7 +48,8 @@ public:
         TypeRole,
         FlagsRole,
         TextRole,//contains title represented as QString,
-        FullTextRole //'title description' convinient for operations such as search
+        FullTextRole, //'title description' convinient for operations such as search
+        UninstalRole  //contains progress status as decimal number in QString
     };
 
     // Function declarations

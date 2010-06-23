@@ -34,7 +34,7 @@
     \param descriptor Service descriptor.
     \param context Ignored.
     \param session Ignored.
-    \return An instance of the CaS60HandlerAdapter<CaAppHandler> when descriptor interface name
+    \retval an instance of the CaAppHandler when descriptor interface name
     is "com.nokia.homescreen.ICommandHandler", NULL otherwise.
 */
 QObject *CaAppHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &descriptor,
@@ -51,37 +51,14 @@ QObject *CaAppHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
         return 0;
     }
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (QT macro)
+
 Q_EXPORT_PLUGIN2(caapphandlerplugin, CaAppHandlerPlugin)
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
-/*!
-    \class CaHandler
-    \ingroup
-    \brief Interface for command handlers
-*/
-
-/*!
-    \fn int CaHandler::execute(const CaEntry &entry, const QString &commandName) = 0
-    \param entry Subject of the command.
-    \param commandName The name of the command to execute.
-    Returns 0 on success, error code otherwise.
-    \sa e32err.h for error code descriptions.
-*/
-
-/*!
-    \class CaS60HandlerAdapter<typename Plugin>
-    \ingroup
-    \brief Adapter for S60 command handlers.
-
-    Adapts S60 command handlers to CaHandler interface
-
-    \sa CaHandler
-*/
-
-/*!
-    \fn int CaS60HandlerAdapter<typename Plugin>::execute(const CaEntry &entry, const QString &commandName)
-    \param entry Subject of the command.
-    \param commandName The name of the command to execute.
-    \return 0 on success, error code otherwise.
-    \sa e32err.h for error code descriptions.
-*/

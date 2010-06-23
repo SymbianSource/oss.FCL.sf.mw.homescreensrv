@@ -141,7 +141,34 @@ void CCaSrvAppScanner::ConstructL()
     iApaLsSession.RegisterListPopulationCompleteObserver( iStatus );
     iCollectionDownloadId = 0;
     iAllCollectionId = 0;
+    
+    //TODO temporary sollution for fake uninstall progres notification
+    ClearUninstallFlagL();
+    
     SetActive();
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+//TODO temporary sollution for fake uninstall progres notification
+void CCaSrvAppScanner::ClearUninstallFlagL()
+    {
+    CCaInnerQuery* uninstallQuery = CCaInnerQuery::NewLC();
+    uninstallQuery->SetFlagsOn( EUninstall );
+    
+    RPointerArray<CCaInnerEntry> resultArray;
+    CleanupResetAndDestroyPushL( resultArray );
+    iCaStorageProxy.GetEntriesL( uninstallQuery, resultArray );
+    for( TInt i = 0; i < resultArray.Count(); i++ )
+    {
+        resultArray[i]->SetFlags( resultArray[i]->GetFlags() & ~EUninstall );
+        iCaStorageProxy.AddL( resultArray[i] );
+    }
+    CleanupStack::PopAndDestroy( &resultArray );
+    
+    CleanupStack::PopAndDestroy( uninstallQuery );    
     }
 
 // ---------------------------------------------------------
@@ -912,13 +939,13 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
         RBuf attrVal;
         attrVal.CleanupClosePushL();
         attrVal.CreateL( KCaMaxAttrValueLen );
-        aEntry->FindAttribute( KCaAttrLongName, attrVal );
-        if( attrVal.Compare( info->iCaption ) != KErrNone
+        aEntry->FindAttribute( KCaAttrShortName, attrVal );
+        if( attrVal.Compare( info->iShortCaption ) != KErrNone
                 || aEntry->GetText().Compare( info->iCaption )
                         != KErrNone )
             {
             aEntry->SetTextL( info->iCaption );
-            aEntry->AddAttributeL( KCaAttrLongName, info->iCaption );
+            aEntry->AddAttributeL( KCaAttrShortName, info->iShortCaption );
             changed = ETrue;
             }
         
@@ -939,9 +966,20 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 aEntry->AddAttributeL(
                         KCaAttrAppType,
                         KCaAttrAppTypeValueJava );
-                aEntry->AddAttributeL(
-                        KCaAttrAppSettingsPlugin,
-                        KCaAttrJavaAppSettingsPluginValue );
+                
+                TComponentId compId = 
+                        iSoftwareRegistry.GetComponentIdForAppL( info->iUid );
+                CPropertyEntry* propertyEntry = 
+                    iSoftwareRegistry.GetComponentPropertyL( compId, KCaScrPropertyAppSettings );
+                CleanupStack::PushL( propertyEntry );
+                if ( propertyEntry && 
+                        propertyEntry->PropertyType() == CPropertyEntry::ELocalizedProperty ) 
+                    {
+                    aEntry->AddAttributeL(
+                            KCaAttrAppSettingsPlugin,
+                            static_cast<CLocalizablePropertyEntry*>(propertyEntry)->StrValue() );
+                    }
+                CleanupStack::PopAndDestroy( propertyEntry );
                 }
             else if ( appTypeUid == KCWRTApplicationTypeUid )
                 {
@@ -998,9 +1036,9 @@ void CCaSrvAppScanner::HandleMissingItemsL(
             TUint mmcId = 0;
             MenuUtils::GetTUint( attrVal, mmcId );
             if( ( mmcId && KErrNotFound != iMmcHistory->Find( mmcId )
-                    && mmcId != CurrentMmcId() ) ||
-                    ( attrVal == KCaMassStorage() &&
-                    IsDriveInUse( DriveInfo::EDefaultMassStorage ) ) )
+                        && mmcId != CurrentMmcId() ) 
+                    || ( attrVal == KCaMassStorage() 
+                        && IsDriveInUse( DriveInfo::EDefaultMassStorage ) ) )
                 {
                 // This item is on an MMC which is currently
                 // in the MMC history or on a mass storage in use.
@@ -1009,7 +1047,7 @@ void CCaSrvAppScanner::HandleMissingItemsL(
                 }
             else
                 {
-                aCaEntries[i]->RemoveAttributeL(KCaAttrMmcId());
+                aCaEntries[i]->RemoveAttributeL( KCaAttrMmcId() );
                 ClearVisibleFlagL( aCaEntries[i] );
                 }
             }
@@ -1025,24 +1063,11 @@ void CCaSrvAppScanner::HandleMissingItemsL(
 //
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::RemoveAppL( CCaInnerEntry* aAppEntry )
-    {
-    RArray<TInt> idsToRemove;
-    CleanupClosePushL( idsToRemove );
-    idsToRemove.AppendL( aAppEntry->GetId() );
-    iCaStorageProxy.RemoveL( idsToRemove );
-    CleanupStack::PopAndDestroy( &idsToRemove );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
 void CCaSrvAppScanner::SetMissingFlagL( CCaInnerEntry* aEntry )
     {
     if( !( aEntry->GetFlags() & EMissing ) )
         {
-        aEntry->SetFlags( aEntry->GetFlags() | EMissing );
+        aEntry->SetFlags( ( aEntry->GetFlags() | EMissing ) & ~EUninstall );
         iCaStorageProxy.AddL( aEntry, EFalse, EItemDisappeared );
         }
     }
@@ -1057,6 +1082,7 @@ void CCaSrvAppScanner::ClearVisibleFlagL( CCaInnerEntry* aEntry )
         {
         aEntry->SetFlags(
                 aEntry->GetFlags() &
+                ~EUninstall &
                 ~EVisible &
                 ~EMissing &
                 ~EUsed );

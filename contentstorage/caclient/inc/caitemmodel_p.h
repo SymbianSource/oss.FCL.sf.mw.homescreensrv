@@ -73,7 +73,7 @@ private:
 
     // Function declarations
     void updateParentEntry();
-    void updateItemData(int id);
+    void updateItemData(const QSharedPointer<CaEntry> &entry);
     void addItem(int id);
     void addItemBlock(const QList<int> &itemsList);
     void handleAddItems(const QList<int> &itemsList);
@@ -89,7 +89,7 @@ private:
 private slots:
 
     // Function declarations
-    void updateModelItem(int id, ChangeType changeType);
+    void updateModelItem(const CaEntry &entry, ChangeType changeType);
     void updateModelContent(int id);
 
 private:

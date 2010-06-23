@@ -1,31 +1,28 @@
 /*
-* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:  Ecom plugin
+ * Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
-*/
-
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:  Ecom plugin
+ *
+ */
 
 #ifndef C_CAWIDGETSCANNERPLUGIN_H
 #define C_CAWIDGETSCANNERPLUGIN_H
 
 #include <casrvplugin.h>
 #include <f32file.h>
-#include "cawidgetdescription.h"
 #include "cammcwatcher.h"
 
 class TPluginParams;
-class CCaWidgetScannerParser;
 class CCaWidgetScannerInstallNotifier;
 class CCaWidgetStorageHandler;
 
@@ -47,12 +44,12 @@ public:
     ~CCaWidgetScannerPlugin();
 
     /**
-     * SynchronizeL
+     * SynchronizeL - synchronizes widgets on device with database
      */
     void SynchronizeL();
 
 private:
-//from MWidgetMmcWatcherCallback
+    //from MWidgetMmcWatcherCallback
 
     /**
      * MmcChangeL is called when the MMC is removed or inserted.
@@ -64,7 +61,7 @@ private:
     /**
      * C++ default constructor.
      */
-    CCaWidgetScannerPlugin( );
+    CCaWidgetScannerPlugin();
 
     /**
      * By default Symbian 2nd phase constructor is private.
@@ -82,11 +79,6 @@ private:
      * Sis installation notifier. Own
      */
     CCaWidgetScannerInstallNotifier* iInstallNotifier;
-
-    /**
-     * Pointer to a parser object. Own
-     */
-    CCaWidgetScannerParser* iParser;
 
     /**
      * Content Storage Handler. Own.

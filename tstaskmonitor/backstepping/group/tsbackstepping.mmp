@@ -26,6 +26,7 @@ EPOCHEAPSIZE   0x100000 0x600000 // 1MB - 6MB
 MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE    ../inc
+USERINCLUDE     ../../../inc
 
 SOURCEPATH     ../src
 SOURCE         tsbackstepping.cpp
@@ -33,5 +34,6 @@ SOURCE         tsbackstepping.cpp
 LIBRARY        euser.lib 
 LIBRARY        ws32.lib // for RWsSession
 LIBRARY        apgrfx.lib // for TApaTask / TApaTasksList
+LIBRARY        tsutils.lib
 
 DEBUGLIBRARY    flogger.lib
