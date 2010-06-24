@@ -25,7 +25,7 @@
 #include "hsdataprovider.h"
 #include "tsdatastorage.h"
 
-class CTsFswDataList;
+class CTsDataList;
 class MTsResourceManager;
 class MTsWindowGroupsMonitor;
 
@@ -59,6 +59,8 @@ public: //MHsDataObserver
     
     void UpdateL(TInt key,const CFbsBitmap& data, TInt param, TInt priority);
     
+    void UpdateL(TInt key, const Visibility& data, TInt param);
+    
     void RemoveL(TInt key, TInt param);
 
 private:
@@ -78,7 +80,7 @@ private:
 private:
     MHsDataObserver& mObserver;
     RBuf8 mData;
-    CTsFswDataList* mEngine;
+    CTsDataList* mEngine;
 };
 
 #endif // RUNNINGAPPSERVER_H

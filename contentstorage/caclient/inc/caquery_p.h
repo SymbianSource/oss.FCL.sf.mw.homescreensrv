@@ -39,6 +39,9 @@ public:
     int parentId() const;
     void setParentId(int id);
 
+    int childId() const;
+    void setChildId(int id);
+    
     QStringList entryTypeNames() const;
     void setEntryTypeNames(const QStringList &entryTypeNames);
 
@@ -71,6 +74,8 @@ private:
     EntryRoles mEntryRoles;
 
     int mParentId;
+    
+    int mChildId;
 
     QStringList mEntryTypeNames;
 

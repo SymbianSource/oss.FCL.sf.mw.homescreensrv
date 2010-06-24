@@ -281,9 +281,19 @@ void CCaWidgetScannerParser::ParseManifestFileL( const TDesC& aFilePath,
                 {
                 ParsePreviewImageNameL( element, aPackageUid, widgetDescriptor, aDrive );
                 }
+            else if ( element.Name() == KTranslationFileName )
+                {
+                ParseTranslationFileNameL( element, widgetDescriptor );
+                }
             }
         CleanupStack::PopAndDestroy( &childElementList );
 
+        //set path for hs to use, trim last 2 chars (doubleslash)
+        HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid, aDrive );
+        widgetDescriptor->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
+        CleanupStack::PopAndDestroy(libraryPath);
+
+        
         HBufC *libraryPath2 = GetManifestDirectoryPathLC( aPackageUid, aDrive );
         libraryPath2 = libraryPath2->ReAllocL( libraryPath2->Length()
                 + widgetDescriptor->GetUri().Length() );
@@ -326,6 +336,7 @@ void CCaWidgetScannerParser::ParseWidgetL( const TDesC& aFilePath,
     widget->SetPackageUidL( aPackageUid );
     widget->SetManifestFilePathNameL( aFilePath );
     SetMmcIdL( widget, aDrive );
+    SetTranslationFileNameL( aElement, widget );
 
     SetModificationTimeL( aFilePath, widget );
 
@@ -353,6 +364,25 @@ void CCaWidgetScannerParser::SetUriL( TXmlEngElement& aElement,
     if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
         aWidget->SetUriL( *attributeValue );
+        aWidget->SetTranslationFileNameL( *attributeValue );
+        }
+    CleanupStack::PopAndDestroy( attributeValue );
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::SetTranslationFileNameL( TXmlEngElement& aElement,
+        CCaWidgetDescription* aWidget )
+    {
+    HBufC *attributeValue = CnvUtfConverter::ConvertToUnicodeFromUtf8L(
+            aElement.AttributeValueL( KTranslationFileName ) );
+    CleanupStack::PushL( attributeValue );
+
+    if ( attributeValue->Compare( KNullDesC ) != 0 )
+        {
+        aWidget->SetTranslationFileNameL( *attributeValue );
         }
     CleanupStack::PopAndDestroy( attributeValue );
     }
@@ -371,6 +401,9 @@ void CCaWidgetScannerParser::SetLibraryL( TXmlEngElement& aElement,
     if ( attributeValue->Compare( KNullDesC ) != 0 )
         {
         HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid, aDrive );
+
+        //set path for hs to use, trim last 2 chars (doubleslash)
+        aWidget->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
 
         libraryPath->ReAllocL( libraryPath->Length() + attributeValue->Length() );
 
@@ -569,7 +602,12 @@ void CCaWidgetScannerParser::ParseUriL( TXmlEngElement& aElement,
         CCaWidgetDescription* aWidgetDescriptor )
     {
     aWidgetDescriptor->SetUriL( *GetElementTextLC( aElement )  );
-    CleanupStack::PopAndDestroy( );
+    CleanupStack::PopAndDestroy();
+    
+    if( aWidgetDescriptor->GetTranslationFileName().Compare( KNullDesC ) == 0 )
+        {
+        ParseTranslationFileNameL( aElement, aWidgetDescriptor );
+        }
     }
 
 // ----------------------------------------------------------------------------
@@ -610,7 +648,18 @@ void CCaWidgetScannerParser::ParsePreviewImageNameL(
     aWidgetDescriptor->SetPreviewImageNameL( 
         *GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive ) );
     
-    CleanupStack::PopAndDestroy( );
+    CleanupStack::PopAndDestroy();
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerParser::ParseTranslationFileNameL(
+        TXmlEngElement& aElement, CCaWidgetDescription* aWidgetDescriptor )
+    {
+    aWidgetDescriptor->SetTranslationFileNameL( *GetElementTextLC( aElement ) );
+    CleanupStack::PopAndDestroy();
     }
 
 // ----------------------------------------------------------------------------

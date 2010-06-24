@@ -45,7 +45,6 @@ symbian: {
         " TARGET calocalizerscanner.rsc" \
         "END"
     MMP_RULES += rssResource
-    MMP_RULES -= EXPORTUNFROZEN
     MMP_RULES += "$${LITERAL_HASH}if defined(WINSCW)" \
         "DEFFILE ./bwins/calocalizerscanner.def" \
         "$${LITERAL_HASH}else" \

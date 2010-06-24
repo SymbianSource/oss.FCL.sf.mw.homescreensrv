@@ -21,30 +21,23 @@
 #include <eikenv.h>
 #include <AknDef.h>
 
-#include "tsfswentry.h"
+#include "tsentry.h"
 
-TsApplicationTask::TsApplicationTask(CTsFswEntry* entry) : TsTask(entry)
+TsApplicationTask::TsApplicationTask(RWsSession &wsSession, CTsEntry* entry) : TsTask(entry), mWsSession(wsSession)
 {
 }
 
 void TsApplicationTask::open()
 {
-    TApaTaskList taskList(CEikonEnv::Static()->WsSession());
+    TApaTaskList taskList(mWsSession);
     TApaTask task = taskList.FindApp(mEntry->AppUid());
     task.BringToForeground();
 }
 
 void TsApplicationTask::close()
 {
-    RWsSession wsSession;
-    if (wsSession.Connect() == KErrNone) {
-        CleanupClosePushL<RWsSession>(wsSession);
-    
-        TWsEvent event;
-        event.SetTimeNow();
-        event.SetType(KAknShutOrHideApp);
-        wsSession.SendEventToWindowGroup(mEntry->WgId(), event);
-
-        CleanupStack::PopAndDestroy(&wsSession);
-    }
+    TWsEvent event;
+    event.SetTimeNow();
+    event.SetType(KAknShutOrHideApp);
+    mWsSession.SendEventToWindowGroup(mEntry->Key().WindowGroupId(), event);
 }

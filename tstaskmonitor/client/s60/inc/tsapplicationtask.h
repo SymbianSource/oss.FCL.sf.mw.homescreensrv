@@ -19,15 +19,20 @@
 
 #include "tstask.h"
 
+#include <w32std.h>
+
 class TsApplicationTask : public TsTask
 {
     
 public:
-    TsApplicationTask(CTsFswEntry* entry);
+    TsApplicationTask(RWsSession &wsSession, CTsEntry* entry);
     
     virtual void open();
     virtual void close();
 
+private:
+    RWsSession &mWsSession;
+    
 };
 
 #endif //TSAPPLICATIONTASK_H

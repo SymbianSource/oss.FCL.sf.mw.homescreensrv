@@ -21,7 +21,7 @@
 #include <QVariant>
 #include <QString>
 
-class ActivityClientPrivate;
+#include <afstorageclient.h>
 
 class ActivityClient : public QObject
 {
@@ -29,7 +29,7 @@ class ActivityClient : public QObject
     Q_OBJECT
 
 public:
-    ActivityClient(QObject *parent = 0);
+    ActivityClient(const QSharedPointer<AfStorageClient> &serviceProvider,QObject *parent = 0);
     ~ActivityClient();
 
 public slots:
@@ -44,9 +44,8 @@ signals:
     void activityRequested(const QString &activityId);
 
 private:
-    ActivityClientPrivate *d_ptr;
-    friend class ActivityClientPrivate;
-
+    QSharedPointer<AfStorageClient> mServiceProvider;
+    bool mIsconnected;
 };
 
 #endif // ACTIVITYCLIENT_H

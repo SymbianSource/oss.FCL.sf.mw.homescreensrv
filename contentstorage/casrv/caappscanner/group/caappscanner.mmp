@@ -54,6 +54,5 @@ LIBRARY         apparc.lib
 LIBRARY         apgrfx.lib
 LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
-LIBRARY         sisregistryclient.lib
 LIBRARY         platformenv.lib
 LIBRARY         scrclient.lib

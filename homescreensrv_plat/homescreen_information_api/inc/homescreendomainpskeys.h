@@ -37,7 +37,7 @@ const char HsStatePSKeyPath[] = "/homescreen";
 */
 const char HsStatePSKeySubPath[] = "state";
 
-#ifdef Q_OS_SYMBIAN
+#if defined(__SYMBIAN32__) || defined(SYMBIAN) 
 /*!
     Home Screen P&S category Uid for pure Symbian usage.
 */
@@ -49,7 +49,7 @@ const TUid KHsCategoryUid = { 0x20022F35 };
     are defined by the enum EPSHsState.
 */
 const TUint KHsCategoryStateKey = 0x1;
-#endif //Q_OS_SYMBIAN
+#endif //SYMBIAN
 
 /*!
     Home screen state.

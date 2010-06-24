@@ -169,6 +169,8 @@ QString CaIconCache::key(const CaEntry &entry, const QSize &size)
     QString key;
     if (!entry.iconDescription().filename().isEmpty()) {
         key.append(entry.iconDescription().filename());
+        key.append(separator);
+        key.append(entry.entryTypeName());
     } else {
         key.append(separator);
         key.append(entry.id());

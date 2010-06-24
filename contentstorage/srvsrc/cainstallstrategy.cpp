@@ -16,9 +16,10 @@
  */
 #include <e32property.h>
 #include <SWInstallerInternalPSKeys.h>
-#include <javadomainpskeys.h>
-#include "cainstallstrategy.h"
+#include <app/javadomainpskeys.h>
 #include <swi/swispubsubdefs.h>
+
+#include "cainstallstrategy.h"
 
 // ---------------------------------------------------------------------------
 //

@@ -21,19 +21,16 @@ CONFIG += plugin
 include(activityserviceplugin.pri)
 
 INCLUDEPATH += ./inc \
+               ../../inc
 
 HEADERS +=  ./inc/activityserviceplugin.h \
             ./inc/activityclient.h \
-            ./inc/activityclient_p.h \
             ./inc/activitymanager.h \
-            ./inc/activitymanager_p.h \
             ./inc/applicationlauncher.h \
 
 SOURCES +=  ./src/activityserviceplugin.cpp \
             ./src/activityclient.cpp \
-            ./src/activityclient_p.cpp \
             ./src/activitymanager.cpp \
-            ./src/activitymanager_p.cpp \
             ./src/applicationlauncher.cpp \
 
 symbian {
@@ -46,7 +43,7 @@ symbian {
     LIBS += -lapparc \
             -lapgrfx \
             -lcone \
-            -lhsactivitydbclient \
+            -lafstorageclient \
             -lxqutils
  
 }

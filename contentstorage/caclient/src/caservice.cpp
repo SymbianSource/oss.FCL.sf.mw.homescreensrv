@@ -823,7 +823,7 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
  Execute command.
  \param entryId id of an entry.
  \param command command.
- \retval true if operation was successful.
+ \retval 0 if operation was successful.
 
  \example
  \code
@@ -833,15 +833,15 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
  itemExecute.setTypeName("application");
  itemExecute.setAttribute("application:uid", "0x12345678");
  CaEntry * entryExecute = service->createEntry(itemExecute->id());
- bool result = service->executeCommand(entryExecute->id(), "remove");
+ int result = service->executeCommand(entryExecute->id(), "remove");
  ...
  \b Output:
- result == true
+ result == 0
  \endcode
  */
-bool CaService::executeCommand(int entryId, const QString &command) const
+int CaService::executeCommand(int entryId, const QString &command) const
 {
-    bool result = false;
+    int result = -19;
     
     const QSharedPointer<CaEntry> temporaryEntry = getEntry(entryId);
     
@@ -855,7 +855,7 @@ bool CaService::executeCommand(int entryId, const QString &command) const
  Execute command.
  \param entry entry.
  \param command command.
- \retval true if operation was successful.
+ \retval 0 if operation was successful.
 
  \example
  \code
@@ -865,13 +865,13 @@ bool CaService::executeCommand(int entryId, const QString &command) const
  itemExecute.setTypeName("url");
  itemExecute.setAttribute("url", "http://www.nokia.com");
  CaEntry * entryExecute = service->createEntry(itemExecute->id());
- bool result = service->executeCommand(*entryExecute, "open");
+ int result = service->executeCommand(*entryExecute, "open");
  ...
  \b Output:
- result == true
+ result == 0
  \endcode
  */
-bool CaService::executeCommand(const CaEntry &entry, const QString &command) const
+int CaService::executeCommand(const CaEntry &entry, const QString &command) const
 {
     return m_d->executeCommand(entry, command);
 }
@@ -1329,9 +1329,9 @@ bool CaServicePrivate::prependEntriesToGroup(int groupId,
  Executes command on entry (fe. "open", "remove")
  \param const reference to an entry on which command will be issued
  \param string containing a command
- \retval boolean which is used as an error code return value, true means positive result
+ \retval int which is used as an error code return value, 0 means no errors
  */
-bool CaServicePrivate::executeCommand(const CaEntry &entry,
+int CaServicePrivate::executeCommand(const CaEntry &entry,
                                       const QString &command)
 {
     qDebug() << "CaServicePrivate::executeCommand"
@@ -1340,21 +1340,23 @@ bool CaServicePrivate::executeCommand(const CaEntry &entry,
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::executeCommand");
 
     if (entry.flags() & UninstallEntryFlag) {
-        return false;
+        return 0;
     }    
     
     if (command == caCmdOpen) {
         touch(entry);
     }
 
-    mErrorCode = mCommandHandler->execute(entry, command);
+    int errorCode = mCommandHandler->execute(entry, command);
+    mErrorCode = CaObjectAdapter::convertErrorCode(errorCode);
+    
 
     qDebug() << "CaServicePrivate::executeCommand mErrorCode on return:"
              << mErrorCode;
 
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::executeCommand");
 
-    return (mErrorCode == NoErrorCode);
+    return errorCode;
 }
 
 /*!

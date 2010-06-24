@@ -480,6 +480,12 @@ void CCaSqlQuery::BindValuesForGetEntriesL( const CCaInnerQuery* aQuery )
             BindIntL( iStatement.ParameterIndex( KSQLGEIdGroup ),
                     aQuery->GetParentId() );
             }
+        if( aQuery->GetChildId() != -1 && iQuery.Find( KSQLGEEntryId )
+                != KErrNotFound )
+            {
+            BindIntL( iStatement.ParameterIndex( KSQLGEEntryId ),
+                    aQuery->GetChildId() );
+            }
         if( aQuery->GetUid() != 0 && iQuery.Find( KSQLEnUid )
                 != KErrNotFound )
             {

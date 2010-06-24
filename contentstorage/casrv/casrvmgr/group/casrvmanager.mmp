@@ -15,7 +15,7 @@
 *
 */
 
-// To get the APP_LAYER_SYSTEMINCLUDE-definition
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
 #include <platform_paths.hrh>
 
 TARGET        casrvmanager.dll
@@ -30,7 +30,7 @@ SOURCE        casrvmanager.cpp
 
 USERINCLUDE   ../inc
 
-APP_LAYER_SYSTEMINCLUDE
+MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY       euser.lib
 LIBRARY       ECom.lib

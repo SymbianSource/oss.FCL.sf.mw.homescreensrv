@@ -33,7 +33,6 @@ symbian {
                                     "inc\tstask.h" \
                                     "inc\tstaskmonitor_global.h" \
                                     "s60\inc\tsscreenshotclient.h" \
-                                    "inc\tsscreenshotregistry.h" \
 
     TARGET.UID3 = 0x200267AF    
     TARGET.CAPABILITY = ALL -TCB

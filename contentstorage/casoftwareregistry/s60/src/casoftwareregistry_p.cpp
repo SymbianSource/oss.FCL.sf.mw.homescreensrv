@@ -262,7 +262,7 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
                 {
                 drives = drives.append(
                         HbParameterLengthLimiter("txt_applib_dialog_1_device_memory").arg(
-                          QString(QChar('A'+ i)).append(":")));
+                          QString(QChar('A'+ i))));
                 }
             else if(DriveInfo::GetDefaultDrive(
                     DriveInfo::EDefaultMassStorage, drive ) == KErrNone 
@@ -270,7 +270,7 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
                 {
                 drives = drives.append(
                         HbParameterLengthLimiter("txt_applib_dialog_1_mass_storage").arg(
-                          QString(QChar('A'+ i)).append(":")));
+                          QString(QChar('A'+ i))));
                 }
             else if(DriveInfo::GetDefaultDrive(
                     DriveInfo::EDefaultRemovableMassStorage, drive ) == KErrNone 
@@ -287,13 +287,13 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
                     if(tv.iName.Length()) { 
                         drives = drives.append(
                                 HbParameterLengthLimiter("txt_applib_dialog_1_2").arg(
-                                   QString(QChar('A'+ i)).append(":")).arg(
+                                   QString(QChar('A'+ i))).arg(
                                            XQConversions::s60DescToQString(tv.iName)));                       
                     }
                     else {
                         drives = drives.append(
                             HbParameterLengthLimiter("txt_applib_dialog_1_memory_card").arg(
-                              QString(QChar('A'+ i)).append(":")));           
+                              QString(QChar('A'+ i))));           
                     }
                 }
             } else {
@@ -309,13 +309,13 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
     static const TInt64 KMega = KKilo * KKilo;
     if(entry.ComponentSize() >= KMega) {
         detailMap[CaSoftwareRegistry::componentSizeKey()] = 
-            HbParameterLengthLimiter("txt_applib_dialog_l1_mb").arg(QString().setNum(
-                    static_cast<double>(entry.ComponentSize() / KMega)));
+            HbParameterLengthLimiter("txt_applib_dialog_l1_mb").arg(
+                    static_cast<double>(entry.ComponentSize() / KMega));
     }
     else {
         detailMap[CaSoftwareRegistry::componentSizeKey()] = 
-            HbParameterLengthLimiter("txt_applib_dialog_l1_kb").arg(QString().setNum(
-                    static_cast<double>(entry.ComponentSize() / KKilo)));
+            HbParameterLengthLimiter("txt_applib_dialog_l1_kb").arg(
+                    static_cast<double>(entry.ComponentSize() / KKilo));
     }
 
     

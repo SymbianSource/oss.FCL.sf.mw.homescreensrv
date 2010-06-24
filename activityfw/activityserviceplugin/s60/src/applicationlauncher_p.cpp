@@ -32,7 +32,7 @@ bool ApplicationLauncherPrivate::isRunning(int applicationId)
 
 void ApplicationLauncherPrivate::startApplication(int applicationId, const QUrl &uri)
 {
-    QString commandLine = QString("-activity %1").arg(uri.toString());
+    QString commandLine = QString("-activity %1").arg(QString(uri.toEncoded()));
 
     QT_TRAP_THROWING( {
         HBufC *commandLineAsDescriptor = XQConversions::qStringToS60Desc(commandLine);

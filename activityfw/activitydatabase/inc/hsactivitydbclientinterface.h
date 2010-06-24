@@ -29,6 +29,7 @@ const char ActivityPersistence [] = ":ActivityPersistence";
 const char ActivityVisibility [] = ":ActivityVisibility";
 const char ActivityScreenshotKeyword [] = "screenshot";
 const char ActivityDataKeyword [] = ":ActivityData";
+const char ActivityApplicationName[] = ":ApplicationName";
 
 class HsActivityDbClientInterface
 {

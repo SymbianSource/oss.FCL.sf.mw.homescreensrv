@@ -17,13 +17,15 @@
 #include "tstaskmonitor_p.h"
 #include "tstaskmonitor.h"
 
+#include <eikenv.h>
+
 #include "tstaskmonitorclient.h"
 #include "tsapplicationtask.h"
 
 #include "tsutils.h"
 using TaskSwitcher::CleanupResetAndDestroyPushL;
 
-TsTaskMonitorPrivate::TsTaskMonitorPrivate(TsTaskMonitor *q) : q_ptr(q), mClient(0)
+TsTaskMonitorPrivate::TsTaskMonitorPrivate(TsTaskMonitor *q) : q_ptr(q), mClient(0), mWsSession(CEikonEnv::Static()->WsSession())
 {
     QT_TRAP_THROWING(mClient = CTsTaskMonitorClient::NewL());
     mClient->Subscribe(*this);
@@ -40,8 +42,8 @@ QList< QSharedPointer<TsTask> > TsTaskMonitorPrivate::taskList()
     QList< QSharedPointer<TsTask> > tasks;
 
     QT_TRAP_THROWING (    
-        RPointerArray<CTsFswEntry> entries;   
-        CleanupResetAndDestroyPushL<CTsFswEntry>(entries);
+        RPointerArray<CTsEntry> entries;   
+        CleanupResetAndDestroyPushL<CTsEntry>(entries);
         mClient->TaskListL(entries);
         
         // TsTask claims ownership of CTsFswEntry, so we have to remove entries from 
@@ -49,12 +51,12 @@ QList< QSharedPointer<TsTask> > TsTaskMonitorPrivate::taskList()
         // CTsFswEntry objects in case of leave (for example due to OOM) in the middle 
         // of the loop below.
         while (entries.Count()) {
-            CTsFswEntry *firstEntry = entries[0];
+            CTsEntry *firstEntry = entries[0];
             CleanupStack::PushL(firstEntry);
             entries.Remove(0);
             
             // @todo switch by entry type
-            QT_TRYCATCH_LEAVING(tasks.append(QSharedPointer<TsTask>(new TsApplicationTask(firstEntry))));
+            QT_TRYCATCH_LEAVING(tasks.append(QSharedPointer<TsTask>(new TsApplicationTask(mWsSession, firstEntry))));
             
             CleanupStack::Pop(firstEntry);
         }

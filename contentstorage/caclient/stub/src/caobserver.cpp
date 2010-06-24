@@ -52,7 +52,7 @@ void CaObserver::entryChanged(const CaEntry &entry,
         ChangeType changeType) const
 {
     qDebug() << "CaClientProxy::entryChanged changeType:" << changeType;
-    CaEntry *caEntry = new CaEntry(entry);
+    QSharedPointer<CaEntry> caEntry(new CaEntry(entry));
     emit signalEntryChanged(*caEntry, changeType);
 }
 

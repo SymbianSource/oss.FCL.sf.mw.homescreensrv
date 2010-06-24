@@ -17,7 +17,7 @@
 
 #include <e32base.h>
 
-#include "tsfswentry.h"
+#include "tsentry.h"
 #include "tstaskmonitorclientimpl.h"
 #include "tstaskmonitorobserver.h"
 

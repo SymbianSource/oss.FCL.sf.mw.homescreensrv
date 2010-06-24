@@ -1,0 +1,44 @@
+EXPORTS
+	?updateActivity@AfStorageClient@@QAEHABVAfStorageEntry@@ABVQPixmap@@@Z @ 1 NONAME ; int AfStorageClient::updateActivity(class AfStorageEntry const &, class QPixmap const &)
+	?tr@AfStorageClient@@SA?AVQString@@PBD0H@Z @ 2 NONAME ; class QString AfStorageClient::tr(char const *, char const *, int)
+	?asyncRequestCompleated@AfStorageClient@@EAEXHHABVQString@@@Z @ 3 NONAME ; void AfStorageClient::asyncRequestCompleated(int, int, class QString const &)
+	??_EAfStorageClient@@UAE@I@Z @ 4 NONAME ; AfStorageClient::~AfStorageClient(unsigned int)
+	?dataChanged@AfStorageClient@@IAEXXZ @ 5 NONAME ; void AfStorageClient::dataChanged(void)
+	?waitActivity@AfStorageClient@@QAEHXZ @ 6 NONAME ; int AfStorageClient::waitActivity(void)
+	?asyncRequestCompleated@AfStorageClient@@EAEXHH@Z @ 7 NONAME ; void AfStorageClient::asyncRequestCompleated(int, int)
+	?applicationId@AfStorageEntry@@QBEHXZ @ 8 NONAME ; int AfStorageEntry::applicationId(void) const
+	?removeActivity@AfStorageClient@@QAEHABVAfStorageEntry@@@Z @ 9 NONAME ; int AfStorageClient::removeActivity(class AfStorageEntry const &)
+	?qt_metacall@AfStorageClient@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 10 NONAME ; int AfStorageClient::qt_metacall(enum QMetaObject::Call, int, void * *)
+	??_EAfStorageEntry@@QAE@I@Z @ 11 NONAME ; AfStorageEntry::~AfStorageEntry(unsigned int)
+	?data@AfStorageEntry@@QBEPBVCAfEntry@@XZ @ 12 NONAME ; class CAfEntry const * AfStorageEntry::data(void) const
+	?getStaticMetaObject@AfStorageClient@@SAABUQMetaObject@@XZ @ 13 NONAME ; struct QMetaObject const & AfStorageClient::getStaticMetaObject(void)
+	?activityData@AfStorageClient@@QAEHAAVAfStorageEntry@@ABV2@@Z @ 14 NONAME ; int AfStorageClient::activityData(class AfStorageEntry &, class AfStorageEntry const &)
+	?activityRequested@AfStorageClient@@IAEXABVQString@@@Z @ 15 NONAME ; void AfStorageClient::activityRequested(class QString const &)
+	?getThumbnail@AfStorageClient@@QAEHVQSize@@VQString@@PAX@Z @ 16 NONAME ; int AfStorageClient::getThumbnail(class QSize, class QString, void *)
+	?metaObject@AfStorageClient@@UBEPBUQMetaObject@@XZ @ 17 NONAME ; struct QMetaObject const * AfStorageClient::metaObject(void) const
+	??0AfStorageEntry@@QAE@V?$QSharedPointer@VCAfEntry@@@@@Z @ 18 NONAME ; AfStorageEntry::AfStorageEntry(class QSharedPointer<class CAfEntry>)
+	??0AfStorageClient@@QAE@PAVQObject@@@Z @ 19 NONAME ; AfStorageClient::AfStorageClient(class QObject *)
+	?thumbnailRequested@AfStorageClient@@IAEXVQPixmap@@PAX@Z @ 20 NONAME ; void AfStorageClient::thumbnailRequested(class QPixmap, void *)
+	?staticMetaObject@AfStorageClient@@2UQMetaObject@@B @ 21 NONAME ; struct QMetaObject const AfStorageClient::staticMetaObject
+	?activities@AfStorageClient@@QAEHAAV?$QList@VAfStorageEntry@@@@@Z @ 22 NONAME ; int AfStorageClient::activities(class QList<class AfStorageEntry> &)
+	?publicData@AfStorageEntry@@QBE?AV?$QHash@VQString@@VQVariant@@@@XZ @ 23 NONAME ; class QHash<class QString, class QVariant> AfStorageEntry::publicData(void) const
+	??1AfStorageEntry@@QAE@XZ @ 24 NONAME ; AfStorageEntry::~AfStorageEntry(void)
+	??0AfStorageEntry@@QAE@ABV0@@Z @ 25 NONAME ; AfStorageEntry::AfStorageEntry(class AfStorageEntry const &)
+	?launchActivity@AfStorageClient@@QAEHABVAfStorageEntry@@@Z @ 26 NONAME ; int AfStorageClient::launchActivity(class AfStorageEntry const &)
+	?trUtf8@AfStorageClient@@SA?AVQString@@PBD0H@Z @ 27 NONAME ; class QString AfStorageClient::trUtf8(char const *, char const *, int)
+	?removeApplicationActivities@AfStorageClient@@QAEHABVAfStorageEntry@@@Z @ 28 NONAME ; int AfStorageClient::removeApplicationActivities(class AfStorageEntry const &)
+	?trUtf8@AfStorageClient@@SA?AVQString@@PBD0@Z @ 29 NONAME ; class QString AfStorageClient::trUtf8(char const *, char const *)
+	?applicationActivities@AfStorageClient@@QAEHAAV?$QList@VAfStorageEntry@@@@ABVAfStorageEntry@@@Z @ 30 NONAME ; int AfStorageClient::applicationActivities(class QList<class AfStorageEntry> &, class AfStorageEntry const &)
+	?connect@AfStorageClient@@QAEHXZ @ 31 NONAME ; int AfStorageClient::connect(void)
+	?tr@AfStorageClient@@SA?AVQString@@PBD0@Z @ 32 NONAME ; class QString AfStorageClient::tr(char const *, char const *)
+	?notifyDataChange@AfStorageClient@@QAEHXZ @ 33 NONAME ; int AfStorageClient::notifyDataChange(void)
+	?imageSrc@AfStorageEntry@@QBE?AVQString@@XZ @ 34 NONAME ; class QString AfStorageEntry::imageSrc(void) const
+	?asyncRequestCompleated@AfStorageClient@@EAEXHHABVQPixmap@@PAX@Z @ 35 NONAME ; void AfStorageClient::asyncRequestCompleated(int, int, class QPixmap const &, void *)
+	??0AfStorageEntry@@QAE@HABVQString@@ABVQVariant@@ABV?$QHash@VQString@@VQVariant@@@@@Z @ 36 NONAME ; AfStorageEntry::AfStorageEntry(int, class QString const &, class QVariant const &, class QHash<class QString, class QVariant> const &)
+	?addActivity@AfStorageClient@@QAEHABVAfStorageEntry@@ABVQPixmap@@@Z @ 37 NONAME ; int AfStorageClient::addActivity(class AfStorageEntry const &, class QPixmap const &)
+	?privateData@AfStorageEntry@@QBE?AVQVariant@@XZ @ 38 NONAME ; class QVariant AfStorageEntry::privateData(void) const
+	??1AfStorageClient@@UAE@XZ @ 39 NONAME ; AfStorageClient::~AfStorageClient(void)
+	?activityId@AfStorageEntry@@QBE?AVQString@@XZ @ 40 NONAME ; class QString AfStorageEntry::activityId(void) const
+	?flags@AfStorageEntry@@QBEHXZ @ 41 NONAME ; int AfStorageEntry::flags(void) const
+	?qt_metacast@AfStorageClient@@UAEPAXPBD@Z @ 42 NONAME ; void * AfStorageClient::qt_metacast(char const *)
+

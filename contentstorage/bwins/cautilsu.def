@@ -99,4 +99,6 @@ EXPORTS
 	?SetStringIdL@CCaLocalizationEntry@@QAEXABVTDesC16@@@Z @ 98 NONAME ; void CCaLocalizationEntry::SetStringIdL(class TDesC16 const &)
 	?SetTextId@CCaLocalizationEntry@@QAEXI@Z @ 99 NONAME ; void CCaLocalizationEntry::SetTextId(unsigned int)
 	?RemoveAttribute@RCaEntryAttrArray@@QAEXABVTDesC16@@@Z @ 100 NONAME ; void RCaEntryAttrArray::RemoveAttribute(class TDesC16 const &)
+	?GetChildId@CCaInnerQuery@@QBEHXZ @ 101 NONAME ; int CCaInnerQuery::GetChildId(void) const
+	?SetChildId@CCaInnerQuery@@QAEXH@Z @ 102 NONAME ; void CCaInnerQuery::SetChildId(int)
 

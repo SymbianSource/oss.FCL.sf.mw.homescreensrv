@@ -16,9 +16,9 @@
 */
 
 #include "tstask.h"
-#include "tsfswentry.h"
+#include "tsentry.h"
 
-TsTask::TsTask(CTsFswEntry* entry) : mEntry(entry)
+TsTask::TsTask(CTsEntry* entry) : mEntry(entry)
 {
 }
 

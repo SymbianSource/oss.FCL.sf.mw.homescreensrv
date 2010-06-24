@@ -21,7 +21,7 @@
 #include <QObject>
 #include <QSharedPointer>
 
-#include "hsiwidgetprovider.h"
+#include "hswidgetcomponentdescriptor.h"
 
 class HsWidgetRegistryServicePrivate;
 
@@ -37,11 +37,11 @@ public:
 
     virtual ~HsWidgetRegistryService();
 
-    QList<HsWidgetToken> widgets();
+    QList<HsWidgetComponentDescriptor> widgets();
 
 signals:
 
-    void widgetAddedToRegistry(const QList<HsWidgetToken> &widgetTokenList);
+    void widgetAddedToRegistry(const QList<HsWidgetComponentDescriptor> &widgetTokenList);
 
     void widgetRemovedFromRegistry(int uid);
 
@@ -51,7 +51,7 @@ private:
 
 private:
 
-    void emitWidgetAddedToRegistry(const QList<HsWidgetToken> &widgetsAdded);
+    void emitWidgetAddedToRegistry(const QList<HsWidgetComponentDescriptor> &widgetsAdded);
 
     void emitWidgetRemovedFromRegistry(int uid);
 

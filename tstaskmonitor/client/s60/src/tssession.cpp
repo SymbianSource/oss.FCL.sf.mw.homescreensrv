@@ -74,7 +74,7 @@ void RTsSession::TaskListL(RTsFswArray& tasks)
         if (err == KErrNone) {
             RDesReadStream dataStream(dataPointer);
             CleanupClosePushL(dataStream);
-            CTsFswEntry::InternalizeArrayL(dataStream, tasks);
+            CTsEntry::InternalizeArrayL(dataStream, tasks);
             CleanupStack::PopAndDestroy(&dataStream);
         } else if (err != KErrCorrupt) {
             User::Leave(err);
@@ -137,4 +137,12 @@ TInt RTsSession::UnregisterScreenshot(TInt wgId)
     arguments.Set(AdditionalParameters, &KNullDesC8);
     
     return SendReceive(UnregisterScreenshotMessage, arguments);
+}
+
+TInt RTsSession::SetVisibility(TInt wgId, Visibility value)
+{
+    TPckgBuf<TInt> windowGroup(wgId), visibilityValue(value);
+    
+    TIpcArgs arguments(&windowGroup, &visibilityValue);
+    return SendReceive(VisibilityChange, arguments);
 }

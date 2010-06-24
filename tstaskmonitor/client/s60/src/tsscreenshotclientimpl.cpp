@@ -62,3 +62,8 @@ TInt CTsScreenshotClientImpl::UnregisterScreenshot(TInt wgId)
 {
     return iSession.UnregisterScreenshot(wgId);
 }
+
+TInt CTsScreenshotClientImpl::SetVisibility(TInt wgId, Visibility value)
+{
+    return iSession.SetVisibility(wgId, value);
+}

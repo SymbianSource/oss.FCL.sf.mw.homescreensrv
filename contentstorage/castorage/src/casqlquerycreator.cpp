@@ -818,6 +818,20 @@ void CaSqlQueryCreator::CreateGetEntriesQueryByQueryL(
         query.Append( getListByParentId2withWhere );
         CleanupStack::PopAndDestroy( &getListByParentId2withWhere );
         }
+    else if ( aQuery->GetChildId() > 0 )
+        {
+        RBuf getListByCildIdwithWhere;
+        getListByCildIdwithWhere.CleanupClosePushL();
+        getListByCildIdwithWhere.CreateL( KSQLGetListByChildId().Length() + whereStatement.Length() );
+        getListByCildIdwithWhere.AppendFormat( KSQLGetListByChildId, &whereStatement );
+        
+        query.ReAllocL( KSQLGetListByParentId1().Length() +  leftJoins.Length() +
+                getListByCildIdwithWhere.Length() );
+        query.Append( KSQLGetListByParentId1 );
+        query.Append( leftJoins );
+        query.Append( getListByCildIdwithWhere );
+        CleanupStack::PopAndDestroy( &getListByCildIdwithWhere );
+        }
     else
         {
         query.CreateL( KSQLGetList1().Length() );

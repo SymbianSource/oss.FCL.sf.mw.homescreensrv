@@ -44,6 +44,8 @@ private:
     void parseDescription();
     void parseHidden();
     void parseServiceXml();
+    void parsePreviewImage();
+    void parseTranslationFileName();
     
    
     bool isWidgetTagValid();

@@ -356,9 +356,9 @@ void CCaWidgetStorageHandler::SetLocalizationsL(
         const CCaWidgetDescription* aWidget, TInt aEntryId )
     {
     RBuf filename;
-    filename.CreateL( aWidget->GetUri().Length() + 1 ); //1 for _
+    filename.CreateL( aWidget->GetTranslationFileName().Length() + 1 ); //1 for _
     CleanupClosePushL( filename );
-    filename.Copy( aWidget->GetUri() );
+    filename.Copy( aWidget->GetTranslationFileName() );
     filename.Append( KWidgetScannerUnderline );
 
     // prepare localizations

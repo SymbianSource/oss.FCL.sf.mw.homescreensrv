@@ -23,7 +23,7 @@
 #include <QPixmap>
 #include <QSize>
 
-class ActivityManagerPrivate;
+#include <afstorageclient.h>
 
 class ActivityManager : public QObject
 {
@@ -31,7 +31,7 @@ class ActivityManager : public QObject
     Q_OBJECT
 
 public:
-    ActivityManager(QObject *parent = 0);
+    ActivityManager(const QSharedPointer<AfStorageClient> &serviceProvider, QObject *parent = 0);
     ~ActivityManager();
 
 public slots:
@@ -46,9 +46,11 @@ signals:
     void dataChanged();
 
 private:
-    ActivityManagerPrivate *d_ptr;
+    void launchActivity(const QVariantHash& activity);
+    QUrl activityToUri(const QVariantHash& activity) const;
 
-    friend class ActivityManagerPrivate;
+private:
+    QSharedPointer<AfStorageClient> mServiceProvider;
 };
 
 #endif // ACTIVITYMANAGER_H

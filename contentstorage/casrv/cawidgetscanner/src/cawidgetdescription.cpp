@@ -71,13 +71,19 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     aEntry->FindAttribute( KPreviewImageAttrName, attribute );
     iPreviewImageName.CreateL( attribute.Length() );
     iPreviewImageName = attribute;
-    
+
     //library
     iLibrary.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetLibrary, iLibrary );
+    //path
+    iPath.CreateL( KCaMaxAttrValueLen );
+    aEntry->FindAttribute( KAttrWidgetPath, iPath );
     //uri
     iUri.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetUri, iUri );
+    //translation filename
+    iTranslationFileName.CreateL( KCaMaxAttrValueLen );
+    aEntry->FindAttribute( KAttrWidgetTranslationFileName, iTranslationFileName );
     //mmc id
     iMmcId.CreateL(KMassStorageIdLength);
     aEntry->FindAttribute( KCaAttrMmcId, iMmcId );
@@ -134,11 +140,12 @@ CCaWidgetDescription* CCaWidgetDescription::NewLC( CCaInnerEntry* aEntry )
 //
 CCaWidgetDescription::~CCaWidgetDescription()
     {
-
+    iPath.Close();
     iModificationTime.Close();
     iServiceXml.Close();
     iMmcId.Close();
     iUri.Close();
+    iTranslationFileName.Close();
     iLibrary.Close();
     iPreviewImageName.Close();
     iIconUri.Close();
@@ -182,6 +189,7 @@ TBool CCaWidgetDescription::Compare( const CCaWidgetDescription& aToCompare )
             aToCompare.GetIconUri() == GetIconUri() &&
             aToCompare.GetPreviewImageName() == GetPreviewImageName() &&
             aToCompare.GetTitle() == GetTitle() &&
+            aToCompare.GetTranslationFileName() == GetTranslationFileName() &&
             aToCompare.GetLibrary() != KNoLibrary &&
             aToCompare.GetModificationTime() == GetModificationTime() &&
             aToCompare.GetServiceXml() == GetServiceXml()
@@ -255,6 +263,18 @@ void CCaWidgetDescription::SetUriL( const TDesC& aUri )
     iUri.Close();
     iUri.CreateL(aUri);
     }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetTranslationFileNameL(
+        const TDesC& aTranslationFileName )
+    {
+    iTranslationFileName.Close();
+    iTranslationFileName.CreateL( aTranslationFileName );
+    }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -373,6 +393,25 @@ TPtrC CCaWidgetDescription::GetLibrary( ) const
     {
     return iLibrary;
     }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetPath( ) const
+    {
+    return iPath;
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetPathL( const TDesC& aPath )
+    {
+	iPath.Close();
+	iPath.CreateL(aPath);
+    }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -389,6 +428,15 @@ TPtrC CCaWidgetDescription::GetDescription( ) const
 TPtrC CCaWidgetDescription::GetUri( ) const
     {
     return iUri;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetTranslationFileName() const
+    {
+    return iTranslationFileName;
     }
 
 // -----------------------------------------------------------------------------
@@ -500,6 +548,10 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
             entry->SetFlags( entry->GetFlags() & ~ERemovable );
             }
         }
+    if ( iPath != KNullDesC )
+        {
+        entry->AddAttributeL(KAttrWidgetPath, iPath);
+        }
     if ( iTitle != KNullDesC )
         {
         entry->SetTextL(iTitle);
@@ -534,6 +586,11 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     if ( iServiceXml != KNullDesC )
         {
         entry->AddAttributeL( KAttrWidgetServiceXml, iServiceXml);
+        }
+    if( iTranslationFileName != KNullDesC )
+        {
+        entry->AddAttributeL( KAttrWidgetTranslationFileName,
+                iTranslationFileName );
         }
     return entry;
     }
@@ -589,72 +646,70 @@ TPtrC CCaWidgetDescription::GetServiceXml() const
 // -----------------------------------------------------------------------------
 //
 void CCaWidgetDescription::LocalizeTextsL()
-	{
-    
-    
-	if( iUri.Length() )
-		{
-	    RBuf uri;
-	    uri.Create( iUri.Length() + 1 );
-	    CleanupClosePushL( uri );
-	    uri.Copy( iUri );
-	    uri.Append( KWidgetScannerUnderline );
-	       
-	    
-	    if( !HbTextResolverSymbian::Init( uri, KLocalizationFilepathC ) )
-	      {
-	      if( !HbTextResolverSymbian::Init( uri, KLocalizationFilepathZ ) )
-	          {
-	          // this should not be called too often 
+    {
+    if( iTranslationFileName.Length() )
+        {
+        RBuf translationFileName;
+        translationFileName.Create( iTranslationFileName.Length() + 1 );
+        CleanupClosePushL( translationFileName );
+        translationFileName.Copy( iTranslationFileName );
+        translationFileName.Append( KWidgetScannerUnderline );
+           
+        
+        if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathC ) )
+          {
+          if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathZ ) )
+              {
+              // this should not be called too often 
               TChar currentDriveLetter;
-	          TDriveList driveList;
-	          RFs fs;
-	          User::LeaveIfError( fs.Connect() );
-	          User::LeaveIfError( fs.DriveList( driveList ) );
+              TDriveList driveList;
+              RFs fs;
+              User::LeaveIfError( fs.Connect() );
+              User::LeaveIfError( fs.DriveList( driveList ) );
 
-	          RBuf path;
-	          path.Create( KLocalizationFilepath().Length() + 1 );
-	          CleanupClosePushL( path );
-	          
-  	          for ( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
-	              {
-	              if ( driveList[driveNr] )
-	                  {
-	                  User::LeaveIfError( fs.DriveToChar( driveNr,
-	                          currentDriveLetter ) );
-	                  path.Append( currentDriveLetter );
-	                  path.Append( KLocalizationFilepath );
-	                  if( HbTextResolverSymbian::Init( uri, path ) )
-	                      {
-	                      break;
-	                      }
-	                  }
-	              path.Zero();
-	              }
-  	          CleanupStack::PopAndDestroy( &path );
-  	          fs.Close();
-	          }
-	       }
-	    
-	    HBufC* tmp;
-	    
-	    if( iTitle.Length() )
-	    	{
-	        SetStringidTitleL( iTitle );
-	        tmp = HbTextResolverSymbian::LoadLC( iTitle );
-	        SetTitleL( *tmp );
-	        CleanupStack::PopAndDestroy( tmp );
-	    	}
-	    if( iDescription.Length() )
-	    	{
-	        SetStringIdDescriptionL( iDescription );
-	        tmp = HbTextResolverSymbian::LoadLC( iDescription );
-	        SetDescriptionL( *tmp );
-	        CleanupStack::PopAndDestroy( tmp );
-	    	}
-	    CleanupStack::PopAndDestroy( &uri );
-		}
-	}
+              RBuf path;
+              path.Create( KLocalizationFilepath().Length() + 1 );
+              CleanupClosePushL( path );
+              
+              for( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
+                  {
+                  if( driveList[driveNr] )
+                      {
+                      User::LeaveIfError( fs.DriveToChar( driveNr,
+                              currentDriveLetter ) );
+                      path.Append( currentDriveLetter );
+                      path.Append( KLocalizationFilepath );
+                      if( HbTextResolverSymbian::Init( translationFileName, path ) )
+                          {
+                          break;
+                          }
+                      }
+                  path.Zero();
+                  }
+              CleanupStack::PopAndDestroy( &path );
+              fs.Close();
+              }
+           }
+        
+        HBufC* tmp;
+        
+        if( iTitle.Length() )
+            {
+            SetStringidTitleL( iTitle );
+            tmp = HbTextResolverSymbian::LoadLC( iTitle );
+            SetTitleL( *tmp );
+            CleanupStack::PopAndDestroy( tmp );
+            }
+        if( iDescription.Length() )
+            {
+            SetStringIdDescriptionL( iDescription );
+            tmp = HbTextResolverSymbian::LoadLC( iDescription );
+            SetDescriptionL( *tmp );
+            CleanupStack::PopAndDestroy( tmp );
+            }
+        CleanupStack::PopAndDestroy( &translationFileName );
+        }
+    }
 
 // -----------------------------------------------------------------------------
 //
