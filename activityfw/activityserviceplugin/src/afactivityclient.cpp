@@ -24,7 +24,7 @@
 #include <afstorageentry.h>
 #include <afstorageglobals.h>
 
-#include "activityclient.h"
+#include "afactivityclient.h"
 ActivityClient::ActivityClient(const QSharedPointer<AfStorageClient> &serviceProvider, QObject *parent) 
 : 
     QObject(parent),

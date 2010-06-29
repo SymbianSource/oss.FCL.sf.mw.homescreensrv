@@ -24,13 +24,13 @@ INCLUDEPATH += ./inc \
                ../../inc
 
 HEADERS +=  ./inc/activityserviceplugin.h \
-            ./inc/activityclient.h \
-            ./inc/activitymanager.h \
+            ./inc/afactivityclient.h \
+            ./inc/afactivitymanager.h \
             ./inc/applicationlauncher.h \
 
 SOURCES +=  ./src/activityserviceplugin.cpp \
-            ./src/activityclient.cpp \
-            ./src/activitymanager.cpp \
+            ./src/afactivityclient.cpp \
+            ./src/afactivitymanager.cpp \
             ./src/applicationlauncher.cpp \
 
 symbian {

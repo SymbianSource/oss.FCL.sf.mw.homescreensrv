@@ -21,8 +21,8 @@
 #include <qabstractsecuritysession.h>
 #include <qservicecontext.h>
 
-#include "activityclient.h"
-#include "activitymanager.h"
+#include "afactivityclient.h"
+#include "afactivitymanager.h"
 
 QObject *ActivityServicePlugin::createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session)
 {

@@ -14,8 +14,8 @@
 * Description:
 *
 */
-#ifndef ACTIVITYCLIENT_H
-#define ACTIVITYCLIENT_H
+#ifndef AFACTIVITYCLIENT_H
+#define AFACTIVITYCLIENT_H
 
 #include <QObject>
 #include <QVariant>
@@ -48,4 +48,4 @@ private:
     bool mIsconnected;
 };
 
-#endif // ACTIVITYCLIENT_H
+#endif // AFACTIVITYCLIENT_H

@@ -45,11 +45,6 @@ symbian: {
         " TARGET calocalizerscanner.rsc" \
         "END"
     MMP_RULES += rssResource
-    MMP_RULES += "$${LITERAL_HASH}if defined(WINSCW)" \
-        "DEFFILE ./bwins/calocalizerscanner.def" \
-        "$${LITERAL_HASH}else" \
-        "DEFFILE ./eabi/calocalizerscanner.def" \
-        "$${LITERAL_HASH}endif"
     HEADERS += ./inc/*.h
     SOURCES += ./src/*.cpp
     LIBS += -leuser \

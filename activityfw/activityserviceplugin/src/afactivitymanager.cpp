@@ -22,7 +22,7 @@
 #include <afstorageentry.h>
 #include <afstorageglobals.h>
 
-#include "activitymanager.h"
+#include "afactivitymanager.h"
 #include "applicationlauncher.h"
 
 ActivityManager::ActivityManager(const QSharedPointer<AfStorageClient> &serviceProvider, 
@@ -92,7 +92,7 @@ void ActivityManager::launchActivity(const QUrl &uri)
 
 void ActivityManager::launchActivity(const QString &uri)
 {
-    qWarning("ActivityManager::launchActivity(const QString &uri) is deprecated, use ActivityManager::launchActivity(const QUrl &uri) instead");
+    qWarning("AfActivityManager::launchActivity(const QString &uri) is deprecated, use AfActivityManager::launchActivity(const QUrl &uri) instead");
     launchActivity(QUrl(uri));
 }
 

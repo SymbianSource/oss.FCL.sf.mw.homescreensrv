@@ -14,8 +14,8 @@
 * Description:
 *
 */
-#ifndef ACTIVITYMANAGER_H
-#define ACTIVITYMANAGER_H
+#ifndef AFACTIVITYMANAGER_H
+#define AFACTIVITYMANAGER_H
 
 #include <QObject>
 #include <QVariant>
@@ -53,4 +53,4 @@ private:
     QSharedPointer<AfStorageClient> mServiceProvider;
 };
 
-#endif // ACTIVITYMANAGER_H
+#endif // AFACTIVITYMANAGER_H
