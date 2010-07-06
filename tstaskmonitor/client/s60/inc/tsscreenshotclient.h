@@ -35,6 +35,7 @@ public:
     IMPORT_C TInt RegisterScreenshot(CFbsBitmap *screenshot, TInt wgId, UpdatePriority priority = Normal);
     IMPORT_C void RegisterScreenshot(TRequestStatus &status, CFbsBitmap *screenshot, TInt wgId, UpdatePriority priority = Normal);
     IMPORT_C TInt UnregisterScreenshot(TInt wgId);
+    IMPORT_C TInt SetVisibility(TInt wgId, Visibility value);
 
 private:
     CTsScreenshotClient();

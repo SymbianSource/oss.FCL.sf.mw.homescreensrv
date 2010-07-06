@@ -58,7 +58,7 @@ public:
 
     bool prependEntriesToGroup(int groupId, const QList<int> &entryIdList);
 
-    bool executeCommand(const CaEntry &entry, const QString &command);
+    int executeCommand(const CaEntry &entry, const QString &command);
 
     CaNotifier *createNotifier(const CaNotifierFilter &filter);
 

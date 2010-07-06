@@ -56,10 +56,7 @@ namespace Swi
  *   to date continuously.
  */
 
-NONSHARABLE_CLASS( CCaSrvAppScanner ):
-    public CActive,
-    public MCaInstallListener,
-    public MApaAppListServObserver
+NONSHARABLE_CLASS( CCaSrvAppScanner ) : public CActive
     {
 
 public:
@@ -78,16 +75,6 @@ public:
     static CCaSrvAppScanner* NewL( CCaStorageProxy& aCaStorageProxy,
             CCaSrvEngUtils& aUtils );
 
-public:
-    // from MCaInstallListener
-
-    /**
-     * Handle Install Event.
-     * @since S60 v5.0
-     * @param aUid installed/uninstalled app uid.
-     */
-    void HandleInstallNotifyL( TInt aUid );
-
 private:
     // Constructors and destructor
 
@@ -103,20 +90,6 @@ private:
      * Second phased constructor.
      */
     void ConstructL();
-
-private:
-
-    /**
-     * Notifies storage about change for aAppUid.
-     * @param aAppUid application uid.
-     */
-    void NotifyL( TInt aAppUid );
-
-    /**
-     * Notifies storage about change for aPackageEntry related app.
-     * @param aPackageEntry application package entry.
-     */
-    void NotifyL( Swi::RSisRegistryEntry& aPackageEntry );
 
 private:
     // from CActive
@@ -138,11 +111,6 @@ private:
     TInt RunError( TInt aError );
 
 private:
-    // from MApaAppListServObserver
-
-    void HandleAppListEvent( TInt aEvent );
-
-private:
     // new methods
 
     /**
@@ -150,9 +118,6 @@ private:
      * @result id of download collection.
      */
     TInt GetCollectionDownloadIdL();
-    
-    //TODO temporary sollution for fake uninstall progres notification
-    void ClearUninstallFlagL();
 
     /**
      * Gets collectionId of all collection.
@@ -199,6 +164,13 @@ private:
      * @return ETrue if flags were updated.
      */
     TBool HandleRemovableVisibleFlagsUpdateL( CCaInnerEntry* aItem );
+
+    /**
+     * Removes application unninstall flag.
+     * @param aItem menu item.
+     * @return ETrue if flags were updated.
+     */
+    TBool RemoveUninstallFlagL( CCaInnerEntry* aItem );
 
     /**
      * Updates application's missing and visible flags.
@@ -285,14 +257,9 @@ private:
      * Add new menu item referring to this application.
      * @param aUid Application capability.
      * @param aCurrentMmcId MMC ID of currently inserted MMC, or 0.
+     * @return added item id
      */
-    void AddAppEntryL( TUint aUid, TUint aCurrentMmcId );
-
-    /**
-     * Removes given uid from iInstalledPackages.
-     * @param aUid Application uid.
-     */
-    void RemoveFromInstalledPackages( TUint aUid );
+    TInt AddAppEntryL( TUint aUid, TUint aCurrentMmcId );
 
     /**
      * Set information from TApaAppInfo to entry.
@@ -386,19 +353,17 @@ private:
      * Update entry from storage.
      * @param aEntry application entry.
      * @param aMmcId unique mmc id.
+     * @param aAlwaysUpdate item always should be updated.
      */
-    void UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId );
+    void UpdateAppEntryL( CCaInnerEntry* aEntry,
+            TUint aMmcId,
+            TBool aAlwaysUpdate = EFalse );
 
     /**
      * Get all applications from storage and visible from apparc
      * and update if necessary.
      */
     void UpdateApplicationEntriesL();
-
-    /**
-     * Notifys storage about updated apps.
-     */
-    void InstallationNotifyL();
 
     /**
      * Make not empty collections with not hidden apps visible.
@@ -410,7 +375,7 @@ private:
      * @param aEntry application entry.
      */
     void MakeCollectionVisibleIfHasVisibleEntryL( CCaInnerEntry* aEntry );
-    
+
     /**
      * Adds or updates component id attribute in entry based on SCR provided data
      * @param aEntry entry being updated with component id attribute.
@@ -418,28 +383,20 @@ private:
      */
     TBool UpdateComponentIdL( CCaInnerEntry& aEntry ) const;
 
-    /**
-     * Schedule appscanner run.
-     * Self complete active object.
-     */
-    void ScheduleScan();
-
 private:
     // data
 
     RApaLsSession iApaLsSession; ///< AppArc session. Own.
-    CApaAppListNotifier* iNotifier; ///< Change notifier. Own.
-    CCaInstallNotifier* iInstallNotifier; ///< Install notifier. Own.
     CCaSrvMmcHistory* iMmcHistory; ///< MMC history. Own.
     RFs iFs; ///< File Server Session. Own.
     Usif::RSoftwareComponentRegistry iSoftwareRegistry;
 
     CCaStorageProxy& iCaStorageProxy; ///< Not own
     CCaSrvEngUtils& iSrvEngUtils; ///< Not own
-    RArray<TInt> iInstalledPackages; ///< Own.
 
     TInt iCollectionDownloadId;
     TInt iAllCollectionId;
+
 CA_STORAGE_TEST_FRIEND_CLASS    (T_casrvAppScaner)
 
     };

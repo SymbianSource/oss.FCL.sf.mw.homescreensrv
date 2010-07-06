@@ -25,8 +25,6 @@ USERINCLUDE     ../../utils/inc
 USERINCLUDE     ../../backstepping/inc
 
 MW_LAYER_SYSTEMINCLUDE 
-APP_LAYER_SYSTEMINCLUDE 
-
 
 SOURCEPATH      ../src
 SOURCE          main.cpp
@@ -37,13 +35,13 @@ SOURCE          hsdataprovidertask.cpp
 SOURCE          tsdatatask.cpp
 
 SOURCE          tsrunningappstorage.cpp
-SOURCE          tsfswdatalist.cpp
+SOURCE          tsdatalist.cpp
 SOURCE          tsscreenshotprovider.cpp
 
 SOURCEPATH      ../../utils/src
 SOURCE          tsentrykey.cpp
 SOURCE          tsentrykeygenerator.cpp
-SOURCE          tsfswentry.cpp
+SOURCE          tsentry.cpp
 
 
 LIBRARY         euser.lib 

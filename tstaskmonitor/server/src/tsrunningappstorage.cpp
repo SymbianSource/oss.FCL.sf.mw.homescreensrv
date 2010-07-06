@@ -15,8 +15,8 @@
 *
 */
 #include "tsrunningappstorage.h"
-#include "tsfswdatalist.h"
-#include "tsfswentry.h"
+#include "tsdatalist.h"
+#include "tsentry.h"
 #include <s32strm.h>
 #include <s32mem.h>
 // -----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ CRunningAppStorage* CRunningAppStorage::NewL(MHsDataObserver& observer,
 void CRunningAppStorage::ConstructL(MTsResourceManager& resources, 
                                     MTsWindowGroupsMonitor &wsMonitor)
 {
-    mEngine = CTsFswDataList::NewL(resources, wsMonitor, *this) ;
+    mEngine = CTsDataList::NewL(resources, wsMonitor, *this) ;
     RArray<RWsSession::TWindowGroupChainInfo> wgList;
     CleanupClosePushL(wgList);
     User::LeaveIfError(resources.WsSession().WindowGroupList(&wgList));
@@ -97,41 +97,43 @@ void CRunningAppStorage::DataChanged()
 //
 void CRunningAppStorage::DataChangedL()
 {
-    RTsFswArray taskList = mEngine->FswDataL();
-    CTsFswEntry* entry = CTsFswEntry::NewLC();
-    // Create a dynamic flat buffer to hold this object’s member data
-    
     const TInt KExpandSize = 256; // "Granularity" of dynamic buffer
     CBufFlat* buf = CBufFlat::NewL(KExpandSize);
     CleanupStack::PushL(buf);
     RBufWriteStream stream(*buf); 
     CleanupClosePushL(stream);
-    entry->ExternalizeArrayL(stream, taskList);
+    CTsEntry::ExternalizeArrayL(stream, mEngine->Data());
     CleanupStack::PopAndDestroy(&stream);
     mData.Close();
     mData.CreateL( buf->Size() );
     buf->Read(0, mData, buf->Size());
-    
-
     CleanupStack::PopAndDestroy(buf);
-    CleanupStack::PopAndDestroy(entry);  
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void CRunningAppStorage::UpdateL(TInt key, const CFbsBitmap& data, TInt /*param*/, TInt priority)
-    {
-    UpdatePriority newpriority = static_cast<UpdatePriority>(priority);
-    mEngine->SetScreenshotL(&data, newpriority, key);
-    }
+void CRunningAppStorage::UpdateL(TInt key, const CFbsBitmap& data, TInt param, TInt priority)
+{
+    mEngine->UpdateL(key, data, param, priority);
+    
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void CRunningAppStorage::RemoveL(TInt key, TInt /*param*/)
-    {
-    mEngine->RemoveScreenshotL(key);
-    }
+void CRunningAppStorage::UpdateL(TInt key, const Visibility& data, TInt param)
+{
+    mEngine->UpdateL(key, data, param);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CRunningAppStorage::RemoveL(TInt key, TInt param)
+{
+    mEngine->RemoveL(key, param);
+}

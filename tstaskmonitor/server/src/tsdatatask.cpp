@@ -25,9 +25,14 @@ void TsDataTask::ExecuteL(MTsDataStorage& dataStorage, const RMessage2& msg)
 {
     switch(msg.Function()) {
     case RegisterScreenshotMessage:
-        TsDataTask::RegisterScreenshotL(dataStorage, msg); break;
+        TsDataTask::RegisterScreenshotL(dataStorage, msg);
+        break;
     case UnregisterScreenshotMessage:
-        TsDataTask::UnregisterScreenshotL(dataStorage, msg); break;
+        TsDataTask::UnregisterScreenshotL(dataStorage, msg);
+        break;
+    case VisibilityChange:
+        VisibilityChangeL(dataStorage, msg);
+        break;
     }
     
     msg.Complete(KErrNone);
@@ -60,4 +65,15 @@ void TsDataTask::UnregisterScreenshotL(MTsDataStorage& dataStorage,
     msg.ReadL(AdditionalParameters, param);
     
     dataStorage.RemoveL(wgId(), param());
+}
+
+void TsDataTask::VisibilityChangeL(MTsDataStorage& dataStorage, 
+                                   const RMessage2& msg)
+{
+    TPckgBuf<TInt> wgId, visibility, param;
+    
+    msg.ReadL(0, wgId);
+    msg.ReadL(1, visibility);
+    
+    dataStorage.UpdateL(wgId(), static_cast<Visibility>(visibility()), 0);
 }

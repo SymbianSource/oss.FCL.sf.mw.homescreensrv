@@ -91,6 +91,7 @@ void CRunningAppSession::ServiceL(const RMessage2& message)
         
     case RegisterScreenshotMessage:
     case UnregisterScreenshotMessage:
+    case VisibilityChange:
         TsDataTask::ExecuteL(mDataStorage, message);
         break;
     

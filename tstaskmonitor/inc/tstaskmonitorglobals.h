@@ -32,12 +32,18 @@ enum RunningAppCmd {
     CancelSubscribeRunningAppChanges,
     RegisterScreenshotMessage,
     UnregisterScreenshotMessage,
+    VisibilityChange
 };
 
 enum UpdatePriority {
     Low = 0,
     Normal,
     High
+};
+
+enum Visibility {
+    Invisible =0,
+    Visible
 };
 
 enum ScreenshotMessageOffsets {

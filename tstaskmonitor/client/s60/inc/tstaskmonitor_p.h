@@ -19,6 +19,8 @@
 
 #include "tstaskmonitorobserver.h"
 
+#include <w32std.h>
+
 #include <QList>
 #include <QSharedPointer>
 
@@ -41,7 +43,7 @@ public:
 private:
     TsTaskMonitor *q_ptr;
     CTsTaskMonitorClient *mClient;
-    
+    RWsSession &mWsSession;
 };
 
 #endif //TSTASKMONITOR_P_H

@@ -101,6 +101,12 @@ public:
      * @param aUri widget uri
      */
     void SetUriL( const TDesC& aUri );
+    
+    /*
+     * Translation file setter.
+     * @param aTranslationFileName widget translation file.
+     */
+    void SetTranslationFileNameL( const TDesC& aTranslationFileName );
 
     /*
      * Icon Uri setter
@@ -120,6 +126,18 @@ public:
      */
     void SetLibraryL( const TDesC& aLibrary );
 
+    /*
+     * Path setter
+     * @param aLibrary widget library
+     */
+    void SetPathL( const TDesC& aPath );
+
+    /*
+     * Path getter
+     * @return widget library
+     */
+    TPtrC GetPath( ) const;
+    
     /*
      * Content storage entry id getter
      * @return CS entry id
@@ -149,6 +167,12 @@ public:
      * @return widget Uri
      */
     TPtrC GetUri() const;
+
+    /*
+     * Uri translation filename
+     * @return widget translation filename
+     */
+    TPtrC GetTranslationFileName() const;
 
     /*
      * IconUri getter
@@ -334,6 +358,11 @@ public:
      * Widget uri. Own
      */
     RBuf iUri;
+    
+    /*
+     * Widget translation file name. Own
+     */
+    RBuf iTranslationFileName;
 
     /*
      * Widget icon uri. Own
@@ -344,6 +373,12 @@ public:
      * Preview name. Own
      */
     RBuf iPreviewImageName;
+    
+    /*
+     * Widget library. Own
+     */
+    RBuf iPath;
+    
     /*
      * Widget library. Own
      */

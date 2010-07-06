@@ -95,6 +95,8 @@ void CaObjectAdapter::convertL(const CaQuery &fromQuery,
                                CCaInnerQuery &toQuery)
 {
     toQuery.SetParentId(fromQuery.parentId());
+    
+    toQuery.SetChildId(fromQuery.childId());
 
     toQuery.SetFlagsOn(static_cast<TUint>(fromQuery.flagsOn()));
 

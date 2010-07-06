@@ -63,6 +63,7 @@ EXPORT_C CCaInnerQuery* CCaInnerQuery::NewLC()
 EXPORT_C void CCaInnerQuery::ExternalizeL( RWriteStream& aStream ) const
     {
     aStream.WriteInt32L( iParentId );
+    aStream.WriteInt32L( iChildId );
     aStream.WriteInt32L( iRole );
     aStream.WriteUint32L( iFlagsOn );
     aStream.WriteUint32L( iFlagsOff );
@@ -93,6 +94,7 @@ EXPORT_C void CCaInnerQuery::ExternalizeL( RWriteStream& aStream ) const
 EXPORT_C void CCaInnerQuery::InternalizeL( RReadStream& aStream )
     {
     iParentId = aStream.ReadInt32L();
+    iChildId = aStream.ReadInt32L();
     iRole = aStream.ReadInt32L();
     iFlagsOn = aStream.ReadUint32L();
     iFlagsOff = aStream.ReadUint32L();
@@ -128,6 +130,7 @@ void CCaInnerQuery::ConstructL()
     {
     iEntryTypeNames = new ( ELeave ) CDesC16ArrayFlat( KDefaultGranularity );
     iParentId = -1;
+    iChildId = -1;
     iRole = Item | Group;
     }
 
@@ -177,6 +180,25 @@ EXPORT_C void CCaInnerQuery::SetParentId( TInt aId )
     {
     iParentId = aId;
     }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C TInt CCaInnerQuery::GetChildId() const
+    {
+    return iChildId;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCaInnerQuery::SetChildId( TInt aId )
+    {
+    iChildId = aId;
+    }
+
 
 // ---------------------------------------------------------------------------
 //

@@ -17,9 +17,6 @@
 
 #include <e32property.h>
 #include <bautils.h>
-#include <swi/sisregistrysession.h>
-#include <swi/sisregistryentry.h>
-#include <swi/sisregistrypackage.h>
 #include <usif/scr/screntries.h>
 
 #include "cadef.h"
@@ -91,9 +88,6 @@ CCaSrvAppScanner::~CCaSrvAppScanner()
     Cancel();
     iSoftwareRegistry.Close();
     iApaLsSession.Close();
-    iInstalledPackages.Close();
-    delete iInstallNotifier;
-    delete iNotifier;
     delete iMmcHistory;
     iFs.Close();
     }
@@ -130,45 +124,17 @@ void CCaSrvAppScanner::ConstructL()
         }
     iMmcHistory = CCaSrvMmcHistory::NewL();
     iMmcHistory->LoadL( iFs, KCaMmcHistoryFname() );
-    iNotifier = CApaAppListNotifier::NewL(
-            this, CActive::EPriorityStandard );
-    iInstallNotifier = CCaInstallNotifier::NewL(
-            *this, CCaInstallNotifier::ESisInstallNotification );
 
     User::LeaveIfError( iApaLsSession.Connect() );
-    User::LeaveIfError( iApaLsSession.GetAllApps() ); // This is async.
     User::LeaveIfError( iSoftwareRegistry.Connect() );
-    iApaLsSession.RegisterListPopulationCompleteObserver( iStatus );
+    iApaLsSession.SetNotify( EFalse, iStatus );
     iCollectionDownloadId = 0;
     iAllCollectionId = 0;
-    
-    //TODO temporary sollution for fake uninstall progres notification
-    ClearUninstallFlagL();
-    
-    SetActive();
-    }
 
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-//TODO temporary sollution for fake uninstall progres notification
-void CCaSrvAppScanner::ClearUninstallFlagL()
-    {
-    CCaInnerQuery* uninstallQuery = CCaInnerQuery::NewLC();
-    uninstallQuery->SetFlagsOn( EUninstall );
-    
-    RPointerArray<CCaInnerEntry> resultArray;
-    CleanupResetAndDestroyPushL( resultArray );
-    iCaStorageProxy.GetEntriesL( uninstallQuery, resultArray );
-    for( TInt i = 0; i < resultArray.Count(); i++ )
-    {
-        resultArray[i]->SetFlags( resultArray[i]->GetFlags() & ~EUninstall );
-        iCaStorageProxy.AddL( resultArray[i] );
-    }
-    CleanupStack::PopAndDestroy( &resultArray );
-    
-    CleanupStack::PopAndDestroy( uninstallQuery );    
+    UpdateApplicationEntriesL();
+    MakeNotEmptyCollectionsVisibleL();
+
+    SetActive();
     }
 
 // ---------------------------------------------------------
@@ -178,10 +144,51 @@ void CCaSrvAppScanner::ClearUninstallFlagL()
 void CCaSrvAppScanner::RunL()
     {
     User::LeaveIfError( iStatus.Int() );
+
     // AppArc app scan complete, we have the app list.
-    UpdateApplicationEntriesL();
-    InstallationNotifyL();
-    MakeNotEmptyCollectionsVisibleL();
+    RArray<TApaAppUpdateInfo> updatedAppsInfo;
+    CleanupClosePushL( updatedAppsInfo );
+    iApaLsSession.UpdatedAppsInfoL( updatedAppsInfo );
+
+    for( TInt i = 0; i < updatedAppsInfo.Count(); i++ )
+    	{
+		TApaAppUpdateInfo::TApaAppAction action = updatedAppsInfo[i].iAction;
+        RPointerArray<CCaInnerEntry> resultArray;
+        CleanupResetAndDestroyPushL( resultArray );
+        GetCaAppEntriesL( updatedAppsInfo[i].iAppUid.iUid, resultArray );
+		if( action == TApaAppUpdateInfo::EAppPresent
+				|| action == TApaAppUpdateInfo::EAppInfoChanged )
+			{
+			TInt id;
+			if( !resultArray.Count() )
+				{
+                id = AddAppEntryL(
+                        updatedAppsInfo[i].iAppUid.iUid, UpdateMmcHistoryL() );
+				}
+			else
+			    {
+                ASSERT( resultArray.Count() == 1 );
+                id = resultArray[0]->GetId();
+                UpdateAppEntryL( resultArray[0], UpdateMmcHistoryL(), ETrue );
+                AddEntryToPredefinedCollectionL( resultArray[0], ETrue );
+			    }
+            AddEntryToDownloadedCollectionL( id );
+            MakeNotEmptyCollectionsVisibleL();
+			}
+		else if( action == TApaAppUpdateInfo::EAppNotPresent )
+			{
+			HandleMissingItemsL( resultArray );
+			}
+		else
+			{
+			User::Leave( KErrNotSupported );
+			}
+        CleanupStack::PopAndDestroy( &resultArray );
+    	}
+    CleanupStack::PopAndDestroy( &updatedAppsInfo );
+
+    iApaLsSession.SetNotify( EFalse, iStatus );
+    SetActive();
     }
 
 // ---------------------------------------------------------
@@ -190,7 +197,7 @@ void CCaSrvAppScanner::RunL()
 //
 void CCaSrvAppScanner::DoCancel()
     {
-    iApaLsSession.CancelListPopulationCompleteObserver();
+    iApaLsSession.CancelNotify();
     }
 
 // ---------------------------------------------------------
@@ -247,7 +254,8 @@ void CCaSrvAppScanner::UpdateApplicationEntryL(
 //
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId )
+void CCaSrvAppScanner::UpdateAppEntryL(
+        CCaInnerEntry* aEntry, TUint aMmcId, TBool aAlwaysUpdate  )
     {
     TBool toUpdate = HandleMmcAttrUpdateL( aEntry, aMmcId );
     TBool missingVisibleFlagChanged =
@@ -255,23 +263,18 @@ void CCaSrvAppScanner::UpdateAppEntryL( CCaInnerEntry* aEntry, TUint aMmcId )
     toUpdate = missingVisibleFlagChanged || toUpdate;
     toUpdate = HandleRemovableVisibleFlagsUpdateL( aEntry ) || toUpdate;
     toUpdate = SetApaAppInfoL( aEntry ) || toUpdate;
+    toUpdate = RemoveUninstallFlagL( aEntry ) || toUpdate;
 
-    if( iInstalledPackages.Find( aEntry->GetUid() ) != KErrNotFound )
-        {
-        AddEntryToDownloadedCollectionL( aEntry->GetId() );
-        toUpdate = HandleUsedFlagUpdate( aEntry ) || toUpdate;
-        AddEntryToPredefinedCollectionL( aEntry, ETrue );
-        }
-    if( toUpdate )
+    if( toUpdate || aAlwaysUpdate )
         {
         //update app in storage
+        HandleUsedFlagUpdate( aEntry );
         TItemAppearance itemAppearanceChange = EItemAppearanceNotChanged;
         if( missingVisibleFlagChanged )
             {
             itemAppearanceChange = EItemAppeared;
             }
         iCaStorageProxy.AddL( aEntry, EFalse, itemAppearanceChange );
-        RemoveFromInstalledPackages( aEntry->GetUid() );
         }
     }
 
@@ -316,19 +319,6 @@ TBool CCaSrvAppScanner::HandleMmcAttrUpdateL(
         //its installed on c: drive - remove attribute
         }
     return toUpdate;
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::InstallationNotifyL()
-    {
-    for( TInt i = iInstalledPackages.Count() - 1; i >= 0; i-- )
-        {
-        NotifyL( iInstalledPackages[i] );
-        iInstalledPackages.Remove( i );
-        }
     }
 
 // ---------------------------------------------------------
@@ -388,6 +378,21 @@ TBool CCaSrvAppScanner::HandleRemovableVisibleFlagsUpdateL(
             aItem->SetFlags( aItem->GetFlags() | ERemovable );
             toChange = ETrue;
             }
+        }
+    return toChange;
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TBool CCaSrvAppScanner::RemoveUninstallFlagL( CCaInnerEntry* aItem )
+    {
+    TBool toChange( EFalse );
+    if( aItem->GetFlags() & EUninstall )
+        {
+		aItem->SetFlags( aItem->GetFlags() & ~EUninstall );
+		toChange = ETrue;
         }
     return toChange;
     }
@@ -627,104 +632,6 @@ void CCaSrvAppScanner::GetCaAppEntriesL( TInt aUid,
 //
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::HandleAppListEvent( TInt /*aEvent*/)
-    {
-    // We only have one event, EAppListChanged.
-    // Call back RunL async, to requeue and initiate rescan.
-    if( !IsActive() )
-        {
-        ScheduleScan();
-        }
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::HandleInstallNotifyL( TInt aUid )
-    {
-    NotifyL( aUid );
-    RArray<TUid> uids;
-    CleanupClosePushL( uids );
-
-    Swi::RSisRegistrySession iSisRegSession;
-    CleanupClosePushL( iSisRegSession );
-    User::LeaveIfError( iSisRegSession.Connect() );
-
-    // Open sis package entry related to aUid
-    Swi::RSisRegistryEntry packageEntry;
-    if( KErrNone
-            == packageEntry.Open( iSisRegSession, TUid::Uid( aUid ) ) )
-        {
-        CleanupClosePushL( packageEntry );
-
-        // Get packageEntry's embedded sis'
-        RPointerArray<Swi::CSisRegistryPackage> embedded;
-        CleanupResetAndDestroyPushL( embedded );
-        packageEntry.EmbeddedPackagesL( embedded );
-        if( embedded.Count() )
-            {
-            // For each embadded sis we notify storage - recursive call
-            for( TInt i = 0; i < embedded.Count(); ++i )
-                {
-                HandleInstallNotifyL( embedded[i]->Uid().iUid );
-                }
-            }
-        else
-            {
-            // There are no embaddes sis', so we can notify storage
-            // of changes in apps included in packageEntry
-            NotifyL( packageEntry );
-            }
-        CleanupStack::PopAndDestroy( &embedded );
-        CleanupStack::PopAndDestroy( &packageEntry );
-        }
-    CleanupStack::PopAndDestroy( &iSisRegSession );
-    CleanupStack::PopAndDestroy( &uids );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::NotifyL( Swi::RSisRegistryEntry & aPackageEntry )
-    {
-    // Get sids ( == uids of exetucables included in aPackageEntry )
-    RArray<TUid> sids;
-    CleanupClosePushL( sids );
-    aPackageEntry.SidsL( sids );
-    if( sids.Count() )
-        {
-        // For each sid we notify storage
-        for( TInt i = 0; i < sids.Count(); ++i )
-            {
-            iInstalledPackages.Append( sids[i].iUid );
-            }
-        }
-    CleanupStack::PopAndDestroy( &sids );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::NotifyL( TInt aAppUid )
-    {
-    // Get entries for given aAppUid
-    RPointerArray<CCaInnerEntry> resultArray;
-    CleanupResetAndDestroyPushL( resultArray );
-    GetCaAppEntriesL( aAppUid, resultArray );
-    if( resultArray.Count() && ( resultArray[0]->GetFlags() & EVisible ) )
-        {//TODO: this only for icons. This functionality should be change
-        iCaStorageProxy.AddL( resultArray[0] );
-        }
-    CleanupStack::PopAndDestroy( &resultArray );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
 void CCaSrvAppScanner::AddEntryToDownloadedCollectionL( TInt aEntryId )
     {
     TCaOperationParams params;
@@ -870,23 +777,9 @@ void CCaSrvAppScanner::RemoveEntryFromDownloadedL( TInt aEntryId )
 //
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::ScheduleScan()
+TInt CCaSrvAppScanner::AddAppEntryL( TUint aUid, TUint aCurrentMmcId )
     {
-    if( !IsActive() )
-        {
-        TRequestStatus* ownStatus = &iStatus;
-        *ownStatus = KRequestPending;
-        SetActive();
-        User::RequestComplete( ownStatus, KErrNone );
-        }
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::AddAppEntryL( TUint aUid, TUint aCurrentMmcId )
-    {
+    TInt id(KErrNotFound);
     // Now add the app entry.
     CCaInnerEntry* appEntry = CCaInnerEntry::NewLC();
 
@@ -900,29 +793,12 @@ void CCaSrvAppScanner::AddAppEntryL( TUint aUid, TUint aCurrentMmcId )
     HandleMmcAttrUpdateL( appEntry, aCurrentMmcId );
 
     iCaStorageProxy.AddL( appEntry );
+    id = appEntry->GetId();
 
     AddEntryToPredefinedCollectionL( appEntry );
 
-    if( iInstalledPackages.Find( aUid ) != KErrNotFound )
-        {
-        AddEntryToDownloadedCollectionL( appEntry->GetId() );
-        RemoveFromInstalledPackages( aUid );
-        }
-
     CleanupStack::PopAndDestroy( appEntry );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-void CCaSrvAppScanner::RemoveFromInstalledPackages( TUint aUid )
-    {
-    TInt appIndex = iInstalledPackages.Find( aUid );
-    if( appIndex != KErrNotFound )
-        {
-        iInstalledPackages.Remove( appIndex );
-        }
+    return id;
     }
 
 // ---------------------------------------------------------------------------
@@ -948,15 +824,15 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
             aEntry->AddAttributeL( KCaAttrShortName, info->iShortCaption );
             changed = ETrue;
             }
-        
-        
+
+
         if ( UpdateComponentIdL( *aEntry ) )
             {
             changed = ETrue;
             }
-        
+
         CleanupStack::PopAndDestroy( &attrVal );
-        
+
         // check if its java app and add attr for entries
         TUid appTypeUid;
         if( KErrNone == iApaLsSession.GetAppType( appTypeUid, info->iUid ) )
@@ -966,14 +842,14 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 aEntry->AddAttributeL(
                         KCaAttrAppType,
                         KCaAttrAppTypeValueJava );
-                
-                TComponentId compId = 
+
+                TComponentId compId =
                         iSoftwareRegistry.GetComponentIdForAppL( info->iUid );
-                CPropertyEntry* propertyEntry = 
+                CPropertyEntry* propertyEntry =
                     iSoftwareRegistry.GetComponentPropertyL( compId, KCaScrPropertyAppSettings );
                 CleanupStack::PushL( propertyEntry );
-                if ( propertyEntry && 
-                        propertyEntry->PropertyType() == CPropertyEntry::ELocalizedProperty ) 
+                if ( propertyEntry &&
+                        propertyEntry->PropertyType() == CPropertyEntry::ELocalizedProperty )
                     {
                     aEntry->AddAttributeL(
                             KCaAttrAppSettingsPlugin,
@@ -986,9 +862,9 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 aEntry->AddAttributeL(
                         KCaAttrAppType,
                         KCaAttrAppTypeValueCWRT );
-                TComponentId compId = 
+                TComponentId compId =
                         iSoftwareRegistry.GetComponentIdForAppL( info->iUid );
-                CPropertyEntry* isMiniview = 
+                CPropertyEntry* isMiniview =
                                         iSoftwareRegistry.GetComponentPropertyL( compId,
                                                 KCaScrPropertyIsMiniviewSupported );
                 CleanupStack::PushL( isMiniview );
@@ -996,11 +872,11 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 if (isMiniview && isMiniview->PropertyType() == CPropertyEntry::EIntProperty &&
                         static_cast<CIntPropertyEntry*>(isMiniview)->IntValue())
                     {
-                    CPropertyEntry* appId = 
+                    CPropertyEntry* appId =
                         iSoftwareRegistry.GetComponentPropertyL( compId, KCaScrPropertyAppId );
                     CleanupStack::PushL( appId );
-                    if ( appId && 
-                         appId->PropertyType() == CPropertyEntry::ELocalizedProperty ) 
+                    if ( appId &&
+                         appId->PropertyType() == CPropertyEntry::ELocalizedProperty )
                         {
                         aEntry->AddAttributeL(
                                             KCaAttrAppWidgetUri,
@@ -1010,7 +886,7 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                                             static_cast<CLocalizablePropertyEntry*>(appId)->StrValue() );
                         }
                     CleanupStack::PopAndDestroy( appId );
-                    }                
+                    }
                 CleanupStack::PopAndDestroy( isMiniview );
                 }
             }
@@ -1036,8 +912,8 @@ void CCaSrvAppScanner::HandleMissingItemsL(
             TUint mmcId = 0;
             MenuUtils::GetTUint( attrVal, mmcId );
             if( ( mmcId && KErrNotFound != iMmcHistory->Find( mmcId )
-                        && mmcId != CurrentMmcId() ) 
-                    || ( attrVal == KCaMassStorage() 
+                        && mmcId != CurrentMmcId() )
+                    || ( attrVal == KCaMassStorage()
                         && IsDriveInUse( DriveInfo::EDefaultMassStorage ) ) )
                 {
                 // This item is on an MMC which is currently
@@ -1286,38 +1162,38 @@ void CCaSrvAppScanner::MakeCollectionVisibleIfHasVisibleEntryL(
 TBool CCaSrvAppScanner::UpdateComponentIdL( CCaInnerEntry& aEntry ) const
     {
     TBool updated( EFalse );
-    
+
     TUid uid;
     TInt err(KErrNone);
     TComponentId componentId( 0 );
-    TRAP(err, componentId = 
+    TRAP(err, componentId =
             iSoftwareRegistry.GetComponentIdForAppL(
             uid.Uid( aEntry.GetUid() ) ) )
-    
+
     if ( componentId > 0 && err == KErrNone )
         {
         RBuf newComponentId;
         newComponentId.CleanupClosePushL();
         newComponentId.CreateL( sizeof(TComponentId) + 1 );
         newComponentId.AppendNum( componentId );
-        
+
         RBuf oldComponentId;
         oldComponentId.CleanupClosePushL();
         oldComponentId.CreateL( KCaMaxAttrValueLen );
-        
-        const TBool componentIdAttributeFound = 
+
+        const TBool componentIdAttributeFound =
             aEntry.FindAttribute( KCaComponentId, oldComponentId );
-              
-        if ( !componentIdAttributeFound 
+
+        if ( !componentIdAttributeFound
             || oldComponentId.Compare( newComponentId ) != 0 )
             {
             // 'add' or 'update' the component id attribute value
-            aEntry.AddAttributeL( KCaComponentId, 
+            aEntry.AddAttributeL( KCaComponentId,
                 newComponentId );
-            
+
             updated = ETrue;
             }
-        
+
         CleanupStack::PopAndDestroy( &oldComponentId );
         CleanupStack::PopAndDestroy( &newComponentId );
         }

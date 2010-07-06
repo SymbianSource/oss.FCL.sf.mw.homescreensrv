@@ -137,6 +137,13 @@ private:
      * @param aWidget widget to set value
      */
     void SetUriL( TXmlEngElement& aElement, CCaWidgetDescription* aWidget );
+    
+    /**
+     * Sets translation filename
+     * @param aElement xml element
+     * @param aWidget widget to set value
+     */
+    void SetTranslationFileNameL( TXmlEngElement& aElement, CCaWidgetDescription* aWidget );
 
     /**
      * Sets widgets library and path created from library
@@ -205,6 +212,9 @@ private:
         const TDesC& aPackageUid,
         CCaWidgetDescription* aWidgetDescriptor,
         TChar& aDrive );
+    
+    void ParseTranslationFileNameL( TXmlEngElement& aElement,
+            CCaWidgetDescription* aWidgetDescriptor );
 
     /**
      * @param aElement xml document element.

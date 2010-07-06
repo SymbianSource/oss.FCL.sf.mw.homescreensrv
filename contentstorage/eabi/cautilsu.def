@@ -99,4 +99,6 @@ EXPORTS
 	_ZNK22CCaInnerNotifierFilter12GetTypeNamesEv @ 98 NONAME
 	_ZNK22CCaInnerNotifierFilter15GetNotifierTypeEv @ 99 NONAME
 	_ZNK22CCaInnerNotifierFilter6GetIdsEv @ 100 NONAME
+	_ZN13CCaInnerQuery10SetChildIdEi @ 101 NONAME
+	_ZNK13CCaInnerQuery10GetChildIdEv @ 102 NONAME
 

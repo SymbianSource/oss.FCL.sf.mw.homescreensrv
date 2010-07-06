@@ -20,7 +20,7 @@ CONFIG += ordered
 
 SUBDIRS += tsutils
 
-symbian:SUBDIRS += activitydatabase
+symbian:SUBDIRS += storage
 
 SUBDIRS +=  activityserviceplugin \
             orbitintegration/hbactivityplugin \

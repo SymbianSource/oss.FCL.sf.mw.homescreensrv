@@ -63,3 +63,8 @@ EXPORT_C TInt CTsScreenshotClient::UnregisterScreenshot(TInt wgId)
 {
     return iImpl->UnregisterScreenshot(wgId);
 }
+
+EXPORT_C TInt CTsScreenshotClient::SetVisibility(TInt wgId, Visibility value)
+{
+    return iImpl->SetVisibility(wgId, value);
+}

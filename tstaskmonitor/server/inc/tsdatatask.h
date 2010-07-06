@@ -29,6 +29,9 @@ private:
     
     static void UnregisterScreenshotL(MTsDataStorage& dataStorage, 
                                       const RMessage2& msg);
+    
+    static void VisibilityChangeL(MTsDataStorage& dataStorage, 
+                                  const RMessage2& msg);
 };
 
 #endif //TSDATATASK_H

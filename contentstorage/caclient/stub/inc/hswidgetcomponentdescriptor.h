@@ -32,7 +32,11 @@ public:
     QString iconUri;
     QString hidden;
     QString serviceXml;
-    QString version;
+    QString version;    
+    QString library;
+    QString translationFilename;
+    int uid;
+    QString previewImage;
     bool isValid();
 };
 

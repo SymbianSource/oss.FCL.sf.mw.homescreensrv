@@ -22,13 +22,13 @@
 
 #include "tstaskmonitor_global.h"
 
-class CTsFswEntry;
+class CTsEntry;
 
 class TsTask
 {
     
 public:
-    TsTask(CTsFswEntry* entry);
+    TsTask(CTsEntry* entry);
     TSTASKMONITOR_EXPORT virtual ~TsTask();
     
     TSTASKMONITOR_EXPORT virtual void open() = 0;
@@ -40,7 +40,7 @@ public:
     TSTASKMONITOR_EXPORT QString name() const;
     
 protected:
-    CTsFswEntry* mEntry;
+    CTsEntry* mEntry;
 
 };
 

@@ -29,8 +29,10 @@ const char ICON[] = "icon";
 const char DESCRIPTION[] = "description";
 const char HIDDEN[] = "hidden";
 const char SERVICEXML[] = "servicexml";
+const char PREVIEWIAMGE[] = "previewimage";
 const char VERSION[] = "version";
 const char VERSION_1_0[] = "1.0";
+const char TRANSLATIONFILENAME[] = "translationfile";
 
 
 
@@ -147,8 +149,12 @@ void HsWidgetComponentParser::parseVersion1_0()
             parseHidden();
         } else if (tag == SERVICEXML) {
             parseServiceXml();
-        } 
-	}
+        } else if (tag == PREVIEWIAMGE) {
+            parsePreviewImage();
+        } else if (tag == TRANSLATIONFILENAME) {
+            parseTranslationFileName();
+		}
+    }
 }
 
 
@@ -160,6 +166,7 @@ void HsWidgetComponentParser::parseUri()
 	}
     mComponentDescriptor.uri = mParser.text().toString();
 }
+
 void HsWidgetComponentParser::parseIcon()
 {
     mParser.readNext();
@@ -168,6 +175,7 @@ void HsWidgetComponentParser::parseIcon()
 	}
     mComponentDescriptor.iconUri = mParser.text().toString();
 }
+
 void HsWidgetComponentParser::parseTitle()
 {
     mParser.readNext();
@@ -176,6 +184,7 @@ void HsWidgetComponentParser::parseTitle()
 	}
     mComponentDescriptor.title = mParser.text().toString();
 }
+
 void HsWidgetComponentParser::parseDescription()
 {
     mParser.readNext();
@@ -184,6 +193,7 @@ void HsWidgetComponentParser::parseDescription()
 	}
     mComponentDescriptor.description = mParser.text().toString();
 }
+
 void HsWidgetComponentParser::parseHidden()
 {
     mParser.readNext();
@@ -192,6 +202,7 @@ void HsWidgetComponentParser::parseHidden()
 	}
     mComponentDescriptor.hidden = mParser.text().toString();
 }
+
 void HsWidgetComponentParser::parseServiceXml()
 {
     mParser.readNext();
@@ -199,6 +210,24 @@ void HsWidgetComponentParser::parseServiceXml()
 		return;
 	}
     mComponentDescriptor.serviceXml = mParser.text().toString();
+}
+
+void HsWidgetComponentParser::parsePreviewImage()
+{
+    mParser.readNext();
+    if(mParser.tokenType() != QXmlStreamReader::Characters) {
+		return;
+	}
+    mComponentDescriptor.previewImage = mParser.text().toString();
+}
+
+void HsWidgetComponentParser::parseTranslationFileName()
+{
+    mParser.readNext();
+    if (mParser.tokenType() != QXmlStreamReader::Characters) {
+		return;
+        }
+    mComponentDescriptor.translationFilename = mParser.text().toString();
 }
 
 bool HsWidgetComponentParser::isWidgetTagValid() 

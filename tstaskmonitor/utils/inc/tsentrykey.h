@@ -28,10 +28,11 @@ class TTsEntryKey
 public:
     TTsEntryKey(TInt parentId =0);
     TBool operator ==(const TTsEntryKey& key) const;
-    void ExternalizeL(RWriteStream& output);
+    void ExternalizeL(RWriteStream& output) const;
     void InternalizeL(RReadStream& input);
+    TInt WindowGroupId() const;
 
-public:
+private:
     TInt mParentId;
 };
 

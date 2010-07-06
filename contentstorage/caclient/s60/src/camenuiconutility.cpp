@@ -108,7 +108,7 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
             pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
             icon = HbIcon(QIcon(pixmap));
         } else {
-            HBufC* fileNameFromApparc;
+            HBufC* fileNameFromApparc = NULL;
             TInt err2 = apaLsSession.GetAppIcon(uid,fileNameFromApparc);
             CleanupStack::PushL(fileNameFromApparc);
             if (err2 == KErrNone) {
@@ -125,9 +125,8 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
                     icon = HbIcon(fileName);
                 }
             }
-            CleanupStack::Pop(fileNameFromApparc);
+            CleanupStack::PopAndDestroy(fileNameFromApparc);
         }
-        
         CleanupStack::PopAndDestroy(apaMaskedBitmap);
     }
     CleanupStack::PopAndDestroy(&apaLsSession);

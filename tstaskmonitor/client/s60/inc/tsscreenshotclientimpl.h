@@ -19,6 +19,7 @@
 
 #include <e32base.h>
 
+#include "tstaskmonitorglobals.h"
 #include "tssession.h"
 
 class CFbsBitmap;
@@ -34,6 +35,7 @@ public:
     TInt RegisterScreenshot(CFbsBitmap *screenshot, TInt wgId, UpdatePriority priority);
     void RegisterScreenshot(TRequestStatus &status, CFbsBitmap *screenshot, TInt wgId, UpdatePriority priority);
     TInt UnregisterScreenshot(TInt wgId);
+    TInt SetVisibility(TInt wgId, Visibility value);
 
 private:
     CTsScreenshotClientImpl();

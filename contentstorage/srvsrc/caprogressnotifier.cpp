@@ -15,9 +15,8 @@
  *
  */
 
-#include "s32mem.h"
+#include <s32mem.h>
 
-#include <usif/usifcommon.h> 
 #include <usif/scr/scr.h>
 #include <usif/scr/screntries.h>
 
@@ -29,83 +28,6 @@
 
 using namespace Usif;
 
-//fake constants
-const TInt KMaxProgressValue = 100;
-const TInt KDelayTimeBetweenNotifications(500000);
-
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT (fake notifier timer)
-
-EXPORT_C CCaFakeProgressNotifier* CCaFakeProgressNotifier::NewL(
-        MCaFakeProgressListener& aListener )
-    {
-    CCaFakeProgressNotifier* self = new ( ELeave ) CCaFakeProgressNotifier( aListener );
-    CleanupStack::PushL( self );
-    self->ConstructL( );
-    CleanupStack::Pop( self );
-    return self;
-    }
-
-CCaFakeProgressNotifier::~CCaFakeProgressNotifier()
-    {
-    Cancel();
-    iTimer.Close();
-    }
-
-CCaFakeProgressNotifier::CCaFakeProgressNotifier( MCaFakeProgressListener& aListener ) :
-    CActive( EPriorityNormal ), iListener( aListener ), iCount( 0 ) 
-    {
-    CActiveScheduler::Add( this );
-    }
-
-void CCaFakeProgressNotifier::ConstructL(  )
-    {
-    User::LeaveIfError( iTimer.CreateLocal() );
-    }
-
-void CCaFakeProgressNotifier::StartNotifying()
-    {
-    iCount = 0;
-    Cancel();
-    iTimer.After( iStatus, TTimeIntervalMicroSeconds32( KDelayTimeBetweenNotifications ) );
-    SetActive();
-    }
-
-void CCaFakeProgressNotifier::DoCancel()
-    {    
-    iTimer.Cancel();
-    }
-
-void CCaFakeProgressNotifier::RunL()
-    {
-    User::LeaveIfError( iStatus.Int() );
-    
-    if ( iCount <= KMaxProgressValue )
-        {
-        if( iCount > 20 )
-            {            
-            iListener.HandleFakeProgressNotifyL(iCount); 
-            }     
-        iTimer.After( iStatus, TTimeIntervalMicroSeconds32( KDelayTimeBetweenNotifications ) );
-        SetActive();
-        iCount += 20;
-        }
-    }
-
-TInt CCaFakeProgressNotifier::RunError( TInt /*aError*/)
-    {
-    // No need to do anything
-    return KErrNone;
-    }
-
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT  (fake notifier)
-
-
-
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -113,9 +35,10 @@ TInt CCaFakeProgressNotifier::RunError( TInt /*aError*/)
 EXPORT_C CCaProgressNotifier* CCaProgressNotifier::NewL(
         CCaStorageProxy& aCaStorageProxy )
     {
-    CCaProgressNotifier* self = new ( ELeave ) CCaProgressNotifier(  );
+    CCaProgressNotifier* self = new ( ELeave ) CCaProgressNotifier(
+            aCaStorageProxy );
     CleanupStack::PushL( self );
-    self->ConstructL( aCaStorageProxy );
+    self->ConstructL();
     CleanupStack::Pop( self );
     return self;
     }
@@ -126,24 +49,16 @@ EXPORT_C CCaProgressNotifier* CCaProgressNotifier::NewL(
 //
 CCaProgressNotifier::~CCaProgressNotifier()
     {
-    // TODO: Commented out since USIF notifications do not 
-    // work on MCL wk20
-    /*
-    iNotifier->CancelSubscribeL();
     delete iNotifier;
-    */
-    
-    // needed for fake:
-    delete iUsifUninstallNotifier;
-    delete iJavaInstallNotifier;
-    delete iFakeProgressNotifier;
+    iResultArrayItems.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-CCaProgressNotifier::CCaProgressNotifier()
+CCaProgressNotifier::CCaProgressNotifier( CCaStorageProxy& aCaStorageProxy ) :
+    iStorageProxy( aCaStorageProxy )
     {
     }
 
@@ -151,140 +66,143 @@ CCaProgressNotifier::CCaProgressNotifier()
 //
 // ---------------------------------------------------------------------------
 //
-void CCaProgressNotifier::ConstructL( CCaStorageProxy& aCaStorageProxy )
+void CCaProgressNotifier::ConstructL()
     {
-    // TODO: Commented out since USIF notifications do not 
-    // work on MCL wk20
-    /*
-    iNotifier = CSifOperationsNotifier::NewL(*this);
-    */
-    
-    iStorageProxy = &aCaStorageProxy;
-    
-    iUsifUninstallNotifier = CCaInstallNotifier::NewL( *this,
-            CCaInstallNotifier::EUsifUninstallNotification );
-
-    iJavaInstallNotifier = CCaInstallNotifier::NewL( *this,
-                CCaInstallNotifier::EJavaInstallNotification );
-
-    iFakeProgressNotifier = CCaFakeProgressNotifier::NewL(*this);    
+    iNotifier = CSifOperationsNotifier::NewL( *this );
     }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaProgressNotifier::StartOperationHandler(TUint /*aKey*/, const CSifOperationStartData& /*aStartData*/)
+void CCaProgressNotifier::StartOperationHandler( TUint aKey,
+        const CSifOperationStartData& aStartData )
     {
-    // TODO: Commented out since USIF notifications do not 
-    // work on MCL wk20
-    /*
-    iNotifier->SubscribeL( aKey, ETrue );
-    */
+    TInt err( KErrNone );
+    TComponentId componentId;
+    iResultArrayItems.ResetAndDestroy();
+
+    TRAP(err, componentId = ComponentIdL( aStartData.GlobalComponentId(),
+                    aStartData.SoftwareType() ));
+    if ( !err )
+        TRAP(err, MarkEntrysForUnistallL(aKey, componentId));
+
     }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaProgressNotifier::EndOperationHandler(const CSifOperationEndData& /*aEndData*/)
+void CCaProgressNotifier::EndOperationHandler(
+        const CSifOperationEndData& aEndData )
     {
+    TInt err = KErrNone;
+    TRAP(err, EndOperationL(aEndData.ErrorCode()));
+    iResultArrayItems.ResetAndDestroy();
     }
 
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
-void CCaProgressNotifier::ProgressOperationHandler(const CSifOperationProgressData& /*aProgressData*/)
+void CCaProgressNotifier::ProgressOperationHandler(
+        const CSifOperationProgressData& aProgressData )
     {
-    
-    // TODO: Commented out since USIF notifications do not 
-    // work on MCL wk20
-    
-    /* 
-    // extract component ID
-    TBuf8<20> globalIdBuf;
-    globalIdBuf.Copy( aProgressData.GlobalComponentId() );
-    
-    RDesReadStream readStream( globalIdBuf );
-    CleanupClosePushL( readStream );
-    CGlobalComponentId *globalId = CGlobalComponentId::NewL( readStream );
-    CleanupStack::PushL(globalId);
-     
-    RSoftwareComponentRegistry iScrSession;
-    TComponentId componentId = iScrSession.GetComponentIdL( globalId->GlobalIdName(), 
-            globalId->SoftwareTypeName() );
+    TInt err = KErrNone;
+    TRAP(err, UpdateProgressL(aProgressData));
+    }
 
-    CleanupStack::PopAndDestroy( globalId );
-    CleanupStack::PopAndDestroy( &readStream );
-
-    RBuf componentIdBuf;
-    componentIdBuf.CleanupClosePushL();
-    componentIdBuf.CreateL( sizeof(TComponentId) + 1 );
-    componentIdBuf.AppendNum( componentId );
-
-    // find entry by componentID
-    CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
-    innerQuery->SetRole( CCaInnerQuery::Item );
-    innerQuery->AddAttributeL( KCaAttrComponentId,
-            componentIdBuf );
-
-    RPointerArray<CCaInnerEntry> resultArrayItems;
-    CleanupResetAndDestroyPushL( resultArrayItems );
-    iStorageProxy->GetEntriesL( innerQuery, resultArrayItems );
-   
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CCaProgressNotifier::UpdateProgressL(
+        const CSifOperationProgressData& aProgressData )
+    {
     RBuf totalProgressBuf;
     totalProgressBuf.CleanupClosePushL();
     totalProgressBuf.CreateL( sizeof(TComponentId) + 1 );
     totalProgressBuf.AppendNum( aProgressData.CurrentProgess() );
 
-    if (resultArrayItems.Count() && aProgressData.Phase() == EUninstalling)
+    if ( iResultArrayItems.Count() && aProgressData.Phase() == EUninstalling )
         {
-        CCaInnerEntry* appEntry = resultArrayItems[0];
-        appEntry->AddAttributeL(KCaAppUninstallProgress, totalProgressBuf);
-
-        iStorageProxy->AddL(appEntry, ETrue, EItemUninstallProgressChanged );
+        for ( int i = 0; i < iResultArrayItems.Count(); i++ )
+            {
+            iResultArrayItems[i]->AddAttributeL( KCaAppUninstallProgress,
+                    totalProgressBuf );
+            iStorageProxy.AddL( iResultArrayItems[i], ETrue,
+                    EItemUninstallProgressChanged );
+            }
         }
+
     CleanupStack::PopAndDestroy( &totalProgressBuf );
-    CleanupStack::PopAndDestroy( &resultArrayItems );
-    CleanupStack::PopAndDestroy( innerQuery );
-    CleanupStack::PopAndDestroy( &componentIdBuf );
-    */
     }
 
-void CCaProgressNotifier::HandleInstallNotifyL( TInt /*aUid*/)
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CCaProgressNotifier::EndOperationL( TInt aError )
     {
-    // start sending fake notifications
-    iFakeProgressNotifier->StartNotifying();
+    if ( aError )
+        {
+        for ( int i = 0; i < iResultArrayItems.Count(); i++ )
+            {
+            iResultArrayItems[i]->SetFlags( iResultArrayItems[i]->GetFlags()
+                    & ~EUninstall );
+            iStorageProxy.AddL( iResultArrayItems[i] );
+            }
+        }
+    iNotifier->CancelSubscribeL( iKey );
     }
 
-void CCaProgressNotifier::HandleFakeProgressNotifyL(TInt aCurrentProgress)
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+TComponentId CCaProgressNotifier::ComponentIdL(
+        const TDesC& aGlobalComponentId, const TDesC& aSwType )
     {
-    //update storage with new info
-    
+    RSoftwareComponentRegistry registry;
+    User::LeaveIfError( registry.Connect() );
+    CleanupClosePushL( registry );
+    TComponentId componentId = registry.GetComponentIdL( aGlobalComponentId,
+            aSwType );
+    CleanupStack::PopAndDestroy( &registry ); // registry    
+    return componentId;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CCaProgressNotifier::MarkEntrysForUnistallL( TUint aKey,
+        TComponentId aComponentId )
+    {
+    RBuf componentIdBuf;
+    componentIdBuf.CleanupClosePushL();
+    componentIdBuf.CreateL( sizeof(TComponentId) + 1 );
+    componentIdBuf.AppendNum( aComponentId );
+
     // find entry by componentID
     CCaInnerQuery *innerQuery = CCaInnerQuery::NewLC();
     innerQuery->SetRole( CCaInnerQuery::Item );
-    innerQuery->SetFlagsOn(EUninstall);
-    
-    RPointerArray<CCaInnerEntry> resultArrayItems;
-    CleanupResetAndDestroyPushL( resultArrayItems );
-    iStorageProxy->GetEntriesL( innerQuery, resultArrayItems );
-    
-    
-    RBuf totalProgressBuf;
-    totalProgressBuf.CleanupClosePushL();
-    totalProgressBuf.CreateL( sizeof( TInt ) + 1 );
-    totalProgressBuf.AppendNum( aCurrentProgress );
-    
-    for ( TInt i = 0; i<resultArrayItems.Count(); i++ )
-       {
-       CCaInnerEntry* appEntry = resultArrayItems[i];
-       appEntry->AddAttributeL(KCaAppUninstallProgress, totalProgressBuf);
-       iStorageProxy->AddL(appEntry, ETrue, EItemUninstallProgressChanged );
-       }
-    
-    CleanupStack::PopAndDestroy( &totalProgressBuf );
-    CleanupStack::PopAndDestroy( &resultArrayItems );
+    innerQuery->AddAttributeL( KCaAttrComponentId, componentIdBuf );
+
+    iStorageProxy.GetEntriesL( innerQuery, iResultArrayItems );
+
+    if ( iResultArrayItems.Count() )
+        {
+        for ( int i = 0; i < iResultArrayItems.Count(); i++ )
+            {
+            iResultArrayItems[i]->SetFlags( iResultArrayItems[i]->GetFlags()
+                    | EUninstall );
+            iStorageProxy.AddL( iResultArrayItems[i] );
+            }
+        // subscribe for progress notifier
+        iKey = aKey;
+        iNotifier->SubscribeL( aKey, ETrue );
+        }
     CleanupStack::PopAndDestroy( innerQuery );
+    CleanupStack::PopAndDestroy( &componentIdBuf );
     }

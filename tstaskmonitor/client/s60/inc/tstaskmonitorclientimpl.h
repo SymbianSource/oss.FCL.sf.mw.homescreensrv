@@ -19,7 +19,7 @@
 
 #include <e32base.h>
 
-#include "tsfswentry.h"
+#include "tsentry.h"
 #include "tssession.h"
 
 class MTsTaskMonitorObserver;

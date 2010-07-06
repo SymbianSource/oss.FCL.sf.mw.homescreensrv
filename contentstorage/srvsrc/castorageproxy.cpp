@@ -287,6 +287,8 @@ EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
             iStorage->GetParentsIdsL( id, parentArray );
             for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
                 {
+                resultArray[0]->SetFlags( 
+                        resultArray[0]->GetFlags() | EUsed );
                 iHandlerNotifier[i]->EntryChanged( resultArray[0],
                         EUpdateChangeType,
                         parentArray );
@@ -444,15 +446,14 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeTextL( CCaInnerEntry* aEntry )
 					result->SetAttributeNameL( KLocalizationEnText );
 					result->SetQmFilenameL( qmFile );
 					result->SetRowId( aEntry->GetId() ? 0 : aEntry->GetId() ); // must be added when present
+					CleanupStack::Pop( result );
 					}
 				else 
 					{
-				    if (translatedString)
-						{
-						CleanupStack::PopAndDestroy(translatedString);
-						}
+					CleanupStack::PopAndDestroy(translatedString);
+					CleanupStack::PopAndDestroy(result);
+					result = NULL;
 					}
-				CleanupStack::Pop( result );
 				}
 			}
 		CleanupStack::PopAndDestroy( &title );
@@ -493,16 +494,20 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeDescriptionL( CCaInnerEntry* aEnt
 					result->SetAttributeNameL( KLocalizationEnDescription );
 					result->SetQmFilenameL( qmFile );
 					result->SetRowId( aEntry->GetId() ? 0 : aEntry->GetId() ); // must be added when present
+					CleanupStack::Pop( result );
 					}
 				else 
 					{
 				    CleanupStack::PopAndDestroy( translatedString );
+				    CleanupStack::PopAndDestroy( result );
+				    result = NULL;
 					}
-				CleanupStack::Pop( result );
+				
 				}
 			}
 		CleanupStack::PopAndDestroy( &description );
 		}
+	
 	return result;
 	}
 

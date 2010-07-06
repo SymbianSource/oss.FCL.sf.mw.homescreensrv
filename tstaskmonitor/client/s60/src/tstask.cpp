@@ -18,22 +18,45 @@
 
 #include <XQConversions>
 
-#include "tsfswentry.h"
+#include "tsentry.h"
 
-TsTask::TsTask(CTsFswEntry* entry) : mEntry(entry)
+/*!
+    @class TsTask
+    @ingroup publicApi
+    @brief TsTask object represents a single task.
+    
+    This class is one of the Qt interfaces for Task Monitor server. It can be
+    used to set custom screenshot of the task, or to change the task visibility.
+*/
+
+/*!
+    @internal
+    Constructor. 
+    Takes ownership over @a entry.
+*/
+TsTask::TsTask(CTsEntry* entry) : mEntry(entry)
 {
 }
 
+/*!
+    Destructor.
+*/
 TsTask::~TsTask()
 {
     delete mEntry;
 }
 
+/*!
+    @return True if it's possible to close the task, false otherwise.
+*/
 bool TsTask::isClosable() const
 {
     return mEntry->CloseableApp();
 }
 
+/*!
+    @return Icon of the task.
+*/
 QPixmap TsTask::icon() const
 {
     QPixmap pixmap = QPixmap::fromSymbianCFbsBitmap(mEntry->AppIconBitmap());
@@ -43,12 +66,28 @@ QPixmap TsTask::icon() const
     return pixmap;
 }
 
+/*!
+    @return Screenshot of the task.
+*/
 QPixmap TsTask::screenshot() const
 {
     return QPixmap::fromSymbianCFbsBitmap(mEntry->Screenshot());
 }
 
+/*!
+    @return Name of the task.
+*/
 QString TsTask::name() const
 {
     return XQConversions::s60DescToQString(mEntry->AppName());
 }
+
+/*!
+    @fn TsTask::open()
+    Start or bring the task to foreground.
+*/
+
+/*!
+    @fn TsTask::close()
+    Close the task.
+*/

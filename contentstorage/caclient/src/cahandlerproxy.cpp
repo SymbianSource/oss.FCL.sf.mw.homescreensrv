@@ -55,14 +55,13 @@ CaHandlerProxy::CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader):
   \retval KErrNone on succes, error code otherwise.
   \sa e32err.h for KErrNone definition.
 */
-ErrorCode CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName)
+int CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName)
 {
     CaHandler *const handler = getHandler(entry, commandName);
-    ErrorCode result = NotFoundErrorCode;
+    int result = -1;
 
     if (handler) {
-            result = CaObjectAdapter::convertErrorCode(
-                handler->execute(entry, commandName));
+            result = handler->execute(entry, commandName);
     }
     return result;
 }

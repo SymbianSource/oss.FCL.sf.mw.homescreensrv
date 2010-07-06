@@ -92,9 +92,9 @@ public:
     bool prependEntriesToGroup(const CaEntry &group,
         const QList< QSharedPointer<CaEntry> > &entryList) const;
 
-    bool executeCommand(int entryId, const QString &command = 
+    int executeCommand(int entryId, const QString &command = 
         caCmdOpen) const;
-    bool executeCommand(const CaEntry &entry, const QString &command =
+    int executeCommand(const CaEntry &entry, const QString &command =
         caCmdOpen) const;
 
     CaNotifier * createNotifier(const CaNotifierFilter &filter) const;

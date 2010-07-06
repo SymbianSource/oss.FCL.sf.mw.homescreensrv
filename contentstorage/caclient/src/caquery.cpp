@@ -135,6 +135,24 @@ int CaQuery::parentId() const
 }
 
 /*!
+ Sets child id.
+ \param id id of the child.
+ */
+void CaQuery::setChildId(int id)
+{
+    m_d->setChildId(id);
+}
+
+/*!
+ Returns child id.
+ \retval child id.
+ */
+int CaQuery::childId() const
+{
+    return m_d->childId();
+}
+
+/*!
  Sets names of entry types.
  \param entryTypeNames list of entry type names (strings).
  */
@@ -288,7 +306,7 @@ void CaQuery::clear()
  */
 CaQueryPrivate::CaQueryPrivate(CaQuery *queryPublic) :
     m_q(queryPublic), mEntryRoles(ItemEntryRole | GroupEntryRole),
-    mParentId(0), mEntryTypeNames(), mFlagsOn(), mFlagsOff(),
+    mParentId(0), mChildId(0), mEntryTypeNames(), mFlagsOn(), mFlagsOff(),
     mSortAttribute(DefaultSortAttribute),
     mSortOrder(Qt::AscendingOrder), mCount(0), mAttributes()
 {
@@ -306,6 +324,7 @@ CaQueryPrivate &CaQueryPrivate::operator=(
     /*m_q is not changed*/
     mEntryRoles = queryPrivate.mEntryRoles;
     mParentId = queryPrivate.mParentId;
+    mChildId = queryPrivate.mChildId;
     mEntryTypeNames = queryPrivate.mEntryTypeNames;
     mFlagsOn = queryPrivate.mFlagsOn;
     mFlagsOff = queryPrivate.mFlagsOff;
@@ -358,6 +377,24 @@ int CaQueryPrivate::parentId() const
 void CaQueryPrivate::setParentId(int id)
 {
     mParentId = id;
+}
+
+/*!
+ Returns child id.
+ \retval child id.
+ */
+int CaQueryPrivate::childId() const
+{
+    return mChildId;
+}
+
+/*!
+ Sets child id.
+ \param id id of the child.
+ */
+void CaQueryPrivate::setChildId(int id)
+{
+    mChildId = id;
 }
 
 /*!
@@ -508,6 +545,7 @@ void CaQueryPrivate::clear()
 {
     mEntryRoles = ItemEntryRole | GroupEntryRole;
     mParentId = 0;
+    mChildId = 0;
     mEntryTypeNames = QStringList();
     mFlagsOn = EntryFlags();
     mFlagsOff = EntryFlags();

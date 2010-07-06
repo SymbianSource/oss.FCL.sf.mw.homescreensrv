@@ -114,12 +114,14 @@ void CCaWidgetScannerInstallNotifier::RunL()
     User::LeaveIfError( iProperty.Get( KUidSystemCategory,
             KSAUidSoftwareInstallKeyValue, status ) );
 
-    if ( iHackFlag )
+    if( iHackFlag )
         {
         iHackFlag = EFalse;
         iCallback->SynchronizeL();
         }
-    else if ( ( status & EInstOpInstall ) || ( status & EInstOpUninstall ) )
+    else if( ( status & EInstOpStatusSuccess ) && (
+            ( status & EInstOpInstall ) || 
+            ( status & EInstOpUninstall ) ) )
         {
         iHackFlag = ETrue;
         }

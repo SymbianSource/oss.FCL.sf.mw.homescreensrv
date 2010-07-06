@@ -23,7 +23,7 @@ SUBDIRS  += hswidgetmodel \
 symbian:SUBDIRS += activityfw
 symbian:SUBDIRS += tstaskmonitor
 symbian:SUBDIRS += hsappkeyhandler
-
+symbian:SUBDIRS += tsdevicedialog
 
 CONFIG += ordered
 

@@ -25,7 +25,7 @@
 class CaClientNotifierProxy;
 class CaEntry;
 class CaQuery;
-class HsWidgetToken;
+class HsWidgetComponentDescriptor;
 
 /**
  *  CaClientProxy
@@ -131,16 +131,6 @@ public:
                           QList<int>& sourceIdList);
 
     /**
-     * Method for executing command
-     *
-     * @param entry entry on wchich command will be executed
-     * @param command command to execute
-     * @return error code
-     */
-    ErrorCode executeCommand(const CaEntry &entry,
-                             const QString &command);
-
-    /**
      * Method for touching entry.
      *
      * @param entry entry to touch
@@ -166,8 +156,8 @@ public:
                        QList<int> &parentIds);
 
 private:
-    bool hsWidgetExists(int uid);
-    void addWidgetEntry(const HsWidgetToken &widgetToken);
+    int hsWidgetId(int uid);
+    void addWidgetEntry(const HsWidgetComponentDescriptor &widgetToken, int widgetId);
 
     void modifyQueryForSortOrder(QString &queryString,
                                  const CaQuery &query, bool parent) const;

@@ -51,11 +51,13 @@ _LIT8(KWidgetManifest, "hswidgetmanifest");
 _LIT8(KIcon, "icon");
 _LIT8( KPreviewImageElementName, "previewimage" );
 _LIT8(KServiceXml, "servicexml");
+_LIT8( KTranslationFileName, "translationfile" );
 
 // CONSTANTS
 _LIT(KAttrWidgetPath, "widget:path");
 _LIT(KAttrWidgetLibrary, "widget:library");
 _LIT(KAttrWidgetUri, "widget:uri");
+_LIT(KAttrWidgetTranslationFileName, "widget:translation_file");
 _LIT(KAttrWidgetServiceXml, "widget:servicexml");
 _LIT(KSlash, "/");
 _LIT(KDllExt, ".dll");

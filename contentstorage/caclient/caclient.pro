@@ -65,8 +65,6 @@ DEPENDPATH += ./stub/inc \
               ./stub/src
 INCLUDEPATH += ./stub/inc
 
-LIBS += -lhswidgetmodel
-
 QT += sql
 
 include(caclient_stub.pri)

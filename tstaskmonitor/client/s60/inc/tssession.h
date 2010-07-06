@@ -20,7 +20,7 @@
 #include <e32base.h>
 
 #include "tstaskmonitorglobals.h"
-#include "tsfswentry.h"
+#include "tsentry.h"
 
 NONSHARABLE_CLASS( RTsSession ) : public RSessionBase
 {
@@ -35,7 +35,8 @@ public: // task monitor API
 public: // screenshots API
     TInt RegisterScreenshot(CFbsBitmap *screenshot, TInt wgId, UpdatePriority priority);
     void RegisterScreenshot(TRequestStatus &status, CFbsBitmap *screenshot, TInt wgId, UpdatePriority priority);
-    TInt UnregisterScreenshot(TInt wgId);    
+    TInt UnregisterScreenshot(TInt wgId);
+    TInt SetVisibility(TInt wgId, Visibility value);
     
 private:
     TInt StartServer();

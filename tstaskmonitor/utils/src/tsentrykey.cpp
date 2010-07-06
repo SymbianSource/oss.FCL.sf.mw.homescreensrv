@@ -41,7 +41,7 @@ TBool TTsEntryKey::operator ==(const TTsEntryKey& key) const
 //
 // -----------------------------------------------------------------------------
 //
-void TTsEntryKey::ExternalizeL(RWriteStream& output)
+void TTsEntryKey::ExternalizeL(RWriteStream& output) const
 {
     output.WriteInt32L(mParentId);
 }
@@ -53,4 +53,13 @@ void TTsEntryKey::ExternalizeL(RWriteStream& output)
 void TTsEntryKey::InternalizeL(RReadStream& input)
 {
     mParentId = input.ReadInt32L();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TInt TTsEntryKey::WindowGroupId() const
+{
+    return mParentId;
 }
