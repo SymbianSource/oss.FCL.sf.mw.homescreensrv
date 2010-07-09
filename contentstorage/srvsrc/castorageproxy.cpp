@@ -363,6 +363,7 @@ EXPORT_C void CCaStorageProxy::CustomSortL( const RArray<TInt>& aEntryIds,
     RArray<TInt> parentArray;
     CleanupClosePushL( parentArray );
     parentArray.AppendL( aGroupId );
+    iStorage->GetParentsIdsL( parentArray, parentArray );
     for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
         {
         iHandlerNotifier[i]->GroupContentChanged( parentArray );

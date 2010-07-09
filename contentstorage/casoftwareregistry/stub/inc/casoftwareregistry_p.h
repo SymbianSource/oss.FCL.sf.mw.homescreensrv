@@ -28,20 +28,21 @@ class CaSoftwareRegistryPrivate
 {
 public:
     typedef QHash<QString, QString> DetailMap;
-    
+
     explicit CaSoftwareRegistryPrivate(
         CaSoftwareRegistry *softwareRegistryPublic);
     ~CaSoftwareRegistryPrivate();
-
-    bool getApplicationsUids(int componentId,
-        QStringList &applicationsUids);
 
     bool getUninstallDetails(int componentId,
         QString &componentName,
         QStringList &applicationsUids,
         QString &confirmationMessage);
 
+    bool getApplicationsUids(int componentId,
+        QStringList &appUids);
     DetailMap entryDetails(int componentId) const;
+
+    QList<DetailMap> retrieveLogEntries() const;
 private:
 
     CaSoftwareRegistry *const m_q;

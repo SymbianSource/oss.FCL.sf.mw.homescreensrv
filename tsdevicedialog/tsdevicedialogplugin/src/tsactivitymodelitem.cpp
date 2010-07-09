@@ -74,6 +74,8 @@ QVariant TsActivityModelItem::data(int role) const
             return decorationRole();
         case TsDataRoles::Closable:
             return QVariant(false);
+        case TsDataRoles::Active:
+            return QVariant(false);
         default:
             return QVariant(QVariant::Invalid);
     }

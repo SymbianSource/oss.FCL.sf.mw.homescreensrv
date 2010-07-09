@@ -20,6 +20,7 @@
 namespace TsDataRoles {
     enum EntryAttributes {
         Closable = Qt::UserRole + 1,
+        Active,
     };
 }
 

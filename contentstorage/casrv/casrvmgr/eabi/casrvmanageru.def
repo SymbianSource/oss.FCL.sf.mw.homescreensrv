@@ -1,4 +1,4 @@
 EXPORTS
-	_ZN13CCaSrvManager4NewLER15CCaStorageProxyP14CCaSrvEngUtils @ 1 NONAME
-	_ZN13CCaSrvManager23LoadOperationErrorCodeLEv @ 2 NONAME
+	_ZN13CCaSrvManager23LoadOperationErrorCodeLEv @ 1 NONAME
+	_ZN13CCaSrvManager4NewLER15CCaStorageProxyPN4Usif26RSoftwareComponentRegistryEP14CCaSrvEngUtils @ 2 NONAME
 

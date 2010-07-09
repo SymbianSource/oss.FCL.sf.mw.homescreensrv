@@ -24,11 +24,15 @@
 
 class CCaStorageProxy;
 class CCaSrvEngUtils;
+namespace Usif{
+    class RSoftwareComponentRegistry;
+}
 
 struct TPluginParams
     {
     CCaStorageProxy* storageProxy;
     CCaSrvEngUtils* engUtils;
+    Usif::RSoftwareComponentRegistry* softwareRegistry;
     };
 
 /**

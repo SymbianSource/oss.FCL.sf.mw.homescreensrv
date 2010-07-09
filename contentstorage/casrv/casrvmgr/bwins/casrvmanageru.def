@@ -1,4 +1,4 @@
 EXPORTS
-	?NewL@CCaSrvManager@@SAPAV1@AAVCCaStorageProxy@@PAVCCaSrvEngUtils@@@Z @ 1 NONAME ; class CCaSrvManager * CCaSrvManager::NewL(class CCaStorageProxy &, class CCaSrvEngUtils *)
-	?LoadOperationErrorCodeL@CCaSrvManager@@QAEHXZ @ 2 NONAME ; int CCaSrvManager::LoadOperationErrorCodeL(void)
+	?LoadOperationErrorCodeL@CCaSrvManager@@QAEHXZ @ 1 NONAME ; int CCaSrvManager::LoadOperationErrorCodeL(void)
+	?NewL@CCaSrvManager@@SAPAV1@AAVCCaStorageProxy@@PAVRSoftwareComponentRegistry@Usif@@PAVCCaSrvEngUtils@@@Z @ 2 NONAME ; class CCaSrvManager * CCaSrvManager::NewL(class CCaStorageProxy &, class Usif::RSoftwareComponentRegistry *, class CCaSrvEngUtils *)
 

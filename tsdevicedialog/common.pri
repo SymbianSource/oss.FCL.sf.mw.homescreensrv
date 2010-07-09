@@ -72,6 +72,5 @@ symbian {
 win32 {
     # add platfrom API for windows
     INCLUDEPATH += \
-                $$PWD/../../homescreensrv/homescreensrv_plat/contentstorage_api \
-                $$PWD/../../homescreensrv/homescreensrv_plat/hswidgetmodel_api \
+                $$PWD/../../homescreensrv/homescreensrv_plat/contentstorage_api
 }

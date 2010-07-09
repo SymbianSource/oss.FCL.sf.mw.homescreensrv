@@ -24,7 +24,11 @@
 #include <e32hashtab.h>
 #include "casrvplugin.h"
 
+
 class CCaSrvEngUtils;
+namespace Usif{
+    class RSoftwareComponentRegistry;
+}
 
 /**
  *
@@ -48,6 +52,7 @@ public:
      * @param aUtils storage utils.
      */
     IMPORT_C static CCaSrvManager* NewL( CCaStorageProxy& aCaStorageProxy,
+            Usif::RSoftwareComponentRegistry* aSoftwareRegistry,
             CCaSrvEngUtils* aUtils = NULL );
 
     /**
@@ -57,6 +62,7 @@ public:
      * @param aUtils storage utils.
      */
     static CCaSrvManager* NewLC( CCaStorageProxy& aCaStorageProxy,
+            Usif::RSoftwareComponentRegistry* aSoftwareRegistry,
             CCaSrvEngUtils* aUtils = NULL );
 
     /**
@@ -79,6 +85,7 @@ private:
      * @param aUtils storage utils.
      */
     void ConstructL( CCaStorageProxy& aCaStorageProxy,
+            Usif::RSoftwareComponentRegistry* aSoftwareRegistry,
             CCaSrvEngUtils* aUtils = NULL );
 
     /**

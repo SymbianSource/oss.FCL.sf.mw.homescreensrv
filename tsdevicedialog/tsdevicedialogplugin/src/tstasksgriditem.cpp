@@ -54,7 +54,7 @@ TsTasksGridItem::TsTasksGridItem(const TsTasksGridItem &item) : HbAbstractViewIt
     applicationLabelFrame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
     applicationLabelFrame->frameDrawer().setFrameGraphicsName("qtg_fr_multimedia_trans");
 
-    mActiveLabel = new HbTextItem(hbTrId("txt_tsw_label_active"), this);
+    mActiveLabel = new HbTextItem(hbTrId("txt_ts_label_active"), this);
     mActiveLabelFrame = new HbFrameItem(this);
     mActiveLabelFrame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
     mActiveLabelFrame->frameDrawer().setFrameGraphicsName("qtg_fr_multimedia_trans");
@@ -88,14 +88,21 @@ void TsTasksGridItem::updateChildItems()
 {
     mScreenshotLabel->setIcon(modelIndex().data(Qt::DecorationRole).value<HbIcon>());
     mApplicationNameLabel->setText(modelIndex().data(Qt::DisplayRole).toString());
-    QVariant status(modelIndex().data(TsDataRoles::Closable));
-    const bool isClosable(status.isValid() && status.toBool());
+    
+    QVariant closableData(modelIndex().data(TsDataRoles::Closable));
+    const bool isClosable(closableData.isValid() && closableData.toBool());
     if (isClosable) {
         mDeleteButton->show();
+    } else {
+        mDeleteButton->hide();
+    }
+    
+    QVariant activeData(modelIndex().data(TsDataRoles::Active));
+    const bool isActive(activeData.isValid() && activeData.toBool());
+    if (isActive) {
         mActiveLabel->show();
         mActiveLabelFrame->show();
     } else {
-        mDeleteButton->hide();
         mActiveLabel->hide();
         mActiveLabelFrame->hide();
     }

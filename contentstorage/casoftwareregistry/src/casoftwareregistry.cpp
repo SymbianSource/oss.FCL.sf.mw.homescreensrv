@@ -42,12 +42,12 @@
  Subsequent calls to CaSoftwareRegistry::create() may return pointers to different
  instances. It is a case when between the calls instance counter of the created
  object dropped to 0 and it was deleted.
- 
+
  */
 
 /*! \typedef typedef QHash<QString, QString> DetailMap;
  * Defines map type for component details.
- * 
+ *
  */
 
 /*!
@@ -57,7 +57,7 @@
 
 
 // Initialization of a static member variable.
-QWeakPointer<CaSoftwareRegistry> CaSoftwareRegistry::m_instance = 
+QWeakPointer<CaSoftwareRegistry> CaSoftwareRegistry::m_instance =
     QWeakPointer<CaSoftwareRegistry>();
 
 
@@ -149,13 +149,23 @@ bool CaSoftwareRegistry::getApplicationsUids(int componentId,
  \endcode
  \param componentId Component id of the entry details are requested for.
  \return Map of the component details if component id was greater than 0 or
- empty map otherwise. 
+ empty map otherwise.
 
  */
 CaSoftwareRegistry::DetailMap CaSoftwareRegistry::entryDetails(
     int componentId) const
 {
     return m_d->entryDetails(componentId);
+}
+
+/*!
+ The method provides installation details from USIF.
+ \return QList of DetailMap.
+ */
+QList<CaSoftwareRegistry::DetailMap>
+        CaSoftwareRegistry::retrieveLogEntries() const
+{
+    return m_d->retrieveLogEntries();
 }
 
 /*!
@@ -195,6 +205,15 @@ QString CaSoftwareRegistry::componentDriveInfoKey()
 }
 
 /*!
+ * \return Component protection domainkey in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentProtectionDomainKey()
+{
+    static const QString key("protectiondomain");
+    return key;
+}
+
+/*!
  * \return Component size info key in CaSoftwareRegistry::DetailMap.
  */
 QString CaSoftwareRegistry::componentSizeKey()
@@ -210,5 +229,74 @@ QString CaSoftwareRegistry::componentTypeKey()
 {
     static const QString key("type");
     return key;
+}
+
+/*!
+ * \return Component description key in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentDescriptionKey()
+{
+    static const QString key("description");
+    return key;
+}
+
+/*!
+ * \return Component instalation/uninstallation
+ * time key in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentTimeKey()
+{
+    static const QString key("time");
+    return key;
+}
+
+/*!
+ * \return Component instalation/uninstallation/upgrade/hidden
+ * operation type key in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentOperationTypeKey()
+{
+    static const QString key("operationType");
+    return key;
+}
+
+/*!
+ * \return Component instalation
+ * operation value in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentInstallValue()
+{
+    static const QString value("install");
+    return value;
+}
+
+/*!
+ * \return Component uninstallation
+ * operation value in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentUninstallValue()
+{
+    static const QString value("uninstall");
+    return value;
+}
+
+/*!
+ * \return Component upgrade
+ * operation value in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentUpgradeValue()
+{
+    static const QString value("upgrade");
+    return value;
+}
+
+/*!
+ * \return Component hidden
+ * operation value in CaSoftwareRegistry::DetailMap.
+ */
+QString CaSoftwareRegistry::componentHiddenValue()
+{
+    static const QString value("hidden");
+    return value;
 }
 

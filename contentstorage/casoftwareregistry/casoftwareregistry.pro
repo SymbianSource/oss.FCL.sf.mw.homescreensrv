@@ -24,7 +24,8 @@ include(casoftwareregistry.pri)
 DEPENDPATH += ./inc \
               ./src
 INCLUDEPATH += ./inc \
-            ../inc
+            ../inc \
+            ../cautils/inc
             
 symbian: {
 

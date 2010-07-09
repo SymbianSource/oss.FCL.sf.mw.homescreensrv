@@ -225,7 +225,7 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
  
     if (entry.entryTypeName() == XQConversions::s60DescToQString(
             KCaTypeWidget)) {
-        icon.addBadge(Qt::AlignBottom | Qt::AlignLeft,
+        icon.addBadge(Qt::AlignBottom | Qt::AlignRight,
 		    HbIcon("qtg_small_homescreen"));
     }
     return icon;

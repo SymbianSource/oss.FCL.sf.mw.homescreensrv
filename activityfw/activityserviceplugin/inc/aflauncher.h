@@ -11,22 +11,32 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
-#ifndef TSPROPERTYDEFS_H
-#define TSPROPERTYDEFS_H
+#ifndef AFLAUNCHER_H
+#define AFLAUNCHER_H
 
-namespace TsProperty {
+class ApplicationLauncherPrivate;
 
-#if defined(__SYMBIAN32__) || defined(SYMBIAN)
-    const TUid KCategory = {0x20022fc5};
-    const TUint KVisibilityKey = 0x2002677F;
-#endif    
-    const char KTsPath[] = "/TaskSwitcher";
-    const char KVisibilityPath[] = "Visibility";
+#include <QString>
+#include <QUrl>
 
-}
+class AfLauncher
+{
 
-#endif // TSPROPERTYDEFS_H
-    
+public:
+    AfLauncher();
+    ~AfLauncher();
+
+public:
+    bool isRunning(int applicationId);
+    void startApplication(int applicationId, const QUrl &uri);
+    void bringToForeground(int applicationId);
+
+private:
+    ApplicationLauncherPrivate *d_ptr;
+
+};
+
+#endif // AFLAUNCHER_H

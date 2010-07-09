@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: 19.1.9 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 19.1.10 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -37,9 +37,8 @@ SOURCE          cainstallnotifier.cpp
 SOURCE          cainstallstrategy.cpp
 SOURCE          cammcwatcher.cpp
 SOURCE          casrvengutils.cpp
-SOURCE			casrvnotifier.cpp
+SOURCE	        casrvnotifier.cpp
 SOURCE          castorageproxy.cpp
-SOURCE          caprogressnotifier.cpp
 
 
 USERINCLUDE     ../srvinc
@@ -65,8 +64,6 @@ LIBRARY         ws32.lib
 LIBRARY         bafl.lib
 LIBRARY         casrvmanager.lib
 
-LIBRARY         sifnotification.lib
-LIBRARY         sif.lib
 LIBRARY         scrclient.lib
 
 // HB LIBRARIES

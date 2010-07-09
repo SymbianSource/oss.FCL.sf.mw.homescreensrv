@@ -34,6 +34,8 @@
 
 using namespace Usif;
 
+
+
 // ==================== LOCAL FUNCTIONS ====================
 
 /**
@@ -69,10 +71,11 @@ LOCAL_C TBool UidMatch( const CCaInnerEntry& aLeft,
 // ---------------------------------------------------------
 //
 CCaSrvAppScanner* CCaSrvAppScanner::NewL( CCaStorageProxy& aCaStorageProxy,
+        Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
         CCaSrvEngUtils& aUtils )
     {
     CCaSrvAppScanner* scanner = new ( ELeave ) CCaSrvAppScanner(
-            aCaStorageProxy, aUtils );
+            aCaStorageProxy, aSoftwareRegistry, aUtils );
     CleanupStack::PushL( scanner );
     scanner->ConstructL();
     CleanupStack::Pop( scanner );
@@ -86,7 +89,6 @@ CCaSrvAppScanner* CCaSrvAppScanner::NewL( CCaStorageProxy& aCaStorageProxy,
 CCaSrvAppScanner::~CCaSrvAppScanner()
     {
     Cancel();
-    iSoftwareRegistry.Close();
     iApaLsSession.Close();
     delete iMmcHistory;
     iFs.Close();
@@ -97,9 +99,11 @@ CCaSrvAppScanner::~CCaSrvAppScanner()
 // ---------------------------------------------------------
 //
 CCaSrvAppScanner::CCaSrvAppScanner( CCaStorageProxy& aCaStorageProxy,
+        Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
         CCaSrvEngUtils& aUtils ) :
     CActive( CActive::EPriorityStandard ),
-    iCaStorageProxy( aCaStorageProxy ), iSrvEngUtils( aUtils )
+    iCaStorageProxy( aCaStorageProxy ),
+    iSoftwareRegistry(aSoftwareRegistry), iSrvEngUtils( aUtils )
     {
     CActiveScheduler::Add( this );
     }
@@ -126,7 +130,6 @@ void CCaSrvAppScanner::ConstructL()
     iMmcHistory->LoadL( iFs, KCaMmcHistoryFname() );
 
     User::LeaveIfError( iApaLsSession.Connect() );
-    User::LeaveIfError( iSoftwareRegistry.Connect() );
     iApaLsSession.SetNotify( EFalse, iStatus );
     iCollectionDownloadId = 0;
     iAllCollectionId = 0;
@@ -164,15 +167,14 @@ void CCaSrvAppScanner::RunL()
 				{
                 id = AddAppEntryL(
                         updatedAppsInfo[i].iAppUid.iUid, UpdateMmcHistoryL() );
+                AddEntryToDownloadedCollectionL( id );
 				}
 			else
 			    {
                 ASSERT( resultArray.Count() == 1 );
                 id = resultArray[0]->GetId();
                 UpdateAppEntryL( resultArray[0], UpdateMmcHistoryL(), ETrue );
-                AddEntryToPredefinedCollectionL( resultArray[0], ETrue );
-			    }
-            AddEntryToDownloadedCollectionL( id );
+                }
             MakeNotEmptyCollectionsVisibleL();
 			}
 		else if( action == TApaAppUpdateInfo::EAppNotPresent )
@@ -255,24 +257,39 @@ void CCaSrvAppScanner::UpdateApplicationEntryL(
 // ---------------------------------------------------------
 //
 void CCaSrvAppScanner::UpdateAppEntryL(
-        CCaInnerEntry* aEntry, TUint aMmcId, TBool aAlwaysUpdate  )
+        CCaInnerEntry* aEntry, TUint aMmcId, TBool aAlwaysUpdate )
     {
-    TBool toUpdate = HandleMmcAttrUpdateL( aEntry, aMmcId );
-    TBool missingVisibleFlagChanged =
-        HandleMissingVisibleFlagsUpdate( aEntry );
-    toUpdate = missingVisibleFlagChanged || toUpdate;
-    toUpdate = HandleRemovableVisibleFlagsUpdateL( aEntry ) || toUpdate;
+    TBool missingFlagChanged = HandleMissingFlagsUpdate( aEntry );
+    TBool visibleFlagChanged = HandleVisibleFlagUpdate( aEntry );
+
+
+    // To handle case with mmc card. When mmc attritube is updated then
+    // used flag should be change. When aplication is update but
+    // it is not appear then this flag should be change too.
+    if( aAlwaysUpdate && !missingFlagChanged )
+        {
+        HandleUsedFlagUpdate( aEntry );
+        }
+    TBool toUpdate = missingFlagChanged || visibleFlagChanged;
     toUpdate = SetApaAppInfoL( aEntry ) || toUpdate;
+    toUpdate = HandleRemovableFlagAndMmcAttrUpdateL( aEntry, aMmcId ) || toUpdate;
     toUpdate = RemoveUninstallFlagL( aEntry ) || toUpdate;
 
     if( toUpdate || aAlwaysUpdate )
         {
         //update app in storage
-        HandleUsedFlagUpdate( aEntry );
         TItemAppearance itemAppearanceChange = EItemAppearanceNotChanged;
-        if( missingVisibleFlagChanged )
+        if( missingFlagChanged || visibleFlagChanged )
             {
             itemAppearanceChange = EItemAppeared;
+            }
+        if( !missingFlagChanged )
+            {
+            AddEntryToPredefinedCollectionL( aEntry, ETrue );
+            if ( aEntry->GetFlags() & ERemovable )
+                {
+                AddEntryToDownloadedCollectionL( aEntry->GetId() );
+                }
             }
         iCaStorageProxy.AddL( aEntry, EFalse, itemAppearanceChange );
         }
@@ -283,42 +300,63 @@ void CCaSrvAppScanner::UpdateAppEntryL(
 // ---------------------------------------------------------
 //
 TBool CCaSrvAppScanner::HandleMmcAttrUpdateL(
+        const Usif::CComponentEntry* aEntry,
         CCaInnerEntry* aItem, TUint aMmcId )
     {
-    TBool toUpdate( ETrue );
-    if( IsInMmcL( TUid::Uid( aItem->GetUid() ) ) )
+    TBool toChange( EFalse );
+    if( aEntry && aEntry->IsRemovable() )
         {
-        //app is instaled on mmc - KCaAttrMmcId attribute update
-        RBuf uidString;
-        uidString.CleanupClosePushL();
-        uidString.CreateL(KUidChars);
-        uidString.Format( KHexFormat, aMmcId );
-        aItem->AddAttributeL( KCaAttrMmcId, uidString );
-        CleanupStack::PopAndDestroy( &uidString );
-        }
-    else if ( IsInMassStorageL( TUid::Uid( aItem->GetUid() ) ) )
-        {
-        //its app installed on mass storage, we need to leave it
-        //in case of connecting usb in mass storage mode
-        aItem->AddAttributeL( KCaAttrMmcId, KCaMassStorage );
-        }
-    else
-        {
-        RBuf attrVal;
-        attrVal.CleanupClosePushL();
-        attrVal.CreateL( KCaMaxAttrValueLen );
-        if( aItem->FindAttribute( KCaAttrMmcId, attrVal ) )
+        TChar currentDriveLetter;
+        if ( aEntry->SoftwareType().Compare(KCaAttrAppTypeValueNative()) != 0 )
             {
-            aItem->RemoveAttributeL( KCaAttrMmcId );
+            TDriveList driveList = aEntry->InstalledDrives();
+            for ( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
+                {
+                if ( driveList[driveNr] )
+                    {
+                    User::LeaveIfError( iFs.DriveToChar( driveNr,
+                            currentDriveLetter ) );
+                    }
+                }
             }
         else
             {
-            toUpdate = EFalse;
+            TApaAppInfo* appInfo = new ( ELeave ) TApaAppInfo();
+            if( !iApaLsSession.GetAppInfo( *appInfo,
+                    TUid::Uid( aItem->GetUid() ) ) )
+                {
+                currentDriveLetter = appInfo->iFullName[0];
+                }
             }
-        CleanupStack::PopAndDestroy( &attrVal );
+
+        if( IsCharInDrive( currentDriveLetter,
+                DriveInfo::EDefaultRemovableMassStorage ) )
+            {
+            //app is instaled on mmc - KCaAttrMmcId attribute update
+            RBuf uidString;
+            uidString.CleanupClosePushL();
+            uidString.CreateL( KUidChars );
+            uidString.Format( KHexFormat, aMmcId );
+            toChange = AddAttributeL( aItem, KCaAttrMmcId, uidString );
+            CleanupStack::PopAndDestroy( &uidString );
+            }
+        else if ( IsCharInDrive( currentDriveLetter, DriveInfo::EDefaultMassStorage ) )
+            {
+            //its app installed on mass storage, we need to leave it
+            //in case of connecting usb in mass storage mode
+            toChange = AddAttributeL( aItem, KCaAttrMmcId, KCaMassStorage );
+            }
+        else
+            {
+            toChange = RemoveAttributeL( aItem, KCaAttrMmcId );
+            }
+        }
+    else
+        {
+        toChange = RemoveAttributeL( aItem, KCaAttrMmcId );
         //its installed on c: drive - remove attribute
         }
-    return toUpdate;
+    return toChange;
     }
 
 // ---------------------------------------------------------
@@ -359,11 +397,23 @@ void CCaSrvAppScanner::UpdateApplicationEntriesL()
 //
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::HandleRemovableVisibleFlagsUpdateL(
-        CCaInnerEntry* aItem )
+TBool CCaSrvAppScanner::HandleRemovableFlagAndMmcAttrUpdateL(
+        CCaInnerEntry* aItem, TUint aMmcId )
     {
     TBool toChange( EFalse );
-    if( ( aItem->GetFlags() & EVisible ) && IsInRomL( aItem->GetUid() ) )
+    TComponentId compId = GetComponentIdFromEntryL( aItem );
+
+    TBool isRemovable( EFalse );
+    if( compId )
+        {
+        CComponentEntry* entry = CComponentEntry::NewLC();
+        iSoftwareRegistry.GetComponentL( compId , *entry );
+        isRemovable = entry->IsRemovable();
+        toChange = HandleMmcAttrUpdateL( entry, aItem, aMmcId );
+        CleanupStack::PopAndDestroy( entry );
+        }
+
+    if( ( aItem->GetFlags() & EVisible ) && !isRemovable )
         {
         if( ( aItem->GetFlags() & ERemovable ) != 0 )
             {
@@ -373,7 +423,7 @@ TBool CCaSrvAppScanner::HandleRemovableVisibleFlagsUpdateL(
         }
     else
         {
-        if( ( aItem->GetFlags() & ERemovable ) == 0 )
+        if( ( aItem->GetFlags() & ERemovable ) == 0 && isRemovable )
             {
             aItem->SetFlags( aItem->GetFlags() | ERemovable );
             toChange = ETrue;
@@ -401,15 +451,14 @@ TBool CCaSrvAppScanner::RemoveUninstallFlagL( CCaInnerEntry* aItem )
 //
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::HandleMissingVisibleFlagsUpdate(
+TBool CCaSrvAppScanner::HandleMissingFlagsUpdate(
         CCaInnerEntry* aItem )
     {
     TBool ret( EFalse );
-    if( aItem->GetFlags() & EMissing ||
-        !( aItem->GetFlags() & EVisible ) )
+    if( aItem->GetFlags() & EMissing )
         {
-        //application found so we unset "missing" and set "visible" flags
-        aItem->SetFlags( aItem->GetFlags() & ~EMissing | EVisible );
+        //application found so we unset "missing" flag
+        aItem->SetFlags( aItem->GetFlags() & ~EMissing );
         ret = ETrue;
         }
     return ret;
@@ -789,8 +838,7 @@ TInt CCaSrvAppScanner::AddAppEntryL( TUint aUid, TUint aCurrentMmcId )
     appEntry->SetRole( EItemEntryRole );
 
     SetApaAppInfoL( appEntry );
-    HandleRemovableVisibleFlagsUpdateL( appEntry );
-    HandleMmcAttrUpdateL( appEntry, aCurrentMmcId );
+    HandleRemovableFlagAndMmcAttrUpdateL( appEntry, aCurrentMmcId );
 
     iCaStorageProxy.AddL( appEntry );
     id = appEntry->GetId();
@@ -812,26 +860,8 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
     CleanupStack::PushL(info);
     if( KErrNone == iSrvEngUtils.GetAppInfo( *aEntry, *info ) )
         {
-        RBuf attrVal;
-        attrVal.CleanupClosePushL();
-        attrVal.CreateL( KCaMaxAttrValueLen );
-        aEntry->FindAttribute( KCaAttrShortName, attrVal );
-        if( attrVal.Compare( info->iShortCaption ) != KErrNone
-                || aEntry->GetText().Compare( info->iCaption )
-                        != KErrNone )
-            {
-            aEntry->SetTextL( info->iCaption );
-            aEntry->AddAttributeL( KCaAttrShortName, info->iShortCaption );
-            changed = ETrue;
-            }
-
-
-        if ( UpdateComponentIdL( *aEntry ) )
-            {
-            changed = ETrue;
-            }
-
-        CleanupStack::PopAndDestroy( &attrVal );
+        changed = SetAppCaptionL( aEntry, info ) || changed;
+        changed = UpdateComponentIdL( *aEntry ) || changed;
 
         // check if its java app and add attr for entries
         TUid appTypeUid;
@@ -839,60 +869,139 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
             {
             if( appTypeUid == KMidletApplicationTypeUid )
                 {
-                aEntry->AddAttributeL(
-                        KCaAttrAppType,
-                        KCaAttrAppTypeValueJava );
-
-                TComponentId compId =
-                        iSoftwareRegistry.GetComponentIdForAppL( info->iUid );
-                CPropertyEntry* propertyEntry =
-                    iSoftwareRegistry.GetComponentPropertyL( compId, KCaScrPropertyAppSettings );
-                CleanupStack::PushL( propertyEntry );
-                if ( propertyEntry &&
-                        propertyEntry->PropertyType() == CPropertyEntry::ELocalizedProperty )
-                    {
-                    aEntry->AddAttributeL(
-                            KCaAttrAppSettingsPlugin,
-                            static_cast<CLocalizablePropertyEntry*>(propertyEntry)->StrValue() );
-                    }
-                CleanupStack::PopAndDestroy( propertyEntry );
+                changed = SetJavaAppL( aEntry ) || changed;
                 }
-            else if ( appTypeUid == KCWRTApplicationTypeUid )
+            else if( appTypeUid == KCWRTApplicationTypeUid )
                 {
-                aEntry->AddAttributeL(
-                        KCaAttrAppType,
-                        KCaAttrAppTypeValueCWRT );
-                TComponentId compId =
-                        iSoftwareRegistry.GetComponentIdForAppL( info->iUid );
-                CPropertyEntry* isMiniview =
-                                        iSoftwareRegistry.GetComponentPropertyL( compId,
-                                                KCaScrPropertyIsMiniviewSupported );
-                CleanupStack::PushL( isMiniview );
-                // check first if we support mini view
-                if (isMiniview && isMiniview->PropertyType() == CPropertyEntry::EIntProperty &&
-                        static_cast<CIntPropertyEntry*>(isMiniview)->IntValue())
-                    {
-                    CPropertyEntry* appId =
-                        iSoftwareRegistry.GetComponentPropertyL( compId, KCaScrPropertyAppId );
-                    CleanupStack::PushL( appId );
-                    if ( appId &&
-                         appId->PropertyType() == CPropertyEntry::ELocalizedProperty )
-                        {
-                        aEntry->AddAttributeL(
-                                            KCaAttrAppWidgetUri,
-                                            KCaAttrAppWidgetUriCWRTValue );
-                        aEntry->AddAttributeL(
-                                            KCaAttrAppWidgetParamWebAppId,
-                                            static_cast<CLocalizablePropertyEntry*>(appId)->StrValue() );
-                        }
-                    CleanupStack::PopAndDestroy( appId );
-                    }
-                CleanupStack::PopAndDestroy( isMiniview );
+                changed = SetCWRTAppL( aEntry ) || changed;
                 }
             }
         }
     CleanupStack::PopAndDestroy( info );
     return changed;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+TBool CCaSrvAppScanner::SetAppCaptionL(
+        CCaInnerEntry* aEntry, TApaAppInfo* info )
+    {
+    TBool changed(EFalse);
+    if( aEntry->GetText().Compare( info->iCaption ) != KErrNone )
+        {
+        aEntry->SetTextL( info->iCaption );
+        changed = ETrue;
+        }
+    changed = AddAttributeL( aEntry, KCaAttrShortName, info->iShortCaption )
+            || changed;
+
+    return changed;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+TBool CCaSrvAppScanner::SetJavaAppL( CCaInnerEntry* aEntry )
+    {
+    TBool changed = AddAttributeL(
+            aEntry, KCaAttrAppType, KCaAttrAppTypeValueJava );
+    TComponentId compId = GetComponentIdFromEntryL( aEntry );
+    CPropertyEntry* propertyEntry = iSoftwareRegistry.GetComponentPropertyL(
+            compId, KCaScrPropertyAppSettings );
+    CleanupStack::PushL( propertyEntry );
+
+    if( propertyEntry
+            && propertyEntry->PropertyType()
+                    == CPropertyEntry::ELocalizedProperty )
+        {
+        changed = AddAttributeL( aEntry, KCaAttrAppSettingsPlugin,
+                static_cast<CLocalizablePropertyEntry*>(
+                        propertyEntry)->StrValue() ) || changed;
+        }
+    CleanupStack::PopAndDestroy( propertyEntry );
+    return changed;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+TBool CCaSrvAppScanner::SetCWRTAppL( CCaInnerEntry* aEntry )
+    {
+    TBool changed = AddAttributeL( aEntry, KCaAttrAppType, KCaAttrAppTypeValueCWRT );
+    TComponentId compId = GetComponentIdFromEntryL( aEntry );
+
+    CPropertyEntry* isMiniview = iSoftwareRegistry.GetComponentPropertyL(
+            compId, KCaScrPropertyIsMiniviewSupported );
+    CleanupStack::PushL( isMiniview );
+
+    // check first if we support mini view
+    if( isMiniview && isMiniview->PropertyType() == CPropertyEntry::EIntProperty
+            && static_cast<CIntPropertyEntry*>( isMiniview)->IntValue() )
+        {
+        CPropertyEntry* appId = iSoftwareRegistry.GetComponentPropertyL(
+                compId, KCaScrPropertyAppId );
+        CleanupStack::PushL( appId );
+
+        if ( appId
+                && appId->PropertyType() == CPropertyEntry::ELocalizedProperty )
+            {
+            changed = AddAttributeL(
+                    aEntry, KCaAttrAppWidgetUri, KCaAttrAppWidgetUriCWRTValue )
+                        || changed;
+            changed = AddAttributeL( aEntry, KCaAttrAppWidgetParamWebAppId,
+                    static_cast<CLocalizablePropertyEntry*>(
+                            appId)->StrValue() ) || changed;
+            }
+        CleanupStack::PopAndDestroy( appId );
+        }
+    CleanupStack::PopAndDestroy( isMiniview );
+    return changed;
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TBool CCaSrvAppScanner::AddAttributeL( CCaInnerEntry* aEntry, const TDesC& aKey,
+        const TDesC& aValue )
+    {
+    TBool changed(EFalse);
+    RBuf attrValue;
+    attrValue.CleanupClosePushL();
+    attrValue.CreateL( KCaMaxAttrValueLen );
+
+    TBool found = aEntry->FindAttribute( aKey, attrValue );
+    if( !( found && attrValue.Compare( aValue ) == KErrNone ) )
+        {
+        aEntry->AddAttributeL( aKey, aValue );
+        changed = ETrue;
+        }
+    CleanupStack::PopAndDestroy( &attrValue );
+    return changed;
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TBool CCaSrvAppScanner::RemoveAttributeL( CCaInnerEntry* aEntry,
+        const TDesC& aKey )
+    {
+    TBool toChange( EFalse );
+    RBuf attrVal;
+    attrVal.CleanupClosePushL();
+    attrVal.CreateL( KCaMaxAttrValueLen );
+    if( aEntry->FindAttribute( KCaAttrMmcId, attrVal ) )
+        {
+        aEntry->RemoveAttributeL( aKey );
+        toChange = ETrue;
+        }
+    CleanupStack::PopAndDestroy( &attrVal );
+    return toChange;
     }
 
 // ---------------------------------------------------------
@@ -924,12 +1033,12 @@ void CCaSrvAppScanner::HandleMissingItemsL(
             else
                 {
                 aCaEntries[i]->RemoveAttributeL( KCaAttrMmcId() );
-                ClearVisibleFlagL( aCaEntries[i] );
+                ClearAllFlagsL( aCaEntries[i] );
                 }
             }
         else
             {
-            ClearVisibleFlagL( aCaEntries[i] );
+            ClearAllFlagsL( aCaEntries[i] );
             }
         CleanupStack::PopAndDestroy( &attrVal );
         }
@@ -952,16 +1061,11 @@ void CCaSrvAppScanner::SetMissingFlagL( CCaInnerEntry* aEntry )
 //
 // ---------------------------------------------------------
 //
-void CCaSrvAppScanner::ClearVisibleFlagL( CCaInnerEntry* aEntry )
+void CCaSrvAppScanner::ClearAllFlagsL( CCaInnerEntry* aEntry )
     {
     if( aEntry->GetFlags() & EVisible )
         {
-        aEntry->SetFlags(
-                aEntry->GetFlags() &
-                ~EUninstall &
-                ~EVisible &
-                ~EMissing &
-                ~EUsed );
+        aEntry->SetFlags( 0 );
         iCaStorageProxy.AddL( aEntry, EFalse, EItemDisappeared );
         }
     }
@@ -1008,72 +1112,22 @@ TUint CCaSrvAppScanner::CurrentMmcId() const
 //
 // ---------------------------------------------------------
 //
-TBool CCaSrvAppScanner::IsFileInDrive(
-    const TDesC& aFileName,
-    const DriveInfo::TDefaultDrives& aDefaultDrive ) const
+TBool CCaSrvAppScanner::IsCharInDrive( const TChar& aDriveLetter,
+        const DriveInfo::TDefaultDrives& aDefaultDrive ) const
     {
     TBool retVal( EFalse );
-    if ( aFileName.Length()>0 )
+    TInt mmcDrive;
+    TInt err = DriveInfo::GetDefaultDrive( aDefaultDrive, mmcDrive );
+    if( !err )
         {
-        TInt mmcDrive;
-        TInt err = DriveInfo::GetDefaultDrive( aDefaultDrive, mmcDrive );
-        if( !err )
+        TInt fileDrive;
+        err = RFs::CharToDrive( aDriveLetter, fileDrive );
+        if( !err && fileDrive == mmcDrive )
             {
-            TInt fileDrive;
-            err = RFs::CharToDrive( aFileName[0], fileDrive );
-            if( !err && fileDrive == mmcDrive )
-                {
-                retVal = ETrue;
-                }
+            retVal = ETrue;
             }
         }
     return retVal;
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-TBool CCaSrvAppScanner::IsAppInDriveL(
-        const TUid aUid,
-        const DriveInfo::TDefaultDrives& aDefaultDrive ) const
-    {
-    TBool ret( EFalse );
-    TApaAppInfo* appInfo = new ( ELeave ) TApaAppInfo();
-    TInt err = iApaLsSession.GetAppInfo( *appInfo, aUid );
-    if( !err && IsFileInDrive( appInfo->iFullName, aDefaultDrive ) )
-        {
-        ret = ETrue;
-        }
-    delete appInfo;
-    return ret;
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-TBool CCaSrvAppScanner::IsInMmcL( const TUid aUid ) const
-    {
-    return IsAppInDriveL( aUid, DriveInfo::EDefaultRemovableMassStorage );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-TBool CCaSrvAppScanner::IsInMassStorageL( const TUid aUid ) const
-    {
-    return IsAppInDriveL( aUid, DriveInfo::EDefaultMassStorage );
-    }
-
-// ---------------------------------------------------------
-//
-// ---------------------------------------------------------
-//
-TBool CCaSrvAppScanner::IsInRomL( TInt aUid )
-    {
-    return IsAppInDriveL( TUid::Uid( aUid ), DriveInfo::EDefaultRom );
     }
 
 // ---------------------------------------------------------
@@ -1158,17 +1212,38 @@ void CCaSrvAppScanner::MakeCollectionVisibleIfHasVisibleEntryL(
 
 // ---------------------------------------------------------
 //
-// ---------------------------------------------------------//
-TBool CCaSrvAppScanner::UpdateComponentIdL( CCaInnerEntry& aEntry ) const
+// ---------------------------------------------------------
+//
+TInt CCaSrvAppScanner::GetComponentIdFromEntryL( CCaInnerEntry* aEntry )
+    {
+    TInt id(0);
+    RBuf componentId;
+    componentId.CleanupClosePushL();
+    componentId.CreateL( KCaMaxAttrValueLen );
+
+    TBool found = aEntry->FindAttribute( KCaComponentId, componentId );
+    if( found )
+        {
+        TLex parser;
+        parser.Assign( componentId );
+        parser.Val( id );
+        }
+    CleanupStack::PopAndDestroy( &componentId );
+
+    return id;
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TBool CCaSrvAppScanner::UpdateComponentIdL( CCaInnerEntry& aEntry )
     {
     TBool updated( EFalse );
-
-    TUid uid;
-    TInt err(KErrNone);
     TComponentId componentId( 0 );
-    TRAP(err, componentId =
-            iSoftwareRegistry.GetComponentIdForAppL(
-            uid.Uid( aEntry.GetUid() ) ) )
+
+    TRAPD(err, componentId = iSoftwareRegistry.GetComponentIdForAppL(
+            TUid::Uid( aEntry.GetUid() ) ) )
 
     if ( componentId > 0 && err == KErrNone )
         {
@@ -1177,24 +1252,9 @@ TBool CCaSrvAppScanner::UpdateComponentIdL( CCaInnerEntry& aEntry ) const
         newComponentId.CreateL( sizeof(TComponentId) + 1 );
         newComponentId.AppendNum( componentId );
 
-        RBuf oldComponentId;
-        oldComponentId.CleanupClosePushL();
-        oldComponentId.CreateL( KCaMaxAttrValueLen );
+        // 'add' or 'update' the component id attribute value
+        updated = AddAttributeL( &aEntry, KCaComponentId, newComponentId );
 
-        const TBool componentIdAttributeFound =
-            aEntry.FindAttribute( KCaComponentId, oldComponentId );
-
-        if ( !componentIdAttributeFound
-            || oldComponentId.Compare( newComponentId ) != 0 )
-            {
-            // 'add' or 'update' the component id attribute value
-            aEntry.AddAttributeL( KCaComponentId,
-                newComponentId );
-
-            updated = ETrue;
-            }
-
-        CleanupStack::PopAndDestroy( &oldComponentId );
         CleanupStack::PopAndDestroy( &newComponentId );
         }
     return updated;

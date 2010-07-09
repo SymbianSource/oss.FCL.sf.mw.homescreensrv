@@ -24,7 +24,8 @@ CCaAppScannerHandler* CCaAppScannerHandler::NewL(TPluginParams* aPluginParams)
     CCaAppScannerHandler* self = new (ELeave) CCaAppScannerHandler(
             aPluginParams);
     CleanupStack::PushL(self);
-    self->ConstructL(*aPluginParams->storageProxy, *aPluginParams->engUtils);
+    self->ConstructL(*aPluginParams->storageProxy,
+	    *aPluginParams->softwareRegistry, *aPluginParams->engUtils);
     CleanupStack::Pop();
     return self;
     }
@@ -39,9 +40,11 @@ CCaAppScannerHandler::CCaAppScannerHandler(TPluginParams* /*aPluginParams*/)
     }
 
 void CCaAppScannerHandler::ConstructL(CCaStorageProxy& aCaStorageProxy,
+        Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
         CCaSrvEngUtils& aUtils)
     {
-    iScanner = CCaSrvAppScanner::NewL(aCaStorageProxy, aUtils);
+    iScanner = CCaSrvAppScanner::NewL(aCaStorageProxy, aSoftwareRegistry,
+	    aUtils);
     }
 
 //  End of File

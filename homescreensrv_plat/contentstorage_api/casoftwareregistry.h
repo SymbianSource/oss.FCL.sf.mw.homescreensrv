@@ -34,34 +34,44 @@ class CaSoftwareRegistryPrivate;
  */
 class CACLIENT_EXPORT CaSoftwareRegistry: public QObject
 {
-    
-Q_OBJECT    
+
+Q_OBJECT
 
     explicit CaSoftwareRegistry(QObject *parent = 0);
 
     ~CaSoftwareRegistry();
-    
+
 public:
-    
+
     static QSharedPointer<CaSoftwareRegistry> create();
-    
+
     typedef QHash<QString, QString> DetailMap;
-    
+
     bool getUninstallDetails(int componentId,
         QString &componentName,
         QStringList &applicationsUids,
         QString &confirmationMessage);
-    
+
     bool getApplicationsUids(int componentId, QStringList &applicationsUids);
-    
+
     DetailMap entryDetails(int componentId) const;
-    
+
+    QList<DetailMap> retrieveLogEntries() const;
+
     static QString componentNameKey();
     static QString componentVersionKey();
     static QString componentVendorKey();
     static QString componentDriveInfoKey();
+    static QString componentProtectionDomainKey();
     static QString componentSizeKey();
     static QString componentTypeKey();
+    static QString componentDescriptionKey();
+    static QString componentTimeKey();
+    static QString componentOperationTypeKey();
+    static QString componentInstallValue();
+    static QString componentUninstallValue();
+    static QString componentUpgradeValue();
+    static QString componentHiddenValue();
 private:
     /**
      * Pointer to a private implementation.
@@ -77,7 +87,7 @@ private:
     friend class QtSharedPointer::ExternalRefCount<CaSoftwareRegistry>;
 
     Q_DISABLE_COPY(CaSoftwareRegistry)
-    
+
 };
 
 #endif // CA_SOFTWARE_REGISTRY_H

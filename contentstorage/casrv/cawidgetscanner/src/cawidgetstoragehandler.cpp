@@ -40,7 +40,8 @@ using namespace Usif;
 // -----------------------------------------------------------------------------
 //
 CCaWidgetStorageHandler::CCaWidgetStorageHandler( CCaStorageProxy* aStorage,
-        RFs& aFs )
+        Usif::RSoftwareComponentRegistry& aSoftwareRegistry, RFs& aFs ) :
+            iSoftwareRegistry(aSoftwareRegistry)
     {
     iStorage = aStorage;
     iFs = aFs;
@@ -52,7 +53,6 @@ CCaWidgetStorageHandler::CCaWidgetStorageHandler( CCaStorageProxy* aStorage,
 //
 void CCaWidgetStorageHandler::ConstructL()
     {
-    User::LeaveIfError( iSoftwareRegistry.Connect() );
     iParser = CCaWidgetScannerParser::NewL( iFs );
     }
 
@@ -61,9 +61,10 @@ void CCaWidgetStorageHandler::ConstructL()
 // -----------------------------------------------------------------------------
 //
 CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewL(
-        CCaStorageProxy* aStorage, RFs& aFs )
+        CCaStorageProxy* aStorage,
+        Usif::RSoftwareComponentRegistry& aSoftwareRegistry, RFs& aFs )
     {
-    CCaWidgetStorageHandler* self = NewLC( aStorage, aFs );
+    CCaWidgetStorageHandler* self = NewLC( aStorage, aSoftwareRegistry, aFs );
     CleanupStack::Pop( self );
     return self;
     }
@@ -73,10 +74,11 @@ CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewL(
 // -----------------------------------------------------------------------------
 //
 CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewLC(
-        CCaStorageProxy* aStorage, RFs& aFs )
+        CCaStorageProxy* aStorage,
+        Usif::RSoftwareComponentRegistry& aSoftwareRegistry, RFs& aFs )
     {
     CCaWidgetStorageHandler* self = new ( ELeave ) CCaWidgetStorageHandler(
-            aStorage, aFs );
+            aStorage, aSoftwareRegistry, aFs );
     CleanupStack::PushL( self );
     self->ConstructL();
     return self;
@@ -89,7 +91,6 @@ CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewLC(
 CCaWidgetStorageHandler::~CCaWidgetStorageHandler()
     {
     delete iParser;
-    iSoftwareRegistry.Close();
     iWidgets.ResetAndDestroy();
     }
 

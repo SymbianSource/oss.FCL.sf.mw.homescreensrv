@@ -56,17 +56,13 @@ QVariant TsEntryModelItem::data(int role) const
             return QVariant(mEntry->name());
         case Qt::DecorationRole:
             {
-                QPixmap icon = mEntry->screenshot().isNull() ? 
-                               mEntry->icon() :
-                               mEntry->screenshot();
-                if (icon.isNull()) {
-                    return HbIcon("qtg_large_application");
-                } else {
-                    return QVariant::fromValue<HbIcon>(HbIcon(icon));
-                }
+            QPixmap icon = mEntry->screenshot();
+            return QVariant::fromValue<HbIcon>(HbIcon(icon));
             }
         case TsDataRoles::Closable:
             return QVariant(mEntry->isClosable());
+        case TsDataRoles::Active:
+            return QVariant(mEntry->isActive());
         default:
             return QVariant(QVariant::Invalid);
     }

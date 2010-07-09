@@ -34,7 +34,7 @@ void ApplicationLauncherPrivate::startApplication(int applicationId, const QUrl 
 {
     QString commandLine = QString("-activity %1").arg(QString(uri.toEncoded()));
 
-    QT_TRAP_THROWING( {
+    TRAP_IGNORE(
         HBufC *commandLineAsDescriptor = XQConversions::qStringToS60Desc(commandLine);
         CleanupStack::PushL(commandLineAsDescriptor);
 
@@ -43,20 +43,15 @@ void ApplicationLauncherPrivate::startApplication(int applicationId, const QUrl 
         CleanupClosePushL(apaLsSession);
 
         TApaAppInfo appInfo;
-        TInt retVal = apaLsSession.GetAppInfo(appInfo, TUid::Uid(applicationId));
+        User::LeaveIfError(apaLsSession.GetAppInfo(appInfo, TUid::Uid(applicationId)));
 
-        if (retVal == KErrNone) {
-            RProcess application;
-            User::LeaveIfError(application.Create(appInfo.iFullName, *commandLineAsDescriptor));
-            application.Resume();
-        } else {
-            // @todo ?
-        }
+        RProcess application;
+        User::LeaveIfError(application.Create(appInfo.iFullName, *commandLineAsDescriptor));
+        application.Resume();
 
         CleanupStack::PopAndDestroy(&apaLsSession);
         CleanupStack::PopAndDestroy(commandLineAsDescriptor);
-    }
-                    );
+    );
 }
 
 void ApplicationLauncherPrivate::bringToForeground(int applicationId)

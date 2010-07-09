@@ -68,7 +68,8 @@ void CCaWidgetScannerPlugin::ConstructL( TPluginParams* aPluginParams )
     iInstallNotifier = CCaWidgetScannerInstallNotifier::NewL( this,
             KUidSystemCategory, KSAUidSoftwareInstallKeyValue );
     iStorageHandler = CCaWidgetStorageHandler::NewL(
-            aPluginParams->storageProxy, iFs );
+            aPluginParams->storageProxy,
+			*aPluginParams->softwareRegistry, iFs );
     SynchronizeL();
     }
 

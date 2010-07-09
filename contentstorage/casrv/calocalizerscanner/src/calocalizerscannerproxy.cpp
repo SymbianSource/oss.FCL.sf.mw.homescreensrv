@@ -19,7 +19,6 @@
 #include <f32file.h>
 #include <qtranslator.h>
 #include <calocalizationentry.h>
-#include <QLocale>
 #include <hbtextresolversymbian.h>
 
 //#include "cainternaltypes.h"

@@ -40,6 +40,7 @@ BLD_INF_RULES.prj_mmpfiles += "casathandler.mmp" \
     "../casrv/cawidgetscanner/group/cawidgetscanner.mmp" \
     "../casrv/carunningappmonitor/group/carunningappmonitor.mmp" \
     "../casrv/causifscanner/group/causifscanner.mmp" \
+    "../casrv/caprogresscanner/group/caprogresscanner.mmp" \
     
 tests_krakow {
         BLD_INF_RULES.prj_mmpfiles += \

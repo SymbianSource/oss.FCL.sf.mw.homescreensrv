@@ -23,15 +23,15 @@ include(activityserviceplugin.pri)
 INCLUDEPATH += ./inc \
                ../../inc
 
-HEADERS +=  ./inc/activityserviceplugin.h \
-            ./inc/afactivityclient.h \
-            ./inc/afactivitymanager.h \
-            ./inc/applicationlauncher.h \
+HEADERS +=  ./inc/afserviceplugin.h \
+            ./inc/afclient.h \
+            ./inc/afmanager.h \
+            ./inc/aflauncher.h \
 
-SOURCES +=  ./src/activityserviceplugin.cpp \
-            ./src/afactivityclient.cpp \
-            ./src/afactivitymanager.cpp \
-            ./src/applicationlauncher.cpp \
+SOURCES +=  ./src/afserviceplugin.cpp \
+            ./src/afclient.cpp \
+            ./src/afmanager.cpp \
+            ./src/aflauncher.cpp \
 
 symbian {
     INCLUDEPATH += ./s60/inc \

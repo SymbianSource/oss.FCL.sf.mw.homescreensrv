@@ -3,12 +3,14 @@
     <widget name="tsdevicedialog" type="HbDialog">
         <widget name="heading" role="HbDialog:headingWidget" type="HbLabel">
             <string name="alignment" value="AlignVCenter|AlignHCenter" />
-            <string locid="txt_tsw_title_task_switcher" name="plainText" value="Task switcher" />
+            <string locid="txt_ts_title_task_switcher" name="plainText" value="Task switcher" />
         </widget>
         <widget name="taskgrid" role="HbDialog:contentWidget" type="TsTasksGrid">
             <widget name="item" role="HbAbstractView:prototype" type="TsTasksGridItem"/>
             <bool name="longPressEnabled" value="FALSE"/>
+            <bool name="itemRecycling" value="TRUE"/>
             <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
+            <bool name="swapDimensionsOnOrientationChange" value="FALSE"/>
         </widget>            
         <bool name="backgroundFaded" value="TRUE"/>
         <string name="dismissPolicy" value="TapOutside"/>
@@ -31,8 +33,8 @@
         </widget>
         <widget name="taskgrid">
             <string name="scrollDirections" value="Horizontal"/>
-            <integer name="rowCount" value="2"/>
-            <integer name="columnCount" value="1"/>
+            <integer name="rowCount" value="1"/>
+            <integer name="columnCount" value="2"/>
         </widget>
     </section>
 </hbdocument>

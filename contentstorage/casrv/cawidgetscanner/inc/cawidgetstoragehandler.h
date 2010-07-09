@@ -49,8 +49,10 @@ public:
      * Two-phased constructor.
      */
     static CCaWidgetStorageHandler* NewL( CCaStorageProxy* aStorage,
+            Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
             RFs& aFs );
     static CCaWidgetStorageHandler* NewLC( CCaStorageProxy* aStorage,
+            Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
             RFs& aFs );
 
     /**
@@ -124,7 +126,8 @@ private:
     /**
      * C++ default constructor.
      */
-    CCaWidgetStorageHandler( CCaStorageProxy* aStorage, RFs& aFs );
+    CCaWidgetStorageHandler( CCaStorageProxy* aStorage,
+            Usif::RSoftwareComponentRegistry& aSoftwareRegistry, RFs& aFs );
 
     /**
      * By default Symbian 2nd phase constructor is private.
@@ -169,7 +172,10 @@ private:
      */
     CCaWidgetScannerParser* iParser;
 
-    Usif::RSoftwareComponentRegistry iSoftwareRegistry;
+    /*
+     * Software Component Registry. Not own
+     */
+    Usif::RSoftwareComponentRegistry& iSoftwareRegistry;
     };
 
 #endif      // C_WIDGETSTORAGEHANDLER_H

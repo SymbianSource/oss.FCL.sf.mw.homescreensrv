@@ -20,12 +20,12 @@
 
 //  INCLUDES
 #include <e32base.h>
+#include <usif/scr/scr.h>
 
 // FORWARD DECLARATION
 class CCaSrvEngUtils;
 class CCaSrvManager;
 class CCaStorageProxy;
-class CCaProgressNotifier;
 
 // GLOBAL FUNCTIONS
 /**
@@ -114,16 +114,16 @@ private:
      * Utils. Own.
      */
     CCaSrvEngUtils* iSrvEngUtils;
+    
+    /*
+     * Software Component Registry. Own.
+     */
+    Usif::RSoftwareComponentRegistry iSoftwareRegistry;
 
     /*
      * Srv plugin manager. Own.
      */
     CCaSrvManager* iSrvManager;
-
-    /*
-     * Uninstall progress notifier
-     */
-    CCaProgressNotifier* iProgressNotifier;
 
     };
 

@@ -79,7 +79,7 @@ win32 {
     # add platfrom API for windows
     INCLUDEPATH += \                
                 $$PWD/homescreensrv_plat/contentstorage_api \
-                $$PWD/homescreensrv_plat/hswidgetmodel_api \                
+                $$PWD/homescreensrv_plat/hswidgetmodel_api \
                 $$PWD/homescreensrv_plat/homescreen_information_api/inc
 }
 

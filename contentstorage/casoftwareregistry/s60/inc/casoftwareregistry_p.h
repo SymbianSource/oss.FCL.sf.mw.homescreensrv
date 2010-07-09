@@ -26,7 +26,7 @@
 class QStringList;
 class CaSoftwareRegistry;
 
-namespace Usif 
+namespace Usif
 {
     class CComponentEntry;
 }
@@ -45,24 +45,32 @@ public:
         QString &componentName,
         QStringList &applicationsUids,
         QString &confirmationMessage);
-    
+
     bool getApplicationsUids(int componentId,
         QStringList &appUids);
 
     DetailMap entryDetails(int componentId) const;
-    
-    DetailMap entryDetails(
-        const Usif::CComponentEntry& entry) const;
+
+    QList<DetailMap> retrieveLogEntries() const;
+    QList<DetailMap> retrieveLogEntriesL() const;
+
 private:
+    DetailMap entryDetailsL(
+            const Usif::CComponentEntry& entry) const;
     void getUninstallDetailsL(int componentId,
         QString &componentName,
         QStringList &appUids,
         QString &confirmationMessage);
     void getApplicationsUidsL(int componentId,
         QStringList &appUids);
+    DetailMap entryDetailsL(int componentId) const;
+    //TODO int should be changed to const Usif::TScrComponentOperationType&
+    //when the problem with usif headers is solved
+    QString operationTypeL(int operationType) const;
+    QString operationTime(TTime time) const;
 private:
     CaSoftwareRegistry *const m_q;
-
+    friend class T_CaSoftwareRegistry;
 };
 
 #endif // CASOFTWAREREGISTRY_P_H

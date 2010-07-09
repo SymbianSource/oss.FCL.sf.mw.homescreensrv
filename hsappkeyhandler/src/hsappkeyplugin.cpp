@@ -20,8 +20,10 @@
 #include <eikenv.h>
 #include <apgtask.h>
 #include <apgcli.h>
+#include <e32property.h>
 #include <hb/hbcore/hbdevicedialogsymbian.h>
 #include <hb/hbcore/hbsymbianvariant.h> 
+#include <tspropertydefs.h>
 #include "hsappkeyplugin.h"
 
 const TUid KHSAppUid  = { 0x20022F35 };
@@ -46,12 +48,6 @@ CHsAppKeyPlugin::CHsAppKeyPlugin()
 CHsAppKeyPlugin* CHsAppKeyPlugin::NewL()
 {
     CHsAppKeyPlugin* self = new (ELeave) CHsAppKeyPlugin;
-    self->iEikEnv->RootWin().CaptureLongKey(EKeyApplication0, 
-                                            EKeyApplication0, 
-                                            0, 
-                                            0, 
-                                            0, 
-                                            ELongCaptureWaitShort);
     return self;
 }
     
@@ -119,7 +115,16 @@ void CHsAppKeyPlugin::ProvideKeyEventsL(RArray<TKeyEvent>& aKeyEventArray)
     key.iCode = EKeyApplication0;
     key.iScanCode = EStdKeyApplication0;
     key.iModifiers = 0;
+    key.iRepeats = 0;
     aKeyEventArray.Append(key);
+    
+    TKeyEvent longkey;
+    longkey.iCode = EKeyApplication0;
+    longkey.iScanCode = EStdKeyApplication0;
+    longkey.iModifiers = 0;
+    longkey.iRepeats = 1;
+    aKeyEventArray.Append(longkey);
+
 }
 
 // ---------------------------------------------------------------------------
@@ -160,15 +165,20 @@ void CHsAppKeyPlugin::HandleShortPressL()
 void CHsAppKeyPlugin::HandleLongPressL()
 {
     if( !mDialog ) {
-         mDialog = CHbDeviceDialogSymbian ::NewL();
-        
-        CHbSymbianVariantMap* params = CHbSymbianVariantMap::NewL();
-        
+        TInt value( 0 );
+        RProperty::Get( TsProperty::KCategory, 
+                    TsProperty::KVisibilityKey,
+                    value );
+        if(!value){
+            mDialog = CHbDeviceDialogSymbian::NewL();
+    
+            CHbSymbianVariantMap* params = CHbSymbianVariantMap::NewL();
         if(KErrNone != mDialog->Show(KTsPluginName,*params,this)) {
             delete mDialog;
             mDialog = 0;
-        }
+            }
         delete params;
+        }
     }
 }
 //  End of File

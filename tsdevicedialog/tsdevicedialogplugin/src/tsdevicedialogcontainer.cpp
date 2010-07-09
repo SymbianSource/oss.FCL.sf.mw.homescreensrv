@@ -62,7 +62,7 @@ TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model, QObj
     connect(dialog, SIGNAL(aboutToClose()), this, SIGNAL(deviceDialogClosed()));
     
     connect(this, SIGNAL(deviceDialogClosed()), this, SLOT(notifyDialogClosed()));    
-    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, true);
+    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, static_cast<int>(true));
     mVisibilityPublisher.sync();
 }
 
@@ -114,6 +114,6 @@ void TsDeviceDialogContainer::changeOrientation(Qt::Orientation orientation)
 
 void TsDeviceDialogContainer::notifyDialogClosed()
 {
-    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, false);
+    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, static_cast<int>(false));
     mVisibilityPublisher.sync();
 }

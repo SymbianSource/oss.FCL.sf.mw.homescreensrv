@@ -30,10 +30,7 @@ class CCaSrvMmcHistory;
 class CCaInnerEntry;
 class CCaStorageProxy;
 class CCaSrvEngUtils;
-namespace Swi
-    {
-    class RSisRegistryEntry;
-    }
+
 
 /**
  * Application scanner.
@@ -70,9 +67,11 @@ public:
     /**
      * Two-phased constructor.
      * @param aCaStorageProxy storage.
+     * @param aSoftwareRegistry software component registry.
      * @param aUtils storage utils.
      */
     static CCaSrvAppScanner* NewL( CCaStorageProxy& aCaStorageProxy,
+            Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
             CCaSrvEngUtils& aUtils );
 
 private:
@@ -81,9 +80,11 @@ private:
     /**
      * Constructor.
      * @param aCaStorageProxy storage.
+     * @param aSoftwareRegistry software component registry.
      * @param aUtils storage utils.
      */
     CCaSrvAppScanner( CCaStorageProxy& aCaStorageProxy,
+            Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
             CCaSrvEngUtils& aUtils );
 
     /**
@@ -161,9 +162,10 @@ private:
     /**
      * Updates application's removable and visible flags.
      * @param aItem menu item.
+     * @param aMmcId MMC ID of currently inserted MMC, or 0.
      * @return ETrue if flags were updated.
      */
-    TBool HandleRemovableVisibleFlagsUpdateL( CCaInnerEntry* aItem );
+    TBool HandleRemovableFlagAndMmcAttrUpdateL( CCaInnerEntry* aItem, TUint aMmcId );
 
     /**
      * Removes application unninstall flag.
@@ -177,7 +179,7 @@ private:
      * @param aItem menu item.
      * @return ETrue if flags were updated.
      */
-    TBool HandleMissingVisibleFlagsUpdate( CCaInnerEntry* aItem );
+    TBool HandleMissingFlagsUpdate( CCaInnerEntry* aItem );
 
     /**
      * Updates visible flag.
@@ -199,14 +201,8 @@ private:
      * @param aMmcId MMC ID of currently inserted MMC, or 0.
      * @return ETrue if mmc attribute was updated.
      */
-    TBool HandleMmcAttrUpdateL( CCaInnerEntry* aItem, TUint aMmcId );
-
-    /**
-     * Check if application is in rom.
-     * Add new menu item referring to this application.
-     * @return ETrue if app is in rom.
-     */
-    TBool IsInRomL( TInt aUid );
+    TBool HandleMmcAttrUpdateL( const Usif::CComponentEntry* aEntry, 
+            CCaInnerEntry* aItem, TUint aMmcId );
 
     /**
      * Get applications from AppArc.
@@ -262,6 +258,55 @@ private:
     TInt AddAppEntryL( TUint aUid, TUint aCurrentMmcId );
 
     /**
+     * Set CWRT ettributes to entry.
+     * @param aEntry CCaInnerEntry with application.
+     * @return ETrue if app info was updatedd
+     */
+    TBool SetCWRTAppL( CCaInnerEntry* aEntry );
+
+    /**
+     * Set Java attributes to entry.
+     * @param aEntry CCaInnerEntry with application.
+     * @return ETrue if app info was updatedd
+     */
+    TBool SetJavaAppL( CCaInnerEntry* aEntry );
+
+    /**
+     * Set information from TApaAppInfo to entry.
+     * @param aEntry CCaInnerEntry with application.
+     * @param info application informations from AppArc.
+     * @return ETrue if app info was updatedd
+     */
+    TBool SetAppCaptionL( CCaInnerEntry* aEntry, TApaAppInfo* info );
+
+    /**
+     * Gets component id from entry.
+     * @param aEntry CCaInnerEntry with application.
+     * @return component id
+     */
+    TInt GetComponentIdFromEntryL( CCaInnerEntry* aEntry );
+
+    /**
+     * Sets new attribute value.
+     * @param aEntry CCaInnerEntry with application.
+     * @param aKey attribute name.
+     * @param aValue attribute value.
+     * @return ETrue if attribute was updated or added
+     */
+    TBool AddAttributeL(
+            CCaInnerEntry* aEntry,
+            const TDesC& aKey,
+            const TDesC& aValue );
+    
+    /**
+     * Removes attribute from entry.
+     * @param aEntry CCaInnerEntry with application.
+     * @param aKey attribute name.
+     * @return ETrue if attribute was removed
+     */
+    TBool RemoveAttributeL( CCaInnerEntry* aEntry, const TDesC& aKey );
+
+    /**
      * Set information from TApaAppInfo to entry.
      * @param aEntry CCaInnerEntry with application.
      * @return ETrue if app info was updatedd
@@ -284,10 +329,10 @@ private:
     void SetMissingFlagL( CCaInnerEntry* aEntry );
 
     /**
-     * Clear "visible" flag (and also "missing" and "used").
+     * Clear all flags.
      * @param aEntry entry.
      */
-    void ClearVisibleFlagL( CCaInnerEntry* aEntry );
+    void ClearAllFlagsL( CCaInnerEntry* aEntry );
 
     /**
      * Check currently inserted MMC card, update and save MMC history.
@@ -300,38 +345,15 @@ private:
      * @return Current MMC id or 0.
      */
     TUint CurrentMmcId() const;
-
+    
     /**
-     * Check if file is on a given default drive type.
-     * @param aFileName File name.
+     * Check if drive letter is on a given default drive type.
+     * @param aDriveLetter drive letter .
      * @param aDefaultDrive default drive type
      * @return ETrue if aFileName is on a given default drive type.
      */
-    TBool IsFileInDrive( const TDesC& aFileName,
+    TBool IsCharInDrive( const TChar& aDriveLetter,
             const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
-
-    /**
-     * Check if application is installed on a given drive type.
-     * @param aUid app uid.
-     * @param aDefaultDrive default drive type.
-     * @return ETrue if app is installed on a given drive type.
-     */
-    TBool IsAppInDriveL( const TUid aUid,
-            const DriveInfo::TDefaultDrives& aDefaultDrive ) const;
-
-    /**
-     * Check if application is installed on MMC.
-     * @param aUid app uid.
-     * @return ETrue if app is installed on MMC.
-     */
-    TBool IsInMmcL( const TUid aUid ) const;
-
-    /**
-     * Check if application is installed on mass storage.
-     * @param aUid app uid.
-     * @return ETrue if app is installed on mass storage.
-     */
-    TBool IsInMassStorageL( const TUid aUid ) const;
 
     /**
      * Check if drive's status is EDriveInUse.
@@ -381,7 +403,7 @@ private:
      * @param aEntry entry being updated with component id attribute.
      * @return ETrue when component id attribute of the entry has been added or changed.
      */
-    TBool UpdateComponentIdL( CCaInnerEntry& aEntry ) const;
+    TBool UpdateComponentIdL( CCaInnerEntry& aEntry );
 
 private:
     // data
@@ -389,9 +411,9 @@ private:
     RApaLsSession iApaLsSession; ///< AppArc session. Own.
     CCaSrvMmcHistory* iMmcHistory; ///< MMC history. Own.
     RFs iFs; ///< File Server Session. Own.
-    Usif::RSoftwareComponentRegistry iSoftwareRegistry;
-
+    
     CCaStorageProxy& iCaStorageProxy; ///< Not own
+    Usif::RSoftwareComponentRegistry& iSoftwareRegistry; ///< Not own
     CCaSrvEngUtils& iSrvEngUtils; ///< Not own
 
     TInt iCollectionDownloadId;

@@ -19,23 +19,24 @@ TEMPLATE = subdirs
 coverage {
     SUBDIRS += ../activityfw
     SUBDIRS += ../hsappkeyhandler
-    SUBDIRS += ../tstaskmonitor
+    SUBDIRS += ../taskswitcher
 }
 
 SUBDIRS += tsdevicedialogplugin
 
 tests {
+    SUBDIRS += ../internal/tstestutils
     SUBDIRS += internal/tstestrunner    
     SUBDIRS += tsdevicedialogplugin/tsrc
     SUBDIRS += ../activityfw/activityserviceplugin/tsrc
     SUBDIRS += ../activityfw/storage/client/t_afstorageclient
     SUBDIRS += ../hsappkeyhandler/tsrc/t_hsappkeyhandler
-    SUBDIRS += ../tstaskmonitor/client/tsrc
-    SUBDIRS += ../tstaskmonitor/server/tsrc
-    SUBDIRS += ../tstaskmonitor/screenshotplugin/tsrc
+    SUBDIRS += ../taskswitcher/client/tsrc
+    SUBDIRS += ../taskswitcher/server/tsrc
+    SUBDIRS += ../taskswitcher/screenshotplugin/tsrc
     SUBDIRS += ../activityfw/tsutils/tsrc
-    SUBDIRS += ../tstaskmonitor/utils/tsrc
-    SUBDIRS += ../tstaskmonitor/backstepping/tsrc
+    SUBDIRS += ../taskswitcher/utils/tsrc
+    SUBDIRS += ../taskswitcher/backstepping/tsrc
 }
 
 symbian:include(rom.pri)

@@ -24,7 +24,6 @@
 #include "casrvengutils.h"
 #include "castorageproxy.h"
 #include "casrvmanager.h"
-#include "caprogressnotifier.h"
 
 // ==================== LOCAL FUNCTIONS ====================
 
@@ -124,8 +123,8 @@ CCaSrv::~CCaSrv()
         delete session;
         }
     delete iSrvManager;
+    iSoftwareRegistry.Close();
     delete iSrvEngUtils;
-    delete iProgressNotifier;
     delete iStorageProxy;
     }
 
@@ -156,8 +155,9 @@ void CCaSrv::ConstructL()
     iSessionCount = 0;
     iStorageProxy = CCaStorageProxy::NewL();
     iSrvEngUtils = CCaSrvEngUtils::NewL();
-    iProgressNotifier = CCaProgressNotifier::NewL( *iStorageProxy );
-    iSrvManager = CCaSrvManager::NewL( *iStorageProxy, iSrvEngUtils );
+    User::LeaveIfError( iSoftwareRegistry.Connect() );
+    iSrvManager = CCaSrvManager::NewL( *iStorageProxy,
+        &iSoftwareRegistry, iSrvEngUtils);
     TInt errCode = iSrvManager->LoadOperationErrorCodeL();
     if( KSqlErrNotDb <= errCode && errCode <= KSqlErrGeneral )
         {
@@ -166,7 +166,8 @@ void CCaSrv::ConstructL()
         delete iSrvManager;
         iSrvManager = NULL;
         iStorageProxy->LoadDataBaseFromRomL();
-        iSrvManager = CCaSrvManager::NewL( *iStorageProxy, iSrvEngUtils );
+        iSrvManager = CCaSrvManager::NewL( *iStorageProxy,
+            &iSoftwareRegistry, iSrvEngUtils );
         }
     }
 

@@ -50,11 +50,12 @@ CCaSrvManager::~CCaSrvManager()
 // ---------------------------------------------------------------------------
 //
 CCaSrvManager* CCaSrvManager::NewLC( CCaStorageProxy& aCaStorageProxy,
+        Usif::RSoftwareComponentRegistry* aSoftwareRegistry,
         CCaSrvEngUtils* aUtils )
     {
     CCaSrvManager* self = new ( ELeave ) CCaSrvManager();
     CleanupStack::PushL( self );
-    self->ConstructL( aCaStorageProxy, aUtils );
+    self->ConstructL( aCaStorageProxy, aSoftwareRegistry, aUtils);
     return self;
     }
 
@@ -62,10 +63,12 @@ CCaSrvManager* CCaSrvManager::NewLC( CCaStorageProxy& aCaStorageProxy,
 //
 // ---------------------------------------------------------------------------
 //
-EXPORT_C CCaSrvManager* CCaSrvManager::NewL(
-        CCaStorageProxy& aCaStorageProxy, CCaSrvEngUtils* aUtils )
+EXPORT_C CCaSrvManager* CCaSrvManager::NewL( CCaStorageProxy& aCaStorageProxy,
+        Usif::RSoftwareComponentRegistry* aSoftwareRegistry,
+        CCaSrvEngUtils* aUtils )
     {
-    CCaSrvManager* self = CCaSrvManager::NewLC( aCaStorageProxy, aUtils );
+    CCaSrvManager* self = CCaSrvManager::NewLC( aCaStorageProxy,
+	        aSoftwareRegistry, aUtils );
     CleanupStack::Pop(); // self;
     return self;
     }
@@ -75,12 +78,13 @@ EXPORT_C CCaSrvManager* CCaSrvManager::NewL(
 // ---------------------------------------------------------------------------
 //
 void CCaSrvManager::ConstructL( CCaStorageProxy& aCaStorageProxy,
+        Usif::RSoftwareComponentRegistry* aSoftwareRegistry,
         CCaSrvEngUtils* aUtils )
     {
     iPluginParams = new TPluginParams();
     iPluginParams->storageProxy = &aCaStorageProxy;
     iPluginParams->engUtils = aUtils;
-
+    iPluginParams->softwareRegistry = aSoftwareRegistry;
     LoadPluginsL();
     }
 

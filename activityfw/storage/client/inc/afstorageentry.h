@@ -19,8 +19,8 @@
 
 #include <qvariant.h>
 #include <qsharedpointer.h>
+#include <afentry.h>
 
-class CAfEntry;
 
 #ifdef ACTIVITY_LIB
     #define ACTIVITY_EXPORT Q_DECL_EXPORT

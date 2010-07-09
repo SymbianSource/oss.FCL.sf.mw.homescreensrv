@@ -52,7 +52,7 @@ public:
 
     /**
      * Two-phased constructor.
-     * @param aPLuginParam plugin param consist of storage, storage utils.
+     * @param aPLuginParam plugin param consist of storage, storage utils and scr.
      * @retval New object.
      */
     static CCaUsifScanner* NewL( TPluginParams* aPluginParams );
@@ -85,8 +85,10 @@ private:
     /**
      * Constructor
      * @param aStorageProxy Storage handler.
+     * @param aSoftwareRegistry software component registry.
      */
-    CCaUsifScanner( CCaStorageProxy& aStorageProxy );
+    CCaUsifScanner( CCaStorageProxy& aStorageProxy,
+	        RSoftwareComponentRegistry& aSoftwareRegistry );
 
     /**
      * Second phased constructor.
@@ -184,9 +186,9 @@ private:
     CCaMmcWatcher* iMmcWatcher;
 
     /**
-     * Software component registry. Own.
+     * Software component registry. Not own.
      */
-    RSoftwareComponentRegistry iSoftwareRegistry;
+    RSoftwareComponentRegistry& iSoftwareRegistry;
 
     };
 

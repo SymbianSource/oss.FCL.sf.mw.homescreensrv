@@ -130,7 +130,7 @@ bool TsDeviceDialogPlugin::deviceDialogInfo(const QString &deviceDialogType, con
     Q_UNUSED(deviceDialogType)
 
     info->group = GenericDeviceDialogGroup;
-    info->flags = NoDeviceDialogFlags;
+    info->flags = SingleInstance;
     info->priority = DefaultPriority;
 
     return true;

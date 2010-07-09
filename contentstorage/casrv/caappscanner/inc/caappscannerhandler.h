@@ -59,9 +59,11 @@ private:
     /**
      * Symbien 2nd phase constructor.
      * @param aCaStorageProxy storage.
+     * @param aSoftwareRegistry software component registry.
      * @param aUtils storage utils.
      */
     void ConstructL( CCaStorageProxy& aCaStorageProxy,
+            Usif::RSoftwareComponentRegistry& aSoftwareRegistry,
             CCaSrvEngUtils& aUtils );
 
 private:

@@ -35,7 +35,7 @@ using namespace Usif;
 CCaUsifScanner* CCaUsifScanner::NewL( TPluginParams* aPluginParams )
     {
     CCaUsifScanner* self = new ( ELeave ) CCaUsifScanner(
-            *aPluginParams->storageProxy );
+            *aPluginParams->storageProxy, *aPluginParams->softwareRegistry );
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -46,8 +46,9 @@ CCaUsifScanner* CCaUsifScanner::NewL( TPluginParams* aPluginParams )
 //
 // ---------------------------------------------------------------------------
 //
-CCaUsifScanner::CCaUsifScanner( CCaStorageProxy& aStorageProxy ) :
-    iStorageProxy( aStorageProxy )
+CCaUsifScanner::CCaUsifScanner( CCaStorageProxy& aStorageProxy,
+    RSoftwareComponentRegistry& aSoftwareRegistry ) :
+        iStorageProxy( aStorageProxy ), iSoftwareRegistry(aSoftwareRegistry)
     {
     }
 
@@ -69,8 +70,6 @@ void CCaUsifScanner::ConstructL()
     User::LeaveIfError( iFs.Connect() );
     iMmcWatcher = CCaMmcWatcher::NewL( iFs, this );
 
-    User::LeaveIfError( iSoftwareRegistry.Connect() );
-
     UpdateUsifListL();
     }
 
@@ -80,7 +79,6 @@ void CCaUsifScanner::ConstructL()
 //
 CCaUsifScanner::~CCaUsifScanner()
     {
-    iSoftwareRegistry.Close();
     delete iMmcWatcher;
     iFs.Close();
     delete iJavaInstallNotifier;

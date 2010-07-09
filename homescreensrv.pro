@@ -21,7 +21,7 @@ SUBDIRS  += hswidgetmodel \
             homescreensrv_plat \
             tsrc
 symbian:SUBDIRS += activityfw
-symbian:SUBDIRS += tstaskmonitor
+symbian:SUBDIRS += taskswitcher
 symbian:SUBDIRS += hsappkeyhandler
 symbian:SUBDIRS += tsdevicedialog
 

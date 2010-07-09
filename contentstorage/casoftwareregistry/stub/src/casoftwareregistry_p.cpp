@@ -88,20 +88,33 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
     int componentId) const
 {
     CaSoftwareRegistry::DetailMap detailMap;
-    
+
     if (componentId >=1) {
-        detailMap[CaSoftwareRegistry::componentNameKey()] = "no data";
-            
-        detailMap[CaSoftwareRegistry::componentVersionKey()] = "no data";
-        
-        detailMap[CaSoftwareRegistry::componentVendorKey()] = "no data";
-                
-        detailMap[CaSoftwareRegistry::componentDriveInfoKey()] = "no data";
-        
-        detailMap[CaSoftwareRegistry::componentSizeKey()] = "no data";
-        
-        detailMap[CaSoftwareRegistry::componentTypeKey()] = "no data";
+        detailMap[CaSoftwareRegistry::componentNameKey()]       = "no data";
+        detailMap[CaSoftwareRegistry::componentVersionKey()]    = "no data";
+        detailMap[CaSoftwareRegistry::componentVendorKey()]     = "no data";
+		detailMap[CaSoftwareRegistry::componentProtectionDomainKey()] = "no data";
+        detailMap[CaSoftwareRegistry::componentDriveInfoKey()]  = "no data";
+        detailMap[CaSoftwareRegistry::componentSizeKey()]       = "no data";
+        detailMap[CaSoftwareRegistry::componentTypeKey()]       = "no data";
+        detailMap[CaSoftwareRegistry::componentDescriptionKey()] = "no data";
     }
-    return detailMap;    
+    return detailMap;
 }
 
+/*!
+ \param entry Software registry entry providing details.
+ \return Map with details for the component represented by \entry.
+ */
+QList<CaSoftwareRegistryPrivate::DetailMap>
+        CaSoftwareRegistryPrivate::retrieveLogEntries() const
+{
+    QList<CaSoftwareRegistryPrivate::DetailMap> logList;
+    DetailMap logMap;
+    logMap[CaSoftwareRegistry::componentNameKey()]          = "no data";
+    logMap[CaSoftwareRegistry::componentVersionKey()]       = "no data";
+    logMap[CaSoftwareRegistry::componentTimeKey()]          = "no data";
+    logMap[CaSoftwareRegistry::componentOperationTypeKey()] = "no data";
+    logList.append(logMap);
+    return logList;
+}
