@@ -19,7 +19,7 @@ EXPORTS
 	_ZN27CHspsPersonalisationService16SetActivePluginLEiR6TDesC8 @ 18 NONAME
 	_ZN27CHspsPersonalisationService17SetActiveAppConfLEiR6TDesC8 @ 19 NONAME
 	_ZN27CHspsPersonalisationService18SetPluginSettingsLEiR6TDesC8R16ChspsDomDocumenti @ 20 NONAME
-	_ZN27CHspsPersonalisationService21RestoreActiveAppConfLEiR6TDesC8 @ 21 NONAME
+	_ZN27CHspsPersonalisationService21RestoreActiveAppConfLEi @ 21 NONAME
 	_ZN27CHspsPersonalisationService22RestoreConfigurationsLEiNS_8TRestoreE @ 22 NONAME
 	_ZN27CHspsPersonalisationService4NewLEv @ 23 NONAME
 	_ZTI25CHspsConfigurationService @ 24 NONAME

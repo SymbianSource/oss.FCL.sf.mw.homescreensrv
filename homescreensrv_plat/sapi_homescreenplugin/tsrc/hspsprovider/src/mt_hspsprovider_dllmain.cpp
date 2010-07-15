@@ -16,7 +16,7 @@
 */
 
 
-#include <ceunittestsuite.h>
+#include <digia/eunit/ceunittestsuite.h>
 
 #include "mt_hspsprovider.h"
 

@@ -1891,7 +1891,7 @@ TInt ChspsMaintenanceHandler::RemoveConfigurationL(
             // Remove plugin resources from the application configuration:
             // By default remove all plugin's resources from all instances
             // - otherwise, after upgrades, there might be various versions of the same resources
-            err = RemovePluginResourcesL( aAppODT, pluginUid );
+            err = hspsServerUtil::RemovePluginResourcesL( aAppODT, pluginUid );
             if ( !err )
                 {
                 // If the application configuration holds other instances of the same plugin                     
@@ -2015,31 +2015,7 @@ void ChspsMaintenanceHandler::GetPluginInstanceCountL(
     CleanupStack::PopAndDestroy( iter );    
     }
 
-// -----------------------------------------------------------------------------
-// Removes plugin resources from the provided ODT
-// -----------------------------------------------------------------------------
-//
-TInt ChspsMaintenanceHandler::RemovePluginResourcesL(
-        ChspsODT& aAppODT,
-        const TInt aPluginUid )        
-    {            
-    // Loop resources of the application configuration            
-    for(TInt aresIndex = 0; aresIndex < aAppODT.ResourceCount(); aresIndex++ )
-        {
-        ChspsResource& ares = aAppODT.ResourceL( aresIndex );
-                                
-        // If the plugin resource was found at  resource list of the application configuration                        
-        if ( ares.ConfigurationUid() == aPluginUid )
-            {
-            // Deletes resource from the application configuration
-            aAppODT.DeleteResourceL( aresIndex );
-            aresIndex--;
-            }
-        
-        }                
-    
-    return KErrNone;
-    }
+
 
 // -----------------------------------------------------------------------------
 // Adds plugin resources to the provided application ODT
@@ -2783,12 +2759,18 @@ void ChspsMaintenanceHandler::ServiceRestoreActiveAppConfL( const RMessage2& aMe
     ThspsParamRestoreActiveAppConf params;        
     TPckg<ThspsParamRestoreActiveAppConf> packagedStruct( params );    
     aMessage.ReadL( 1, packagedStruct );                      
+            
+    // Get active root configuration for the application
+    TInt confUid = 0;
+    User::LeaveIfError( 
+            iCentralRepository.Get( params.appUid, confUid ) 
+            );
     
     // Create search criteria
     ChspsODT* searchMask = ChspsODT::NewL();
     CleanupStack::PushL( searchMask );
     searchMask->SetRootUid( params.appUid );
-    searchMask->SetThemeUid( params.confUid );
+    searchMask->SetThemeUid( confUid );
 
     // Get configuration header
     ChspsODT* confHeader( NULL );
@@ -3469,7 +3451,7 @@ TBool ChspsMaintenanceHandler::InvalidateUninstalledPluginInstancesL(
     if ( processedCount )
         {
         // Remove uninstalled resources from the server (copies will remain in client's private directory)
-        RemovePluginResourcesL( aAppODT, aPluginUid );
+        hspsServerUtil::RemovePluginResourcesL( aAppODT, aPluginUid );
         
         // Store changes
         User::LeaveIfError( iDefinitionRepository.SetOdtL( aAppODT ) );
@@ -3660,7 +3642,7 @@ TInt ChspsMaintenanceHandler::UpdatePluginConfigurationL(
     TInt err(KErrNone);
     
     // remove old resources
-    err = RemovePluginResourcesL( aOdt, aPluginOdt.ThemeUid() );
+    err = hspsServerUtil::RemovePluginResourcesL( aOdt, aPluginOdt.ThemeUid() );
     
     if( err )
         {
@@ -3844,8 +3826,7 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsSetConfState(
 // -----------------------------------------------------------------------------
 //
 ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsRestoreActiveAppConf(
-    const TInt /*aAppUid*/,
-    const TInt /*aConfUid*/ )
+    const TInt /*aAppUid*/ )
     {
     return EhspsServiceNotSupported;
     }
@@ -4522,20 +4503,15 @@ TBool ChspsMaintenanceHandler::FilterHeader(
 void ChspsMaintenanceHandler::RestoreDefaultAppConfL(
     ChspsODT*& aHeader,
     ChspsODT& aOdt)
-    {
-    
-    // If active application configuration is LicenceeRestorable 
-    if ( aHeader->Flags() & EhspsThemeStatusLicenceeRestorable )
-        {
-        // Reinstall the configuration from ROM
-        iThemeServer.ReinstallConfL( aHeader->RootUid(), aHeader->ThemeUid() );
-        }
-    else
-        {
+    {    
+    // If active application configuration is not "LicenceeRestorable" 
+    if ( !(aHeader->Flags() & EhspsThemeStatusLicenceeRestorable) )
+        {        
         // Try to activate a configuation with the LicenceeRestorable status
         ChspsODT* searchMask = ChspsODT::NewL();
         CleanupStack::PushL( searchMask );
         searchMask->SetRootUid( aHeader->RootUid() );
+        searchMask->SetFamily( aHeader->Family() );
         searchMask->SetFlags( EhspsThemeStatusLicenceeRestorable );
         TInt pos( 0 );
         iThemeServer.GetConfigurationHeader( *searchMask, aHeader, pos );
@@ -4548,12 +4524,17 @@ void ChspsMaintenanceHandler::RestoreDefaultAppConfL(
             }
         else
             {
-            // Licensee restorable configuration not found
-            // There must be at least one licensee restorable configuration
+            // Licensee restorable configuration not found. There must be  
+            // at least one licensee restorable configuration per application
             User::Leave( KErrNotFound );
             }
         CleanupStack::PopAndDestroy( searchMask );
-        }    
+        }
+    else
+        {        
+        // Reinstall the application configuration from ROM
+        iThemeServer.ReinstallConfL( aHeader->RootUid(), aHeader->ThemeUid() );
+        }
     }
 
 // -----------------------------------------------------------------------------
@@ -4737,29 +4718,9 @@ void ChspsMaintenanceHandler::ServiceRestoreConfigurationsL( const RMessage2& aM
 //
 void ChspsMaintenanceHandler::HandleReinstallationL(
         const TBool aInstallUdaEmmc ) 
-    {
+    {       
     // Install plug-in configurations from the "install" directories
     iThemeServer.InstallWidgetsL( aInstallUdaEmmc );
-    if( aInstallUdaEmmc )
-        {
-        // Install plug-in configurations from the "import" directories in C 
-        // and emmc(if exists)
-        iThemeServer.InstallUDAWidgetsL( KImportDirectoryC );
-
-        TInt drive = hspsServerUtil::GetEmmcDrivePath( 
-                iServerSession->FileSystem() );
-        if ( drive != KErrNotFound )
-            {
-            TDriveUnit unit(drive);
-            HBufC* importDirectoryE = HBufC::NewLC( 
-                    KImportDirectory().Length() + unit.Name().Length() ); 
-            importDirectoryE->Des().Append( unit.Name() );
-            importDirectoryE->Des().Append( KImportDirectory );
-            
-            iThemeServer.InstallUDAWidgetsL( *importDirectoryE );
-            CleanupStack::PopAndDestroy( importDirectoryE );
-            }
-        }
     
     // Force updating of the header cache
     iThemeServer.UpdateHeaderListCacheL();   

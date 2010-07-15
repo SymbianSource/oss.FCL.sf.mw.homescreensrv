@@ -180,7 +180,7 @@ const TUid KhspsThemeStatusRepositoryUid = {0x200159C9};
 const TInt KMaxHeaderDataLength8=512;
 
 /** KHeaderListGranularity. List granularity used in header listing operations: */
-const TInt KHeaderListGranularity = 4;
+const TInt KHeaderListGranularity = 8;
 
 /** 
 *   KHeaderListUpdatePollingTimeSpan. The time between the subsequent 
@@ -1006,8 +1006,7 @@ struct ThspsParamReinstallConf
  */
 struct ThspsParamRestoreActiveAppConf
     {
-    TInt appUid;                    // uid of the application
-    TInt confUid;                   // uid of the restored configuration
+    TInt appUid;                    // uid of the application    
     };
 
 /**
@@ -1466,13 +1465,11 @@ class MhspsMaintenanceService
         /** 
         * Restores active application configuration
         * @since S60 5.0
-        * @param aAppUid identifies the application which configuration is requested to be restored
-        * @param aConfUid identifies the configuration to be restored
+        * @param aAppUid identifies the application which configuration is requested to be restored        
         * @return ThspsServiceCompletedMessage expressing the result of the call.
         */
         virtual ThspsServiceCompletedMessage hspsRestoreActiveAppConf(
-                const TInt aAppUid,
-                const TInt aConfUid ) = 0;
+                const TInt aAppUid ) = 0;
         
         /** 
          * Updates plugin configuration in all application configurations

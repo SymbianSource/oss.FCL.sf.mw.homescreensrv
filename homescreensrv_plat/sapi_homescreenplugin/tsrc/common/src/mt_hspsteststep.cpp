@@ -18,8 +18,8 @@
 
 #include <e32base.h>
 #include <s32mem.h>
-#include <eunitmacros.h>
-#include <eunitdecorators.h>
+#include <digia/eunit/eunitmacros.h>
+#include <digia/eunit/eunitdecorators.h>
 #include "mt_hspsteststep.h"
 
 #ifdef HSPS_LOG_ACTIVE

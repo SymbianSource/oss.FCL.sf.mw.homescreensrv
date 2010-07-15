@@ -403,8 +403,7 @@ class ChspsClient : public CActive, public MhspsInstallationService, public Mhsp
         * From MhspsMaintenanceService        
         */
         IMPORT_C ThspsServiceCompletedMessage hspsRestoreActiveAppConf(
-                const TInt aAppUid,
-                const TInt aConfUid );
+                const TInt aAppUid );
 
         /** 
          * Updates plugin configuration in all application configuration

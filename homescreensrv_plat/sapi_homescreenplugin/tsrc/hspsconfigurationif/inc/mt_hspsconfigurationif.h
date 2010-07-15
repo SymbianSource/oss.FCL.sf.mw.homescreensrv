@@ -19,7 +19,7 @@
 #ifndef C_MT_HSPSCONFIGURATIONIF_H
 #define C_MT_HSPSCONFIGURATIONIF_H
 
-#include <eunitdecorators.h>
+#include <digia/eunit/eunitdecorators.h>
 #include <liwservicehandler.h>
 #include "mt_hsps.h"
 

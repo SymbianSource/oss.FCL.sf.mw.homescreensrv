@@ -347,16 +347,11 @@ EXPORT_C void CHspsPersonalisationService::SetConfStateL(
 // Restore active application configuration
 // -----------------------------------------------------------------------------
 EXPORT_C void CHspsPersonalisationService::RestoreActiveAppConfL(
-    TInt aAppUid,
-    TDesC8& aConfUid )
-    {
-
-    const TInt confUid = HspsServiceUtilities::HexString2IntL( aConfUid );        
-
+    TInt aAppUid )
+    {           
     // Set configuration state
-    const ThspsServiceCompletedMessage ret = iHspsClient->hspsRestoreActiveAppConf( 
-        aAppUid,
-        confUid );
+    const ThspsServiceCompletedMessage ret = 
+            iHspsClient->hspsRestoreActiveAppConf( aAppUid );
 
     if ( ret != EhspsRestoreActiveAppConfSuccess )
         {
@@ -434,8 +429,8 @@ EXPORT_C void CHspsPersonalisationService::RestoreConfigurationsL(
     const TInt aAppUid, 
     const TRestore aOperation )
     {        
-    ThspsRestore operation( EhspsRestoreAll );
-    if( aOperation == EDefault )
+    ThspsRestore operation( EhspsRestoreAll );        
+    if( aOperation == EAll )
         {
         operation = EhspsRestoreAll; 
         }    

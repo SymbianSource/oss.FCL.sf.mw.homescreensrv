@@ -873,14 +873,12 @@ EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsSetConfState(
 // -----------------------------------------------------------------------------
 //
 EXPORT_C ThspsServiceCompletedMessage ChspsClient::hspsRestoreActiveAppConf(
-    const TInt aAppUid,
-    const TInt aConfUid )
+    const TInt aAppUid )
     {
     ThspsServiceCompletedMessage ret = EhspsRestoreActiveAppConfFailed;
     
     ThspsParamRestoreActiveAppConf params;
-    params.appUid = aAppUid;
-    params.confUid = aConfUid;
+    params.appUid = aAppUid;    
 
     ret = ( ThspsServiceCompletedMessage )iSession.RestoreActiveAppConf( iResultData, params );
     

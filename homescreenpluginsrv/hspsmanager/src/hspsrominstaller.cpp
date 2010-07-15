@@ -28,13 +28,15 @@
 #include "hspsserverutil.h"
 
 _LIT(KPrivateInstallC, "C:\\private\\200159c0\\install\\");
-_LIT(KPrivateInstallE, "E:\\private\\200159c0\\install\\");
+_LIT(KPrivateInstall, "\\private\\200159c0\\install\\");
 _LIT(KPrivateInstallZ, "Z:\\private\\200159c0\\install\\");
 
 _LIT(KBackslash, "\\");
 _LIT(KHsps, "hsps");
 _LIT(KTestLanguage, "00");
 _LIT(KManifest, "manifest.dat");
+                             
+const TInt KExcludedDrives = KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted;
 
 // ========================= LOCAL FUNCTIONS ==================================
 
@@ -137,9 +139,12 @@ void ChspsRomInstaller::InstallL()
     RPointerArray<HBufC> fileArray;
     CleanupResetAndDestroyPushL( fileArray );
             
-    // Find the manifest files     
-    FindInstallationFilesL( fileArray );
-            
+    // Find manifest files from the "install" directories 
+    FindInstallFilesL( fileArray );
+      
+    // Find manifest files from the "imports" directories
+    FindImportFilesL( fileArray );  
+	        
     // Install the manifest files    
     for( TInt index=0; index < fileArray.Count(); index++ )
         {         
@@ -163,38 +168,145 @@ void ChspsRomInstaller::InstallL()
     CleanupStack::PopAndDestroy(); // fileArray
     }
 
+// -----------------------------------------------------------------------------
+// ChspsRomInstaller::FindImportFilesL()
+// -----------------------------------------------------------------------------
+//
+void ChspsRomInstaller::FindImportFilesL(
+        RPointerArray<HBufC>& aFileArray )
+    {                    
+    if( iInstallUdaEmmc )
+        {
+        // If eMMC is present         
+        TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
+        if ( drive != KErrNotFound )
+            {
+            TDriveUnit unit(drive);
+            
+            HBufC* path = HBufC::NewLC( 
+                    KImportDirectory().Length() + unit.Name().Length() );             
+            path->Des().Append( unit.Name() );
+            path->Des().Append( KImportDirectory );
+            
+            // Find manifest files from eMMC
+            DoFindImportFilesL( aFileArray, *path );
+            
+            CleanupStack::PopAndDestroy( path );
+            }
+            
+        // Find manifest files from C
+        DoFindImportFilesL( aFileArray, KImportDirectoryC );  
+        }
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsThemeServer::DoFindImportFilesL()
+// -----------------------------------------------------------------------------
+//
+void ChspsRomInstaller::DoFindImportFilesL( 
+        RPointerArray<HBufC>& aFileArray,
+        const TDesC& aPath )
+    {               
+	_LIT(KDat, ".dat");
+    CDir* importDir( NULL );                      
+    TFindFile fileFinder( iFsSession );      
+    fileFinder.SetFindMask( KExcludedDrives );       
+    fileFinder.FindWildByPath( aPath, NULL, importDir );          
+    if ( importDir )
+        {
+        CleanupStack::PushL( importDir );
+                
+        for ( TInt i=0; i < importDir->Count(); i++ )
+            {
+            const TEntry& dirEntry = (*importDir)[i];
+            if ( !dirEntry.IsDir() 
+                    && dirEntry.iName.FindF( KDat ) > 0 )
+                {                
+                // Get path to the manifest file
+                HBufC* manifestBuf = 
+                        iThemeServer.GetManifestFromImportLC( dirEntry.iName, aPath );
+                if( !manifestBuf )
+                    {
+                    continue;
+                    }
+                
+                // Check for duplicates
+                TBool isShadowed = EFalse;
+                TParsePtrC manifestPtr( *manifestBuf );                
+                for( TInt i=0; i < aFileArray.Count(); i++ )
+                    {
+                    TParsePtrC ptr( aFileArray[i]->Des() );
+                    if( ptr.Path() == manifestPtr.Path() )
+                        {
+                        isShadowed = ETrue;
+                        break;
+                        }
+                    }
+                
+                if( !isShadowed )
+                    {           
+                    if( BaflUtils::FileExists( iFsSession, *manifestBuf ) )
+                        {                        
+                        HBufC* nameBuf = manifestBuf->Des().AllocLC();                
+                        aFileArray.AppendL( nameBuf );
+                        CleanupStack::Pop( nameBuf );
+                        }
+                    }
+                
+                CleanupStack::PopAndDestroy( manifestBuf );
+                }
+            }
+                        
+        CleanupStack::PopAndDestroy( importDir );
+        }     
+    }
 
 // -----------------------------------------------------------------------------
 // ChspsRomInstaller::FindInstallationFilesL()
 // -----------------------------------------------------------------------------
 //
-void ChspsRomInstaller::FindInstallationFilesL(  
+void ChspsRomInstaller::FindInstallFilesL(  
         RPointerArray<HBufC>& aFileArray )
     {
     __ASSERT_DEBUG( aFileArray.Count() == 0, User::Leave( KErrArgument ) );
                     
     if( iInstallUdaEmmc )
         {
-        // Handle installation of the imaker exports 
-        DoFindInstallationFilesL( aFileArray, KPrivateInstallE );    
-        DoFindInstallationFilesL( aFileArray, KPrivateInstallC );  
+        // If eMMC is present             
+        TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
+        if ( drive != KErrNotFound )
+            {
+            TDriveUnit unit(drive);
+            
+            HBufC* path = HBufC::NewLC( 
+                    KPrivateInstall().Length() + unit.Name().Length() );             
+            path->Des().Append( unit.Name() );
+            path->Des().Append( KPrivateInstall );
+            
+            // Find manifest files from eMMC
+            DoFindInstallFilesL( aFileArray, *path );
+            
+            CleanupStack::PopAndDestroy( path );
+            }
+        
+        // Find manifest files from C
+        DoFindInstallFilesL( aFileArray, KPrivateInstallC );  
         }
     
-    // ROM
-    DoFindInstallationFilesL( aFileArray, KPrivateInstallZ );    
+    // Find manifest files from Z
+    DoFindInstallFilesL( aFileArray, KPrivateInstallZ );    
     }
 
 // -----------------------------------------------------------------------------
-// ChspsRomInstaller::DoFindInstallationFilesL()
+// ChspsRomInstaller::DoFindInstallFilesL()
 // -----------------------------------------------------------------------------
 //
-void ChspsRomInstaller::DoFindInstallationFilesL(  
+void ChspsRomInstaller::DoFindInstallFilesL(  
         RPointerArray<HBufC>& aFileArray,
         const TDesC& aPath )
     {               
     TFindFile fileFinder( iFsSession );    
-    fileFinder.SetFindMask( 
-         KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+    fileFinder.SetFindMask( KExcludedDrives );       
     CDir* dirList( NULL );    
     fileFinder.FindWildByPath( aPath, NULL, dirList );
     if ( dirList )

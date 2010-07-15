@@ -11,7 +11,6 @@
         <unit unitID="hs.homescreensrv" mrp="" bldFile="&layer_real_source_path;/group" name="homescreensrv" />
       </module>
     </layer>
-
 		<layer name="api_test_layer">
   		<module name="homescreensrv_api_tests">
   			<unit unitID="hsdo.content_harvester.test" name="content_harvester.test" bldFile="&layer_real_source_path;/homescreensrv_plat/content_harvester_plugin_api/tsrc/group" mrp="" />
@@ -25,7 +24,6 @@
     <layer name="unit_test_layer">
       <module name="homescreensrv_unit_tests">
   			<unit unitID="hsdo.idlefw.test" name="idlefw.test" bldFile="&layer_real_source_path;/idlefw/Internal/tsrc/group" mrp="" />
-  			<unit unitID="hsdo.hsps.test" name="hsps.test" bldFile="&layer_real_source_path;/homescreensrv_plat/sapi_homescreenplugin/tsrc/group" mrp="" />
       </module>
     </layer>		
 		

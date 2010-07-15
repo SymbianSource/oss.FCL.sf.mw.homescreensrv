@@ -737,6 +737,12 @@ private:
     void ConstructL();
     
     /**
+     * Initialized headers.
+     * @since S60 5.2
+     */
+    void InitializeHeadersL();
+    
+    /**
     * NewSessionL
     * @since S60 3.1
     */

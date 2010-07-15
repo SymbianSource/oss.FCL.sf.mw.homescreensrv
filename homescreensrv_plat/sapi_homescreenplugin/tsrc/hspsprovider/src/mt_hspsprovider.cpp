@@ -16,8 +16,8 @@
 */
 
 
-#include <eunitmacros.h>
-#include <eunitdecorators.h>
+#include <digia/eunit/eunitmacros.h>
+#include <digia/eunit/eunitdecorators.h>
 
 #include "mt_hspsprovider.h"
 #include "mt_hspsinstallationservice.h"

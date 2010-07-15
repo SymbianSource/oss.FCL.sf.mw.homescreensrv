@@ -100,6 +100,15 @@ ThspsServiceCompletedMessage CHSPSInstaller::InstallConfigurationL(
     }
 
 // -----------------------------------------------------------------------------
+// CHSPSInstaller::InstallationHandler
+// -----------------------------------------------------------------------------
+//
+ChspsInstallationHandler& CHSPSInstaller::InstallationHandler()
+    {
+    return *iInstallationHandler;
+    }
+
+// -----------------------------------------------------------------------------
 // CHSPSInstaller::RunError
 // -----------------------------------------------------------------------------
 //

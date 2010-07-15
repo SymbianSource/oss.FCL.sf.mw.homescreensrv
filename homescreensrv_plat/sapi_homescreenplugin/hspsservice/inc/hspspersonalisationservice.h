@@ -47,7 +47,8 @@ class CHspsPersonalisationService : public CBase, public MhspsThemeManagementSer
     
         enum TRestore
             {            
-            EDefault,            
+            EDefault,
+            EAll,
             ERom,
             EViews
             };    
@@ -218,12 +219,10 @@ class CHspsPersonalisationService : public CBase, public MhspsThemeManagementSer
 
         /**
          * Restore active application configuration
-         * @param aAppUid - application uid
-         * @param aConfId - configuration id 
+         * @param aAppUid - application uid         
          */
         IMPORT_C void RestoreActiveAppConfL(
-            TInt aAppUid,
-            TDesC8& aConfUid );
+            TInt aAppUid );
 
         /**
          * Activates defined plugin in plugin list

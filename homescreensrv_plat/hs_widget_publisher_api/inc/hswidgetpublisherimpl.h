@@ -237,7 +237,15 @@ private:
      * @return Converted unicode-encoded (16 bit) string.
      */
     HBufC* StdStringToUnicodeLC( const std::string& aSrcString ) const;
-
+    
+    /**
+     * Convert template name if needed
+     *
+     * @param aSrcString utf8-encoded std::string.
+     * @return Converted utf8-encoded  std::string.
+     */
+    std::string TemplateName(const std::string &aSrcTemplate);
+    
 private:
     
 	std::vector<HsWidget*>	mWidgets;

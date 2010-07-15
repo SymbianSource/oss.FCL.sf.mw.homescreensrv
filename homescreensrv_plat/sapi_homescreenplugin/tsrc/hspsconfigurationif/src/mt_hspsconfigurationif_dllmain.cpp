@@ -16,7 +16,7 @@
 */
 
 
-#include <ceunittestSuite.h>
+#include <digia/eunit/ceunittestSuite.h>
 
 #include "mt_hspsconfigurationif.h"
 

@@ -638,6 +638,16 @@ class hspsServerUtil
 	     */
 	    static TInt GetEmmcDrivePath( RFs& aFs );
 	    
+	    /**
+	     * Removes all plugin resources from the provided ODT instance.
+	     * @since S60 5.0
+	     * @param aAppODT is an instance of the the application configuration         
+	     * @param aPluginUid is an UID of the plugin instance
+	     * @return KErrNone if succeeded
+	     */
+	    static TInt RemovePluginResourcesL(
+	            ChspsODT& aAppODT,
+	            const TInt aPluginUid );
 	private:
         /**
          * Internal method. Do not call directly!

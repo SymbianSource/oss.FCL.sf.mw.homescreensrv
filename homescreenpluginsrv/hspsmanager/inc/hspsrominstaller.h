@@ -151,15 +151,26 @@ class ChspsRomInstaller : public CActive
         void ConstructL();           
                         
         /**         
-         * Retrieves manifest files from all internal drives in 
-         * \\private\200159C0\install\ paths.
-         * @since S60 5.0         
+         * Retrieves manifest files from all internal drives under the  
+         * \\private\200159C0\install\ path.
+         * @since S60 5.2         
          * @param aFileArray An array of file names
          */
-        void FindInstallationFilesL(  
-                RPointerArray<HBufC>& aFileArray );
+        void FindInstallFilesL(  
+                RPointerArray<HBufC>& aFileArray );        
+        void DoFindInstallFilesL(  
+                RPointerArray<HBufC>& aFileArray,
+                const TDesC& aPath );
         
-        void DoFindInstallationFilesL(  
+        /**         
+         * Retrieves manifest files from all internal drives under the  
+         * \\private\200159C0\import\ path.
+         * @since S60 5.2         
+         * @param aFileArray An array of file names
+         */
+        void FindImportFilesL(
+                RPointerArray<HBufC>& aFileArray );        
+        void DoFindImportFilesL( 
                 RPointerArray<HBufC>& aFileArray,
                 const TDesC& aPath );
         

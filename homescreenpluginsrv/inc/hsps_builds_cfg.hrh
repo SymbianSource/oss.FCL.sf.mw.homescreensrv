@@ -66,7 +66,6 @@
     #define _hsps_SERVER_SHUTDOWN_ENABLED_
 
     #ifdef _hsps_DEBUG_
-        #define _hsps_PERFORMANCE_TEST_
         #if defined(WINSCW) || defined(__WINS__)          
             #define _hsps_EMULATOR_SUPPORT_
         #endif

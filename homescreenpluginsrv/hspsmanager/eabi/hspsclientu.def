@@ -24,7 +24,7 @@ EXPORTS
 	_ZN11ChspsClient21hspsSetPluginSettingsERK8ChspsODTiR16ChspsDomDocumenti @ 23 NONAME
 	_ZN11ChspsClient22hspsCancelInstallThemeEv @ 24 NONAME
 	_ZN11ChspsClient24hspsCancelGetListHeadersEv @ 25 NONAME
-	_ZN11ChspsClient24hspsRestoreActiveAppConfEii @ 26 NONAME
+	_ZN11ChspsClient24hspsRestoreActiveAppConfEi @ 26 NONAME
 	_ZN11ChspsClient25hspsRestoreConfigurationsEi12ThspsRestore @ 27 NONAME
 	_ZN11ChspsClient4NewLER35MhspsThemeManagementServiceObserver @ 28 NONAME
 	_ZN11ChspsClient5NewLCER35MhspsThemeManagementServiceObserver @ 29 NONAME
@@ -52,5 +52,5 @@ EXPORTS
 	_ZThn32_N11ChspsClient19hspsSetActivePluginEii @ 51 NONAME
 	_ZThn32_N11ChspsClient21hspsSetPluginSettingsERK8ChspsODTiR16ChspsDomDocumenti @ 52 NONAME
 	_ZThn32_N11ChspsClient24hspsCancelGetListHeadersEv @ 53 NONAME
-	_ZThn32_N11ChspsClient24hspsRestoreActiveAppConfEii @ 54 NONAME
+	_ZThn32_N11ChspsClient24hspsRestoreActiveAppConfEi @ 54 NONAME
 

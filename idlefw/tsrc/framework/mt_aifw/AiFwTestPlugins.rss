@@ -1,0 +1,255 @@
+/*
+* Copyright (c) 2002-2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  ?Description
+*
+*/
+
+
+//  INCLUDES
+#include <platform/mw/aisystemuids.hrh>
+#include <Ecom/RegistryInfoV2.rh>
+
+#include "aicontentpublisheruid.hrh"
+#include "aiuicontrolleruid.hrh"
+
+//#include <?include_file>
+
+
+//  CONSTANTS
+//#define ?constant   ?value
+
+
+//  MACROS
+//#define ?macro
+
+
+//  RESOURCE DEFINITIONS
+// -----------------------------------------------------------------------------
+//
+// ?resource_name
+// ?description
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE REGISTRY_INFO registry_info
+{
+    resource_format_version = RESOURCE_FORMAT_VERSION_2;
+    // UID for the DLL
+    dll_uid = 0x10170001;
+
+    // Interface info array
+    interfaces =
+    {
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170010;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_UICONTROLLER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170011;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestController";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_UICONTROLLER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170016;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestController2";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170012;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin2";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170013;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin3";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170014;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin4";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170015;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin5";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170017;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin6";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170018;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin7";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170019;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin8";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        },
+        INTERFACE_INFO
+        {
+            // UID of the implemented interface
+            interface_uid = AI_UID_ECOM_INTERFACE_CONTENTPUBLISHER;
+
+            implementations =
+            {
+                IMPLEMENTATION_INFO
+                {
+                    implementation_uid  =  0x10170020;
+                    version_no          =  1;
+                    display_name        =  "AiFwTestPlugin9";
+                    default_data        =  "";
+                    opaque_data         =  " ";
+                    rom_only            =  1;
+                }
+            };
+        }
+    };
+}
+
+// End of File.

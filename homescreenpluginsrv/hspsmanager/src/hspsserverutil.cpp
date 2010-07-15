@@ -30,7 +30,7 @@
 #include "bautils.h" 
 #include "sysutil.h"
 #include <syslangutil.h>
-#include <DriveInfo.h>
+#include <driveinfo.h>
 
 
 _LIT(KHspsFolder, "\\200159c0\\themes\\" );
@@ -724,17 +724,7 @@ TInt hspsServerUtil::CopyResourceFileL(
                 aTargetPath,
                 0,
                 KEntryAttReadOnly,
-                TTime( 0 ) ); // TTime(0) = preserve original time stamp.
-                        
-#ifdef HSPS_LOG_ACTIVE
-            if ( iLogBus )
-                {
-                iLogBus->LogText( 
-                        _L( "hspsServerUtil::CopyResourceFileL(): - %S was copied" ), 
-                        &aTargetPath 
-                        );
-                } 
-#endif            
+                TTime( 0 ) ); // TTime(0) = preserve original time stamp.                        
             }        
         }                
     
@@ -2223,6 +2213,32 @@ TInt hspsServerUtil::GetEmmcDrivePath( RFs& aFs )
         }
     return KErrNotFound;
     }          
+
+// -----------------------------------------------------------------------------
+// Removes plugin resources from the provided ODT
+// -----------------------------------------------------------------------------
+//
+TInt hspsServerUtil::RemovePluginResourcesL(
+        ChspsODT& aAppODT,
+        const TInt aPluginUid )        
+    {            
+    // Loop resources of the application configuration            
+    for(TInt aresIndex = 0; aresIndex < aAppODT.ResourceCount(); aresIndex++ )
+        {
+        ChspsResource& ares = aAppODT.ResourceL( aresIndex );
+                                
+        // If the plugin resource was found at  resource list of the application configuration                        
+        if ( ares.ConfigurationUid() == aPluginUid )
+            {
+            // Deletes resource from the application configuration
+            aAppODT.DeleteResourceL( aresIndex );
+            aresIndex--;
+            }
+        
+        }                
+    
+    return KErrNone;
+    }
 
 // -----------------------------------------------------------------------------
 // hspsServerUtil::hspsServerUtil

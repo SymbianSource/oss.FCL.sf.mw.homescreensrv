@@ -438,8 +438,7 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
         * Not used - see ServiceRestoreActiveAppConfL instead which has a diffrent input
         */
         ThspsServiceCompletedMessage hspsRestoreActiveAppConf(
-            const TInt /*aAppUid*/,
-            const TInt /*aConfUid*/ );
+            const TInt /*aAppUid*/ );
         
         /** 
          * Updates plugin configuration in all application configuration
@@ -639,16 +638,7 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
                 const TInt aPluginUid,
                 TInt& aInstanceCount );
         
-        /**
-         * Removes plugin resources from the provided ODT
-         * @since S60 5.0
-         * @param aAppODT is an instance of the the application configuration         
-         * @param aPluginUid is an UID of the plugin instance
-         * @return KErrNone if succeeded
-         */
-        TInt RemovePluginResourcesL(
-                ChspsODT& aAppODT,
-                const TInt aPluginUid );
+
         
         /**
          * Adds plugin resouces to the provided ODT

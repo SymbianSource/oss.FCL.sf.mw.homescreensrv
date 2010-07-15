@@ -16,9 +16,9 @@
 */
 
 #include <s32mem.h>
-#include <eunitmacros.h>
-#include <eunitdecorators.h>
-#include <eunituids.h>
+#include <digia/eunit/eunitmacros.h>
+#include <digia/eunit/eunitdecorators.h>
+#include <digia/eunit/eunituids.h>
 #include <apgtask.h>
 #include <eikenv.h>
 #include <centralrepository.h>
@@ -3188,6 +3188,14 @@ void MT_CHSPSConfigurationIf::RestoreConfigurations_1_L()
     
     // Test step 6
     EUNIT_PRINT( _L8( "Test step 6" ) );
+    RunTestStepSyncL(
+        ( TUint8* )restoreconfigurations_1_ts_6_method,
+        ( TUint8* )restoreconfigurations_1_ts_6_input,
+        ( TUint8* )restoreconfigurations_1_ts_6_output );
+    EUNIT_PRINT( _L8( "Test step passed" ) );    
+    
+    // Test step 7
+    EUNIT_PRINT( _L8( "Test step 7" ) );
     RunTestStepSyncL(
         ( TUint8* )restoreconfigurations_1_ts_6_method,
         ( TUint8* )restoreconfigurations_1_ts_6_input,

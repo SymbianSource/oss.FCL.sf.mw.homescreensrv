@@ -44,27 +44,27 @@ NONSHARABLE_CLASS( CSapiDataPlugin ) : public CHsContentPublisher
 public:
     // data types
     
-	 /**
-	 * Plugin's network state.
-	 */
-	enum TPluginNetworkStatus 
-		{
-		EUnknown, 
-		EOffline,
-		EOnline
-		};
-	
-	/**
-	 * Plugin's state.
-	 */
-	enum TPluginStates
-		{
-	    EStopped,
-	    EStarted,
-		EResume,
-		ESuspend			
-		};
-	
+    /**
+    * Plugin's network state.
+    */
+    enum TPluginNetworkStatus 
+    {
+    EUnknown, 
+    EOffline,
+    EOnline
+    };
+
+    /**
+    * Plugin's state.
+    */
+    enum TPluginStates
+    {
+    EStopped,
+    EStarted,
+    EResume,
+    ESuspend
+    };
+
 public:
     // constructor and destructor
     
@@ -318,6 +318,13 @@ private:
     TPluginStates iPluginState;
     /** Flag to indicate whether observer is registered */
     TBool iPubObsRegistered;
+    
+private:
+    // friend classes
+    
+#ifdef _SAPIDATAPLUGIN_TEST
+    friend class MT_SapiDataPlugin;
+#endif 
     };
 
 #endif // SAPIDATAPLUGIN_H

@@ -137,6 +137,11 @@ private:
     
     /** action trigger list, owned.  */
     RPointerArray<HBufC8> iActions;
+   
+private: 
+#ifdef _SAPIDATAPLUGIN_TEST
+    friend class MT_SapiDataPlugin;
+#endif
     };
 
 #endif /* AICPSEXECUTEPARAM_H */

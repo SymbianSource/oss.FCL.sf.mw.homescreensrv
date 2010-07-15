@@ -1,0 +1,69 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+
+TARGET          AiFwTestPlugins.dll
+TARGETTYPE      PLUGIN
+UID             0x10009d8d 0x10170001
+
+CAPABILITY		ALL -TCB            
+//VENDORID                
+
+SOURCEPATH              ../MT_aifw
+SOURCE                  AiFwTestPluginsMain.cpp
+SOURCE                  AiFwTestPluginsDllMain.cpp
+SOURCE                  AiFwTestContentPlugin.cpp
+SOURCE                  AiFwTestContentPlugin2.cpp
+SOURCE                  AiFwTestContentPlugin3.cpp
+SOURCE                  AiFwTestContentPlugin4.cpp
+SOURCE                  AiFwTestContentPlugin5.cpp
+SOURCE                  AiFwTestContentPlugin6.cpp
+SOURCE                  AiFwTestContentPlugin7.cpp
+SOURCE                  AiFwTestContentPlugin8.cpp
+SOURCE                  AiFwTestContentPlugin9.cpp
+SOURCE                  AiFwTestControllerPlugin.cpp
+SOURCE                  AiFwTestControllerPlugin2.cpp
+
+START RESOURCE			AiFwTestPlugins.rss
+TARGET					AiFwTestPlugins.rsc
+END
+
+USERINCLUDE             ../MT_aifw
+USERINCLUDE             ../../../../inc/framework
+USERINCLUDE             ../../../../inc/common
+USERINCLUDE             ../../../../../../homescreen/idlehomescreen/inc
+
+
+SYSTEMINCLUDE             ../../../../group
+SYSTEMINCLUDE           /epoc32/include/Digia/EUnit
+
+LANG                    SC
+
+#if defined(WINS)
+    DEFFILE ../BWINS/AiFwTestPlugins.DEF
+#endif
+#if defined(EABI)
+    DEFFILE ../EABI/AiFwTestPlugins.DEF
+#endif
+APP_LAYER_SYSTEMINCLUDE
+LIBRARY                 euser.lib ecom.lib
+LIBRARY                 cone.lib
+LIBRARY                 aifw.lib aiutils.lib
+
+// End of file

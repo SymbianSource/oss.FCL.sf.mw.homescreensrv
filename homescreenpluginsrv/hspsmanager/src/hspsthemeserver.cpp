@@ -347,7 +347,7 @@ void ChspsThemeServer::ConstructL()
 #endif     
     
     // Find header files from the Plug-in Repository
-	UpdateHeaderListCacheL();  
+	TRAP_IGNORE( UpdateHeaderListCacheL() );  
        
     // Initialize remove index
     iThemeIndexToRemove = KErrNotFound;
@@ -357,26 +357,17 @@ void ChspsThemeServer::ConstructL()
         
     // Start observing the notifications
     iDefinitionRepository->RegisterObserverL( *this );
-           
-
+        
 #if defined(WINSCW) || defined(__WINS__)
     // Resolution & orientation change listener
     iFamily = ChspsFamilyListener::NewL( *this );
 #else 
     iFamily = ChspsFamily::NewL();
 #endif //defined(WINSCW) || defined(__WINS__)
-    
-    // Auto-localize ODTs in the Definition Repository when the device language has changed
-    HandleLanguageChangeL();            
-    
-    // Installs manifest files from the ROM drive when server is starting for the first time
-    HandleRomInstallationsL();
-        
-#ifndef __DISABLE_SISX_INSTALLATION_
-    // Start observing of import folder to enable autoinstallations
-    EnableAutoInstallationL();
-#endif //__DISABLE_SISX_INSTALLATION_    
-
+                        
+    // These might leave if configurations are invalid
+    TRAP_IGNORE( InitializeHeadersL() );
+                               
     // Update configurations
     // When server is started all configurations with "WaitForConfirmation" state are updated
     // to "NotConfirmed" state to allow client to validate configurations
@@ -405,6 +396,20 @@ void ChspsThemeServer::ConstructL()
     iLogBus->LogText( _L( "hspsThemeServer: server fully constructed" ) );
     iLogBus->LogText( _L( "--------------------------------------------------------" ) );
 #endif    
+    }
+
+void ChspsThemeServer::InitializeHeadersL()
+    {        
+    // Auto-localize ODTs in the Definition Repository when the device language has changed
+    HandleLanguageChangeL();            
+   
+    // Reinstall plug-ins/handle FOTA updates
+    HandleRomInstallationsL();
+       
+#ifndef __DISABLE_SISX_INSTALLATION_
+    // Start observing of import folder to enable autoinstallations
+    EnableAutoInstallationL();
+#endif //__DISABLE_SISX_INSTALLATION_    
     }
 
 // Destructor
@@ -2174,7 +2179,9 @@ void ChspsThemeServer::HandleLanguageChangeL()
    	if ( res.Count() == 0 )
    		{
 #ifdef HSPS_LOG_ACTIVE   		
-   		iLogBus->LogText( _L( "ChspsThemeServer::HandleLanguageChangeL(): - Couldn't find %d key from the HSPS cenrep!" ), KCenrepLangKey );
+   		iLogBus->LogText( 
+   		    _L( "ChspsThemeServer::HandleLanguageChangeL(): - Couldn't find %d key from the HSPS cenrep!" ), 
+   		    KCenrepKeyLang );
 #endif   		             
 
    		User::Leave( KErrNotFound );
@@ -2752,27 +2759,9 @@ void ChspsThemeServer::HandleRomInstallationsL()
     if( ( errorCode == KErrNone ) &&
         ( fwVersion.Length() == 0 ) )
         {
-        // Install widgets from \private\200159C0\install\ directories (ROM and UDA image)
-        InstallWidgetsL();
-
-        // Install widgets from \private\200159C0\imports\ directory 
-        //from c (UDA image) and from emmc
-        InstallUDAWidgetsL( KImportDirectoryC );
+        // Install widgets from install and import directories (eMMC, UDA ROM)
+        InstallWidgetsL( ETrue );
                 
-        TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
-        if ( drive != KErrNotFound )
-            {
-            TDriveUnit unit(drive);
-            HBufC* importDirectoryE = HBufC::NewLC( 
-                    KImportDirectory().Length() + unit.Name().Length() ); 
-            
-            importDirectoryE->Des().Append( unit.Name() );
-            importDirectoryE->Des().Append( KImportDirectory );
-            
-            InstallUDAWidgetsL( *importDirectoryE );
-            CleanupStack::PopAndDestroy( importDirectoryE );
-            }
-
         // Post RFS installations have been done, prevent re-installations at next startup
         // by reading firmware version and saving it to cenrep.
         GetFWVersion( fwVersion );
@@ -2805,7 +2794,8 @@ void ChspsThemeServer::HandleRomInstallationsL()
             {
             // Phone software has been updated.
             CreateBackupDataL();
-            InstallWidgetsL();
+            InstallWidgetsL( EFalse );
+            // Restore the personalization
             RestoreApplicationConfigurationsL();
             // Save new firmware version to cenrep
             if ( errorCode == KErrNone )
@@ -2855,7 +2845,10 @@ void ChspsThemeServer::InstallWidgetsL(
         const TBool aInstallUdaEmmc )
     {    
     __ASSERT_DEBUG( !iRomInstaller, User::Leave( KErrGeneral) );	
-	iRomInstaller = ChspsRomInstaller::NewL( *this, iFsSession, aInstallUdaEmmc );	
+	iRomInstaller = ChspsRomInstaller::NewL( 
+	        *this, 
+	        iFsSession, 
+	        aInstallUdaEmmc );	
 #ifdef HSPS_LOG_ACTIVE            	
 	iRomInstaller->SetLogBus( iLogBus );
 #endif
@@ -2879,14 +2872,17 @@ void ChspsThemeServer::GetConfigurationHeader(
     TInt& aPos )
     {
     ChspsODT* header( NULL );
-    TBool rootUidMatch( ETrue );
-    TBool themeUidMatch( ETrue );
-    TBool flagsMatch( ETrue );
-    TBool typeMatch( ETrue );
     aConfHeader = NULL;
     for ( TInt i = aPos; i < iHeaderListCache->Count() && aConfHeader == NULL; i++ )
         {
+        TBool rootUidMatch( ETrue );
+        TBool themeUidMatch( ETrue );
+        TBool flagsMatch( ETrue );
+        TBool typeMatch( ETrue );
+        TBool familyMatch( ETrue );
+
         header = iHeaderListCache->At(i);
+        
         if ( aSearchMask.RootUid() && 
              aSearchMask.RootUid() != header->RootUid() )
             {
@@ -2913,18 +2909,17 @@ void ChspsThemeServer::GetConfigurationHeader(
             {
             typeMatch = EFalse;
             }
+        if ( aSearchMask.Family() &&
+                !( aSearchMask.Family() & header->Family() ) )
+            {
+            // Family does not match
+            familyMatch = EFalse;
+            }
         // else configuration type ignored
-        if ( rootUidMatch && themeUidMatch && flagsMatch && typeMatch )
+        if ( rootUidMatch && themeUidMatch && flagsMatch && typeMatch && familyMatch )
             {
             aConfHeader = header;
             aPos = i;
-            }
-        else
-            {
-            rootUidMatch = ETrue;
-            themeUidMatch = ETrue;
-            flagsMatch = ETrue;
-            typeMatch = ETrue;
             }
         }                                     
     }
@@ -3045,6 +3040,8 @@ void ChspsThemeServer::HandleBRRestoreStateL(
         DisableAutoInstallation();
         // Restore imported configurations from backup/import folder
         RestoreImportedConfigurationsL();
+        // Update cache
+        UpdateHeaderListCacheL();
         // Restore application configurations from backup/themes folder
         RestoreApplicationConfigurationsL();
         // Restore completed
@@ -3212,6 +3209,7 @@ void ChspsThemeServer::RestoreImportedConfigurationsL()
         // Install found configurations
         TInt err( KErrNone );
         CHSPSInstaller* installer = CHSPSInstaller::NewL( *this );
+        installer->InstallationHandler().DisableNotifications();
         CleanupStack::PushL( installer );
         for ( TInt i = 0; i < files.Count(); i++ )
             {
@@ -3408,18 +3406,12 @@ void ChspsThemeServer::ValidateRestoredConfigurationL(
 
         if ( err != KErrNone )        
             {
-            // Invalid configuration
+            // Set plugin configuration to "error" state
             state.Set( KConfStateError );
-            // Delete related resource files
-            const TInt count = aOdt.ResourceCount();
-            for( TInt j( 0 ); j < count; j++ )
-                {
-                ChspsResource& resource = aOdt.ResourceL( j );
-                if( resource.ConfigurationUid() == uids[ i ] )
-                    {
-                    aOdt.DeleteResourceL( j );
-                    }
-                }
+            
+            // Remove missing plugins, thus there will be no error note later on 
+            hspsServerUtil::RemovePluginResourcesL( aOdt, uids[ i ] );
+            
             }
         else if ( state.CompareF( KConfStateError ) != 0 )
             {
@@ -3621,11 +3613,11 @@ TBool ChspsThemeServer::HandleFamilyChangeL(
             
                 // Skip family change if it's already up to date
                 TInt activeConfigurationUid = -1;
-                User::LeaveIfError( 
-                    iCentralRepository->Get( 
-                        header->RootUid(), 
-                        activeConfigurationUid )
-                    );
+                const TInt err = iCentralRepository->Get( header->RootUid(), activeConfigurationUid );
+                if( err )
+                    {
+                    continue;
+                    }
                 
                 // Notify each client only once
                 TBool alreadyIncluded = EFalse;
@@ -3641,9 +3633,23 @@ TBool ChspsThemeServer::HandleFamilyChangeL(
                 if ( !alreadyIncluded )
                     {                
                     notificationTargets.Append( header );
-                             
-                    TBool updateRequired = ( activeConfigurationUid != header->ThemeUid() );                        
-                    if ( updateRequired )
+
+                    // Check if active configuration supports the current family
+                    TBool updateRequired = ETrue;
+                    for( TInt i=0; i < iHeaderListCache->Count(); i++ )
+                        {
+                        ChspsODT* h = iHeaderListCache->At( i );
+                        if( h->ThemeUid() == activeConfigurationUid )
+                            {
+                            if( (ThspsFamily)h->Family() & aNewFamily )                             
+                                {
+                                // No need to change the active root configuration
+                                updateRequired = EFalse;
+                                break;
+                                }
+                            }
+                        }
+                    if( updateRequired  && activeConfigurationUid != header->ThemeUid() )                    
                         {                    
                         // Activate the resolution specific theme
                         ChspsODT* newOdt = ChspsODT::NewL();

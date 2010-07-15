@@ -19,8 +19,8 @@
 #ifndef C_MT_HSPS_H
 #define C_MT_HSPS_H
 
-#include <ceunittestsuiteclass.h>
-#include <eunitdecorators.h>
+#include <digia/eunit/ceunittestsuiteclass.h>
+#include <digia/eunit/eunitdecorators.h>
 #include <liwservicehandler.h>
 #include <hspsthememanagement.h>
 

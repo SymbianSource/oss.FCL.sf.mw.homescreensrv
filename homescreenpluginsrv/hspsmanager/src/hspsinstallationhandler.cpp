@@ -163,8 +163,7 @@ ChspsInstallationHandler* ChspsInstallationHandler::NewLC( ChspsThemeServer& aTh
 // -----------------------------------------------------------------------------
 //
 ChspsInstallationHandler::~ChspsInstallationHandler()
-    {        
-    iFsSession.Close();
+    {
     delete iXmlParser;
     delete iOdt;
     delete iDtdFile;
@@ -196,8 +195,8 @@ ChspsInstallationHandler::~ChspsInstallationHandler()
         delete iDefEngine;
         }
 
-    REComSession::FinalClose(); 
-
+    iFsSession.Close();
+    REComSession::FinalClose();
     }
     
     
@@ -210,6 +209,8 @@ ChspsInstallationHandler::~ChspsInstallationHandler()
 //
 void ChspsInstallationHandler::ConstructL()
     {
+    User::LeaveIfError( iFsSession.Connect() );
+
     _LIT8(KMimeType, "text/xml");
     MContentHandler* contentHandler = this;
     iXmlParser = Xml::CParser::NewL( KMimeType, *contentHandler );
@@ -219,11 +220,11 @@ void ChspsInstallationHandler::ConstructL()
     iOdt = ChspsODT::NewL();
     iResourceList = new( ELeave ) CArrayPtrSeg<ChspsResource>( KPathListGranularity ); 
     iTempLocalizedResourceList = new( ELeave ) CArrayPtrSeg<ChspsResource>( KPathListGranularity );
-    User::LeaveIfError( iFsSession.Connect() );    
-    iResult = ChspsResult::NewL();
-     
-    iMultiInstanceFound = EFalse;
     
+    iResult = ChspsResult::NewL();
+    iXmlFile = KNullDesC().AllocL();
+    
+    iMultiInstanceFound = EFalse;    
     }
 
 // -----------------------------------------------------------------------------
@@ -955,7 +956,48 @@ void ChspsInstallationHandler::CheckHeaderL()
     
     iOdt->SetConfigurationType( iConfigurationType );
     iOdt->SetFlags( iThemeStatus );   
-
+    
+    // Check that there is only one restorable application configuration 
+    // for a client in a device family     
+    if( iOdt->Flags() & EhspsThemeStatusLicenceeRestorable
+        && iConfigurationType == EhspsAppConfiguration )
+        {               
+        ChspsODT* searchMask = ChspsODT::NewL();
+        CleanupStack::PushL( searchMask );                
+        searchMask->SetRootUid( iOdt->RootUid() );        
+        searchMask->SetFlags( EhspsThemeStatusLicenceeRestorable );
+        
+        TInt pos( 0 );
+        ChspsODT* header = NULL;
+        iThemeServer.GetConfigurationHeader( *searchMask, header, pos );
+        while( header )
+            {
+            // If another plugin has already been installed with the restorable status 
+            if( header->Family() & iOdt->Family() 
+                    && header->ThemeUid() != iOdt->ThemeUid() )
+                {
+                // Unset the restorable bit
+                TUint flags = iOdt->Flags();                
+                flags &= ~EhspsThemeStatusLicenceeRestorable;
+                iOdt->SetFlags( flags );
+#ifdef HSPS_LOG_ACTIVE  
+                if( iLogBus )
+                    {
+                    iLogBus->LogText( _L( "ChspsInstallationHandler::CheckHeaderL(): - too many restorable plugins were found!" ) );
+                    }
+#endif                
+                break;
+                }
+            
+            // Get next application configuration header
+            pos++;
+            iThemeServer.GetConfigurationHeader( *searchMask, header, pos );
+            }
+        
+        header = NULL;
+        CleanupStack::PopAndDestroy();
+        }
+    
     // If configuration file is missing
     if( !iXmlFile ) 
         {

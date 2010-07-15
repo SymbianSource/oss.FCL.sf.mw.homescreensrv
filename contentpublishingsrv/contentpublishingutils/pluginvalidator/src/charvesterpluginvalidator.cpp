@@ -31,6 +31,8 @@ const TUint32 KHarvesterUid =
     0x10282E5A
     };
 
+const TInt KADatFactorySettingsServerPluginUid(0x102830EF);
+
 // ======== MEMBER FUNCTIONS ========
 
 // ----------------------------------------------------------------------------
@@ -167,18 +169,30 @@ void CHarvesterPluginValidator::LoadPluginL(TPluginInfo& aPluginInfo)
 void CHarvesterPluginValidator::UpdatePluginsL()
     {
     // set property value to 1 (which means "in progress")
-    iInProgressProperty.Set(TUid::Uid(KHarvesterUid), KInProgressPropertyKey,
-            1);
+    iInProgressProperty.Set(TUid::Uid(KHarvesterUid), KInProgressPropertyKey, 1);
+    CContentHarvesterPlugin* plugin = NULL;
+    CContentHarvesterPlugin* fsplugin =
+            static_cast<CContentHarvesterPlugin*> (GetImplementation(
+                    TUid::Uid(KADatFactorySettingsServerPluginUid)));
+
+	if (fsplugin)
+        {
+        iBlacklist->AppendL(TUid::Uid(KADatFactorySettingsServerPluginUid));
+            TRAP_IGNORE( fsplugin->UpdateL() );
+        iBlacklist->RemoveL(TUid::Uid(KADatFactorySettingsServerPluginUid));
+        }
     for (TInt i = 0; i < iPluginArray.Count(); i++)
         {
-        //first we append UID to the blacklist
-        iBlacklist->AppendL(iPluginArray[i].iImplementationUid);
-
-        TRAP_IGNORE( static_cast<CContentHarvesterPlugin*>
-                    ( iPluginArray[i].iPlugin )->UpdateL() );
-
-        //no panic during update so we can remove UID from blacklist
-        iBlacklist->RemoveL(iPluginArray[i].iImplementationUid);
+        plugin
+                = static_cast<CContentHarvesterPlugin*> (iPluginArray[i].iPlugin);
+        if (plugin != fsplugin)
+            {
+            //first we append UID to the blacklist
+            iBlacklist->AppendL(iPluginArray[i].iImplementationUid);
+                TRAP_IGNORE( plugin->UpdateL() );
+            //no panic during update so we can remove UID from blacklist
+            iBlacklist->RemoveL(iPluginArray[i].iImplementationUid);
+            }
         }
     // set property value to 0 (which means "finished")
     iInProgressProperty.Set(TUid::Uid(KHarvesterUid), KInProgressPropertyKey,

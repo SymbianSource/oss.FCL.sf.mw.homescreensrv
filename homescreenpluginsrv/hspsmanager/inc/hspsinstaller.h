@@ -68,6 +68,11 @@ class CHSPSInstaller : public CActive
         ThspsServiceCompletedMessage InstallConfigurationL( 
             const TDesC& aFileName ); 
         
+        /**
+         * Get installation handler.
+         */
+        ChspsInstallationHandler& InstallationHandler();
+        
     public: // Functions from base classes
         
         /**

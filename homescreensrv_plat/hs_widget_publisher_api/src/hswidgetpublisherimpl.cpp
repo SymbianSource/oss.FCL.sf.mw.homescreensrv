@@ -83,6 +83,7 @@ HsWidget& HsWidgetPublisherImpl::CreateWidget( std::string& aTemplateName,
 	std::string& aWidgetName, std::string& aIdentifier,
 	std::string& aDescription, std::string& aIconLocation)
 	{
+    aTemplateName = TemplateName( aTemplateName );
 	if( CheckIfWidgetExist( aTemplateName, aWidgetName, aIdentifier, EFalse ) )
 		{
 		throw HsException( KErrAlreadyExists );
@@ -543,6 +544,7 @@ void HsWidgetPublisherImpl::RemoveWidget( std::string& aTemplateName,
 	std::string& aWidgetName,
 	std::string& aIdentifier )
 	{
+    aTemplateName = TemplateName( aTemplateName );
 	HsWidget* ret( 0 );
 	int count = mWidgets.size();
 	for (int index = 0; index < count; index++)
@@ -637,6 +639,7 @@ HsWidget& HsWidgetPublisherImpl::GetWidget( std::string& aTemplateName,
 	std::string& aWidgetName,
 	std::string& aIdentifier )
 	{
+    aTemplateName = TemplateName( aTemplateName );
 	HsWidget* ret( 0 );
 	int count = mWidgets.size();
 	for (int index = 0; index < count; index++)
@@ -816,8 +819,7 @@ void HsWidgetPublisherImpl::InsertWidgetInfoL( HsWidget& aWidget,
 	CLiwDefaultMap* aDataMap )
     {
     __ASSERT_ALWAYS( aDataMap, User::Invariant() );
-
-    HBufC* templateType = StdStringToUnicodeLC( aWidget.getTemplateName() );
+    HBufC* templateType = StdStringToUnicodeLC( TemplateName (aWidget.getTemplateName()) );
     HBufC* widgetName = StdStringToUnicodeLC( aWidget.getWidgetName() );
 	    
 	aDataMap->InsertL( KTemplateType, TLiwVariant( *templateType ) );
@@ -1085,4 +1087,20 @@ HBufC* HsWidgetPublisherImpl::StdStringToUnicodeLC(
     TPtrC8 srcDescriptor = reinterpret_cast<const TUint8*>(
             aSrcString.c_str() );
     return Utf8ToUnicodeLC( srcDescriptor );
+    }
+
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
+//
+std::string HsWidgetPublisherImpl::TemplateName(const std::string &aSrcTemplate)
+    {
+    // In 9.2 HS wideimage template is reserved for wrt and cwrt widget.
+    // to support backward(5.0) compatability posterwideimage template 
+    // will be usedfor wideimage template
+    if (aSrcTemplate == std::string("wideimage") )
+        {
+        return std::string("posterwideimage");
+        }
+    return aSrcTemplate;
     }

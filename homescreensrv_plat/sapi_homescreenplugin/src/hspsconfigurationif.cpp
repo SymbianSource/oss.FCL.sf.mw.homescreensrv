@@ -359,18 +359,11 @@ void CHSPSConfigurationIf::GetActiveAppConfL(
    	    state );
 
     if ( state.Compare( KConfStateError ) == 0 )
-        {
-        // Restore active application configuration
-        TPtrC8 confUid;
-        CHspsLiwUtilities::GetAttributeValueL( 
-            *node, 
-            KConfigurationAttrUid, 
-            confUid );        
+        {                
         TInt appUid;
         iHspsConfigurationService->GetAppUidL( appUid );
         iHspsPersonalisationService->RestoreActiveAppConfL( 
-            appUid, 
-            confUid );
+                appUid );
         
         // Invalidate ODT.
         iHspsConfigurationService->InvalidateODT();
@@ -1200,6 +1193,10 @@ void CHSPSConfigurationIf::RestoreConfigurationsL(
         {
         operation = CHspsPersonalisationService::EDefault;
         }
+    else if( restorePtr.CompareF( KHspsLiwRestoreAll ) == 0 )
+        {
+        operation = CHspsPersonalisationService::EAll;
+        }
     else if( restorePtr.CompareF( KHspsLiwRestoreRom ) == 0 )
         {
         operation = CHspsPersonalisationService::ERom;
@@ -1216,8 +1213,17 @@ void CHSPSConfigurationIf::RestoreConfigurationsL(
     // Get client application's uid
     TInt appUid;
     iHspsConfigurationService->GetAppUidL( appUid );
-        
-    iHspsPersonalisationService->RestoreConfigurationsL( appUid, operation );
+    
+    if( operation == CHspsPersonalisationService::EDefault )
+        {
+        // Try to activate another application configuration which has a restorable status
+        iHspsPersonalisationService->RestoreActiveAppConfL( appUid );
+        }
+    else
+        {
+        // Re-install or strip plugins 
+        iHspsPersonalisationService->RestoreConfigurationsL( appUid, operation );
+        }
 
     // Invalidate ODT.
     iHspsConfigurationService->InvalidateODT();

@@ -73,6 +73,7 @@ _LIT8( KHspsLiwStorePluginRefence, "storePluginConf" );
 _LIT8( KHspsLiwStoreAppConf, "storeAppConf" ); 
 _LIT8( KHspsLiwRestore, "restore" );
 _LIT8( KHspsLiwRestoreDefault, "default");
+_LIT8( KHspsLiwRestoreAll, "all");
 _LIT8( KHspsLiwRestoreRom, "rom");
 _LIT8( KHspsLiwRestoreViews, "views");
 

@@ -563,8 +563,7 @@ void CSapiData::ExecuteActionL(const TDesC& aObjectId, const TDesC& aTrigger )
 	   TLiwGenericParam cptype( KType, TLiwVariant( KPubData ) );
 	   inParamList->AppendL( cptype );
 	   cptype.Reset();
-	   // use the first item configuration to create the filter
-	   filter = CreateFilterLC( KWidget() );
+	   filter = CreateFilterLC( KAll(), KAll() );
 	   }
    else
 	   {
