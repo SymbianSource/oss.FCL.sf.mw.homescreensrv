@@ -15,14 +15,12 @@
  *
  */
 
-#include <cadefs.h>
 #include <qserviceinterfacedescriptor.h>
 #include <qabstractsecuritysession.h>
 #include <qservicecontext.h>
-#include "cahandlerloader.h"
 
+#include "cahandlerloader.h"
 #include "caurlhandlerplugin.h"
-#include "cas60urlhandleradapter.h"
 #include "caurlhandler.h"
 
 /*!
@@ -35,7 +33,7 @@
     \param descriptor Service descriptor.
     \param context Ignored.
     \param session Ignored.
-    \return An instance of the CaS60UrlHandlerAdapter<CCaUrlHandler> when descriptor interface name
+    \return An instance of the CaS60UrlHandlerAdapter<CaUrlHandler> when descriptor interface name
     is "com.nokia.homescreen.ICommandHandler", NULL otherwise.
 */
 QObject *CaUrlHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &descriptor,
@@ -46,10 +44,19 @@ QObject *CaUrlHandlerPlugin::createInstance(const QServiceInterfaceDescriptor &d
     Q_UNUSED(session);
 
     if (descriptor.interfaceName() ==
-            "com.nokia.homescreen.ICommandHandler") {
-        return new CaS60UrlHandlerAdapter();
+        QLatin1String("com.nokia.homescreen.ICommandHandler")) {
+        return new CaUrlHandler();
     } else {
         return 0;
     }
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (QT macro)
+
 Q_EXPORT_PLUGIN2(caurlhandlerplugin, CaUrlHandlerPlugin)
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT

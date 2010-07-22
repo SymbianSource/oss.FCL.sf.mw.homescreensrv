@@ -19,7 +19,9 @@
 #define CASTORAGEPROXY_H
 
 #include "cadef.h"
+#include "castorage_global.h"
 #include "caoperationparams.h"
+
 
 
 // FORWARD DECLARATIONS
@@ -28,6 +30,8 @@ class CCaInnerQuery;
 class CCaInnerEntry;
 class CCaLocalizationEntry;
 class MCaSessionNorifier;
+
+CA_STORAGE_TEST_CLASS( TestCaClient )
 
 /**
  * Interface for CA database implementations.
@@ -59,6 +63,13 @@ public:
      */
     IMPORT_C void LocalizeEntryL( CCaLocalizationEntry& aLocalization );
 
+    /**
+     * Add localization row to the storage
+     *
+     * @param aLocalization entry containing localization row to be added
+     */
+    IMPORT_C void AddLocalizationL(const CCaLocalizationEntry& aLocalization);
+    
     /**
      * Fetches localization data from database
      *
@@ -173,6 +184,12 @@ private:
      * C++ default constructor.
      */
     CCaStorageProxy();
+    
+    CCaLocalizationEntry* LocalizeTextL( CCaInnerEntry* aEntry );
+    
+    CCaLocalizationEntry* LocalizeDescriptionL( CCaInnerEntry* aEntry );
+    
+    TBool InitializeTranslatorL( TDesC& aQmFilename );
 
 private:
     //Data
@@ -186,6 +203,9 @@ private:
      * Sessions using this engine. Own.
      */
     RPointerArray<MCaSessionNorifier> iHandlerNotifier;
+    
+    CA_STORAGE_TEST_FRIEND_CLASS( TestCaClient )
+    
     };
 
 #endif //CASTORAGEPROXY_H

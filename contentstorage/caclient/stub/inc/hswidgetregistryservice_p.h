@@ -25,7 +25,7 @@
 #include <QMap>
 #include <QFileSystemWatcher>
 
-#include "hsiwidgetprovider.h"
+#include "hswidgetcomponentdescriptor.h"
 
 class HsWidgetRegistryService;
 
@@ -40,20 +40,20 @@ public:
 
     ~HsWidgetRegistryServicePrivate();
 
-    QList<HsWidgetToken> widgets();
+    QList<HsWidgetComponentDescriptor> widgets();
 
 private:
 
     Q_DISABLE_COPY(HsWidgetRegistryServicePrivate)
 
-    IHsWidgetProvider *loadProviderFromPlugin(const QString &pluginName);
+//    IHsWidgetProvider *loadProviderFromPlugin(const QString &pluginName);
 
     QStringList readManifestDirectories(const QString &path);
 
     void doWidgetRemove(const QString &path, const QStringList &originalList,
                         const QStringList &currentList);
 
-    QList<HsWidgetToken> readManifestFile(const QString &path);
+    QList<HsWidgetComponentDescriptor> readManifestFile(const QString &path);
 
     void ensureWidgetRegistryPaths();
 

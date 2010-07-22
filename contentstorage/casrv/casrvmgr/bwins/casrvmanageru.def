@@ -1,3 +1,4 @@
 EXPORTS
 	?NewL@CCaSrvManager@@SAPAV1@AAVCCaStorageProxy@@PAVCCaSrvEngUtils@@@Z @ 1 NONAME ; class CCaSrvManager * CCaSrvManager::NewL(class CCaStorageProxy &, class CCaSrvEngUtils *)
+	?LoadOperationErrorCodeL@CCaSrvManager@@QAEHXZ @ 2 NONAME ; int CCaSrvManager::LoadOperationErrorCodeL(void)
 

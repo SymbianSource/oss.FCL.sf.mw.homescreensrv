@@ -15,75 +15,26 @@
  *
  */
 
-#ifndef __CCAURLHANDLER_H__
-#define __CCAURLHANDLER_H__
+#ifndef CAURLHANDLER_H
+#define CAURLHANDLER_H
 
-#include <e32base.h>
+#include "cahandler.h"
 
-class CCaInnerEntry;
+class QString;
 
-// Constants
-const TUid KUidBrowser =
-    {
-    0x10008D39
-    };
-_LIT( KBrowserPrefix, "4 " );
-
-/**
- *  Command handler for url entries.
- *
- *  @lib caclient.lib
- */
-NONSHARABLE_CLASS( CCaUrlHandler ): public CBase
-    {
-
-public:
-    // construction
-
-    /**
-     * Destructor.
-     */
-    virtual ~CCaUrlHandler();
-
-    /**
-     * Two-phased constructor. Leaves on failure.
-     * @return The constructed object.
-     */
-    static CCaUrlHandler* NewL();
-
-protected:
-    // construction
-
-    /**
-     * Constructor.
-     * @param aMenu Menu.
-     */
-    CCaUrlHandler();
-
-    /**
-     * Second-phase constructor.
-     */
-    void ConstructL();
+class CaUrlHandler: public QObject, public CaHandler
+{
+    Q_OBJECT
+    Q_INTERFACES(CaHandler)
 
 public:
 
+    explicit CaUrlHandler(QObject *parent = 0);
 
-    /**
-     * Handle command.
-     * @param aEntry The url entry to be processed.
-     * @param aCommand Command.
-     */
-    void HandleCommandL( CCaInnerEntry& aEntry, const TDesC8& aCommand );
+    virtual ~CaUrlHandler();
 
-private:
-    // internal
+    int execute(const CaEntry &entry, const QString &command);
 
-    /**
-     * Launches the url.
-     * @param aUrl The url to be launched.
-     */
-    void LaunchUrlL( const TDesC& aUrl );
+};
 
-    };
-
-#endif // __CCAURLHANDLER_H__
+#endif // CAURLHANDLER_H

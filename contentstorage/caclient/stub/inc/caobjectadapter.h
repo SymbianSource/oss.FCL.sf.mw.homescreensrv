@@ -15,51 +15,31 @@
  *
  */
 
-#ifndef OBJECTADAPTER_H
-#define OBJECTADAPTER_H
+#ifndef CAOBJECTADAPTER_H
+#define CAOBJECTADAPTER_H
 
 // INCLUDES
 #include <QPixmap>
+
+#include <cadefs.h>
 
 class QSize;
 class CaEntry;
 class CaIconDescription;
 class HbIcon;
 
-/**
- *  CaObjectAdapter
- *
- */
 class CaObjectAdapter
 {
 public:
 
-    /**
-     * Create an icon.
-     * @param entry entry.
-     * @param size size of the icon
-     * @return QPixmap.
-     */
-    static HbIcon makeIcon(
-        const CaEntry &entry,
-        const QSize &size);
+    static HbIcon makeIcon(const CaEntry &entry, const QSize &size);
 
-    /**
-     * Set entry id.
-     * @param entry entry.
-     * @param id entry id.
-     */
-    static void setId(CaEntry &entry,
-                      int id);
+    static void setId(CaEntry &entry, int id);
 
-    /**
-     * Set icon description id.
-     * @param iconDescription icon description.
-     * @param id icon description id.
-     */
-    static void setId(CaIconDescription &iconDescription,
-                      int id);
+    static void setId(CaIconDescription &iconDescription, int id);
+                      
+    static ErrorCode convertErrorCode(int internalErrorCode);
 
 };
 
-#endif // OBJECTADAPTER_H
+#endif // CAOBJECTADAPTER_H

@@ -25,6 +25,7 @@
 class CCaSrvEngUtils;
 class CCaSrvManager;
 class CCaStorageProxy;
+class CCaProgressNotifier;
 
 // GLOBAL FUNCTIONS
 /**
@@ -118,6 +119,11 @@ private:
      * Srv plugin manager. Own.
      */
     CCaSrvManager* iSrvManager;
+
+    /*
+     * Uninstall progress notifier
+     */
+    CCaProgressNotifier* iProgressNotifier;
 
     };
 

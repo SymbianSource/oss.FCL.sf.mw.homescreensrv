@@ -1,31 +1,33 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:
+ * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
  *
-*/
-
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:
+ *
+ */
 
 #ifndef C_WIDGETSTORAGEHANDLER_H
 #define C_WIDGETSTORAGEHANDLER_H
 
 class CCaStorageProxy;
 class CCaWidgetDescription;
+class CCaWidgetScannerParser;
 
 //  INCLUDES
 #include <e32base.h>
+#include <usif/scr/scr.h>
 #include "cawidgetdescription.h"
 #include "castorage_global.h"
+
 // CONSTANTS
 
 // FORWARD DECLARATIONS
@@ -38,7 +40,7 @@ class CCaWidgetDescription;
 class CCaWidgetStorageHandler : public CBase
     {
 public:
-    CA_STORAGE_TEST_FRIEND_CLASS    (T_CaWidgetScanner)
+CA_STORAGE_TEST_FRIEND_CLASS (T_CaWidgetScanner)
 
 public:
     // Constructors and destructor
@@ -57,11 +59,9 @@ public:
     virtual ~CCaWidgetStorageHandler();
 
     /**
-     * Synchronizes widgets
-     * @param aWidgets widgets to synchronize
+     * SynchronizeL - synchronizes widgets on device with database
      */
-    void SynchronizeL( const RWidgetArray& aWidgets );
-
+    void SynchronizeL();
 
 private:
 
@@ -74,6 +74,7 @@ private:
     /**
      * Updates widget in storage.
      * @param aWidget widget to be updated
+     * @param aEntryId entry of widget in db
      */
     void UpdateL( const CCaWidgetDescription* aWidget, TUint aEntryId );
 
@@ -86,12 +87,12 @@ private:
     /**
      * Removes widgets from DB
      */
-    void RemoveWidgetsL( ) ;
+    void RemoveWidgetsL();
 
     /**
      * Fetch widgets from content storage
      */
-    void FetchWidgetsL( );
+    void FetchWidgetsL();
 
     /**
      * Add widget to download collection
@@ -111,6 +112,13 @@ private:
      */
     void ClearVisibleFlagL( const CCaWidgetDescription* aWidget );
 
+    /**
+     * Set localizations for widget in db
+     * @param aWidget widget.
+     * @param aEntryId of widget.
+     */
+    void SetLocalizationsL( const CCaWidgetDescription* aWidget, TInt aEntryId );
+
 private:
 
     /**
@@ -121,13 +129,22 @@ private:
     /**
      * By default Symbian 2nd phase constructor is private.
      */
-    void ConstructL( );
+    void ConstructL();
 
     /**
      * Check if mass storage is not in use.
      * @return true if mass storage is not in use.
      */
     TBool MassStorageNotInUse();
+
+    /**
+     * Adds or updates component id attribute in entry based on SCR provided data
+     * @param aPackageUid uid of the package which the widget represented by aEntry
+     * is delivered with
+     * @param aEntry widget entry being updated with component id attribute.
+     */
+    void UpdateComponentIdL( const TDesC& aManifestFilePathName,
+            CCaInnerEntry& aEntry ) const;
 
 private:
     // Data
@@ -147,12 +164,12 @@ private:
      */
     RWidgetArray iWidgets;
 
-    /*
-     * Indexes updated during last add operation. Own.
+    /**
+     * Pointer to a parser object. Own
      */
-    RArray<TInt> iUpdatedIndexes;
+    CCaWidgetScannerParser* iParser;
 
-
+    Usif::RSoftwareComponentRegistry iSoftwareRegistry;
     };
 
 #endif      // C_WIDGETSTORAGEHANDLER_H

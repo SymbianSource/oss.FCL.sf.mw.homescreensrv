@@ -43,10 +43,10 @@ public:
     void setId(int id);
 
     QString text() const;
-    void setText(const QString &text);
+    void setText(const QString &text, bool localized = false);
 
     QString description() const;
-    void setDescription(const QString &text);
+    void setDescription(const QString &text, bool localized = false);
 
     CaIconDescription iconDescription() const;
     void setIconDescription(const CaIconDescription &iconDescription);
@@ -65,6 +65,8 @@ public:
 
     EntryRole role() const;
     void setRole(const EntryRole &role);
+    
+    bool isLocalized(LocalizationType localized) const;
 
 private:
 
@@ -85,6 +87,10 @@ private:
     QMap<QString, QString> mAttributes;
 
     EntryRole mEntryRole;
+    
+    bool mTextLocalized;
+    
+    bool mDescriptionLocalized;
 };
 
 #endif // CAENTRY_PRIVATE_H

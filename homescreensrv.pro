@@ -16,14 +16,14 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS  += appfoundation \
-            hswidgetmodel \
+SUBDIRS  += hswidgetmodel \
             contentstorage \
             homescreensrv_plat \
             tsrc
 symbian:SUBDIRS += activityfw
+symbian:SUBDIRS += tstaskmonitor
 symbian:SUBDIRS += hsappkeyhandler
-
+symbian:SUBDIRS += tsdevicedialog
 
 CONFIG += ordered
 

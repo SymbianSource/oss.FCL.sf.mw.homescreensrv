@@ -36,19 +36,15 @@ public:
     // construction
 
     /**
-     * Destructor.
+     * Creates an instance of CCaSrvMmcHistory.
+     * @return a pointer to CCaSrvMmcHistory insctance.
      */
-    virtual ~CCaSrvMmcHistory()
-        {
-        iMmcList.Close();
-        }
+    IMPORT_C static CCaSrvMmcHistory* NewL();
 
     /**
-     * Constructor.
+     * Destructor.
      */
-    CCaSrvMmcHistory()
-        {
-        }
+    virtual ~CCaSrvMmcHistory();
 
 public:
     // new methods
@@ -82,6 +78,17 @@ public:
      * @return History index, or KErrNotFound.
      */
     IMPORT_C TInt Find( TUint aMmc ); // Find mmc in history.
+
+private:
+    /**
+     * Constructor.
+     */
+    CCaSrvMmcHistory();
+
+    /**
+     * Second phase symbian constructor.
+     */
+    void ConstructL();
 
 private:
     // data

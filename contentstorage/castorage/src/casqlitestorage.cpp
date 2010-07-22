@@ -207,23 +207,90 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
         }
     }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void CCaSqLiteStorage::LocalizeEntryL( CCaLocalizationEntry& aLocalization )
     {
     CCaSqlQuery* sqlLocalizeEntryQuery = CCaSqlQuery::NewLC( iSqlDb );
-    CaSqlQueryCreator::CreateLocalizeEntryQueryL( sqlLocalizeEntryQuery );
+    if( aLocalization.GetAttributeName().Compare( KColumnEnText ) == 0 )
+        {
+        CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
+            KSQLLocalizeTextEntry );
+        }
+    else if ( aLocalization.GetAttributeName().Compare(
+            KColumnEnDescription ) == 0 )
+        {
+        CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
+            KSQLLocalizeDescriptionEntry );
+        }
     sqlLocalizeEntryQuery->PrepareL();
     sqlLocalizeEntryQuery->BindValuesForLocalizeL( aLocalization );
     sqlLocalizeEntryQuery->ExecuteL( );
     CleanupStack::PopAndDestroy( sqlLocalizeEntryQuery );
     }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::AddLocalizationL(
+        const CCaLocalizationEntry& aLocalization)
+    {
+    if (LocalizationEntryPresentL(aLocalization))
+        {
+        ExecuteLocalizationStatementL(aLocalization, KSQLUpdateLocalization);
+        }
+    else
+        {
+        ExecuteLocalizationStatementL(aLocalization, KSQLAddLocalization);
+        }
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+TBool CCaSqLiteStorage::LocalizationEntryPresentL(
+        const CCaLocalizationEntry& aLocalization)
+    {
+    TBool result(EFalse);
+    CCaSqlQuery* sqlQuery = CCaSqlQuery::NewLC( iSqlDb );
+    CaSqlQueryCreator::CreateLocalizationTableQueryL(sqlQuery,
+            KSQLGetLocalization);
+    sqlQuery->PrepareL();
+    sqlQuery->BindValuesForGetLocalizationEntryL( aLocalization );
+    result = sqlQuery->ExecuteEntryPresentL( );
+    CleanupStack::PopAndDestroy( sqlQuery );
+    return result;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::ExecuteLocalizationStatementL(
+        const CCaLocalizationEntry& aLocalization, const TDesC& aStatement)
+    {
+    CCaSqlQuery* sqlQuery = CCaSqlQuery::NewLC( iSqlDb );
+    CaSqlQueryCreator::CreateLocalizationTableQueryL(sqlQuery,aStatement );
+    sqlQuery->PrepareL();
+    sqlQuery->BindValuesForLocalizationEntryL( aLocalization );
+    sqlQuery->ExecuteL( );
+    CleanupStack::PopAndDestroy( sqlQuery );
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void CCaSqLiteStorage::GetLocalizationsL(
         RPointerArray<CCaLocalizationEntry>& aResultContainer )
     {
     CCaSqlQuery* sqlGetLocalizationsQuery = CCaSqlQuery::NewLC( iSqlDb );
-    CaSqlQueryCreator::CreateGetLocalizationsQueryL(
-            sqlGetLocalizationsQuery );
-
+    CaSqlQueryCreator::CreateLocalizationTableQueryL(
+            sqlGetLocalizationsQuery, KSQLGetLocalizations );
     sqlGetLocalizationsQuery->PrepareL();
     sqlGetLocalizationsQuery->ExecuteLocalizationsL( aResultContainer );
     CleanupStack::PopAndDestroy( sqlGetLocalizationsQuery );
@@ -245,7 +312,6 @@ void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
     sqlGetEntriesIdsQuery->ExecuteL( aResultIdArray,
             CCaSqlQuery::EEntryTable );
     CleanupStack::PopAndDestroy( sqlGetEntriesIdsQuery );
-
     }
 
 // ---------------------------------------------------------------------------
@@ -254,7 +320,7 @@ void CCaSqLiteStorage::GetEntriesIdsL( const CCaInnerQuery* aQuery,
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
-        RArray<TInt>& aParentIdArray )
+        RArray<TInt>& aParentIdArray, TBool aCheckParentsParent )
     {
     CCaSqlQuery* sqlGetParentIdsQuery = CCaSqlQuery::NewLC( iSqlDb );
     CaSqlQueryCreator::CreateGetParentsIdsQueryL( aEntryIdArray,
@@ -268,7 +334,7 @@ void CCaSqLiteStorage::GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
     TInt parentCount = sqlGetParentIdsQuery->ExecuteL( aParentIdArray,
             CCaSqlQuery::EGroupTable );
     CleanupStack::PopAndDestroy( sqlGetParentIdsQuery );
-    if( parentCount > 0 )
+    if( aCheckParentsParent && parentCount > 0 )
         {
         GetParentsIdsL( aParentIdArray, aParentIdArray );
         }
@@ -843,4 +909,5 @@ void CCaSqLiteStorage::SetEntriesInProperOrderL(
             }
         }
     }
+
 

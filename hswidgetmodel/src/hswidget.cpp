@@ -20,7 +20,7 @@
 #include "hswidget_p.h"
 #include "ihswidgetpreferenceservice.h"
 
-/*!
+/*DEPRECATED
     \ingroup group_hswidgetmodel group_widget_api_candidates
     \class HsWidget
     \brief Base class for all home screen widgets.

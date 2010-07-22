@@ -17,6 +17,9 @@
 // INCLUDE FILES
 
 #include <badesca.h>
+#include <usif/scr/screntries.h>
+#include <hbtextresolversymbian.h>
+
 #include "widgetscannerutils.h"
 #include "cawidgetstoragehandler.h"
 #include "cadef.h"
@@ -24,34 +27,37 @@
 #include "cainnerquery.h"
 #include "castorageproxy.h"
 #include "caarraycleanup.inl"
+#include "calocalizationentry.h"
+#include "cawidgetscannerparser.h"
+#include "cawidgetscannerdef.h"
 
-// ============================ MEMBER FUNCTIONS ===============================
+using namespace Usif;
+
+// ============================ MEMBER FUNCTIONS ============================z===
 
 // -----------------------------------------------------------------------------
-// CCaWidgetStorageHandler::CCaWidgetStorageHandler
-// C++ default constructor can NOT contain any code, that
-// might leave.
+// 
 // -----------------------------------------------------------------------------
 //
-CCaWidgetStorageHandler::CCaWidgetStorageHandler(
-        CCaStorageProxy* aStorage, RFs& aFs )
+CCaWidgetStorageHandler::CCaWidgetStorageHandler( CCaStorageProxy* aStorage,
+        RFs& aFs )
     {
     iStorage = aStorage;
     iFs = aFs;
     }
 
 // -----------------------------------------------------------------------------
-// CCaWidgetStorageHandler::ConstructL
-// Symbian 2nd phase constructor can leave.
+// 
 // -----------------------------------------------------------------------------
 //
 void CCaWidgetStorageHandler::ConstructL()
     {
+    User::LeaveIfError( iSoftwareRegistry.Connect() );
+    iParser = CCaWidgetScannerParser::NewL( iFs );
     }
 
 // -----------------------------------------------------------------------------
-// CCaWidgetStorageHandler::NewL
-// Two-phased constructor.
+// 
 // -----------------------------------------------------------------------------
 //
 CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewL(
@@ -63,8 +69,7 @@ CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewL(
     }
 
 // -----------------------------------------------------------------------------
-// CCaWidgetStorageHandler::NewLC
-// Two-phased constructor.
+// 
 // -----------------------------------------------------------------------------
 //
 CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewLC(
@@ -78,23 +83,24 @@ CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewLC(
     }
 
 // -----------------------------------------------------------------------------
-// Destructor
+// 
 // -----------------------------------------------------------------------------
 //
 CCaWidgetStorageHandler::~CCaWidgetStorageHandler()
     {
+    delete iParser;
+    iSoftwareRegistry.Close();
     iWidgets.ResetAndDestroy();
-    iUpdatedIndexes.Close();
     }
 
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------
 //
-void CCaWidgetStorageHandler::SynchronizeL( const RWidgetArray& aWidgets )
+void CCaWidgetStorageHandler::SynchronizeL()
     {
     FetchWidgetsL();
-    AddWidgetsL( aWidgets );
+    AddWidgetsL( iParser->WidgetsScanL( iWidgets ) );
     RemoveWidgetsL();
     }
 
@@ -105,8 +111,12 @@ void CCaWidgetStorageHandler::SynchronizeL( const RWidgetArray& aWidgets )
 void CCaWidgetStorageHandler::AddL( const CCaWidgetDescription* aWidget )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
+    UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
     iStorage->AddL( entry );
-    if( entry->GetFlags() & ERemovable )
+
+    SetLocalizationsL( aWidget, entry->GetId() );
+
+    if ( entry->GetFlags() & ERemovable )
         {
         AddWidgetToDownloadCollectionL( entry );
         }
@@ -121,20 +131,23 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
         TUint aEntryId )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
+    UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
     entry->SetId( aEntryId );
-    if( !aWidget->IsMissing() && aWidget->IsUsed() )
+    if ( !aWidget->IsMissing() && aWidget->IsUsed() )
         {
         entry->SetFlags( entry->GetFlags() & ~EUsed );
         }
     TItemAppearance itemAppearanceChange = EItemAppearanceNotChanged;
-    if( ( entry->GetFlags() & EMissing ) ||
-        !( entry->GetFlags() & EVisible ) )
+    if ( ( entry->GetFlags() & EMissing ) || !( entry->GetFlags() & EVisible ) )
         {
         itemAppearanceChange = EItemAppeared;
         }
     entry->SetFlags( entry->GetFlags() & ~EMissing | EVisible );
     iStorage->AddL( entry, EFalse, itemAppearanceChange );
-    if( !aWidget->IsMissing() )
+
+    SetLocalizationsL( aWidget, entry->GetId() );
+
+    if ( !aWidget->IsMissing() )
         {
         AddWidgetToDownloadCollectionL( entry );
         }
@@ -147,28 +160,28 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
 //
 void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
     {
-    iUpdatedIndexes.Reset();
-    for( TInt i = 0; i < aWidgets.Count(); i++ )
+    for ( TInt i = 0; i < aWidgets.Count(); i++ )
         {
-        TInt index = iWidgets.Find(
-                aWidgets[i], CCaWidgetDescription::Compare );
-        if( index != KErrNotFound )
+        aWidgets[i]->LocalizeTextsL();
+        TInt index = iWidgets.Find( aWidgets[i], CCaWidgetDescription::Compare );
+        if ( index != KErrNotFound )
             {
-            if( !iWidgets[index]->Compare( *aWidgets[i] ) ||
-                    iWidgets[index]->IsMissing() )
+            iWidgets[index]->SetValid( ETrue );
+            if ( !iWidgets[index]->Compare( *aWidgets[i] )
+                    || iWidgets[index]->IsMissing() )
                 {
-                aWidgets[i]->SetMissing( iWidgets[index]->IsMissing() );
-                aWidgets[i]->SetUsed( iWidgets[index]->IsUsed() );
-                aWidgets[i]->SetVisible( iWidgets[index]->IsVisible() );
+                aWidgets[i]->SetFlag( EMissing, iWidgets[index]->IsMissing() );
+                aWidgets[i]->SetFlag( EUsed, iWidgets[index]->IsUsed() );
+                aWidgets[i]->SetFlag( EVisible, iWidgets[index]->IsVisible() );
                 UpdateL( aWidgets[i], iWidgets[index]->GetEntryId() );
                 }
-            iUpdatedIndexes.AppendL( index );
             }
         else
             {
             AddL( aWidgets[i] );
             }
         }
+    HbTextResolverSymbian::Init( _L(""), KLocalizationFilepathZ );
     }
 
 // ----------------------------------------------------------------------------
@@ -177,11 +190,11 @@ void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
 //
 void CCaWidgetStorageHandler::RemoveWidgetsL()
     {
-    for( TInt i = 0; i < iWidgets.Count(); i++ )
+    for ( TInt i = 0; i < iWidgets.Count(); i++ )
         {
-        if( iUpdatedIndexes.Find( i ) == KErrNotFound )
+        if ( !iWidgets[i]->IsValid() )
             {
-            if( iWidgets[i]->GetMmcId() != KNullDesC )
+            if ( iWidgets[i]->GetMmcId() != KNullDesC )
                 {
                 RBuf currentMmcId;
                 currentMmcId.CreateL( KMassStorageIdLength );
@@ -199,7 +212,7 @@ void CCaWidgetStorageHandler::RemoveWidgetsL()
                     {
                     SetMissingFlagL( iWidgets[i] );
                     }
-                CleanupStack::PopAndDestroy(&currentMmcId);
+                CleanupStack::PopAndDestroy( &currentMmcId );
                 }
             else
                 {
@@ -262,11 +275,11 @@ void CCaWidgetStorageHandler::FetchWidgetsL()
     RPointerArray<CCaInnerEntry> entries;
     CleanupResetAndDestroyPushL( entries );
     iStorage->GetEntriesL( query, entries );
+
     iWidgets.ResetAndDestroy();
-    for( TInt i = 0; i < entries.Count(); i++ )
+    for ( TInt i = 0; i < entries.Count(); i++ )
         {
-        CCaWidgetDescription* widget = CCaWidgetDescription::NewLC(
-                entries[i] );
+        CCaWidgetDescription* widget = CCaWidgetDescription::NewLC( entries[i] );
         iWidgets.AppendL( widget ); //iWidgets takes ownership
         CleanupStack::Pop( widget );
         }
@@ -281,11 +294,11 @@ void CCaWidgetStorageHandler::FetchWidgetsL()
 void CCaWidgetStorageHandler::SetMissingFlagL(
         const CCaWidgetDescription* aWidget )
     {
-    if( !aWidget->IsMissing() )
+    if ( !aWidget->IsMissing() )
         {
         CCaInnerEntry* entry = aWidget->GetEntryLC();
-        entry->SetFlags( entry->GetFlags() | EMissing );
-        if( aWidget->IsUsed() )
+        entry->SetFlags( ( entry->GetFlags() | EMissing ) & ~EUninstall );
+        if ( aWidget->IsUsed() )
             {
             entry->SetFlags( entry->GetFlags() | EUsed );
             }
@@ -301,10 +314,14 @@ void CCaWidgetStorageHandler::SetMissingFlagL(
 void CCaWidgetStorageHandler::ClearVisibleFlagL(
         const CCaWidgetDescription* aWidget )
     {
-    if( aWidget->IsVisible() )
+    if ( aWidget->IsVisible() )
         {
         CCaInnerEntry* entry = aWidget->GetEntryLC();
-        entry->SetFlags( entry->GetFlags() & ~EVisible & ~EMissing & ~EUsed );
+        entry->SetFlags( entry->GetFlags()
+                & ~EUninstall
+                & ~EVisible 
+                & ~EMissing 
+                & ~EUsed );
         iStorage->AddL( entry, EFalse, EItemDisappeared );
         CleanupStack::PopAndDestroy( entry );
         }
@@ -329,6 +346,97 @@ TBool CCaWidgetStorageHandler::MassStorageNotInUse()
             }
         }
     return massStorageNotInUse;
+    }
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+
+void CCaWidgetStorageHandler::SetLocalizationsL(
+        const CCaWidgetDescription* aWidget, TInt aEntryId )
+    {
+    RBuf filename;
+    filename.CreateL( aWidget->GetTranslationFileName().Length() + 1 ); //1 for _
+    CleanupClosePushL( filename );
+    filename.Copy( aWidget->GetTranslationFileName() );
+    filename.Append( KWidgetScannerUnderline );
+
+    // prepare localizations
+    if ( aWidget->GetTitle().Length() > 0 && aWidget->GetTitle().Compare(
+            aWidget->GetStringIdTitle() ) )
+    // lets do not add localization when key and value are identical
+        {
+        CCaLocalizationEntry* titleEntry = CCaLocalizationEntry::NewL();
+        CleanupStack::PushL( titleEntry );
+        titleEntry->SetTableNameL( KLocalizationCaEntry );
+        titleEntry->SetAttributeNameL( KLocalizationEnText );
+        titleEntry->SetStringIdL( aWidget->GetStringIdTitle() );
+        titleEntry->SetQmFilenameL( filename );
+        titleEntry->SetRowId( aEntryId );
+        iStorage->AddLocalizationL( *titleEntry );
+        CleanupStack::PopAndDestroy( titleEntry );
+        }
+    if ( aWidget->GetDescription().Length() > 0 &&
+            aWidget->GetDescription().Compare(
+                    aWidget->GetStringIdDescription() ) )
+    // lets do not add localization when key and value are identical
+        {
+        CCaLocalizationEntry* descEntry = CCaLocalizationEntry::NewL();
+        CleanupStack::PushL( descEntry );
+        descEntry->SetTableNameL( KLocalizationCaEntry );
+        descEntry->SetAttributeNameL( KLocalizationEnDescription );
+        descEntry->SetStringIdL( aWidget->GetStringIdDescription() );
+        descEntry->SetQmFilenameL( filename );
+        descEntry->SetRowId( aEntryId );
+        iStorage->AddLocalizationL( *descEntry );
+        CleanupStack::PopAndDestroy( descEntry );
+        }
+    CleanupStack::PopAndDestroy( &filename );
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+
+void CCaWidgetStorageHandler::UpdateComponentIdL(
+        const TDesC& aManifestFilePathName, CCaInnerEntry& aEntry ) const
+    {
+    RArray<TComponentId> componentIds;
+    CleanupClosePushL( componentIds );
+
+    CComponentFilter* const fileNameFilter = CComponentFilter::NewLC();
+    fileNameFilter->SetFileL( aManifestFilePathName );
+    iSoftwareRegistry.GetComponentIdsL( componentIds, fileNameFilter );
+
+    CleanupStack::PopAndDestroy( fileNameFilter );
+
+    if ( componentIds.Count() == 1 )
+        {
+        RBuf newComponentId;
+        newComponentId.CleanupClosePushL();
+        newComponentId.CreateL( sizeof(TComponentId) + 1 );
+        newComponentId.AppendNum( componentIds[0] );
+
+        RBuf oldComponentId;
+        oldComponentId.CleanupClosePushL();
+        oldComponentId.CreateL( KCaMaxAttrValueLen );
+
+        const TBool componentIdAttributeFound = aEntry.FindAttribute(
+                KCaComponentId, oldComponentId );
+
+        if ( !componentIdAttributeFound || oldComponentId.Compare(
+                newComponentId ) != 0 )
+            {
+            // 'add' or 'update' the component id attribute value
+            aEntry.AddAttributeL( KCaComponentId, newComponentId );
+            }
+
+        CleanupStack::PopAndDestroy( &oldComponentId );
+        CleanupStack::PopAndDestroy( &newComponentId );
+        }
+
+    CleanupStack::PopAndDestroy( &componentIds );
     }
 
 //  End of File

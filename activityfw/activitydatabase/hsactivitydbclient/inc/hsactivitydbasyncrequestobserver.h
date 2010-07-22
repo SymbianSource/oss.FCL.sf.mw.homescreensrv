@@ -43,5 +43,13 @@ public:
                                         int requestType,
                                         const QPixmap& pixmap, 
                                         void* userData)=0;
+    
+    /**
+     * Function inform observer about asynchronous request results
+     * @param result - request result
+     * @param requestType - request type
+     */
+    virtual void asyncRequestCompleated(int result,
+                                        int requestType)=0;
 };
 #endif // HSACTIVITYDBASYNCREQUESTOBSERVER_H

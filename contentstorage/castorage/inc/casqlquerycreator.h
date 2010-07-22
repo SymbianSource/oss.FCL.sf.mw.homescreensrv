@@ -24,6 +24,7 @@
 
 // CLASS DECLARATION
 
+class CCaLocalizationEntry; 
 class CCaSqlQuery;
 class CCaInnerEntry;
 class CCaInnerQuery;
@@ -144,18 +145,13 @@ public:
             CCaSqlQuery* aQuery, const TDesC& aSqlQueryText );
     
     /**
-     * Creates an sql query to get a list of of localizations entries.
+     * Creates an sql query to add, update or get data from localization table.
      *
-     * @param aQuery The result query.
+     * @param aSqlQuery The result query.
+     * @param aStatement statement
      */
-    static void CreateGetLocalizationsQueryL( CCaSqlQuery* aQuery );
-
-    /**
-     * Creates an sql query to update db entry with localization.
-     *
-     * @param aQuery The result query.
-     */
-    static void CreateLocalizeEntryQueryL( CCaSqlQuery* aQuery );
+    static void CreateLocalizationTableQueryL(CCaSqlQuery* aSqlQuery,
+            const TDesC& aStatement);
     
     /**
      * Creates an sql query to custom sort order.

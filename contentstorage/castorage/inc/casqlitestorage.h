@@ -75,6 +75,29 @@ public:
     void LocalizeEntryL( CCaLocalizationEntry& aLocalization );
 
     /**
+     * Adds or updates localization row in the localization table
+     *
+     * @param aLocalization localization information about entry.
+     */
+    void AddLocalizationL( const CCaLocalizationEntry& aLocalization );
+    
+    /**
+     * Checks if entry already exists in localization table
+     *
+     * @param aLocalization localization information about entry.
+     */
+    TBool LocalizationEntryPresentL(const CCaLocalizationEntry& aLocalization);
+
+    /**
+     * Updates localization row in the localization table
+     *
+     * @param aLocalization localization information about entry.
+     * @param aStatement SQL statement
+     */
+    void ExecuteLocalizationStatementL(const CCaLocalizationEntry& aLocalization, 
+            const TDesC& aStatement);
+   
+    /**
      * Fetches data from database.
      *
      * @param aMap Filtering and sorting criteria
@@ -106,9 +129,12 @@ public:
      * @param aEntryIdArray List of enties ids.
      * @param aParentIdArray The result list of parents
      * ids for a specific select.
+     * @param aCheckParentsParent falg if set to true then 
+     * search also for parent of the parent 
      */
     void GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
-            RArray<TInt>& aParentIdArray );
+            RArray<TInt>& aParentIdArray, 
+            TBool aCheckParentsParent = ETrue );
 
     /**
      * Adds or Updates data & action to database.

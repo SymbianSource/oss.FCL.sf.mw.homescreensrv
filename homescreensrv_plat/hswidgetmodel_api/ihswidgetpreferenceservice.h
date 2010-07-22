@@ -22,7 +22,7 @@
 class QString;
 class HsWidget;
 
-/**
+/*DEPRECATED
  * @ingroup group_hswidgetmodel group_widget_api_candidates
  * @brief Preference store for widget.
  *

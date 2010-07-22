@@ -26,16 +26,13 @@
 ;Unique Vendor name
 :"Nokia"
 
-
-;"/epoc32/release/armv5/urel/activityserviceinstaller.exe" - "!:\sys\bin\activityserviceinstaller.exe"
 "/epoc32/release/armv5/urel/activityserviceplugin.dll"-"!:\sys\bin\activityserviceplugin.dll"
 "/epoc32/data/z/resource/qt/plugins/activityserviceplugin.qtplugin"-"!:\resource\qt\plugins\activityserviceplugin.qtplugin"
 
 "/epoc32/release/armv5/urel/hsactivitydbserver.exe"    - "!:\sys\bin\hsactivitydbserver.exe"
-"/epoc32/data/z/resource/apps/hsactivitydbserver.rsc"    - "!:\resource\apps\hsactivitydbserver.rsc"
-"/epoc32/data/z/private/10003a3f/import/apps/hsactivitydbserver_reg.rsc"    - "!:\private\10003a3f\import\apps\hsactivitydbserver_reg.rsc"
 
-"/epoc32/release/armv5/urel/hsactivitydbclient.dll"    - "!:\sys\bin\hsactivitydbclient.dll"
+"/epoc32/release/armv5/urel/afstorageclient.dll"    - "!:\sys\bin\afstorageclient.dll"
+"/epoc32/release/armv5/urel/tsutils.dll"    - "!:\sys\bin\tsutils.dll"
 
 "/epoc32/release/armv5/urel/hbactivityplugin.dll"    - "!:\sys\bin\hbactivityplugin.dll"
 "/epoc32/data/z/resource/qt/plugins/hbactivityplugin.qtplugin"-"!:\resource\qt\plugins\hbactivityplugin.qtplugin"

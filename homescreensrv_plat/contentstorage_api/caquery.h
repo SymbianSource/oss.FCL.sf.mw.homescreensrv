@@ -40,6 +40,9 @@ public:
     void setParentId(int id);
     int parentId() const;
 
+    void setChildId(int id);
+    int childId() const;
+
     void setEntryTypeNames(const QStringList &entryTypeNames);
     QStringList entryTypeNames() const;
 

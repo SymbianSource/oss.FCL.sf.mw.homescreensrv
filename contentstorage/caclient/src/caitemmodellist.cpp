@@ -93,13 +93,13 @@ void CaItemModelList::reloadEntries(const CaQuery &query)
 
 /*!
  Updates entry with given id
- \param id of item in the list
+ \param entry of item in the list
  */
-void CaItemModelList::updateEntry(int id)
+void CaItemModelList::updateEntry(const QSharedPointer<CaEntry> &entry)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelList::updateEntry");
-    if (mEntriesHash.contains(id)) {
-        mEntriesHash.insert(id, mService->getEntry(id));
+    if (mEntriesHash.contains(entry->id())) {
+        mEntriesHash.insert(entry->id(), entry);
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelList::updateEntry");
 }

@@ -141,6 +141,22 @@ public:
     void BindValuesForAddL( const CCaInnerEntry* aEntry );
 
     /**
+     * Binds values for an get localization entry
+     *
+     * @param aLocalization The entry from which to get data for bindings.
+     */
+    void BindValuesForGetLocalizationEntryL(
+        const CCaLocalizationEntry& aLocalization);
+    
+    /**
+     * Binds values for an add and update localization entry
+     *
+     * @param aLocalization The entry from which to get data for bindings.
+     */
+    void BindValuesForLocalizationEntryL(
+            const CCaLocalizationEntry& aLocalization);
+    
+    /**
      * Binds values for an add operation.
      *
      * @param aQuery The query from which to get data for bindings.
@@ -268,6 +284,13 @@ public:
      */
     TInt ExecuteL();
 
+    /**
+     * Executes a statement.
+     *
+     * @return ETrue if any data was found
+     */
+    TBool ExecuteEntryPresentL( );
+    
     /**
      * Executes a statement.
      *

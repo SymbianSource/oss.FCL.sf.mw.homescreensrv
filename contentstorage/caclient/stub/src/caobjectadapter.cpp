@@ -24,9 +24,12 @@
 #include "caicondescription.h"
 #include <cadefs.h>
 
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
+/*!
+ * Create an icon.
+ * \param entry a CaEntry instance.
+ * \param size a size of the icon
+ * \retval a HbIcon instance.
+ */
 HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 {
     HbIcon icon;
@@ -42,21 +45,42 @@ HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
 }
 
 
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaObjectAdapter::setId(CaEntry &entry,
-                            int id)
+/*!
+ * Set entry id.
+ * \param entry entry.
+ * \param id entry id.
+ */
+void CaObjectAdapter::setId(CaEntry &entry, int id)
 {
     entry.setId(id);
 }
 
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-void CaObjectAdapter::setId(CaIconDescription &iconDescription,
-                            int id)
+/*!
+ * Set icon description id.
+ * \param iconDescription icon description.
+ * \param id icon description id.
+ */
+void CaObjectAdapter::setId(CaIconDescription &iconDescription, int id)
 {
     iconDescription.setId(id);
+}
+
+/**
+ * Convert Symbian error code to error code (used in QT code).
+ * \param internalErrorCode Symbian error code.
+ * \retval converted error code (ErrorCode enum).
+ */
+ErrorCode CaObjectAdapter::convertErrorCode(int internalErrorCode)
+{
+    ErrorCode error(NoErrorCode);
+    switch (internalErrorCode) {
+    case 0:
+        error = NoErrorCode;
+        break;
+    default:
+        error = UnknownErrorCode;
+        break;
+    }
+    return error;
 }
 

@@ -18,14 +18,18 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-symbian:SUBDIRS += activitydatabase
+SUBDIRS += tsutils
+
+symbian:SUBDIRS += storage
 
 SUBDIRS +=  activityserviceplugin \
-            orbitintegration/hbactivityplugin 
+            orbitintegration/hbactivityplugin \
             
+tests {
+    SUBDIRS +=  activityserviceplugin/tsrc \
+                tsutils/tsrc \
+}
 
-
-tests:SUBDIRS += activityserviceplugin/unittests
 symbian:SUBDIRS += activityserviceplugin/symbianinstaller
 
 symbian:include(rom.pri)

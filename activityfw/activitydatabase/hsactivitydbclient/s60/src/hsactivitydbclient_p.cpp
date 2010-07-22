@@ -14,41 +14,45 @@
 * Description:
 *
 */
+#include <fbs.h>
+#include <s32mem.h>
+
+#include <qvariant.h>
+#include <XQConversions>
 
 #include "hsactivitydbclient_p.h"
 #include "hsactivitydbasyncrequest_p.h"
 #include "hsactivityglobals.h"
 #include "hsserializer.h"
-#include <qvariant.h>
-#include <xqconversions>
+#include "afentry.h"
+
 
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Constructor
+ */
 HsActivityDbClientPrivate::HsActivityDbClientPrivate(HsActivityDbAsyncRequestObserver &observer):
     mObserver(observer)
 {
-    mAsyncDataHandler = HsActivityDbAsyncRequestPrivate::newWaitActivityL(
-            observer, *this);
+
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Destructor
+ */
 HsActivityDbClientPrivate::~HsActivityDbClientPrivate()
 {
     mAsyncTasks.ResetAndDestroy();
-    delete mAsyncDataHandler;
     Close();
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Function establish connection to activity server
+ * @return 0 on succees, error code otherwise
+ */
 int HsActivityDbClientPrivate::connect()
 {
     TRAPD(errNo, connectL());
@@ -56,90 +60,91 @@ int HsActivityDbClientPrivate::connect()
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-int HsActivityDbClientPrivate::addActivity(const QVariantHash &activity)
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::addActivity(const QVariantHash &)
+ */
+int HsActivityDbClientPrivate::addActivity(const QVariantHash &privateData,
+                                           const QVariantHash &publicData)
 {
-    int errNo(KErrCorrupt);
-    if (activity.end() != activity.find(ActivityApplicationKeyword) &&
-        activity.end() != activity.find(ActivityActivityKeyword)) {
-        TRAP(errNo, execSimpleRequestL(AddActivity, activity);)
-    }
-    return errNo;
+    return execute(AddActivity, privateData, publicData);
+    
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-int HsActivityDbClientPrivate::updateActivity(const QVariantHash &activity)
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash &)
+ */
+int HsActivityDbClientPrivate::updateActivity(const QVariantHash &privateData,
+                                              const QVariantHash &publicData)
 {
-    int errNo(KErrCorrupt);
-    if (activity.end() != activity.find(ActivityApplicationKeyword) &&
-        activity.end() != activity.find(ActivityActivityKeyword)) {
-        TRAP(errNo, execSimpleRequestL(UpdateActivity, activity);)
-    }
-    return errNo;
+    return execute(UpdateActivity, privateData, publicData);
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::removeActivity(const QVariantHash &)
+ */
 int HsActivityDbClientPrivate::removeActivity(const QVariantHash &activity)
 {
-    int errNo(KErrCorrupt);
-    if (activity.end() != activity.find(ActivityApplicationKeyword) &&
-        activity.end() != activity.find(ActivityActivityKeyword)) {
-        TRAP(errNo, execSimpleRequestL(RemoveActivity, activity);)
-    }
-    return errNo;
+    return execute(RemoveActivity, QVariantHash(), activity);
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::removeApplicationActivities(const QVariantHash &)
+*/
+
 int HsActivityDbClientPrivate::removeApplicationActivities(const QVariantHash &activity)
 {
-    int errNo(KErrCorrupt);
-    if (activity.end() != activity.find(ActivityApplicationKeyword)) {
-        TRAP(errNo, execSimpleRequestL(RemoveApplicationActivities, activity);)
-    }
-    return errNo;
+    return execute(RemoveApplicationActivities, QVariantHash(), activity);
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::activities(QList<QVariantHash> &);
+ */
 int HsActivityDbClientPrivate::activities(QList<QVariantHash>& result)
 {
-    TRAPD(errNo, activitiesL(result));
-    return errNo;
+    return execute(Activities, result, QVariantHash());
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::applicationActivities(QList<QVariantHash> &, const QVariantHash &)
+ */
 int HsActivityDbClientPrivate::applicationActivities(QList<QVariantHash>& result,
         const QVariantHash &condition)
 {
-    TRAPD(errNo, applicationActivitiesL(result, condition));
+    return execute(ApplicationActivities, result, condition);
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::activityData(QVariant &, const QVariantHash &)
+ */
+int HsActivityDbClientPrivate::activityData(QVariant &result, const QVariantHash &activity)
+{
+    TRAPD(errNo,
+    User::LeaveIfError(checkDataConstraint(ApplicationActivity, activity));
+    activityDataL(result, activity);)
     return errNo;
 }
 
-
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::waitActivity(const QVariantHash &)
+ */
 int HsActivityDbClientPrivate::waitActivity(const QVariantHash &activity)
 {
-    TRAPD(errNo, waitActivityL(activity);)
-    return errNo;
+    return execute(WaitActivity, QVariantHash(), activity);
 }
 
 // -----------------------------------------------------------------------------
@@ -156,16 +161,26 @@ int HsActivityDbClientPrivate::getThumbnail(QSize size, QString imagePath, QStri
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityDbClientPrivate::launchActivity(const QVariantHash &activity)
+int HsActivityDbClientPrivate::notifyDataChange()
 {
-    TRAPD(errNo, execSimpleRequestL(LaunchActivity, activity);)
-    return errNo;
+    return execute(NotifyChange, QVariantHash(), QVariantHash());
 }
 
 // -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::launchActivity(const QVariantHash &)
+ */
+int HsActivityDbClientPrivate::launchActivity(const QVariantHash &activity)
+{
+    return execute(LaunchActivity, QVariantHash(), activity);
+}
+
 // -----------------------------------------------------------------------------
-//
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::cancelWaitActivity()
+ */
 int HsActivityDbClientPrivate::cancelWaitActivity()
 {
     return SendReceive(CancelWait, TIpcArgs());
@@ -175,6 +190,16 @@ int HsActivityDbClientPrivate::cancelWaitActivity()
 //
 // -----------------------------------------------------------------------------
 //
+int HsActivityDbClientPrivate::cancelNotifyDataChange()
+{
+    return SendReceive(CancelNotify, TIpcArgs());
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Function start activity server process.
+ * Function can leave on failure.
+ */
 void HsActivityDbClientPrivate::startServerL()
 {
     RProcess server;
@@ -198,9 +223,10 @@ void HsActivityDbClientPrivate::startServerL()
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Function establish connection to activity server.
+ * Function can leave on failure
+ */
 void HsActivityDbClientPrivate::connectL()
 {
     const int asyncMessageSlots(12);
@@ -224,82 +250,248 @@ void HsActivityDbClientPrivate::connectL()
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void HsActivityDbClientPrivate::execSimpleRequestL(int function, const QVariantHash &activity)
+/**
+ * Function execute remote call request.
+ * @param function - remote function identyfier
+ * @param activity - remote function parameters
+ */
+void HsActivityDbClientPrivate::execSimpleRequestL(int function,
+                                                   const QVariantHash &privateData,
+                                                   const QVariantHash &publicData)
 {
-    TPckgBuf<TInt> appId( activity.find(ActivityApplicationKeyword).value().toInt() );
-    HBufC8 *actId = XQConversions::qStringToS60Desc8(activity.find(ActivityActivityKeyword).value().toString());
-    CleanupStack::PushL(actId);
-    TPckgBuf<TInt> taskId(0);
-    RBuf8 data;
+
+    TPckgBuf<TInt> bitmapHdl(0);
+    int flags(0);
+    if(publicData.end() != publicData.find(ActivityPersistence) &&
+       publicData[ActivityPersistence].toBool()) {
+        flags |= CAfEntry::Persistent;
+    }
+    if(publicData.end() != publicData.find(ActivityVisibility) &&
+       !publicData[ActivityVisibility].toBool()) {
+        flags |= CAfEntry::Invisible;
+    }
+    CFbsBitmap* bitmap(0);
+    if (publicData.end() != publicData.find(ActivityScreenshotKeyword)) {
+        bitmap = publicData[ActivityScreenshotKeyword].value<QPixmap>().toSymbianCFbsBitmap();
+        if (bitmap) {
+            CleanupStack::PushL(bitmap);
+            bitmapHdl = bitmap->Handle();
+        }
+        
+        
+    }
+
+    RBuf8 prvBuffer, pubBuffer, data;
     CleanupClosePushL(data);
-    data.CreateL(256);
-    data << activity;
-    User::LeaveIfError(SendReceive(function, TIpcArgs(&appId, actId, &data, &taskId)));
-    CleanupStack::PopAndDestroy(&data);
+    CleanupClosePushL(prvBuffer);
+    CleanupClosePushL(pubBuffer);
+
+    prvBuffer << privateData;
+    if (publicData.end() != publicData.find(ActivityScreenshotKeyword)) {
+        QVariantHash localData(publicData);
+        localData.remove(ActivityScreenshotKeyword);
+        pubBuffer << localData;
+    } else {
+        pubBuffer << publicData;
+    }
+    
+    HBufC *actId = XQConversions::qStringToS60Desc(publicData[ActivityActivityKeyword].toString());
+    CleanupStack::PushL(actId);
+    CAfEntry *entry = CAfEntry::NewL(flags,
+                                     publicData[ActivityApplicationKeyword].toInt(),
+                                     *actId,
+                                     KNullDesC,
+                                     prvBuffer,
+                                     pubBuffer);
     CleanupStack::PopAndDestroy(actId);
+    CleanupStack::PopAndDestroy(&pubBuffer);
+    CleanupStack::PopAndDestroy(&prvBuffer);
+
+    CleanupStack::PushL(entry);
+    data.CreateL(entry->Size());
+    RDesWriteStream stream(data);
+    CleanupClosePushL(stream);
+    stream << (*entry);
+    CleanupStack::PopAndDestroy(&stream);
+    CleanupStack::PopAndDestroy(entry);
+    User::LeaveIfError(SendReceive(function, TIpcArgs(&data, &bitmapHdl)));
+    
+    CleanupStack::PopAndDestroy(&data);
+    if (0 != bitmap) {
+        CleanupStack::PopAndDestroy(bitmap);
+    }
+
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Function retrieve all stored activity
+ * Function can leave on failure
+ * @param result - list of activity
+ */
 void HsActivityDbClientPrivate::activitiesL(QList<QVariantHash>& result)
 {
-    TPckgBuf<TInt> appId(0);
-    TPtrC8 actId(KNullDesC8);
-    TPtrC8 desc(KNullDesC8);
-    TPckgBuf<TInt> taskId(0);
-    User::LeaveIfError(SendReceive(Activities, 
-                       TIpcArgs(&appId, &actId, &desc, &taskId)));
+    result.clear();
 
-    int sizeBuf(appId());
-    RBuf8 data;
-    CleanupClosePushL(data);
-    data.Create(sizeBuf);
-    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &data)));
-    
-    result << data;
-    CleanupStack::PopAndDestroy(&data);
+    RBuf8 buffer;
+    CleanupClosePushL(buffer);
+
+    TPckgBuf<int> emptyFilter(0), length(0), taskId(0);
+    User::LeaveIfError(SendReceive(Activities,
+                                   TIpcArgs(&emptyFilter, &length, &taskId)));
+
+    CAfEntry::ReallocL(buffer, length());
+
+    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &buffer)));
+
+    RPointerArray<CAfEntry> entries;
+    CleanupClosePushL(entries);
+
+    entries << buffer;
+    buffer.Close();//release unneeded resources
+
+
+    while(entries.Count()) {
+        QVariantHash publicData;
+        publicData << entries[0]->Data(CAfEntry::Public);
+        publicData.insert(ActivityScreenshotKeyword,
+                          QString::fromUtf16(entries[0]->ImageSrc().Ptr(),
+                                             entries[0]->ImageSrc().Length()));
+        result.append(publicData);
+        entries.Remove(0);
+    }
+    CleanupStack::PopAndDestroy(&entries);
+    CleanupStack::PopAndDestroy(&buffer);
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Function retrieve all stored activity
+ * Function can leave on failure
+ * @param result - list of activity
+ * @param cond - request conditions
+ */
 void HsActivityDbClientPrivate::applicationActivitiesL(QList<QVariantHash>& result,
                                                      const QVariantHash & condition)
 {
-    TPckgBuf<TInt> appId = condition.find(ActivityApplicationKeyword).value().toInt();
-    TPtrC8 actId(KNullDesC8);
-    TPtrC8 desc(KNullDesC8);
-    TPckgBuf<TInt> taskId(0);
-    User::LeaveIfError(SendReceive(ApplicationActivities, 
-                       TIpcArgs(&appId, &actId, &desc, &taskId)));
+    result.clear();
 
-    int sizeBuf(appId());
-    RBuf8 data;
-    CleanupClosePushL(data);
-    data.Create(sizeBuf);
-    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &data)));
-    
-    result << data;
-    CleanupStack::PopAndDestroy(&data);
+    RBuf8 buffer;
+    CleanupClosePushL(buffer);
+    CAfEntry *entry = CAfEntry::NewLC(0,
+                                      condition[ActivityApplicationKeyword].toInt(),
+                                      KNullDesC,
+                                      KNullDesC,
+                                      KNullDesC8,
+                                      KNullDesC8);//filtering using application id only
+    CAfEntry::ReallocL(buffer, entry->Size());
+    RDesWriteStream writer(buffer);
+    CleanupClosePushL(writer);
+    writer << (*entry);
+    CleanupStack::PopAndDestroy(&writer);
+    CleanupStack::PopAndDestroy(entry);
+
+    TPckgBuf<int> length(0), taskId(0);
+    User::LeaveIfError(SendReceive(ApplicationActivities,
+                                   TIpcArgs(&buffer, &length, &taskId)));
+
+    CAfEntry::ReallocL(buffer, length());
+
+    User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &buffer)));
+
+    RPointerArray<CAfEntry> entries;
+    CleanupClosePushL(entries);
+
+    entries << buffer;
+    buffer.Close();//release unneeded resources
+
+
+    while(entries.Count()) {
+        QVariantHash publicData;
+        publicData << entries[0]->Data(CAfEntry::Public);
+        publicData.insert(ActivityScreenshotKeyword,
+                          QString::fromUtf16(entries[0]->ImageSrc().Ptr(),
+                                             entries[0]->ImageSrc().Length()));
+        result.append(publicData);
+        entries.Remove(0);
+    }
+    CleanupStack::PopAndDestroy(&entries);
+    CleanupStack::PopAndDestroy(&buffer);
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Function retrieve private data of stored activity
+ * Function can leave on failure
+ * @param result - list of activity
+ * @param activity - request conditions
+ */
+void HsActivityDbClientPrivate::activityDataL(QVariant &result, const QVariantHash &activity)
+{
+    result.clear();
+
+    RBuf8 buffer;
+    CleanupClosePushL(buffer);
+
+    {   // prepare entry to send
+        HBufC *activityId = XQConversions::qStringToS60Desc(activity[ActivityActivityKeyword].toString());
+        CleanupStack::PushL(activityId);
+
+        CAfEntry *entry = CAfEntry::NewLC(0,
+                                          activity[ActivityApplicationKeyword].toInt(),
+                                          *activityId,
+                                          KNullDesC,
+                                          KNullDesC8,
+                                          KNullDesC8);//filtering using application id only
+        CAfEntry::ReallocL(buffer, entry->Size());
+        RDesWriteStream writer(buffer);
+        CleanupClosePushL(writer);
+        writer << (*entry);
+        CleanupStack::PopAndDestroy(&writer);
+        CleanupStack::PopAndDestroy(entry);
+        CleanupStack::PopAndDestroy(activityId);
+    }
+
+    {   // get data
+        TPckgBuf<int> length(0), taskId(0);
+        User::LeaveIfError(SendReceive(ApplicationActivity, TIpcArgs(&buffer, &length, &taskId)));
+
+        CAfEntry::ReallocL(buffer, length());
+        User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &buffer)));
+    }
+
+    {   // read data to Qt structure
+        CAfEntry *entry = CAfEntry::NewLC();
+        RDesReadStream reader(buffer);
+        CleanupClosePushL(reader);
+        entry->InternalizeL(reader);
+        CleanupStack::PopAndDestroy(&reader);
+
+        buffer.Close(); //release unneeded resources
+
+        QVariantHash privateData;
+        privateData << entry->Data(CAfEntry::Private);
+        result = privateData.value(ActivityDataKeyword);
+
+        CleanupStack::PopAndDestroy(entry);
+    }
+    CleanupStack::PopAndDestroy(&buffer);
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void HsActivityDbClientPrivate::waitActivityL(const QVariantHash &activity)
+void HsActivityDbClientPrivate::launchActivityL(const QVariantHash &activity)
 {
-    if (mAsyncDataHandler->IsActive()) {
-        User::Leave(KErrServerBusy);
-    } else {
-        mAsyncDataHandler->waitActivity(activity);
-    }
+    TPckgC<TInt> applicationId(activity[ActivityApplicationKeyword].toInt());
+    HBufC8 *activityId = XQConversions::qStringToS60Desc8(activity[ActivityActivityKeyword].toString());
+    CleanupStack::PushL(activityId);
+    TPtrC8 empty(KNullDesC8);
+    User::LeaveIfError(SendReceive(LaunchActivity,
+                                   TIpcArgs(&applicationId, activityId, &empty, &empty)));
+    CleanupStack::PopAndDestroy(activityId);
+
 }
 
 // -----------------------------------------------------------------------------
@@ -313,9 +505,11 @@ void HsActivityDbClientPrivate::getThumbnailL(QSize size, QString imagePath, QSt
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Function get cached data from server
+ * @param taskId - request task id
+ * @param dst - destination, preallocated buffer
+ */
 void HsActivityDbClientPrivate::getData(int taskId, RBuf8 &data)
 {
     TPckgBuf<int> requestId(taskId);
@@ -323,11 +517,14 @@ void HsActivityDbClientPrivate::getData(int taskId, RBuf8 &data)
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
+/**
+ * Function initialize aync request
+ * @param func - requested function
+ * @param data - request data
+ * @param status - request status
+ */
 void HsActivityDbClientPrivate::sendDataAsync(int func,
-                                              const TIpcArgs &data, 
+                                              const TIpcArgs &data,
                                               TRequestStatus& status)
 {
     SendReceive(func, data, status);
@@ -354,4 +551,93 @@ void HsActivityDbClientPrivate::Pop(HsActivityDbAsyncRequestPrivate *task)
     if (KErrNotFound != offset) {
         mAsyncTasks.Remove(offset);
     }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClientPrivate::execute(int func, const QVariantHash &privateData, const QVariantHash &publicData)
+{
+    TRAPD(errNo,
+    User::LeaveIfError(checkDataConstraint(func, publicData));
+    switch (func) {
+    case AddActivity:
+    case UpdateActivity:
+    case RemoveActivity:
+    case RemoveApplicationActivities:
+        execSimpleRequestL(func, privateData, publicData);
+        break;
+    
+    case LaunchActivity:
+        launchActivityL(publicData);
+        break;
+    
+    case NotifyChange:
+        HsActivityDbAsyncRequestPrivate::notifyDataChangeLD(mObserver, *this);
+        break;
+    
+    case WaitActivity:
+        HsActivityDbAsyncRequestPrivate::waitActivityLD(mObserver,*this, publicData);
+        break;
+    
+    }
+    
+    )
+    return errNo;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClientPrivate::execute(int func, 
+                                       QList<QVariantHash>&dst, 
+                                       const QVariantHash &src)
+{
+    TRAPD(errNo,
+    User::LeaveIfError(checkDataConstraint(func, src));
+    switch (func) {
+    case Activities: activitiesL(dst);break;
+    case ApplicationActivities: applicationActivitiesL(dst, src); break;
+    }
+    )
+    return errNo;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClientPrivate::checkDataConstraint(int func, const QVariantHash &data)
+{
+    int retVal(KErrNone);
+    QStringList constraints;
+    switch(func) {
+    case AddActivity:
+    case UpdateActivity:
+        constraints << ActivityApplicationKeyword 
+                    << ActivityActivityKeyword 
+                    << ActivityScreenshotKeyword;
+        break;
+    
+    case ApplicationActivity:
+    case LaunchActivity:
+    case RemoveActivity:
+        constraints << ActivityApplicationKeyword
+                    << ActivityActivityKeyword;
+                    break;
+    
+    case WaitActivity:
+    case RemoveApplicationActivities:
+        constraints << ActivityApplicationKeyword;
+        break;
+    }
+    foreach (QString constraint, constraints) {
+        if (data.end() == data.find(constraint)) {
+            retVal = KErrCorrupt;
+            break;
+        }
+    }
+    return retVal;
 }

@@ -20,8 +20,8 @@ TEMPLATE = subdirs
 BLD_INF_RULES.prj_exports += \
      "../castorage/conf/castoragedb.confml APP_LAYER_CONFML(castoragedb.confml)" \
      "../castorage/conf/castoragedb.implml APP_LAYER_CONFML(castoragedb.implml)" \
-     "../castorage/data/castoragedb_create.sql APP_LAYER_CONFML(castoragedb_templates/castoragedb_create.sql)" \
-     "../castorage/conf/castoragedb_templates/castoragedb_variant.sql APP_LAYER_CONFML(castoragedb_templates/castoragedb_variant.sql)" \
+     "../castorage/data/castoragedb_create.sql APP_LAYER_CONFML(../implml/castoragedb_templates/castoragedb_create.sql)" \
+     "../castorage/conf/castoragedb_templates/castoragedb_variant.sql APP_LAYER_CONFML(../implml/castoragedb_templates/castoragedb_variant.sql)" \
      "$${LITERAL_HASH}ifndef CONTENT_ARSENAL_STORAGE_UT" \
      "../castorage/data/castorage.db z:/private/20022F90/castorage.db" \
      "$${LITERAL_HASH}else " \

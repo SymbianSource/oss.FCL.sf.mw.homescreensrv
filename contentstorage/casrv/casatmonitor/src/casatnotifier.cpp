@@ -95,6 +95,9 @@ void CCaSatNotifier::DoCancel()
     iProperty.Cancel();
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (error ignored)
 // ---------------------------------------------------------------------------
 // CCaSatNotifier::RunError
 // ---------------------------------------------------------------------------
@@ -103,6 +106,9 @@ TInt CCaSatNotifier::RunError( TInt /*aError*/)
     {
     return KErrNone;
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 // ---------------------------------------------------------------------------
 // CCaSatNotifier::RunL

@@ -20,41 +20,40 @@ TARGET = activityserviceplugin
 CONFIG += plugin 
 include(activityserviceplugin.pri)
 
-HEADERS +=  activityserviceplugin.h \
-            activitydatastorage.h \
-            activityclient.h \
-            activityclient_p.h \
-            activitymanager.h \
-            activitymanager_p.h \
-            applicationlauncher.h \
+INCLUDEPATH += ./inc \
+               ../../inc
 
-SOURCES +=  activityserviceplugin.cpp \
-            activitydatastorage.cpp \
-            activityclient.cpp \
-            activityclient_p.cpp \
-            activitymanager.cpp \
-            activitymanager_p.cpp \
-            applicationlauncher.cpp \
+HEADERS +=  ./inc/activityserviceplugin.h \
+            ./inc/afactivityclient.h \
+            ./inc/afactivitymanager.h \
+            ./inc/applicationlauncher.h \
+
+SOURCES +=  ./src/activityserviceplugin.cpp \
+            ./src/afactivityclient.cpp \
+            ./src/afactivitymanager.cpp \
+            ./src/applicationlauncher.cpp \
 
 symbian {
-    INCLUDEPATH += ./s60/
-    SOURCES += ./s60/applicationlauncher_p.cpp
+    INCLUDEPATH += ./s60/inc \
+
+    SOURCES += ./s60/src/applicationlauncher_p.cpp
     
-    HEADERS += ./s60/applicationlauncher_p.h
+    HEADERS += ./s60/inc/applicationlauncher_p.h
 
     LIBS += -lapparc \
             -lapgrfx \
             -lcone \
-            -lhsactivitydbclient \
+            -lafstorageclient \
             -lxqutils
  
 }
 
 win32 {
-    INCLUDEPATH += ./win/
-    SOURCES += ./win/applicationlauncher_p.cpp
+    INCLUDEPATH += ./win/inc \
 
-    HEADERS += ./win/applicationlauncher_p.h
+    SOURCES += ./win/src/applicationlauncher_p.cpp
+
+    HEADERS += ./win/inc/applicationlauncher_p.h
 }            
             
 symbian {
@@ -63,7 +62,15 @@ symbian {
     TARGET.CAPABILITY = ALL -TCB
     TARGET.UID3 = 0x200267B2
 
-
     plugin.sources = activityserviceplugin.dll
     plugin.path = $$QT_PLUGINS_BASE_DIR     
+    
+    xml.sources = ./data/activityserviceplugin.xml
+    xml.path = $$RESOURCE_FILES_DIR/activity
+    
+    DEPLOYMENT += xml
+
+    #temporary workaround
+    BLD_INF_RULES.prj_exports += "data/activityserviceplugin.xml z:/resource/activity/activityserviceplugin.xml"
+    
 }

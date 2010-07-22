@@ -11,12 +11,12 @@
  *
  * Contributors:
  *
- * Description:
+ * Description: Url handler plugin.
  *
  */
 
-#ifndef CA_URL_HANDLER_PLUGIN_H
-#define CA_URL_HANDLER_PLUGIN_H
+#ifndef CAURLHANDLERPLUGIN_H
+#define CAURLHANDLERPLUGIN_H
 
 #include <QObject>
 #include <qserviceplugininterface.h>
@@ -30,8 +30,8 @@ class CaUrlHandlerPlugin : public QObject, public QServicePluginInterface
 
 public:
     QObject *createInstance(const QServiceInterfaceDescriptor &descriptor,
-                            QServiceContext *context,
-                            QAbstractSecuritySession *session);
+        QServiceContext *context,
+        QAbstractSecuritySession *session);
 };
 
-#endif
+#endif // CAURLHANDLERPLUGIN_H

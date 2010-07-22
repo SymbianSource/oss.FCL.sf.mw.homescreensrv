@@ -80,16 +80,27 @@ public:
      * Gets LocalizedString
      * @return LocalizedString
      */
-    IMPORT_C const RBuf& GetLocalizedString( ) const;
+    IMPORT_C const RBuf& GetLocalizedString() const;
     
+    /**
+     * Gets GetQmFilename
+     * @return GetQmFilename
+     */
+    IMPORT_C const RBuf& GetQmFilename() const;
+
     // SETTERS
+
+    /**
+    */
+    IMPORT_C void SetQmFilenameL( const TDesC& aQmFilename );
+    
     /**
 
      */
     IMPORT_C void SetRowId( TUint aRowId );
     
     /**
-
+      Sets localization id
      */
     IMPORT_C void SetTextId( TUint aId );
     
@@ -117,6 +128,7 @@ public:
      * @param aLocalName LocalizedString
      */
     IMPORT_C void SetLocalizedStringL( const TDesC& aLocalName );
+    
     
     
 /*    *
@@ -183,6 +195,12 @@ private:
      * Own.
      */
     RBuf iLocalName;
+    
+    /*
+     * Qm filename.
+     * Own.
+     */
+    RBuf iQmFilename;
 
      };
 

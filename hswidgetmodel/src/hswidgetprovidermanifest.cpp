@@ -23,7 +23,7 @@
 #include "hstest_global.h"
 
 
-/**
+/*DEPRECATED
     \class HsWidgetProviderManifest
     \ingroup group_hswidgetmodel
     \brief Loads home screen widget tokens from an XML manifest file.

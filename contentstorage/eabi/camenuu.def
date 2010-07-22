@@ -23,4 +23,6 @@ EXPORTS
 	_ZNK14CCaSrvEngUtils13GetApaAppInfoE4TUidR11TApaAppInfo @ 22 NONAME
 	_ZTI15CCaStorageProxy @ 23 NONAME
 	_ZTV15CCaStorageProxy @ 24 NONAME
+	_ZN16CCaSrvMmcHistory4NewLEv @ 25 NONAME
+	_ZN15CCaStorageProxy16AddLocalizationLERK20CCaLocalizationEntry @ 26 NONAME
 

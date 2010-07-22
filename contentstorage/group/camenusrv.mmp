@@ -24,7 +24,7 @@
 TARGET          camenuserver.exe
 TARGETTYPE      exe
 UID             0x1000008c CA_SRV_UID3
-CAPABILITY      AllFiles ProtServ ReadDeviceData ReadUserData 
+CAPABILITY      CAP_SERVER AllFiles 
 VENDORID        VID_DEFAULT
 
 EPOCSTACKSIZE   0x5000

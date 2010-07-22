@@ -27,6 +27,7 @@ class CaQuery;
 class CaService;
 class CaNotifier;
 class CaClientNotifierProxy;
+class CaHandlerProxy;
 
 class CaServicePrivate
 {
@@ -57,7 +58,7 @@ public:
 
     bool prependEntriesToGroup(int groupId, const QList<int> &entryIdList);
 
-    bool executeCommand(const CaEntry &entry, const QString &command);
+    int executeCommand(const CaEntry &entry, const QString &command);
 
     CaNotifier *createNotifier(const CaNotifierFilter &filter);
 
@@ -68,6 +69,9 @@ public:
 private:
 
     CaService *const m_q;
+
+    // Command handler.
+    QSharedPointer<CaHandlerProxy> mCommandHandler;
 
     CaClientProxy *mProxy;
  

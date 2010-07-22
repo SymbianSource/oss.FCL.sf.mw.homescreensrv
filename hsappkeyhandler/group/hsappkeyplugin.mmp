@@ -34,7 +34,7 @@ SOURCE hsappkeypluginproxy.cpp
 
 USERINCLUDE ../inc
 
-APP_LAYER_SYSTEMINCLUDE
+MW_LAYER_SYSTEMINCLUDE
 
 
 LIBRARY ecom.lib

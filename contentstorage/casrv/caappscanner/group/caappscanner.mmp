@@ -36,7 +36,6 @@ USERINCLUDE     ../../casrvmgr/inc
 USERINCLUDE     ../../../inc
 USERINCLUDE     ../../../cautils/inc
 USERINCLUDE     ../../../srvinc
-USERINCLUDE     ../../../castorage/inc
 
 
 MW_LAYER_SYSTEMINCLUDE
@@ -55,7 +54,5 @@ LIBRARY         apparc.lib
 LIBRARY         apgrfx.lib
 LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
-LIBRARY         sisregistryclient.lib
 LIBRARY         platformenv.lib
-// temporary till cWRT will be in SCR
-LIBRARY         WidgetRegistryClient.lib
+LIBRARY         scrclient.lib

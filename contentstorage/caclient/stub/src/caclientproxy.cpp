@@ -94,18 +94,13 @@ void CaClientProxy::updateWidgets()
 
     HsWidgetRegistryService *rs =
         new HsWidgetRegistryService(mWidgetRegistryPath);
-    QList<HsWidgetToken> widgets = rs->widgets();
+    QList<HsWidgetComponentDescriptor> widgets = rs->widgets();
 
     // Read widgets in order to add synchronize the content of the widgets
     // registry with Content Storage database.
-    foreach(const HsWidgetToken &widgetToken, widgets) {
-        int uid = widgetToken.mUid;
-
-        if (!hsWidgetExists(uid)) {
-            // The given widget does not have a corresonding entry
-            // in the databse, so such an entry needs do be created.
-            addWidgetEntry(widgetToken);
-        }
+    foreach(const HsWidgetComponentDescriptor &widgetToken, widgets) {
+        int uid = widgetToken.uid;
+        addWidgetEntry(widgetToken, hsWidgetId(uid));        
     }
 
     delete rs;
@@ -115,51 +110,82 @@ void CaClientProxy::updateWidgets()
 /*!
  Returns true if a widget with the given uid exists in the database.
  */
-void CaClientProxy::addWidgetEntry(const HsWidgetToken &widgetToken)
+void CaClientProxy::addWidgetEntry(const HsWidgetComponentDescriptor &widgetToken, 
+                                   int widgetId)
 {
-    QString description = widgetToken.mDescription;
-    QString iconUri = widgetToken.mIconUri;
-    QString library = widgetToken.mLibrary;
-    QString title = widgetToken.mTitle;
-    int uid = widgetToken.mUid;
-    QString uri = widgetToken.mUri;
+    QString description = widgetToken.description;
+    QString iconUri = widgetToken.iconUri;
+    QString library = widgetToken.library;
+    QString title = widgetToken.title;
+    int uid = widgetToken.uid;
+    QString uri = widgetToken.uri;
+    QString previewImage = widgetToken.previewImage;
+    QString translationFileName = widgetToken.translationFilename;
     QSqlDatabase db = dbConnection();
     QSqlQuery query(db);
     QString hexUid;
     hexUid.setNum(uid,16);
     QDir currentDir = QDir::current();
+    if (widgetId == -1) {
+        // Add icon.
+        QString queryAddIcon =
+            "INSERT INTO CA_ICON " \
+            "(IC_FILENAME) " \
+            "VALUES " \
+            "(?)";
 
-    // Add icon.
-    QString queryAddIcon =
-        "INSERT INTO CA_ICON " \
-        "(IC_FILENAME) " \
-        "VALUES " \
-        "(?)";
+        query.prepare(queryAddIcon);
+        query.addBindValue(iconUri);
+        query.exec();
+        qDebug() << query.executedQuery();
 
-    query.prepare(queryAddIcon);
-    query.addBindValue(iconUri);
-    query.exec();
-    qDebug() << query.executedQuery();
+        // Add entry.
+        QString queryAddEntry =
+            "INSERT INTO CA_ENTRY " \
+            "(EN_TEXT, EN_DESCRIPTION, EN_ROLE, EN_TYPE_NAME, EN_ICON_ID) " \
+            "VALUES " \
+            "(?, ?, 1, 'widget', last_insert_rowid())";
 
-    // Add entry.
-    QString queryAddEntry =
-        "INSERT INTO CA_ENTRY " \
-        "(EN_TEXT, EN_DESCRIPTION, EN_ROLE, EN_TYPE_NAME, EN_ICON_ID) " \
-        "VALUES " \
-        "(?, ?, 1, 'widget', last_insert_rowid())";
+        query.prepare(queryAddEntry);
+        query.addBindValue(title);
+        query.addBindValue(description);
+        query.exec();
+        qDebug() << query.executedQuery();
 
-    query.prepare(queryAddEntry);
-    query.addBindValue(title);
-    query.addBindValue(description);
-    query.exec();
-    qDebug() << query.executedQuery();
+        // Get last id
+        QString queryLastId = "SELECT last_insert_rowid() AS LAST_ID";
+        query.prepare(queryLastId);
+        query.exec();
+        query.next();
+        widgetId = query.value(query.record().indexOf("LAST_ID")).toInt();
+    } else {
+        // update entry.
+        QString queryUpdateEntry =
+            "UPDATE CA_ENTRY SET EN_TEXT = ?, EN_DESCRIPTION = ? WHERE ENTRY_ID = ?";
+            
+        query.prepare(queryUpdateEntry);
+        query.addBindValue(title);
+        query.addBindValue(description);
+        query.addBindValue(widgetId);
+        query.exec();
+        qDebug() << query.executedQuery();
 
-    // Get last id
-    QString queryLastId = "SELECT last_insert_rowid() AS LAST_ID";
-    query.prepare(queryLastId);
-    query.exec();
-    query.next();
-    int lastId = query.value(query.record().indexOf("LAST_ID")).toInt();
+        QString queryUpdateIcon =
+            "UPDATE CA_ICON SET IC_FILENAME = ? WHERE" \
+            " ICON_ID = (SELECT EN_ICON_ID FROM CA_ENTRY WHERE ENTRY_ID = ?)";
+            
+        query.prepare(queryUpdateIcon);
+        query.addBindValue(iconUri);
+        query.addBindValue(widgetId);
+        query.exec();
+        qDebug() << query.executedQuery();
+
+        // delete old attribute         
+        query.prepare("DELETE FROM CA_ATTRIBUTE WHERE AT_ENTRY_ID = ?");
+        query.addBindValue(widgetId);
+        query.exec();
+        qDebug() << query.executedQuery();
+    }
 
     // Add attribute packageuid
     QString queryAddAttribute1 =
@@ -169,7 +195,7 @@ void CaClientProxy::addWidgetEntry(const HsWidgetToken &widgetToken)
         "(?, 'packageuid', ?)";
 
     query.prepare(queryAddAttribute1);
-    query.addBindValue(lastId);
+    query.addBindValue(widgetId);
     query.addBindValue(hexUid);
     query.exec();
     qDebug() << query.executedQuery();
@@ -182,7 +208,7 @@ void CaClientProxy::addWidgetEntry(const HsWidgetToken &widgetToken)
         "(?, 'widget:uri', ?)";
 
     query.prepare(queryAddAttribute2);
-    query.addBindValue(lastId);
+    query.addBindValue(widgetId);
     query.addBindValue(uri);
     query.exec();
     qDebug() << query.executedQuery();
@@ -195,18 +221,48 @@ void CaClientProxy::addWidgetEntry(const HsWidgetToken &widgetToken)
         "(?, 'widget:library', ?)";
 
     query.prepare(queryAddAttribute3);
-    query.addBindValue(lastId);
+    query.addBindValue(widgetId);
     query.addBindValue(library);
     query.exec();
     qDebug() << query.executedQuery();
+    
+    // Add attribute preview image
+    if (!previewImage.isEmpty()) {
+        QString queryAddPreviewImage =
+            "INSERT INTO CA_ATTRIBUTE " \
+            "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
+            "VALUES " \
+            "(?, 'preview_image_name', ?)";
+
+        query.prepare(queryAddPreviewImage);
+        query.addBindValue(widgetId);
+        query.addBindValue(previewImage);
+        query.exec();
+        qDebug() << query.executedQuery();
+    }
+
+    // Add attribute widget:traslation_file
+    if (!translationFileName.isEmpty()) {
+        QString queryAddWidgetTranslationFile =
+            "INSERT INTO CA_ATTRIBUTE " \
+            "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
+            "VALUES " \
+            "(?, 'widget:traslation_file', ?)";
+
+        query.prepare(queryAddWidgetTranslationFile);
+        query.addBindValue(widgetId);
+        query.addBindValue(translationFileName);
+        query.exec();
+        qDebug() << query.executedQuery();
+    }
 }
 
 /*!
  Returns true if a widget with the given uid exists in the database.
  */
-bool CaClientProxy::hsWidgetExists(int uid)
+int CaClientProxy::hsWidgetId(int uid)
 {
-    bool exists(false);
+    int result(-1);
     QSqlDatabase db = dbConnection();
     QSqlQuery query(db);
     QString hexUid;
@@ -223,17 +279,12 @@ bool CaClientProxy::hsWidgetExists(int uid)
     query.prepare(queryString);
     query.addBindValue(hexUid);
 
-    if (query.exec() && query.next()) {
-        // Query returned a non empty result.
-        exists = true;
-    } else {
-        // The widget with the given uid was not found.
-        exists = false;
-    }
-
+    if (query.exec() && query.next()) {        
+        result = query.value(query.record().indexOf("AT_ENTRY_ID")).toInt();
+    } 
     qDebug() << query.executedQuery();
 
-    return exists;
+    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -700,22 +751,6 @@ ErrorCode CaClientProxy::getEntryIds(const CaQuery &query,
         error = NoErrorCode;
     }
     return error;
-}
-
-//----------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------
-ErrorCode CaClientProxy::executeCommand(const CaEntry &entry,
-                                        const QString &command)
-{
-    qDebug() << "CaClientProxy::executeCommand" << "entry id: "
-             << entry.id() << "command: " << command;
-
-    ErrorCode result = NoErrorCode;
-    if (command != caCmdOpen && command != QString("remove")) {
-        result = UnknownErrorCode;
-    }
-    return result;
 }
 
 //----------------------------------------------------------------------------

@@ -30,6 +30,12 @@ NONSHARABLE_CLASS( CCaInnerEntry ): public CBase
     {
 public:
 
+
+    enum TLocalizedType
+        {
+        ENameLocalized = 0,
+        EDescriptionLocalized
+        };
     /**
      * Destructor.
      */
@@ -116,16 +122,17 @@ public:
     IMPORT_C void SetId( TUint aId );
 
     /**
-     * Sets the entry text.
+     * Sets localized entry text.
      * @param aText Entry text.
      */
-    IMPORT_C void SetTextL( const TDesC& aText );
-
+    IMPORT_C void SetTextL( 
+            const TDesC& aText, TBool localized = false );    
     /**
-     * Sets the entry description.
+     * Sets localized entry description.
      * @param aText Entry description.
      */
-    IMPORT_C void SetDescriptionL( const TDesC& aText );
+    IMPORT_C void SetDescriptionL( 
+            const TDesC& aText, TBool localized = false );
 
     /**
      * Sets the entry typename.
@@ -206,6 +213,12 @@ public:
      * @param aStream a read stream
      */
     IMPORT_C void InternalizeL( RReadStream& aStream );
+    
+    /**
+     * Gets if Description is localized.
+     * @return ETrue if entry desscription is localized.
+     */
+    IMPORT_C TBool isLocalized(TLocalizedType aLocalized) const;
 
 private:
 
@@ -270,6 +283,11 @@ private:
      * Uid
      */
     TInt32 iUid;
+    
+    TBool iTextLocalized;
+    
+    TBool iDescriptionLocalized;
+    
 
     };
 

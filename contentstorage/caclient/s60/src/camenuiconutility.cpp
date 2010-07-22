@@ -19,9 +19,14 @@
 #include <XQConversions>
 // apparc
 #include <apparc.h>
-#include <APGCLI.H>
+#include <apgcli.h>
+#ifdef SYMBIAN_ENABLE_SPLIT_HEADERS
+#include <apaidpartner.h>
+#else
+#include <apaid.h>
+#endif
 // cfbsbitmap
-#include <APGICNFL.H>
+#include <apgicnfl.h>
 
 #include <HbIcon>
 #include "camenuiconutility.h"
@@ -50,20 +55,7 @@ LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry)
     if (icon.isNull() || !(icon.size().isValid())) {
         QString fileName(entry.iconDescription().filename());
         if (!fileName.isEmpty()) {
-        
-            // TODO:
-            // work-around for HbIcon::size() method locking files if returns 
-            // default size, error id: ou1cimx1#279208 Case: mcl06HsDo07 - 
-            // "Cannot delete file" when trying to uninstall sisx file
-            
-            if (entry.entryTypeName() == XQConversions::s60DescToQString(
-                    KCaTypeWidget)) {
-                icon = QIcon(fileName);
-                qWarning("Widget icon created by QIcon, "
-                        "as work-around for HbIcon::size");
-            } else {
-                icon = HbIcon(fileName);
-            }
+            icon = HbIcon(fileName);
         }
     }
     return icon;
@@ -116,7 +108,7 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
             pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
             icon = HbIcon(QIcon(pixmap));
         } else {
-            HBufC* fileNameFromApparc;
+            HBufC* fileNameFromApparc = NULL;
             TInt err2 = apaLsSession.GetAppIcon(uid,fileNameFromApparc);
             CleanupStack::PushL(fileNameFromApparc);
             if (err2 == KErrNone) {
@@ -133,9 +125,8 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
                     icon = HbIcon(fileName);
                 }
             }
-            CleanupStack::Pop(fileNameFromApparc);
+            CleanupStack::PopAndDestroy(fileNameFromApparc);
         }
-        
         CleanupStack::PopAndDestroy(apaMaskedBitmap);
     }
     CleanupStack::PopAndDestroy(&apaLsSession);
@@ -223,16 +214,19 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
 {
     HbIcon icon;
     icon = getIconFromEntry(entry);
-
+ 
     if (icon.isNull() || !(icon.size().isValid())) {
         TRAP_IGNORE(icon = getIconFromApparcL(entry, size));
     }
-
+ 
     if (icon.isNull() || !(icon.size().isValid())) {
         icon = getDefaultIcon(entry);
     }
-    
+ 
+    if (entry.entryTypeName() == XQConversions::s60DescToQString(
+            KCaTypeWidget)) {
+        icon.addBadge(Qt::AlignBottom | Qt::AlignLeft,
+		    HbIcon("qtg_small_homescreen"));
+    }
     return icon;
 }
-
-

@@ -49,13 +49,20 @@ enum SortAttribute
 enum EntryFlag
 {
     UsedEntryFlag = 1,
-    SystemEntryFlag = 2,
+    UninstallEntryFlag = 2,
     RemovableEntryFlag = 4,
     VisibleEntryFlag = 8,
     RunningEntryFlag = 16,
     NativeEntryFlag = 32,
     MissingEntryFlag = 64
 };
+
+enum LocalizationType
+{
+    NameLocalized,
+    DescriptionLocalized
+};
+
 Q_DECLARE_FLAGS(EntryFlags, EntryFlag)
 Q_DECLARE_OPERATORS_FOR_FLAGS(EntryFlags)
 Q_DECLARE_METATYPE(EntryFlags)
@@ -70,7 +77,8 @@ enum ErrorCode
     UnknownErrorCode
 };
 
-const QString caCmdOpen("open");
+static const QString caCmdOpen("open");
+static const QString caCmdRemove("remove");
 
 #ifndef QT_NO_DEBUG_OUTPUT
 #   define USE_QDEBUG_IF(predicate) if (!predicate) {} else qDebug()

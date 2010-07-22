@@ -413,6 +413,41 @@ void CCaSqlQuery::BindValuesForPropertyUpdateL( const TDesC& aProperty, const TD
 //
 // ---------------------------------------------------------------------------
 //
+void CCaSqlQuery::BindValuesForGetLocalizationEntryL(
+        const CCaLocalizationEntry& aLocalization)
+    {
+    BindIntL( iStatement.ParameterIndex( KSQLLocRowId ),
+            aLocalization.GetRowId() );
+    BindTextL( iStatement.ParameterIndex( KSQLLocTable ),
+            aLocalization.GetTableName() );
+    BindTextL( iStatement.ParameterIndex( KSQLLocAttribute ),
+            aLocalization.GetAttributeName() );
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqlQuery::BindValuesForLocalizationEntryL(
+        const CCaLocalizationEntry& aLocalization)
+    {
+    BindIntL( iStatement.ParameterIndex( KSQLLocRowId ),
+            aLocalization.GetRowId() );
+    BindTextL( iStatement.ParameterIndex( KSQLLocTable ),
+            aLocalization.GetTableName() );
+    BindTextL( iStatement.ParameterIndex( KSQLLocAttribute ),
+            aLocalization.GetAttributeName() );
+    BindTextL( iStatement.ParameterIndex( KSQLLocQmFilename ),
+            aLocalization.GetQmFilename() );
+    BindTextL( iStatement.ParameterIndex( KSQLLocString ),
+            aLocalization.GetStringId() );
+    }
+
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 void CCaSqlQuery::BindValuesForGetEntriesL( const CCaInnerQuery* aQuery )
     {
     if( aQuery->GetIds().Count() > 0 )
@@ -444,6 +479,12 @@ void CCaSqlQuery::BindValuesForGetEntriesL( const CCaInnerQuery* aQuery )
             {
             BindIntL( iStatement.ParameterIndex( KSQLGEIdGroup ),
                     aQuery->GetParentId() );
+            }
+        if( aQuery->GetChildId() != -1 && iQuery.Find( KSQLGEEntryId )
+                != KErrNotFound )
+            {
+            BindIntL( iStatement.ParameterIndex( KSQLGEEntryId ),
+                    aQuery->GetChildId() );
             }
         if( aQuery->GetUid() != 0 && iQuery.Find( KSQLEnUid )
                 != KErrNotFound )
@@ -609,6 +650,19 @@ TInt CCaSqlQuery::ExecuteL()
 //
 // ---------------------------------------------------------------------------
 //
+TBool CCaSqlQuery::ExecuteEntryPresentL( )
+    {
+    if( iStatement.Next() == KSqlAtRow )
+        {
+        return ETrue;
+        }
+    return EFalse;
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 TInt CCaSqlQuery::ExecuteL( TInt& aId )
     {
     if( iStatement.Next() == KSqlAtRow )
@@ -743,6 +797,13 @@ TInt CCaSqlQuery::ExecuteLocalizationsL(
                         tableName )
                         );
         
+        TPtrC qmFilename;
+        User::LeaveIfError(
+                iStatement.ColumnText(
+                        ColumnIndexL( iStatement, KColumnQmFile ),
+                        qmFilename )
+                        );
+        
         TPtrC attribute;
         User::LeaveIfError(
                 iStatement.ColumnText(
@@ -763,6 +824,7 @@ TInt CCaSqlQuery::ExecuteLocalizationsL(
         result->SetStringIdL( stringId );
         result->SetRowId( rowId );
         result->SetTableNameL( tableName );
+        result->SetQmFilenameL( qmFilename );
         
         aResultInput.AppendL( result );
         CleanupStack::Pop( result );

@@ -57,9 +57,13 @@ void HsActivityDbClient::asyncRequestCompleated(int result,
 {
     switch (requestType) {
         case WaitActivity:
+            if (KErrCancel != result) {
+                waitActivity(QVariantHash());
+            }            
             if (KErrNone == result) {
                 emit activityRequested(data);
             }
+            
             break;
     }
 }
@@ -75,9 +79,8 @@ void HsActivityDbClient::asyncRequestCompleated(int result,
 {
     switch (requestType) {
         case GetThumbnail:
-            if (KErrNone == result) {
-                emit thumbnailRequested(pixmap, userData);
-            }
+            emit thumbnailRequested(0 == result ? pixmap : QPixmap(), 
+                                    userData);
             break;
     }
 }
@@ -86,18 +89,40 @@ void HsActivityDbClient::asyncRequestCompleated(int result,
 //
 // -----------------------------------------------------------------------------
 //
-int HsActivityDbClient::addActivity(const QVariantHash &activity)
+void HsActivityDbClient::asyncRequestCompleated(int result,int requestType)
 {
-    return d_ptr->addActivity(activity);
+    switch(requestType) {
+    case NotifyChange:
+        if (KErrCancel != result) {
+            d_ptr->notifyDataChange();
+        }
+        if (KErrNone == result) {
+            emit dataChanged();
+        }
+        break;
+    }
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-int HsActivityDbClient::updateActivity(const QVariantHash &activity)
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::addActivity(const QVariantHash&)
+ */
+int HsActivityDbClient::addActivity(const QVariantHash &privateData, 
+                                    const QVariantHash &publicData)
 {
-    return d_ptr->updateActivity(activity);
+    return d_ptr->addActivity(privateData, publicData);
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Interface implementation.
+ * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash&)
+ */
+int HsActivityDbClient::updateActivity(const QVariantHash &privateData, 
+                                       const QVariantHash &publicData)
+{
+    return d_ptr->updateActivity(privateData, publicData);
 }
 
 // -----------------------------------------------------------------------------
@@ -141,9 +166,22 @@ int HsActivityDbClient::applicationActivities(QList<QVariantHash> & result,
 //
 // -----------------------------------------------------------------------------
 //
+int HsActivityDbClient::activityData(QVariant &result, const QVariantHash &activity)
+{
+    return d_ptr->activityData(result, activity);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 int HsActivityDbClient::waitActivity(const QVariantHash &activity)
 {
-    return d_ptr->waitActivity(activity);
+    QVariantHash condition(activity);
+    RProcess process;
+    condition.insert(ActivityApplicationKeyword, 
+                     static_cast<int>(process.SecureId().iId));
+    return d_ptr->waitActivity(condition);
 }
 
 // -----------------------------------------------------------------------------
@@ -159,8 +197,16 @@ int HsActivityDbClient::launchActivity(const QVariantHash &activity)
 //
 // -----------------------------------------------------------------------------
 //
-//int HsActivityDbClient::getThumbnail(const QVariantHash &condition)
 int HsActivityDbClient::getThumbnail(QSize size, QString imagePath, QString mimeType, void* userDdata)
 {
     return d_ptr->getThumbnail(size, imagePath, mimeType, userDdata);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+int HsActivityDbClient::notifyDataChange()
+{
+    return  d_ptr->notifyDataChange();
 }

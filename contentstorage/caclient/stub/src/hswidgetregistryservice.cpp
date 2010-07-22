@@ -67,9 +67,9 @@ HsWidgetRegistryServicePrivate::~HsWidgetRegistryServicePrivate()
 /*!
     ?Qt_style_documentation
 */
-QList<HsWidgetToken> HsWidgetRegistryServicePrivate::widgets()
+QList<HsWidgetComponentDescriptor> HsWidgetRegistryServicePrivate::widgets()
 {
-    QList<HsWidgetToken> widgets;
+    QList<HsWidgetComponentDescriptor> widgets;
     QMapIterator<QString, QStringList> i(mManifestDirectories);
 
     while (i.hasNext()) {
@@ -88,6 +88,7 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::widgets()
 /*!
     ?Qt_style_documentation
 */
+/*
 IHsWidgetProvider *HsWidgetRegistryServicePrivate::loadProviderFromPlugin(
     const QString &pluginName)
 {
@@ -109,6 +110,7 @@ IHsWidgetProvider *HsWidgetRegistryServicePrivate::loadProviderFromPlugin(
     // qDebug("Widget provider load failed - Not found.")
     return 0;
 }
+*/
 
 /*!
     ?Qt_style_documentation
@@ -151,10 +153,10 @@ void HsWidgetRegistryServicePrivate::doWidgetRemove(const QString &path,
 /*!
     ?Qt_style_documentation
 */
-QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
+QList<HsWidgetComponentDescriptor> HsWidgetRegistryServicePrivate::readManifestFile(
     const QString &manifestFilePath)
 {
-    QList<HsWidgetToken> widgets;
+    QList<HsWidgetComponentDescriptor> widgets;
     QStringList filters("*.manifest");
     QDir dir(manifestFilePath);
     QStringList manifestDir = dir.entryList(filters, QDir::Files);
@@ -164,44 +166,22 @@ QList<HsWidgetToken> HsWidgetRegistryServicePrivate::readManifestFile(
         QString fileName = manifestDir.first();
         HsWidgetComponentParser componentParser(dir.absoluteFilePath(fileName));
         if ( !componentParser.error() ) {
-            HsWidgetToken widgetToken;
-            HsWidgetComponentDescriptor widgetDescriptor = componentParser.widgetComponentDescriptor();
-            widgetToken.mUri = widgetDescriptor.uri;
-            widgetToken.mLibrary = manifestFilePath + "/" + widgetDescriptor.uri + ".dll";
-            widgetToken.mTitle = widgetDescriptor.title;
+            
+            HsWidgetComponentDescriptor widgetDescriptor = componentParser.widgetComponentDescriptor();            
+            widgetDescriptor.library = manifestFilePath + "/" + widgetDescriptor.uri + ".dll";
             if (widgetDescriptor.iconUri.length() > 0 ) {
-                widgetToken.mIconUri = manifestFilePath + "/" + widgetDescriptor.iconUri;
-            }
-            widgetToken.mDescription = widgetDescriptor.description;
+                widgetDescriptor.iconUri = manifestFilePath + "/" + widgetDescriptor.iconUri;
+            }            
+            if (widgetDescriptor.previewImage.length() > 0 ) {
+                widgetDescriptor.previewImage = manifestFilePath + "/" + widgetDescriptor.previewImage;
+            }            
+
             int widgetUid = dir.dirName().toUInt(0, 16);
-            widgetToken.mUid = widgetUid;
-            widgets << widgetToken;
+            widgetDescriptor.uid = widgetUid;
+            widgets << widgetDescriptor;
             qDebug() << "HsWidgetRegistryServicePrivate::readManifestFile - " \
                      "widget added: " << fileName;
         }
-#if 0
-
-        if (fileName != "hsposterwidgetprovider.manifest") {
-            // Directory differs from the poster widget's directory
-            // which is not supported for the time being.
-//            manifest.loadFromXml(dir.absoluteFilePath(fileName));
-//            widgets = manifest.widgets();
-            int widgetUid = dir.dirName().toUInt(0, 16);
-
-            // ?
-            for (int i=0; i<widgets.count(); i++) {
-                widgets[i].mUid = widgetUid;
-                widgets[i].mLibrary = manifestFilePath + "/" + widgets[i].mLibrary;
-                if (widgets[i].mIconUri != "") {
-                    // ?
-                    widgets[i].mIconUri = manifestFilePath + "/" + widgets[i].mIconUri;
-                }
-            }
-
-            qDebug() << "HsWidgetRegistryServicePrivate::readManifestFile - " \
-                     "widget added: " << fileName;
-        }
-#endif                
     }
     return widgets;
 }
@@ -219,8 +199,8 @@ void HsWidgetRegistryServicePrivate::ensureWidgetRegistryPaths()
     for(int i=0; i < pathList.count(); i++) {
         QDir registryDir(pathList.at(i));
 
-    	if(!registryDir.exists()) {
-    		// ?
+        if(!registryDir.exists()) {
+            // ?
             registryDir.mkpath(pathList.at(i));
         }
     }
@@ -266,7 +246,7 @@ void HsWidgetRegistryServicePrivate::installerStateChanged(int newValue)
     Q_UNUSED(newValue);
     /*
     if ((newValue & KSASwisOperationMask) == ESASwisNone) {
-    	// ?
+        // ?
         mInstallerObserver.unSubscribe();
         mInstallerObserver.disconnect();
         QStringList originalList = mManifestDirectories.value(mLatestChangedDirectory);
@@ -317,7 +297,7 @@ HsWidgetRegistryService::~HsWidgetRegistryService()
     Fetch available widgets information
     Return List of widget tokens.
 */
-QList<HsWidgetToken> HsWidgetRegistryService::widgets()
+QList<HsWidgetComponentDescriptor> HsWidgetRegistryService::widgets()
 {
     return mPrivate->widgets();
 }
@@ -345,7 +325,7 @@ QList<HsWidgetToken> HsWidgetRegistryService::widgets()
     Emits the widgetAddedToRegistry() signal
     \a widgetsAdded Identifies the added widgets.
 */
-void HsWidgetRegistryService::emitWidgetAddedToRegistry(const QList<HsWidgetToken> &widgetsAdded)
+void HsWidgetRegistryService::emitWidgetAddedToRegistry(const QList<HsWidgetComponentDescriptor> &widgetsAdded)
 {
     emit widgetAddedToRegistry(widgetsAdded);
 }

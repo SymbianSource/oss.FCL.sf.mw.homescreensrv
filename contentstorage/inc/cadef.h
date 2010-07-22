@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: ou1s60ui#10.1.14 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.25 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -49,7 +49,7 @@ enum TEntryRole
 enum TEntryFlag
     {
     EUsed = 1,
-    ESystem = 2,
+    EUninstall = 2,
     ERemovable = 4,
     EVisible = 8,
     ERunning = 16,
@@ -61,7 +61,8 @@ enum TItemAppearance
     {
     EItemAppearanceNotChanged,
     EItemDisappeared,
-    EItemAppeared
+    EItemAppeared,
+    EItemUninstallProgressChanged
     };
 
 // Ca - Application
@@ -86,16 +87,30 @@ _LIT( KCaAttrAppTypeValueCWRT, "cwrt");
 _LIT( KCaAttrAppTypeValueNative, "native");
 _LIT( KCaAttrComponentId, "component_id" );
 _LIT( KCaAttrAppSettingsPlugin, "app_settings_plugin");
-// app settings plugin for java apps
-_LIT( KCaAttrJavaAppSettingsPluginValue,
-        "/resource/qt/plugins/appsettings/javaapplicationsettingsview.qtplugin");
+_LIT( KCaScrPropertyAppSettings, "settingsName");
+_LIT( KPreviewImageAttrName, "preview_image_name" );
 _LIT( KCaAttrAppWidgetUri, "widget:uri");
 _LIT( KCaAttrAppWidgetServiceXml, "widget:servicexml");
 
 _LIT( KCaAttrAppWidgetUriCWRTValue, "wrtwidgetuiplugin");
 _LIT( KCaAttrAppWidgetParamWebAppId, "widgetparam:webAppId");
+_LIT( KCaScrPropertyAppId, "AppID");
+_LIT( KCaScrPropertyIsMiniviewSupported, "isMiniviewSupported");
 
 _LIT( KCaAppGroupName, "appgroup_name" );
+_LIT( KCaAppUninstallProgress, "uninstall_progress" );
+
+_LIT( KCollectionIconFileName, "qtg_large_applications_user");
+
+
+_LIT(KLocalizationFilepathZ, "z:/resource/qt/translations");
+_LIT(KLocalizationFilepathC, "c:/resource/qt/translations");
+_LIT(KLocalizationFilepath, ":/resource/qt/translations");
+_LIT( KLocalizationCaEntry, "CA_ENTRY" );
+_LIT( KLocalizationEnText, "EN_TEXT" );
+_LIT( KLocalizationEnDescription, "EN_DESCRIPTION" );
+const TInt charsToFilename= 6;  // <loc://> loc://email/qtn_gmail_mail_account
+
 
 const TInt KGranularityOne = 1;
 const TInt KUidChars = 10;
@@ -132,7 +147,7 @@ const TUid KMidletApplicationTypeUid =
 
 const TUid KCWRTApplicationTypeUid =
     {
-    0x200267DC
+    0x10282821 
     };
 
 const TInt KCenRepBufferSize = 255;
@@ -145,7 +160,8 @@ const TInt KCenRepBufferSize = 255;
 // Note, however, that none of these is guaranteed to be set, or be used by a menu UI.
 // Menu clients always need to check that the necessary attributes are present.
 //
-_LIT( KCaAttrLongName, "long_name" ); ///< Long name.
+_LIT( KCaAttrShortName, "short_name" ); ///< Short name.
+_LIT( KCaComponentId, "component_id" ); ///< Component Id.
 
 // Built-in types and attributes.
 //

@@ -65,18 +65,18 @@ public:
      * @see int HsActivityDbAsyncRequestObserver::asyncRequestCompleated(int, int, QPixmap&)
      */
     void asyncRequestCompleated(int, int, const QPixmap&, void*);
+    
 
     /**
      * Interface implementation.
-     * @see int HsActivityDbClientInterface::saveActivity(const QVariantHash&)
+     * @see int HsActivityDbAsyncRequestObserver::asyncRequestCompleated(int, int)
      */
-    int addActivity(const QVariantHash &);
+    void asyncRequestCompleated(int result,
+                                int requestType);
 
-    /**
-     * Interface implementation.
-     * @see int HsActivityDbClientInterface::updateActivity(const QVariantHash&)
-     */
-    int updateActivity(const QVariantHash &);
+    int addActivity(const QVariantHash &, const QVariantHash &);
+
+    int updateActivity(const QVariantHash &, const QVariantHash &);
 
     /**
      * Interface implementation.
@@ -105,10 +105,16 @@ public:
 
     /**
      * Interface implementation.
+     * @see int HsActivityDbClientInterface::activityData(QVariant &, const QVariantHash &)
+     */
+    int activityData(QVariant &result, const QVariantHash &activity);
+                              
+    /**
+     * Interface implementation.
      * @see int HsActivityDbClientInterface::waitActivity(const QVariantHash &)
      */
-    int waitActivity(const QVariantHash &);
-
+    int waitActivity(const QVariantHash &activity);
+    
     /**
      * Interface implementation.
      * @see int HsActivityDbClientInterface::launchActivity(const QVariantHash &)
@@ -119,6 +125,8 @@ public:
      */
     //getThumbnail(resolution, thumbnailPath, "image/png", data)
     int getThumbnail(QSize size, QString imagePath, QString mimeType, void* userDdata);
+    
+    int notifyDataChange();
 
 signals:
     /**
@@ -132,6 +140,8 @@ signals:
      * @param thumbnailPixmap - requested thumbnail
      */
     void thumbnailRequested(QPixmap thumbnailPixmap, void *userData);
+    
+    void dataChanged();
     
 private:
     /**

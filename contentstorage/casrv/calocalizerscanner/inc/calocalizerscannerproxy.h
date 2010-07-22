@@ -21,7 +21,6 @@
 // INCLUDES
 #include <e32std.h>
 #include <e32base.h>
-#include "hbtextresolversymbian.h"
 
 #include "castorage_global.h"
 
@@ -36,11 +35,7 @@ class CCaInnerEntry;
  */
 class CCaLocalizerScannerProxy : public CBase
     {
-    
-
 public:
-    
-
     /**
      * Two-phased constructor.
      */
@@ -55,7 +50,11 @@ public:
      * Destructor.
      */
     ~CCaLocalizerScannerProxy( );
-
+    
+    /**
+     * Get localization rows and updates database 
+     */
+    void UpdateLocalNamesL( );
    
 private:
 
@@ -69,30 +68,42 @@ private:
      */
     void ConstructL( );
 
-private:
-    /**
-     * Get localization rows and updates database 
-     */
-    void UpdateLocalNamesL( );
-
     /**
      * Gets localization rows from database as table of CCaLocalizationEntries
      * @param aLocals pointers to localization entries
      */
     void GetLocalizationRowsL( RPointerArray<CCaLocalizationEntry>& aLocals );
     
+    /**
+     * Gets localized names from translation files
+     * @param aLocEntry localization entry
+     * @return localized name
+     */
+    HBufC* GetLocalizedNameLC( const CCaLocalizationEntry* aLocEntry );
+    
+    /**
+     * Gets entry text from the storage
+     * @param aEntries array containing entries
+     * @param aId entry id
+     * @return entry text
+     */
     const TDesC& GetEntryText(
-            RPointerArray<CCaInnerEntry> aEntries, TInt aId );
+            const RPointerArray<CCaInnerEntry>& aEntries, TInt aId );
+    
+    const TDesC& GetEntryDescription(
+            const RPointerArray<CCaInnerEntry>& aEntries, TInt aId );
+
+private:
+	
     /*
      * Not own
      */
     CCaStorageProxy* iStorageProxy;
 
     /*
-     * Owned
+     * Recent translation file name
      */
-    HbTextResolverSymbian* iResolver;
-
+    RBuf iRecentQmFile;
     };
 
 #endif // CALOCALSCANNERPROXY_H

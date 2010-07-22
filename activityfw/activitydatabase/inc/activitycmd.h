@@ -34,11 +34,14 @@ enum ActivityCmd {
     RemoveApplicationActivities,
     Activities,
     ApplicationActivities,
+    ApplicationActivity,
     WaitActivity,
     LaunchActivity,
     GetThumbnail,
     GetData,
-    CancelWait
+    NotifyChange,
+    CancelWait,
+    CancelNotify
 };
 
 #endif  //ACTIVITYCMD_H

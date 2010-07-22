@@ -45,19 +45,26 @@ USERINCLUDE     ../inc
 USERINCLUDE     ../../casrvmgr/inc
 USERINCLUDE     ../../../cautils/inc
 USERINCLUDE     ../../../srvinc
-USERINCLUDE     ../../../castorage/inc
 USERINCLUDE     ../../../inc
 
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
 LIBRARY         efsrv.lib
-LIBRARY			bafl.lib
+LIBRARY         bafl.lib
 LIBRARY         ecom.lib
 LIBRARY         cautils.lib
 LIBRARY         camenu.lib
 LIBRARY         platformenv.lib
 LIBRARY         charconv.lib
 LIBRARY         xmlengineDOM.lib
+LIBRARY         scrclient.lib
+
+
+// HB LIBRARIES
+SYSTEMINCLUDE		/epoc32/include/mw/hb/hbcore
+LIBRARY		HbCore.lib
+
+
 
 // End of file

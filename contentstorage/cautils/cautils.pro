@@ -16,6 +16,7 @@
 
 TEMPLATE = lib
 symbian:{
+defFilePath = ./..
 DEPENDPATH += ./inc \
 			./src
 INCLUDEPATH += ./inc \

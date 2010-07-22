@@ -47,10 +47,10 @@ public:
     int id() const;
 
     QString text() const;
-    void setText(const QString &text);
+    void setText(const QString &text, bool localized = false);
 
     QString description() const;
-    void setDescription(const QString &text);
+    void setDescription(const QString &text, bool localized = false);
     
     CaIconDescription iconDescription() const;
     void setIconDescription(const CaIconDescription &iconDescription);
@@ -76,6 +76,7 @@ public:
 private:
 
     void setId(int id);
+    bool isLocalized(LocalizationType localized) const; 
 
 private:
     /*!

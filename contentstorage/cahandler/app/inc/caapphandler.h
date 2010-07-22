@@ -15,106 +15,47 @@
  *
  */
 
-#ifndef C_CAAPPHANDLER_H
-#define C_CAAPPHANDLER_H
+#ifndef CAAPPHANDLER_H
+#define CAAPPHANDLER_H
 
-#include <e32base.h>
+#include <QObject>
 
-// forward declarations
+#include "cahandler.h"
+
 class CEikonEnv;
-class CCaInnerEntry;
-class CCaUninstallOperation;
 class CCaUsifUninstallOperation;
+class CaEntry;
 
-/**
- *  Command handler for application entries.
- *
- *  @lib caclient.lib
- */
-NONSHARABLE_CLASS( CCaAppHandler ): public CBase
-    {
-
-public:
-    /**
-    * Allocates memory for and initializes CCaAppHandler object
-    */
-    static CCaAppHandler* NewL();
-
-    /**
-     * Destructor.
-     */
-    virtual ~CCaAppHandler();
-
-protected:
-
-    CCaAppHandler();
-
-    void ConstructL();
+class CaAppHandler: public QObject, public CaHandler
+{
+    Q_OBJECT
+    Q_INTERFACES(CaHandler)
 
 public:
 
-    /**
-     * Handle command.
-     * @param aItem Item of supported type.
-     * @param aCommand Command.
-     * @param aParams. Command parameters.
-     * @param aStatus Observer request status. When the operation completes,
-     * this status will be completed with the resulting error code.
-     * @return Asynchronous operation. Owned by the caller.
-     */
-    void HandleCommandL( CCaInnerEntry& aEntry, const TDesC8& aCommand );
+    explicit CaAppHandler(QObject *parent = 0);
+
+    virtual ~CaAppHandler();
+
+public:
+
+    int execute(const CaEntry &entry, const QString &command);
 
 private:
-    /**
-     * Launches application
-     * @param aUid UID of the application to launch
-     * @param aParam command parameters
-     * @param aViewId id of the view the application is to start in
-     */
-    void LaunchApplicationL( const TUid aUid, const TDesC8 &aParam,
-            TInt aViewId );
 
-    /**
-     * Closes application
-     * @param aEntry the entry represeting application to close
-     */
-    void CloseApplicationL( CCaInnerEntry& aEntry );
+    void launchApplicationL(const TUid uid, TInt viewId);
 
-    /**
-     * Uninstall application 
-     * @param aEntry the entry represeting application to uninstall
-     */
-    void HandleRemoveL( CCaInnerEntry &aEntry );
+    int closeApplication(const EntryFlags &flags, TInt windowGroupId);
 
-    /**
-     * Gets component id 
-     * @param aEntry the entry 
-     * @param aSoftwareType indicates software type
-     * @return component id
-     */
-    TInt GetComponentIdL( const CCaInnerEntry &aEntry,
-            const TDesC& aSoftwareType );
+    int handleRemove(const EntryFlags &flags,
+        const QString &typeName,
+        const QString &componentId);
     
-    /**
-     * Start uninstall operation via usif 
-     * @param aComponentId component id
-     */
-    void StartUsifUninstallL( TInt aComponentId );
-
-    
-    /**
-     * Start uninstall operation via swi 
-     * @param aEntry the entry 
-     */
-    void StartSwiUninstallL(CCaInnerEntry &aEntry );
-
+    void startUsifUninstallL(TInt componentId);
     
 private:
-    // data
+    CEikonEnv *iEikEnv;
+    CCaUsifUninstallOperation *iUsifUninstallOperation;
+};
 
-    CEikonEnv* iEikEnv;
-    CCaUninstallOperation* iUninstallOperation;
-    CCaUsifUninstallOperation* iUsifUninstallOperation;
-    };
-
-#endif // C_CAAPPHANDLER_H
+#endif // CAAPPHANDLER_H

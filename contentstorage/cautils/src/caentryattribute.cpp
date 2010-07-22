@@ -32,6 +32,9 @@ CCaEntryAttribute::~CCaEntryAttribute()
     iValue.Close();
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (only NewLC used in code)
 // ---------------------------------------------------------
 // CCaEntryAttribute::NewL
 // ---------------------------------------------------------
@@ -42,6 +45,9 @@ EXPORT_C CCaEntryAttribute* CCaEntryAttribute::NewL( const TDesC& aName )
     CleanupStack::Pop( attr );
     return attr;
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 // ---------------------------------------------------------
 // CCaEntryAttribute::NewLC

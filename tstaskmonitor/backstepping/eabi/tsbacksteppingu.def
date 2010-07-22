@@ -1,0 +1,9 @@
+EXPORTS
+	_ZN15CTsBackstepping4NewLER22MTsWindowGroupsMonitor @ 1 NONAME
+	_ZN15CTsBackstepping5NewLCER22MTsWindowGroupsMonitor @ 2 NONAME
+	_ZN15CTsBacksteppingD0Ev @ 3 NONAME
+	_ZN15CTsBacksteppingD1Ev @ 4 NONAME
+	_ZN15CTsBacksteppingD2Ev @ 5 NONAME
+	_ZTI15CTsBackstepping @ 6 NONAME
+	_ZTV15CTsBackstepping @ 7 NONAME
+

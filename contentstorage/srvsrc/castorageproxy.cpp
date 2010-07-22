@@ -15,6 +15,9 @@
  *
  */
 
+#include <driveinfo.h>
+#include <hbtextresolversymbian.h>
+
 #include "castorage.h"
 #include "castorageproxy.h"
 #include "castoragefactory.h"
@@ -107,14 +110,23 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
     TChangeType changeType = EAddChangeType;
     RArray<TInt> parentArray;
     CleanupClosePushL( parentArray );
-
+          
     if( aEntry->GetId() > 0 )
         {
         changeType = EUpdateChangeType;
         RArray<TInt> id;
         CleanupClosePushL( id );
         id.AppendL( aEntry->GetId() );
-        iStorage->GetParentsIdsL( id, parentArray );
+        if (aItemAppearanceChange == EItemUninstallProgressChanged)
+            {
+            // no need to search for parent parents for uninstall 
+            // progress change
+            iStorage->GetParentsIdsL( id, parentArray, EFalse );
+            }
+        else
+            {
+            iStorage->GetParentsIdsL( id, parentArray );
+            }
         CleanupStack::PopAndDestroy( &id );
         }
 
@@ -126,8 +138,47 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
         {
         changeType = EAddChangeType;
         }
-
-    iStorage->AddL( aEntry, aUpdate );
+    
+    // do not update entry in db with uninstall progress
+    if (aItemAppearanceChange != EItemUninstallProgressChanged)
+        {
+        RPointerArray<CCaLocalizationEntry> localizations;
+	    CleanupResetAndDestroyPushL( localizations );
+        CCaLocalizationEntry* tempLocalization = NULL;
+        if( aEntry->isLocalized( CCaInnerEntry::ENameLocalized ) )		
+            {
+            tempLocalization = LocalizeTextL( aEntry );
+            if( tempLocalization )
+                {
+                localizations.Append( tempLocalization );
+                tempLocalization = NULL;
+                }
+            }
+        if( aEntry->isLocalized( CCaInnerEntry::EDescriptionLocalized ) )
+            {
+            tempLocalization = LocalizeDescriptionL( aEntry );
+            if (tempLocalization)
+                {
+                localizations.Append(tempLocalization);
+                tempLocalization = NULL;
+                }
+            }
+        
+        iStorage->AddL( aEntry, aUpdate );
+        
+        for( TInt j =0; j < localizations.Count(); j++ )
+            {
+            localizations[j]->SetRowId( aEntry->GetId() );
+            AddLocalizationL( *( localizations[j] ) );
+            }
+		if( localizations.Count() > 0 )
+            {
+            HbTextResolverSymbian::Init( _L(""), KLocalizationFilepathZ );
+            }
+		 CleanupStack::PopAndDestroy( &localizations );
+        }
+    
+        
     for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
         {
         iHandlerNotifier[i]->EntryChanged( aEntry, changeType, parentArray );
@@ -236,6 +287,8 @@ EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
             iStorage->GetParentsIdsL( id, parentArray );
             for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
                 {
+                resultArray[0]->SetFlags( 
+                        resultArray[0]->GetFlags() | EUsed );
                 iHandlerNotifier[i]->EntryChanged( resultArray[0],
                         EUpdateChangeType,
                         parentArray );
@@ -267,6 +320,16 @@ EXPORT_C void CCaStorageProxy::LocalizeEntryL(
     {
     iStorage->LocalizeEntryL( aLocalization );
     }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCaStorageProxy::AddLocalizationL(
+		const CCaLocalizationEntry& aLocalization)
+	{
+	iStorage->AddLocalizationL(aLocalization);
+	}
 
 // ---------------------------------------------------------------------------
 //
@@ -307,6 +370,9 @@ EXPORT_C void CCaStorageProxy::CustomSortL( const RArray<TInt>& aEntryIds,
     CleanupStack::PopAndDestroy( &parentArray );
     }
 
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (calls another method)
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
@@ -315,6 +381,9 @@ EXPORT_C void CCaStorageProxy::LoadDataBaseFromRomL()
     {
     iStorage->LoadDataBaseFromRomL();
     }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
 
 // ---------------------------------------------------------
 //
@@ -340,3 +409,150 @@ void CCaStorageProxy::RemoveSession( MCaSessionNorifier* aHandlerNotifier )
         iHandlerNotifier.Remove( i );
         }
     }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+CCaLocalizationEntry* CCaStorageProxy::LocalizeTextL( CCaInnerEntry* aEntry )
+    {
+	CCaLocalizationEntry* result = NULL;
+	TInt textLength = aEntry->GetText().Length();
+	if (textLength > 0)
+		{
+		TChar delimiter = '/'; // cannot add it as global
+		RBuf title;
+		CleanupClosePushL( title );
+		title.CreateL( aEntry->GetText() );
+		TInt pos = title.LocateReverse( delimiter );
+		if ( pos > 0 && pos + 1 < textLength )   // 1 is for delimiters
+			{
+			TPtrC16 logString = title.Mid( pos + 1 ); 
+			TInt qmFileNameLength = textLength - charsToFilename - 1 - logString.Length();
+			TPtrC16 qmFile = title.Mid( charsToFilename, qmFileNameLength );
+			if ( InitializeTranslatorL( qmFile ) )
+				{
+			    result = CCaLocalizationEntry::NewLC();			
+				HBufC* translatedString = HbTextResolverSymbian::LoadLC( logString );
+				if ( translatedString->Compare( logString ) )
+					{
+					result->SetStringIdL( logString );
+					aEntry->SetTextL( *translatedString );
+					if( translatedString )
+						{
+					    CleanupStack::PopAndDestroy( translatedString );
+						}
+					result->SetTableNameL( KLocalizationCaEntry );
+					result->SetAttributeNameL( KLocalizationEnText );
+					result->SetQmFilenameL( qmFile );
+					result->SetRowId( aEntry->GetId() ? 0 : aEntry->GetId() ); // must be added when present
+					CleanupStack::Pop( result );
+					}
+				else 
+					{
+					CleanupStack::PopAndDestroy(translatedString);
+					CleanupStack::PopAndDestroy(result);
+					result = NULL;
+					}
+				}
+			}
+		CleanupStack::PopAndDestroy( &title );
+		}
+	return result;
+	}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+CCaLocalizationEntry* CCaStorageProxy::LocalizeDescriptionL( CCaInnerEntry* aEntry )
+    {
+	CCaLocalizationEntry* result = NULL;
+	TInt dscLength = aEntry->GetDescription().Length();
+	if ( dscLength )
+		{
+		TChar delimiter = '/'; // cannot add it as global
+		RBuf description;
+		CleanupClosePushL( description );
+		description.CreateL( aEntry->GetDescription() );
+		TInt pos = description.LocateReverse( delimiter );
+		if ( pos > 0 && pos + 1 < dscLength )   // 1 is for delimiters
+			{
+			TPtrC16 logString = description.Mid(pos + 1);
+			TInt qmFileNameLength = dscLength - charsToFilename - 1 - logString.Length();
+			TPtrC16 qmFile = description.Mid(charsToFilename, qmFileNameLength);
+			if ( InitializeTranslatorL( qmFile ) )
+				{
+			    result = CCaLocalizationEntry::NewLC();
+				HBufC* translatedString = HbTextResolverSymbian::LoadLC( logString );
+				if ( translatedString->Compare( logString ) )
+					{
+					result->SetStringIdL( logString );
+					aEntry->SetDescriptionL( *translatedString );
+					CleanupStack::PopAndDestroy( translatedString );
+					result->SetTableNameL( KLocalizationCaEntry );
+					result->SetAttributeNameL( KLocalizationEnDescription );
+					result->SetQmFilenameL( qmFile );
+					result->SetRowId( aEntry->GetId() ? 0 : aEntry->GetId() ); // must be added when present
+					CleanupStack::Pop( result );
+					}
+				else 
+					{
+				    CleanupStack::PopAndDestroy( translatedString );
+				    CleanupStack::PopAndDestroy( result );
+				    result = NULL;
+					}
+				
+				}
+			}
+		CleanupStack::PopAndDestroy( &description );
+		}
+	
+	return result;
+	}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TBool CCaStorageProxy::InitializeTranslatorL( TDesC& aQmFilename )
+    {
+	TBool result = HbTextResolverSymbian::Init( aQmFilename, KLocalizationFilepathC );
+	if ( !result )
+		{
+		// this should not be called too often 
+		TChar currentDriveLetter;
+		TDriveList driveList;
+		RFs fs;
+		User::LeaveIfError( fs.Connect() );
+		User::LeaveIfError( fs.DriveList( driveList ) );
+
+		RBuf path;
+		CleanupClosePushL( path );
+		path.CreateL( KLocalizationFilepath().Length() + 1 );
+
+		for ( TInt driveNr = EDriveY; driveNr >= EDriveA; driveNr-- )
+			{
+			if ( driveList[driveNr] )
+				{
+				User::LeaveIfError(fs.DriveToChar( driveNr, currentDriveLetter ));
+				path.Append( currentDriveLetter );
+				path.Append( KLocalizationFilepath );
+				if (HbTextResolverSymbian::Init( aQmFilename, path ))
+					{
+				    result = ETrue;
+					break;
+					}
+				}
+			path.Zero();
+			}
+		CleanupStack::PopAndDestroy( &path );
+		fs.Close();
+		
+		if( !result )
+			{
+		    result = HbTextResolverSymbian::Init( aQmFilename, KLocalizationFilepathZ );
+			}
+		}
+	return result;
+	}

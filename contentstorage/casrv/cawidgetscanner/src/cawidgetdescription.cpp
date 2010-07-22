@@ -17,16 +17,13 @@
 
 
 // INCLUDE FILES
+#include <hbtextresolversymbian.h>
 
 #include "cadef.h"
 #include "cawidgetdescription.h"
 #include "cainnerentry.h"
 #include "widgetscannerutils.h"
-
-// CONST
-const TInt KNoId = -1;
-_LIT( KDoubleSlash, "\\" );
-
+#include "cawidgetscannerdef.h"
 // ============================ MEMBER FUNCTIONS ===============================
 
 // -----------------------------------------------------------------------------
@@ -36,7 +33,7 @@ _LIT( KDoubleSlash, "\\" );
 // -----------------------------------------------------------------------------
 //
 CCaWidgetDescription::CCaWidgetDescription() :
-    iEntryId(KNoId), iMmcId()
+    iEntryId( KNoId ), iValid ( EFalse )
     {
     }
 
@@ -67,7 +64,14 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
         User::LeaveIfError( uidLex.Val( iPackageUid, EHex ));
         }
     iTitle.CreateL( aEntry->GetText() );
+    
     iIconUri.CreateL( aEntry->Icon()->FileName() );
+    
+    TPtrC attribute;
+    aEntry->FindAttribute( KPreviewImageAttrName, attribute );
+    iPreviewImageName.CreateL( attribute.Length() );
+    iPreviewImageName = attribute;
+
     //library
     iLibrary.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetLibrary, iLibrary );
@@ -77,6 +81,9 @@ void CCaWidgetDescription::ConstructL( CCaInnerEntry* aEntry )
     //uri
     iUri.CreateL( KCaMaxAttrValueLen );
     aEntry->FindAttribute( KAttrWidgetUri, iUri );
+    //translation filename
+    iTranslationFileName.CreateL( KCaMaxAttrValueLen );
+    aEntry->FindAttribute( KAttrWidgetTranslationFileName, iTranslationFileName );
     //mmc id
     iMmcId.CreateL(KMassStorageIdLength);
     aEntry->FindAttribute( KCaAttrMmcId, iMmcId );
@@ -133,15 +140,21 @@ CCaWidgetDescription* CCaWidgetDescription::NewLC( CCaInnerEntry* aEntry )
 //
 CCaWidgetDescription::~CCaWidgetDescription()
     {
-    iTitle.Close();
-    iDescription.Close();
-    iUri.Close();
-    iIconUri.Close();
-    iLibrary.Close();
     iPath.Close();
     iModificationTime.Close();
-    iMmcId.Close();
     iServiceXml.Close();
+    iMmcId.Close();
+    iUri.Close();
+    iTranslationFileName.Close();
+    iLibrary.Close();
+    iPreviewImageName.Close();
+    iIconUri.Close();
+    iTitle.Close();
+    iDescription.Close();
+    iStringIdTitle.Close();
+    iStringIdDescription.Close();
+    iManifestFilePathName.Close();
+    
     }
 
 // ----------------------------------------------------------------------------
@@ -151,14 +164,16 @@ CCaWidgetDescription::~CCaWidgetDescription()
 TBool CCaWidgetDescription::Compare(
         const CCaWidgetDescription& aFirst,const CCaWidgetDescription& aSecond)
     {
+    TBool result = EFalse;
     if( aFirst.GetUri() == aSecond.GetUri() )
         {
-        return ETrue;
+        result = ETrue;
         }
     else
         {
-        return EFalse;
+        result = EFalse;
         }
+    return result;
     }
 
 // ----------------------------------------------------------------------------
@@ -167,23 +182,28 @@ TBool CCaWidgetDescription::Compare(
 //
 TBool CCaWidgetDescription::Compare( const CCaWidgetDescription& aToCompare )
     {
+    TBool result = EFalse;
     if( aToCompare.GetLibrary() == GetLibrary() &&
             aToCompare.GetDescription() == GetDescription() &&
             aToCompare.GetUri() == GetUri() &&
             aToCompare.GetIconUri() == GetIconUri() &&
+            aToCompare.GetPreviewImageName() == GetPreviewImageName() &&
             aToCompare.GetTitle() == GetTitle() &&
+            aToCompare.GetTranslationFileName() == GetTranslationFileName() &&
             aToCompare.GetLibrary() != KNoLibrary &&
             aToCompare.GetModificationTime() == GetModificationTime() &&
             aToCompare.GetServiceXml() == GetServiceXml()
             )
         {
-        return ETrue;
+        result = ETrue;
         }
     else
         {
-        return EFalse;
+        result = EFalse;
         }
+    return result;
     }
+
 
 // -----------------------------------------------------------------------------
 //
@@ -203,6 +223,15 @@ void CCaWidgetDescription::SetPackageUidL( const TDesC& aPackageUid )
     {
     TLex lexer( aPackageUid );
     User::LeaveIfError( lexer.Val( iPackageUid,EHex));
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TUint CCaWidgetDescription::GetPackageUidL()
+    {
+    return iPackageUid;
     }
 
 // -----------------------------------------------------------------------------
@@ -234,6 +263,18 @@ void CCaWidgetDescription::SetUriL( const TDesC& aUri )
     iUri.Close();
     iUri.CreateL(aUri);
     }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetTranslationFileNameL(
+        const TDesC& aTranslationFileName )
+    {
+    iTranslationFileName.Close();
+    iTranslationFileName.CreateL( aTranslationFileName );
+    }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -247,37 +288,19 @@ void CCaWidgetDescription::SetIconUriL( const TDesC& aIconUri )
 //
 // -----------------------------------------------------------------------------
 //
+void CCaWidgetDescription::SetPreviewImageNameL( const TDesC& aPreviewName )
+    {
+    iPreviewImageName.Close();
+    iPreviewImageName.CreateL( aPreviewName );
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 void CCaWidgetDescription::SetLibraryL( const TDesC& aLibrary )
     {
     iLibrary.Close();
     iLibrary.CreateL(aLibrary);
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetMissing( TBool aMissing )
-    {
-    SetFlag( EMissing, aMissing );
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetVisible( TBool aVisible )
-    {
-    SetFlag( EVisible, aVisible );
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CCaWidgetDescription::SetUsed( TBool aUsed )
-    {
-    SetFlag( EUsed, aUsed );
     }
 
 // -----------------------------------------------------------------------------
@@ -310,6 +333,26 @@ void CCaWidgetDescription::SetModificationTimeL( const TDesC& aModificationTime 
 //
 // -----------------------------------------------------------------------------
 //
+void CCaWidgetDescription::SetStringIdDescriptionL( const TDesC& aStringIdDescription )
+    {
+    iStringIdDescription.Close();
+    iStringIdDescription.CreateL( aStringIdDescription );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetStringidTitleL( const TDesC& aStringIdTitle )
+    {
+    iStringIdTitle.Close();
+    iStringIdTitle.CreateL( aStringIdTitle );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TInt CCaWidgetDescription::GetEntryId( ) const
     {
     return iEntryId;
@@ -328,10 +371,29 @@ TPtrC CCaWidgetDescription::GetMmcId( ) const
 //
 // -----------------------------------------------------------------------------
 //
+TPtrC CCaWidgetDescription::GetStringIdDescription() const
+    {
+    return iStringIdDescription;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+
+TPtrC CCaWidgetDescription::GetStringIdTitle() const
+    {
+    return iStringIdTitle;
+    }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TPtrC CCaWidgetDescription::GetLibrary( ) const
     {
     return iLibrary;
     }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -349,6 +411,7 @@ void CCaWidgetDescription::SetPathL( const TDesC& aPath )
 	iPath.Close();
 	iPath.CreateL(aPath);
     }
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -371,6 +434,15 @@ TPtrC CCaWidgetDescription::GetUri( ) const
 //
 // -----------------------------------------------------------------------------
 //
+TPtrC CCaWidgetDescription::GetTranslationFileName() const
+    {
+    return iTranslationFileName;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TPtrC CCaWidgetDescription::GetIconUri( ) const
     {
     return iIconUri;
@@ -380,16 +452,27 @@ TPtrC CCaWidgetDescription::GetIconUri( ) const
 //
 // -----------------------------------------------------------------------------
 //
+TPtrC CCaWidgetDescription::GetPreviewImageName( ) const
+    {
+    return iPreviewImageName;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
 TPtrC CCaWidgetDescription::GetTitle( ) const
     {
+    TPtrC result ;
     if ( iTitle == KNullDesC )
         {
-        return GetLibraryName();
+        result.Set( GetLibraryName() );
         }
     else
         {
-        return iTitle;
+        result.Set( iTitle );
         }
+    return result;
     }
 
 // -----------------------------------------------------------------------------
@@ -472,13 +555,11 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     if ( iTitle != KNullDesC )
         {
         entry->SetTextL(iTitle);
-        entry->AddAttributeL(KCaAttrLongName, iTitle);
         }
     else
         {
         TPtrC libraryName( GetLibraryName() );
         entry->SetTextL( libraryName );
-        entry->AddAttributeL( KCaAttrLongName, libraryName );
         }
 
     if ( iDescription != KNullDesC )
@@ -492,9 +573,12 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     if ( iIconUri != KNullDesC)
         {
         // aSkinId and AppId not used for widgets - KNullDesC
-        entry->SetIconDataL(iIconUri, KNullDesC, KNullDesC);
+        entry->SetIconDataL( iIconUri, KNullDesC, KNullDesC );
         }
-
+    if ( iPreviewImageName != KNullDesC )
+        {
+        entry->AddAttributeL( KPreviewImageAttrName, iPreviewImageName );
+        }
     if( iModificationTime != KNullDesC )
         {
         entry->AddAttributeL( KCaAttrInstallationTime, iModificationTime );
@@ -502,6 +586,11 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     if ( iServiceXml != KNullDesC )
         {
         entry->AddAttributeL( KAttrWidgetServiceXml, iServiceXml);
+        }
+    if( iTranslationFileName != KNullDesC )
+        {
+        entry->AddAttributeL( KAttrWidgetTranslationFileName,
+                iTranslationFileName );
         }
     return entry;
     }
@@ -550,5 +639,113 @@ void CCaWidgetDescription::SetServiceXmlL(const TDesC& aServiceXml)
 TPtrC CCaWidgetDescription::GetServiceXml() const
     {
     return iServiceXml;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::LocalizeTextsL()
+    {
+    if( iTranslationFileName.Length() )
+        {
+        RBuf translationFileName;
+        translationFileName.Create( iTranslationFileName.Length() + 1 );
+        CleanupClosePushL( translationFileName );
+        translationFileName.Copy( iTranslationFileName );
+        translationFileName.Append( KWidgetScannerUnderline );
+           
+        
+        if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathC ) )
+          {
+          if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathZ ) )
+              {
+              // this should not be called too often 
+              TChar currentDriveLetter;
+              TDriveList driveList;
+              RFs fs;
+              User::LeaveIfError( fs.Connect() );
+              User::LeaveIfError( fs.DriveList( driveList ) );
+
+              RBuf path;
+              path.Create( KLocalizationFilepath().Length() + 1 );
+              CleanupClosePushL( path );
+              
+              for( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
+                  {
+                  if( driveList[driveNr] )
+                      {
+                      User::LeaveIfError( fs.DriveToChar( driveNr,
+                              currentDriveLetter ) );
+                      path.Append( currentDriveLetter );
+                      path.Append( KLocalizationFilepath );
+                      if( HbTextResolverSymbian::Init( translationFileName, path ) )
+                          {
+                          break;
+                          }
+                      }
+                  path.Zero();
+                  }
+              CleanupStack::PopAndDestroy( &path );
+              fs.Close();
+              }
+           }
+        
+        HBufC* tmp;
+        
+        if( iTitle.Length() )
+            {
+            SetStringidTitleL( iTitle );
+            tmp = HbTextResolverSymbian::LoadLC( iTitle );
+            SetTitleL( *tmp );
+            CleanupStack::PopAndDestroy( tmp );
+            }
+        if( iDescription.Length() )
+            {
+            SetStringIdDescriptionL( iDescription );
+            tmp = HbTextResolverSymbian::LoadLC( iDescription );
+            SetDescriptionL( *tmp );
+            CleanupStack::PopAndDestroy( tmp );
+            }
+        CleanupStack::PopAndDestroy( &translationFileName );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+// 
+TBool CCaWidgetDescription::IsValid()
+    {
+    return iValid;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetValid(TBool aVal)
+    {
+    iValid = aVal;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+void CCaWidgetDescription::SetManifestFilePathNameL( 
+    const TDesC& aManifestFilePathName )
+    {
+    iManifestFilePathName.Close();
+    iManifestFilePathName.CreateL( aManifestFilePathName );
+    }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//
+TPtrC CCaWidgetDescription::GetManifestFilePathName() const
+    {
+    return iManifestFilePathName;
     }
 //  End of File

@@ -30,6 +30,8 @@
 
 #include "caclientproxy.h"
 #include "caclientnotifierproxy.h"
+#include "cahandlerproxy.h"
+#include "caqtsfhandlerloader.h"
 #include "caobjectadapter.h"
 #include "caclienttest_global.h"
 
@@ -38,19 +40,25 @@
 /*!
 
  \class CaService.
- \brief This class operates on data, anable creating and inserting new entry
+ \brief This class operates on data, enables creating and inserting new entry
  to DB, removing entry from DB, update entry or get entry from DB, execute
- command on entry and create notifier to notify client about changes onto DB.
+ command on entry and create notifier to notify a client about changes onto DB.
 
  CaService class uses singleton design pattern, so that it contains static
  method called instance() to get instance of a class.
+
+ References to CaService instance are counted. When the number of references
+ drops to zero the instance is deleted to save memory.
+ CaNotifier class contains a member referencing to the CaService instance so
+ it is not deleted unless all CaNotifier instances are deleted (and there are
+ no variables referencing CaService).
 
  \code
  QSharedPointer<CaService> service = CaService::instance();
  \endcode
 
- For every operations on data is used always one instantiation of a class.
- Below are examples how to create data and work on those ones.
+ For every operations on data is used always one instantiation of the class.
+ Below, there are examples how to create data and work on those ones.
 
  */
 
@@ -83,7 +91,6 @@ QWeakPointer<CaService> CaService::m_instance = QWeakPointer<CaService>();
 CaService::CaService(QObject *parent) :
     QObject(parent), m_d(new CaServicePrivate(this))
 {
-
 }
 
 /*!
@@ -816,7 +823,7 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
  Execute command.
  \param entryId id of an entry.
  \param command command.
- \retval true if operation was successful.
+ \retval 0 if operation was successful.
 
  \example
  \code
@@ -826,15 +833,15 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
  itemExecute.setTypeName("application");
  itemExecute.setAttribute("application:uid", "0x12345678");
  CaEntry * entryExecute = service->createEntry(itemExecute->id());
- bool result = service->executeCommand(entryExecute->id(), "remove");
+ int result = service->executeCommand(entryExecute->id(), "remove");
  ...
  \b Output:
- result == true
+ result == 0
  \endcode
  */
-bool CaService::executeCommand(int entryId, const QString &command) const
+int CaService::executeCommand(int entryId, const QString &command) const
 {
-    bool result = false;
+    int result = -19;
     
     const QSharedPointer<CaEntry> temporaryEntry = getEntry(entryId);
     
@@ -848,7 +855,7 @@ bool CaService::executeCommand(int entryId, const QString &command) const
  Execute command.
  \param entry entry.
  \param command command.
- \retval true if operation was successful.
+ \retval 0 if operation was successful.
 
  \example
  \code
@@ -858,13 +865,13 @@ bool CaService::executeCommand(int entryId, const QString &command) const
  itemExecute.setTypeName("url");
  itemExecute.setAttribute("url", "http://www.nokia.com");
  CaEntry * entryExecute = service->createEntry(itemExecute->id());
- bool result = service->executeCommand(*entryExecute, "open");
+ int result = service->executeCommand(*entryExecute, "open");
  ...
  \b Output:
- result == true
+ result == 0
  \endcode
  */
-bool CaService::executeCommand(const CaEntry &entry, const QString &command) const
+int CaService::executeCommand(const CaEntry &entry, const QString &command) const
 {
     return m_d->executeCommand(entry, command);
 }
@@ -938,7 +945,10 @@ ErrorCode CaService::lastError() const
  \param servicePublic pointer to public service
  */
 CaServicePrivate::CaServicePrivate(CaService *servicePublic) :
-    m_q(servicePublic), mProxy(new CaClientProxy), 
+    m_q(servicePublic),
+    mCommandHandler(new CaHandlerProxy(QSharedPointer<CaHandlerLoader>
+        (new CaQtSfHandlerLoader()))),
+    mProxy(new CaClientProxy()),
     mNotifierProxy(NULL)
 {
     const ErrorCode connectionResult = mProxy->connect();
@@ -963,7 +973,8 @@ CaServicePrivate::~CaServicePrivate()
  \param entryIdList list of entry ids
  \retval list of entries (pointers)
  */
-QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(const QList<int> &entryIdList) const
+QList< QSharedPointer<CaEntry> > CaServicePrivate::getEntries(
+    const QList<int> &entryIdList) const
 {
     qDebug() << "CaServicePrivate::getEntries"
              << "entryIdList:" << entryIdList;
@@ -1318,9 +1329,9 @@ bool CaServicePrivate::prependEntriesToGroup(int groupId,
  Executes command on entry (fe. "open", "remove")
  \param const reference to an entry on which command will be issued
  \param string containing a command
- \retval boolean which is used as an error code return value, true means positive result
+ \retval int which is used as an error code return value, 0 means no errors
  */
-bool CaServicePrivate::executeCommand(const CaEntry &entry,
+int CaServicePrivate::executeCommand(const CaEntry &entry,
                                       const QString &command)
 {
     qDebug() << "CaServicePrivate::executeCommand"
@@ -1328,18 +1339,24 @@ bool CaServicePrivate::executeCommand(const CaEntry &entry,
 
     CACLIENTTEST_FUNC_ENTRY("CaServicePrivate::executeCommand");
 
+    if (entry.flags() & UninstallEntryFlag) {
+        return 0;
+    }    
+    
     if (command == caCmdOpen) {
         touch(entry);
     }
 
-    mErrorCode = mProxy->executeCommand(entry, command);
+    int errorCode = mCommandHandler->execute(entry, command);
+    mErrorCode = CaObjectAdapter::convertErrorCode(errorCode);
+    
 
     qDebug() << "CaServicePrivate::executeCommand mErrorCode on return:"
              << mErrorCode;
 
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::executeCommand");
 
-    return (mErrorCode == NoErrorCode);
+    return errorCode;
 }
 
 /*!

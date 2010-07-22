@@ -90,11 +90,24 @@ public:
     IMPORT_C TInt GetParentId() const;
 
     /**
-     * Sets the parent id to be queried. This will cause returning only entries whose aprent ids are aId.
+     * Sets the parent id to be queried. This will cause returning only entries whose parent ids are aId.
      * @param aId The parent id to be set for the query.
      */
     IMPORT_C void SetParentId( TInt aId );
 
+    /**
+     * Returns the child id set for the query.
+     * @return Id of entry's child.
+     */
+    IMPORT_C TInt GetChildId() const;
+
+    /**
+     * Sets the child id to be queried. This will cause returning parents of the entry with id aId
+     * @param aId The child id to be set for the query.
+     */
+    IMPORT_C void SetChildId( TInt aId );
+    
+    
     /**
      * Gets the typenames filter set in the query.
      * @return Array of typenames set in this query. 
@@ -229,6 +242,11 @@ private:
      * Unique identifier of the parent.
      */
     TInt iParentId;
+
+    /*
+     * Unique identifier of the child entry.
+     */
+    TInt iChildId;
 
     /*
      * Own.

@@ -1,19 +1,19 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
-* All rights reserved.
-* This component and the accompanying materials are made available
-* under the terms of "Eclipse Public License v1.0"
-* which accompanies this distribution, and is available
-* at the URL "http://www.eclipse.org/legal/epl-v10.html".
-*
-* Initial Contributors:
-* Nokia Corporation - initial contribution.
-*
-* Contributors:
-*
-* Description:
-*
-*/
+ * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+ * All rights reserved.
+ * This component and the accompanying materials are made available
+ * under the terms of "Eclipse Public License v1.0"
+ * which accompanies this distribution, and is available
+ * at the URL "http://www.eclipse.org/legal/epl-v10.html".
+ *
+ * Initial Contributors:
+ * Nokia Corporation - initial contribution.
+ *
+ * Contributors:
+ *
+ * Description:
+ *
+ */
 #ifndef C_WIDGETDESCRIPTION_H
 #define C_WIDGETDESCRIPTION_H
 
@@ -49,13 +49,14 @@ public:
 
     /**
      * Static method to compare two CCaWidgetDescription objects
+     * used in Find() method
      * @param aFirst first item to compare
      * @param aSecond second item to compare
-     * @return ETrue if iLibrary value is the same in both objects,
+     * @return ETrue if widget uri value is the same in both objects,
      * otherwise returns EFalse
      */
     static TBool Compare( const CCaWidgetDescription& aFirst,
-            const CCaWidgetDescription& aSecond);
+            const CCaWidgetDescription& aSecond );
 
     /**
      * Method to compare two CCaWidgetDescription objects
@@ -78,6 +79,12 @@ public:
     void SetPackageUidL( const TDesC& aPackageUid );
 
     /*
+     * PackageUid getter
+     * @return iPackageUid - package UID
+     */
+    TUint GetPackageUidL();
+    
+    /*
      * Title setter
      * @param aTitle widget title
      */
@@ -94,6 +101,12 @@ public:
      * @param aUri widget uri
      */
     void SetUriL( const TDesC& aUri );
+    
+    /*
+     * Translation file setter.
+     * @param aTranslationFileName widget translation file.
+     */
+    void SetTranslationFileNameL( const TDesC& aTranslationFileName );
 
     /*
      * Icon Uri setter
@@ -101,6 +114,12 @@ public:
      */
     void SetIconUriL( const TDesC& aIconUri );
 
+    /*
+     * Preview image name setter.
+     * @param aPreview preview image name identifier.
+     */
+    void SetPreviewImageNameL( const TDesC& aPreviewName );
+    
     /*
      * Library setter
      * @param aLibrary widget library
@@ -118,91 +137,84 @@ public:
      * @return widget library
      */
     TPtrC GetPath( ) const;
-
+    
     /*
-     * Missing flag setter
-     * @param aMissing flag
+     * Content storage entry id getter
+     * @return CS entry id
      */
-    void SetMissing( TBool aMissing );
-
-    /*
-     * Visible flag setter
-     * @param aVisible flag
-     */
-    void SetVisible( TBool aVisible );
-
-    /*
-     * Used flag setter
-     * @param aUsed flag
-     */
-    void SetUsed( TBool aUsed );
-
-    /*
-     * Content arsenal entry id getter
-     * @return CA entry id
-     */
-    TInt GetEntryId( ) const;
+    TInt GetEntryId() const;
 
     /*
      * MMC id getter
      * @return CA entry id
      */
-    TPtrC GetMmcId( ) const;
+    TPtrC GetMmcId() const;
 
     /*
      * Library getter
      * @return widget library
      */
-    TPtrC GetLibrary( ) const;
+    TPtrC GetLibrary() const;
 
     /*
      * Description getter
      * @return widget Description
      */
-    TPtrC GetDescription( ) const;
+    TPtrC GetDescription() const;
 
     /*
      * Uri getter
      * @return widget Uri
      */
-    TPtrC GetUri( ) const;
+    TPtrC GetUri() const;
+
+    /*
+     * Uri translation filename
+     * @return widget translation filename
+     */
+    TPtrC GetTranslationFileName() const;
 
     /*
      * IconUri getter
      * @return widget IconUri
      */
-    TPtrC GetIconUri( ) const;
+    TPtrC GetIconUri() const;
 
     /*
-     * Title getter
-     * @return widget IconUri
+     * Preview image name getter
+     * @return widget preview image name
      */
-    TPtrC GetTitle( ) const;
+    TPtrC GetPreviewImageName( ) const;
+    
+    /*
+     * Title getter
+     * @return widget title
+     */
+    TPtrC GetTitle() const;
 
     /*
      * Missing flag
      * @return ETrue if flag missing is set
      */
-    TBool IsMissing( ) const;
+    TBool IsMissing() const;
 
     /*
      * Used flag
      * @return ETrue if flag used is set
      */
-    TBool IsUsed( ) const;
-    
+    TBool IsUsed() const;
 
     /*
      * Used flag
      * @return ETrue if flag visible is set
      */
-    TBool IsVisible( ) const;
+    TBool IsVisible() const;
 
     /*
      * Entry getter
      * @return entry representing widget
      */
-    CCaInnerEntry* GetEntryLC( ) const;
+    CCaInnerEntry* GetEntryLC() const;
 
     /*
      * Modification time setter
@@ -224,20 +236,54 @@ public:
      * Set service fw xml filename
      * @param aServiceXml Service xml filename
      */
-    void SetServiceXmlL(const TDesC& aServiceXml);
+    void SetServiceXmlL( const TDesC& aServiceXml );
     /*
      * Get service fw xml filename
      * @return Service xml filename
      */
     TPtrC GetServiceXml() const;
 
-private:
+    /*
+     /*
+     * Localizes title and description, fill string id fields
+     */
+    void LocalizeTextsL();
 
     /*
-     * Library name getter
-     * @return libraru name
+     * StringIdDescription time getter
+     * @return StringIdDescription
      */
-    TPtrC GetLibraryName( ) const;
+    TPtrC GetStringIdDescription() const;
+
+    /*
+     * StringIdTitle time getter
+     * @return widget StringIdTitle
+     */
+    TPtrC GetStringIdTitle() const;
+
+    /*
+     * Set manifest file path name.
+     * @param aServiceXml Manifest file path name.
+     */
+    void SetManifestFilePathNameL( const TDesC& aManifestFilePathName );
+
+    /*
+     * Get manifest file path name.
+     * @return Manifest file path name.
+     */
+    TPtrC GetManifestFilePathName() const;
+
+    /*
+     * Set logical string for description.
+     * @param aStringIdDescription logical string for description.
+     */
+    void SetStringIdDescriptionL( const TDesC& aStringIdDescription );
+
+    /*
+     * Set logical string for title.
+     * @param aStringIdTitle logical string for title.
+     */
+    void SetStringidTitleL( const TDesC& aStringIdTitle );
 
     /*
      * Flag setter
@@ -246,7 +292,24 @@ private:
      */
     void SetFlag( TInt aFlag, TBool aValue );
 
-private:
+    /*
+     * Valid setter
+     * @param aVal value
+     */ 
+    void SetValid(TBool aVal);
+    
+    /*
+     * Valid getter
+     * @return valid value
+     */ 
+    TBool CCaWidgetDescription::IsValid();
+
+    /*
+     * Library name getter
+     * @return libraru name
+     */
+    TPtrC GetLibraryName() const;
+
 
     /**
      * C++ default constructor.
@@ -256,17 +319,20 @@ private:
     /**
      * By default Symbian 2nd phase constructor is private.
      */
-    void ConstructL( );
+    void ConstructL();
     void ConstructL( CCaInnerEntry* aEntry );
 
-
-private:
     // Data
 
     /*
      * Content Storage entry id
      */
     TInt iEntryId;
+    
+    /*
+     * Marks vidget as valid, used to remove widgets
+     */
+    TBool iValid;
 
     /*
      * Package UID
@@ -292,17 +358,27 @@ private:
      * Widget uri. Own
      */
     RBuf iUri;
+    
+    /*
+     * Widget translation file name. Own
+     */
+    RBuf iTranslationFileName;
 
     /*
      * Widget icon uri. Own
      */
     RBuf iIconUri;
-
+    
+    /*
+     * Preview name. Own
+     */
+    RBuf iPreviewImageName;
+    
     /*
      * Widget library. Own
      */
     RBuf iPath;
-
+    
     /*
      * Widget library. Own
      */
@@ -321,6 +397,18 @@ private:
      * Service fw xml file
      */
     RBuf iServiceXml;
+    /*
+     * Manifest file path name.
+     */
+    RBuf iManifestFilePathName;
+    /*
+     * Strign id of title
+     */
+    RBuf iStringIdTitle;
+    /*
+     * Strign id of description
+     */
+    RBuf iStringIdDescription;
     };
 
 typedef RPointerArray<CCaWidgetDescription> RWidgetArray;

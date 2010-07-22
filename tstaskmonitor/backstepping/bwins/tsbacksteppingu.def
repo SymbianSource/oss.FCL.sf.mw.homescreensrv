@@ -1,0 +1,5 @@
+EXPORTS
+	?NewL@CTsBackstepping@@SAPAV1@AAVMTsWindowGroupsMonitor@@@Z @ 1 NONAME ; class CTsBackstepping * CTsBackstepping::NewL(class MTsWindowGroupsMonitor &)
+	?NewLC@CTsBackstepping@@SAPAV1@AAVMTsWindowGroupsMonitor@@@Z @ 2 NONAME ; class CTsBackstepping * CTsBackstepping::NewLC(class MTsWindowGroupsMonitor &)
+	??1CTsBackstepping@@UAE@XZ @ 3 NONAME ; CTsBackstepping::~CTsBackstepping(void)
+

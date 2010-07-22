@@ -17,6 +17,7 @@
 
 #include <HbIcon>
 
+#include "caclient_defines.h"
 #include "caitemmodel.h"
 #include "caitemmodel_p.h"
 #include "canotifier.h"
@@ -469,6 +470,9 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
             variant = QVariant(entry(modelIndex)->text() + QString(" ")
                 + entry(modelIndex)->description());
             break;
+        case CaItemModel::UninstalRole:
+      	    variant = QVariant(entry(modelIndex)->attribute(UNINSTALL_PROGRESS_APPLICATION_ATTRIBUTE_NAME).toInt());
+            break;
         default:
             variant = QVariant(QVariant::Invalid);
         }
@@ -699,26 +703,27 @@ void CaItemModelPrivate::updateParentEntry()
 
 /*!
  Updates model item with fresh data
- \param id id of item to update
+ \param entry item to update
  */
-void CaItemModelPrivate::updateItemData(int id)
+void CaItemModelPrivate::updateItemData(const QSharedPointer<CaEntry> &entry)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateItemData");
 
-    mEntries.updateEntry(id);
 
+    int id = entry->id();
     QList<int> ids = mService->getEntryIds(mQuery);
     if (mEntries.indexOf(id) >= 0
            && ids.indexOf(id) == mEntries.indexOf(id)) {
-        emit m_q->dataChanged(index(mEntries.indexOf(id)), index(
-                                  mEntries.indexOf(id)));
-    } else if (ids.indexOf(id) < 0){
-        removeItem(id);
-    } else if (mEntries.indexOf(id) < 0){
-        addItem(id);
+        mEntries.updateEntry(entry);
+        emit m_q->dataChanged(
+            index(mEntries.indexOf(id)), index(mEntries.indexOf(id)));
     } else if (mParentEntry && id == mParentEntry->id()) {
         updateParentEntry();
         m_q->reset();
+    } else if (ids.indexOf(id) < 0) {
+        removeItem(id);
+    } else if (mEntries.indexOf(id) < 0) {
+        addItem(id);
     } else {
         updateModel();
     }
@@ -737,9 +742,17 @@ void CaItemModelPrivate::addItem(int id)
     //we use beginInsertRows and endInsertRows to emit proper signal
     //(see Qt documentation of QAbstractItemModel)
     if (mEntries.indexOf(id) < 0 && row >= 0) {
-        m_q->beginInsertRows(QModelIndex(), row, row);
-        mEntries.insert(row, id);
+        if (row > mEntries.count()) {
+        	m_q->beginInsertRows(QModelIndex(), mEntries.count(), mEntries.count());
+        	mEntries.insert(mEntries.count(), id);
+        } else {
+			m_q->beginInsertRows(QModelIndex(), row , row);
+        	mEntries.insert(row, id);
+        }
         m_q->endInsertRows();
+    } else if (row == -1) {
+        //we udpade whole model because we do not know parent collecion for given item
+        updateModel();
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::addItem");
 }
@@ -907,8 +920,8 @@ void CaItemModelPrivate::updateLayout()
 void CaItemModelPrivate::connectSlots()
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::connectSlots");
-    connect(mNotifier, SIGNAL(entryChanged(int,ChangeType)),
-            this, SLOT(updateModelItem(int,ChangeType)));
+    connect(mNotifier, SIGNAL(entryChanged(CaEntry ,ChangeType)),
+            this, SLOT(updateModelItem(CaEntry, ChangeType)));
 
     if (mQuery.parentId() > 0) {
         connect(mNotifier, SIGNAL(groupContentChanged(int)),
@@ -923,8 +936,8 @@ void CaItemModelPrivate::connectSlots()
 void CaItemModelPrivate::disconnectSlots()
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::disconnectSlots");
-    disconnect(mNotifier, SIGNAL(entryChanged(int,ChangeType)),
-               this, SLOT(updateModelItem(int,ChangeType)));
+    disconnect(mNotifier, SIGNAL(entryChanged(CaEntry ,ChangeType)),
+            this, SLOT(updateModelItem(CaEntry, ChangeType)));
     if (mQuery.parentId() > 0) {
         disconnect(mNotifier, SIGNAL(groupContentChanged(int)),
                    this, SLOT(updateModelContent(int)));
@@ -948,20 +961,24 @@ void CaItemModelPrivate::reconnectSlots()
  \param id of item to handle
  \param changeType change type
  */
-void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
+void CaItemModelPrivate::updateModelItem(
+    const CaEntry &entry, ChangeType changeType)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModelItem");
+    QSharedPointer<CaEntry> sharedEntry(new CaEntry(entry));
+    int previousCount = rowCount();
     switch (changeType) {
-    case AddChangeType:
-        addItem(id);
-        break;
-    case RemoveChangeType:
-        removeItem(id);
-        break;
-    default:
-        updateItemData(id);
-        break;
+        case AddChangeType:
+            addItem(sharedEntry->id());
+            break;
+        case RemoveChangeType:
+            removeItem(sharedEntry->id());
+            break;
+        default:
+            updateItemData(sharedEntry);
+            break;
     }
+    emitEmpty(previousCount);
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelItem");
 }
 
@@ -972,6 +989,8 @@ void CaItemModelPrivate::updateModelItem(int id, ChangeType changeType)
 void CaItemModelPrivate::updateModelContent(int id)
 {
     Q_UNUSED(id);
+    int previousCount = rowCount();
+
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::updateModelContent");
     QList<int> ids = mService->getEntryIds(mQuery);
 
@@ -980,5 +999,20 @@ void CaItemModelPrivate::updateModelContent(int id)
     } else {
         removeItems(ids);
     }
+    emitEmpty(previousCount);
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelContent");
+}
+
+/*!
+ Emits empty signal if model state was changed
+ \param id of parent
+ */
+void CaItemModelPrivate::emitEmpty(int previousCount)
+{
+    if ( previousCount && !rowCount()) {
+        emit m_q->empty(true);
+    }
+    if ( !previousCount && rowCount()) {
+        emit m_q->empty(false);
+    }
 }
