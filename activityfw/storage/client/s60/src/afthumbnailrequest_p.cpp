@@ -22,6 +22,7 @@
 #include "afstorageclient_p.h"
 #include "afstorageclient.h"
 #include "afentry.h"
+#include "afcmd.h"
 
 // -----------------------------------------------------------------------------
 /**

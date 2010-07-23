@@ -18,8 +18,10 @@ TEMPLATE = subdirs
 
 SUBDIRS  += hswidgetmodel \
             contentstorage \
-            homescreensrv_plat \
-            tsrc
+            homescreensrv_plat
+            
+exists(tsrc/tsrc.pro): SUBDIRS  += tsrc
+            
 symbian:SUBDIRS += activityfw
 symbian:SUBDIRS += taskswitcher
 symbian:SUBDIRS += hsappkeyhandler

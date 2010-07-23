@@ -49,6 +49,7 @@ ECOM_PLUGIN( cawidgetscanner.dll, cawidgetscanner.rsc )
 ECOM_PLUGIN( calocalizerscanner.dll, calocalizerscanner.rsc )
 ECOM_PLUGIN( carunningappmonitor.dll, carunningappmonitor.rsc )
 ECOM_PLUGIN( causifscanner.dll, causifscanner.rsc )
+ECOM_PLUGIN( caprogresscanner.dll, caprogresscanner.rsc )
 
 data=ZPRIVATE\20022F90\castorage.db          private\20022F90\castorage.db
 

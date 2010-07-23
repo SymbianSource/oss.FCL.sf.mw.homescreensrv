@@ -28,7 +28,6 @@
 #endif
 
 class TsTaskMonitor;
-class ActivityManager;
 class CaNotifier;
 class TsModelItem;
 

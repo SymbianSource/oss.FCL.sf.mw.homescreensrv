@@ -112,7 +112,7 @@ void CCaWidgetStorageHandler::SynchronizeL()
 void CCaWidgetStorageHandler::AddL( const CCaWidgetDescription* aWidget )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
-    UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
+    UpdateCompIdAndRemovableFlagL( aWidget->GetManifestFilePathName(), *entry );
     iStorage->AddL( entry );
 
     SetLocalizationsL( aWidget, entry->GetId() );
@@ -132,7 +132,7 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
         TUint aEntryId )
     {
     CCaInnerEntry* entry = aWidget->GetEntryLC();
-    UpdateComponentIdL( aWidget->GetManifestFilePathName(), *entry );
+    UpdateCompIdAndRemovableFlagL( aWidget->GetManifestFilePathName(), *entry );
     entry->SetId( aEntryId );
     if ( !aWidget->IsMissing() && aWidget->IsUsed() )
         {
@@ -148,7 +148,7 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
 
     SetLocalizationsL( aWidget, entry->GetId() );
 
-    if ( !aWidget->IsMissing() )
+    if ( !aWidget->IsMissing() && ( entry->GetFlags() & ERemovable ) )
         {
         AddWidgetToDownloadCollectionL( entry );
         }
@@ -400,7 +400,7 @@ void CCaWidgetStorageHandler::SetLocalizationsL(
 // ----------------------------------------------------------------------------
 //
 
-void CCaWidgetStorageHandler::UpdateComponentIdL(
+void CCaWidgetStorageHandler::UpdateCompIdAndRemovableFlagL(
         const TDesC& aManifestFilePathName, CCaInnerEntry& aEntry ) const
     {
     RArray<TComponentId> componentIds;
@@ -412,7 +412,7 @@ void CCaWidgetStorageHandler::UpdateComponentIdL(
 
     CleanupStack::PopAndDestroy( fileNameFilter );
 
-    if ( componentIds.Count() == 1 )
+    if( componentIds.Count() == 1 )
         {
         RBuf newComponentId;
         newComponentId.CleanupClosePushL();
@@ -426,13 +426,19 @@ void CCaWidgetStorageHandler::UpdateComponentIdL(
         const TBool componentIdAttributeFound = aEntry.FindAttribute(
                 KCaComponentId, oldComponentId );
 
-        if ( !componentIdAttributeFound || oldComponentId.Compare(
+        if( !componentIdAttributeFound || oldComponentId.Compare(
                 newComponentId ) != 0 )
             {
             // 'add' or 'update' the component id attribute value
             aEntry.AddAttributeL( KCaComponentId, newComponentId );
             }
-
+        CComponentEntry* entry = CComponentEntry::NewLC();
+        iSoftwareRegistry.GetComponentL( componentIds[0] , *entry );
+        if( entry->IsRemovable() )
+            {
+            aEntry.SetFlags( aEntry.GetFlags() | ERemovable );
+            }
+        CleanupStack::PopAndDestroy( entry );
         CleanupStack::PopAndDestroy( &oldComponentId );
         CleanupStack::PopAndDestroy( &newComponentId );
         }

@@ -60,7 +60,7 @@ LIBS += -lavkon \
 include(caclient_s60.pri)
 }
 
-win32: {
+!symbian: {
 DEPENDPATH += ./stub/inc \
               ./stub/src
 INCLUDEPATH += ./stub/inc

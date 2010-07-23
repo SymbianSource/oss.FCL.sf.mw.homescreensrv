@@ -17,6 +17,8 @@
 #include "afstorageclient.h"
 #include "afstorageclient_p.h"
 
+#include "afcmd.h"
+
 // -----------------------------------------------------------------------------
 /**
  * Constructor

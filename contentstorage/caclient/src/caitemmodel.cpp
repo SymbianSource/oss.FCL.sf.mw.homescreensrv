@@ -446,33 +446,44 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::data");
     QVariant variant;
-    if (modelIndex.isValid()) {
+    QSharedPointer<CaEntry> pEntry = entry(modelIndex);
+    if (!pEntry.isNull()) {
         switch (role) {
         case Qt::DisplayRole:
-            variant = displayRole(modelIndex);
+            variant = displayRole(pEntry.data());
             break;
         case Qt::DecorationRole:
-            variant = QVariant(HbIcon(entry(modelIndex)->makeIcon(mSize)));
+            variant = QVariant(HbIcon(pEntry->makeIcon(mSize)));
             break;
         case CaItemModel::IdRole:
-            variant = QVariant(entry(modelIndex)->id());
+            variant = QVariant(pEntry->id());
             break;
         case CaItemModel::TypeRole:
-            variant = QVariant(entry(modelIndex)->entryTypeName());
+            variant = QVariant(pEntry->entryTypeName());
             break;
         case CaItemModel::FlagsRole:
-            variant = qVariantFromValue(entry(modelIndex)->flags());
+            variant = qVariantFromValue(pEntry->flags());
             break;
         case CaItemModel::TextRole:
-            variant = QVariant(entry(modelIndex)->text());
+            variant = QVariant(pEntry->text());
             break;
         case CaItemModel::FullTextRole:
-            variant = QVariant(entry(modelIndex)->text() + QString(" ")
-                + entry(modelIndex)->description());
+            variant = QVariant(pEntry->text() + QString(" ") + pEntry->description());
             break;
         case CaItemModel::UninstalRole:
-      	    variant = QVariant(entry(modelIndex)->attribute(UNINSTALL_PROGRESS_APPLICATION_ATTRIBUTE_NAME).toInt());
+            variant = QVariant(
+                pEntry->attribute(UNINSTALL_PROGRESS_APPLICATION_ATTRIBUTE_NAME).toInt());
             break;
+        case CaItemModel::CollectionTitleRole:
+            if (!pEntry->attribute(COLLECTION_TITLE_NAME).isNull()) {
+                variant = QVariant(hbTrId(pEntry->
+                    attribute(COLLECTION_TITLE_NAME).toUtf8()));
+            }
+            else {
+                variant = QVariant(pEntry->text());
+            }
+            break;
+            
         default:
             variant = QVariant(QVariant::Invalid);
         }
@@ -559,11 +570,21 @@ QModelIndex CaItemModelPrivate::root()
  */
 QSharedPointer<CaEntry> CaItemModelPrivate::entry(const QModelIndex &modelIndex) const
 {
-    if (modelIndex.column() == 1) {
-        return mParentEntry;
-    } else {
-        return mEntries.at(modelIndex.row());
+    if (modelIndex.isValid()) {
+        if (modelIndex.column() == 1) {
+            return mParentEntry;
+        }
+        else {
+            int row = modelIndex.row();
+            if (row >= mEntries.count()) {
+                return QSharedPointer<CaEntry> ();
+            }
+            else {
+                return mEntries.at(row);
+            }
+        }
     }
+    return QSharedPointer<CaEntry> ();
 }
 
 /*!
@@ -593,22 +614,22 @@ bool CaItemModelPrivate::secondLineVisibility() const
  \param modelIndex item index
  \retval QVariant containing display role
  */
-QVariant CaItemModelPrivate::displayRole(const QModelIndex &modelIndex) const
+QVariant CaItemModelPrivate::displayRole(const CaEntry* entry) const
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::displayRole")
 
     QVariant result;
     if (mSecondLineVisibility) {
-        if (entry(modelIndex)->description().isEmpty()) {
-            result = entry(modelIndex)->text();
+        if (entry->description().isEmpty()) {
+            result = entry->text();
         } else {
             QList<QVariant> text;
-            text << entry(modelIndex)->text();
-            text << entry(modelIndex)->description();
+            text << entry->text();
+            text << entry->description();
             result = QVariant(text);
         }
     } else {
-        result = entry(modelIndex)->text();
+        result = entry->text();
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::displayRole")
     return result;
@@ -788,9 +809,19 @@ void CaItemModelPrivate::handleAddItems(const QList<int> &itemsList)
     const int oldItemCount(mEntries.count());
     if (oldItemCount) {
         const int newItemCount(itemsList.count());
+        int i = 0;
+        QList<int> oldList = mEntries.orderedIdList();
+        //we loop through items to find first added
+        while (i < oldList.count()) {
+            if (oldList[i] != itemsList[i]) {
+                oldList.takeAt(i);
+            } else {
+                ++i;
+            }
+        }
         if (newItemCount == oldItemCount) {
             // count is the same - check if item order changed
-            if (itemsList == mEntries.orderedIdList()) {
+            if (itemsList == oldList) {
                 // assume that if the order has not changed
                 // it had to be the secondary lines
                 updateModel();
@@ -798,20 +829,10 @@ void CaItemModelPrivate::handleAddItems(const QList<int> &itemsList)
                 updateLayout();
             }
         } else {
-            int i = 0;
-            QList<int> oldList = mEntries.orderedIdList();
-            //we loop through items to find first added
-            while (i < oldList.count()) {
-                if (oldList[i] != itemsList[i]) {
-                    oldList.takeAt(i);
-                } else {
-                    ++i;
-                }
-            }
             updateModel();
             //i is the index of first added item
-            emit m_q->scrollTo(i, QAbstractItemView::PositionAtTop);
         }
+        emit m_q->scrollTo(i, QAbstractItemView::PositionAtTop);
     } else {
         // items added to an empty list - add all as a single block
         addItemBlock(itemsList);
@@ -1000,6 +1021,7 @@ void CaItemModelPrivate::updateModelContent(int id)
         removeItems(ids);
     }
     emitEmpty(previousCount);
+    emitCountChange(previousCount);
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelContent");
 }
 
@@ -1014,5 +1036,16 @@ void CaItemModelPrivate::emitEmpty(int previousCount)
     }
     if ( !previousCount && rowCount()) {
         emit m_q->empty(false);
+    }
+}
+
+/*!
+ Emits empty signal if count of item in model was change
+ \param previousCount 
+ */
+void CaItemModelPrivate::emitCountChange(int previousCount)
+{
+    if (previousCount != rowCount()) {
+        emit m_q->countChange();
     }
 }

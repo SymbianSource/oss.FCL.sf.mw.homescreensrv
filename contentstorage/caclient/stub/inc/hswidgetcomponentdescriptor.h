@@ -25,6 +25,8 @@
 class HsWidgetComponentDescriptor
 {
 public:
+    HsWidgetComponentDescriptor();
+    HsWidgetComponentDescriptor(const HsWidgetComponentDescriptor& copyFrom);
     QString installationPath;
     QString uri;
     QString title;

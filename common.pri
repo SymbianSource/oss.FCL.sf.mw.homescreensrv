@@ -38,7 +38,7 @@ CONFIG(debug, debug|release) {
     SUBDIRPART = release
 }
 
-win32: OUTPUT_DIR = $$PWD/../bin/$$SUBDIRPART
+!symbian: OUTPUT_DIR = $$PWD/../bin/$$SUBDIRPART
 symbian: OUTPUT_DIR = $$PWD/bin
 
 SOURCE_DIR = $$PWD/inc
@@ -73,9 +73,7 @@ symbian {
     INCLUDEPATH += $$MOC_DIR
     TARGET.CAPABILITY = ALL -TCB
     TARGET.EPOCALLOWDLLDATA=1
-}
-
-win32 {
+} else {
     # add platfrom API for windows
     INCLUDEPATH += \                
                 $$PWD/homescreensrv_plat/contentstorage_api \
@@ -85,7 +83,7 @@ win32 {
 
 plugin: !isEmpty(PLUGIN_SUBDIR): DESTDIR = $$OUTPUT_DIR/$$PLUGIN_SUBDIR
 
-win32: plugin { # copy manifiers
+!symbian: plugin { # copy manifiers
     manifest.path = $$DESTDIR
     manifest.files = ./resource/*.manifest ./resource/*.xml
     manifest.CONFIG += no_build
@@ -120,8 +118,7 @@ symbian {
         for(entry, entries) : BLD_INF_RULES.prj_exports += "./$$entry z:/$$replace(2, ^/,)/$$basename(entry)"
     }
     export ( BLD_INF_RULES.prj_exports)
-}
-win32 {
+} else {
     name = $$replace(1, [/\\\\\.\*], _)
     eval ($${name}.path = $${OUTPUT_DIR}/$${2})
     eval ($${name}.files = $$1)

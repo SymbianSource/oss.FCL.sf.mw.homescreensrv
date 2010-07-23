@@ -541,12 +541,6 @@ CCaInnerEntry* CCaWidgetDescription::GetEntryLC( ) const
     if ( iLibrary != KNullDesC )
         {
         entry->AddAttributeL(KAttrWidgetLibrary, iLibrary);
-        entry->SetFlags(entry->GetFlags() | ERemovable);
-        if (WidgetScannerUtils::IsFileOnDrive( iLibrary,
-                DriveInfo::EDefaultRom ) )
-            {
-            entry->SetFlags( entry->GetFlags() & ~ERemovable );
-            }
         }
     if ( iPath != KNullDesC )
         {

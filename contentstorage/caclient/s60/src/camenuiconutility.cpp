@@ -67,7 +67,7 @@ LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry)
  \param sie const reference to icon size.
  \retval icon.
  */
-LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
+LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSize &size)
 {
     HbIcon icon;
     
@@ -75,22 +75,20 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
     CleanupClosePushL(apaLsSession);
     User::LeaveIfError(apaLsSession.Connect());
 
-    QString uidString(entry.attribute(appUidAttributeName));
-    TUid uid;
-    uid = uid.Uid(uidString.toInt());
-    
+    TUid uid = uid.Uid(uidValue);
     CApaAppServiceInfoArray* skinArray(NULL);
-    TRAPD( err, skinArray = apaLsSession.GetAppServiceOpaqueDataLC(uid, TUid::Uid(0x2002DCF3));
-    if (err == KErrNone && skinArray ) {
-        TArray<TApaAppServiceInfo> tmpArray( skinArray->Array() );
-        if ( tmpArray.Count() ) {
-            TPtrC8 opaque(tmpArray[0].OpaqueData());
-            const TPtrC16 iconName((TText16*) opaque.Ptr(),(opaque.Length()+1)>>1);
-            icon = HbIcon( XQConversions:: s60DescToQString( iconName ) );
-        } 
-    }
-    CleanupStack::PopAndDestroy(skinArray);
-    );
+    TRAPD( err, skinArray =
+        apaLsSession.GetAppServiceOpaqueDataLC(uid, TUid::Uid(0x2002DCF3));
+        if (err == KErrNone && skinArray ) {
+            TArray<TApaAppServiceInfo> tmpArray( skinArray->Array() );
+            if ( tmpArray.Count() ) {
+                TPtrC8 opaque(tmpArray[0].OpaqueData());
+                const TPtrC16 iconName((TText16*) opaque.Ptr(),(opaque.Length()+1)>>1);
+                icon = HbIcon( XQConversions:: s60DescToQString( iconName ) );
+            }
+        }
+        CleanupStack::PopAndDestroy(skinArray);
+        );
     
     if (icon.isNull() || !(icon.size().isValid())) {
         TSize iconSize(size.width(), size.height());
@@ -130,7 +128,6 @@ LOCAL_C HbIcon getIconFromApparcL(const CaEntry& entry, const QSize &size)
         CleanupStack::PopAndDestroy(apaMaskedBitmap);
     }
     CleanupStack::PopAndDestroy(&apaLsSession);
-    
     return icon;
 }
 
@@ -216,7 +213,16 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
     icon = getIconFromEntry(entry);
  
     if (icon.isNull() || !(icon.size().isValid())) {
-        TRAP_IGNORE(icon = getIconFromApparcL(entry, size));
+        QString uidString(entry.attribute(appUidAttributeName));
+        bool uidOk(false);
+        int uidValue = uidString.toInt(&uidOk);
+        if (!uidOk) {
+            uidString = entry.iconDescription().applicationId();
+            uidValue = uidString.toInt(&uidOk);
+        }
+        if (uidOk) {
+            TRAP_IGNORE(icon = getIconFromApparcL(uidValue, size));
+        }
     }
  
     if (icon.isNull() || !(icon.size().isValid())) {
@@ -225,8 +231,8 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
  
     if (entry.entryTypeName() == XQConversions::s60DescToQString(
             KCaTypeWidget)) {
-        icon.addBadge(Qt::AlignBottom | Qt::AlignRight,
-		    HbIcon("qtg_small_homescreen"));
+        icon.addProportionalBadge(Qt::AlignBottom | Qt::AlignRight,
+		    HbIcon("qtg_small_homescreen"), QSizeF(0.5, 0.5));
     }
     return icon;
 }

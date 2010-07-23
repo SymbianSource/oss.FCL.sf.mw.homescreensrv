@@ -49,7 +49,9 @@ public:
         FlagsRole,
         TextRole,//contains title represented as QString,
         FullTextRole, //'title description' convinient for operations such as search
-        UninstalRole  //contains progress status as decimal number in QString
+        UninstalRole,  //contains progress status as decimal number in QString
+        CollectionTitleRole //contains title represented as QString,
+
     };
 
     // Function declarations
@@ -83,6 +85,7 @@ public:
     void scrollTo(int row, QAbstractItemView::ScrollHint hint =
         QAbstractItemView::EnsureVisible);
     void empty(bool value);
+    void countChange();
 
 protected:
     // data

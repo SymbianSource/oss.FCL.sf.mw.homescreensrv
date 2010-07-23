@@ -25,5 +25,6 @@ const char WIDGET_ENTRY_TYPE_NAME[] = "widget";
 const char URL_ENTRY_TYPE_NAME[] = "url";
 const char PACKAGE_ENTRY_TYPE_NAME[] = "package";
 const char TEMPLATED_APPLICATION_ENTRY_TYPE_NAME[] = "templatedApplication";
+const char COLLECTION_TITLE_NAME[] = "title_name";
 
 #endif //CACLIENT_DEFINES_H

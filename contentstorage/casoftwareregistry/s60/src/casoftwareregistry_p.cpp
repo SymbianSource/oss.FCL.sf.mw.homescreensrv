@@ -36,7 +36,8 @@ using namespace Usif;
 _LIT(KConfirmMessageKey, "MIDlet-Delete-Confirm");
 _LIT(KCaScrPropertyDomainCategory, "Domain-Category");
 _LIT(KCaScrPropertyMidletDescryption, "MIDlet-Description");
-const int maxLogsCount = 20;
+const int maxLogsCount = 20;  // should be 50 - workaround for 
+// ou1cimx1#476143 Dialog crash when label contains big amount of lines
 
 /*!
  Constructor
@@ -217,41 +218,37 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
         CleanupClosePushL(scr);
         if (scr.Connect() == KErrNone) {
             CComponentEntry* entry = CComponentEntry::NewLC();
-
-            TBool resultCode = EFalse;
-            resultCode = scr.GetComponentL(componentId, *entry);
-            if ( resultCode) {
+            if (scr.GetComponentL(componentId, *entry)) {
                 result = entryDetailsL(*entry);
-            }
+                if (entry->SoftwareType().Compare(KSoftwareTypeJava) == 0) {
+                    CPropertyEntry* domainProperty =
+                        scr.GetComponentPropertyL(componentId,
+                            KCaScrPropertyDomainCategory);
+                    CleanupStack::PushL(domainProperty);
+                    if (domainProperty &&
+                        domainProperty->PropertyType() ==
+                            CPropertyEntry::ELocalizedProperty) {
+                        result[CaSoftwareRegistry::componentProtectionDomainKey()] =
+                            XQConversions::s60DescToQString(
+                                static_cast<CLocalizablePropertyEntry*>(
+                                    domainProperty)->StrValue());
+                    }
 
-            if (entry->SoftwareType().Compare(KSoftwareTypeJava) == 0) {
-                CPropertyEntry* domainProperty =
-                    scr.GetComponentPropertyL(componentId,
-                        KCaScrPropertyDomainCategory);
-                CleanupStack::PushL(domainProperty);
-                if (domainProperty &&
-                    domainProperty->PropertyType() ==
-                        CPropertyEntry::ELocalizedProperty) {
-                    result[CaSoftwareRegistry::componentProtectionDomainKey()] =
-                        XQConversions::s60DescToQString(
-                            static_cast<CLocalizablePropertyEntry*>(
-                                domainProperty)->StrValue());
+                    CPropertyEntry *midletDescryption =
+                        scr.GetComponentPropertyL(componentId,
+                            KCaScrPropertyMidletDescryption);
+                    CleanupStack::PushL(midletDescryption);
+                    if (midletDescryption &&
+                        midletDescryption->PropertyType() ==
+                            CPropertyEntry::ELocalizedProperty) {
+                        result[CaSoftwareRegistry::componentDescriptionKey()] =
+                            XQConversions::s60DescToQString(
+                                static_cast<CLocalizablePropertyEntry*>(
+                                    midletDescryption)->StrValue());
+                    }
+                    CleanupStack::PopAndDestroy(midletDescryption);
+                    CleanupStack::PopAndDestroy(domainProperty);
                 }
-
-                CPropertyEntry *midletDescryption =
-                    scr.GetComponentPropertyL(componentId,
-                        KCaScrPropertyMidletDescryption);
-                CleanupStack::PushL(midletDescryption);
-                if (midletDescryption &&
-                    midletDescryption->PropertyType() ==
-                        CPropertyEntry::ELocalizedProperty) {
-                    result[CaSoftwareRegistry::componentDescriptionKey()] =
-                        XQConversions::s60DescToQString(
-                            static_cast<CLocalizablePropertyEntry*>(
-                                midletDescryption)->StrValue());
-                }
-                CleanupStack::PopAndDestroy(midletDescryption);
-                CleanupStack::PopAndDestroy(domainProperty);
             }
             CleanupStack::PopAndDestroy(entry);
         }
@@ -439,7 +436,7 @@ QString CaSoftwareRegistryPrivate::operationTypeL(int operationType) const
 QString CaSoftwareRegistryPrivate::operationTime(TTime time) const
 {
     TDateTime dt = time.DateTime();
-    QDate date(dt.Year(), dt.Month()+1, dt.Day());
+    QDate date(dt.Year(), dt.Month() + 1, dt.Day() + 1);
     HbExtendedLocale hbLoc;
     return hbLoc.format(date, r_qtn_date_usual_with_zero);
 }

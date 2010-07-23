@@ -24,31 +24,6 @@
 //
 // -----------------------------------------------------------------------------
 //
-TBool WidgetScannerUtils::IsFileOnDrive( const TDesC& aFileName,
-        const DriveInfo::TDefaultDrives& aDefaultDrive )
-    {
-    TBool result = EFalse;
-    if ( aFileName.Length() )
-        {
-        TInt drive;
-        TInt err = DriveInfo::GetDefaultDrive( aDefaultDrive, drive );
-        if ( !err )
-            {
-            TInt fileDrive;
-            err = RFs::CharToDrive( aFileName[0], fileDrive );
-            if ( !err && fileDrive == drive )
-                {
-                result = ETrue;
-                }
-            }
-        }
-    return result;
-    }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
 void WidgetScannerUtils::CurrentMmcId( const RFs& aFs, TDes& aMmcId )
     {
     TInt mmcDrive;

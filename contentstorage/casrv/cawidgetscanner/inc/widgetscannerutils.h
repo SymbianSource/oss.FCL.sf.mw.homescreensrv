@@ -35,15 +35,6 @@ class WidgetScannerUtils
 public:
 
     /**
-     * Checks if file is present on a drive
-     * @param aFileName file name
-     * @param aDriveLetter drive letter
-     * @return ETrue if file is present, EFalse if not
-     */
-    static TBool IsFileOnDrive( const TDesC& aFileName,
-            const DriveInfo::TDefaultDrives& aDefaultDrive );
-
-    /**
      * Returns current MMC id.
      * @param aFs file server session reference.
      * @param aMmcId mmc id reference.

@@ -5,6 +5,12 @@
       <confml:setting ref="Name" name="Name" type="string">
         <confml:desc>Collection name. It is only identifier. Localized name should be used too.</confml:desc>
       </confml:setting>
+      <confml:setting ref="ColShortName" name="Collection Short Name" type="string">
+        <confml:desc>Collection short name. Optional.</confml:desc>
+      </confml:setting>
+      <confml:setting ref="ColTitleName" name="Collection Title Name" type="string">
+        <confml:desc>Collection title name. Optional.</confml:desc>
+      </confml:setting>
       <confml:setting ref="GroupName" name="Collection Group Name" type="string">
         <confml:desc>Group name. Identify collection where application with predefined group name should be added after installation. Should be the same as not localized name.</confml:desc>
       </confml:setting>
@@ -33,6 +39,9 @@
       <confml:setting ref="Name" name="Entry name" type="string">
         <confml:desc>Name. In case of applications and homescreen widgets this is only information field( Names are taken from system ).</confml:desc>
       </confml:setting>
+      <confml:setting ref="ShortName" name="ShortName" type="string">
+        <confml:desc>Item short name. Available for URL. Optional.</confml:desc>
+      </confml:setting>
       <confml:setting ref="DestinationUid" name="Uid" type="string" relevant="Type=&quot;application&quot;">
         <confml:desc>Application uid. Uid of application in decimal format. Must for application type.</confml:desc>
         <xs:pattern value="^[-+]?[0-9]{9}"/>
@@ -58,19 +67,19 @@
   </confml:feature>
    <confml:data>
     <confml:CaStorageDbSetting>
-      <confml:Collections extensionPolicy="replace"><confml:Name>Favorites</confml:Name><confml:GroupName>Favorites</confml:GroupName><confml:Flags>4</confml:Flags><confml:LocName></confml:LocName><confml:IconFileName>qtg_large_applications_user</confml:IconFileName></confml:Collections>
+      <confml:Collections extensionPolicy="replace"><confml:Name>Favorites</confml:Name><confml:GroupName>Favorites</confml:GroupName><confml:ColTitleName>FavoritesT</confml:ColTitleName><confml:Flags>4</confml:Flags><confml:LocName></confml:LocName><confml:IconFileName>qtg_large_applications_user</confml:IconFileName></confml:Collections>
       <confml:Items extensionPolicy="append"><confml:Type>application</confml:Type><confml:Name>calendar</confml:Name><confml:DestinationUid>268458241</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Camera</confml:Name><confml:DestinationUid>270501242</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Contacts</confml:Name><confml:DestinationUid>537014009</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Email</confml:Name><confml:DestinationUid>537023930</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>FM Radio</confml:Name><confml:DestinationUid>270530934</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Internet</confml:Name><confml:DestinationUid>222222222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Maps</confml:Name><confml:DestinationUid>222222222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Internet</confml:Name><confml:DestinationUid>222242222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Maps</confml:Name><confml:DestinationUid>222332222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Messaging</confml:Name><confml:DestinationUid>537001593</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Music</confml:Name><confml:DestinationUid>270564450</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Photos (camera)</confml:Name><confml:DestinationUid>536913858</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
       <confml:Items><confml:Type>application</confml:Type><confml:Name>Settings</confml:Name><confml:DestinationUid>268458220</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Videos (video camera)</confml:Name><confml:DestinationUid>222222222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
+      <confml:Items><confml:Type>application</confml:Type><confml:Name>Videos (video camera)</confml:Name><confml:DestinationUid>222111222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
     </confml:CaStorageDbSetting>
   </confml:data>
 

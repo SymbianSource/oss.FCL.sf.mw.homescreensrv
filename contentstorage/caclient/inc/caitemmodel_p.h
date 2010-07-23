@@ -58,7 +58,7 @@ public:
     QSharedPointer<CaEntry> entry(const QModelIndex &modelIndex) const;
     void setSecondLineVisibility(bool secondLineVisibility);
     bool secondLineVisibility() const;
-    QVariant displayRole(const QModelIndex &modelIndex) const;
+    QVariant displayRole(const CaEntry* entry) const;
     void setParentId(int parentId);
     void setFlagsOn(const EntryFlags &onFlags);
     void setFlagsOff(const EntryFlags &offFlags);
@@ -85,6 +85,7 @@ private:
     void disconnectSlots();
     void reconnectSlots();
     void emitEmpty(int previousCount);
+    void emitCountChange(int previousCount);
 
 private slots:
 

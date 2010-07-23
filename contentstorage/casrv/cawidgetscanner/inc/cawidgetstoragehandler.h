@@ -142,11 +142,12 @@ private:
 
     /**
      * Adds or updates component id attribute in entry based on SCR provided data
+     * and removable flag - get info from src.
      * @param aPackageUid uid of the package which the widget represented by aEntry
-     * is delivered with
+     * is delivered with.
      * @param aEntry widget entry being updated with component id attribute.
      */
-    void UpdateComponentIdL( const TDesC& aManifestFilePathName,
+    void UpdateCompIdAndRemovableFlagL( const TDesC& aManifestFilePathName,
             CCaInnerEntry& aEntry ) const;
 
 private:

@@ -18,6 +18,28 @@
 
 #include "hswidgetcomponentdescriptor.h"
 
+
+HsWidgetComponentDescriptor::HsWidgetComponentDescriptor():installationPath(),uri(),title(),
+	description(),iconUri(),hidden(),serviceXml(),version(),library(),translationFilename(),uid(0),previewImage()
+{}
+
+HsWidgetComponentDescriptor::HsWidgetComponentDescriptor(const HsWidgetComponentDescriptor& copyFrom) {
+    this->installationPath = copyFrom.installationPath;
+    this->uri = copyFrom.uri;
+    this->title = copyFrom.title;
+    this->description = copyFrom.description;
+    this->iconUri = copyFrom.iconUri;
+    this->hidden = copyFrom.hidden;
+    this->serviceXml = copyFrom.serviceXml;
+    this->version = copyFrom.version;
+    this->library = copyFrom.library;
+    this->translationFilename = copyFrom.translationFilename;
+    this->uid = copyFrom.uid;
+    this->previewImage = copyFrom.previewImage;
+
+}
+
+
 bool HsWidgetComponentDescriptor::isValid()
 {
     bool ret(false);

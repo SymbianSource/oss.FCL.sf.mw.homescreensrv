@@ -19,7 +19,7 @@
 #ifndef HSWIDGETMODEL_GLOBAL_H
 #define HSWIDGETMODEL_GLOBAL_H
 
-#include <Qt/qglobal.h>
+#include <qglobal.h>
 
 
 #ifdef HSWIDGETMODEL_LIB
