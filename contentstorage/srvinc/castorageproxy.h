@@ -154,6 +154,18 @@ public:
     IMPORT_C void CustomSortL( const RArray<TInt>& aEntryIds,
             const TInt aGroupId );
 
+    
+    /**
+     * Saves a copy of database to private.
+     */
+	IMPORT_C void SaveDatabaseL();
+	
+    /**
+     * Marks db to be restored from backup by next restart
+     */
+	IMPORT_C void RestoreDatabaseL();
+    
+    
     /**
      * Loads data base from rom.
      */

@@ -421,10 +421,8 @@ void CaEntry::setAttribute(const QString &name, const QString &value)
 HbIcon CaEntry::makeIcon(const QSize &size) const
 {
     CACLIENTTEST_FUNC_ENTRY("CaEntry::makeIcon");
-    HbIcon icon;
-    if (CaIconCache::cache()->exist(*this,size)) {
-        icon = CaIconCache::cache()->icon(*this,size);
-    } else {
+    HbIcon icon = CaIconCache::cache()->icon(*this,size);
+    if (icon.isNull()) {
         icon = m_d->makeIcon(size);
         CaIconCache::cache()->insert(*this, size, icon);
     }

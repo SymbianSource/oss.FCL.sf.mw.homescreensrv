@@ -26,6 +26,8 @@
 #include <xqconversions.h>
 #include <driveinfo.h>
 
+#include "cauninstallnotifier.h"
+#include "cauninstallnotifier_p.h"
 #include "casoftwareregistry.h"
 #include "casoftwareregistry_p.h"
 #include "cadefs.h"
@@ -54,6 +56,7 @@ CaSoftwareRegistryPrivate::CaSoftwareRegistryPrivate(
  */
 CaSoftwareRegistryPrivate::~CaSoftwareRegistryPrivate()
 {
+    
 }
 
 /*!
@@ -358,6 +361,14 @@ QList<CaSoftwareRegistryPrivate::DetailMap>
     QList<CaSoftwareRegistryPrivate::DetailMap> logMap;
     TRAP_IGNORE(logMap = retrieveLogEntriesL());
     return logMap;
+}
+/*!
+ Creating uninstall notifier
+ \return CaUninstallNotifier instance
+ */
+CaUninstallNotifier *CaSoftwareRegistryPrivate::createUninstallNotifier() const
+{
+    return CaUninstallNotifier::notifier();
 }
 
 /*!

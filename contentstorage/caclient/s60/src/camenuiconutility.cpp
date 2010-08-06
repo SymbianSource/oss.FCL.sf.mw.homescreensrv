@@ -116,8 +116,6 @@ LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSize &size)
                     
                     TPtr ptr(fileNameFromApparc->Des());
                     CaMenuIconMifUtility::GetPixmapByFilenameL(ptr,size,pixmap);
-        
-                    pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
                     icon = HbIcon(QIcon(pixmap));
                 } else {
                     icon = HbIcon(fileName);
@@ -149,7 +147,7 @@ LOCAL_C HbIcon getDefaultIcon(const CaEntry& entry)
             XQConversions::s60DescToQString(KCaTypeCollection) ||
             entry.entryTypeName() == 
             XQConversions::s60DescToQString(KCaTypeCollectionDownload)) {
-        icon = HbIcon("qtg_large_application");
+        icon = HbIcon("qtg_large_applications_user");
     } else if (entry.entryTypeName() ==
         XQConversions::s60DescToQString(KCaTypeUrl)) {
         icon = HbIcon("qtg_large_application");

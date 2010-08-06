@@ -19,6 +19,7 @@ TEMPLATE = subdirs
 #Exporting ibys
 BLD_INF_RULES.prj_exports += \
      "../castorage/conf/castoragedb.confml APP_LAYER_CONFML(castoragedb.confml)" \
+     "../castorage/conf/CI_castoragedb.confml APP_LAYER_CONFML(CI_castoragedb.confml)" \
      "../castorage/conf/castoragedb.implml APP_LAYER_CRML(castoragedb.implml)" \
      "../castorage/data/castoragedb_create.sql APP_LAYER_CRML(castoragedb_templates/castoragedb_create.sql)" \
      "../castorage/conf/castoragedb_templates/castoragedb_variant.sql APP_LAYER_CRML(castoragedb_templates/castoragedb_variant.sql)" \ 
@@ -40,7 +41,6 @@ BLD_INF_RULES.prj_mmpfiles += "casathandler.mmp" \
     "../casrv/cawidgetscanner/group/cawidgetscanner.mmp" \
     "../casrv/carunningappmonitor/group/carunningappmonitor.mmp" \
     "../casrv/causifscanner/group/causifscanner.mmp" \
-    "../casrv/caprogresscanner/group/caprogresscanner.mmp" \
     
 tests_krakow {
         BLD_INF_RULES.prj_mmpfiles += \

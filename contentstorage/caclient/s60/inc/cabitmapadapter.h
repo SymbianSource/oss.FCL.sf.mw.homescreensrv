@@ -32,15 +32,6 @@ class CFbsBitmap;
 class CaBitmapAdapter
 {
 public:
-
-    //Static convertion methods between Symbian and Qt objects
-
-    /**
-     * Make bitmap copy, used to get rid of compression for extended bitmap
-     * @param input input bitmap.
-     * @return copied bitmap.
-     */
-    static CFbsBitmap *copyBitmapLC(CFbsBitmap *input);
     
     /**
      * Convert from bitmap and mask to qpixmap

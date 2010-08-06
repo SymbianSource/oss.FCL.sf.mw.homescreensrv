@@ -48,6 +48,12 @@ public:
     virtual ~CCaWidgetDescription();
 
     /**
+     * @return new heap allocated object being a copy of the object.
+     * Ownership is passed to the caller.
+     */
+    CCaWidgetDescription *CloneL();
+    
+    /**
      * Static method to compare two CCaWidgetDescription objects
      * used in Find() method
      * @param aFirst first item to compare
@@ -55,7 +61,7 @@ public:
      * @return ETrue if widget uri value is the same in both objects,
      * otherwise returns EFalse
      */
-    static TBool Compare( const CCaWidgetDescription& aFirst,
+    static TBool CompareUri( const CCaWidgetDescription& aFirst,
             const CCaWidgetDescription& aSecond );
 
     /**

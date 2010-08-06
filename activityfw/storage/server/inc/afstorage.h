@@ -35,6 +35,8 @@ public:
     void AddActivityL(CAfEntry &entry);
     
     void UpdateActivityL(CAfEntry &entry);
+    
+    void SaveActivityL(CAfEntry &entry);
 
     void DeleteActivityL(CAfEntry &entry);
 

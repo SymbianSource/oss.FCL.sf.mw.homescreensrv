@@ -17,75 +17,40 @@
 
 #ifndef AFSTORAGECLIENT_H
 #define AFSTORAGECLIENT_H
-#include <QObject>
-#include <afasyncrequestobserver.h>
 
-#ifdef ACTIVITY_LIB
-    #define ACTIVITY_EXPORT Q_DECL_EXPORT
-#else
-    #define ACTIVITY_EXPORT Q_DECL_IMPORT
-#endif
+#include "afasyncrequestobserver.h"
 
-class AfStorageClientPrivate;
-class AfStorageEntry;
+class CAfStorageClientPrivate;
+class CAfEntry;
 
-class ACTIVITY_EXPORT AfStorageClient: public QObject,
-                                       public MAfAsyncRequestObserver
+NONSHARABLE_CLASS(CAfStorageClient) : public CBase
 {
-    Q_OBJECT
 public:
-    AfStorageClient(QObject* =0);
-
-    ~AfStorageClient();
-
-    int connect();
-
-    int addActivity(const AfStorageEntry &entry, const QPixmap& imageSource = QPixmap());
-
-    int updateActivity(const AfStorageEntry &entry, const QPixmap& imageSource = QPixmap());
-
-    int removeActivity(const AfStorageEntry &entry);
-
-    int removeApplicationActivities(const AfStorageEntry &entry);
-
-    int activities(QList<AfStorageEntry> &dst);
-
-    int applicationActivities(QList<AfStorageEntry> &dst, 
-                              const AfStorageEntry &entry);
-
-    int activityData(AfStorageEntry &dst, const AfStorageEntry &entry);
-
-    int waitActivity();
-    
-    int launchActivity(const AfStorageEntry &entry);
-    
-    int getThumbnail(QSize size, QString imagePath, void* userDdata);
-    
-    int notifyDataChange();
+    IMPORT_C static CAfStorageClient *NewL(MAfAsyncRequestObserver &observer);
+    IMPORT_C static CAfStorageClient *NewLC(MAfAsyncRequestObserver &observer);
+    IMPORT_C virtual ~CAfStorageClient();
 
 private:
-    void asyncRequestCompleated(int, int, const QString &);
-
-    void asyncRequestCompleated(int, int, const QPixmap&, void*);
-
-    void asyncRequestCompleated(int result,
-                                int requestType);
-
-signals:
-    void activityRequested(const QString &activityId);
-
-    void thumbnailRequested(QPixmap thumbnailPixmap, void *userData);
+    CAfStorageClient();
+    void ConstructL(MAfAsyncRequestObserver &observer);
     
-    void dataChanged();
+public:    
+    IMPORT_C int addActivity(const CAfEntry &entry, TInt imageHandle);
+    IMPORT_C int updateActivity(const CAfEntry &entry, TInt imageHandle);
+    IMPORT_C int saveActivity(const CAfEntry &entry, TInt imageHandle);
+    IMPORT_C int removeActivity(const CAfEntry &entry);
+    IMPORT_C int removeApplicationActivities(const CAfEntry &entry);
+    IMPORT_C int activities(RPointerArray<CAfEntry> &dst);
+    IMPORT_C int applicationActivities(RPointerArray<CAfEntry> &dst, const CAfEntry &entry);
+    IMPORT_C int activityData(CAfEntry *&dst, const CAfEntry &entry);
+    IMPORT_C int waitActivity();
+    IMPORT_C int launchActivity(const CAfEntry &entry);
+    IMPORT_C int getThumbnail(const TSize &size, const TDesC &imagePath, void *userData);
+    IMPORT_C int notifyDataChange();
+
+private: 
+    CAfStorageClientPrivate *d_ptr;
     
-private:
-    /**
-     * Private client implementation.
-     * Own.
-     */
-    AfStorageClientPrivate *d_ptr;
-    
-    friend class AfStorageClientPrivate;
 };
 
 #endif //AFSTORAGECLIENT_H

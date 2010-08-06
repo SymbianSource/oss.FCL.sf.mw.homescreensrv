@@ -21,8 +21,11 @@
 #include <qabstractsecuritysession.h>
 #include <qservicecontext.h>
 
+#include "afstorageproxy.h"
 #include "afclient.h"
 #include "afmanager.h"
+#include "afactivation.h"
+#include "afactivitystorage.h"
 
 QObject *AfServicePlugin::createInstance(const QServiceInterfaceDescriptor &descriptor, QServiceContext *context, QAbstractSecuritySession *session)
 {
@@ -30,9 +33,13 @@ QObject *AfServicePlugin::createInstance(const QServiceInterfaceDescriptor &desc
     Q_UNUSED(session);
 
     if (descriptor.interfaceName() == "com.nokia.qt.activities.ActivityClient") {
-        return new AfClient(QSharedPointer<AfStorageClient>(new AfStorageClient()));
+        return new AfClient(QSharedPointer<AfActivityStorage>(new AfActivityStorage()), QSharedPointer<AfActivation>(new AfActivation()));
     } else if (descriptor.interfaceName() == "com.nokia.qt.activities.ActivityManager") {
-        return new AfManager(QSharedPointer<AfStorageClient>(new AfStorageClient()));
+        return new AfManager(QSharedPointer<AfStorageProxy>(new AfStorageProxy()));
+    } else if (descriptor.interfaceName() == "com.nokia.qt.activities.Storage") {
+        return new AfActivityStorage();
+    } else if (descriptor.interfaceName() == "com.nokia.qt.activities.Activation") {
+        return new AfActivation();
     } else {
         return NULL;
     }

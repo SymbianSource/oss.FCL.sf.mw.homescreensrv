@@ -113,8 +113,9 @@ public:
      * Stores touch data information in storage.
      *
      * @param aEntryId The entry id for which touch data should be stored.
+     * @param aRemovable if entry is removable then flag is set if necessary.
      */
-    virtual void TouchL( const TInt aEntryId ) = 0;
+    virtual void TouchL( const TInt aEntryId, TBool aRemovable ) = 0;
 
     /**
      * Get database property from db.
@@ -148,6 +149,17 @@ public:
     virtual void CustomSortL( const RArray<TInt>& aEntryIds,
             const TInt aGroupId ) = 0;
 
+    
+    /**
+    * Saves a copy of database to private.
+    */
+    virtual void RestoreDatabaseL() = 0;
+        
+    /**
+     * Saves a copy of database to private.
+     */
+    virtual void SaveDatabaseL() = 0;
+    
     /**
      * Loads data base from rom.
      */

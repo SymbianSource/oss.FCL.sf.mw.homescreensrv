@@ -23,16 +23,16 @@
 
 // ---- contentstorage --------------------------------------------
 file=ABI_DIR\BUILD_DIR\caapphandlerplugin.dll     SHARED_LIB_DIR\caapphandlerplugin.dll
-data=\epoc32\data\z\hsresources\plugins\commandhandler\caapphandlerplugin.qtplugin  hsresources\plugins\commandhandler\caapphandlerplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\commandhandler\caapphandlerplugin.xml       hsresources\plugins\commandhandler\caapphandlerplugin.xml
+data=\epoc32\data\z\resource\qt\plugins\commandhandler\caapphandlerplugin.qtplugin  resource\qt\plugins\commandhandler\caapphandlerplugin.qtplugin
+data=\epoc32\data\z\resource\qt\plugins\commandhandler\caapphandlerplugin.xml       resource\qt\plugins\commandhandler\caapphandlerplugin.xml
 
 file=ABI_DIR\BUILD_DIR\catapphandlerplugin.dll     SHARED_LIB_DIR\catapphandlerplugin.dll
-data=\epoc32\data\z\hsresources\plugins\commandhandler\catapphandlerplugin.qtplugin  hsresources\plugins\commandhandler\catapphandlerplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\commandhandler\catapphandlerplugin.xml       hsresources\plugins\commandhandler\catapphandlerplugin.xml
+data=\epoc32\data\z\resource\qt\plugins\commandhandler\catapphandlerplugin.qtplugin  resource\qt\plugins\commandhandler\catapphandlerplugin.qtplugin
+data=\epoc32\data\z\resource\qt\plugins\commandhandler\catapphandlerplugin.xml       resource\qt\plugins\commandhandler\catapphandlerplugin.xml
 
 file=ABI_DIR\BUILD_DIR\caurlhandlerplugin.dll     SHARED_LIB_DIR\caurlhandlerplugin.dll
-data=\epoc32\data\z\hsresources\plugins\commandhandler\caurlhandlerplugin.qtplugin  hsresources\plugins\commandhandler\caurlhandlerplugin.qtplugin
-data=\epoc32\data\z\hsresources\plugins\commandhandler\caurlhandlerplugin.xml       hsresources\plugins\commandhandler\caurlhandlerplugin.xml
+data=\epoc32\data\z\resource\qt\plugins\commandhandler\caurlhandlerplugin.qtplugin  resource\qt\plugins\commandhandler\caurlhandlerplugin.qtplugin
+data=\epoc32\data\z\resource\qt\plugins\commandhandler\caurlhandlerplugin.xml       resource\qt\plugins\commandhandler\caurlhandlerplugin.xml
 
 file=ABI_DIR\BUILD_DIR\caclient.dll     SHARED_LIB_DIR\caclient.dll
 file=ABI_DIR\BUILD_DIR\cautils.dll     SHARED_LIB_DIR\cautils.dll
@@ -49,7 +49,6 @@ ECOM_PLUGIN( cawidgetscanner.dll, cawidgetscanner.rsc )
 ECOM_PLUGIN( calocalizerscanner.dll, calocalizerscanner.rsc )
 ECOM_PLUGIN( carunningappmonitor.dll, carunningappmonitor.rsc )
 ECOM_PLUGIN( causifscanner.dll, causifscanner.rsc )
-ECOM_PLUGIN( caprogresscanner.dll, caprogresscanner.rsc )
 
 data=ZPRIVATE\20022F90\castorage.db          private\20022F90\castorage.db
 

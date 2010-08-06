@@ -164,9 +164,9 @@ private:
     RFs iFs;
 
     /*
-     * Widgets. Own.
+     * DB cache for widgets. Own.
      */
-    RWidgetArray iWidgets;
+    RWidgetArray iWidgetDBCache;
 
     /**
      * Pointer to a parser object. Own

@@ -49,6 +49,8 @@ mFsSession(session)
  */
 CAfStorage::~CAfStorage()
 {
+    mActDb.Close();
+    delete mFileStore;
 }
 
 // -----------------------------------------------------------------------------
@@ -113,12 +115,6 @@ void CAfStorage::OpenDbL(const TDesC& databaseFile)
                                             EFileRead|EFileWrite);
     mFileStore->SetTypeL(mFileStore->Layout()); /* Set file store type*/
     mActDb.OpenL(mFileStore,mFileStore->Root());
-    CDbTableNames* tables = mActDb.TableNamesL();
-    CleanupStack::PushL(tables);
-    if (0 == tables->Count()) {
-        CreateTableL();
-    }
-    CleanupStack::PopAndDestroy(tables);
 }
 
 // -----------------------------------------------------------------------------
@@ -233,16 +229,70 @@ void CAfStorage::UpdateActivityL(CAfEntry& entry)
     ExternalizeDataL(view, entry, colSet->ColNo(KDataColumnName));
 
     view.PutL();
-    if (KErrNone != errNo) {
-        view.Cancel();
-        User::Leave(errNo);
-    }
     CleanupStack::PopAndDestroy(colSet);)
 
     if (KErrNone != errNo) {
         view.Cancel();
         User::Leave(errNo);
     }
+    CleanupStack::PopAndDestroy(&view);
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Save activity
+ * @param entry - activity data
+ */
+void CAfStorage::SaveActivityL(CAfEntry &entry)
+{
+    // @todo check if this can be tidied up
+    //verify if row already exists
+    TInt errNo(KErrNone);
+    RDbView view;
+    CleanupClosePushL(view);
+    TRAP(errNo, GetActivityForUpdateL(view, entry.ApplicationId(), entry.ActivityId()));
+    if (KErrNone == errNo) {
+        // update
+        view.UpdateL();
+        TRAPD(errNo,
+        CDbColSet* colSet = view.ColSetL();
+        CleanupStack::PushL(colSet);
+
+        view.SetColL(colSet->ColNo(KFlagsColumnName), entry.Flags());
+        ExternalizeDataL(view, entry, colSet->ColNo(KDataColumnName));
+
+        view.PutL();
+        CleanupStack::PopAndDestroy(colSet);)
+
+        if (KErrNone != errNo) {
+            view.Cancel();
+            User::Leave(errNo);
+        }
+    } else {
+        // insert
+
+        //write table
+        RDbTable table;
+        CleanupClosePushL(table);
+        User::LeaveIfError(table.Open(mActDb, KActivityTableName, table.EUpdatable));
+        CDbColSet *row = table.ColSetL();
+        CleanupStack::PushL(row);
+
+        table.InsertL();
+        TRAP(errNo,
+        table.SetColL(row->ColNo(KApplicationColumnName), TInt64(entry.ApplicationId()));
+        table.SetColL(row->ColNo(KActivityColumnName), entry.ActivityId());
+        table.SetColL(row->ColNo(KFlagsColumnName), entry.Flags());
+        ExternalizeDataL(table, entry, row->ColNo(KDataColumnName));
+        table.PutL();)
+        if (KErrNone != errNo) {
+            table.Cancel();
+            User::Leave(errNo);
+        }
+        CleanupStack::PopAndDestroy(row);
+        CleanupStack::PopAndDestroy(&table);
+    }
+            
     CleanupStack::PopAndDestroy(&view);
 }
 

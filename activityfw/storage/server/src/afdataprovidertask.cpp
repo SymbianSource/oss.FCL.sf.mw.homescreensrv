@@ -51,8 +51,6 @@ void AfDataProviderTask::ExecuteL(MAfTaskStorage& storage,
 void AfDataProviderTask::ProvideDataL(const RMessage2& msg, 
                                       const CAfTask& src)
 {
-    if (EFalse ==msg.IsNull()) {
-        msg.WriteL(KResponseDataOffset, src.Data());
-        msg.Complete(KErrNone);
-    }
+    msg.WriteL(KResponseDataOffset, src.Data());
+    msg.Complete(KErrNone);
 }

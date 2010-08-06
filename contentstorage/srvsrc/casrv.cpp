@@ -18,12 +18,15 @@
 #include <sqldb.h>
 #include <eikenv.h>
 #include <eikappui.h>
+
 #include "casrv.h"
 #include "casrvdef.h"
 #include "casrvsession.h"
 #include "casrvengutils.h"
 #include "castorageproxy.h"
 #include "casrvmanager.h"
+#include "cabackupnotifier.h"
+ 
 
 // ==================== LOCAL FUNCTIONS ====================
 
@@ -77,6 +80,7 @@ EXPORT_C TInt RunCaServer()
                 }
             }
         }
+
     // Let the caller know how it went.
     RProcess::Rendezvous( err );
     if( !err )
@@ -116,6 +120,7 @@ CCaSrv::~CCaSrv()
     // Base class would do it for us but that's too late - our sessions
     // call the server back (SessionClosed, RemoveContainer, etc.).
     Cancel();
+    delete iBackupNotifier;
     CSession2* session;
     iSessionIter.SetToFirst();
     while( ( session = iSessionIter++ ) != NULL )
@@ -169,6 +174,7 @@ void CCaSrv::ConstructL()
         iSrvManager = CCaSrvManager::NewL( *iStorageProxy,
             &iSoftwareRegistry, iSrvEngUtils );
         }
+    iBackupNotifier = CCaBackupNotifier::NewL( iStorageProxy );
     }
 
 // ---------------------------------------------------------

@@ -161,7 +161,34 @@ CCaWidgetDescription::~CCaWidgetDescription()
 //
 // ----------------------------------------------------------------------------
 //
-TBool CCaWidgetDescription::Compare(
+CCaWidgetDescription *CCaWidgetDescription::CloneL()
+    {   
+    CCaWidgetDescription* clone = CCaWidgetDescription::NewL();
+    
+    clone->SetPathL( GetPath() );
+    clone->SetMmcIdL( GetMmcId() );
+    clone->SetStringidTitleL( GetStringIdTitle() );
+    clone->SetLibraryL( GetLibrary() );
+    clone->SetDescriptionL( GetDescription() );
+    clone->SetStringIdDescriptionL( GetStringIdDescription() );
+    clone->SetUriL( GetUri() );
+    clone->SetIconUriL( GetIconUri() );
+    clone->SetPreviewImageNameL( GetPreviewImageName() );
+    clone->SetTitleL( GetTitle() );
+    clone->SetTranslationFileNameL( GetTranslationFileName() );
+    clone->SetLibraryL( GetLibrary() );
+    clone->SetModificationTimeL( GetModificationTime() );
+    clone->SetServiceXmlL( GetServiceXml() );
+    clone->SetManifestFilePathNameL( GetManifestFilePathName() );
+    
+    return clone;
+    }
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+TBool CCaWidgetDescription::CompareUri(
         const CCaWidgetDescription& aFirst,const CCaWidgetDescription& aSecond)
     {
     TBool result = EFalse;

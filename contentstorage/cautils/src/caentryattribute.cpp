@@ -116,7 +116,7 @@ void CCaEntryAttribute::InternalizeL( RReadStream& aStream )
 // RMenuSrvAttrArray::Find
 // ---------------------------------------------------------
 //
-EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TDes& aAttrVal )
+EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TDes& aAttrVal ) const
     {
     for( TInt i = 0; i < Count(); i++ )
         {
@@ -133,7 +133,7 @@ EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TDes& aAttrVal )
 // RMenuSrvAttrArray::Find
 // ---------------------------------------------------------
 //
-EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TPtrC& aAttrVal )
+EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TPtrC& aAttrVal ) const
     {
     for( TInt i = 0; i < Count(); i++ )
         {
@@ -150,7 +150,7 @@ EXPORT_C TBool RCaEntryAttrArray::Find( const TDesC& aName, TPtrC& aAttrVal )
 // RCaEntryAttrArray::Exist
 // ---------------------------------------------------------
 //
-EXPORT_C TBool RCaEntryAttrArray::Exist( const TDesC& aName )
+EXPORT_C TBool RCaEntryAttrArray::Exist( const TDesC& aName ) const
     {
     for( TInt i = 0; i < Count(); i++ )
         {

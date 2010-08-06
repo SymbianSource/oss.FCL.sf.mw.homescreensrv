@@ -23,6 +23,7 @@
 
 class QStringList;
 class CaSoftwareRegistry;
+class CaUninstallNotifier;
 
 class CaSoftwareRegistryPrivate
 {
@@ -43,6 +44,7 @@ public:
     DetailMap entryDetails(int componentId) const;
 
     QList<DetailMap> retrieveLogEntries() const;
+    CaUninstallNotifier *createUninstallNotifier() const;
 private:
 
     CaSoftwareRegistry *const m_q;

@@ -19,7 +19,6 @@
 #define TSDEVICEDIALOGPLUGIN_H
 
 #include <hbdevicedialogplugin.h>
-
 #include <QObject>
 #include <QVariantMap>
 #include <QSharedPointer>
@@ -36,15 +35,19 @@ public:
     TsDeviceDialogPlugin();
     ~TsDeviceDialogPlugin();
 
-    bool accessAllowed(const QString &deviceDialogType, const QVariantMap &parameters, const QVariantMap &securityInfo) const;
-    HbDeviceDialogInterface *createDeviceDialog(const QString &deviceDialogType, const QVariantMap &parameters);
-    bool deviceDialogInfo(const QString &deviceDialogType, const QVariantMap &parameters, DeviceDialogInfo *info) const;
+    bool accessAllowed(const QString &deviceDialogType, 
+                       const QVariantMap &parameters, 
+                       const QVariantMap &securityInfo) const;
+    HbDeviceDialogInterface *createDeviceDialog(const QString &deviceDialogType, 
+                                                const QVariantMap &parameters);
+    bool deviceDialogInfo(const QString &deviceDialogType, 
+                          const QVariantMap &parameters, 
+                          DeviceDialogInfo *info) const;
     QStringList deviceDialogTypes() const;
     PluginFlags pluginFlags() const;
     int error() const;
 
 private:
-    int mError;
     TsDocumentLoader mLoader;
     QAbstractListModel *mModel;
     TsTaskMonitor *mStorage;

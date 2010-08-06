@@ -17,8 +17,8 @@
 
 #ifndef AFASYNCREQUESTOBSERVER_H
 #define AFASYNCREQUESTOBSERVER_H
-#include <QString>
-#include <QPixmap>
+
+#include <e32base.h>
 
 class MAfAsyncRequestObserver
 {
@@ -26,30 +26,25 @@ public:
     /**
      * Function inform observer about asynchronous request results
      * @param result - request result
-     * @param requestType - request type
-     * @param data - respons data
+     * @param data - response data
      */
-    virtual void asyncRequestCompleated(int result,
-                                        int requestType,
-                                        const QString &data)=0;
+    virtual void waitActivityRequestCompleted(int result, 
+                                              const TDesC8 &data) = 0;
 
     /**
      * Function inform observer about asynchronous request results
      * @param result - request result
-     * @param requestType - request type
      * @param pixmap - pixmap respons
      */
-    virtual void asyncRequestCompleated(int result,
-                                        int requestType,
-                                        const QPixmap& pixmap, 
-                                        void* userData)=0;
+    virtual void getThumbnailRequestCompleted(int result,
+                                              int bitmapHandle, 
+                                              void* userData) = 0;
     
     /**
      * Function inform observer about asynchronous request results
      * @param result - request result
-     * @param requestType - request type
      */
-    virtual void asyncRequestCompleated(int result,
-                                        int requestType)=0;
+    virtual void dataChangeNotificationCompleted(int result) = 0;
+    
 };
 #endif // AFASYNCREQUESTOBSERVER_H

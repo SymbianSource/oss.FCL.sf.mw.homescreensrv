@@ -25,6 +25,7 @@
 
 class QStringList;
 class CaSoftwareRegistry;
+class CaUninstallNotifier;
 
 namespace Usif
 {
@@ -52,9 +53,10 @@ public:
     DetailMap entryDetails(int componentId) const;
 
     QList<DetailMap> retrieveLogEntries() const;
-    QList<DetailMap> retrieveLogEntriesL() const;
-
+    CaUninstallNotifier *createUninstallNotifier() const;
+    
 private:
+    QList<DetailMap> retrieveLogEntriesL() const;
     DetailMap entryDetailsL(
             const Usif::CComponentEntry& entry) const;
     void getUninstallDetailsL(int componentId,

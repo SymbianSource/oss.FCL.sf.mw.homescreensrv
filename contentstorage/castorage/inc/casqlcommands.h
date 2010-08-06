@@ -74,6 +74,10 @@ _LIT( KSQLLocalizeTextEntry, "UPDATE CA_ENTRY SET \
 EN_TEXT = :LT_STRING WHERE ENTRY_ID = :LT_ROW_ID"); // WHERE ENTRY_ID must be changed if an attribute
 _LIT( KSQLLocalizeDescriptionEntry, "UPDATE CA_ENTRY SET \
 EN_DESCRIPTION = :LT_STRING WHERE ENTRY_ID = :LT_ROW_ID"); // WHERE ENTRY_ID must be changed if an attribute
+_LIT( KSQLLocalizeShortNameAttribute, "UPDATE CA_ATTRIBUTE SET \
+AT_VALUE = :LT_STRING WHERE AT_ENTRY_ID = :LT_ROW_ID AND AT_NAME = \"short_name\""); 
+_LIT( KSQLLocalizeTitleNameAttribute, "UPDATE CA_ATTRIBUTE SET \
+AT_VALUE = :LT_STRING WHERE AT_ENTRY_ID = :LT_ROW_ID AND AT_NAME = \"title_name\""); 
 
 _LIT( KSQLUpdatePositionInGroup, "UPDATE CA_GROUP_ENTRY SET \
 GE_POSITION = :GE_POSITION WHERE \
@@ -345,6 +349,9 @@ _LIT( KColumnEnIdIcon, "EN_ICON_ID" );
 _LIT( KColumnEnCreationTime, "EN_CREATION_TIME" );
 _LIT( KColumnEnUid, "EN_UID" );
 _LIT( KColumnEnFlags, "EN_FLAGS" );
+
+_LIT( KShortName, "short_name");
+_LIT( KTitleName, "title_name");
 
 _LIT( KColumnGroupEntryId, "GROUP_ENTRY_ID" );
 _LIT( KColumnGEIdGroup, "GE_GROUP_ID" );

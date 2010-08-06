@@ -273,7 +273,7 @@ EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
     RPointerArray<CCaInnerEntry> resultArray;
     CleanupResetAndDestroyPushL( resultArray );
     iStorage->GetEntriesL( touchQuery, resultArray );
-    iStorage->TouchL( entryId );
+    iStorage->TouchL( entryId, aEntry->GetFlags() & ERemovable );
     for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
         {
         iHandlerNotifier[i]->EntryTouched( entryId );
@@ -371,13 +371,48 @@ EXPORT_C void CCaStorageProxy::CustomSortL( const RArray<TInt>& aEntryIds,
     CleanupStack::PopAndDestroy( &parentArray );
     }
 
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT (calls another method)
+
+EXPORT_C void CCaStorageProxy::SaveDatabaseL()
+    {
+    iStorage->SaveDatabaseL();
+    }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+
 // ---------------------------------------------------------------------------
 //
 // ---------------------------------------------------------------------------
 //
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (calls another method)
+
+EXPORT_C void CCaStorageProxy::RestoreDatabaseL()
+    {
+    iStorage->RestoreDatabaseL();
+    }
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (calls another method)
+
 EXPORT_C void CCaStorageProxy::LoadDataBaseFromRomL()
     {
     iStorage->LoadDataBaseFromRomL();

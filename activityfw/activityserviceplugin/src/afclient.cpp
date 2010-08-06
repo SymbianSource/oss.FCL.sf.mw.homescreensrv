@@ -16,30 +16,16 @@
 */
 #include "afclient.h"
 
-#include <QCoreApplication>
-#include <QStringList>
-#include <QTimer>
-#include <QUrl>
-#include <QDebug>
-#include <QDir>
-
-#include <afstorageentry.h>
-#include <afstorageglobals.h>
-
 #include "aflauncher.h"
+#include "afcommandlineparser.h"
 
-AfClient::AfClient(const QSharedPointer<AfStorageClient> &serviceProvider, QObject *parent) 
+AfClient::AfClient(const QSharedPointer<AfActivityStorage> &storage, const QSharedPointer<AfActivation> &activation, QObject *parent)
 : 
     QObject(parent),
-    mServiceProvider(serviceProvider),
-    mIsconnected(false)
+    mStorage(storage),
+    mActivation(activation)
 {
-    mIsconnected = ( KErrNone == mServiceProvider->connect());
-    if( mIsconnected) {
-        mServiceProvider->waitActivity();
-    }
-    connect(mServiceProvider.data(), SIGNAL(activityRequested(QString)), this, SIGNAL(activityRequested(QString)));
-    connect(mServiceProvider.data(), SIGNAL(activityRequested(QString)), this, SLOT(bringToForeground()));
+    connect(mActivation.data(), SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)), this, SLOT(handleActivityRequest(Af::ActivationReason,QString,QVariantHash)));
 }
 
 AfClient::~AfClient()
@@ -48,103 +34,44 @@ AfClient::~AfClient()
 
 bool AfClient::addActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters)
 {
-    bool result(mIsconnected);
-    if (result) {
-        QVariantHash publicData(parameters);
-        
-        QPixmap screenshot(publicData[ActivityScreenshotKeyword].value<QPixmap>());
-        publicData.remove(ActivityScreenshotKeyword);
-        
-        RProcess process;
-        publicData.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-        publicData.insert(ActivityActivityKeyword, activityId);
-        AfStorageEntry entry(process.SecureId().iId, activityId, data, publicData);
-        result = (KErrNone == mServiceProvider->addActivity(entry, screenshot));
-    }
-    return result;
+    return mStorage->saveActivity(activityId, data, parameters);
 }
 
 bool AfClient::removeActivity(const QString &activityId)
 {
-    bool result(mIsconnected);
-    if (result) {
-        RProcess process;
-        AfStorageEntry entry(process.SecureId().iId, activityId);
-        result = (KErrNone == mServiceProvider->removeActivity(entry));
-    }
-    return result;
+    return mStorage->removeActivity(activityId);
 }
 
 bool AfClient::updateActivity(const QString &activityId, const QVariant &data, const QVariantHash &parameters)
 {
-    bool result(mIsconnected);
-    if (result) {
-        QVariantHash publicData(parameters);
-        QPixmap screenshot(publicData[ActivityScreenshotKeyword].value<QPixmap>());
-        publicData.remove(ActivityScreenshotKeyword);
-        RProcess process;
-        publicData.insert(ActivityApplicationKeyword, static_cast<int>(process.SecureId().iId));
-        publicData.insert(ActivityActivityKeyword, activityId);
-        AfStorageEntry entry(process.SecureId().iId, activityId, data, publicData);
-        result = (KErrNone == mServiceProvider->updateActivity(entry, screenshot));
-    }
-    return result;
+    return mStorage->saveActivity(activityId, data, parameters);
 }
 
 QList<QVariantHash> AfClient::activities() const
 {
-    QList<QVariantHash> retVal;
-    if (mIsconnected) {
-        RProcess process;
-        AfStorageEntry entry(process.SecureId().iId);
-        QList<AfStorageEntry> activities;
-        mServiceProvider->applicationActivities(activities, entry);
-        
-        QList<AfStorageEntry>::iterator iter(activities.begin());
-        for (; activities.end() != iter; iter = activities.erase(iter)) {
-            retVal.append((*iter).publicData());
-        }
+    QList<QVariantHash> result;
+    
+    QStringList activitiesList = mStorage->allActivities();
+    foreach (const QString &activityId, activitiesList) {
+        result.append(mStorage->activityMetaData(activityId));
     }
-    return retVal;
+    return result;
 }
 
 QVariant AfClient::activityData(const QString &activityId) const
 {
-    QVariant data;
-    if (mIsconnected) {
-        RProcess process;
-        AfStorageEntry entry(static_cast<int>(process.SecureId().iId), activityId), result;
-        if (0 == mServiceProvider->activityData(result, entry)) {
-            data = result.privateData();
-        }
-    }
-    return data;
+    return mStorage->activityData(activityId);
 }
 
 QVariantHash AfClient::parseCommandLine(const QStringList &commandLineParams) const
 {
-     QVariantHash activityParams;
-    int activityMarkerIndex = commandLineParams.indexOf("-activity");
-    if (activityMarkerIndex != -1 && commandLineParams.count() - 1 > activityMarkerIndex) {
-        QUrl activityUri = QUrl::fromEncoded(commandLineParams.at(activityMarkerIndex+1).toAscii());
-        if (activityUri.scheme() == "appto") {
-            QList<QPair<QString, QString> > parameters = activityUri.queryItems();
-            for (QList<QPair<QString, QString> >::const_iterator i = parameters.constBegin(); i != parameters.constEnd(); ++i) {
-                activityParams.insert(i->first, i->second);
-            }
-
-            if (activityParams.contains("activityname") && !activityParams.value("activityname").toString().isEmpty()) {
-                return activityParams;
-            }
-        }
-    }
-    return QVariantHash();
+    return AfCommandLineParser::getActivityParameters(commandLineParams);
 }
 
-void AfClient::bringToForeground()
+void AfClient::handleActivityRequest(Af::ActivationReason reason, const QString &name, const QVariantHash &parameters)
 {
-    // process all update events from widgets to prevent flickering
-    QCoreApplication::processEvents();
-    RProcess process;
-    AfLauncher().bringToForeground(process.SecureId().iId);
+    Q_UNUSED(parameters);
+    if (Af::ActivationReasonActivity == reason) {
+        emit activityRequested(name);
+    }
 }

@@ -115,15 +115,6 @@ QString TsActivityModelItem::applicationKeyword()
 }
 
 /*!
-    Return activity visibility status keyword
-*/
-QString TsActivityModelItem::visibilityKeyword()
-{
-    static QString visibility("visible");
-    return visibility;
-}
-
-/*!
     Return activity screenshot keyword
 */
 QString TsActivityModelItem::screenshotKeyword()
@@ -139,14 +130,15 @@ QString TsActivityModelItem::screenshotKeyword()
 QVariant TsActivityModelItem::decorationRole() const
 {
     if (!mRequestPending) {
-        const_cast<TsActivityModelItem *>(this)->mRequestPending = true;
+        mRequestPending = true;
         QVariant screenshot = mActivity.value(screenshotKeyword());
         if (screenshot.isValid()) {
-            QMetaObject::invokeMethod(&mService,
-                                      "getThumbnail",
-                                      Q_ARG(QSize, QSize(128, 128)),
-                                      Q_ARG(QString, screenshot.toString()),
-                                      Q_ARG(void *, const_cast<TsActivityModelItem *>(this)));
+            QMetaObject::invokeMethod(
+                &mService,
+                "getThumbnail",
+                Q_ARG(QSize, QSize(128, 128)),
+                Q_ARG(QString, screenshot.toString()),
+                Q_ARG(void *, const_cast<TsActivityModelItem *>(this)));
         }
     }
     return QVariant::fromValue<HbIcon>(HbIcon(mIcon));

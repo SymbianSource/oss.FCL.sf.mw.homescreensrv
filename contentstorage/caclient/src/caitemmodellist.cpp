@@ -17,6 +17,7 @@
 
 #include <QIcon>
 
+#include "caclient_defines.h"
 #include "caitemmodellist.h"
 #include "caitemmodel_p.h"
 #include "canotifier.h"
@@ -102,6 +103,25 @@ void CaItemModelList::updateEntry(const QSharedPointer<CaEntry> &entry)
         mEntriesHash.insert(entry->id(), entry);
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelList::updateEntry");
+}
+
+int CaItemModelList::updateProgress(int id, int valueOfProgress)
+{
+    if (mEntriesHash.contains(id)) {
+        QSharedPointer<CaEntry> entry = at(indexOf(id));
+        if (valueOfProgress < 0) {
+            //we need to reload this entry from database
+            mEntriesHash.insert(id, mService->getEntry(entry->id()));
+        }
+        else {
+            entry->setFlags(entry->flags() | UsedEntryFlag 
+                    | UninstallEntryFlag);
+            entry->setAttribute(UNINSTALL_PROGRESS_APPLICATION_ATTRIBUTE_NAME,
+                    QString().setNum(valueOfProgress));
+            mEntriesHash.insert(id, entry);
+        }
+    }
+    return indexOf(id);
 }
 
 /*!

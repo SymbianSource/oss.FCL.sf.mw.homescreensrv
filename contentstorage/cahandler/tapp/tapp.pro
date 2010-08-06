@@ -19,7 +19,7 @@ TARGET = catapphandlerplugin
 CONFIG += plugin mobility
 MOBILITY = serviceframework
 
-PLUGIN_SUBDIR = /hsresources/plugins/commandhandler
+PLUGIN_SUBDIR = /resource/qt/plugins/commandhandler
 
 
 include (../../../common.pri)

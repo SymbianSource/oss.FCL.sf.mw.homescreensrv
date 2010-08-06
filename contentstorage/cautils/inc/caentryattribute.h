@@ -129,7 +129,7 @@ public:
      * @param aAttr Attribute value.
      * @return TBool ,ETrue if attribute was found
      */
-    IMPORT_C TBool Find( const TDesC& aName, TDes& aAttrVal );
+    IMPORT_C TBool Find( const TDesC& aName, TDes& aAttrVal ) const;
 
     /**
      * Find attribute by name.
@@ -138,7 +138,7 @@ public:
      * @param aAttr Attribute value.
      * @return TBool, ETrue if attribute was found
      */
-    IMPORT_C TBool Find( const TDesC& aName, TPtrC& aAttrVal );
+    IMPORT_C TBool Find( const TDesC& aName, TPtrC& aAttrVal ) const;
 
     /*
      * Check if attribute exists
@@ -146,7 +146,7 @@ public:
      * @param aName Name
      * @return ETrue if attribute exists
      */
-    IMPORT_C TBool Exist( const TDesC& aName );
+    IMPORT_C TBool Exist( const TDesC& aName ) const;
 
     /**
      * Remove attribute

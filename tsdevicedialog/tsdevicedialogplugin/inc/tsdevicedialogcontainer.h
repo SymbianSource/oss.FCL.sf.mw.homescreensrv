@@ -18,9 +18,7 @@
 #define TSDEVICEDIALOGCONTAINER_H
 
 #include <QObject>
-
 #include <HbDeviceDialogInterface>
-
 #include <qvaluespacepublisher.h>
 
 #include "tsdocumentloader.h"
@@ -29,11 +27,13 @@ QTM_USE_NAMESPACE
 
 class QAbstractListModel;
 
-class TsDeviceDialogContainer : public QObject, public HbDeviceDialogInterface
+class TsDeviceDialogContainer : public QObject, 
+                                public HbDeviceDialogInterface
 {
 Q_OBJECT
 public:
-    explicit TsDeviceDialogContainer(QAbstractListModel *model, QObject *parent = 0);
+    explicit TsDeviceDialogContainer(QAbstractListModel *model, 
+                                     QObject *parent = 0);
     ~TsDeviceDialogContainer();
 
 public:
@@ -51,11 +51,13 @@ public slots:
 
 private slots:
     void notifyDialogClosed();
+    void switchViewOnModelChange();
     
 private:
     TsDocumentLoader mLoader;
     QValueSpacePublisher mVisibilityPublisher;
 
+    Q_DISABLE_COPY(TsDeviceDialogContainer)
 };
 
 #endif // TSDEVICEDIALOGCONTAINER_H

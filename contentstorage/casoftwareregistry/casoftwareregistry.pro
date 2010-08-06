@@ -41,6 +41,7 @@ LIBS += -leuser \
         -lbafl \
         -lestor \
         -lscrclient \
+        -lsifnotification \
         -lxqutils \
         -lPlatformEnv \
         -lefsrv

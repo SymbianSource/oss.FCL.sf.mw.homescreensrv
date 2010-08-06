@@ -5,12 +5,22 @@
             <string name="alignment" value="AlignVCenter|AlignHCenter" />
             <string locid="txt_ts_title_task_switcher" name="plainText" value="Task switcher" />
         </widget>
-        <widget name="taskgrid" role="HbDialog:contentWidget" type="TsTasksGrid">
-            <widget name="item" role="HbAbstractView:prototype" type="TsTasksGridItem"/>
-            <bool name="longPressEnabled" value="FALSE"/>
-            <bool name="itemRecycling" value="TRUE"/>
-            <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
-            <bool name="swapDimensionsOnOrientationChange" value="FALSE"/>
+        <widget name="gridContainer" role="HbDialog:contentWidget" type="HbWidget">
+            <widget name="taskgrid" type="TsTasksGrid">
+                <widget name="item" role="HbAbstractView:prototype" type="TsTasksGridItem"/>
+                <bool name="longPressEnabled" value="FALSE"/>
+                <bool name="itemRecycling" value="TRUE"/>
+                <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
+                <bool name="swapDimensionsOnOrientationChange" value="FALSE"/>
+            </widget>            
+            <widget name="noitemslabel" type="HbLabel">
+                <string name="alignment" value="AlignVCenter|AlignHCenter" />
+                <string locid="txt_ts_info_no_recent_applications" name="plainText"/>
+            </widget>          
+            <layout type="stacked">
+                <stackitem itemname="noitemslabel"/>
+                <stackitem itemname="taskgrid"/>
+            </layout>
         </widget>            
         <bool name="backgroundFaded" value="TRUE"/>
         <string name="dismissPolicy" value="TapOutside"/>

@@ -44,6 +44,9 @@ private:
     static void UpdateActivityL(CAfStorage& dataStorage, 
                                 const RMessage2& msg);
 
+    static void SaveActivityL(CAfStorage& dataStorage, 
+                                const RMessage2& msg);
+                                
     static void DeleteActivityL(CAfStorage& dataStorage, 
                                 const RMessage2& msg);
 

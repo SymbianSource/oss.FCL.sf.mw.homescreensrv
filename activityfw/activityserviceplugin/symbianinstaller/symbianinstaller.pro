@@ -20,7 +20,7 @@ SUBDIRS = activityserviceinstaller
 symbian {
     load(data_caging_paths) 
 
-    plugin.sources = activityserviceplugin.dll
+    plugin.sources = afservice.dll
     plugin.path = $$QT_PLUGINS_BASE_DIR 
     
     installer.pkg_postrules += "\"$${EPOCROOT}epoc32/release/$(PLATFORM)/$(TARGET)/activityserviceinstaller.exe\" \  

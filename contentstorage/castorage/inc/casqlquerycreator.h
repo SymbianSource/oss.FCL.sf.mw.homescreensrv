@@ -107,11 +107,13 @@ public:
      *
      * @param aSqlQuery The list of result queries needed for the touch 
      * operation.
-     * @param aSqlDb The handle to the database needed for the created 
+     * @param aSqlDb The handle to the database needed for the created. 
+     * @param aRemovable to create query to change used flag only for 
+     * removable entries.
      * queries' member (RSqlStatement iStatement).
      */
     static void CreateTouchQueryL( RPointerArray<CCaSqlQuery>& aSqlQuery,
-            RSqlDatabase& aSqlDb );
+            RSqlDatabase& aSqlDb, TBool aRemovable );
 
     /**
      * Creates an sql query to organize data within a group.

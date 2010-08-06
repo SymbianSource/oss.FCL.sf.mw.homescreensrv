@@ -14,7 +14,7 @@ TARGET = caurlhandlerplugin
 CONFIG += plugin hb mobility
 MOBILITY = serviceframework
 
-PLUGIN_SUBDIR = /hsresources/plugins/commandhandler
+PLUGIN_SUBDIR = /resource/qt/plugins/commandhandler
 
 include(../../../common.pri)
 
@@ -47,8 +47,6 @@ symbian: {
     -lefsrv \
     -lxqutils \
     -lcaclient
-
-    exists($${EPOCROOT}epoc32/include/platform/mw/XQSettingsManager):LIBS += -lxqsettingsmanager
 }
 
 

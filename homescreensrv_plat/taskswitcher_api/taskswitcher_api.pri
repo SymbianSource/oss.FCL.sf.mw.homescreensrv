@@ -15,4 +15,5 @@
 #
 
 PLATFORM_HEADERS += taskswitcher_api/tstasksettings.h \
+                    taskswitcher_api/tstaskmonitor_global.h \
                     taskswitcher_api/tspropertydefs.h \

@@ -20,16 +20,17 @@
 #include <QObject>
 #include <QVariant>
 #include <QString>
+#include <QSharedPointer>
 
-#include <afstorageclient.h>
+#include "afactivitystorage.h"
+#include "afactivation.h"
 
 class AfClient : public QObject
 {
-
     Q_OBJECT
 
 public:
-    AfClient(const QSharedPointer<AfStorageClient> &serviceProvider,QObject *parent = 0);
+    AfClient(const QSharedPointer<AfActivityStorage> &storage, const QSharedPointer<AfActivation> &activation, QObject *parent = 0);             
     ~AfClient();
 
 public slots:
@@ -41,14 +42,15 @@ public slots:
     QVariantHash parseCommandLine(const QStringList &commandLineParams) const;
 
 private slots:
-    void bringToForeground();
+    void handleActivityRequest(Af::ActivationReason reason, const QString &name, const QVariantHash &parameters);
     
 signals:
     void activityRequested(const QString &activityId);
 
-private:
-    QSharedPointer<AfStorageClient> mServiceProvider;
-    bool mIsconnected;
+private:    
+    QSharedPointer<AfActivityStorage> mStorage;
+    QSharedPointer<AfActivation> mActivation;
+    
 };
 
 #endif // AFCLIENT_H

@@ -154,12 +154,12 @@ void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName,
         {
         if ( ( *fileList )[i].iName.Find( KManifest ) != KErrNotFound )
             {
-            RBuf fullFilePath;
-            CleanupClosePushL( fullFilePath );
-            fullFilePath.CreateL( manifestDirectoryPath->Length()
+            RBuf manifestFilePathName;
+            CleanupClosePushL( manifestFilePathName );
+            manifestFilePathName.CreateL( manifestDirectoryPath->Length()
                     + ( *fileList )[i].iName.Length() );
-            fullFilePath.Append( *manifestDirectoryPath );
-            fullFilePath.Append( ( *fileList )[i].iName );
+            manifestFilePathName.Append( *manifestDirectoryPath );
+            manifestFilePathName.Append( ( *fileList )[i].iName );
           
             TPtrC packageUidPtr = manifestDirectoryPath->Mid(
                     manifestDirectoryPath->Length() - KPackageUidPosition,
@@ -168,37 +168,46 @@ void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName,
             TLex lexer( packageUidPtr );
             User::LeaveIfError( lexer.Val( packageUid, EHex ) );
 
-            CCaWidgetDescription* compareWidget = NULL;
+            CCaWidgetDescription* currentWidget = NULL;
             for ( TInt j = 0; j < iFetchedWidgets.Count(); j++ )
                 {
                 if ( iFetchedWidgets[j]->GetPackageUidL() ==  packageUid )
                     {
-                    compareWidget = iFetchedWidgets[j];
-                    compareWidget->SetValid( ETrue ); //do not remove from db
+                    currentWidget = iFetchedWidgets[j];
+                    currentWidget->SetValid( ETrue ); //do not remove from db
                     break; // once found we dont iterate anymore
                     }
                 }
 
-            if ( compareWidget )
+            if ( currentWidget )
                 {
                 TTime modificationTime = ( *fileList )[i].iModified;
                 TInt64 modificationIntTime = modificationTime.Int64();
-                TLex lex( compareWidget->GetModificationTime() );
+                TLex lex( currentWidget->GetModificationTime() );
                 TInt64 uintTimeDB( 0 );
                 User::LeaveIfError( lex.Val( uintTimeDB ) );
 
                 if ( uintTimeDB != modificationIntTime )
                     {
-                    TRAP_IGNORE( ParseManifestFileL( fullFilePath,
+                    TRAP_IGNORE( ParseManifestFileL( manifestFilePathName,
                                     aDirectoryName, aDrive ) );
+                    }
+                else if ( currentWidget->IsMissing() ) 
+                    {
+                    // manifest of missing widget found
+                    CCaWidgetDescription* clone = currentWidget->CloneL();
+                    CleanupStack::PushL( clone );
+                    clone->SetManifestFilePathNameL( manifestFilePathName );
+                    iWidgets.AppendL( clone );
+                    CleanupStack::Pop( clone );
                     }
                 }
             else
                 {
-                TRAP_IGNORE( ParseManifestFileL( fullFilePath, aDirectoryName,
+                TRAP_IGNORE( ParseManifestFileL( manifestFilePathName, aDirectoryName,
                                 aDrive ) );
                 }
-            CleanupStack::PopAndDestroy( &fullFilePath );
+            CleanupStack::PopAndDestroy( &manifestFilePathName );
             }
         }
     CleanupStack::PopAndDestroy( fileList );
@@ -304,7 +313,7 @@ void CCaWidgetScannerParser::ParseManifestFileL( const TDesC& aFilePath,
         SetModificationTimeL( aFilePath, widgetDescriptor );
 
         TInt index = iWidgets.Find( widgetDescriptor,
-                CCaWidgetDescription::Compare );
+                CCaWidgetDescription::CompareUri );
         if ( index != KErrNotFound )
             {
             delete iWidgets[index];
@@ -340,7 +349,7 @@ void CCaWidgetScannerParser::ParseWidgetL( const TDesC& aFilePath,
 
     SetModificationTimeL( aFilePath, widget );
 
-    TInt index = iWidgets.Find( widget, CCaWidgetDescription::Compare );
+    TInt index = iWidgets.Find( widget, CCaWidgetDescription::CompareUri );
     if ( index != KErrNotFound )
         {
         delete iWidgets[index];

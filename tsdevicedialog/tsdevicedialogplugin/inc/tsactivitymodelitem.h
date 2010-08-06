@@ -17,9 +17,11 @@
 
 #ifndef TSACTIVITYMODELITEM_H
 #define TSACTIVITYMODELITEM_H
-#include "tsmodelitem.h"
+
 #include <qvariant.h>
 #include <qicon.h>
+
+#include "tsmodelitem.h"
 /*!
     Implements model item which represents Activity entry
 */
@@ -27,13 +29,14 @@ class TsActivityModelItem : public TsModelItem
 {
     Q_OBJECT
 public:
-    TsActivityModelItem(QAbstractListModel &model, QObject &service, const QVariantHash &activity);
+    TsActivityModelItem(QAbstractListModel &model, 
+                        QObject &service, 
+                        const QVariantHash &activity);
     ~TsActivityModelItem();
     QVariant data(int role) const;
     void close();
     void open();
     static QString applicationKeyword();
-    static QString visibilityKeyword();
     static QString screenshotKeyword();
 
 private:
@@ -50,7 +53,10 @@ private:
     QObject &mService;
     const QVariantHash mActivity;
     QIcon mIcon;
-    bool mRequestPending;
+    mutable bool mRequestPending;
+    
+    Q_DISABLE_COPY(TsActivityModelItem)
+
 };
 
 #endif // TSACTIVITYMODELITEM_H

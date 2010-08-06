@@ -36,13 +36,14 @@ class TsModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-    explicit TsModel(TsTaskMonitor &applicationSrv,
-                     QObject &activitySrv,
-                     QObject *parent = 0);
+    TsModel(TsTaskMonitor &applicationSrv,
+            QObject &activitySrv,
+            QObject *parent = 0);
     ~TsModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+    QVariant data(const QModelIndex &index, 
+                  int role = Qt::DisplayRole) const;
     int maxRowCount()const;
 
 public slots:
@@ -75,14 +76,11 @@ private:
 #endif
 
     /*
-     * Icon size in model
-     */
-    QSize mSize;
-    
-    /*
      * Maximum number of items (only for running apps + activities)
      */ 
     int mMaxItems;
+    
+    Q_DISABLE_COPY(TsModel)
 };
 
 #endif // TSMODEL_H

@@ -28,7 +28,7 @@ HbActivityPlugin::HbActivityPlugin(QObject *parent) : QObject(parent), mActivity
     if (serviceManager.findInterfaces("ActivityService").isEmpty()) {
         // clean old entries
         serviceManager.removeService("ActivityService");
-        bool servicesAdded = serviceManager.addService(":/activityserviceplugin.xml");
+        bool servicesAdded = serviceManager.addService(":/afservice.xml");
         if (!servicesAdded) {
             qWarning("addService for ActivityService returned false, error %d", serviceManager.error());
         }

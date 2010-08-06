@@ -22,6 +22,7 @@ include(hswidgetmodel_api/hswidgetmodel_api.pri)
 include(menu_sat_interface_api/menu_sat_interface_api.pri)
 include(homescreen_information_api/homescreen_information_api.pri)
 include(taskswitcher_api/taskswitcher_api.pri)
+include(activity_framework_api/activity_framework_api.pri)
 
 for(filename,PLATFORM_HEADERS){
     BLD_INF_RULES.prj_exports *= "$$filename MW_LAYER_PLATFORM_EXPORT_PATH($$basename(filename))"

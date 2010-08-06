@@ -19,9 +19,7 @@
 #include <QCoreApplication>
 #include <QLocale>
 #include <QtPlugin>
-
 #include <qservicemanager.h>
-
 #include <hbdevicedialog.h>
 #include <HbMainWindow>
 
@@ -42,12 +40,17 @@ namespace
 {
     const char KTranslationPath[] = "resource/qt/translations";
     const char KTsDialogType[] = "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
+    const char KActivityManaged [] = "com.nokia.qt.activities.ActivityManager";
 } 
  
 /*!
     Constructor.
  */
-TsDeviceDialogPlugin::TsDeviceDialogPlugin() : mError(0), mModel(0), mStorage(0), mTriedToLoadTranslation(false)
+TsDeviceDialogPlugin::TsDeviceDialogPlugin()
+: 
+mModel(0), 
+mStorage(0), 
+mTriedToLoadTranslation(false)
 {
 }
 
@@ -58,7 +61,9 @@ TsDeviceDialogPlugin::~TsDeviceDialogPlugin()
 /*!
     \reimp
  */
-bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType, const QVariantMap &parameters, const QVariantMap &securityInfo) const
+bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType, 
+                                         const QVariantMap &parameters, 
+                                         const QVariantMap &securityInfo) const
 {
     Q_UNUSED(deviceDialogType)
     Q_UNUSED(parameters)
@@ -72,7 +77,9 @@ bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType, const 
 /*!
     \reimp
  */
-HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType, const QVariantMap &parameters)
+HbDeviceDialogInterface * 
+TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType, 
+                                         const QVariantMap &parameters)
 {
     Q_UNUSED(parameters)
     HbDeviceDialogInterface *dialogInterface(0);
@@ -82,16 +89,23 @@ HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString 
             mTriedToLoadTranslation = true;
 
             QTranslator *translator = new QTranslator(this);
-            QString translationFile = QString("taskswitcher_%1").arg(QLocale::system().name());
+            QString translationFile = 
+                QString("taskswitcher_%1").arg(QLocale::system().name());
     
             bool translationLoaded(false);
             #ifdef Q_OS_SYMBIAN
-                translationLoaded = translator->load(translationFile, QString("z:/") + KTranslationPath);
+                translationLoaded = 
+                    translator->load(translationFile, 
+                                     QString("z:/") + KTranslationPath);
                 if (!translationLoaded) {
-                    translationLoaded = translator->load(translationFile, QString("c:/") + KTranslationPath);
+                    translationLoaded = 
+                        translator->load(translationFile, 
+                                         QString("c:/") + KTranslationPath);
                 }
             #else
-                translationLoaded = translator->load(translationFile, QString(KTranslationPath));
+                translationLoaded = 
+                    translator->load(translationFile, 
+                                     QString(KTranslationPath));
             #endif //Q_OS_SYMBIAN
 
             Q_ASSERT(translationLoaded);
@@ -106,8 +120,8 @@ HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString 
             }
             
             QtMobility::QServiceManager serviceManager;
-            QObject *activityManager(serviceManager.loadInterface("com.nokia.qt.activities.ActivityManager"));
-            if (activityManager) {
+            QObject *activityManager(serviceManager.loadInterface(KActivityManaged));
+            if (0 != activityManager) {
                 activityManager->setParent(this); //make it autodestructed
             } else {
                 activityManager = this; //activity plugin is not present. provide invalid instance because its not critical functionality.
@@ -124,7 +138,9 @@ HbDeviceDialogInterface *TsDeviceDialogPlugin::createDeviceDialog(const QString 
 /*!
     \reimp
  */
-bool TsDeviceDialogPlugin::deviceDialogInfo(const QString &deviceDialogType, const QVariantMap &parameters, DeviceDialogInfo *info) const
+bool TsDeviceDialogPlugin::deviceDialogInfo(const QString &deviceDialogType, 
+                                            const QVariantMap &parameters, 
+                                            DeviceDialogInfo *info) const
 {
     Q_UNUSED(parameters)
     Q_UNUSED(deviceDialogType)
@@ -157,7 +173,7 @@ HbDeviceDialogPlugin::PluginFlags TsDeviceDialogPlugin::pluginFlags() const
  */
 int TsDeviceDialogPlugin::error() const
 {
-    return mError;
+    return 0;
 }
 
 #ifdef COVERAGE_MEASUREMENT

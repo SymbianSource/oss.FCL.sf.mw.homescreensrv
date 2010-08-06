@@ -30,6 +30,8 @@ tests {
     SUBDIRS += tsdevicedialogplugin/tsrc
     SUBDIRS += ../activityfw/activityserviceplugin/tsrc
     SUBDIRS += ../activityfw/storage/client/t_afstorageclient
+    SUBDIRS += ../activityfw/storage/server/tsrc
+    SUBDIRS += ../activityfw/afactivitylauncher/tsrc
     SUBDIRS += ../hsappkeyhandler/tsrc/t_hsappkeyhandler
     SUBDIRS += ../taskswitcher/client/tsrc
     SUBDIRS += ../taskswitcher/server/tsrc

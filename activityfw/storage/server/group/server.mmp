@@ -22,7 +22,6 @@ MW_LAYER_SYSTEMINCLUDE
 
 USERINCLUDE     ../inc
 USERINCLUDE     ../../inc
-USERINCLUDE     ../../s60/inc
 USERINCLUDE     ../../../../inc
 
 SOURCEPATH      ../src
@@ -36,12 +35,14 @@ SOURCE          afstoragesynctask.cpp
 SOURCE          afstorageasynctask.cpp
 SOURCE          afobservertask.cpp
 SOURCE          afthumbnailtask.cpp
-
-SOURCEPATH      ../../s60/src
-SOURCE          afentry.cpp
+SOURCE          afapplicationsmonitor.cpp
+SOURCE          afapplicationscollection.cpp
+SOURCE          afapplicationsstorage.cpp
+SOURCE          afapplicationsengine.cpp
 
 LIBRARY        euser.lib 
 LIBRARY        estor.lib
+LIBRARY		   apgrfx.lib
 LIBRARY        edbms.lib  
 LIBRARY        efsrv.lib
 LIBRARY        bafl.lib
@@ -50,6 +51,7 @@ LIBRARY        hash.lib
 LIBRARY        bitmaptransforms.lib
 LIBRARY        imageconversion.lib
 LIBRARY        tsutils.lib
+STATICLIBRARY        afstoragecommon.lib
 
 CAPABILITY     ALL -TCB
 EPOCHEAPSIZE   0x100000 0x600000 // 1MB - 6MB

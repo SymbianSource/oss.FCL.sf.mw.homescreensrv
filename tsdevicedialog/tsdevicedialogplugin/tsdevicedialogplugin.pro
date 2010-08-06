@@ -42,6 +42,7 @@ SOURCES +=  src/tsdevicedialogcontainer.cpp \
 
 INCLUDEPATH += . \
                ./inc \
+               ../../inc \
 
 LIBS +=     -ltstaskmonitorclient
             
@@ -58,13 +59,11 @@ symbian {
     LIBS += -lxqsettingsmanager -lapparc -lapgrfx
     
     # ugly hack
-    translation.sources = ./*.qm
-    translation.path = $$QT_PLUGINS_BASE_DIR/../translations
     
     crml.sources = ./resource/*.qcrml
     crml.path = /resource/qt/crml
     
-    DEPLOYMENT += pluginstub translation crml
+    DEPLOYMENT += pluginstub crml
     
     BLD_INF_RULES.prj_exports += \
     "$${LITERAL_HASH}include <platform_paths.hrh>" \

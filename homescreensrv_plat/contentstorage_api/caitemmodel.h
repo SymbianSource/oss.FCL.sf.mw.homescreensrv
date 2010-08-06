@@ -80,13 +80,17 @@ public:
     void setFlagsOff(const EntryFlags &offFlags);
     QSharedPointer<CaEntry> entry(const QModelIndex &index) const;
 
-    signals:
+    QList<int> getUninstallingEntriesIds(int componentId);
+    void updateProgress(int id, int valueOfProgress);
+
+    
+signals:
 
     void scrollTo(int row, QAbstractItemView::ScrollHint hint =
         QAbstractItemView::EnsureVisible);
     void empty(bool value);
     void countChange();
-
+    
 protected:
     // data
 

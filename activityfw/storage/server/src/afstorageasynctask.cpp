@@ -19,8 +19,6 @@
 #include "afstorageasynctask.h"
 #include "afcmd.h"
 
-_LIT(KUnsupportedStorageAsyncTask, "Unsupported async storage task");
-
 // -----------------------------------------------------------------------------
 /**
  * Constructor for performing 1st stage construction
@@ -56,9 +54,7 @@ void CAfStorageAsyncTask::ExecuteLD(MAfTaskStorage& taskStorage,
     self->ExecuteL(dataStorage, msg);
     taskStorage.PushL(self);
     CleanupStack::Pop(self);
-    if (EFalse == msg.IsNull()) {
-        msg.Complete(KErrNone);
-    }
+    msg.Complete(KErrNone);
 }
 
 // -----------------------------------------------------------------------------
@@ -100,9 +96,6 @@ void CAfStorageAsyncTask::ExecuteL(CAfStorage& dataStorage,
     case ApplicationActivity:
         ApplicationActivityL(dataStorage, msg);
         break;
-    default:
-        //this code shouldn't be called. fatal error: means wrong session implementation 
-        User::Panic(KUnsupportedStorageAsyncTask, KErrGeneral);
     };
 }
 
@@ -166,12 +159,10 @@ void CAfStorageAsyncTask::ExternalizeL()
  */
 void CAfStorageAsyncTask::WriteResponseL(const RMessage2& msg)
 {
-    if (EFalse == msg.IsNull()) {
-        msg.WriteL(1, 
-                   TPckgBuf<TInt>(mExternalizedData.Length()));//write data size
-        msg.WriteL(2, 
-                   TPckgBuf<CBase*>(this));//task identyfier
-    }
+    msg.WriteL(1, 
+               TPckgBuf<TInt>(mExternalizedData.Length()));//write data size
+    msg.WriteL(2, 
+               TPckgBuf<CBase*>(this));//task identyfier
 }
 
 // -----------------------------------------------------------------------------

@@ -46,5 +46,6 @@ LIBRARY ws32.lib
 LIBRARY HbCore.lib
 LIBRARY apparc.lib
 LIBRARY apgrfx.lib
+LIBRARY afactivitylauncher.lib
 DEBUGLIBRARY flogger.lib
 // End of file

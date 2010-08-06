@@ -16,5 +16,3 @@
 
 CONFIG += mobility
 MOBILITY = serviceframework
-
-QT += sql

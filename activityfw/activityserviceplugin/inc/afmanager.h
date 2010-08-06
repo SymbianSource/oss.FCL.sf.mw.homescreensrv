@@ -23,7 +23,7 @@
 #include <QPixmap>
 #include <QSize>
 
-#include <afstorageclient.h>
+#include "afstorageproxy.h"
 
 class AfManager : public QObject
 {
@@ -31,7 +31,7 @@ class AfManager : public QObject
     Q_OBJECT
 
 public:
-    AfManager(const QSharedPointer<AfStorageClient> &serviceProvider, QObject *parent = 0);
+    AfManager(const QSharedPointer<AfStorageProxy> &serviceProvider, QObject *parent = 0);
     ~AfManager();
 
 public slots:
@@ -50,7 +50,7 @@ private:
     QUrl activityToUri(const QVariantHash& activity) const;
 
 private:
-    QSharedPointer<AfStorageClient> mServiceProvider;
+    QSharedPointer<AfStorageProxy> mServiceProvider;
 };
 
 #endif // AFMANAGER_H

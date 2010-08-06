@@ -25,4 +25,5 @@ PLATFORM_HEADERS += \
                       contentstorage_api/caservice.h \
                       contentstorage_api/caitemmodel.h \
                       contentstorage_api/camenuiconutility.h \
-                      contentstorage_api/casoftwareregistry.h
+                      contentstorage_api/casoftwareregistry.h \
+                      contentstorage_api/cauninstallnotifier.h 

@@ -63,6 +63,10 @@ public:
     void setFlagsOn(const EntryFlags &onFlags);
     void setFlagsOff(const EntryFlags &offFlags);
     bool notifierExists() const;
+    
+    QList<int> getUninstallingEntriesIds(int componentId);
+    void updateProgress(int id, int valueOfProgress);
+    
 
 public slots:
 

@@ -91,7 +91,7 @@ CCaWidgetStorageHandler* CCaWidgetStorageHandler::NewLC(
 CCaWidgetStorageHandler::~CCaWidgetStorageHandler()
     {
     delete iParser;
-    iWidgets.ResetAndDestroy();
+    iWidgetDBCache.ResetAndDestroy();
     }
 
 // ----------------------------------------------------------------------------
@@ -101,7 +101,7 @@ CCaWidgetStorageHandler::~CCaWidgetStorageHandler()
 void CCaWidgetStorageHandler::SynchronizeL()
     {
     FetchWidgetsL();
-    AddWidgetsL( iParser->WidgetsScanL( iWidgets ) );
+    AddWidgetsL( iParser->WidgetsScanL( iWidgetDBCache ) );
     RemoveWidgetsL();
     }
 
@@ -161,25 +161,40 @@ void CCaWidgetStorageHandler::UpdateL( const CCaWidgetDescription* aWidget,
 //
 void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
     {
-    for ( TInt i = 0; i < aWidgets.Count(); i++ )
+    const TInt newWidgetsCount = aWidgets.Count();
+    
+    for ( TInt i = 0; i < newWidgetsCount; ++i )
         {
-        aWidgets[i]->LocalizeTextsL();
-        TInt index = iWidgets.Find( aWidgets[i], CCaWidgetDescription::Compare );
-        if ( index != KErrNotFound )
+        CCaWidgetDescription *const newWidget = aWidgets[i];
+        
+        newWidget->LocalizeTextsL();
+        
+        const TInt dbCacheIndex = 
+            iWidgetDBCache.Find( 
+                newWidget, CCaWidgetDescription::CompareUri );
+        
+        if ( dbCacheIndex != KErrNotFound )
             {
-            iWidgets[index]->SetValid( ETrue );
-            if ( !iWidgets[index]->Compare( *aWidgets[i] )
-                    || iWidgets[index]->IsMissing() )
+            CCaWidgetDescription *const cachedWidget = 
+                iWidgetDBCache[dbCacheIndex];
+            
+            cachedWidget->SetValid( ETrue );
+            
+            const TBool cachedDifferentThanNew = 
+                !cachedWidget->Compare( *newWidget );
+            
+            if ( cachedDifferentThanNew || cachedWidget->IsMissing() )
                 {
-                aWidgets[i]->SetFlag( EMissing, iWidgets[index]->IsMissing() );
-                aWidgets[i]->SetFlag( EUsed, iWidgets[index]->IsUsed() );
-                aWidgets[i]->SetFlag( EVisible, iWidgets[index]->IsVisible() );
-                UpdateL( aWidgets[i], iWidgets[index]->GetEntryId() );
+                newWidget->SetFlag( EMissing, cachedWidget->IsMissing() );
+                newWidget->SetFlag( EUsed,  cachedWidget->IsUsed() );
+                newWidget->SetFlag( EVisible, cachedWidget->IsVisible() );
+                
+                UpdateL( newWidget, cachedWidget->GetEntryId() );
                 }
             }
         else
             {
-            AddL( aWidgets[i] );
+            AddL( newWidget );
             }
         }
     HbTextResolverSymbian::Init( _L(""), KLocalizationFilepathZ );
@@ -191,34 +206,36 @@ void CCaWidgetStorageHandler::AddWidgetsL( const RWidgetArray& aWidgets )
 //
 void CCaWidgetStorageHandler::RemoveWidgetsL()
     {
-    for ( TInt i = 0; i < iWidgets.Count(); i++ )
+    const TInt cacheCount = iWidgetDBCache.Count();
+    for ( TInt i = 0; i < cacheCount; ++i)
         {
-        if ( !iWidgets[i]->IsValid() )
+        CCaWidgetDescription *const cachedWidget = iWidgetDBCache[i];
+        if ( !cachedWidget->IsValid() )
             {
-            if ( iWidgets[i]->GetMmcId() != KNullDesC )
+            if ( cachedWidget->GetMmcId() != KNullDesC )
                 {
                 RBuf currentMmcId;
                 currentMmcId.CreateL( KMassStorageIdLength );
                 currentMmcId.CleanupClosePushL();
                 WidgetScannerUtils::CurrentMmcId( iFs, currentMmcId );
-                if( iWidgets[i]->GetMmcId() == currentMmcId ||
-                        ( iWidgets[i]->GetMmcId() == KCaMassStorage() &&
+                if( cachedWidget->GetMmcId() == currentMmcId ||
+                        ( cachedWidget->GetMmcId() == KCaMassStorage() &&
                         MassStorageNotInUse() ) )
                     {
                     //item was uninstalled so we remove its mmc id
-                    iWidgets[i]->RemoveMmcId();
-                    ClearVisibleFlagL( iWidgets[i] );
+                    cachedWidget->RemoveMmcId();
+                    ClearVisibleFlagL( cachedWidget );
                     }
                 else
                     {
-                    SetMissingFlagL( iWidgets[i] );
+                    SetMissingFlagL( cachedWidget );
                     }
                 CleanupStack::PopAndDestroy( &currentMmcId );
                 }
             else
                 {
                 //item was uninstalled so we remove its mmc id
-                ClearVisibleFlagL( iWidgets[i] );
+                ClearVisibleFlagL( cachedWidget );
                 }
             }
         }
@@ -277,11 +294,11 @@ void CCaWidgetStorageHandler::FetchWidgetsL()
     CleanupResetAndDestroyPushL( entries );
     iStorage->GetEntriesL( query, entries );
 
-    iWidgets.ResetAndDestroy();
+    iWidgetDBCache.ResetAndDestroy();
     for ( TInt i = 0; i < entries.Count(); i++ )
         {
         CCaWidgetDescription* widget = CCaWidgetDescription::NewLC( entries[i] );
-        iWidgets.AppendL( widget ); //iWidgets takes ownership
+        iWidgetDBCache.AppendL( widget ); //iWidgets takes ownership
         CleanupStack::Pop( widget );
         }
     CleanupStack::PopAndDestroy( &entries );

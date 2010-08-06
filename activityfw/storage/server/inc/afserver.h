@@ -23,6 +23,7 @@
 #include <e32std.h>
 #include <e32base.h>
 #include <f32file.h>    // RFs
+#include <apgcli.h>
 
 #include "aftaskstorage.h"
 
@@ -54,9 +55,11 @@ private:
     void RemoveNotValidTasks(const CSession2* session);
 
 private:
+    RApaLsSession mApaSession;
     RFs mFsSession;
     CAfStorage* mStorage;
     RPointerArray<CAfTask> mObservers;
+    CBase* mAppEngine;
 };
 
 #endif // AFSERVER_H

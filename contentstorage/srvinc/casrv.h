@@ -26,6 +26,7 @@
 class CCaSrvEngUtils;
 class CCaSrvManager;
 class CCaStorageProxy;
+class CCaBackupNotifier;
 
 // GLOBAL FUNCTIONS
 /**
@@ -124,6 +125,11 @@ private:
      * Srv plugin manager. Own.
      */
     CCaSrvManager* iSrvManager;
+    
+    /*
+     * Srv plugin manager. Own.
+     */
+    CCaBackupNotifier* iBackupNotifier;
 
     };
 

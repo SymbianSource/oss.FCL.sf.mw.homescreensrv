@@ -28,6 +28,7 @@
 //FORWARD DECLARATIONS
 class QStringList;
 class CaSoftwareRegistryPrivate;
+class CaUninstallNotifier;
 
 /**
  * Class provides Usif specific services
@@ -57,6 +58,8 @@ public:
     DetailMap entryDetails(int componentId) const;
 
     QList<DetailMap> retrieveLogEntries() const;
+    
+    CaUninstallNotifier *createUninstallNotifier() const;
 
     static QString componentNameKey();
     static QString componentVersionKey();

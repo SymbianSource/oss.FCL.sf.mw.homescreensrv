@@ -137,12 +137,19 @@ void CCaLocalizerScannerProxy::UpdateLocalNamesL()
         localizedName = GetLocalizedNameLC( locals[i] );
         
         if( locals[i]->GetAttributeName().Compare( KColumnEnText) == 0
-                && !localizedName->Compare(
-                    GetEntryText( entries, locals[i]->GetRowId() ) ) == 0 
+                && localizedName->Compare(
+                    GetEntryText( entries, locals[i]->GetRowId() ) ) != 0 
                 ||
             locals[i]->GetAttributeName().Compare( KColumnEnDescription) == 0
-                && !localizedName->Compare(
-                    GetEntryDescription( entries, locals[i]->GetRowId() ) ) == 0 )
+                && localizedName->Compare(
+                    GetEntryDescription( entries, locals[i]->GetRowId() ) ) != 0
+                ||
+            ( locals[i]->GetAttributeName().Compare( KShortName ) == 0
+                || locals[i]->GetAttributeName().Compare( KTitleName ) == 0 )
+                && localizedName->Compare(
+                    GetAttributeName( entries,
+                        locals[i]->GetRowId(),
+                        locals[i]->GetAttributeName() ) ) != 0 )
             // translations different than text
             {
             locals[i]->SetLocalizedStringL( *localizedName );
@@ -245,4 +252,27 @@ const TDesC& CCaLocalizerScannerProxy::GetEntryDescription(
             }
         }
     return KNullDesC();
+    }
+
+// ---------------------------------------------------------------------------
+//  
+// ---------------------------------------------------------------------------
+//
+const TPtrC CCaLocalizerScannerProxy::GetAttributeName(
+        const RPointerArray<CCaInnerEntry>& aEntries,
+        TInt aId,
+        const TDesC& aAttrName )
+    {
+    TBool notFound( ETrue );
+    TPtrC attrValue;
+    TInt entriesCount = aEntries.Count();
+    for( TInt i=0; i < entriesCount && notFound; i++ )
+        {
+        if( aEntries[i]->GetId() == aId &&
+            aEntries[i]->GetAttributes().Find(aAttrName, attrValue) )
+            {
+            notFound = EFalse;
+            }
+        }
+    return attrValue;
     }

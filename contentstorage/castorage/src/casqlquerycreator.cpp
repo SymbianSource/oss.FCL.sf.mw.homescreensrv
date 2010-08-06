@@ -555,7 +555,8 @@ void CaSqlQueryCreator::CreateRemoveQueryL(
 // ---------------------------------------------------------------------------
 //
 void CaSqlQueryCreator::CreateTouchQueryL(
-        RPointerArray<CCaSqlQuery>& aSqlQuery, RSqlDatabase& aSqlDb )
+        RPointerArray<CCaSqlQuery>& aSqlQuery, RSqlDatabase& aSqlDb, 
+        TBool aRemovable )
     {
     DEBUG(("_CA_:CASqlQueryCreator::CreateTouchQueryL"));
 
@@ -563,11 +564,13 @@ void CaSqlQueryCreator::CreateTouchQueryL(
     query->SetQueryL( KSQLInsertToLaunch );
     aSqlQuery.Append( query );
     CleanupStack::Pop( query );
-
-    query = CCaSqlQuery::NewLC( aSqlDb );
-    query->SetQueryL( KSQLUpdateEntryUsedFlag );
-    aSqlQuery.Append( query );
-    CleanupStack::Pop( query );
+    if( aRemovable )
+        {
+        query = CCaSqlQuery::NewLC( aSqlDb );
+        query->SetQueryL( KSQLUpdateEntryUsedFlag );
+        aSqlQuery.Append( query );
+        CleanupStack::Pop( query );
+        }
     }
 
 // ---------------------------------------------------------------------------

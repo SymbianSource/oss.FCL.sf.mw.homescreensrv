@@ -14,12 +14,6 @@
 * Description: tsmodel.cpp
 *
 */
-#include "tsmodel.h"
-#include "tsmodelitem.h"
-#include "tsentrymodelitem.h"
-#include "tsactivitymodelitem.h"
-#include "tsdataroles.h"
-
 #include <HbIcon>
 #include <qvariant.h>
 #include <qlist.h>
@@ -33,6 +27,12 @@ const int TSDeviceDialogUid = 0x2002677F;
 const int ItemsLimit = 0x00000001;
 #endif
 
+#include "tsmodel.h"
+#include "tsmodelitem.h"
+#include "tsentrymodelitem.h"
+#include "tsactivitymodelitem.h"
+#include "tsdataroles.h"
+
 const int maxItems(10);
 /*!
     \class TsModel
@@ -45,19 +45,21 @@ const int maxItems(10);
     \param query used to create model
     \param pointer to parent object
 */
-TsModel::TsModel(TsTaskMonitor &applicationSrv, QObject &activitySrv, QObject *parent) :
+TsModel::TsModel(TsTaskMonitor &applicationSrv, 
+                 QObject &activitySrv, 
+                 QObject *parent) :
     QAbstractListModel(parent),
     mEntries(),
     mApplicationService(applicationSrv),
     mActivityService(activitySrv),
-    mSize(240, 240),
     mMaxItems(maxItems)
 {
     
 #ifdef Q_OS_SYMBIAN
     XQSettingsManager *crManager = new XQSettingsManager;
     XQCentralRepositorySettingsKey itemsNumberKey(TSDeviceDialogUid, ItemsLimit);
-    QVariant itemsNumberVariant = crManager->readItemValue(itemsNumberKey, XQSettingsManager::TypeInt);
+    QVariant itemsNumberVariant = 
+        crManager->readItemValue(itemsNumberKey, XQSettingsManager::TypeInt);
     if (!itemsNumberVariant.isNull()) {
         int number = itemsNumberVariant.toInt();
         if (number > 0) {
@@ -67,8 +69,14 @@ TsModel::TsModel(TsTaskMonitor &applicationSrv, QObject &activitySrv, QObject *p
     iAppArcSession.Connect();
 #endif
 
-    connect(&activitySrv, SIGNAL(dataChanged()), this, SLOT(updateModel()));
-    connect(&applicationSrv, SIGNAL(taskListChanged()), this, SLOT(updateModel()));
+    connect(&activitySrv, 
+            SIGNAL(dataChanged()), 
+            this, 
+            SLOT(updateModel()));
+    connect(&applicationSrv, 
+            SIGNAL(taskListChanged()), 
+            this, 
+            SLOT(updateModel()));
     updateModel();
 }
 
@@ -132,7 +140,8 @@ void TsModel::openApplication(const QModelIndex &index)
 */
 void TsModel::closeApplication(const QModelIndex &index)
 {
-    if (!index.isValid() || !entry(index)->data(TsDataRoles::Closable).toBool()) {
+    if (!index.isValid() || 
+        !entry(index)->data(TsDataRoles::Closable).toBool()) {
         return;
     }
     entry(index)->close();
@@ -144,10 +153,9 @@ void TsModel::closeApplication(const QModelIndex &index)
 void TsModel::updateModel()
 {
     //clear current data
+    beginResetModel();
     qDeleteAll(mEntries);
     mEntries.clear();
-
-    beginResetModel();
     getApplications();
     getActivities();
     endResetModel();
@@ -160,13 +168,9 @@ void TsModel::updateModel()
 void TsModel::getApplications()
 {
     //get running applications
-    TsModelItem *entry(0);
     QList< QSharedPointer<TsTask> > tasks(mApplicationService.taskList());
     foreach (QSharedPointer<TsTask> taskData, tasks) {
-        entry = new TsEntryModelItem(taskData);
-        if (0 != entry) {
-            mEntries.append(entry);
-        }
+        mEntries.append(new TsEntryModelItem(taskData));
     }
 }
 
@@ -178,16 +182,18 @@ void TsModel::getActivities()
     //get activities
     TsModelItem *entry(0);
     QList<QVariantHash> activities;
-    QMetaObject::invokeMethod(&mActivityService, "activitiesList", Q_RETURN_ARG(QList<QVariantHash>, activities));
+    QMetaObject::invokeMethod(&mActivityService, 
+                              "activitiesList", 
+                              Q_RETURN_ARG(QList<QVariantHash>, 
+                              activities));
     foreach(QVariantHash activity, activities) {
         prepareActivityEntry(activity);
         entry = new TsActivityModelItem(*this, mActivityService, activity);
-        if (entry) {
-            if (maxRowCount() <= mEntries.count()) {
-                break;
-            }
-            mEntries.append(entry);
+        if (maxRowCount() <= mEntries.count()) {
+            delete entry;
+            break;
         }
+        mEntries.append(entry);
     }
 }
 

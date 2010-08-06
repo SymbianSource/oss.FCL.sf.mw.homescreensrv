@@ -14,11 +14,12 @@
 * Description: tsentrymodelitem.cpp
 *
 */
-#include "tsentrymodelitem.h"
-#include "tsdataroles.h"
 
 #include <tstask.h>
 #include <HbIcon>
+
+#include "tsentrymodelitem.h"
+#include "tsdataroles.h"
 
 /*!
     \class TsEntryModelItem
@@ -55,10 +56,7 @@ QVariant TsEntryModelItem::data(int role) const
         case Qt::DisplayRole:
             return QVariant(mEntry->name());
         case Qt::DecorationRole:
-            {
-            QPixmap icon = mEntry->screenshot();
-            return QVariant::fromValue<HbIcon>(HbIcon(icon));
-            }
+            return QVariant::fromValue<HbIcon>(HbIcon(mEntry->screenshot()));
         case TsDataRoles::Closable:
             return QVariant(mEntry->isClosable());
         case TsDataRoles::Active:

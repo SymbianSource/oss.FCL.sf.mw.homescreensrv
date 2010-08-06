@@ -388,6 +388,16 @@ QSharedPointer<CaEntry> CaItemModel::entry(const QModelIndex &index) const
     return m_d->entry(index);
 }
 
+QList<int> CaItemModel::getUninstallingEntriesIds(int componentId)
+{
+    return m_d->getUninstallingEntriesIds(componentId);
+}
+
+void CaItemModel::updateProgress(int id, int valueOfProgress)
+{
+    m_d->updateProgress(id, valueOfProgress);
+}
+
 /*!
  Constructor
  \param query needed to create model
@@ -476,8 +486,8 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
             break;
         case CaItemModel::CollectionTitleRole:
             if (!pEntry->attribute(COLLECTION_TITLE_NAME).isNull()) {
-                variant = QVariant(hbTrId(pEntry->
-                    attribute(COLLECTION_TITLE_NAME).toUtf8()));
+                variant = QVariant(pEntry->
+                    attribute(COLLECTION_TITLE_NAME).toUtf8());
             }
             else {
                 variant = QVariant(pEntry->text());
@@ -693,6 +703,24 @@ bool CaItemModelPrivate::notifierExists() const
 }
 
 
+QList<int> CaItemModelPrivate::getUninstallingEntriesIds(int componentId)
+{
+    CaQuery* query = new CaQuery(mQuery);
+    QString compId(QString().setNum(componentId));
+    query->setAttribute(QString("component_id"), compId);
+    QList<int> ids = mService->getEntryIds(*query);
+    delete query;
+    return ids;
+}
+
+void CaItemModelPrivate::updateProgress(int id, int valueOfProgress)
+{
+    int updateIndex = mEntries.updateProgress(id, valueOfProgress);
+    if (updateIndex >= 0) {
+        emit m_q->dataChanged(
+                index(updateIndex), index(updateIndex));
+    }        
+}
 /*!
  Updates model with fresh entries and resets model
  */
@@ -824,7 +852,7 @@ void CaItemModelPrivate::handleAddItems(const QList<int> &itemsList)
             if (itemsList == oldList) {
                 // assume that if the order has not changed
                 // it had to be the secondary lines
-                updateModel();
+                emit m_q->dataChanged(index(0), index(m_q->rowCount()-1));
             } else {
                 updateLayout();
             }
@@ -1049,3 +1077,4 @@ void CaItemModelPrivate::emitCountChange(int previousCount)
         emit m_q->countChange();
     }
 }
+

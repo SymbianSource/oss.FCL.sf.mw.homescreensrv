@@ -14,8 +14,6 @@
 * Description:
 *
 */
-#include "tstasksgriditem.h"
-
 #include <HbPushButton>
 #include <HbAbstractItemView>
 #include <HbFrameItem>
@@ -23,6 +21,7 @@
 #include <HbIconItem>
 #include <HbStyleLoader>
 
+#include "tstasksgriditem.h"
 #include "tsdataroles.h"
 
 /*!
@@ -32,12 +31,21 @@
 */
 
 
-TsTasksGridItem::TsTasksGridItem() : HbAbstractViewItem(), mScreenshotLabel(0), mApplicationNameLabel(0), mDeleteButton(0), mActiveLabelFrame(0), mActiveLabel(0)
+TsTasksGridItem::TsTasksGridItem() 
+: 
+HbAbstractViewItem(), 
+mScreenshotLabel(0), 
+mApplicationNameLabel(0), 
+mDeleteButton(0), 
+mActiveLabelFrame(0), 
+mActiveLabel(0)
 {
     // Register the custom docml and css to provide our own style to the list items
-    bool widgetmlLoaded = HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.widgetml");
+    bool widgetmlLoaded = 
+        HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.widgetml");
     Q_ASSERT(widgetmlLoaded);
-    bool cssLoaded = HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.css");
+    bool cssLoaded = 
+        HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.css");
     Q_ASSERT(cssLoaded);
 }
 

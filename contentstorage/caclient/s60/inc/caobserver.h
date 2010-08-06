@@ -74,11 +74,6 @@ public:
      * @param parent pointer to parent. Defaults to NULL.
      */
     CaObserver(QObject *parent = 0);
-
-    /**
-     * Destructor.
-     */
-    ~CaObserver();
     
     /**
      * Method invoked when entry is changed.

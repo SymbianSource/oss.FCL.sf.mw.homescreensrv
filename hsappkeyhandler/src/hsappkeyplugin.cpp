@@ -24,9 +24,12 @@
 #include <hb/hbcore/hbdevicedialogsymbian.h>
 #include <hb/hbcore/hbsymbianvariant.h> 
 #include <tspropertydefs.h>
+#include <afactivitylauncher.h>
+#include <homescreendomainpskeys.h>
 #include "hsappkeyplugin.h"
 
-const TUid KHSAppUid  = { 0x20022F35 };
+_LIT(KHsActivactionUri, "appto://20022F35?activityname=HsIdleView");
+_LIT(KAppLibActivactionUri, "appto://20022F35?activityname=AppLibMainView");
 _LIT(KTsPluginName, "com.nokia.taskswitcher.tsdevicedialogplugin/1.0");
 
 
@@ -132,28 +135,22 @@ void CHsAppKeyPlugin::ProvideKeyEventsL(RArray<TKeyEvent>& aKeyEventArray)
 // ---------------------------------------------------------------------------
 //
 void CHsAppKeyPlugin::HandleShortPressL()
-{    
-    RWsSession& ws = iEikEnv->WsSession();
-    TApaTaskList appList(ws);
-    TApaTask task = appList.FindApp(KHSAppUid);
-
-    if (task.Exists()) {
-        task.BringToForeground();
-    } else {        
-        RApaLsSession apaLsSession;
-        User::LeaveIfError(apaLsSession.Connect());
-        CleanupClosePushL(apaLsSession);
-        
-        TApaAppInfo appInfo;
-        apaLsSession.GetAppInfo(appInfo, KHSAppUid );
-        
-        CApaCommandLine *cmdLine = CApaCommandLine::NewLC();
-        cmdLine->SetExecutableNameL(appInfo.iFullName);
-        User::LeaveIfError( apaLsSession.StartApp(*cmdLine));
-    
-        CleanupStack::PopAndDestroy(cmdLine);
-        CleanupStack::PopAndDestroy(&apaLsSession);
-    }
+{   
+    RApaLsSession apaLsSession;
+    CleanupClosePushL(apaLsSession);
+    User::LeaveIfError(apaLsSession.Connect());
+    CAfActivityLauncher *activityEnabler = 
+        CAfActivityLauncher::NewLC(apaLsSession, 
+                                   iEikEnv->WsSession());
+    TInt state(0);
+    RProperty::Get(KHsCategoryUid, KHsCategoryStateKey, state);
+    if (state == EHomeScreenIdleState) {
+        activityEnabler->launchActivityL(KAppLibActivactionUri);
+    } else {
+        activityEnabler->launchActivityL(KHsActivactionUri);
+    }    
+    CleanupStack::PopAndDestroy(activityEnabler);
+    CleanupStack::PopAndDestroy(&apaLsSession);
     delete mDialog;
     mDialog =0;
 }

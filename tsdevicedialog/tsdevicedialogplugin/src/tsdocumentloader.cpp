@@ -27,7 +27,8 @@
     TS implementation of document loader. It is creating TS objects used in UI
 */
 
-QObject *TsDocumentLoader::createObject(const QString &type, const QString &name)
+QObject *TsDocumentLoader::createObject(const QString &type, 
+                                        const QString &name)
 {
     if (type == TsTasksGrid::staticMetaObject.className()) {
         QObject *object = new TsTasksGrid();

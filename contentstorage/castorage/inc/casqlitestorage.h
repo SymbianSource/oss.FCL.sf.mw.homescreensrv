@@ -66,6 +66,18 @@ public:
      * Loads data base from rom.
      */
     void LoadDataBaseFromRomL();
+    
+    //from CCpStorage
+    /**
+     * Saves a copy of database to private.
+     */
+    void SaveDatabaseL();
+
+    //from CCpStorage
+    /**
+     * Restores a copy of database from backup to private.
+     */
+    void RestoreDatabaseL();
 
     /**
      * Localizes one entry attribute.
@@ -161,8 +173,9 @@ public:
     /**
      * Add ifno launch to db.
      * @param aEntryId.
+     * @param aRemovable.
      */
-    void TouchL( const TInt aEntryId );
+    void TouchL( const TInt aEntryId, TBool aRemovable );
 
     /**
      * Get database property from db.
@@ -224,7 +237,7 @@ private:
     void ExecuteOrganizeL( const RArray<TInt>& aEntryIds,
             TCaOperationParams aParams );
 
-    void ExecuteTouchL( const TInt aEntryId );
+    void ExecuteTouchL( const TInt aEntryId, TBool aRemovable );
 
     void ExecuteDbPropertyL( const TDesC& aProperty, TDes& aPropertyValue );
 
@@ -270,6 +283,11 @@ private:
      * Private path on C-drive.
      */
     TFileName iPrivatePathCDrive;
+    
+    /**
+     * Private path on C-drive for backup db.
+     */
+    TFileName iPrivatePathCDriveDbBackup;
 
     /**
      * RFs session.

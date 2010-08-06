@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.25 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.26 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -48,7 +48,7 @@ enum TEntryRole
 //Entry flags
 enum TEntryFlag
     {
-    EUsed = 1,
+    EUsed = 1,//Flag is set only for removable applications
     EUninstall = 2,
     ERemovable = 4,
     EVisible = 8,

@@ -116,10 +116,12 @@ bool CaIconCache::exist(const CaEntry &entry, const QSize &size)
 HbIcon CaIconCache::icon(const CaEntry &entry, const QSize &size)
 {
     CACLIENTTEST_FUNC_ENTRY("CaIconCache::icon");
-    HbIcon icon;
-    icon = *mCache.object(key(entry,size));
+    HbIcon result;
+    if (HbIcon* tmp = mCache.object(key(entry,size))) {
+        result = *tmp;
+    }
     CACLIENTTEST_FUNC_EXIT("CaIconCache::icon");
-    return icon;
+    return result; 
 }
 
 /*!

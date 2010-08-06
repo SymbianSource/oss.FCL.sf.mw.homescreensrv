@@ -40,5 +40,21 @@
         </command>
     </commandml>
 
+    <content xmlns="http://www.s60.com/xml/content/2">
+        <output dir="content/private/20022F35/customsvg" flatten="true" >
+        <input>
+            <include files="${CaStorageDbSetting.Collections.Icon.localPath}"/>
+        </input>
+        <input>
+            <include files="${CaStorageDbSetting.URLs.URLIcon.localPath}"/>
+        </input>
+        <input>
+            <include files="${CaStorageDbSetting.OperatorCollections.Icon.localPath}"/>
+        </input>
+        <input>
+            <include files="${CaStorageDbSetting.OperatorURLs.OperatorURLIcon.localPath}"/>
+        </input>
+        </output>
+    </content>
 
 </container>

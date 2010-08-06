@@ -54,7 +54,7 @@ CaQtSfHandlerLoader::CaQtSfHandlerLoader()
 */
 void CaQtSfHandlerLoader::registerPlugins() const
 {
-    const QString pluginPath("hsresources/plugins/commandhandler");
+    const QString pluginPath("/resource/qt/plugins/commandhandler");
     const QFileInfoList drives = QDir::drives();
     
     foreach (QFileInfo drive, drives) {

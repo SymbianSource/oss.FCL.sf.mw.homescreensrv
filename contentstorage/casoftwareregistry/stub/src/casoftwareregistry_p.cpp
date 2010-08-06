@@ -18,7 +18,8 @@
 #include <QMetaType>
 #include <QStringList>
 
-
+#include "cauninstallnotifier.h"
+#include "cauninstallnotifier_p.h"
 #include "casoftwareregistry.h"
 #include "casoftwareregistry_p.h"
 
@@ -117,4 +118,13 @@ QList<CaSoftwareRegistryPrivate::DetailMap>
     logMap[CaSoftwareRegistry::componentOperationTypeKey()] = "no data";
     logList.append(logMap);
     return logList;
+}
+
+/*!
+ Creating uninstall notifier
+ \return CaUninstallNotifier instance
+ */
+CaUninstallNotifier *CaSoftwareRegistryPrivate::createUninstallNotifier() const
+{
+    return CaUninstallNotifier::notifier();
 }

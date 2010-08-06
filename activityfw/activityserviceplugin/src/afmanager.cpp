@@ -18,26 +18,23 @@
 #include <QStringList>
 #include <QUrl>
 
-#include <afstorageclient.h>
-#include <afstorageentry.h>
 #include <afstorageglobals.h>
 
+#include "afactivities_global.h"
 #include "afmanager.h"
 #include "aflauncher.h"
 
-AfManager::AfManager(const QSharedPointer<AfStorageClient> &serviceProvider, 
+AfManager::AfManager(const QSharedPointer<AfStorageProxy> &serviceProvider, 
                      QObject *parent) 
 : 
     QObject(parent), 
     mServiceProvider(serviceProvider)
 {
-    if(0 == mServiceProvider->connect()){
-        mServiceProvider->notifyDataChange();
-    }
+    mServiceProvider->notifyDataChange();
     connect(mServiceProvider.data(),
-            SIGNAL(thumbnailRequested(QPixmap, void *)),
+            SIGNAL(thumbnailRequested(QPixmap,void*)),
             this,
-            SIGNAL(thumbnailReady(QPixmap, void *)));
+            SIGNAL(thumbnailReady(QPixmap,void*)));
     connect(mServiceProvider.data(),
             SIGNAL(dataChanged()),
             this,
@@ -50,20 +47,14 @@ AfManager::~AfManager()
 
 QList<QVariantHash> AfManager::activitiesList()
 {
-    QList<AfStorageEntry> results;
+    QList<QVariantHash> results;
     mServiceProvider->activities(results);
-    
-    QList<QVariantHash> retVal;
-    QList<AfStorageEntry>::iterator iter(results.begin());
-    for (; iter != results.end(); iter = results.erase(iter)) {
-        retVal.append((*iter).publicData());
-    }
-    return retVal;
+    return results;
 }
 
 void AfManager::launchActivity(const QUrl &uri)
 {
-    if (uri.scheme() != "appto")
+    if (uri.scheme() != Af::KActivityScheme)
         return;
 
     bool conversionOk(false);
@@ -80,9 +71,9 @@ void AfManager::launchActivity(const QUrl &uri)
         parameters.insert(i->first, i->second);
     }
 
-    if (parameters.contains("activityname")) {
-        activity.insert(ActivityActivityKeyword, parameters.value("activityname").toString());
-        parameters.remove("activityname");
+    if (parameters.contains(Af::KActivityUriNameKey)) {
+        activity.insert(ActivityActivityKeyword, parameters.value(Af::KActivityUriNameKey).toString());
+        parameters.remove(Af::KActivityUriNameKey);
     }
     
     activity.insert(ActivityParametersKeyword, parameters);
@@ -115,10 +106,8 @@ void AfManager::launchActivity(const QVariantHash& activity)
 {
     AfLauncher applicationLauncher;
     int applicationId = activity.value(ActivityApplicationKeyword).toInt();
-    AfStorageEntry entry(applicationId, 
-                         activity[ActivityActivityKeyword].toString());
     if (applicationLauncher.isRunning(applicationId)) {
-        mServiceProvider->launchActivity(entry);
+        mServiceProvider->launchActivity(applicationId, activityToUri(activity).toString());
     } else {
         applicationLauncher.startApplication(applicationId, activityToUri(activity));
     }
@@ -127,11 +116,11 @@ void AfManager::launchActivity(const QVariantHash& activity)
 QUrl AfManager::activityToUri(const QVariantHash& activity) const
 {
     QUrl uri;
-    uri.setScheme("appto");
+    uri.setScheme(Af::KActivityScheme);
     uri.setHost(QString("%1").arg(activity.value(ActivityApplicationKeyword).toUInt(), 8, 16, QChar('0')));
     
     if (activity.contains(ActivityActivityKeyword))
-        uri.addQueryItem("activityname", activity.value(ActivityActivityKeyword).toString());
+        uri.addQueryItem(Af::KActivityUriNameKey, activity.value(ActivityActivityKeyword).toString());
     
     QVariantHash parameters = activity.value(ActivityParametersKeyword).toHash();
     foreach(const QString &key, parameters.keys()) {

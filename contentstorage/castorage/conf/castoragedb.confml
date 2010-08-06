@@ -1,86 +1,56 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<confml:configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:confml="http://www.s60.com/xml/confml/2" xsi:schemaLocation="http://www.s60.com/xml/confml/2 http://www.s60.com/xml/confml/1#//confml2" xmlns:xs="http://www.w3.org/2001/XMLSchema" name="Content storage database settings">
-  <confml:feature ref="CaStorageDbSetting" name="Application Library model">
-    <confml:setting ref="Collections" mapKey="Name" mapValue="Name" name="Collections" type="sequence">
-      <confml:setting ref="Name" name="Name" type="string">
-        <confml:desc>Collection name. It is only identifier. Localized name should be used too.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="ColShortName" name="Collection Short Name" type="string">
-        <confml:desc>Collection short name. Optional.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="ColTitleName" name="Collection Title Name" type="string">
-        <confml:desc>Collection title name. Optional.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="GroupName" name="Collection Group Name" type="string">
-        <confml:desc>Group name. Identify collection where application with predefined group name should be added after installation. Should be the same as not localized name.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="Flags" name="Lock collection and content" type="selection">
-      	<confml:desc>Lock operator collection and content - user can not delete operator collection, prevent renaming collection and even content. Not possible by user to add new content to locked collection</confml:desc>
-      	<confml:option name="locked" value='0'/>
-      	<confml:option name="unlocked" value='4'/>
-      </confml:setting>
-      <confml:setting ref="LocName" name="Localzied Name" type="string">
-        <confml:desc>Localized Collection name. Localized names are taken from contentstorage_*.ts file( for example contentstorage_en_GB.ts ). If text hasn't been found in ts file this one wouldn't be translated. Leave empty field if collection name sholdn't be localized.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="IconFileName" name="Icon filename" type="string">
-        <confml:desc>Collection Icon filename. Optional.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="IconSkinId" name="Icon skin id" type="string">
-        <confml:desc>Collection Icon skin id. Optional.</confml:desc>
-      </confml:setting>
-    </confml:setting>
-    <confml:setting ref="Items"  name="Items" type="sequence" >
-      <confml:setting ref="Type" name="Entry type" type="selection">
-      	<confml:desc>Type of entry. Must.</confml:desc>
-      	<confml:option name="application" value="application"/>
-      	<confml:option name="url" value="url"/>
-      	<confml:option name="hs widget" value="widget"/>
-      </confml:setting>
-      <confml:setting ref="Name" name="Entry name" type="string">
-        <confml:desc>Name. In case of applications and homescreen widgets this is only information field( Names are taken from system ).</confml:desc>
-      </confml:setting>
-      <confml:setting ref="ShortName" name="ShortName" type="string">
-        <confml:desc>Item short name. Available for URL. Optional.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="DestinationUid" name="Uid" type="string" relevant="Type=&quot;application&quot;">
-        <confml:desc>Application uid. Uid of application in decimal format. Must for application type.</confml:desc>
-        <xs:pattern value="^[-+]?[0-9]{9}"/>
-      </confml:setting>
-      <confml:setting ref="DestinationUrl" name="Url" type="string" relevant="Type=&quot;url&quot;">
-        <confml:desc>Url. Must for url type.</confml:desc>
-        <xs:pattern value="(http(|s)://([\w-]+\.)+[\w-]+(:[0-9]{1,5})?(/[\w- ./?%&amp;=]*)?|)"/>
-      </confml:setting>
-      <confml:setting ref="DestinationWidgetUri" name="Homescreen widget Uri" type="string" relevant="Type=&quot;widget&quot;">
-        <confml:desc>HS Widget Uri. Must for hs widget type.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="IconFileName" name="Icon filename" type="string">
-        <confml:desc>Icon filename. Optional.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="IconSkinId" name="Icon skin Id" type="string">
-        <confml:desc>Icon skin id. Optional.</confml:desc>
-      </confml:setting>
-      <confml:setting ref="Col_Name" name="In collection " type="selection">
-        <confml:desc>Collection where entry will be added.</confml:desc>
-        <confml:option map="CaStorageDbSetting/Collections"/>
-      </confml:setting>
-    </confml:setting>
-  </confml:feature>
-   <confml:data>
-    <confml:CaStorageDbSetting>
-      <confml:Collections extensionPolicy="replace"><confml:Name>Favorites</confml:Name><confml:GroupName>Favorites</confml:GroupName><confml:ColTitleName>FavoritesT</confml:ColTitleName><confml:Flags>4</confml:Flags><confml:LocName></confml:LocName><confml:IconFileName>qtg_large_applications_user</confml:IconFileName></confml:Collections>
-      <confml:Items extensionPolicy="append"><confml:Type>application</confml:Type><confml:Name>calendar</confml:Name><confml:DestinationUid>268458241</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Camera</confml:Name><confml:DestinationUid>270501242</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Contacts</confml:Name><confml:DestinationUid>537014009</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Email</confml:Name><confml:DestinationUid>537023930</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>FM Radio</confml:Name><confml:DestinationUid>270530934</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Internet</confml:Name><confml:DestinationUid>222242222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Maps</confml:Name><confml:DestinationUid>222332222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Messaging</confml:Name><confml:DestinationUid>537001593</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Music</confml:Name><confml:DestinationUid>270564450</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Photos (camera)</confml:Name><confml:DestinationUid>536913858</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Settings</confml:Name><confml:DestinationUid>268458220</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-      <confml:Items><confml:Type>application</confml:Type><confml:Name>Videos (video camera)</confml:Name><confml:DestinationUid>222111222</confml:DestinationUid><confml:IconFileName></confml:IconFileName><confml:Col_Name map="CaStorageDbSetting/Collections[@key='Favorites']"></confml:Col_Name></confml:Items>
-    </confml:CaStorageDbSetting>
-  </confml:data>
+<confml:configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.s60.com/xml/confml/2" xmlns:confml="http://www.s60.com/xml/confml/2" xsi:schemaLocation="http://www.s60.com/xml/confml/2 http://www.s60.com/xml/confml/1#//confml2" xmlns:xs="http://www.w3.org/2001/XMLSchema" name="Content storage database settings">
+    <confml:data>
+        <confml:CaStorageDbSetting>
+     
+            <Collections template="true">
+                <LocalizeNames>false</LocalizeNames>
+                <TranslationFile>contentstorage</TranslationFile>
+                <Icon><localPath>dummy</localPath></Icon>
+            </Collections>
+
+            <OperatorCollections template="true">
+                <Icon><localPath>dummy</localPath></Icon>
+            </OperatorCollections>
+            
+            <URLs template="true">
+                <URLIcon><localPath>dummy</localPath></URLIcon>
+            </URLs>
+            
+            <OperatorURLs template="true">
+                 <OperatorURLIcon><localPath>dummy</localPath></OperatorURLIcon>
+            </OperatorURLs>
+            
+            <Collections extensionPolicy="append"><LocalizeNames>true</LocalizeNames><TranslationFile>contentstorage</TranslationFile><Name>txt_applib_dblist_essentials</Name>
+                <ShortName/><TitleName>txt_applib_subtitle_essentials</TitleName><GroupName>Favorites</GroupName><Locked>true</Locked>
+                <Icon><localPath>dummy</localPath></Icon><IconSkinId/>
+            </Collections>
+            
+            <confml:Items extensionPolicy="append"><confml:Type>1</confml:Type><confml:Application>268458241</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Calendar</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>270501242</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Camera</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>537014009</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Contacts</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>537023930</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Email</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>270530934</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>FM Radio</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>222242222</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments></Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>222332222</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments></Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>537001593</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Messaging</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>270564450</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Music</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>536913858</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Photos</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>268458220</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments>Settings</Comments></confml:Items>
+            <confml:Items><confml:Type>1</confml:Type><confml:Application>222111222</confml:Application><ColName map="CaStorageDbSetting/Collections[@key='txt_applib_dblist_essentials']"></ColName>
+                <Comments></Comments></confml:Items>
+        </confml:CaStorageDbSetting>
+    </confml:data>
 
 </confml:configuration>

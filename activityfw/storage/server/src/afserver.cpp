@@ -20,6 +20,7 @@
 #include "afsession.h"
 #include "afstorage.h"
 #include "aftask.h"
+#include "afapplicationsengine.h"
 
 _LIT( KActivityServerName, "hsactivitydbserver" );
 _LIT(KObserverAlreadyExists, "Observer task exists");
@@ -41,8 +42,10 @@ CServer2( EPriorityStandard )
  */
 CAfServer::~CAfServer()
 {
+    delete mAppEngine;
     delete mStorage;
     mFsSession.Close();
+    mApaSession.Close();
     mObservers.ResetAndDestroy();
     RFbsSession::Disconnect();
 }
@@ -66,10 +69,11 @@ CAfServer* CAfServer::NewLC()
 void CAfServer::ConstructL()
 {
     StartL(KActivityServerName);
+    User::LeaveIfError(mApaSession.Connect());
     User::LeaveIfError(mFsSession.Connect());
     User::LeaveIfError(RFbsSession::Connect(mFsSession));
     mStorage = CAfStorage::NewL(mFsSession);
-    mObservers.Array();
+    mAppEngine = CAfApplicationsEngine::NewL(mApaSession, *mStorage);
 }
 
 // -----------------------------------------------------------------------------

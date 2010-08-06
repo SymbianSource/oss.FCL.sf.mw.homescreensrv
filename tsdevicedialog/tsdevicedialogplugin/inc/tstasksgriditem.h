@@ -48,6 +48,7 @@ private:
 
     HbFrameItem *mActiveLabelFrame;
     HbTextItem *mActiveLabel;
+
 };
 
 #endif //TSTASKSGRIDITEM_H

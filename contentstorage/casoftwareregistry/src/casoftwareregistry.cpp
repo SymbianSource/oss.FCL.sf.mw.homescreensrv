@@ -18,7 +18,7 @@
 #include <QString>
 #include <QStringList>
 
-
+#include "cauninstallnotifier.h"
 #include "casoftwareregistry.h"
 #include "casoftwareregistry_p.h"
 
@@ -166,6 +166,15 @@ QList<CaSoftwareRegistry::DetailMap>
         CaSoftwareRegistry::retrieveLogEntries() const
 {
     return m_d->retrieveLogEntries();
+}
+
+/*!
+ Creates uninstall notifier.
+ \retval pointer to created CaUninstallNotifier instance.
+ */
+CaUninstallNotifier *CaSoftwareRegistry::createUninstallNotifier() const
+{
+    return m_d->createUninstallNotifier();
 }
 
 /*!

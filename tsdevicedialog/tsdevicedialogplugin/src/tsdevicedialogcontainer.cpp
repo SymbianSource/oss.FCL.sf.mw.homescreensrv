@@ -11,18 +11,17 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
-#include "tsdevicedialogcontainer.h"
 
 #include <QAbstractListModel>
-
 #include <HbDialog>
 #include <HbMainWindow>
-
+#include <HbLabel>
 #include <tspropertydefs.h>
 
+#include "tsdevicedialogcontainer.h"
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
 
@@ -30,48 +29,77 @@ namespace {
     const char KDocmlPath[] = ":/resource/layout.docml";
 }
 
-TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model, QObject *parent) : QObject(parent), mVisibilityPublisher(TsProperty::KTsPath)
+TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model, 
+                                                 QObject *parent)
+:
+    QObject(parent), 
+    mVisibilityPublisher(TsProperty::KTsPath)
 {
     bool ok(true);
     mLoader.load(KDocmlPath, &ok);
     Q_ASSERT(ok);
 
-    HbDialog *dialog = qobject_cast<HbDialog*>(mLoader.findWidget("tsdevicedialog"));
-    TsTasksGrid *grid = qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
+    HbDialog *dialog = 
+        qobject_cast<HbDialog*>(mLoader.findWidget("tsdevicedialog"));
+    TsTasksGrid *grid = 
+        qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
     Q_ASSERT(dialog);
     Q_ASSERT(grid);
 
-    changeOrientation(dialog->mainWindow()->orientation());
-
     grid->setModel(model);
+
+    changeOrientation(dialog->mainWindow()->orientation());
+    switchViewOnModelChange();
 
     // needed because of Qt::QueuedConnection used below
     // @todo: check if we actually need queued connections
     qRegisterMetaType<QModelIndex>("QModelIndex");
 
     // connect the grid and model
-    disconnect(grid, SIGNAL(activated(QModelIndex)), model, SLOT(openApplication(QModelIndex)));
-    disconnect(grid, SIGNAL(activated(QModelIndex)), dialog, SLOT(close()));
-    disconnect(grid, SIGNAL(deleteButtonClicked(QModelIndex)), model, SLOT(closeApplication(QModelIndex)));
+    connect(grid, 
+            SIGNAL(activated(QModelIndex)), 
+            model, 
+            SLOT(openApplication(QModelIndex)));
+    connect(grid, 
+            SIGNAL(activated(QModelIndex)), 
+            dialog, 
+            SLOT(close()));
+    connect(grid, 
+            SIGNAL(deleteButtonClicked(QModelIndex)), 
+            model, SLOT(closeApplication(QModelIndex)), 
+            Qt::QueuedConnection);
 
-    connect(grid, SIGNAL(activated(QModelIndex)), model, SLOT(openApplication(QModelIndex)));
-    connect(grid, SIGNAL(activated(QModelIndex)), dialog, SLOT(close()));
-    connect(grid, SIGNAL(deleteButtonClicked(QModelIndex)), model, SLOT(closeApplication(QModelIndex)), Qt::QueuedConnection);
+    connect(dialog->mainWindow(), 
+            SIGNAL(orientationChanged(Qt::Orientation)), 
+            this, 
+            SLOT(changeOrientation(Qt::Orientation)));
+    connect(dialog, 
+            SIGNAL(aboutToClose()), 
+            this, 
+            SIGNAL(deviceDialogClosed()));
 
-    connect(dialog->mainWindow(), SIGNAL(orientationChanged(Qt::Orientation)), this, SLOT(changeOrientation(Qt::Orientation)));
-    connect(dialog, SIGNAL(aboutToClose()), this, SIGNAL(deviceDialogClosed()));
-    
-    connect(this, SIGNAL(deviceDialogClosed()), this, SLOT(notifyDialogClosed()));    
-    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, static_cast<int>(true));
+    // note: connect to more signals when partial model updates are implemented
+    connect(model, 
+            SIGNAL(modelReset()), 
+            this, 
+            SLOT(switchViewOnModelChange()));
+
+    connect(this, 
+            SIGNAL(deviceDialogClosed()), 
+            this, 
+            SLOT(notifyDialogClosed()));
+    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, 
+                                  static_cast<int>(true));
     mVisibilityPublisher.sync();
 }
 
-TsDeviceDialogContainer::~TsDeviceDialogContainer() 
-{ 
+TsDeviceDialogContainer::~TsDeviceDialogContainer()
+{
     delete deviceDialogWidget();
 }
 
-bool TsDeviceDialogContainer::setDeviceDialogParameters(const QVariantMap &parameters)
+bool TsDeviceDialogContainer::setDeviceDialogParameters(
+                                  const QVariantMap &parameters)
 {
     Q_UNUSED(parameters);
     return false;
@@ -91,7 +119,8 @@ void TsDeviceDialogContainer::closeDeviceDialog(bool byClient)
 
 HbPopup *TsDeviceDialogContainer::deviceDialogWidget() const
 {
-    HbDialog *widget = qobject_cast<HbDialog*>(mLoader.findWidget("tsdevicedialog"));
+    HbDialog *widget = 
+        qobject_cast<HbDialog*>(mLoader.findWidget("tsdevicedialog"));
     Q_ASSERT(widget);
     return widget;
 }
@@ -114,6 +143,25 @@ void TsDeviceDialogContainer::changeOrientation(Qt::Orientation orientation)
 
 void TsDeviceDialogContainer::notifyDialogClosed()
 {
-    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, static_cast<int>(false));
+    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, 
+                                  static_cast<int>(false));
     mVisibilityPublisher.sync();
+}
+
+void TsDeviceDialogContainer::switchViewOnModelChange()
+{
+    TsTasksGrid *grid = 
+        qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
+    HbLabel *noItemsLabel = 
+        qobject_cast<HbLabel *>(mLoader.findWidget("noitemslabel"));
+    Q_ASSERT(grid);
+    Q_ASSERT(noItemsLabel);
+
+    if (grid->model()->rowCount()) {
+        noItemsLabel->hide();
+        grid->show();
+    } else {
+        noItemsLabel->show();
+        grid->hide();
+    }
 }

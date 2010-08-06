@@ -27,11 +27,7 @@ void AfBroadcastTask::ExecuteL(MAfTaskStorage& storage,
 {
     const RPointerArray<CAfTask> &tasks(storage.StorageData());
     for (TInt iter(tasks.Count() - 1); iter >= 0 ; --iter ) {
-        if(EFalse == msg.IsNull()) {
-            (tasks[iter])->BroadcastReceivedL(msg);
-        }
+        (tasks[iter])->BroadcastReceivedL(msg);
     }
-    if(EFalse == msg.IsNull()) {
-        msg.Complete(KErrNone);
-    }
+    msg.Complete(KErrNone);
 }

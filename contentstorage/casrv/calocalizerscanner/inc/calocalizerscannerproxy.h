@@ -93,6 +93,10 @@ private:
     const TDesC& GetEntryDescription(
             const RPointerArray<CCaInnerEntry>& aEntries, TInt aId );
 
+    const TPtrC GetAttributeName(
+            const RPointerArray<CCaInnerEntry>& aEntries,
+            TInt aId,
+            const TDesC& aAttrName );
 private:
 	
     /*

@@ -15,123 +15,99 @@
 *
 */
 #include "afstorageclient.h"
-#include "afstorageclient_p.h"
 
+#include <e32debug.h>
+
+#include "afstorageclient_p.h"
 #include "afcmd.h"
 
 // -----------------------------------------------------------------------------
 /**
- * Constructor
+ * Two-phase constructor. Create and initialize instance
+ * @return entry instance
  */
-AfStorageClient::AfStorageClient(QObject *obj)
-:
-QObject(obj),
-d_ptr(0)
+EXPORT_C CAfStorageClient *CAfStorageClient::NewL(MAfAsyncRequestObserver &observer)
 {
-    d_ptr = new AfStorageClientPrivate(*this);
+    CAfStorageClient *self = CAfStorageClient::NewLC(observer);
+    CleanupStack::Pop(self);
+    return self;
 }
+
+// -----------------------------------------------------------------------------
+/**
+ * Two-phase constructor. Create, initialize and push instance into cleanup stack
+ * @return entry instance
+ */
+EXPORT_C CAfStorageClient *CAfStorageClient::NewLC(MAfAsyncRequestObserver &observer)
+{
+    CAfStorageClient *self = new (ELeave) CAfStorageClient();
+    CleanupStack::PushL(self);
+    self->ConstructL(observer);
+    return self;
+}    
 
 // -----------------------------------------------------------------------------
 /**
  * Destructor
  */
-AfStorageClient::~AfStorageClient()
+EXPORT_C CAfStorageClient::~CAfStorageClient()
 {
     delete d_ptr;
 }
-
+    
 // -----------------------------------------------------------------------------
 /**
- * Establish connection with activity server
- * @return 0 on succees, error code otherwise
+ * Constructor
  */
-int AfStorageClient::connect()
+CAfStorageClient::CAfStorageClient()
 {
-    return d_ptr->connect();
 }
 
 // -----------------------------------------------------------------------------
 /**
- * Interface implementation.
- * @see int MAfAsyncRequestObserver::asyncRequestCompleated(int, int, const QString&)
+ * 2nd phase of construction
  */
-void AfStorageClient::asyncRequestCompleated(int result,
-                                             int requestType, 
-                                             const QString& data)
+void CAfStorageClient::ConstructL(MAfAsyncRequestObserver &observer)
 {
-    switch (requestType) {
-    case WaitActivity:
-        if (KErrCancel != result) {
-            waitActivity();
-        }            
-        if (KErrNone == result) {
-            emit activityRequested(data);
-        }
-        
-        break;
-    }
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Interface implementation.
- * @see int MAfAsyncRequestObserver::asyncRequestCompleated(int, int, QPixmap&, void*)
- */
-void AfStorageClient::asyncRequestCompleated(int result,
-                                             int requestType, 
-                                             const QPixmap& pixmap,
-                                             void* userData)
-{
-    switch (requestType) {
-    case GetThumbnail:
-        emit thumbnailRequested(0 == result ? pixmap : QPixmap(), 
-                                userData);
-        break;
-    }
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Interface implementation.
- * @see int MAfAsyncRequestObserver::asyncRequestCompleated(int, int)
- */
-void AfStorageClient::asyncRequestCompleated(int result,int requestType)
-{
-    switch(requestType) {
-    case NotifyChange:
-        if (KErrCancel != result) {
-            notifyDataChange();
-        }
-        if (KErrNone == result) {
-            emit dataChanged();
-        }
-        break;
-    }
+    d_ptr = CAfStorageClientPrivate::NewL(observer);
 }
 
 // -----------------------------------------------------------------------------
 /**
  * Function add new activity
  * @param entry - activity entry data structure
- * @param imageSource - source for activity thumbnail
+ * @param imageHandle - handle for activity thumbnail
  * @return 0 on success, error code otherwise
  */
-int AfStorageClient::addActivity(const AfStorageEntry &entry, const QPixmap &imageSource)
+EXPORT_C int CAfStorageClient::addActivity(const CAfEntry &entry, TInt imageHandle)
 {
-    return d_ptr->addActivity(entry, imageSource);
+    RDebug::Print(_L("This method is deprecated, please use CAfStorageClient::saveActivity instead"));
+    return d_ptr->addActivity(entry, imageHandle);
 }
 
 // -----------------------------------------------------------------------------
 /**
  * Function update existing activity
  * @param entry - activity entry data structure
- * @param imageSource - source for activity thumbnail
+ * @param imageHandle - handle for activity thumbnail
  * @return 0 on success, error code otherwise
  */
-int AfStorageClient::updateActivity(const AfStorageEntry &entry, 
-                                    const QPixmap &imageSource)
+EXPORT_C int CAfStorageClient::updateActivity(const CAfEntry &entry, TInt imageHandle)
 {
-    return d_ptr->updateActivity(entry, imageSource);
+    RDebug::Print(_L("This method is deprecated, please use CAfStorageClient::saveActivity instead"));
+    return d_ptr->updateActivity(entry, imageHandle);
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Function save an activity (add new one or update existing one)
+ * @param entry - activity entry data structure
+ * @param imageHandle - handle for activity thumbnail
+ * @return 0 on success, error code otherwise
+ */
+EXPORT_C int CAfStorageClient::saveActivity(const CAfEntry &entry, TInt imageHandle)
+{    
+    return d_ptr->saveActivity(entry, imageHandle);
 }
 
 // -----------------------------------------------------------------------------
@@ -140,7 +116,7 @@ int AfStorageClient::updateActivity(const AfStorageEntry &entry,
  * @param entry - activity entry template
   * @return 0 on success, error code otherwise
  */
-int AfStorageClient::removeActivity(const AfStorageEntry &entry)
+EXPORT_C int CAfStorageClient::removeActivity(const CAfEntry &entry)
 {
     return d_ptr->removeActivity(entry);
 }
@@ -151,7 +127,7 @@ int AfStorageClient::removeActivity(const AfStorageEntry &entry)
  * @param entry - activity entry template
   * @return 0 on success, error code otherwise
  */
-int AfStorageClient::removeApplicationActivities(const AfStorageEntry &entry)
+EXPORT_C int CAfStorageClient::removeApplicationActivities(const CAfEntry &entry)
 {
     return d_ptr->removeApplicationActivities(entry);
 }
@@ -162,7 +138,7 @@ int AfStorageClient::removeApplicationActivities(const AfStorageEntry &entry)
  * @param dst - list of results
  * @return 0 on success, error code otherwise 
  */
-int AfStorageClient::activities(QList<AfStorageEntry> &dst)
+EXPORT_C int CAfStorageClient::activities(RPointerArray<CAfEntry> &dst)
 {
     return d_ptr->activities(dst);
 }
@@ -174,8 +150,7 @@ int AfStorageClient::activities(QList<AfStorageEntry> &dst)
  * @param entry - activity template
  * @return 0 on success, error code otherwise 
  */
-int AfStorageClient::applicationActivities(QList<AfStorageEntry> &dst, 
-                                           const AfStorageEntry &entry)
+EXPORT_C int CAfStorageClient::applicationActivities(RPointerArray<CAfEntry> &dst, const CAfEntry &entry)
 {
     return d_ptr->applicationActivities(dst, entry);
 }
@@ -187,7 +162,7 @@ int AfStorageClient::applicationActivities(QList<AfStorageEntry> &dst,
  * @param entry - activity template
  * @return 0 on success, error code otherwise 
  */
-int AfStorageClient::activityData(AfStorageEntry &dst, const AfStorageEntry &entry)
+EXPORT_C int CAfStorageClient::activityData(CAfEntry *&dst, const CAfEntry &entry)
 {
     return d_ptr->activityData(dst, entry);
 }
@@ -197,7 +172,7 @@ int AfStorageClient::activityData(AfStorageEntry &dst, const AfStorageEntry &ent
  * Function subscribe application for notyfication about requested activity changes
  * @return 0 on success, error code otherwise 
  */
-int AfStorageClient::waitActivity()
+EXPORT_C int CAfStorageClient::waitActivity()
 {
     return d_ptr->waitActivity();
 }
@@ -208,15 +183,15 @@ int AfStorageClient::waitActivity()
  * @param entry - activity template 
  * @return 0 on success, error code otherwise 
  */
-int AfStorageClient::launchActivity(const AfStorageEntry &entry)
+EXPORT_C int CAfStorageClient::launchActivity(const CAfEntry &entry)
 {
     return d_ptr->launchActivity(entry);
 }
 
 // -----------------------------------------------------------------------------
-int AfStorageClient::getThumbnail(QSize size, QString imagePath, void* userDdata)
+EXPORT_C int CAfStorageClient::getThumbnail(const TSize &size, const TDesC &imagePath, void *userData)
 {
-    return d_ptr->getThumbnail(size, imagePath, userDdata);
+    return d_ptr->getThumbnail(size, imagePath, userData);
 }
 
 // -----------------------------------------------------------------------------
@@ -224,7 +199,7 @@ int AfStorageClient::getThumbnail(QSize size, QString imagePath, void* userDdata
  * Function subscribe launcher for data model changes
  * @return 0 on success, error code otherwise 
  */
-int AfStorageClient::notifyDataChange()
+EXPORT_C int CAfStorageClient::notifyDataChange()
 {
-    return  d_ptr->notifyDataChange();
+    return d_ptr->notifyDataChange();
 }

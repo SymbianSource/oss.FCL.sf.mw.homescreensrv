@@ -53,6 +53,9 @@ void CCaSqLiteStorage::ConstructL()
     User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDrive, KCDrive,
             KNullDesC ) );
     
+    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDriveDbBackup, KCDrive,
+    		KDbNameBackup ) );
+    
 
     if( iSqlDb.Open( iPrivatePathCDriveDb, &KSqlDbConfig ) )
         {
@@ -102,6 +105,40 @@ void CCaSqLiteStorage::LoadDataBaseFromRomL()
                 iPrivatePathZDriveDb, iPrivatePathCDrive ) );
         User::LeaveIfError( iRfs.SetAtt( iPrivatePathCDriveDb,
                 KEntryAttNormal, KEntryAttReadOnly ) );
+        User::LeaveIfError( iSqlDb.Open( iPrivatePathCDriveDb,
+                &KSqlDbConfig ) );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::SaveDatabaseL()
+    {
+    if( ( BaflUtils::FileExists( iRfs, iPrivatePathCDriveDb ) ) )
+        {
+        iSqlDb.Close();
+        User::LeaveIfError( BaflUtils::CopyFile( iRfs,
+                iPrivatePathCDriveDb, iPrivatePathCDriveDbBackup ) );
+        User::LeaveIfError( iSqlDb.Open( iPrivatePathCDriveDb,
+                &KSqlDbConfig ) );
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// 
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::RestoreDatabaseL()
+    {
+    if( ( BaflUtils::FileExists( iRfs, iPrivatePathCDriveDbBackup ) ) )
+        {
+        iSqlDb.Close();
+        User::LeaveIfError( BaflUtils::CopyFile( iRfs,
+        		iPrivatePathCDriveDbBackup, iPrivatePathCDriveDb ) );
         User::LeaveIfError( iSqlDb.Open( iPrivatePathCDriveDb,
                 &KSqlDbConfig ) );
         }
@@ -214,7 +251,7 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
 void CCaSqLiteStorage::LocalizeEntryL( CCaLocalizationEntry& aLocalization )
     {
     CCaSqlQuery* sqlLocalizeEntryQuery = CCaSqlQuery::NewLC( iSqlDb );
-    if( aLocalization.GetAttributeName().Compare( KColumnEnText ) == 0 )
+    if ( aLocalization.GetAttributeName().Compare( KColumnEnText ) == 0 )
         {
         CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
             KSQLLocalizeTextEntry );
@@ -224,6 +261,16 @@ void CCaSqLiteStorage::LocalizeEntryL( CCaLocalizationEntry& aLocalization )
         {
         CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
             KSQLLocalizeDescriptionEntry );
+        }
+    else if ( aLocalization.GetAttributeName().Compare( KShortName ) == 0 )
+        {
+        CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
+            KSQLLocalizeShortNameAttribute );
+        }
+    else if ( aLocalization.GetAttributeName().Compare( KTitleName ) == 0 )
+        {
+        CaSqlQueryCreator::CreateLocalizationTableQueryL( sqlLocalizeEntryQuery,
+            KSQLLocalizeTitleNameAttribute );
         }
     sqlLocalizeEntryQuery->PrepareL();
     sqlLocalizeEntryQuery->BindValuesForLocalizeL( aLocalization );
@@ -410,10 +457,10 @@ void CCaSqLiteStorage::OrganizeL( const RArray<TInt>& aEntryIds,
 //
 // ---------------------------------------------------------------------------
 //
-void CCaSqLiteStorage::TouchL( const TInt aEntryId )
+void CCaSqLiteStorage::TouchL( const TInt aEntryId, TBool aRemovable )
     {
     ExecuteStatementL( KSqlStatementBegin );
-    TRAPD( err, ExecuteTouchL( aEntryId ) );
+    TRAPD( err, ExecuteTouchL( aEntryId, aRemovable ) );
     if( err )
         {
         ExecuteStatementL( KSqlStatementRollback );
@@ -483,14 +530,43 @@ void CCaSqLiteStorage::RemoveFromLocalizationL( const TInt aEntryId )
 void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
         const TInt aGroupId )
     {
+    RArray<TInt> entryIds;
+    CleanupClosePushL( entryIds );
+    for( TInt j=0; j<aEntryIds.Count(); j++ )
+        {
+        entryIds.AppendL(aEntryIds[j]);
+        }
+    
+    RArray<TInt> oldIds;
+    CleanupClosePushL( oldIds );
+    CCaInnerQuery* innerQuery = CCaInnerQuery::NewLC();
+    innerQuery->SetParentId( aGroupId );
+    
+    GetEntriesIdsL( innerQuery, oldIds );
+    
+    if( oldIds.Count() != entryIds.Count() )
+        {
+        for( TInt i=0; i<oldIds.Count(); i++ )
+            {
+            TInt oldId = oldIds[i];
+            if( entryIds.Find( oldId ) == KErrNotFound )
+                {
+                // instert apps with visible set on false on old positions
+                entryIds.InsertL( oldId, i );
+                }
+            }
+        }
+    
+    const RArray<TInt> constEntryIds( entryIds );
+    
     RPointerArray<CCaSqlQuery> sqlQueries;
-    CleanupResetAndDestroyPushL( sqlQueries );
+    CleanupResetAndDestroyPushL( sqlQueries ); 
 
     CaSqlQueryCreator::CreateCustomSortQueryL(
-            aEntryIds, sqlQueries, iSqlDb );
+            constEntryIds, sqlQueries, iSqlDb );
 
     ExecuteStatementL( KSqlStatementBegin );
-    TRAPD( err, ExecuteCustomSortL( aEntryIds, aGroupId, sqlQueries ) );
+    TRAPD( err, ExecuteCustomSortL( constEntryIds, aGroupId, sqlQueries ) );
     if( err )
         {
         ExecuteStatementL( KSqlStatementRollback );
@@ -499,6 +575,9 @@ void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
     ExecuteStatementL( KSqlStatementCommit );
 
     CleanupStack::PopAndDestroy( &sqlQueries );
+    CleanupStack::PopAndDestroy( innerQuery );
+    CleanupStack::PopAndDestroy( &oldIds );
+    CleanupStack::PopAndDestroy( &entryIds );
     }
 
 // ---------------------------------------------------------------------------
@@ -748,12 +827,12 @@ void CCaSqLiteStorage::ExecuteOrganizeL( const RArray<TInt>& aEntryIds,
 //
 // ---------------------------------------------------------------------------
 //
-void CCaSqLiteStorage::ExecuteTouchL( const TInt aEntryId )
+void CCaSqLiteStorage::ExecuteTouchL( const TInt aEntryId, TBool aRemovable )
     {
     RPointerArray<CCaSqlQuery> sqlQuery;
     CleanupResetAndDestroyPushL( sqlQuery );
 
-    CaSqlQueryCreator::CreateTouchQueryL( sqlQuery, iSqlDb );
+    CaSqlQueryCreator::CreateTouchQueryL( sqlQuery, iSqlDb, aRemovable );
 
     TTime time;
     time.UniversalTime();
