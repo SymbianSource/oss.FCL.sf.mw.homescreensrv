@@ -17,10 +17,10 @@
 
 #ifndef TSENTRYMODELITEM_H
 #define TSENTRYMODELITEM_H
+
 #include "tsmodelitem.h"
 
-#include <qsharedpointer.h>
-#include <qstring.h>
+#include <QSharedPointer>
 
 class TsTask;
 

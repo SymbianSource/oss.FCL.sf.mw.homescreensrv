@@ -14,10 +14,14 @@
 * Description: tsactivitymodelitem.cpp
 *
 */
-#include <hbicon.h>
+#include "tsactivitymodelitem.h"
+
+#include <QAbstractListModel>
+
+#include <HbIcon>
+
 #include <afstorageglobals.h>
 
-#include "tsactivitymodelitem.h"
 #include "tsdataroles.h"
 
 /*!

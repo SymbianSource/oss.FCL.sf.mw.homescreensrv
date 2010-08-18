@@ -638,10 +638,12 @@ void CCaWidgetScannerParser::ParseIconL( TXmlEngElement& aElement,
         const TDesC& aPackageUid, CCaWidgetDescription* aWidgetDescriptor,
         TChar& aDrive )
     {
-    aWidgetDescriptor->SetIconUriL( 
-        *GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive ) );
+    HBufC *const graphicsName = 
+        GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive );   
+    
+    aWidgetDescriptor->SetIconUriL( *graphicsName );
    
-    CleanupStack::PopAndDestroy( );
+    CleanupStack::PopAndDestroy( graphicsName );
     }
 
 // ----------------------------------------------------------------------------
@@ -654,10 +656,12 @@ void CCaWidgetScannerParser::ParsePreviewImageNameL(
         CCaWidgetDescription* aWidgetDescriptor,
         TChar& aDrive )
     {
-    aWidgetDescriptor->SetPreviewImageNameL( 
-        *GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive ) );
+    HBufC *const graphicsName = 
+        GetThemableGraphicsNameLC(aElement, aPackageUid, aDrive );
     
-    CleanupStack::PopAndDestroy();
+    aWidgetDescriptor->SetPreviewImageNameL( *graphicsName );
+    
+    CleanupStack::PopAndDestroy( graphicsName );
     }
 
 // ----------------------------------------------------------------------------
@@ -731,47 +735,42 @@ HBufC* CCaWidgetScannerParser::GetThemableGraphicsNameLC(
     {
     RBuf graphicsName;
     graphicsName.CleanupClosePushL();
-    HBufC* result; 
 
+    RBuf elementText;
+    elementText.CleanupClosePushL();
     
-    if ( aElement.Text() != KNullDesC8 )
+    elementText.Assign( 
+        CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() ) );
+    
+    if ( TParsePtrC(elementText).Ext() != KNullDesC )
         {
-        RBuf elementText;
-        elementText.CleanupClosePushL();
+        HBufC* const manifestDirectoryPath( 
+            GetManifestDirectoryPathLC( aPackageUid, aDrive ) );
         
-        elementText.Assign( 
-            CnvUtfConverter::ConvertToUnicodeFromUtf8L( aElement.Text() ) );
+        graphicsName.CreateL( manifestDirectoryPath->Length() + 
+            elementText.Length() );
+        graphicsName.Append( *manifestDirectoryPath );
         
-        if ( TParsePtrC(elementText).Ext() != KNullDesC )
-            {
-            HBufC* const manifestDirectoryPath( 
-                GetManifestDirectoryPathLC( aPackageUid, aDrive ) );
-            
-            graphicsName.CreateL( manifestDirectoryPath->Length() + 
-                elementText.Length() );
-            graphicsName.Append( *manifestDirectoryPath );
-            
-            CleanupStack::PopAndDestroy( manifestDirectoryPath );
-            }
-        else
-            {   
-            graphicsName.CreateL( elementText.Length() );
-            }
-        
-        graphicsName.Append( elementText );
-        result = HBufC::NewL( graphicsName.Length() ) ;
-        *result = graphicsName;
-        
-        CleanupStack::PopAndDestroy( &elementText );
+        CleanupStack::PopAndDestroy( manifestDirectoryPath );
         }
     else
-    	{
-        result = HBufC::NewL( 1 ) ;
-    	}
-        CleanupStack::PopAndDestroy( &graphicsName );
-        CleanupStack::PushL( result );
-        
-        return result;
+        {   
+        graphicsName.CreateL( elementText.Length() );
+        }
+    
+    graphicsName.Append( elementText );
+
+    
+    CleanupStack::PopAndDestroy( &elementText );
+    
+    HBufC *result = HBufC::NewL( graphicsName.Length() ) ;
+    *result = graphicsName;
+    
+    CleanupStack::PopAndDestroy( &graphicsName );
+    
+    CleanupStack::PushL( result );
+    
+    return result;
     }
 
 

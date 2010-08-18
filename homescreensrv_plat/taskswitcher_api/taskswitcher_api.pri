@@ -17,3 +17,9 @@
 PLATFORM_HEADERS += taskswitcher_api/tstasksettings.h \
                     taskswitcher_api/tstaskmonitor_global.h \
                     taskswitcher_api/tspropertydefs.h \
+
+symbian {
+    crml.sources = taskswitcher_api/tsdevicedialog.qcrml
+    crml.path = /resource/qt/crml
+    DEPLOYMENT += crml
+}

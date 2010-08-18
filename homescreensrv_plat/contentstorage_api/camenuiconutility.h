@@ -28,10 +28,10 @@ class CACLIENT_EXPORT CaMenuIconUtility
 {
 public:
     static HbIcon getApplicationIcon(int uid,
-            const QSize &size = QSize(50,80));
+            const QSizeF &size = QSizeF(50,80));
     
     static HbIcon getEntryIcon(const CaEntry& entry,
-            const QSize &size = QSize(50,80));
+            const QSizeF &size = QSizeF(50,80));
 };
 
 #endif // __CAMENUICONUTILITY_H__

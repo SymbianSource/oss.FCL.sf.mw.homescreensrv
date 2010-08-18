@@ -21,6 +21,7 @@ SUBDIRS  += cautils
 SUBDIRS  += group
 SUBDIRS  += casrv/calocalizerscanner
 SUBDIRS  += cahandler
+SUBDIRS  += camificonengine
 }
 SUBDIRS  += caclient
 SUBDIRS  += casoftwareregistry

@@ -27,11 +27,12 @@
 /*!
  * Create an icon.
  * \param entry a CaEntry instance.
- * \param size a size of the icon
+ * \param size Currently ignored.
  * \retval a HbIcon instance.
  */
-HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSize &size)
+HbIcon CaObjectAdapter::makeIcon(const CaEntry &entry, const QSizeF &size)
 {
+    Q_UNUSED(size);
     HbIcon icon;
     QString filename(entry.iconDescription().filename());
     if (!filename.isEmpty()) {

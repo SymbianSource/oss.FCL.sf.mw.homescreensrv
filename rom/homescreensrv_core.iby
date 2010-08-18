@@ -34,6 +34,9 @@ file=ABI_DIR\BUILD_DIR\caurlhandlerplugin.dll     SHARED_LIB_DIR\caurlhandlerplu
 data=\epoc32\data\z\resource\qt\plugins\commandhandler\caurlhandlerplugin.qtplugin  resource\qt\plugins\commandhandler\caurlhandlerplugin.qtplugin
 data=\epoc32\data\z\resource\qt\plugins\commandhandler\caurlhandlerplugin.xml       resource\qt\plugins\commandhandler\caurlhandlerplugin.xml
 
+file=ABI_DIR\BUILD_DIR\camificon.dll     SHARED_LIB_DIR\camificon.dll
+data=\epoc32\data\z\resource\qt\plugins\iconengines\camificon.qtplugin  resource\qt\plugins\iconengines\camificon.qtplugin
+
 file=ABI_DIR\BUILD_DIR\caclient.dll     SHARED_LIB_DIR\caclient.dll
 file=ABI_DIR\BUILD_DIR\cautils.dll     SHARED_LIB_DIR\cautils.dll
 file=ABI_DIR\BUILD_DIR\camenu.dll     SHARED_LIB_DIR\camenu.dll

@@ -49,7 +49,7 @@ CCaSatHandler::~CCaSatHandler()
     }
 
 // -----------------------------------------------------------------------------
-// Destructor
+// LoadIconL
 // -----------------------------------------------------------------------------
 EXPORT_C CAknIcon* CCaSatHandler::LoadIconL()
     {
@@ -63,9 +63,9 @@ EXPORT_C CAknIcon* CCaSatHandler::LoadIconL()
         iSatIcon.GetIconInfoL( TUint8( iconId ), iIconEf );
         CleanupClosePushL( iIconEf );
         CFbsBitmap* bitmap = GetBitmapL( iIconEf );
-        if( !bitmap )
+        if( bitmap )
             {
-            CFbsBitmap* mask( NULL );
+            CFbsBitmap* mask(  new (ELeave) CFbsBitmap );
             CleanupStack::PushL( mask );
 
             icon->SetBitmap( bitmap );

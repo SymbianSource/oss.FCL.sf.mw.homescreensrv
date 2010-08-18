@@ -72,8 +72,8 @@ public:
     bool isAutoUpdate() const;
     void setSort(SortAttribute sortAttribute, Qt::SortOrder sortOrder =
         Qt::AscendingOrder);
-    void setIconSize(const QSize &size);
-    QSize getIconSize() const;
+    void setIconSize(const QSizeF &size);
+    QSizeF getIconSize() const;
     void updateModel();
     void setParentId(int parentId);
     void setFlagsOn(const EntryFlags &onFlags);

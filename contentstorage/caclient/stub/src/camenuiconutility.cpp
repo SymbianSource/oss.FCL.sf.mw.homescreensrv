@@ -30,8 +30,9 @@
  \retval icon.
  */
 HbIcon CaMenuIconUtility::getApplicationIcon(int uid,
-        const QSize &size)
+        const QSizeF &size)
 {
+    Q_UNUSED(size);
     HbIcon icon;
     return icon;
 }
@@ -43,7 +44,7 @@ HbIcon CaMenuIconUtility::getApplicationIcon(int uid,
  \retval icon.
  */
 HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
-        const QSize &size)
+        const QSizeF &size)
 {
     HbIcon icon;
     QString filename(entry.iconDescription().filename());

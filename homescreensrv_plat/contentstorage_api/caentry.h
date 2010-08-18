@@ -66,7 +66,7 @@ public:
     QString attribute(const QString &name) const;
     void setAttribute(const QString &name, const QString &value);
 
-    HbIcon makeIcon(const QSize &size = QSize(70, 70)) const;
+    HbIcon makeIcon(const QSizeF &size = QSizeF(70.0, 70.0)) const;
 
     EntryRole role() const;
 

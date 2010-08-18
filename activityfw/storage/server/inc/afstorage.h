@@ -25,6 +25,8 @@
 #include <s32file.h>    // CFileStore & CPermanentFileStore
 #include "afentry.h"
 
+class CAfDatabaseCleaner;
+
 class CAfStorage : public CBase
     {
 public:
@@ -109,10 +111,15 @@ private:
 
     void InternalizeDataL(CAfEntry &dst, RDbRowSet& src, TInt offset) const;
 
+public:
+    TBool InterruptCleanup();
+    void RequestCleanup();
+
 private:
     RFs& mFsSession;
     RDbStoreDatabase mActDb;/* For database operations                 */
     CFileStore* mFileStore;  /* For creating and opening database files */
+    CAfDatabaseCleaner *mDatabaseCleaner;
 };
 
 #endif //AFSTORAGE_H

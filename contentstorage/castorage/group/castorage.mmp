@@ -44,6 +44,3 @@ LIBRARY       cautils.lib
 DEBUGLIBRARY    flogger.lib
 
 
-EXPORTUNFROZEN
-
-

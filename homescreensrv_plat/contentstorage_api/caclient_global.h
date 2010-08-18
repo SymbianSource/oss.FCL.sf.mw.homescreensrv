@@ -18,7 +18,6 @@
 #ifndef CACLIENT_GLOBAL_H
 #define CACLIENT_GLOBAL_H
 
-#include <qglobal.h>
 
 #ifdef CACLIENT_LIB
 #define CACLIENT_EXPORT Q_DECL_EXPORT

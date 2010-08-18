@@ -130,24 +130,39 @@ void AfStorageSyncTask::SaveActivityL(CAfStorage& dataStorage, const RMessage2& 
     TPckgBuf<TInt> bitmapHdl(0);
     CAfEntry *entry = CAfEntry::NewLC(msg);
     msg.ReadL(1, bitmapHdl);
-        
-    RBuf thumbnailPath;
-    CleanupClosePushL(thumbnailPath);
-    DeleteActivityScreenshotL(dataStorage, 
-                    entry->ApplicationId(), 
-                    entry->ActivityId());
+
+    TInt hdl = bitmapHdl();
+    if (0 >= hdl) {
+        User::Leave(KErrCorrupt);
+    }
+    CFbsBitmap *bitmap = new (ELeave) CFbsBitmap;
+    CleanupStack::PushL(bitmap);
+    User::LeaveIfError(bitmap->Duplicate(hdl));
     
-    dataStorage.ThumbnailPathL(thumbnailPath, 
-                   dataStorage.Fs(), 
-                   entry->ApplicationId(), 
-                   entry->ActivityId(),
-                   entry->Flags() & CAfEntry::Persistent);
-    CreateThumbnailL(thumbnailPath, bitmapHdl());
     //all data is retrieved. compleate message to improve response time
     msg.Complete(KErrNone);
-    TRAP_IGNORE(entry->SetImageSrcL(thumbnailPath);
-    dataStorage.SaveActivityL(*entry);)
-    CleanupStack::PopAndDestroy(&thumbnailPath);
+    
+    // trap all other leaving methods to prevent completing message in ServiceError
+    TRAP_IGNORE(
+        RBuf thumbnailPath;
+        CleanupClosePushL(thumbnailPath);
+        DeleteActivityScreenshotL(dataStorage, 
+                        entry->ApplicationId(), 
+                        entry->ActivityId());
+        
+        dataStorage.ThumbnailPathL(thumbnailPath, 
+                       dataStorage.Fs(), 
+                       entry->ApplicationId(), 
+                       entry->ActivityId(),
+                       entry->Flags() & CAfEntry::Persistent);
+                       
+        User::LeaveIfError(bitmap->Save(thumbnailPath));
+
+        entry->SetImageSrcL(thumbnailPath);
+        dataStorage.SaveActivityL(*entry);
+        CleanupStack::PopAndDestroy(&thumbnailPath);
+    )
+    CleanupStack::PopAndDestroy(bitmap);
     CleanupStack::PopAndDestroy(entry);
 }
 

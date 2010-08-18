@@ -13,12 +13,23 @@
                 <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
                 <bool name="swapDimensionsOnOrientationChange" value="FALSE"/>
             </widget>            
-            <widget name="noitemslabel" type="HbLabel">
-                <string name="alignment" value="AlignVCenter|AlignHCenter" />
-                <string locid="txt_ts_info_no_recent_applications" name="plainText"/>
+            <widget name="noitemswidget" type="HbWidget">
+                <widget name="noitemslabel" type="TsNoItemsLabel">
+                    <string name="alignment" value="AlignVCenter|AlignHCenter" />
+                    <string locid="txt_ts_info_no_recent_applications" name="plainText"/>
+                    
+                    <fontspec name="fontSpec" role="Primary" textheight="var(hb-param-text-height-primary)"/>
+                    <enums name="textWrapping" value="TextWordWrap"/>                    
+                </widget>   
+                <layout orientation="Vertical" spacing="0.0un" type="linear">
+                    <contentsmargins bottom="var(hb-param-margin-gene-screen)" left="var(hb-param-margin-gene-screen)" right="var(hb-param-margin-gene-screen)" top="var(hb-param-margin-gene-screen)"/>
+                    <stretchitem stretchfactor="1"/>
+                    <linearitem itemname="noitemslabel"/>
+                    <stretchitem stretchfactor="1"/>
+                </layout>
             </widget>          
             <layout type="stacked">
-                <stackitem itemname="noitemslabel"/>
+                <stackitem itemname="noitemswidget"/>
                 <stackitem itemname="taskgrid"/>
             </layout>
         </widget>            

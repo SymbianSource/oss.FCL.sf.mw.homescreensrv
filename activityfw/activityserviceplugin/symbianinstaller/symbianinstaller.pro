@@ -24,7 +24,7 @@ symbian {
     plugin.path = $$QT_PLUGINS_BASE_DIR 
     
     installer.pkg_postrules += "\"$${EPOCROOT}epoc32/release/$(PLATFORM)/$(TARGET)/activityserviceinstaller.exe\" \  
-                                         - \"!:\sys\bin\activityserviceinstaller.exe\",FR,RB,RW"
+                                         - \"!:\\sys\\bin\\activityserviceinstaller.exe\",FR,RB,RW"
     
     DEPLOYMENT += plugin installer
 }

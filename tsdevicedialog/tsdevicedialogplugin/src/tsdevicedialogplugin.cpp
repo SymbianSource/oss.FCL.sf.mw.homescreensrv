@@ -15,20 +15,28 @@
 *
 */
 
+#include "tsdevicedialogplugin.h"
+
 #include <QTranslator>
 #include <QCoreApplication>
 #include <QLocale>
 #include <QtPlugin>
-#include <qservicemanager.h>
-#include <hbdevicedialog.h>
+
+#include <QValueSpacePublisher>
+#include <QServiceManager>
+
+#include <HbDeviceDialog>
 #include <HbMainWindow>
 
-#include "tsdevicedialogplugin.h"
+#include <tspropertydefs.h>
+
 #include "tsdevicedialogcontainer.h"
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
 #include "tsdocumentloader.h"
 #include "tsmodel.h"
+
+QTM_USE_NAMESPACE
 
 /*!
     \class TsDeviceDialogPlugin
@@ -113,15 +121,12 @@ TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
         }
     
         // lazy loading of model
-        if (0 == mModel) {
+        if (!mModel) {
             mStorage = new TsTaskMonitor(this);
-            if (0 == mStorage) {
-                return 0; // provider of running application list is critical
-            }
             
-            QtMobility::QServiceManager serviceManager;
+            QServiceManager serviceManager;
             QObject *activityManager(serviceManager.loadInterface(KActivityManaged));
-            if (0 != activityManager) {
+            if (activityManager) {
                 activityManager->setParent(this); //make it autodestructed
             } else {
                 activityManager = this; //activity plugin is not present. provide invalid instance because its not critical functionality.
@@ -129,7 +134,15 @@ TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
             }
             mModel = new TsModel(*mStorage, *activityManager);
         }
+            
+        // ensure the dismiss request property is set to false
+
+        QValueSpacePublisher dismissRequestPublisher(TsProperty::KTsPath);
+        dismissRequestPublisher.setValue(TsProperty::KDismissRequestPath, static_cast<int>(false));
+        dismissRequestPublisher.sync();
+
         
+        // create device dialog
         dialogInterface = new TsDeviceDialogContainer(mModel);
     }
     return dialogInterface;

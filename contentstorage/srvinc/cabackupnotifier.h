@@ -19,6 +19,7 @@
 #define CABACKUPNOTIFIER_H
 
 #include <e32property.h>
+#include "caclient_global.h"
 
 class CCaStorageProxy;
 
@@ -39,10 +40,10 @@ enum TCaBackupState
 	@released
 	@publishedAll
 	*/
-	{
-	ECaBackup       = 1,
-	ECaRestore      = 2
-	};
+	    {
+	    ECaBackup       = 1,
+	    ECaRestore      = 2
+	    };
 
 public:
 
@@ -101,6 +102,8 @@ private:
      */
     TInt iLastState;
 
+    CA_CLIENT_TEST_FRIEND_CLASS(TestCaClient)
+    
     };
 
 #endif /* CABACKUPNOTIFIER_H */

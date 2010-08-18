@@ -89,9 +89,8 @@ void CHsAppKeyPlugin::DeviceDialogClosed(TInt /*aCompletionCode*/)
 // 
 // ---------------------------------------------------------------------------
 //
-TKeyResponse CHsAppKeyPlugin::HandleKeyEventL( const TKeyEvent&  aKeyEvent , 
-                                              TEventCode  /*aType*/ 
-                                            )
+TKeyResponse CHsAppKeyPlugin::HandleKeyEventL(const TKeyEvent &aKeyEvent, 
+                                              TEventCode /*aType*/)
 {
     TKeyResponse retVal(EKeyWasNotConsumed);
     if (aKeyEvent.iCode == EKeyApplication0) {
@@ -102,7 +101,7 @@ TKeyResponse CHsAppKeyPlugin::HandleKeyEventL( const TKeyEvent&  aKeyEvent ,
                 HandleShortPressL();
             retVal = EKeyWasConsumed;
         }
-        iSecondEvent =!iSecondEvent; 
+        iSecondEvent = !iSecondEvent; 
     }
     return retVal;
 }
@@ -136,23 +135,39 @@ void CHsAppKeyPlugin::ProvideKeyEventsL(RArray<TKeyEvent>& aKeyEventArray)
 //
 void CHsAppKeyPlugin::HandleShortPressL()
 {   
-    RApaLsSession apaLsSession;
-    CleanupClosePushL(apaLsSession);
-    User::LeaveIfError(apaLsSession.Connect());
-    CAfActivityLauncher *activityEnabler = 
-        CAfActivityLauncher::NewLC(apaLsSession, 
-                                   iEikEnv->WsSession());
-    TInt state(0);
-    RProperty::Get(KHsCategoryUid, KHsCategoryStateKey, state);
-    if (state == EHomeScreenIdleState) {
-        activityEnabler->launchActivityL(KAppLibActivactionUri);
+    TInt value(0);
+    RProperty::Get(TsProperty::KCategory, TsProperty::KVisibilityKey, value);
+    if (value) {
+        // when Task Switcher dialog is visible, Appkey is used to dismiss it
+    
+        // @todo: remove notification through property when SharedDialog flag
+        // is implemented in Orbit.
+        if (!mDialog) {
+            // dismiss dialog launched from HomeScreen
+            User::LeaveIfError(RProperty::Set(TsProperty::KCategory, TsProperty::KDismissRequestKey, 1));
+        } else {
+            // dismiss dialog launched by this plugin
+            delete mDialog;
+            mDialog = 0;
+        }
     } else {
-        activityEnabler->launchActivityL(KHsActivactionUri);
-    }    
-    CleanupStack::PopAndDestroy(activityEnabler);
-    CleanupStack::PopAndDestroy(&apaLsSession);
-    delete mDialog;
-    mDialog =0;
+        // when there is no Task Switcher dialog, Appkey is used to switch between Applib and HomeScreen
+        RApaLsSession apaLsSession;
+        CleanupClosePushL(apaLsSession);
+        User::LeaveIfError(apaLsSession.Connect());
+        CAfActivityLauncher *activityEnabler = 
+            CAfActivityLauncher::NewLC(apaLsSession, 
+                                       iEikEnv->WsSession());
+        TInt state(0);
+        RProperty::Get(KHsCategoryUid, KHsCategoryStateKey, state);
+        if (state == EHomeScreenIdleState) {
+            activityEnabler->launchActivityL(KAppLibActivactionUri);
+        } else {
+            activityEnabler->launchActivityL(KHsActivactionUri);
+        }    
+        CleanupStack::PopAndDestroy(activityEnabler);
+        CleanupStack::PopAndDestroy(&apaLsSession);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -166,15 +181,14 @@ void CHsAppKeyPlugin::HandleLongPressL()
         RProperty::Get( TsProperty::KCategory, 
                     TsProperty::KVisibilityKey,
                     value );
-        if(!value){
-            mDialog = CHbDeviceDialogSymbian::NewL();
-    
+        if(!value) {
+            mDialog = CHbDeviceDialogSymbian::NewL();    
             CHbSymbianVariantMap* params = CHbSymbianVariantMap::NewL();
-        if(KErrNone != mDialog->Show(KTsPluginName,*params,this)) {
-            delete mDialog;
-            mDialog = 0;
+            if(KErrNone != mDialog->Show(KTsPluginName,*params,this)) {
+                delete mDialog;
+                mDialog = 0;
             }
-        delete params;
+            delete params;
         }
     }
 }

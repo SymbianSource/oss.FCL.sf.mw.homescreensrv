@@ -15,10 +15,12 @@
 *
 */
 
-#include <tstask.h>
+#include "tsentrymodelitem.h"
+
 #include <HbIcon>
 
-#include "tsentrymodelitem.h"
+#include <tstask.h>
+
 #include "tsdataroles.h"
 
 /*!

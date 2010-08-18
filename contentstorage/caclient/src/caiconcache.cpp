@@ -90,22 +90,6 @@ CaIconCache::CaIconCache(QObject *parent): QObject(parent),
 }
 
 /*!
- Checks if icon is already cached
- \param entry an entry
- \param size size of an icon
- \retval true if icon exist in cache
-
- */
-bool CaIconCache::exist(const CaEntry &entry, const QSize &size)
-{
-    CACLIENTTEST_FUNC_ENTRY("CaIconCache::exist");
-    bool result(false);
-    result = mCache.contains(key(entry,size));
-    CACLIENTTEST_FUNC_EXIT("CaIconCache::exist");
-    return result;
-}
-
-/*!
  Returns an icon from a cache
  \param entry an entry
  \param size size of an icon
@@ -113,7 +97,7 @@ bool CaIconCache::exist(const CaEntry &entry, const QSize &size)
 
  */
 
-HbIcon CaIconCache::icon(const CaEntry &entry, const QSize &size)
+HbIcon CaIconCache::icon(const CaEntry &entry, const QSizeF &size)
 {
     CACLIENTTEST_FUNC_ENTRY("CaIconCache::icon");
     HbIcon result;
@@ -131,7 +115,7 @@ HbIcon CaIconCache::icon(const CaEntry &entry, const QSize &size)
  \param icon icon to be cached
 
  */
-void CaIconCache::insert(const CaEntry &entry, const QSize &size,
+void CaIconCache::insert(const CaEntry &entry, const QSizeF &size,
                          const HbIcon &icon)
 {
     CACLIENTTEST_FUNC_ENTRY("CaIconCache::insert");
@@ -166,7 +150,7 @@ void CaIconCache::remove(const CaEntry &entry, ChangeType changeType)
  \return key
  */
 
-QString CaIconCache::key(const CaEntry &entry, const QSize &size)
+QString CaIconCache::key(const CaEntry &entry, const QSizeF &size)
 {
     QString key;
     if (!entry.iconDescription().filename().isEmpty()) {
@@ -179,9 +163,9 @@ QString CaIconCache::key(const CaEntry &entry, const QSize &size)
     }
     if (size.isValid()) {
         key.append(separator);
-        key.append(size.height());
+        key += QString::number(size.height());
         key.append(separator);
-        key.append(size.width());
+        key += QString::number(size.width());
     }
     return key;
 }

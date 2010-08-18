@@ -25,7 +25,7 @@
 #include "caclienttest_global.h"
 
 // Constants
-const QSize defaultIconSize(30, 30);
+const QSizeF defaultIconSize(30, 30);
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -283,7 +283,7 @@ void CaItemModel::setSort(SortAttribute sortAttribute,
  \endcode
 
  */
-void CaItemModel::setIconSize(const QSize &size)
+void CaItemModel::setIconSize(const QSizeF &size)
 {
     m_d->setIconSize(size);
 }
@@ -292,7 +292,7 @@ void CaItemModel::setIconSize(const QSize &size)
  Method for getting icon size
  \param  size icon size to display
  */
-QSize CaItemModel::getIconSize() const
+QSizeF CaItemModel::getIconSize() const
 {
     return m_d->getIconSize();
 }
@@ -541,7 +541,7 @@ void CaItemModelPrivate::setSort(SortAttribute sortAttribute,
  Method for setting icon size
  \param size icon size to display
  */
-void CaItemModelPrivate::setIconSize(const QSize &size)
+void CaItemModelPrivate::setIconSize(const QSizeF &size)
 {
     if (mSize == size)
         return;
@@ -554,7 +554,7 @@ void CaItemModelPrivate::setIconSize(const QSize &size)
  Method for getting icon size
  \retval icon size to display
  */
-QSize CaItemModelPrivate::getIconSize() const
+QSizeF CaItemModelPrivate::getIconSize() const
 {
     return mSize;
 }
@@ -708,6 +708,7 @@ QList<int> CaItemModelPrivate::getUninstallingEntriesIds(int componentId)
     CaQuery* query = new CaQuery(mQuery);
     QString compId(QString().setNum(componentId));
     query->setAttribute(QString("component_id"), compId);
+    query->setFlagsOn(RemovableEntryFlag | VisibleEntryFlag);
     QList<int> ids = mService->getEntryIds(*query);
     delete query;
     return ids;

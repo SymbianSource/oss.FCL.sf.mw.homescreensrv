@@ -36,15 +36,14 @@ class CaIconCache: public QObject
 public:
 
     static CaIconCache *cache();
-    bool exist(const CaEntry &entry, const QSize &size);
-    HbIcon icon(const CaEntry &entry, const QSize &size);
-    void insert(const CaEntry &entry, const QSize &size, const HbIcon &icon);
+    HbIcon icon(const CaEntry &entry, const QSizeF &size);
+    void insert(const CaEntry &entry, const QSizeF &size, const HbIcon &icon);
 
 private:
 
     explicit CaIconCache(QObject *parent = 0);
     ~CaIconCache();
-    QString key(const CaEntry &entry, const QSize &size = QSize());
+    QString key(const CaEntry &entry, const QSizeF &size = QSizeF());
 
 private slots:
 

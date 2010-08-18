@@ -52,8 +52,8 @@ public:
     void setAutoUpdate(bool autoUpdate);
     void setSort(SortAttribute sortAttribute, Qt::SortOrder sortOrder =
                      Qt::AscendingOrder);
-    void setIconSize(const QSize &size);
-    QSize getIconSize() const;
+    void setIconSize(const QSizeF &size);
+    QSizeF getIconSize() const;
     QModelIndex root();
     QSharedPointer<CaEntry> entry(const QModelIndex &modelIndex) const;
     void setSecondLineVisibility(bool secondLineVisibility);
@@ -106,7 +106,7 @@ private:
     QSharedPointer<CaService> mService;
     CaItemModelList mEntries;
     CaNotifier *mNotifier;//own
-    QSize mSize;
+    QSizeF mSize;
     bool mSecondLineVisibility;
 
 };

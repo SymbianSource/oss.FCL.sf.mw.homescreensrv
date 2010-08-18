@@ -18,10 +18,13 @@
 #ifndef TSACTIVITYMODELITEM_H
 #define TSACTIVITYMODELITEM_H
 
-#include <qvariant.h>
-#include <qicon.h>
+#include <QVariant>
+#include <QIcon>
 
 #include "tsmodelitem.h"
+
+class QAbstractListModel;
+
 /*!
     Implements model item which represents Activity entry
 */

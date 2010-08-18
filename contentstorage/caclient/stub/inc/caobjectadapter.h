@@ -32,7 +32,7 @@ class CaObjectAdapter
 {
 public:
 
-    static HbIcon makeIcon(const CaEntry &entry, const QSize &size);
+    static HbIcon makeIcon(const CaEntry &entry, const QSizeF &size);
 
     static void setId(CaEntry &entry, int id);
 

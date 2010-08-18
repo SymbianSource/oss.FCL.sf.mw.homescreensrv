@@ -34,9 +34,13 @@ TsTasksGridItem > HbPushButton#closebadge::icon {
     max-height: var(hb-param-graphic-size-primary-small);
 }
 
+TsTasksGridItem::screenshot {
+    alignment: center;
+}
+
 TsTasksGridItem::activeLabel  {
     text-align: center;
-    color: var(qtc_default_main_pane_normal);
+    color: var(qtc_multimedia_trans_normal);
     text-height: var(hb-param-text-height-tiny);
     font-variant: secondary;
     

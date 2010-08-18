@@ -19,6 +19,7 @@
 #include <QCoreApplication>
 #include <QString>
 #include <QDebug>
+#include <QCoreApplication>
 
 #include "caservice.h"
 #include "caservice_p.h"
@@ -107,6 +108,9 @@ QSharedPointer<CaService> CaService::instance()
 
         service = QSharedPointer<CaService>(new CaService);
         m_instance = service.toWeakRef();
+        
+        const QString iconEnginesPluginPath("resource/iconengines/plugins");
+        QCoreApplication::addLibraryPath(iconEnginesPluginPath);
     }
     return service;
 }

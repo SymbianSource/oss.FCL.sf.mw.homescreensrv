@@ -18,16 +18,17 @@
 #ifndef TSMODEL_H
 #define TSMODEL_H
 
-#include <QAbstractItemModel>
+#include <QAbstractListModel>
 #include <QList>
 #include <QSize>
 #include <QSharedPointer>
+
 #include <tstaskmonitor.h>
+
 #ifdef Q_OS_SYMBIAN
 #include <apgcli.h>
 #endif
 
-class TsTaskMonitor;
 class CaNotifier;
 class TsModelItem;
 
@@ -45,11 +46,23 @@ public:
     QVariant data(const QModelIndex &index, 
                   int role = Qt::DisplayRole) const;
     int maxRowCount()const;
+    // from QAbstractModel
+    virtual bool insertRows(int row, int count, TsModelItem* item,
+                            const QModelIndex & parent = QModelIndex());
+    virtual bool removeRows(int row, int count,
+                            const QModelIndex & parent = QModelIndex());
+
+    
+    bool moveRows(int oldPosition, int newPosition,
+                  const QModelIndex & parent = QModelIndex());
+    bool updateRows(int row, TsModelItem* item);
+    void fullUpdate();
 
 public slots:
     void openApplication(const QModelIndex &index);
     void closeApplication(const QModelIndex &index);
-    void updateModel();
+    void updateApplications();
+    void updateActivities();
     void entryChanged(TsModelItem *);
 private:
     TsModelItem *entry(const QModelIndex &index) const;

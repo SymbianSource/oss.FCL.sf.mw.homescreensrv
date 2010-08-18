@@ -418,10 +418,10 @@ void CaEntry::setAttribute(const QString &name, const QString &value)
  icon.size() == iconSize;
  \endcode
  */
-HbIcon CaEntry::makeIcon(const QSize &size) const
+HbIcon CaEntry::makeIcon(const QSizeF &size) const
 {
     CACLIENTTEST_FUNC_ENTRY("CaEntry::makeIcon");
-    HbIcon icon = CaIconCache::cache()->icon(*this,size);
+    HbIcon icon = CaIconCache::cache()->icon(*this, size);
     if (icon.isNull()) {
         icon = m_d->makeIcon(size);
         CaIconCache::cache()->insert(*this, size, icon);
@@ -645,7 +645,7 @@ void CaEntryPrivate::setAttribute(const QString &name, const QString &value)
  \param  size icon size to display
  \retval created icon (HbIcon).
  */
-HbIcon CaEntryPrivate::makeIcon(const QSize &size) const
+HbIcon CaEntryPrivate::makeIcon(const QSizeF &size) const
 {
     return CaMenuIconUtility::getEntryIcon(*m_q, size);
 }

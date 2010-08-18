@@ -194,12 +194,39 @@ void CCaUsifScanner::AddPackageL()
 
     for( TInt i(0); i < resultUsifArray.Count(); i++ )
         {
-        if( PackageExists( entries, resultUsifArray[i] ) == KErrNotFound )
+        TInt entryIndex = PackageExists( entries, resultUsifArray[i]);
+        // entry is not present in CaStorage
+        if( entryIndex == KErrNotFound )
             {
             CCaInnerEntry *caEntry = CCaInnerEntry::NewLC();
             CreateCaEntryFromEntryL( resultUsifArray[i], caEntry );
+            // in case we rebuild our db mark as missing
+            if( !(iSoftwareRegistry.IsComponentPresentL( 
+                    resultUsifArray[i]->ComponentId())) )
+                {
+                caEntry->SetFlags( caEntry->GetFlags() | EMissing );
+                }
             iStorageProxy.AddL( caEntry );
             CleanupStack::PopAndDestroy( caEntry );
+            } 
+        // found in the CaStorage, mark is as missing
+        else if( !(iSoftwareRegistry.IsComponentPresentL( 
+                resultUsifArray[i]->ComponentId() ))  ) 
+            {
+            if( !( entries[entryIndex]->GetFlags() & EMissing ) )
+                {
+                entries[entryIndex]->SetFlags( 
+                        ( entries[entryIndex]->GetFlags() | EMissing ) );
+                iStorageProxy.AddL( 
+                        entries[entryIndex], EFalse, EItemDisappeared );
+                }
+            }
+        // found in the storage remove missing flag as this is Present in scr
+        else if (entries[entryIndex]->GetFlags() & EMissing)
+            {
+            entries[entryIndex]->SetFlags( 
+                    entries[entryIndex]->GetFlags() & ~EMissing );
+            iStorageProxy.AddL( entries[entryIndex]);            
             }
         }
 
@@ -268,15 +295,8 @@ void CCaUsifScanner::GetUsifPackageEntriesL(
     while( CComponentEntry* entry = scrView.NextComponentL() )
         {
         CleanupStack::PushL( entry );
-        if( iSoftwareRegistry.IsComponentPresentL( entry->ComponentId() ) )
-            {
-            aArray.AppendL( entry );
-            CleanupStack::Pop( entry );
-            }
-        else
-            {
-            CleanupStack::PopAndDestroy( entry );
-            }
+        aArray.AppendL( entry );
+        CleanupStack::Pop( entry );
         }
     CleanupStack::PopAndDestroy( &scrView );
     CleanupStack::PopAndDestroy( filter );
@@ -325,8 +345,7 @@ void CCaUsifScanner::FindDeletedEntriesL(
             //for each usif entry check if entry has to be removed
             for( TInt k( 0 ); k < aUsifArray.Count(); k++ )
                 {
-                if( aUsifArray[k]->ComponentId() == uint
-                        && iSoftwareRegistry.IsComponentPresentL( uint ) )
+                if( aUsifArray[k]->ComponentId() == uint)
                     {
                     delete aCaArray[i];
                     aCaArray.Remove( i );

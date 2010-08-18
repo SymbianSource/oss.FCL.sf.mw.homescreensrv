@@ -17,7 +17,7 @@
 #ifndef TSTASKSGRIDITEM_H
 #define TSTASKSGRIDITEM_H
 
-#include <hbabstractviewitem.h>
+#include <HbAbstractViewItem>
 
 class HbTextItem;
 class HbIconItem;

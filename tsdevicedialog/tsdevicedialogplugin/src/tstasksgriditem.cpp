@@ -14,6 +14,8 @@
 * Description:
 *
 */
+#include "tstasksgriditem.h"
+
 #include <HbPushButton>
 #include <HbAbstractItemView>
 #include <HbFrameItem>
@@ -21,7 +23,6 @@
 #include <HbIconItem>
 #include <HbStyleLoader>
 
-#include "tstasksgriditem.h"
 #include "tsdataroles.h"
 
 /*!
@@ -29,7 +30,6 @@
     \ingroup group_tsdevicedialogplugin
     \brief Item that should be presented in grid.
 */
-
 
 TsTasksGridItem::TsTasksGridItem() 
 : 

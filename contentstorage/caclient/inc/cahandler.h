@@ -24,7 +24,7 @@
 class QString;
 class CaEntry;
 
-class CaHandler // move this header to caclient/inc
+class CaHandler
 {
 public:
     virtual ~CaHandler() {}

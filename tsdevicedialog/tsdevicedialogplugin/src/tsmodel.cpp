@@ -14,9 +14,13 @@
 * Description: tsmodel.cpp
 *
 */
+#include "tsmodel.h"
+
+#include <QVariant>
+#include <QList>
+
 #include <HbIcon>
-#include <qvariant.h>
-#include <qlist.h>
+
 #include <afstorageglobals.h>
 
 #ifdef Q_OS_SYMBIAN
@@ -27,11 +31,11 @@ const int TSDeviceDialogUid = 0x2002677F;
 const int ItemsLimit = 0x00000001;
 #endif
 
-#include "tsmodel.h"
 #include "tsmodelitem.h"
 #include "tsentrymodelitem.h"
 #include "tsactivitymodelitem.h"
 #include "tsdataroles.h"
+#include "tstaskchangeinfo.h"
 
 const int maxItems(10);
 /*!
@@ -69,15 +73,16 @@ TsModel::TsModel(TsTaskMonitor &applicationSrv,
     iAppArcSession.Connect();
 #endif
 
-    connect(&activitySrv, 
-            SIGNAL(dataChanged()), 
-            this, 
-            SLOT(updateModel()));
-    connect(&applicationSrv, 
-            SIGNAL(taskListChanged()), 
-            this, 
-            SLOT(updateModel()));
-    updateModel();
+    connect(&activitySrv,
+	SIGNAL(dataChanged()),
+			 this,
+			 SLOT(updateActivities()));
+    connect(&applicationSrv,
+	        SIGNAL(taskListChanged()),
+			this,
+			SLOT(updateApplications()));
+
+    fullUpdate();    
 }
 
 /*!
@@ -100,6 +105,42 @@ int TsModel::rowCount(
 {
     Q_UNUSED(parent);
     return mEntries.count();
+}
+
+bool TsModel::insertRows(int row, int count, TsModelItem* item, const QModelIndex & parent)
+{
+    beginInsertRows(parent, row, row+count-1);
+    mEntries.insert(row, item);
+    endInsertRows();
+    return true;
+}
+
+bool TsModel::removeRows(int row, int count, const QModelIndex & parent)
+{
+    beginRemoveRows(parent, row, row + count - 1);
+    mEntries.removeAt(row);
+    endRemoveRows();
+    return true;
+}
+
+
+bool TsModel::moveRows(int oldPosition, int newPosition, const QModelIndex & parent)
+{
+   beginMoveRows(parent, oldPosition, oldPosition, parent, newPosition);
+   mEntries.move(oldPosition, newPosition);
+   endMoveRows();
+   return true;
+}
+
+
+bool TsModel::updateRows(int row, TsModelItem* item)
+{
+    TsModelItem *oldItem = mEntries.at(row);
+    mEntries[row] = item;
+    delete oldItem;
+
+    emit dataChanged(index(row),index(row));
+    return true;
 }
 
 /*!
@@ -150,10 +191,61 @@ void TsModel::closeApplication(const QModelIndex &index)
 /*!
     Updates model with fresh entries
 */
-void TsModel::updateModel()
+void TsModel::updateApplications()
 {
-    //clear current data
-    beginResetModel();
+    RDebug::Printf( "TsModel::updateApps \n");
+    RDebug::Printf(" from %d \n: ",this);
+    QList<TsTaskChange>  changes(mApplicationService.changeList());
+    
+    if(changes.count() == 0)
+    {
+        //no applications - only activities on list
+        return;
+    }
+    //check 1st item whether we have cancel change - if so reset model
+    if (changes[0].first.changeType() == TsTaskChangeInfo::EChangeCancel) {
+        fullUpdate();
+        return;
+    }
+    for (int iter(0); iter < changes.count(); iter++) {
+        switch (changes[iter].first.changeType()) {
+            case TsTaskChangeInfo::EChangeDelete :
+                removeRows(changes[iter].first.oldOffset(), 1);
+            break;
+            case TsTaskChangeInfo::EChangeInsert :
+                insertRows(changes[iter].first.newOffset(), 1,
+                    new TsEntryModelItem(changes[iter].second));
+            break;
+            case TsTaskChangeInfo::EChangeMove :
+                moveRows(changes[iter].first.oldOffset(), changes[iter].first.newOffset());
+            break;            
+            case TsTaskChangeInfo::EChangeUpdate :
+                updateRows(changes[iter].first.oldOffset(),
+                           new TsEntryModelItem(changes[iter].second));
+            break;
+            default:
+            break;
+        }
+    }
+
+    //because delete entries are at end of changelist - iterate backwards
+
+}
+
+/*!
+    Updates model with fresh entries
+*/
+void TsModel::updateActivities()
+{
+    //as for now we need full update when activities change
+    fullUpdate();
+}
+
+/*!
+    reset model using full application and activities lists
+*/
+void TsModel::fullUpdate()
+{
     qDeleteAll(mEntries);
     mEntries.clear();
     getApplications();
@@ -167,10 +259,17 @@ void TsModel::updateModel()
 */
 void TsModel::getApplications()
 {
-    //get running applications
-    QList< QSharedPointer<TsTask> > tasks(mApplicationService.taskList());
-    foreach (QSharedPointer<TsTask> taskData, tasks) {
-        mEntries.append(new TsEntryModelItem(taskData));
+    RDebug::Printf( "CTsTaskMonitorClientImpl::RunL \n");
+    //get all running applications and append to entries list
+    TsModelItem *entry(0);
+    QList< TsTaskChange> tasks(mApplicationService.changeList(true));
+    foreach (TsTaskChange taskData, tasks) {
+        if (!taskData.second.isNull()) {
+            entry = new TsEntryModelItem(taskData.second);
+            if (entry) {
+                mEntries.append(entry);
+            }
+        }
     }
 }
 

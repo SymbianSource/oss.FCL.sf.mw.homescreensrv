@@ -31,4 +31,6 @@ EXPORTS
 	_ZTI17AfActivityStorage @ 30 NONAME
 	_ZTV12AfActivation @ 31 NONAME
 	_ZTV17AfActivityStorage @ 32 NONAME
+	_ZTI8CAfEntry @ 33 NONAME
+	_ZTV8CAfEntry @ 34 NONAME
 

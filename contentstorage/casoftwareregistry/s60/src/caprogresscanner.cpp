@@ -115,7 +115,8 @@ void CCaProgresScanner::UpdateProgressL(
     {
     if( aProgressData.Phase() == EUninstalling )
         {
-        iObserver->progressChange( iComponentId, aProgressData.CurrentProgess() );
+        TInt progress = (aProgressData.CurrentProgess()*100)/aProgressData.Total();
+        iObserver->progressChange( iComponentId, progress );
         }
     else
     	{

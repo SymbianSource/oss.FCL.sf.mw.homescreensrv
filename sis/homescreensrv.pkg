@@ -131,8 +131,9 @@
 "/epoc32/release/armv5/urel/calocalizerscanner.dll" - "c:/sys/bin/calocalizerscanner.dll"
 "/epoc32/data/z/resource/plugins/calocalizerscanner.rsc"-"c:/resource/plugins/calocalizerscanner.rsc"
 "/epoc32/release/armv5/urel/causifscanner.dll" - "c:/sys/bin/causifscanner.dll"
-"/epoc32/data/z/resource/plugins/causifscanner.rsc"-"c:/resource/plugins/causifscanner.rsc"
-
+"/epoc32/data/z/resource/plugins/causifscanner.rsc" - "c:/resource/plugins/causifscanner.rsc"
+"/epoc32/release/armv5/urel/camificon.dll" - "c:/sys/bin/camificon.dll"
+"/epoc32/data/z/resource/qt/plugins/iconengines/camificon.qtplugin" - "c:/resource/qt/plugins/iconengines/camificon.qtplugin"
 
 "/epoc32/release/armv5/urel/camenuserver.exe" - "c:/sys/bin/camenuserver.exe"
 "/epoc32/release/armv5/urel/caextendedmenu.dll" - "c:/sys/bin/caextendedmenu.dll"

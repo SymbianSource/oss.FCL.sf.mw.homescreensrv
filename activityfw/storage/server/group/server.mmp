@@ -39,6 +39,7 @@ SOURCE          afapplicationsmonitor.cpp
 SOURCE          afapplicationscollection.cpp
 SOURCE          afapplicationsstorage.cpp
 SOURCE          afapplicationsengine.cpp
+SOURCE          afdatabasecleaner.cpp
 
 LIBRARY        euser.lib 
 LIBRARY        estor.lib

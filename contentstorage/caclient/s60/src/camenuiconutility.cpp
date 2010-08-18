@@ -29,22 +29,22 @@
 #include <apgicnfl.h>
 
 #include <HbIcon>
+
 #include "camenuiconutility.h"
-#include "camenuiconmifutility.h"
 #include "cabitmapadapter.h"
 #include "caentry.h"
 #include "caquery.h"
 #include "caservice.h"
 #include "cadef.h"
 
-const QString appUidAttributeName("application:uid");
+const char appUidAttributeName[] = "application:uid";
 
 /*!
  Get icon from entry.
  \param entry const reference to CaEntry.
  \retval icon.
  */
-LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry)
+LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry, const QSizeF &size)
 {
     HbIcon icon;
     QString skinId(entry.iconDescription().skinId());
@@ -56,6 +56,11 @@ LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry)
         QString fileName(entry.iconDescription().filename());
         if (!fileName.isEmpty()) {
             icon = HbIcon(fileName);
+            if (fileName.contains(QChar('.'))
+                    && !icon.isNull() && icon.size().isValid()) {
+                icon.setSize(size);
+                icon = HbIcon(QIcon(icon.pixmap()));
+            }
         }
     }
     return icon;
@@ -67,7 +72,7 @@ LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry)
  \param sie const reference to icon size.
  \retval icon.
  */
-LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSize &size)
+LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSizeF &size)
 {
     HbIcon icon;
     
@@ -103,7 +108,8 @@ LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSize &size)
             CaBitmapAdapter::fromBitmapAndMaskToPixmapL(apaMaskedBitmap,
                     apaMaskedBitmap->Mask(), pixmap);
     
-            pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
+            pixmap = pixmap.scaled(size.toSize(), 
+                Qt::KeepAspectRatioByExpanding);
             icon = HbIcon(QIcon(pixmap));
         } else {
             HBufC* fileNameFromApparc = NULL;
@@ -112,11 +118,13 @@ LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSize &size)
             if (err2 == KErrNone) {
                 QString fileName = XQConversions::s60DescToQString(
                         fileNameFromApparc->Des());
-                if (fileName.contains(QString(".mif")) || fileName.contains(QString(".mbm"))) {
-                    
-                    TPtr ptr(fileNameFromApparc->Des());
-                    CaMenuIconMifUtility::GetPixmapByFilenameL(ptr,size,pixmap);
-                    icon = HbIcon(QIcon(pixmap));
+                if (fileName.endsWith(QLatin1String(".mif"),
+                        Qt::CaseInsensitive) ||
+                    fileName.endsWith(QLatin1String(".mbm"),
+                        Qt::CaseInsensitive)) {
+                    icon = HbIcon(QIcon(fileName));
+                    // Icon should be valid.
+                    icon.setSize(QSizeF(0.0, 0.0));
                 } else {
                     icon = HbIcon(fileName);
                 }
@@ -189,7 +197,7 @@ LOCAL_C CaEntry getEntryByUid(int uid)
  \retval icon.
  */
 HbIcon CaMenuIconUtility::getApplicationIcon(int uid,
-        const QSize &size)
+        const QSizeF &size)
 {
     HbIcon icon;
     CaEntry entry;
@@ -205,10 +213,10 @@ HbIcon CaMenuIconUtility::getApplicationIcon(int uid,
  \retval icon.
  */
 HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
-        const QSize &size)
+        const QSizeF &size)
 {
     HbIcon icon;
-    icon = getIconFromEntry(entry);
+    icon = getIconFromEntry(entry, size);
  
     if (icon.isNull() || !(icon.size().isValid())) {
         QString uidString(entry.attribute(appUidAttributeName));
@@ -234,3 +242,4 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
     }
     return icon;
 }
+

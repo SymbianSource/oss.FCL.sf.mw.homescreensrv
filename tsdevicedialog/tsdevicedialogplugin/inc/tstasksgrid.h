@@ -17,7 +17,7 @@
 #ifndef TSTASKSGRID_H
 #define TSTASKSGRID_H
 
-#include <hbgridview.h>
+#include <HbGridView>
 
 class TsTasksGrid : public HbGridView
 {

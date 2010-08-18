@@ -116,6 +116,7 @@ void CAfObserverTask::BroadcastReceivedL(const RMessage2& msg)
     } else if(NotifyChange == mMsg.Function() &&
               (AddActivity == msg.Function() ||
                UpdateActivity == msg.Function() ||
+               SaveActivity == msg.Function() ||
                RemoveActivity == msg.Function() ||
                RemoveApplicationActivities == msg.Function())){
         mMsg.Complete(KErrNone);

@@ -18,6 +18,7 @@
 #include "tsdocumentloader.h"
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
+#include "tsnoitemslabel.h"
 
 /*!
     \class TsDocumentLoader
@@ -36,6 +37,10 @@ QObject *TsDocumentLoader::createObject(const QString &type,
         return object;
     } else if (type == TsTasksGridItem::staticMetaObject.className()) {
         QObject *object = new TsTasksGridItem();
+        object->setObjectName(name);
+        return object;
+    } else if (type == TsNoItemsLabel::staticMetaObject.className()) {
+        QObject *object = new TsNoItemsLabel();
         object->setObjectName(name);
         return object;
     }

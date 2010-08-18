@@ -77,8 +77,8 @@ enum ErrorCode
     UnknownErrorCode
 };
 
-static const QString caCmdOpen("open");
-static const QString caCmdRemove("remove");
+const char caCmdOpen[] = "open";
+const char caCmdRemove[] = "remove";
 
 #ifndef QT_NO_DEBUG_OUTPUT
 #   define USE_QDEBUG_IF(predicate) if (!predicate) {} else qDebug()

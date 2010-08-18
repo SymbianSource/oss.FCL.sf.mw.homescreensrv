@@ -97,14 +97,22 @@ void CAfSession::ServiceL(const RMessage2& message)
     case SaveActivity:
     case RemoveActivity:
     case RemoveApplicationActivities:
+        {
+        mStorage.InterruptCleanup();
         AfStorageSyncTask::ExecuteL(mTasksStorage, mStorage, message);
+        mStorage.RequestCleanup();
         break;
+        }
     
     case ApplicationActivity:
     case Activities:
     case ApplicationActivities:
+        {
+        TBool cleanupInterrupted = mStorage.InterruptCleanup();
         CAfStorageAsyncTask::ExecuteLD(*this, mStorage, message);
+        if (cleanupInterrupted) mStorage.RequestCleanup();
         break;
+        }
     
     case WaitActivity:
     case NotifyChange:

@@ -15,13 +15,16 @@
 *
 */
 
+#include "tsdevicedialogcontainer.h"
+
 #include <QAbstractListModel>
+
 #include <HbDialog>
 #include <HbMainWindow>
 #include <HbLabel>
+
 #include <tspropertydefs.h>
 
-#include "tsdevicedialogcontainer.h"
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
 
@@ -33,7 +36,8 @@ TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model,
                                                  QObject *parent)
 :
     QObject(parent), 
-    mVisibilityPublisher(TsProperty::KTsPath)
+    mVisibilityPublisher(TsProperty::KTsPath),
+    mDismissRequestSubscriber(QString("%1/%2").arg(TsProperty::KTsPath).arg(TsProperty::KDismissRequestPath))
 {
     bool ok(true);
     mLoader.load(KDocmlPath, &ok);
@@ -91,6 +95,11 @@ TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model,
     mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, 
                                   static_cast<int>(true));
     mVisibilityPublisher.sync();
+    
+    connect(&mDismissRequestSubscriber,
+            SIGNAL(contentsChanged()),
+            this,
+            SLOT(handleDismissRequest()));
 }
 
 TsDeviceDialogContainer::~TsDeviceDialogContainer()
@@ -152,16 +161,23 @@ void TsDeviceDialogContainer::switchViewOnModelChange()
 {
     TsTasksGrid *grid = 
         qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
-    HbLabel *noItemsLabel = 
-        qobject_cast<HbLabel *>(mLoader.findWidget("noitemslabel"));
+    HbWidget *noItemsWidget = 
+        qobject_cast<HbWidget *>(mLoader.findWidget("noitemswidget"));
     Q_ASSERT(grid);
-    Q_ASSERT(noItemsLabel);
+    Q_ASSERT(noItemsWidget);
 
     if (grid->model()->rowCount()) {
-        noItemsLabel->hide();
+        noItemsWidget->hide();
         grid->show();
     } else {
-        noItemsLabel->show();
+        noItemsWidget->show();
         grid->hide();
+    }
+}
+
+void TsDeviceDialogContainer::handleDismissRequest()
+{
+    if (mDismissRequestSubscriber.value().toBool()) {
+        emit deviceDialogClosed();
     }
 }

@@ -14,11 +14,12 @@
 * Description: tsmodelitem.h
 *
 */
-
 #ifndef TSMODELITEM_H
 #define TSMODELITEM_H
+
+#include <QObject>
 #include <QVariant>
-#include <QModelIndex>
+
 /*!
     Abstract class which define model item for taskswitcher
 */

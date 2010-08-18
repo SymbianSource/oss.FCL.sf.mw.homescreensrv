@@ -19,6 +19,7 @@
 #include <hash.h>
 #include <s32mem.h>
 
+#include "afdatabasecleaner.h"
 #include "afqueries.h"
 #include "afentry.h"
 
@@ -49,6 +50,7 @@ mFsSession(session)
  */
 CAfStorage::~CAfStorage()
 {
+    delete mDatabaseCleaner;
     mActDb.Close();
     delete mFileStore;
 }
@@ -83,7 +85,10 @@ void CAfStorage::ConstructL()
     BaflUtils::FileExists(mFsSession, path) ? OpenDbL(path) : CreateDbL(path);
     CleanupStack::PopAndDestroy(&path);
 
+    mDatabaseCleaner = new (ELeave) CAfDatabaseCleaner(mActDb);
+
     DeleteNonPersistentActivitiesL();
+    RequestCleanup();
 }
 
 // -----------------------------------------------------------------------------
@@ -658,4 +663,28 @@ HBufC8* CAfStorage::Md5HexDigestL(const TDesC8 &string)
     }
     CleanupStack::PopAndDestroy(md5);
     return buf;
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Cancel ongoing cleanup if one is in progress.
+ * @return ETrue if the database cleanup was in progress, EFalse otherwise
+ */
+TBool CAfStorage::InterruptCleanup()
+{    
+    if (mDatabaseCleaner->IsActive()) {
+        mDatabaseCleaner->Cancel();
+        return ETrue;
+    } else {
+        return EFalse;
+    }
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Start database cleanup
+ */
+void CAfStorage::RequestCleanup()
+{
+    mDatabaseCleaner->StartCleanup();
 }

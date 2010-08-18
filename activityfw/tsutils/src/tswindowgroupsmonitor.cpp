@@ -84,7 +84,7 @@ EXPORT_C CTsWindowGroupsMonitor::~CTsWindowGroupsMonitor()
 EXPORT_C void CTsWindowGroupsMonitor::SubscribeL(MTsWindowGroupsObserver &observer)
 {
     const TInt offset(mObservers.Find(&observer));
-    KErrNotFound == offset ? mObservers.AppendL(&observer) : 
+    KErrNotFound == offset ? mObservers.InsertL(&observer, 0) : 
                              User::Leave(KErrAlreadyExists);
 }
 
@@ -168,7 +168,7 @@ void CTsWindowGroupsMonitor::ProvideEventL(TWsEvent event,
     CleanupClosePushL(wgInfo);
     switch(event.Type()) {
     case EEventWindowGroupListChanged:
-        User::LeaveIfError(mResources.WsSession().WindowGroupList(&wgInfo));
+        User::LeaveIfError(mResources.WsSession().WindowGroupList(0, &wgInfo));
         observer.HandleWindowGroupChanged(mResources, wgInfo.Array());
         break;
     }

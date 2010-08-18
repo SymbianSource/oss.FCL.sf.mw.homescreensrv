@@ -19,7 +19,8 @@
 
 #include <QObject>
 #include <HbDeviceDialogInterface>
-#include <qvaluespacepublisher.h>
+#include <QValueSpacePublisher>
+#include <QValueSpaceSubscriber>
 
 #include "tsdocumentloader.h"
 
@@ -52,10 +53,12 @@ public slots:
 private slots:
     void notifyDialogClosed();
     void switchViewOnModelChange();
+    void handleDismissRequest();
     
 private:
     TsDocumentLoader mLoader;
     QValueSpacePublisher mVisibilityPublisher;
+    QValueSpaceSubscriber mDismissRequestSubscriber;
 
     Q_DISABLE_COPY(TsDeviceDialogContainer)
 };

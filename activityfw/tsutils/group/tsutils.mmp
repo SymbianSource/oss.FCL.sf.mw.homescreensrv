@@ -38,7 +38,6 @@ LIBRARY      efsrv.lib
 LIBRARY      ws32.lib
 LIBRARY      apgrfx.lib
 
-//EXPORTUNFROZEN
 
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE_UDEBONLY

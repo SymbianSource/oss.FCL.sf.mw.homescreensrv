@@ -30,6 +30,7 @@ HEADERS +=  inc/tsdevicedialogcontainer.h \
             inc/tstasksgriditem.h \
             inc/tsdocumentloader.h \
             inc/tsdataroles.h \
+            inc/tsnoitemslabel.h \
 
 SOURCES +=  src/tsdevicedialogcontainer.cpp \
             src/tsdevicedialogplugin.cpp \
@@ -39,6 +40,7 @@ SOURCES +=  src/tsdevicedialogcontainer.cpp \
             src/tstasksgrid.cpp \
             src/tstasksgriditem.cpp \
             src/tsdocumentloader.cpp \
+            src/tsnoitemslabel.cpp \
 
 INCLUDEPATH += . \
                ./inc \
@@ -55,15 +57,9 @@ symbian {
     TARGET.UID3 = 0x2002677F
     pluginstub.sources = tsdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs
+    DEPLOYMENT += pluginstub
     
     LIBS += -lxqsettingsmanager -lapparc -lapgrfx
-    
-    # ugly hack
-    
-    crml.sources = ./resource/*.qcrml
-    crml.path = /resource/qt/crml
-    
-    DEPLOYMENT += pluginstub crml
     
     BLD_INF_RULES.prj_exports += \
     "$${LITERAL_HASH}include <platform_paths.hrh>" \

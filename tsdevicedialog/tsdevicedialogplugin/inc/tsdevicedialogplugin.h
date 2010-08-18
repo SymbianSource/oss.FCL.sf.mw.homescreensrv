@@ -18,15 +18,15 @@
 #ifndef TSDEVICEDIALOGPLUGIN_H
 #define TSDEVICEDIALOGPLUGIN_H
 
-#include <hbdevicedialogplugin.h>
-#include <QObject>
 #include <QVariantMap>
-#include <QSharedPointer>
-#include <qabstractitemmodel.h>
+
+#include <HbDeviceDialogPlugin>
 
 #include "tsdocumentloader.h"
 
+class QAbstractListModel;
 class TsTaskMonitor;
+
 class TsDeviceDialogPlugin : public HbDeviceDialogPlugin
 {
     Q_OBJECT

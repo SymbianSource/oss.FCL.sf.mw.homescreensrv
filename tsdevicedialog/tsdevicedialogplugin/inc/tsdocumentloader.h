@@ -18,7 +18,7 @@
 #ifndef TSDOCUMENTLOADER_H
 #define TSDOCUMENTLOADER_H
 
-#include <hbdocumentloader.h>
+#include <HbDocumentLoader>
 
 class TsDocumentLoader : public HbDocumentLoader
 {

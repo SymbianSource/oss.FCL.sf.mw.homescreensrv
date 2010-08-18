@@ -14,8 +14,8 @@
 * Description:
 *
 */
-#include <s32mem.h>
 #include "afserializer.h"
+#include <s32mem.h>
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -45,6 +45,6 @@ QVariantHash &operator <<(QVariantHash &dst, const TDesC8 &src)
                                                src.Length()) );
 
     QDataStream stream(&buffer, QIODevice::ReadOnly);
-    QT_TRYCATCH_LEAVING(stream >> dst);
+    stream >> dst;
     return dst;
 }
