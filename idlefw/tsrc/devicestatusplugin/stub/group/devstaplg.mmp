@@ -1,0 +1,106 @@
+/*
+* Copyright (c) 2002-2005 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+
+/*
+ * Note!
+ *
+ * This separate .mmp is needed for creating instance of Device Status Plug-In
+ * that links against stub.lib instead of sssettings.lib, profileeng.lib and
+ * networkhandling.lib.
+ *
+ * Stub.lib contains dummy methods that are used in module tests.
+ */
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <eunitcaps.h>
+
+#include        <platform/mw/aisystemuids.hrh>
+
+TARGET          aidevstaplg.dll
+TARGETTYPE      PLUGIN
+UID             0x10009D8D AI_UID_ECOM_DLL_CONTENTPUBLISHER_DEVSTAPLUGIN
+
+CAPABILITY      EUNIT_CAPS
+
+SOURCEPATH      ../../../../plugins/devicestatus/src
+SOURCE          aidevicestatusplugin.cpp
+SOURCE          aidevicestatuspluginengine.cpp
+SOURCE          aimulticontentobserver.cpp
+SOURCE          aidatepublisher.cpp
+SOURCE          aipublisherfactory.cpp
+SOURCE          ainetworkinfolistener.cpp
+SOURCE          aioperatorlogopublisher.cpp
+SOURCE          aioperatornamepublisher.cpp
+SOURCE          aibtsappublisher.cpp
+SOURCE          aisimregpublisher.cpp
+SOURCE          aimcnpublisher.cpp
+SOURCE          aicugpublisher.cpp
+SOURCE          aivhzpublisher.cpp
+SOURCE          aipublishprioritizer.cpp
+SOURCE          aicontentobserveroptimizer.cpp
+SOURCE          ainwspublisher.cpp
+SOURCE          aicugmcnpublisher.cpp
+
+SOURCEPATH      ../../../../plugins/devicestatus/data
+START RESOURCE  aidevstaplg.rss
+TARGET          aidevstaplg.rsc
+END
+
+
+START RESOURCE  aidevstaplgres.rss
+HEADER
+TARGET          aidevstaplgres.rsc
+TARGETPATH      APP_RESOURCE_DIR
+END
+
+USERINCLUDE     ../../../../group
+USERINCLUDE     ../../../../inc/common
+USERINCLUDE     ../../../../plugins/devicestatus/inc
+USERINCLUDE     ../../../../plugins/devicestatus/loc
+USERINCLUDE     ../../../../cenrep
+USERINCLUDE     ../../../../../../homescreen/idlehomescreen/inc
+USERINCLUDE     /epoc32/include/platform/mw
+
+
+APP_LAYER_SYSTEMINCLUDE
+LIBRARY         stub.lib
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         avkon.lib
+LIBRARY         sssettings.lib
+LIBRARY         networkhandling.lib
+LIBRARY         phoneclient.lib
+LIBRARY         fbscli.lib
+LIBRARY         cone.lib
+LIBRARY         commonengine.lib 
+LIBRARY         featmgr.lib
+LIBRARY         centralrepository.lib
+LIBRARY         cenrepnotifhandler.lib
+LIBRARY         egul.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         gdi.lib
+LIBRARY         bitgdi.lib
+LIBRARY         aiutils.lib
+LIBRARY         flogger.lib
+LIBRARY         bafl.lib
+LIBRARY         profileengine.lib 
+
+LANG            SC
+
+// End of File.

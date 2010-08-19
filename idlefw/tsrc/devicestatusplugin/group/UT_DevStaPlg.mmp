@@ -1,0 +1,104 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <eunitcaps.h>
+
+TARGET          UT_DevStaPlg.dll
+TARGETTYPE      dll
+TARGETPATH      /DigiaEUnit/Tests
+UID             0x1000af5a 0x01700000
+
+CAPABILITY      EUNIT_CAPS
+
+VENDORID        0x00000000
+
+SOURCEPATH      ../UT_DevStaPlg
+SOURCE          UT_DevStaPlgDllMain.cpp
+SOURCE          UT_DevStaPlg.cpp
+
+SOURCEPATH      ../../../../plugins/devicestatus/src
+SOURCE          aioperatornamepublisher.cpp
+SOURCE          aioperatorlogopublisher.cpp
+
+SOURCEPATH      ../Stub
+SOURCE          profileengine.cpp
+SOURCE          networkhandling.cpp
+
+SOURCEPATH      ../MT_DevStaPlg
+SOURCE          contentobserver.cpp
+SOURCE          runtimetest.cpp
+
+SOURCEPATH      ../../../../plugins/devicestatus/src
+SOURCE          aidevicestatusplugin.cpp
+SOURCE          aidevicestatuspluginengine.cpp
+SOURCE          aimulticontentobserver.cpp
+SOURCE			aiprofilepublisher.cpp
+SOURCE			aidatepublisher.cpp
+SOURCE          aipublisherfactory.cpp
+SOURCE          ainetworkinfolistener.cpp
+SOURCE          aibtsappublisher.cpp
+SOURCE          aisimregpublisher.cpp
+SOURCE          aimcnpublisher.cpp
+SOURCE          aicugpublisher.cpp
+SOURCE          aivhzpublisher.cpp
+SOURCE          aipublishprioritizer.cpp
+
+
+USERINCLUDE             ../UT_DevStaPlg
+USERINCLUDE             ../MT_DevStaPlg
+USERINCLUDE             ../Stub
+USERINCLUDE             ../../../../inc/common
+USERINCLUDE             ../../../../inc/framework
+USERINCLUDE             ../../../../group
+USERINCLUDE             ../../../../plugins/devicestatus/inc
+USERINCLUDE             ../../../../inc/nativeuicontroller
+
+SYSTEMINCLUDE           /epoc32/include
+SYSTEMINCLUDE           /epoc32/include/oem
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         stub.lib
+LIBRARY         EUnit.lib
+LIBRARY         avkon.lib
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         stub.lib
+LIBRARY         eunitutil.lib
+LIBRARY         efsrv.lib
+LIBRARY         phoneclient.lib
+LIBRARY         fbscli.lib
+LIBRARY         egul.lib
+LIBRARY			aifw.lib
+LIBRARY			flogger.lib
+LIBRARY			aiutils.lib
+LIBRARY         featmgr.lib
+LIBRARY         cone.lib
+LIBRARY         commonengine.lib
+LIBRARY         centralrepository.lib
+LIBRARY			cenrepnotifhandler.lib
+LIBRARY         egul.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         gdi.lib
+LIBRARY         bitgdi.lib
+LIBRARY         aiutils.lib
+LIBRARY         bafl.lib
+LIBRARY         profileengine.lib 
+
+// End of file

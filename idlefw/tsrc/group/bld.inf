@@ -23,3 +23,24 @@
 
 // AI Framework
 #include "../framework/group/bld.inf"
+
+//Device status plugin
+#include "../devicestatusplugin/group/bld.inf"
+
+// Window Server plug-in
+#include "../wsplugin/group/bld.inf"
+
+// Profile plug-in
+#include "../profileplugin/group/bld.inf"
+
+// MCSPlugin
+#include "../mcsplugin/group/bld.inf"
+
+// AI Utilities API
+#include "../ai_utilities_api/group/bld.inf"
+
+// Sapidataplugin
+#include "../sapidataplugin/group/bld.inf"
+
+// WRT data plug-in
+#include "../wrtdataplugin/group/bld.inf"
