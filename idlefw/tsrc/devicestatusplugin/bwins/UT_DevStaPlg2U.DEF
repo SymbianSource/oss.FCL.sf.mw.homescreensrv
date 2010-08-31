@@ -1,8 +1,0 @@
-EXPORTS
-	?CreateTestSuiteL@@YAPAVMEUnitTest@@XZ @ 1 NONAME ; class MEUnitTest * CreateTestSuiteL(void)
-	?ImplementationGroupProxy@@YAPBUTImplementationProxy@@AAH@Z @ 2 NONAME ; struct TImplementationProxy const * ImplementationGroupProxy(int &)
-	??1CNWSession@@UAE@XZ @ 3 NONAME ; CNWSession::~CNWSession(void)
-	?NewL@CProfileChangeNotifyHandler@@SAPAV1@PAVMProfileChangeObserver@@@Z @ 4 NONAME ; class CProfileChangeNotifyHandler * CProfileChangeNotifyHandler::NewL(class MProfileChangeObserver *)
-	?NewL@CProfileEngine@@SAPAV1@XZ @ 5 NONAME ; class CProfileEngine * CProfileEngine::NewL(void)
-	?NewLC@CProfileEngine@@SAPAV1@XZ @ 6 NONAME ; class CProfileEngine * CProfileEngine::NewLC(void)
-

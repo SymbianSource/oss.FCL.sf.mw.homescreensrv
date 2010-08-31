@@ -1,3 +1,0 @@
-EXPORTS
-	?NewL@CHsCcProviderClient@@SAPAV1@AAVMHsContentController@@@Z @ 1 NONAME ; class CHsCcProviderClient * CHsCcProviderClient::NewL(class MHsContentController &)
-

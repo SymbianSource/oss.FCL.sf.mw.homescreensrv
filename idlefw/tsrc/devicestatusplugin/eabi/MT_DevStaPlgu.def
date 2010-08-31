@@ -1,7 +1,0 @@
-EXPORTS
-	_Z16CreateTestSuiteLv @ 1 NONAME
-	_ZTI12CRuntimeTest @ 2 NONAME ; #<TI>#
-	_ZTI16CContentObserver @ 3 NONAME ; #<TI>#
-	_ZTV12CRuntimeTest @ 4 NONAME ; #<VT>#
-	_ZTV16CContentObserver @ 5 NONAME ; #<VT>#
-

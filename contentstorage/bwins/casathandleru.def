@@ -1,0 +1,6 @@
+EXPORTS
+	?CheckVisibility@CCaSatHandler@@SAHXZ @ 1 NONAME ; int CCaSatHandler::CheckVisibility(void)
+	?GetName@CCaSatHandler@@QAEHAAVTDes16@@@Z @ 2 NONAME ; int CCaSatHandler::GetName(class TDes16 &)
+	?LoadIconL@CCaSatHandler@@QAEPAVCAknIcon@@XZ @ 3 NONAME ; class CAknIcon * CCaSatHandler::LoadIconL(void)
+	?NewL@CCaSatHandler@@SAPAV1@XZ @ 4 NONAME ; class CCaSatHandler * CCaSatHandler::NewL(void)
+

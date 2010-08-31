@@ -1,0 +1,151 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description:
+;
+
+; Language
+&EN
+
+; SIS header: name, uid, version
+#{"homescreensrv"},(0x20022F66),1,0,0
+
+; Localised Vendor name
+%{"Nokia"}
+
+; Unique Vendor name
+:"Nokia"
+
+; Supports S60 5th Edition
+[0x1028315F], 0, 0, 0, {"S60ProductID"}
+
+; ---- qt --------------------------------------------
+
+"/epoc32/data/z/resource/apps/s60main.rsc"    - "c:/resource/apps/s60main.rsc"
+"/epoc32/release/armv5/urel/QtCore.dll"    - "c:/sys/bin/QtCore.dll"
+"/epoc32/release/armv5/urel/QtXml.dll"    - "c:/sys/bin/QtXml.dll"
+"/epoc32/release/armv5/urel/QtGui.dll"    - "c:/sys/bin/QtGui.dll"
+"/epoc32/release/armv5/urel/QtNetwork.dll"    - "c:/sys/bin/QtNetwork.dll"
+;"/epoc32/release/armv5/urel/QtScript.dll"    - "c:/sys/bin/QtScript.dll"
+"/epoc32/release/armv5/urel/QtTest.dll"    - "c:/sys/bin/QtTest.dll"
+"/epoc32/release/armv5/urel/QtSql.dll"    - "c:/sys/bin/QtSql.dll"
+"/epoc32/release/armv5/urel/qts60plugin_3_1.dll"    - "c:/sys/bin/qts60plugin_3_1.dll"
+"/epoc32/release/armv5/urel/qts60plugin_3_2.dll"    - "c:/sys/bin/qts60plugin_3_2.dll"
+"/epoc32/release/armv5/urel/qts60plugin_5_0.dll"    - "c:/sys/bin/qts60plugin_5_0.dll"
+"/epoc32/release/armv5/urel/sqlite3.dll"    - "c:/sys/bin/sqlite3.dll"
+"/epoc32/release/armv5/urel/QtSvg.dll"    - "c:/sys/bin/QtSvg.dll"
+;"/epoc32/release/armv5/urel/Phonon.dll"    - "c:/sys/bin/Phonon.dll"
+"/epoc32/release/armv5/urel/qjpeg.dll"    - "c:/sys/bin/qjpeg.dll"
+"/epoc32/winscw/c/resource/qt/plugins/imageformats/qjpeg.qtplugin"    - "c:/resource/qt/plugins/imageformats/qjpeg.qtplugin"
+"/epoc32/release/armv5/urel/qgif.dll"    - "c:/sys/bin/qgif.dll"
+"/epoc32/winscw/c/resource/qt/plugins/imageformats/qgif.qtplugin"    - "c:/resource/qt/plugins/imageformats/qgif.qtplugin"
+"/epoc32/release/armv5/urel/qmng.dll"    - "c:/sys/bin/qmng.dll"
+"/epoc32/winscw/c/resource/qt/plugins/imageformats/qmng.qtplugin"    - "c:/resource/qt/plugins/imageformats/qmng.qtplugin"
+"/epoc32/release/armv5/urel/qtiff.dll"    - "c:/sys/bin/qtiff.dll"
+"/epoc32/winscw/c/resource/qt/plugins/imageformats/qtiff.qtplugin"    - "c:/resource/qt/plugins/imageformats/qtiff.qtplugin"
+"/epoc32/release/armv5/urel/qico.dll"    - "c:/sys/bin/qico.dll"
+"/epoc32/winscw/c/resource/qt/plugins/imageformats/qico.qtplugin"    - "c:/resource/qt/plugins/imageformats/qico.qtplugin"
+"/epoc32/release/armv5/urel/qsvg.dll"    - "c:/sys/bin/qsvg.dll"
+"/epoc32/winscw/c/resource/qt/plugins/imageformats/qsvg.qtplugin"    - "c:/resource/qt/plugins/imageformats/qsvg.qtplugin"
+"/epoc32/release/armv5/urel/qcncodecs.dll"    - "c:/sys/bin/qcncodecs.dll"
+"/epoc32/winscw/c/resource/qt/plugins/codecs/qcncodecs.qtplugin"    - "c:/resource/qt/plugins/codecs/qcncodecs.qtplugin"
+"/epoc32/release/armv5/urel/qjpcodecs.dll"    - "c:/sys/bin/qjpcodecs.dll"
+"/epoc32/winscw/c/resource/qt/plugins/codecs/qjpcodecs.qtplugin"    - "c:/resource/qt/plugins/codecs/qjpcodecs.qtplugin"
+"/epoc32/release/armv5/urel/qtwcodecs.dll"    - "c:/sys/bin/qtwcodecs.dll"
+"/epoc32/winscw/c/resource/qt/plugins/codecs/qtwcodecs.qtplugin"    - "c:/resource/qt/plugins/codecs/qtwcodecs.qtplugin"
+"/epoc32/release/armv5/urel/qkrcodecs.dll"    - "c:/sys/bin/qkrcodecs.dll"
+"/epoc32/winscw/c/resource/qt/plugins/codecs/qkrcodecs.qtplugin"    - "c:/resource/qt/plugins/codecs/qkrcodecs.qtplugin"
+"/epoc32/release/armv5/urel/qsvgicon.dll"    - "c:/sys/bin/qsvgicon.dll"
+"/epoc32/winscw/c/resource/qt/plugins/iconengines/qsvgicon.qtplugin"    - "c:/resource/qt/plugins/iconengines/qsvgicon.qtplugin"
+
+; ---- hb --------------------------------------------
+
+"/epoc32/release/armv5/urel/HbCore.dll" - "c:/sys/bin/HbCore.dll"
+"/epoc32/release/armv5/urel/HbWidgets.dll" - "c:/sys/bin/HbWidgets.dll"
+"/epoc32/release/armv5/urel/HbTools.dll" - "c:/sys/bin/HbTools.dll"
+"/epoc32/release/armv5/urel/HbInput.dll" - "c:/sys/bin/HbInput.dll"
+"/epoc32/release/armv5/urel/HbFeedback.dll" - "c:/sys/bin/HbFeedback.dll"
+"/epoc32/release/armv5/urel/HbFeedbackEffectPlugin.dll" - "c:/sys/bin/HbFeedbackEffectPlugin.dll"
+"/epoc32/winscw/c/resource/qt/plugins/hb/feedback/HbFeedbackEffectPlugin.qtplugin" - "c:/resource/qt/plugins/hb/feedback/HbFeedbackEffectPlugin.qtplugin"
+"/epoc32/release/armv5/urel/HbDeviceNotificationDialogPlugin.dll"    - "!:\sys\bin\HbDeviceNotificationDialogPlugin.dll"
+"/epoc32/winscw/c/resource/plugins/devicedialogs/HbDeviceNotificationDialogPlugin.qtplugin" - "!:\resource\plugins\devicedialogs\HbDeviceNotificationDialogPlugin.qtplugin"
+"/epoc32/release/armv5/urel/HbIndicatorPopupPlugin.dll"    - "!:\sys\bin\HbIndicatorPopupPlugin.dll"
+"/epoc32/winscw/c/resource/plugins/devicedialogs/HbIndicatorPopupPlugin.qtplugin" - "!:\resource\plugins\devicedialogs\HbIndicatorPopupPlugin.qtplugin"
+"/epoc32/release/armv5/urel/HbDeviceProgressDialogPlugin.dll"    - "!:\sys\bin\HbDeviceProgressDialogPlugin.dll"
+"/epoc32/winscw/c/resource/plugins/devicedialogs/HbDeviceProgressDialogPlugin.qtplugin" - "!:\resource\plugins\devicedialogs\HbDeviceProgressDialogPlugin.qtplugin"
+"/epoc32/release/armv5/urel/HbAutoComplete.dll"    - "!:\sys\bin\HbAutoComplete.dll"
+"/epoc32/winscw/c/resource/hbinputs/engines/HbAutoComplete.qtplugin"    - "!:\resource\hbinputs\engines\HbAutoComplete.qtplugin"
+"/epoc32/release/armv5/urel/HbTouchInput.dll"    - "!:\sys\bin\HbTouchInput.dll"
+"/epoc32/winscw/c/resource/hbinputs/inputmethods/HbTouchInput.qtplugin"    - "!:\resource\hbinputs\inputmethods\HbTouchInput.qtplugin"
+
+;"/epoc32/release/armv5/urel/HbKeymappings_1.dll"    - "!:\sys\bin\HbKeymappings_1.dll"
+;"/epoc32/winscw/c/resource/hbinputs/keymappings/HbKeymappings_1.qtplugin"    - "!:\resource\hbinputs\keymappings\HbKeymappings_1.qtplugin"
+;"/epoc32/release/armv5/urel/HbKeymappings_2.dll"    - "!:\sys\bin\HbKeymappings_2.dll"
+;"/epoc32/winscw/c/resource/hbinputs/keymappings/HbKeymappings_2.qtplugin"    - "!:\resource\hbinputs\keymappings\HbKeymappings_2.qtplugin"
+;"/epoc32/release/armv5/urel/HbKeymappings_3.dll"    - "!:\sys\bin\HbKeymappings_3.dll"
+;"/epoc32/winscw/c/resource/hbinputs/keymappings/HbKeymappings_3.qtplugin"    - "!:\resource\hbinputs\keymappings\HbKeymappings_3.qtplugin"
+;"/epoc32/release/armv5/urel/HbKeymappings_4.dll"    - "!:\sys\bin\HbKeymappings_4.dll"
+;"/epoc32/winscw/c/resource/hbinputs/keymappings/HbKeymappings_4.qtplugin"    - "!:\resource\hbinputs\keymappings\HbKeymappings_4.qtplugin"
+
+"/epoc32/release/armv5/urel/hbdevicedialogappserver.exe"    - "!:\sys\bin\hbdevicedialogappserver.exe"
+"/epoc32/data/z/resource/apps/hbdevicedialogappserver.rsc"    - "!:\resource\apps\hbdevicedialogappserver.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/hbdevicedialogappserver_reg.rsc"    - "!:\private\10003a3f\import\apps\hbdevicedialogappserver_reg.rsc"
+
+"/epoc32/release/armv5/urel/hbthemeserver.exe"    - "!:\sys\bin\hbthemeserver.exe"
+"/epoc32/data/z/resource/apps/hbthemeserver.rsc"    - "!:\resource\apps\hbthemeserver.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/hbthemeserver_reg.rsc"    - "!:\private\10003a3f\import\apps\hbthemeserver_reg.rsc"
+
+"/epoc32/release/armv5/urel/hbiconpreloader.exe"    - "!:\sys\bin\hbiconpreloader.exe"
+"/epoc32/data/z/resource/apps/hbiconpreloader.rsc"    - "!:\resource\apps\hbiconpreloader.rsc"
+"/epoc32/data/z/private/10003a3f/import/apps/hbiconpreloader_reg.rsc"    - "!:\private\10003a3f\import\apps\hbiconpreloader_reg.rsc"
+
+
+; ---- db localizations ------------------------------------------
+"/epoc32/data/z/resource/qt/translations/contentstorage.qm" - "c:/resource/qt/translations/contentstorage.qm"
+
+; ---- contentstorage --------------------------------------------
+
+"/epoc32/release/armv5/urel/caclient.dll" - "c:/sys/bin/caclient.dll"
+"/epoc32/release/armv5/urel/cautils.dll" - "c:/sys/bin/cautils.dll"
+"/epoc32/release/armv5/urel/camenu.dll" - "c:/sys/bin/camenu.dll"
+
+"/epoc32/release/armv5/urel/casrvmanager.dll" - "c:/sys/bin/casrvmanager.dll"
+"/epoc32/release/armv5/urel/casatmonitor.dll" - "c:/sys/bin/casatmonitor.dll"
+"/epoc32/data/z/resource/plugins/casatmonitor.rsc"-"c:/resource/plugins/casatmonitor.rsc"
+"/epoc32/release/armv5/urel/caappscanner.dll" - "c:/sys/bin/caappscanner.dll"
+"/epoc32/data/z/resource/plugins/caappscanner.rsc"-"c:/resource/plugins/caappscanner.rsc"
+"/epoc32/release/armv5/urel/carunningappmonitor.dll" - "c:/sys/bin/carunningappmonitor.dll"
+"/epoc32/data/z/resource/plugins/carunningappmonitor.rsc"-"c:/resource/plugins/carunningappmonitor.rsc"
+"/epoc32/release/armv5/urel/cawidgetscanner.dll" - "c:/sys/bin/cawidgetscanner.dll"
+"/epoc32/data/z/resource/plugins/cawidgetscanner.rsc"-"c:/resource/plugins/cawidgetscanner.rsc"
+"/epoc32/release/armv5/urel/calocalizerscanner.dll" - "c:/sys/bin/calocalizerscanner.dll"
+"/epoc32/data/z/resource/plugins/calocalizerscanner.rsc"-"c:/resource/plugins/calocalizerscanner.rsc"
+"/epoc32/release/armv5/urel/causifscanner.dll" - "c:/sys/bin/causifscanner.dll"
+"/epoc32/data/z/resource/plugins/causifscanner.rsc" - "c:/resource/plugins/causifscanner.rsc"
+"/epoc32/release/armv5/urel/camificon.dll" - "c:/sys/bin/camificon.dll"
+"/epoc32/data/z/resource/qt/plugins/iconengines/camificon.qtplugin" - "c:/resource/qt/plugins/iconengines/camificon.qtplugin"
+
+"/epoc32/release/armv5/urel/camenuserver.exe" - "c:/sys/bin/camenuserver.exe"
+"/epoc32/release/armv5/urel/caextendedmenu.dll" - "c:/sys/bin/caextendedmenu.dll"
+"/epoc32/release/armv5/urel/casathandler.dll" - "c:/sys/bin/casathandler.dll"
+"/epoc32/release/armv5/urel/castorage.dll" - "c:/sys/bin/castorage.dll"
+"/epoc32/release/armv5/urel/casoftwareregistry.dll" - "c:/sys/bin/casoftwareregistry.dll"
+"/epoc32/release/armv5/urel/castockhandlerplugins.dll" - "c:/sys/bin/castockhandlerplugins.dll"
+"/epoc32/data/z/private/20022F90/castorage.db" - "c:/private/20022F90/castorage.db"
+"/epoc32/data/z/resource/plugins/castockhandlerplugins.rsc"-"c:/resource/plugins/castockhandlerplugins.rsc"
+
+; ----  hswidgetmodel --------------------------------------------
+"/epoc32/release/armv5/urel/hswidgetmodel.dll" - "c:/sys/bin/hswidgetmodel.dll"
+
+; ---- screensavermodel --------------------------------------------
+"/epoc32/release/armv5/urel/screensavermodel.dll" - "c:/sys/bin/screensavermodel.dll"

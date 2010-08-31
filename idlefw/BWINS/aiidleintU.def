@@ -1,5 +1,0 @@
-EXPORTS
-	?NewLC@CAiIdleAppRegister@@SAPAV1@XZ @ 1 NONAME ; class CAiIdleAppRegister * CAiIdleAppRegister::NewLC(void)
-	?NewL@CAiWsPluginManager@@SAPAV1@AAVCCoeEnv@@@Z @ 2 NONAME ; class CAiWsPluginManager * CAiWsPluginManager::NewL(class CCoeEnv &)
-	?NewL@CAiUiIdleIntegration@@SAPAV1@AAVCEikonEnv@@ABUTAiIdleKeySoundConfig@@PAVMAiFwEventHandler@@@Z @ 3 NONAME ; class CAiUiIdleIntegration * CAiUiIdleIntegration::NewL(class CEikonEnv &, struct TAiIdleKeySoundConfig const &, class MAiFwEventHandler *)
-

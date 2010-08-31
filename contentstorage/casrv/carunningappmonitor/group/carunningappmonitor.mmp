@@ -1,0 +1,57 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: carunningappmonitor.mmp
+*
+*/
+
+// To get the system includes definitions
+#include <platform_paths.hrh>
+
+TARGET carunningappmonitor.dll
+TARGETTYPE PLUGIN
+
+// ECom Dll recognition UID followed by the unique UID for this dll
+UID 0x10009D8D 0x200267B5
+SECUREID 0x200267B5
+CAPABILITY CAP_ECOM_PLUGIN
+
+DEFFILE         carunningappmonitor.def
+
+SOURCEPATH      ../src
+SOURCE          proxy.cpp
+SOURCE          castoragetask.cpp
+SOURCE          carunningapphandler.cpp
+SOURCE          carunningappmonitor.cpp
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../../casrvmgr/inc
+USERINCLUDE     ../../../inc
+USERINCLUDE     ../../../srvinc
+USERINCLUDE     ../../../cautils/inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+SOURCEPATH      ../data
+START RESOURCE  carunningappmonitor.rss
+    LANG    sc
+    TARGET  carunningappmonitor.rsc
+END
+
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         ws32.lib
+LIBRARY         apgrfx.lib
+LIBRARY         cautils.lib
+LIBRARY         camenu.lib
+
