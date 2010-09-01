@@ -1,0 +1,3 @@
+EXPORTS
+	?GetItemIconL@MenuIconUtility@@SAPAVCAknIcon@@AAVCMenuItem@@@Z @ 1 NONAME ; class CAknIcon * MenuIconUtility::GetItemIconL(class CMenuItem &)
+

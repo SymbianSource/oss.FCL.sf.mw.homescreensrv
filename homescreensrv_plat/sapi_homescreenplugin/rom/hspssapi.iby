@@ -1,0 +1,30 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+#ifndef HSPSSAPI_IBY
+#define HSPSSAPI_IBY
+
+#include <bldvariant.hrh>
+
+file=ABI_DIR\BUILD_DIR\hspsservice.dll   SHARED_LIB_DIR\hspsservice.dll
+ECOM_PLUGIN( hspsprovider.dll, hspsprovider.rsc )
+
+// Uncomment following lines to include test environment and test cases.
+// file=ABI_DIR\BUILD_DIR\mt_hspsconfigurationif.dll	SHARED_LIB_DIR\mt_hspsconfigurationif.dll
+// file=ABI_DIR\BUILD_DIR\mt_hspsprovider.dll		SHARED_LIB_DIR\mt_hspsprovider.dll
+// #include <eunit_s60.iby>
+
+#endif 

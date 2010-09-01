@@ -1,0 +1,87 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <eunitcaps.h>
+
+TARGET          ut_mcssettings.dll
+TARGETTYPE      dll
+TARGETPATH      /DigiaEUnit/Tests
+UID                     0x1000af5a 0x01700afe
+
+CAPABILITY              EUNIT_CAPS
+//VENDORID                0x00000000
+
+SOURCEPATH              ../UT_mcssettings
+SOURCE                  UT_mcssettingsDllMain.cpp
+SOURCE                  UT_mcssettings.cpp
+
+// Sources needed by the test
+SOURCEPATH              ../../../plugins/mcsplugin/settings/src
+SOURCE                  mcspluginsettings.cpp
+SOURCE                  mcspluginsettingscontainer.cpp
+SOURCE                  mcspluginsettingsmodel.cpp
+SOURCE                  mcspluginsettingsapplist.cpp
+SOURCE                  mcspluginsettingsbkmlist.cpp
+
+SOURCEPATH              ../../../plugins/mcsplugin/commonsrc
+SOURCE                  mcspluginwatcher.cpp
+
+
+
+USERINCLUDE             ../../../plugins/mcsplugin/settings/inc
+USERINCLUDE             ../../../plugins/mcsplugin/commoninc
+USERINCLUDE             ../../../plugins/mcsplugin/data
+USERINCLUDE		        ../../../inc/common
+USERINCLUDE             ../UT_mcssettings
+
+SYSTEMINCLUDE           /epoc32/include/internal
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY                 euser.lib
+LIBRARY                 ecom.lib
+LIBRARY                 avkon.lib
+LIBRARY                 bafl.lib
+LIBRARY                 cone.lib
+LIBRARY                 efsrv.lib
+LIBRARY                 eikcoctl.lib
+LIBRARY                 eikcore.lib
+LIBRARY                 centralrepository.lib
+LIBRARY                 cenrepnotifhandler.lib  // CCenRepNotifyHandler
+LIBRARY                 gsframework.lib         // For base classes
+LIBRARY                 gslistbox.lib           // For CGSListBoxItemTextArray
+LIBRARY                 gsecomplugin.lib
+LIBRARY                 commonengine.lib        // For RConeResourceLoader
+LIBRARY                 inetprotutil.lib        // For TUriParser
+LIBRARY                 apgrfx.lib              // For RApaLsSession
+LIBRARY                 apparc.lib              // For TApaAppInfo
+LIBRARY                 msgs.lib                // For Message Server
+LIBRARY                 platformenv.lib         // For PathInfo
+LIBRARY                 hlplch.lib              // for HlpLauncher
+LIBRARY                 featmgr.lib             // For feature manager
+LIBRARY                 favouritesengine.lib
+LIBRARY                 EUnit.lib
+LIBRARY			        CdlEngine.lib
+LIBRARY                 javaregistryclient.lib  // For JavaRegistry
+LIBRARY        			ws32.lib
+
+LIBRARY         mcsmenu.lib
+LIBRARY         hspluginsettings.lib
+LIBRARY         aiutils.lib
+
+// End of File.

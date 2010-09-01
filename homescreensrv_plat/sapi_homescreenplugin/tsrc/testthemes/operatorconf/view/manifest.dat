@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package version="2.0">
+
+  <!-- Set both two families for unit tests -->
+  <family>qhd_tch</family>
+  <family>vga_tch</family>
+  
+  <type>view</type>
+  
+  <!-- Interface UID -->
+	<interfaceuid>0998</interfaceuid>
+	
+	<!-- Vendor UID -->
+	<provideruid>101FB657</provideruid>
+	
+	<!-- Configuration UID -->
+	<configurationuid>2000B131</configurationuid>	
+	
+	<!-- statuslicenceedefault|statuslicenceerestorable|statusoperatordefault|statususerdefault -->
+	
+	<!-- Description -->
+	<fullname>&amp;qtn_2000B131_configuration_name;</fullname>
+	<shortname>operatorview</shortname>
+	<version>1.0</version>
+	<description>&amp;qtn_2000B131_configuration_desc;</description>
+	<filelogo>mif(dummy.mif 1 2)</filelogo>
+	
+	<!-- Configuration -->
+	<filexml>configuration.xml</filexml>			
+	
+	<!-- Name of the localization files -->
+	<filedtd>locale.dtd</filedtd>
+	  
+</package>  	

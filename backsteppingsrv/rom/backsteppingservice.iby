@@ -1,0 +1,27 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*
+*/
+
+
+#ifndef BACKSTEPPINGSERVICE_IBY
+#define BACKSTEPPINGSERVICE_IBY
+
+file=ABI_DIR\BUILD_DIR\bsengine.exe                     SHARED_LIB_DIR\bsengine.exe
+data=\epoc32\data\Z\private\2000F83E\bs_config.xml      private\2000F83E\bs_config.xml
+
+#endif // BACKSTEPPINGSERVICE_IBY
+
+//  End of File  

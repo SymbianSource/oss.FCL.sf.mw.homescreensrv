@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: homescreensrv main bld.inf file for module tests
+*
+*/
+
+// Utility lib
+#include "../utility/group/bld.inf"
+
+// Idle integration
+#include "../idleint/group/bld.inf"
+
+// AI Framework
+#include "../framework/group/bld.inf"
+
+//Device status plugin
+#include "../devicestatusplugin/group/bld.inf"
+
+// Window Server plug-in
+#include "../wsplugin/group/bld.inf"
+
+// Profile plug-in
+#include "../profileplugin/group/bld.inf"
+
+// MCSPlugin
+#include "../mcsplugin/group/bld.inf"
+
+// AI Utilities API
+#include "../ai_utilities_api/group/bld.inf"
+
+// Sapidataplugin
+#include "../sapidataplugin/group/bld.inf"
+
+// WRT data plug-in
+#include "../wrtdataplugin/group/bld.inf"

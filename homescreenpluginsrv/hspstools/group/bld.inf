@@ -1,0 +1,33 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*                
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../inc/hspsodtdump.h			MW_LAYER_PLATFORM_EXPORT_PATH(hspsodtdump.h)
+../inc/hspsliwdump.h			MW_LAYER_PLATFORM_EXPORT_PATH(hspsliwdump.h)
+../inc/hspslogbus.h                     MW_LAYER_PLATFORM_EXPORT_PATH(hspslogbus.h)
+../inc/hspslogbusfile.h			MW_LAYER_PLATFORM_EXPORT_PATH(hspslogbusfile.h)
+../inc/hspslogbusrdebug.h		MW_LAYER_PLATFORM_EXPORT_PATH(hspslogbusrdebug.h)
+
+PRJ_MMPFILES
+hspstools.mmp

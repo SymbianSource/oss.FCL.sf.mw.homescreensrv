@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/" >
-        <file alias="activityserviceplugin.xml">../../data/afservice.xml</file>
-    </qresource>
-</RCC>

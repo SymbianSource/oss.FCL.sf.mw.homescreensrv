@@ -1,0 +1,127 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  
+*  Version     : %version: sa1spcx1#11.1.7.1.8 % << Don't touch! Updated by Synergy at check-out.
+*
+*/
+
+// To get the MW_LAYER_SYSTEMINCLUDE-definition
+#include <platform_paths.hrh>
+
+#include <data_caging_paths.hrh>
+#include "../inc/menuuid.hrh"
+
+TARGET          mcsmenu.dll
+TARGETTYPE      dll
+UID             0x1000008D MENU_DLL_UID3
+CAPABILITY      CAP_GENERAL_DLL
+VENDORID        VID_DEFAULT
+
+// Client and common code
+SOURCEPATH      ../src
+SOURCE          menu.cpp
+SOURCE          menusapi.cpp
+SOURCE          menuitem.cpp
+SOURCE          menunotifier.cpp
+SOURCE          menuoperation.cpp
+SOURCE          menubuf.cpp
+SOURCE          menuutil.cpp
+SOURCE          menuitemattr.cpp
+SOURCE          menufilter.cpp
+SOURCE          menuclientoperation.cpp
+SOURCE          menucompletedoperation.cpp
+SOURCE          menuhandlereng.cpp
+SOURCE          menuhandler.cpp
+
+// Server code
+SOURCEPATH      ../srvsrc
+SOURCE          menusrvsession.cpp
+SOURCE          menusrv.cpp
+SOURCE          menusrvobject.cpp
+SOURCE          menusrvoperation.cpp
+SOURCE          menusrvobjectfilter.cpp
+SOURCE          menusrvnotifier.cpp
+SOURCE          menusrvbuf.cpp
+SOURCE          menusrvstream.cpp
+SOURCE          menusrveng.cpp
+SOURCE          menusrvengutils.cpp
+SOURCE          menusrvappattributes.cpp
+SOURCE          timeout.cpp
+SOURCE          menusrvappscanner.cpp
+SOURCE          menusrvfoldercrnotifier.cpp
+SOURCE          menusrvmmchistory.cpp
+SOURCE          mcsrunningappshandler.cpp
+SOURCE          mcsrunningappswgmonitor.cpp
+SOURCE          mcsrunningappsfswmonitor.cpp
+SOURCE          mcsrunningappshiddenattrscanner.cpp
+SOURCE          mcsrunningappsaddremovehandler.cpp
+SOURCE          mcssatmonitor.cpp 
+SOURCE          mcsdrmhandler.cpp
+SOURCE          mcscachehandler.cpp
+SOURCE          menusrvattr.cpp 
+SOURCE          mcsdrmobserver.cpp
+SOURCE          mcsdrmscanner.cpp
+SOURCE          mcsdrmobservermanager.cpp
+SOURCE          mcschildrenhandler.cpp
+SOURCE          mcschildrenscanner.cpp 
+SOURCE          menusrvtypefilters.cpp 
+
+SOURCE          mcsmmcobserver.cpp
+SOURCE          mcsfreespaceobserver.cpp
+SOURCE          mcsinstallnotifier.cpp
+
+SOURCE          mcsgetlistcreatorinterface.cpp
+SOURCE          mcsgetlisthandler.cpp
+SOURCE          mcsgetlistflatcreator.cpp
+SOURCE          mcsgetlisttreecreator.cpp
+
+
+USERINCLUDE     ../inc
+USERINCLUDE     ../srvinc
+USERINCLUDE     ../enginc
+USERINCLUDE     ../extinc
+// it must remain like this as JAVA API is published in app layer
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         efsrv.lib
+LIBRARY         estor.lib
+LIBRARY         ecom.lib
+LIBRARY         apparc.lib
+LIBRARY         apgrfx.lib
+LIBRARY         platformenv.lib
+LIBRARY         mcsmenueng.lib
+LIBRARY         mcsmenuutils.lib
+LIBRARY         flogger.lib
+LIBRARY         centralrepository.lib
+LIBRARY         CenRepNotifHandler.lib 
+LIBRARY         mcssathandler.lib
+LIBRARY         sisregistryclient.lib
+LIBRARY         fbscli.lib 
+LIBRARY         eikcore.lib
+LIBRARY         cone.lib
+LIBRARY	        drmserverinterfaces.lib
+LIBRARY         javaregistryclient.lib
+LIBRARY         drmhelper.lib
+LIBRARY         drmrightsinfo.lib
+LIBRARY         sysutil.lib
+ 
+LIBRARY         ws32.lib
+LIBRARY         bafl.lib 
+LIBRARY         WidgetRegistryClient.lib
+LIBRARY         featmgr.lib 
+LIBRARY         liwServiceHandler.lib
+LIBRARY         xcfw.lib
+
+

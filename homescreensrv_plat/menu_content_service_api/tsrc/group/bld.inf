@@ -1,0 +1,33 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../init/ui_mcsapitest.ini 				c:/testframework/ui_mcsapitest.ini
+../conf/ui_mcsapitest.cfg 				c:/testframework/ui_mcsapitest.cfg
+../data/mcsapi.bat						c:/mcsapi.bat
+../data/c/sapitest_menudata.xml			c:/testing/data/MCSAPI/sapitest_menudata.xml
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+
+mcsapitest.mmp
+
+//  End of File

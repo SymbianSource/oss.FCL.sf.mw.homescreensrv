@@ -1,0 +1,70 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource headers for Action handler
+ *
+*/
+
+
+#ifndef T_ACTIONHANDLERPROPERTIES_HRH
+#define T_ACTIONHANDLERPROPERTIES_HRH
+
+const TUid KServerUid =
+    {
+    0x20016B7B
+    };
+
+/** Publisher activate*/
+enum TPublisherActivate
+    {
+    ECPDeActivate = 0,
+    ECPActivate = 1
+    };
+
+/** Possible types of an action */
+//map values 
+_LIT( KActionValueLaunchApplication, "launch_application" );
+_LIT( KActionValueViewActivation, "view_activation" );
+_LIT( KActionValueSendSMS, "send_sms" );
+_LIT( KActionValueSendMMS, "send_mms" );
+_LIT( KActionValueSendEmail, "send_email" );
+_LIT( KLaunchMethodValueCmdLine, "cmd_line" );
+_LIT( KLaunchMethodValueMessageWithDoc, "message_with_doc" );
+_LIT( KLaunchMethodValueMessageWithTail, "message_with_tail" );
+/** The application is to open the document specified on the command line. */
+_LIT( KApaCommandOpen, "apa_command_open" );
+/** The application is to open the last used document and to run in the background. */
+_LIT( KApaCommandBackground, "apa_command_background" );
+
+//map kyes
+_LIT8( KApplicationUid, "application_uid" );
+_LIT8( KMessageUid, "message_uid" );
+_LIT8( KViewId, "view_id" );
+_LIT8( KApaCommand, "apa_command" );
+_LIT8( KViewAppUid, "view_app_uid" );
+_LIT8( KAdditionalData, "additional_data" );
+_LIT8( KDocumentName, "document_name" );
+
+_LIT8( KType, "type" );
+_LIT8( KLaunchMethod, "launch_method" );
+_LIT8( KAddress, "address" );
+_LIT8( KNumber, "number" );
+_LIT8( KAlias, "alias" );
+
+_LIT8( KHelpUid, "help_uid" );
+_LIT8( KHelpTopic, "help_topic" );
+
+_LIT8( KPublisher_Uid, "publisher_Uid" );
+_LIT8( KActivate, "Activate" );
+
+#endif // T_ACTIONHANDLERPROPERTIES_HRH

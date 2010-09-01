@@ -1,0 +1,31 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../init/ah_plugin_api.ini 				c:/testframework/ah_plugin_api.ini
+../conf/ah_plugin_api.cfg 				c:/testframework/ah_plugin_api.cfg
+../data/ahapi.bat						c:/ahapi.bat
+
+PRJ_MMPFILES
+
+PRJ_TESTMMPFILES
+ah_plugin_api.mmp
+
+//  End of File

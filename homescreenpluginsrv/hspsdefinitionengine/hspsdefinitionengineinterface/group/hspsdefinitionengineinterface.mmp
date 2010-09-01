@@ -1,0 +1,54 @@
+/*
+* Copyright (c) 2005,2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Project makefile for hspsdefinitionengineinterface
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+TARGET      hspsdefinitionengineinterface.dll
+CAPABILITY  CAP_GENERAL_DLL
+TARGETTYPE  dll
+// Dll recognition UID followed by the unique UID for this dll
+UID         0x1000008d 0x200159B9// old: 10207481
+VENDORID    VID_DEFAULT
+
+SOURCEPATH	../src 
+SOURCE      hspsdefinitionengineinterface.cpp
+
+USERINCLUDE . 
+USERINCLUDE ../inc
+USERINCLUDE ../../hspsdefinitionengine/inc
+USERINCLUDE ../../../inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         ecom.lib 
+LIBRARY         charconv.lib 
+LIBRARY         hspsodt.lib 
+
+LANG			SC
+
+START WINS      
+
+END
+
+START MARM
+
+END
+
+
+

@@ -1,0 +1,4 @@
+EXPORTS
+	_ZN9MenuUtils8GetTUintERK7TDesC16Rj @ 1 NONAME
+	_ZN9MenuUtils8SetTUintER6TDes16j @ 2 NONAME
+

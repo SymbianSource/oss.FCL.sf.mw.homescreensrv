@@ -1,0 +1,3 @@
+EXPORTS
+	?NewL@CHsCcApiClient@@SAPAV1@PAVMHsContentControl@@@Z @ 1 NONAME ; class CHsCcApiClient * CHsCcApiClient::NewL(class MHsContentControl *)
+

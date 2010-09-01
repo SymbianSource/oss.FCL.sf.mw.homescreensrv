@@ -1,0 +1,18 @@
+<configuration>
+
+	<control>
+		
+		<!-- Enable adding of plugins with an empty plugins element -->
+		<plugins>
+		</plugins>
+		
+		<settings>
+		  <item id="bgcolor" name="Background color">
+		    <property name="value" value="200,100,0"/>
+		  </item>
+		</settings>
+
+	</control>
+
+</configuration>
+

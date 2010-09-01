@@ -1,0 +1,128 @@
+EXPORTS
+	_ZN11CXCFWEngine11HasTextDataEv @ 1 NONAME
+	_ZN11CXCFWEngine12CurrentStateEv @ 2 NONAME
+	_ZN11CXCFWEngine12TextDetailsLER7TPtrC16Ri @ 3 NONAME
+	_ZN11CXCFWEngine13NumAttributesEv @ 4 NONAME
+	_ZN11CXCFWEngine15CancelOperationEv @ 5 NONAME
+	_ZN11CXCFWEngine17AttributeDetailsLEiR7TPtrC16S1_Ri @ 6 NONAME
+	_ZN11CXCFWEngine22RegisterObjectFactoryLEP22CGECOObjectFactoryBase @ 7 NONAME
+	_ZN11CXCFWEngine23UnRegisterObjectFactoryEP22CGECOObjectFactoryBase @ 8 NONAME
+	_ZN11CXCFWEngine4NewLEP19MXCFWEngineObserver @ 9 NONAME
+	_ZN11CXCFWEngine5LoadLER9MXCFWTreeRK7TDesC16 @ 10 NONAME
+	_ZN11CXCFWEngine5LoadLER9MXCFWTreeRK7TDesC16S4_ @ 11 NONAME
+	_ZN11CXCFWEngine5SaveLER9MXCFWTreeRK7TDesC16 @ 12 NONAME
+	_ZN11CXCFWEngine5SaveLER9MXCFWTreeRK7TDesC16S4_ @ 13 NONAME
+	_ZN11CXCFWEngineD0Ev @ 14 NONAME
+	_ZN11CXCFWEngineD1Ev @ 15 NONAME
+	_ZN11CXCFWEngineD2Ev @ 16 NONAME
+	_ZN18CGECODefaultObject10RemoveTextEv @ 17 NONAME
+	_ZN18CGECODefaultObject11HasTextDataEv @ 18 NONAME
+	_ZN18CGECODefaultObject12GetAttributeERK7TDesC16R7TPtrC16 @ 19 NONAME
+	_ZN18CGECODefaultObject12GetAttributeERK7TDesC16R7TPtrC16Ri @ 20 NONAME
+	_ZN18CGECODefaultObject12TextDetailsLER7TPtrC16Ri @ 21 NONAME
+	_ZN18CGECODefaultObject13NumAttributesEv @ 22 NONAME
+	_ZN18CGECODefaultObject13SetAttributeLERK7TDesC16S2_ @ 23 NONAME
+	_ZN18CGECODefaultObject13SetAttributeLERK7TDesC16S2_i @ 24 NONAME
+	_ZN18CGECODefaultObject14BaseConstructLERK7TDesC16 @ 25 NONAME
+	_ZN18CGECODefaultObject14TypeIdentifierEv @ 26 NONAME
+	_ZN18CGECODefaultObject15RemoveAttributeERK7TDesC16 @ 27 NONAME
+	_ZN18CGECODefaultObject17AttributeDetailsLEiR7TPtrC16S1_Ri @ 28 NONAME
+	_ZN18CGECODefaultObject4NewLERK7TDesC16 @ 29 NONAME
+	_ZN18CGECODefaultObject7GetTextER7TPtrC16 @ 30 NONAME
+	_ZN18CGECODefaultObject8SetTextLERK7TDesC16 @ 31 NONAME
+	_ZN18CGECODefaultObject8SetTextLERK7TDesC16i @ 32 NONAME
+	_ZN18CGECODefaultObjectC1Ev @ 33 NONAME
+	_ZN18CGECODefaultObjectC2Ev @ 34 NONAME
+	_ZN18CGECODefaultObjectD0Ev @ 35 NONAME
+	_ZN18CGECODefaultObjectD1Ev @ 36 NONAME
+	_ZN18CGECODefaultObjectD2Ev @ 37 NONAME
+	_ZN20CXCFWEntityConverter19OutputComposedTextLEP14CMDXMLComposerRK7TDesC16 @ 38 NONAME
+	_ZN20CXCFWEntityConverterC1Ev @ 39 NONAME
+	_ZN20CXCFWEntityConverterC2Ev @ 40 NONAME
+	_ZN20CXCFWEntityConverterD0Ev @ 41 NONAME
+	_ZN20CXCFWEntityConverterD1Ev @ 42 NONAME
+	_ZN20CXCFWEntityConverterD2Ev @ 43 NONAME
+	_ZN25CGECODefaultObjectFactory10SetContextEP15CGECOObjectBase @ 44 NONAME
+	_ZN25CGECODefaultObjectFactory11HasTextDataEv @ 45 NONAME
+	_ZN25CGECODefaultObjectFactory12TextDetailsLER7TPtrC16Ri @ 46 NONAME
+	_ZN25CGECODefaultObjectFactory13NumAttributesEv @ 47 NONAME
+	_ZN25CGECODefaultObjectFactory17AttributeDetailsLEiR7TPtrC16S1_Ri @ 48 NONAME
+	_ZN25CGECODefaultObjectFactory17InitializeObjectLER22MGECOAttributeProvider @ 49 NONAME
+	_ZN25CGECODefaultObjectFactory30GetContentObjectAndSetContextLERK7TDesC16 @ 50 NONAME
+	_ZN25CGECODefaultObjectFactory4NewLEv @ 51 NONAME
+	_ZN25CGECODefaultObjectFactoryC1Ev @ 52 NONAME
+	_ZN25CGECODefaultObjectFactoryC2Ev @ 53 NONAME
+	_ZN25CGECODefaultObjectFactoryD0Ev @ 54 NONAME
+	_ZN25CGECODefaultObjectFactoryD1Ev @ 55 NONAME
+	_ZN25CGECODefaultObjectFactoryD2Ev @ 56 NONAME
+	_ZN9CXCFWNode10FirstChildEv @ 57 NONAME
+	_ZN9CXCFWNode11NextSiblingEv @ 58 NONAME
+	_ZN9CXCFWNode11PrevSiblingEv @ 59 NONAME
+	_ZN9CXCFWNode4DataEv @ 60 NONAME
+	_ZN9CXCFWNode6ParentEv @ 61 NONAME
+	_ZN9CXCFWNode9LastChildEv @ 62 NONAME
+	_ZN9CXCFWTree11RemoveNodeLEP9MXCFWNode @ 63 NONAME
+	_ZN9CXCFWTree14GetChildNodesLEP9MXCFWNodeR13RPointerArrayIS0_E @ 64 NONAME
+	_ZN9CXCFWTree15GetNodesOfTypeLERK7TDesC16R13RPointerArrayI9MXCFWNodeEPS4_i @ 65 NONAME
+	_ZN9CXCFWTree4NewLEv @ 66 NONAME
+	_ZN9CXCFWTree4RootEv @ 67 NONAME
+	_ZN9CXCFWTree5NodesEv @ 68 NONAME
+	_ZN9CXCFWTree8AddNodeLEP15CGECOObjectBase @ 69 NONAME
+	_ZN9CXCFWTree8AddNodeLEP15CGECOObjectBaseP9MXCFWNode @ 70 NONAME
+	_ZN9CXCFWTree8AddNodeLEP15CGECOObjectBaseP9MXCFWNodeS3_ @ 71 NONAME
+	_ZN9CXCFWTree8IsLockedEv @ 72 NONAME
+	_ZN9CXCFWTree9MoveNodeLEP9MXCFWNodeS1_S1_ @ 73 NONAME
+	_ZN9CXCFWTree9SetLockedEi @ 74 NONAME
+	_ZN9CXCFWTreeD0Ev @ 75 NONAME
+	_ZN9CXCFWTreeD1Ev @ 76 NONAME
+	_ZN9CXCFWTreeD2Ev @ 77 NONAME
+	_ZTI11CXCFWEngine @ 78 NONAME ; #<TI>#
+	_ZTI14CXCFWLocalizer @ 79 NONAME ; #<TI>#
+	_ZTI18CGECODefaultObject @ 80 NONAME ; #<TI>#
+	_ZTI20CXCFWEntityConverter @ 81 NONAME ; #<TI>#
+	_ZTI25CGECODefaultObjectFactory @ 82 NONAME ; #<TI>#
+	_ZTI9CXCFWNode @ 83 NONAME ; #<TI>#
+	_ZTI9CXCFWTree @ 84 NONAME ; #<TI>#
+	_ZTV11CXCFWEngine @ 85 NONAME ; #<VT>#
+	_ZTV14CXCFWLocalizer @ 86 NONAME ; #<VT>#
+	_ZTV18CGECODefaultObject @ 87 NONAME ; #<VT>#
+	_ZTV20CXCFWEntityConverter @ 88 NONAME ; #<VT>#
+	_ZTV25CGECODefaultObjectFactory @ 89 NONAME ; #<VT>#
+	_ZTV9CXCFWNode @ 90 NONAME ; #<VT>#
+	_ZTV9CXCFWTree @ 91 NONAME ; #<VT>#
+	_ZThn28_N11CXCFWEngine11HasTextDataEv @ 92 NONAME ; #<thunk>#
+	_ZThn28_N11CXCFWEngine12TextDetailsLER7TPtrC16Ri @ 93 NONAME ; #<thunk>#
+	_ZThn28_N11CXCFWEngine13NumAttributesEv @ 94 NONAME ; #<thunk>#
+	_ZThn28_N11CXCFWEngine17AttributeDetailsLEiR7TPtrC16S1_Ri @ 95 NONAME ; #<thunk>#
+	_ZThn4_N18CGECODefaultObject11HasTextDataEv @ 96 NONAME ; #<thunk>#
+	_ZThn4_N18CGECODefaultObject12TextDetailsLER7TPtrC16Ri @ 97 NONAME ; #<thunk>#
+	_ZThn4_N18CGECODefaultObject13NumAttributesEv @ 98 NONAME ; #<thunk>#
+	_ZThn4_N18CGECODefaultObject17AttributeDetailsLEiR7TPtrC16S1_Ri @ 99 NONAME ; #<thunk>#
+	_ZThn4_N25CGECODefaultObjectFactory11HasTextDataEv @ 100 NONAME ; #<thunk>#
+	_ZThn4_N25CGECODefaultObjectFactory12TextDetailsLER7TPtrC16Ri @ 101 NONAME ; #<thunk>#
+	_ZThn4_N25CGECODefaultObjectFactory13NumAttributesEv @ 102 NONAME ; #<thunk>#
+	_ZThn4_N25CGECODefaultObjectFactory17AttributeDetailsLEiR7TPtrC16S1_Ri @ 103 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWNode10FirstChildEv @ 104 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWNode11NextSiblingEv @ 105 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWNode11PrevSiblingEv @ 106 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWNode4DataEv @ 107 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWNode6ParentEv @ 108 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWNode9LastChildEv @ 109 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree11RemoveNodeLEP9MXCFWNode @ 110 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree14GetChildNodesLEP9MXCFWNodeR13RPointerArrayIS0_E @ 111 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree15GetNodesOfTypeLERK7TDesC16R13RPointerArrayI9MXCFWNodeEPS4_i @ 112 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree4RootEv @ 113 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree5NodesEv @ 114 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree8AddNodeLEP15CGECOObjectBase @ 115 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree8AddNodeLEP15CGECOObjectBaseP9MXCFWNode @ 116 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree8AddNodeLEP15CGECOObjectBaseP9MXCFWNodeS3_ @ 117 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree8IsLockedEv @ 118 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree9MoveNodeLEP9MXCFWNodeS1_S1_ @ 119 NONAME ; #<thunk>#
+	_ZThn4_N9CXCFWTree9SetLockedEi @ 120 NONAME ; #<thunk>#
+	_ZN11CXCFWEngine17AttributeDetailsLEiR7TPtrC16S1_ @ 121 NONAME
+	_ZN18CGECODefaultObject17AttributeDetailsLEiR7TPtrC16S1_ @ 122 NONAME
+	_ZN25CGECODefaultObjectFactory17AttributeDetailsLEiR7TPtrC16S1_ @ 123 NONAME
+	_ZThn28_N11CXCFWEngine17AttributeDetailsLEiR7TPtrC16S1_ @ 124 NONAME ; #<thunk>#
+	_ZThn4_N18CGECODefaultObject17AttributeDetailsLEiR7TPtrC16S1_ @ 125 NONAME ; #<thunk>#
+	_ZThn4_N25CGECODefaultObjectFactory17AttributeDetailsLEiR7TPtrC16S1_ @ 126 NONAME ; #<thunk>#
+

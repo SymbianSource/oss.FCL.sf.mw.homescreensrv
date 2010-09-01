@@ -1,0 +1,7 @@
+EXPORTS
+	?CheckVisibility@CMcsSatHandler@@SAHXZ @ 1 NONAME ; int CMcsSatHandler::CheckVisibility(void)
+	?GetName@CMcsSatHandler@@QAEHAAVTDes16@@@Z @ 2 NONAME ; int CMcsSatHandler::GetName(class TDes16 &)
+	?LoadIconL@CMcsSatHandler@@QAEPAVCAknIcon@@XZ @ 3 NONAME ; class CAknIcon * CMcsSatHandler::LoadIconL(void)
+	?NewL@CMcsSatHandler@@SAPAV1@XZ @ 4 NONAME ; class CMcsSatHandler * CMcsSatHandler::NewL(void)
+	?NewL@CMcsSatNotifier@@SAPAV1@PAVMMcsSATNotifierCallback@@VTUid@@I@Z @ 5 NONAME ; class CMcsSatNotifier * CMcsSatNotifier::NewL(class MMcsSATNotifierCallback *, class TUid, unsigned int)
+

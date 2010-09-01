@@ -1,0 +1,5 @@
+EXPORTS
+	_ZN14CHsCcApiClient4NewLEP17MHsContentControl @ 1 NONAME
+	_ZTI14CHsCcApiClient @ 2 NONAME
+	_ZTV14CHsCcApiClient @ 3 NONAME
+

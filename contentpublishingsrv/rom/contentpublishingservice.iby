@@ -1,0 +1,41 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  IBY file for the content publishing
+*
+*/
+
+
+#ifndef CONTENTPUBLISHINGSERVICE_IBY
+#define CONTENTPUBLISHINGSERVICE_IBY
+
+file=ABI_DIR\BUILD_DIR\cpserver.exe						SHARED_LIB_DIR\cpserver.exe
+file=ABI_DIR\BUILD_DIR\cpstorage.dll					SHARED_LIB_DIR\cpstorage.dll
+file=ABI_DIR\BUILD_DIR\cputils.dll						SHARED_LIB_DIR\cputils.dll
+file=ABI_DIR\BUILD_DIR\contentharvesterclient.dll		SHARED_LIB_DIR\contentharvesterclient.dll
+file=ABI_DIR\BUILD_DIR\contentharvester.exe				SHARED_LIB_DIR\contentharvester.exe
+file=ABI_DIR\BUILD_DIR\pluginvalidator.dll				SHARED_LIB_DIR\pluginvalidator.dll
+
+ECOM_PLUGIN(chswiplugin.dll,chswiplugin.rsc)
+ECOM_PLUGIN(chfactorysettingsplugin.dll,chfactorysettingsplugin.rsc)
+
+#ifdef CONTENT_PUBLISHER_DEBUG
+file=ABI_DIR\BUILD_DIR\cpdebug.dll SHARED_LIB_DIR\cpdebug.dll
+#endif // CONTENT_PUBLISHER_DEBUG
+
+data=\epoc32\data\z\private\20016b7b\backup_registration.xml private\20016b7b\backup_registration.xml
+data=\epoc32\data\z\private\10202be9\20016b7b.txt private\10202be9\20016b7b.txt
+
+#endif // CONTENTPUBLISHING_IBY
+
+//  End of File  

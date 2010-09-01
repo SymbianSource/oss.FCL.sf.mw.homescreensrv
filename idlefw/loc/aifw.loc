@@ -1,0 +1,41 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Localization strings for project IdleFW
+*
+*/
+
+
+// d: It is text of Active Idle 3 application in application shell grid. 
+// d: When user selects that item, then phone goes to idle state 
+// d: or call related state.
+// l: cell_app_pane_t1
+// w:
+// r: 3.2
+//
+#define qtn_apps_idle_grid "Idle"
+
+// d: It is possible that user activates Idle theme which
+// d: contains one or more plug-ins which can not be loaded to framework.
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_idle_theme_error_incompatible "Problems with theme. It may not work correctly."
+
+// d: In case plug-in dies during operation error note is shown.
+// l: popup_note_window
+// w:
+// r: 3.2
+//
+#define qtn_idle_theme_error_notloaded "Error in theme."

@@ -1,0 +1,72 @@
+/*
+* Copyright (c) 2010 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+#include        <platform_paths.hrh>
+#include        <eunitcaps.h>
+
+
+TARGET          UT_idleint.dll
+TARGETTYPE      dll
+UID             0x1000af5a 0x01700000
+VENDORID        VID_DEFAULT
+
+CAPABILITY      EUNIT_CAPS
+MACRO           _AIUIIDLEINT_UNIT_TEST
+
+MW_LAYER_SYSTEMINCLUDE
+APP_LAYER_SYSTEMINCLUDE
+
+USERINCLUDE     ../UT_IdleInt
+USERINCLUDE     ../stubs
+SYSTEMINCLUDE   ../stubs1
+USERINCLUDE     ../../../group
+USERINCLUDE     ../../../inc/common
+USERINCLUDE     ../../../inc/idleint
+USERINCLUDE     ../../../inc/utility
+USERINCLUDE     ../../../inc/framework
+USERINCLUDE     ../../../src/idleint
+
+SOURCEPATH      ../UT_IdleInt
+SOURCE          UT_idleint.cpp
+SOURCE          UT_idleintdllmain.cpp
+SOURCE          testshellforidleint.cpp
+SOURCE          testshellforstate.cpp
+
+SOURCEPATH      ../stubs
+SOURCE          caipspropertyobserver.cpp
+SOURCE          aiutility.cpp
+
+SOURCEPATH      ../../../src/common
+SOURCE          aifwpanic.cpp
+
+SOURCEPATH      ../../../src/idleint
+SOURCE          aiwspluginmanager.cpp
+SOURCE          aiidleappregister.cpp
+
+LIBRARY         eunit.lib
+LIBRARY         eunitutil.lib
+LIBRARY         euser.lib
+LIBRARY         apgrfx.lib 
+LIBRARY         ws32.lib
+LIBRARY         cone.lib
+LIBRARY         eikcore.lib
+LIBRARY         avkon.lib
+LIBRARY         aknnotify.lib
+
+LIBRARY         aiutils.lib
+
+// End of file

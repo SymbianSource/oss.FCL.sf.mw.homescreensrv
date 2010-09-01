@@ -1,0 +1,9 @@
+EXPORTS
+	?GetCount@CPluginValidator@@QAEHXZ @ 1 NONAME ; int CPluginValidator::GetCount(void)
+	?GetImplementation@CPluginValidator@@QAEPAXH@Z @ 2 NONAME ; void * CPluginValidator::GetImplementation(int)
+	?GetImplementation@CPluginValidator@@QAEPAXVTUid@@@Z @ 3 NONAME ; void * CPluginValidator::GetImplementation(class TUid)
+	?NewL@CPluginValidator@@SAPAV1@VTUid@@PAX@Z @ 4 NONAME ; class CPluginValidator * CPluginValidator::NewL(class TUid, void *)
+	?NewLC@CPluginValidator@@SAPAV1@VTUid@@PAX@Z @ 5 NONAME ; class CPluginValidator * CPluginValidator::NewLC(class TUid, void *)
+	?NewL@CHarvesterPluginValidator@@SAPAV1@VTUid@@PAX@Z @ 6 NONAME ; class CHarvesterPluginValidator * CHarvesterPluginValidator::NewL(class TUid, void *)
+	?NewLC@CHarvesterPluginValidator@@SAPAV1@VTUid@@PAX@Z @ 7 NONAME ; class CHarvesterPluginValidator * CHarvesterPluginValidator::NewLC(class TUid, void *)
+

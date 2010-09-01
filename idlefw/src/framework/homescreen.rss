@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource definitions for project homescreen
+*
+*/
+
+
+NAME AIFW
+
+#include    <appinfo.rh>
+#include    <bldvariant.hrh>
+#include    <data_caging_paths_strings.hrh>
+
+#include    <eikcore.rsg>
+#include    <eikon.rh>
+#include    <eikon.rsg>
+#include    <avkon.rsg>
+#include    <avkon.rh>
+
+#include    <aifw.loc>
+
+RESOURCE RSS_SIGNATURE { }
+
+RESOURCE TBUF { buf=""; }
+
+// ---------------------------------------------------------------------------
+// r_homescreen_localisable_app_info
+// It defines localisable app info of Active Idle 3
+// ---------------------------------------------------------------------------
+//
+RESOURCE LOCALISABLE_APP_INFO r_homescreen_localisable_app_info
+    {
+    short_caption = qtn_apps_idle_grid;
+    caption_and_icon = 
+    CAPTION_AND_ICON_INFO
+        {
+        caption = qtn_apps_idle_grid;
+        
+#ifdef __SCALABLE_ICONS
+
+        number_of_icons = 1;
+        icon_file = APP_RESOURCE_DIR"\\homescreen_aif.mif";
+
+#else
+
+        number_of_icons = 1;
+        icon_file = APP_RESOURCE_DIR"\\homescreen_aif.mbm";
+
+#endif // __SCALABLE_ICONS
+        };
+    }

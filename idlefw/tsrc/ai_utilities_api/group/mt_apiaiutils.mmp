@@ -1,0 +1,48 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description: 
+*
+*/
+
+#include        <platform_paths.hrh>
+#include        <eunitcaps.h>
+
+TARGET          mt_apiaiutils.dll
+TARGETTYPE      dll
+UID             0x1000af5a 0x017000F3
+
+CAPABILITY      EUNIT_CAPS
+
+SOURCEPATH              ../src
+SOURCE                  mt_apiaiutilsdllmain.cpp
+SOURCE                  mt_apiaicontentitemarrayiterator.cpp
+SOURCE                  mt_apiaipspropertyobserver.cpp
+SOURCE                  mt_apicontentprioritymap.cpp
+SOURCE                  mt_apiaistrparser.cpp
+SOURCE                  mt_apiaiplugintool.cpp
+SOURCE                  mt_apiaipluginsettings.cpp
+
+USERINCLUDE             ../inc
+
+MW_LAYER_SYSTEMINCLUDE
+
+SYSTEMINCLUDE           ../inc
+SYSTEMINCLUDE           /epoc32/tools
+
+LIBRARY                 euser.lib charconv.lib eunit.lib
+
+// Module under test
+LIBRARY                 aiutils.lib
+
+LIBRARY                 ecom.lib 

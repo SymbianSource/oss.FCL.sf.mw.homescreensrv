@@ -1,0 +1,107 @@
+/*
+* Copyright (c) 2005-2006 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Resource file for ProfilePlugin.
+*
+*/
+
+
+// ========== RESOURCE IDENTIFIER =============================================
+
+NAME    AIPP // 4 letter ID
+
+// ========== INCLUDE FILES ===================================================
+
+
+#include <eikcore.rsg>
+#include <uikon.rh>
+#include <eikon.rh>
+#include <avkon.loc>
+#include <avkon.rh>
+#include <avkon.rsg>
+
+#include <ai3profileplugin.loc>
+
+
+// ========== CONSTANTS =======================================================
+
+// ========== RESOURCE DEFINITIONS ============================================
+
+RESOURCE RSS_SIGNATURE
+    {
+    }
+
+RESOURCE TBUF
+    {
+    buf = "";
+    }
+
+// ----------------------------------------------------------------------------
+//
+// "Activate: %U"
+//
+// ----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_ai_pers_prof_toggle
+    {
+    buf = qtn_ai_pers_prof_toggle;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// "Insert SIM card"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_su_note_insert_sim
+    {
+    buf = qtn_su_note_insert_sim;
+    }
+
+// -----------------------------------------------------------------------------
+//
+// "Are you sure that you want to switch GSM network on?"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE DIALOG r_ai_leave_offline_mode_query
+     {
+     flags = EGeneralQueryFlags;
+     buttons = R_AVKON_SOFTKEYS_YES_NO;
+     items =
+         {
+         DLG_LINE
+             {
+             type = EAknCtQuery;
+             id = EGeneralQuery;
+             control = AVKON_CONFIRMATION_QUERY
+                 {
+                 layout = EConfirmationQueryLayout;
+                 label = qtn_leave_offline_mode_query;
+                 };
+             }
+         };
+     }
+ 
+// -----------------------------------------------------------------------------
+//
+// "Insert SIM card and restart"
+//
+// -----------------------------------------------------------------------------
+//
+RESOURCE TBUF r_su_note_insert_sim_and_restart
+    {
+    buf = qtn_su_note_insert_sim_and_restart;
+    }
+
+// End of File.

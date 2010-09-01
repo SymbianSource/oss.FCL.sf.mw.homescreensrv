@@ -1,0 +1,88 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:    Localization strings for project MCS Plugin
+*
+*/
+
+// d: Text in title pane
+// l: title_pane_t2/opt9
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_title_pers_shortcuts "Shortcuts"
+
+// d: Text of a list item in personalisation view's folder list
+// d: Item opens Shortcuts folder
+// l: list_setting_pane_t1
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_pers_shortcuts "Shortcuts"
+
+// d: Shortcuts Item caption
+// d: Active Idle Shortcut Settings View
+// d: %N order number of the shortcut item
+// l: list_setting_pane_t1
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_myt_linkn "%N. Shortcut item"
+
+// d: Prompt text for change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: heading_pane_t1
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_change_prompt "Change to:"
+
+// d: Application shortcut type choice item in change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: list_set_graphic_pane_t1
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_change_apps "Application"
+
+// d: Bookmark shortcut type choice item in change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: list_set_graphic_pane_t1
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_change_bookmark "Bookmark"
+
+// d: URL shortcut type choice item in change shortcut type query
+// d: Active Idle Shortcut Settings View
+// l: list_set_graphic_pane_t1
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_change_url "Web address"
+
+// d: Text for fixed item information note
+// d: Shown when user tries to change fixed shortcut in settings
+// l: popup_note_window
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_app_note_fixed "Fixed item. Can't be changed"
+
+// d: Text for empty listbox item
+// d: Shown when there are no modifiable shortcuts in settings
+// l: main_list_empty_pane
+// w:
+// r: tb9.2
+//
+#define qtn_ai_mcs_set_all_fixed "(No editable shortcuts available in this Idle theme.)"

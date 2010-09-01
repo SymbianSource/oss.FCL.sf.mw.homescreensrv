@@ -1,0 +1,119 @@
+/*
+* Copyright (c) 2004 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+
+#include <platform_paths.hrh>
+#include <data_caging_paths.hrh>
+#include <eunitcaps.h>
+
+TARGET          UT_DevStaPlg2.dll
+TARGETTYPE      dll
+TARGETPATH      /sys/bin/
+UID             0x1000af5a 0x01700000
+
+CAPABILITY      EUNIT_CAPS
+VENDORID        0x00000000
+
+SOURCEPATH      ../UT_DevStaPlg
+SOURCE          UT_DevStaPlg2DllMain.cpp
+SOURCE          UT_DevStaPlg2.cpp
+
+SOURCEPATH      ../Stub
+SOURCE          profileengine.cpp
+SOURCE          networkhandling.cpp
+SOURCE          aioperatornamepublishercontainer.cpp
+SOURCE          aioperatorlogopublishercontainer.cpp
+SOURCE          aidatepublishercontainer.cpp
+// SOURCE			aiprofilepublishercontainer.cpp
+
+SOURCEPATH      ../MT_DevStaPlg
+SOURCE          contentobserver.cpp
+SOURCE          runtimetest.cpp
+
+SOURCEPATH      ../../../../plugins/devicestatus/src
+SOURCE          aidevicestatusplugin.cpp
+SOURCE          aidevicestatuspluginengine.cpp
+SOURCE          aicontentobserveroptimizer.cpp
+SOURCE          aimulticontentobserver.cpp
+SOURCE          aipublisherfactory.cpp
+SOURCE          ainetworkinfolistener.cpp
+SOURCE          aibtsappublisher.cpp
+SOURCE          aisimregpublisher.cpp
+SOURCE          aimcnpublisher.cpp
+SOURCE          aicugpublisher.cpp
+SOURCE          aivhzpublisher.cpp
+SOURCE          aipublishprioritizer.cpp
+SOURCE          ainwspublisher.cpp
+SOURCE          aicugmcnpublisher.cpp
+
+SOURCEPATH      ../../../../plugins/devicestatus/data
+START RESOURCE  aidevstaplgres.rss
+HEADER
+TARGET          aidevstaplgres.rsc
+TARGETPATH      ../UT_DevStaPlg
+LANGUAGE_IDS
+END
+
+
+USERINCLUDE             ../UT_DevStaPlg
+USERINCLUDE             ../MT_DevStaPlg
+USERINCLUDE             ../Stub
+USERINCLUDE             ../../../../inc/common
+USERINCLUDE             ../../../../inc/framework
+USERINCLUDE             ../../../../group
+USERINCLUDE             ../../../../plugins/devicestatus/inc
+USERINCLUDE             ../../../../plugins/devicestatus/src
+USERINCLUDE             ../../../../plugins/devicestatus/loc
+USERINCLUDE             ../../../../cenrep
+USERINCLUDE             ../../../../../../homescreen/idlehomescreen/nativeuicontroller/inc
+USERINCLUDE             ../../../../../../../app/homescreen/idlehomescreen/nativeuicontroller/inc
+USERINCLUDE             ../../../../../../homescreen/idlehomescreen/inc
+USERINCLUDE             ../../../../../idlefw/plugins/profileplugin/inc
+
+APP_LAYER_SYSTEMINCLUDE
+
+LIBRARY         stub.lib
+LIBRARY         EUnit.lib
+LIBRARY         avkon.lib
+LIBRARY         euser.lib
+LIBRARY         ecom.lib
+LIBRARY         eunitutil.lib
+LIBRARY         efsrv.lib
+LIBRARY         phoneclient.lib
+LIBRARY         fbscli.lib 
+LIBRARY			aifw.lib
+LIBRARY			flogger.lib
+LIBRARY         featmgr.lib
+LIBRARY         cone.lib
+LIBRARY         commonengine.lib
+LIBRARY         centralrepository.lib
+LIBRARY			cenrepnotifhandler.lib
+LIBRARY         egul.lib
+LIBRARY         aknlayout2scalable.lib
+LIBRARY         cdlengine.lib
+LIBRARY         gdi.lib
+LIBRARY         bitgdi.lib
+LIBRARY         aiutils.lib
+LIBRARY         bafl.lib 
+
+
+
+LIBRARY         sssettings.lib
+LIBRARY         profileengine.lib 
+LIBRARY         networkhandling.lib
+
+
+// End of file

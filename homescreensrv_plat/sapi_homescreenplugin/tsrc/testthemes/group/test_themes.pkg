@@ -1,0 +1,138 @@
+;
+; Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+; All rights reserved.
+; This component and the accompanying materials are made available
+; under the terms of "Eclipse Public License v1.0"
+; which accompanies this distribution, and is available
+; at the URL "http://www.eclipse.org/legal/epl-v10.html".
+;
+; Initial Contributors:
+; Nokia Corporation - initial contribution.
+;
+; Contributors:
+;
+; Description: 
+;
+; mt_sapi_homescreenplugin_winscw.pkg
+;
+;Language - standard language definitions
+&EN
+
+; standard SIS file header
+#{"test themes"},(0xEf111203),1,0,0
+
+; Supports Series 60 v5.0
+[0x1028315F], 0, 0, 0, {"Series60ProductID"}
+
+;Localized Vendor Name
+%{"Nokia"}
+
+;Unique Vendor name 
+:"Nokia"
+
+; Test configurations
+
+; MinimalConfiguration - Widget
+"../minimalconf/widget/manifest.dat"-"c:/data/mt_hsps/minimalconf/widget/manifest.dat"
+"../minimalconf/widget/widgetconfiguration.xml"-"c:/data/mt_hsps/minimalconf/widget/widgetconfiguration.xml"
+"../minimalconf/widget/0/locale.dtd"-"c:/data/mt_hsps/minimalconf/widget/0/locale.dtd"
+
+; MinimalConfiguration - View
+"../minimalconf/view/manifest.dat"-"c:/data/mt_hsps/minimalconf/view/manifest.dat"
+"../minimalconf/view/viewconfiguration.xml"-"c:/data/mt_hsps/minimalconf/view/viewconfiguration.xml"
+"../minimalconf/view/main.xml"-"c:/data/mt_hsps/minimalconf/view/main.xml"
+"../minimalconf/view/picture.jpeg"-"c:/data/mt_hsps/minimalconf/view/picture.jpeg"
+"../minimalconf/view/resource.file"-"c:/data/mt_hsps/minimalconf/view/resource.file"
+"../minimalconf/view/viewnavigationrules.xml"-"c:/data/mt_hsps/minimalconf/view/viewnavigationrules.xml"
+"../minimalconf/view/0/locale.dtd"-"c:/data/mt_hsps/minimalconf/view/0/locale.dtd"
+
+; MinimalConfiguration - Root
+"../minimalconf/root/manifest.dat"-"c:/data/mt_hsps/minimalconf/root/manifest.dat"
+"../minimalconf/root/rootconfiguration.xml"-"c:/data/mt_hsps/minimalconf/root/rootconfiguration.xml"
+"../minimalconf/root/0/locale.dtd"-"c:/data/mt_hsps/minimalconf/root/0/locale.dtd"
+
+; TypicalConfiguration - Widget
+"../typicalconf/widget/manifest.dat"-"c:/data/mt_hsps/typicalconf/widget/manifest.dat"
+"../typicalconf/widget/widgetconfiguration.xml"-"c:/data/mt_hsps/typicalconf/widget/widgetconfiguration.xml"
+"../typicalconf/widget/hs_logo.jpg"-"c:/data/mt_hsps/typicalconf/widget/hs_logo.jpg"
+"../typicalconf/widget/widget.bmp"-"c:/data/mt_hsps/typicalconf/widget/widget.bmp"
+"../typicalconf/widget/0/locale.dtd"-"c:/data/mt_hsps/typicalconf/widget/0/locale.dtd"
+"../typicalconf/widget/1/locale.dtd"-"c:/data/mt_hsps/typicalconf/widget/1/locale.dtd"
+"../typicalconf/widget/9/locale.dtd"-"c:/data/mt_hsps/typicalconf/widget/9/locale.dtd"
+
+; TypicalConfiguration - View1
+"../typicalconf/view1/manifest.dat"-"c:/data/mt_hsps/typicalconf/view1/manifest.dat"
+"../typicalconf/view1/viewconfiguration.xml"-"c:/data/mt_hsps/typicalconf/view1/viewconfiguration.xml"
+"../typicalconf/view1/view1.bmp"-"c:/data/mt_hsps/typicalconf/view1/view1.bmp"
+"../typicalconf/view1/0/locale.dtd"-"c:/data/mt_hsps/typicalconf/view1/0/locale.dtd"
+"../typicalconf/view1/1/locale.dtd"-"c:/data/mt_hsps/typicalconf/view1/1/locale.dtd"
+"../typicalconf/view1/9/locale.dtd"-"c:/data/mt_hsps/typicalconf/view1/9/locale.dtd"
+"../typicalconf/view1/0/hs_logoz.jpg"-"c:/data/mt_hsps/typicalconf/view1/0/hs_logoz.jpg"
+"../typicalconf/view1/1/hs_logoz.jpg"-"c:/data/mt_hsps/typicalconf/view1/1/hs_logoz.jpg"
+"../typicalconf/view1/9/hs_logoz.jpg"-"c:/data/mt_hsps/typicalconf/view1/9/hs_logoz.jpg"
+
+; TypicalConfiguration - View2
+"../typicalconf/view2/manifest.dat"-"c:/data/mt_hsps/typicalconf/view2/manifest.dat"
+"../typicalconf/view2/viewconfiguration.xml"-"c:/data/mt_hsps/typicalconf/view2/viewconfiguration.xml"
+"../typicalconf/view2/view2.bmp"-"c:/data/mt_hsps/typicalconf/view2/view2.bmp"
+"../typicalconf/view2/0/locale.dtd"-"c:/data/mt_hsps/typicalconf/view2/0/locale.dtd"
+"../typicalconf/view2/1/locale.dtd"-"c:/data/mt_hsps/typicalconf/view2/1/locale.dtd"
+"../typicalconf/view2/9/locale.dtd"-"c:/data/mt_hsps/typicalconf/view2/9/locale.dtd"
+
+; TypicalConfiguration - Root
+"../typicalconf/root/manifest.dat"-"c:/data/mt_hsps/typicalconf/root/manifest.dat"
+"../typicalconf/root/rootconfiguration.xml"-"c:/data/mt_hsps/typicalconf/root/rootconfiguration.xml"
+"../typicalconf/root/root.bmp"-"c:/data/mt_hsps/typicalconf/root/root.bmp"
+"../typicalconf/root/0/locale.dtd"-"c:/data/mt_hsps/typicalconf/root/0/locale.dtd"
+"../typicalconf/root/1/locale.dtd"-"c:/data/mt_hsps/typicalconf/root/1/locale.dtd"
+"../typicalconf/root/9/locale.dtd"-"c:/data/mt_hsps/typicalconf/root/9/locale.dtd"
+
+; OperatorConfiguration - View
+"../operatorconf/view/manifest.dat"-"c:/data/mt_hsps/operatorconf/view/manifest.dat"
+"../operatorconf/view/configuration.xml"-"c:/data/mt_hsps/operatorconf/view/configuration.xml"
+"../operatorconf/view/dummy.mif"-"c:/data/mt_hsps/operatorconf/view/dummy.mif"
+"../operatorconf/view/0/locale.dtd"-"c:/data/mt_hsps/operatorconf/view/0/locale.dtd"
+
+; OperatorConfiguration - Root
+"../operatorconf/root/manifest.dat"-"c:/data/mt_hsps/operatorconf/root/manifest.dat"
+"../operatorconf/root/configuration.xml"-"c:/data/mt_hsps/operatorconf/root/configuration.xml"
+"../operatorconf/root/0/locale.dtd"-"c:/data/mt_hsps/operatorconf/root/0/locale.dtd"
+
+; FinnishWidget - Widget
+"../finnish_widget/manifest.dat"-"c:/data/mt_hsps/finnish_widget/manifest.dat"
+"../finnish_widget/widgetconfiguration.xml"-"c:/data/mt_hsps/finnish_widget/widgetconfiguration.xml"
+"../finnish_widget/common.jpg"-"c:/data/mt_hsps/finnish_widget/common.jpg"
+"../finnish_widget/dummy.mif"-"c:/data/mt_hsps/finnish_widget/dummy.mif"
+"../finnish_widget/0/locale.dtd"-"c:/data/mt_hsps/finnish_widget/0/locale.dtd"
+"../finnish_widget/9/locale.dtd"-"c:/data/mt_hsps/finnish_widget/9/locale.dtd"
+"../finnish_widget/0/localizedbg.jpg"-"c:/data/mt_hsps/finnish_widget/0/localizedbg.jpg"
+"../finnish_widget/9/localizedbg.jpg"-"c:/data/mt_hsps/finnish_widget/9/localizedbg.jpg"
+
+; InstalledWidget
+"../installed_widget/manifest.dat"-"c:/data/mt_hsps/installed_widget/manifest.dat"
+"../installed_widget/plugin_0998_101FB657_2000B133_1.0.dat"-"c:/data/mt_hsps/installed_widget/plugin_0998_101FB657_2000B133_1.0.dat"
+"../installed_widget/widgetconfiguration.xml"-"c:/data/mt_hsps/installed_widget/widgetconfiguration.xml"
+"../installed_widget/widgetconfiguration_customized.xml"-"c:/data/mt_hsps/installed_widget/widgetconfiguration_customized.xml"
+"../installed_widget/0/locale.dtd"-"c:/data/mt_hsps/installed_widget/0/locale.dtd"
+"../installed_widget/0/hs_logo.jpg"-"c:/data/mt_hsps/installed_widget/0/hs_logo.jpg"
+"../installed_widget/0/widget.bmp"-"c:/data/mt_hsps/installed_widget/0/widget.bmp"
+"../installed_widget/1/locale.dtd"-"c:/data/mt_hsps/installed_widget/1/locale.dtd"
+"../installed_widget/1/hs_logo.jpg"-"c:/data/mt_hsps/installed_widget/1/hs_logo.jpg"
+"../installed_widget/1/widget.bmp"-"c:/data/mt_hsps/installed_widget/1/widget.bmp"
+"../installed_widget/9/locale.dtd"-"c:/data/mt_hsps/installed_widget/9/locale.dtd"
+"../installed_widget/9/hs_logo.jpg"-"c:/data/mt_hsps/installed_widget/9/hs_logo.jpg"
+"../installed_widget/9/widget.bmp"-"c:/data/mt_hsps/installed_widget/9/widget.bmp"
+
+; InstalledWidget_v2
+"../installed_widget_v2/manifest.dat"-"c:/data/mt_hsps/installed_widget_v2/manifest.dat"
+"../installed_widget_v2/plugin_0998_101FB657_2000B133_2.0.dat"-"c:/data/mt_hsps/installed_widget_v2/plugin_0998_101FB657_2000B133_2.0.dat"
+"../installed_widget_v2/widgetconfiguration.xml"-"c:/data/mt_hsps/installed_widget_v2/widgetconfiguration.xml"
+"../installed_widget_v2/0/locale.dtd"-"c:/data/mt_hsps/installed_widget_v2/0/locale.dtd"
+"../installed_widget_v2/0/hs_logo.jpg"-"c:/data/mt_hsps/installed_widget_v2/0/hs_logo.jpg"
+"../installed_widget_v2/0/widget.bmp"-"c:/data/mt_hsps/installed_widget_v2/0/widget.bmp"
+"../installed_widget_v2/1/locale.dtd"-"c:/data/mt_hsps/installed_widget_v2/1/locale.dtd"
+"../installed_widget_v2/1/hs_logo.jpg"-"c:/data/mt_hsps/installed_widget_v2/1/hs_logo.jpg"
+"../installed_widget_v2/1/widget.bmp"-"c:/data/mt_hsps/installed_widget_v2/1/widget.bmp"
+"../installed_widget_v2/9/locale.dtd"-"c:/data/mt_hsps/installed_widget_v2/9/locale.dtd"
+"../installed_widget_v2/9/hs_logo.jpg"-"c:/data/mt_hsps/installed_widget_v2/9/hs_logo.jpg"
+"../installed_widget_v2/9/widget.bmp"-"c:/data/mt_hsps/installed_widget_v2/9/widget.bmp"

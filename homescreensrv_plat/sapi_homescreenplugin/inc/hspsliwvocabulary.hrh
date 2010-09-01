@@ -1,0 +1,148 @@
+/*
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  SAPI vocabulary
+*
+*/
+
+
+#ifndef HSPSLIWVOCABULARY_HRH
+#define HSPSLIWVOCABULARY_HRH
+/*
+*  @ingroup homescreenpluginservice_sapi
+*  HSPS liw based vocabulary
+*/
+//General words
+_LIT8( KHspsLiwEmptyValue, "" );
+
+// Configuration types
+_LIT8( KHspsLiwApplicationConf, "application" );
+_LIT8( KHspsLiwViewConf, "view" );
+_LIT8( KHspsLiwWidgetConf, "widget" );
+_LIT8( KHspsLiwTemplateConf, "template" );
+
+// Configuration states
+_LIT8( KHspsLiwConfNotConfirmed, "NotConfirmed" );
+_LIT8( KHspsLiwConfWaitForConfirmation, "WaitForConfirmation" );
+_LIT8( KHspsLiwConfConfirmed, "Confirmed" );
+_LIT8( KHspsLiwConfError, "Error" );
+
+// Configuration filters
+_LIT8( KHspsLiwConfFilterPlugins, "Plugins" );
+
+// SAPI methods
+_LIT8( KGetActiveAppConf, "GetActiveAppConf" );
+_LIT8( KGetPluginConf, "GetPluginConf" );
+_LIT8( KGetPlugins, "GetPlugins" );
+_LIT8( KGetPluginList, "GetPluginList" );
+_LIT8( KAddPlugin, "AddPlugin" );
+_LIT8( KRemovePlugin, "RemovePlugin" );
+_LIT8( KReplacePlugin, "ReplacePlugin" );
+_LIT8( KSetPluginSettings, "SetPluginSettings" );
+_LIT8( KGetPluginSettings, "GetPluginSettings" );
+_LIT8( KMovePlugins, "MovePlugins" );
+_LIT8( KGetAppConfs, "GetAppConfs" );
+_LIT8( KSetActiveAppConf, "SetActiveAppConf" );
+_LIT8( KRequestNotification, "RequestNotification" );
+_LIT8( KSetConfState, "SetConfState" );
+_LIT8( KSetActivePlugin, "SetActivePlugin" );
+_LIT8( KRestoreConfigurations, "RestoreConfigurations" );
+
+//Input words.
+_LIT8( KPluginId, "pluginId" );
+_LIT8( KHspsLiwAppUid, "appUid" );
+_LIT8( KHspsLiwConfId, "confId" );
+_LIT8( KHspsLiwConfUid, "confUid" );
+_LIT8( KHspsLiwConfState, "state" );
+_LIT8( KHspsLiwPluginUid, "pluginUid" );
+_LIT8( KHspsLiwAppConfUid, "appConfUid" );
+_LIT8( KHspsLiwPosition, "position" );
+_LIT8( KHspsLiwFilter, "filter" );
+_LIT8( KHspsLiwStoringParams, "storingParams" ); //optional
+_LIT8( KHspsLiwStorePluginRefence, "storePluginConf" );
+_LIT8( KHspsLiwStoreAppConf, "storeAppConf" ); 
+_LIT8( KHspsLiwRestore, "restore" );
+_LIT8( KHspsLiwRestoreDefault, "default");
+_LIT8( KHspsLiwRestoreAll, "all");
+_LIT8( KHspsLiwRestoreRom, "rom");
+_LIT8( KHspsLiwRestoreViews, "views");
+
+//Output words.
+_LIT8( KHspsLiwPluginId, "pluginId" );
+_LIT8( KHspsLiwPluginIds, "pluginIds" );
+
+_LIT8( KHspsLiwStatus, "status" );
+
+_LIT8( KHspsLiwAppConf, "appConf" );
+_LIT8( KHspsLiwPluginConf, "pluginConf" );
+_LIT8( KHspsLiwReturnValue, "ReturnValue" );
+_LIT8( KHspsLiwNotification, "notification" );
+_LIT8( KHspsLiwId, "id" );
+_LIT8( KHspsLiwType, "type" );
+_LIT8( KHspsLiwCopyLogos, "copylogos" );
+_LIT8( KHspsLiwInterface, "interface" );
+_LIT8( KHspsLiwUid, "uid" );
+_LIT8( KHspsLiwName, "name" );
+_LIT8( KHspsLiwState, "state" );
+_LIT8( KHspsLiwMaxChild, "max_child" );
+_LIT8( KHspsLiwPlugins, "plugins" );
+_LIT8( KHspsLiwAppConfs, "appConfs" );
+_LIT8( KHspsLiwActivationState, "activationstate" );
+_LIT8( KHspsLiwMultiInstance, "multiinstance" );
+_LIT8( KHspsLiwDescription, "desc" );
+_LIT8( KHspsLiwLogo, "logo" );
+_LIT8( KHspsLiwPreview, "preview" );
+_LIT8( KHspsLiwOrigUid, "origUid" );
+_LIT8( KHspsLiwLockingStatus, "locking_status" );
+_LIT8( KHspsLiwLockingNone, "none" );
+
+_LIT8( KHspsLiwSettings, "settings" );
+_LIT8( KHspsLiwSettingsId, "settingsId" );
+
+_LIT8( KHspsLiwItems, "items" );
+_LIT8( KHspsLiwItemId, "itemId" );
+_LIT8( KHspsLiwItemName, "name" );
+
+_LIT8( KHspsLiwAttributes, "attributes" );
+_LIT8( KHspsLiwAttrKey, "key" );
+_LIT8( KHspsLiwAttrName, "name" );
+
+_LIT8( KHspsLiwProperties, "properties" );
+_LIT8( KHspsLiwPropertyName, "name" );
+_LIT8( KHspsLiwPropertyValue, "value" );
+
+_LIT8( KHspsLiwResources, "resources" );
+_LIT8( KHspsLiwObjectName, "name" );
+_LIT8( KHspsLiwObjectPath, "path" );
+_LIT8( KHspsLiwObjectMediatype, "mediatype" );
+_LIT8( KHspsLiwObjectType, "type" );
+_LIT8( KHspsLiwObjectTag, "tag" );
+
+_LIT8(KErrorCode,           "ErrorCode");
+_LIT8(KErrorMessage,        "ErrorMessage");
+_LIT8(KReturnValue,         "ReturnValue");
+_LIT8(KTransactionID,       "TransactionID");
+
+_LIT8(KReqNotifEvent,                  "event");
+
+_LIT8(KReqNotifPluginInstalledEvent,    "PluginInstalled");
+_LIT8(KReqNotifPluginUpdatedEvent,      "PluginUpdated");
+_LIT8(KReqNotifPluginUnInstalledEvent,  "PluginUninstalled");
+_LIT8(KReqNotifRemovePluginEvent,       "PluginRemoved");
+_LIT8(KReqNotifAddPluginEvent,          "PluginAdded");
+_LIT8(KReqNotifSettingsChangedEvent,    "PluginSettingsChanged");
+_LIT8(KReqNotifAppConfActivetedEvent,   "AppConfActivated");
+_LIT8(KReqNotifPluginActivatedEvent,    "PluginActivated");
+_LIT8(KReqNotifPluginReplacedEvent,    "PluginReplaced");
+
+#endif //HSPSLIWVOCABULARY_HRH

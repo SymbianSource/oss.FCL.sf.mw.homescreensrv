@@ -1,0 +1,3 @@
+EXPORTS
+	?NewDatabaseL@StorageFactory@@SAPAVCCpStorage@@AAVTLiwVariant@@@Z @ 1 NONAME ; class CCpStorage * StorageFactory::NewDatabaseL(class TLiwVariant &)
+

@@ -1,0 +1,46 @@
+/*
+* Copyright (c) 2007 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Build information file for project MenuContentService
+*  Version     : %version: sa1spcx1#22 % << Don't touch! Updated by Synergy at check-out.
+*
+*/
+
+
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+ARMV5 WINSCW
+#include "../menusatinterface/group/bld.inf"
+
+PRJ_MMPFILES
+mcssathandler.mmp
+mcsmenuutils.mmp
+mcsmenueng.mmp
+mcsmenu.mmp
+mcsmenusrv.mmp
+mcsmenuhandler.mmp
+mcsextendedmenu.mmp
+
+PRJ_EXPORTS
+../rom/mcs.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(mcs.iby)
+../data/backup_registration.xml z:/private/200113dd/backup_registration.xml
+
+// Generic configuration interface for component cenrep settings  
+../conf/s60mcs.confml                  MW_LAYER_CONFML(s60mcs.confml)
+../conf/s60mcs_101F8847.crml           MW_LAYER_CRML(s60mcs_101F8847.crml)
+
+// export header needed for mcssapi client
+../extinc/mcssathandler.h         		|../../inc/mcssathandler.h
+
+../inc/mcsmenusapi.h 					MW_LAYER_PLATFORM_EXPORT_PATH(mcsmenusapi.h)

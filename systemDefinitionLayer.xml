@@ -1,0 +1,7 @@
+<layer name="homescreensrv">
+  <module name="group_homescreensrv">
+    <component name="group_homescreensrv">
+      <unit unitID="homescreensrv" mrp="" bldFile="&layer_real_source_path;\group" name="homescreensrv" />
+    </component>
+  </module>
+</layer>

@@ -1,0 +1,20 @@
+<configuration>
+
+	<control>
+
+		<!-- List of plug-ins -->
+		<plugins>
+	    <plugin uid="0x2000B120"/>		    		    
+	    <plugin uid="0x2000B120"/>		    		    
+	    <plugin uid="0x2000B120"/>		    		    
+		</plugins>
+
+    <settings>
+		  <item id="bgcolor" name="" _name="&amp;qtn_2000B111_bgcolor;">
+		    <property name="value" value="200,100,0"/>
+		  </item>
+		</settings>
+
+	</control>
+
+</configuration>

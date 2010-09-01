@@ -1,0 +1,5 @@
+EXPORTS
+	_ZN18CAiWsPluginManager4NewLER7CCoeEnv @ 1 NONAME
+	_ZN18CAiIdleAppRegister5NewLCEv @ 2 NONAME
+	_ZN20CAiUiIdleIntegration4NewLER9CEikonEnvRK21TAiIdleKeySoundConfigP17MAiFwEventHandler @ 3 NONAME
+

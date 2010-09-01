@@ -1,0 +1,40 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:
+*
+*/
+#include <platform_paths.hrh>
+
+TARGET          menusatinterfacetest.dll
+TARGETTYPE      dll
+UID             0x1000008D 0x02FE5167
+
+CAPABILITY	ALL -TCB
+
+SOURCEPATH      ../src
+SOURCE			menusatinterfacetest.cpp
+SOURCE			menusatinterfacetestblocks.cpp menusatinterfacetestutils.cpp waitactive.cpp
+
+USERINCLUDE     ../inc 
+USERINCLUDE     ../../inc 
+
+MW_LAYER_SYSTEMINCLUDE
+
+LIBRARY         euser.lib
+LIBRARY         stiftestinterface.lib
+LIBRARY 		MenuInterface.lib
+
+LANG			SC
+
+// End of File

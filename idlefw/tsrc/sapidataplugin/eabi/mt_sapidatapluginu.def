@@ -1,0 +1,5 @@
+EXPORTS
+	_Z16CreateTestSuiteLv @ 1 NONAME
+	_ZTI8Observer @ 2 NONAME
+	_ZTV8Observer @ 3 NONAME
+

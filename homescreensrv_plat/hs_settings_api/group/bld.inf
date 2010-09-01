@@ -1,0 +1,29 @@
+/*
+* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* All rights reserved.
+* This component and the accompanying materials are made available
+* under the terms of "Eclipse Public License v1.0"
+* which accompanies this distribution, and is available
+* at the URL "http://www.eclipse.org/legal/epl-v10.html".
+*
+* Initial Contributors:
+* Nokia Corporation - initial contribution.
+*
+* Contributors:
+*
+* Description:  Item id, name and properties
+*
+*/
+#include <platform_paths.hrh>
+
+PRJ_PLATFORMS
+DEFAULT
+
+PRJ_EXPORTS
+../inc/hspluginsettings.h     MW_LAYER_PLATFORM_EXPORT_PATH(hspluginsettings.h)
+../inc/mhomescreensettingsif.h MW_LAYER_PLATFORM_EXPORT_PATH(mhomescreensettingsif.h)
+../inc/mhomescreensettingsobserver.h     MW_LAYER_PLATFORM_EXPORT_PATH(mhomescreensettingsobserver.h)
+../inc/itemmap.h     MW_LAYER_PLATFORM_EXPORT_PATH(itemmap.h)
+../inc/propertymap.h     MW_LAYER_PLATFORM_EXPORT_PATH(propertymap.h)
+
+PRJ_MMPFILES

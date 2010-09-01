@@ -1,0 +1,5 @@
+EXPORTS
+	_ZN19CHsCcProviderClient4NewLER20MHsContentController @ 1 NONAME
+	_ZTI19CHsCcProviderClient @ 2 NONAME
+	_ZTV19CHsCcProviderClient @ 3 NONAME
+

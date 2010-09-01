@@ -1,0 +1,13 @@
+<?xml version="1.0" ?>
+<api id="2a99eec72bdd6c098a4384ee1ebf3ba2" dataversion="2.0">
+<name>sapi_menucontent</name>
+<description>Menu Content Service Service API</description>
+<type>c++</type>
+<collection>menucontentsrv</collection>
+<libs></libs>
+<release category="platform" sinceversion="0"/>
+<attributes>
+<htmldocprovided>no</htmldocprovided>
+<adaptation>no</adaptation>
+</attributes>
+</api>

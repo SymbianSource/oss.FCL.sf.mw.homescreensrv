@@ -1,0 +1,11 @@
+EXPORTS
+	_Z16CreateTestSuiteLv @ 1 NONAME
+	_ZN18CAiIdleAppRegister5NewLCEv @ 2 NONAME
+	_ZN18CAiWsPluginManager4NewLER7CCoeEnv @ 3 NONAME
+	_ZN20CAiUiIdleIntegration4NewLER9CEikonEnvRK21TAiIdleKeySoundConfigP17MAiFwEventHandler @ 4 NONAME
+	_ZN9AiUtility16CreateStrParserLEv @ 5 NONAME
+	_ZN9AiUtility17CreatePluginToolLEv @ 6 NONAME
+	_ZN9AiUtility21CreatePluginSettingsLEv @ 7 NONAME
+	_ZN9AiUtility25CreatePSPropertyObserverLE9TCallBack4TUidi @ 8 NONAME
+	_ZN9AiUtility31CreateContentItemArrayIteratorLEPK14TAiContentItemi @ 9 NONAME
+
