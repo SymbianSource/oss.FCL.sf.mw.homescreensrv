@@ -29,7 +29,9 @@ class CaHandler
 public:
     virtual ~CaHandler() {}
     virtual int execute(const CaEntry &entry,
-                        const QString &commandName) = 0;
+                        const QString &commandName,
+                        QObject* receiver = NULL,
+                        const char* member = NULL) = 0;
 };
 
 Q_DECLARE_INTERFACE(CaHandler, "com.nokia.homescreen.ICommandHandler")

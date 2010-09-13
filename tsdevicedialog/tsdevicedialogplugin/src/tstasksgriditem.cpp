@@ -31,20 +31,20 @@
     \brief Item that should be presented in grid.
 */
 
-TsTasksGridItem::TsTasksGridItem() 
-: 
-HbAbstractViewItem(), 
-mScreenshotLabel(0), 
-mApplicationNameLabel(0), 
-mDeleteButton(0), 
-mActiveLabelFrame(0), 
-mActiveLabel(0)
+TsTasksGridItem::TsTasksGridItem()
+    :
+    HbAbstractViewItem(),
+    mScreenshotLabel(0),
+    mApplicationNameLabel(0),
+    mDeleteButton(0),
+    mActiveLabelFrame(0),
+    mActiveLabel(0)
 {
     // Register the custom docml and css to provide our own style to the list items
-    bool widgetmlLoaded = 
+    bool widgetmlLoaded =
         HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.widgetml");
     Q_ASSERT(widgetmlLoaded);
-    bool cssLoaded = 
+    bool cssLoaded =
         HbStyleLoader::registerFilePath(":/resource/tstasksgriditem.css");
     Q_ASSERT(cssLoaded);
 }
@@ -54,7 +54,7 @@ TsTasksGridItem::TsTasksGridItem(const TsTasksGridItem &item) : HbAbstractViewIt
     mScreenshotLabel = new HbIconItem(this);
     mApplicationNameLabel = new HbTextItem(this);
     mDeleteButton = new HbPushButton(this);
-    HbFrameItem *screenshotFrame = new HbFrameItem(this);    
+    HbFrameItem *screenshotFrame = new HbFrameItem(this);
     screenshotFrame->frameDrawer().setFrameType(HbFrameDrawer::NinePieces);
     screenshotFrame->frameDrawer().setFrameGraphicsName("qtg_fr_multimedia_trans");
 
@@ -96,7 +96,7 @@ void TsTasksGridItem::updateChildItems()
 {
     mScreenshotLabel->setIcon(modelIndex().data(Qt::DecorationRole).value<HbIcon>());
     mApplicationNameLabel->setText(modelIndex().data(Qt::DisplayRole).toString());
-    
+
     QVariant closableData(modelIndex().data(TsDataRoles::Closable));
     const bool isClosable(closableData.isValid() && closableData.toBool());
     if (isClosable) {
@@ -104,7 +104,7 @@ void TsTasksGridItem::updateChildItems()
     } else {
         mDeleteButton->hide();
     }
-    
+
     QVariant activeData(modelIndex().data(TsDataRoles::Active));
     const bool isActive(activeData.isValid() && activeData.toBool());
     if (isActive) {

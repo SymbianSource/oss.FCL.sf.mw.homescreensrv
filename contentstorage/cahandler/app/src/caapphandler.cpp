@@ -28,6 +28,7 @@
 
 #include <usif/usifcommon.h>
 #include <usif/scr/scr.h>
+#include <usif/usiferror.h>
 
 #include <cadefs.h>
 #include <caentry.h>
@@ -78,10 +79,17 @@ CaAppHandler::~CaAppHandler()
  * Execute a given command.
  * \param entry a reference to a CaEntry instance.
  * \param command a given command.
+ * \param receiver a QObject class with slot to invoke.
+ * \param member a slot to invoke.
  * \retval an error code.
  */
-int CaAppHandler::execute(const CaEntry &entry, const QString &command)
+int CaAppHandler::execute(const CaEntry &entry, const QString &command,
+        QObject* receiver, const char* member)
 {
+    if ( receiver && member ) {
+        connect( this, SIGNAL(uninstallFailed(int)), receiver, member, Qt::UniqueConnection );
+    }
+    
     int result(KErrGeneral);
     if (command == caCmdOpen && entry.entryTypeName() == caTypeApp) {
         QString viewIdValue = entry.attribute(caAttrView);
@@ -179,7 +187,7 @@ void CaAppHandler::launchApplicationL(const TUid uid, TInt viewId)
 int CaAppHandler::closeApplication(const EntryFlags &flags, int windowGroupId)
 {
     int result(KErrNone);
-    if (flags.testFlag(RunningEntryFlag) && windowGroupId > 0) {
+    if (windowGroupId > 0) {
         RWsSession wsSession;
         result = wsSession.Connect();
         if (result==KErrNone) {
@@ -237,10 +245,29 @@ int CaAppHandler::handleRemove(const EntryFlags &flags,
 void CaAppHandler::startUsifUninstallL(TInt componentId)
 {
     if (iUsifUninstallOperation && iUsifUninstallOperation->IsActive()) {
-        User::Leave( KErrInUse );
+        uninstallError(Usif::EInstallerBusy);
+    } else {
+        delete iUsifUninstallOperation;
+        iUsifUninstallOperation = NULL;
+        iUsifUninstallOperation = CCaUsifUninstallOperation::NewL(componentId);
+        iUsifUninstallOperation->AddObserver(this);
     }
-    delete iUsifUninstallOperation;
-    iUsifUninstallOperation = NULL;
-    iUsifUninstallOperation = CCaUsifUninstallOperation::NewL(componentId);
 }
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT 
+/*!
+ * Show information message about unninstall error.
+ * \param error uninstall error.
+ * \retval void.
+ */
+void CaAppHandler::uninstallError(int error)
+{
+   	emit uninstallFailed(error);
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
 

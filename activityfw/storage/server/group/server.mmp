@@ -51,7 +51,7 @@ LIBRARY        fbscli.lib
 LIBRARY        hash.lib 
 LIBRARY        bitmaptransforms.lib
 LIBRARY        imageconversion.lib
-LIBRARY        tsutils.lib
+STATICLIBRARY        tsimageutils.lib
 STATICLIBRARY        afstoragecommon.lib
 
 CAPABILITY     ALL -TCB

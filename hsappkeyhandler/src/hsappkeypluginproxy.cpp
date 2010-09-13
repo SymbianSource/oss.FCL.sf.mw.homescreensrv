@@ -24,16 +24,16 @@
 
 const TImplementationProxy AppkeyPluginImplementationTable[] =
     {
-	IMPLEMENTATION_PROXY_ENTRY(KUIDAPPKEYPLUGINIMPL1, CHsAppKeyPlugin::NewL)
+    IMPLEMENTATION_PROXY_ENTRY( KUIDAPPKEYPLUGINIMPL1, CHsAppKeyPlugin::NewL )
     };
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
-EXPORT_C const TImplementationProxy* ImplementationGroupProxy(TInt& aTableCount)
+EXPORT_C const TImplementationProxy* ImplementationGroupProxy( TInt& aTableCount )
     {
-    aTableCount = sizeof(AppkeyPluginImplementationTable) / sizeof(TImplementationProxy);
+    aTableCount = sizeof( AppkeyPluginImplementationTable ) / sizeof( TImplementationProxy );
 
     return AppkeyPluginImplementationTable;
     }

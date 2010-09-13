@@ -33,15 +33,19 @@
 
 AfStorageProxyPrivate::AfStorageProxyPrivate(AfStorageProxy *q) : mClient(0), q_ptr(q)
 {    
-    QT_TRAP_THROWING(mClient = CAfStorageClient::NewL(*this));
+    QT_TRAP_THROWING(
+        mClient = CAfStorageClient::NewL(*this);
+        User::LeaveIfError(mAppArcSession.Connect());
+    );
 }
 
 AfStorageProxyPrivate::~AfStorageProxyPrivate()
 {
     delete mClient;
+    mAppArcSession.Close();
 }
 
-bool AfStorageProxyPrivate::addActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
+bool AfStorageProxyPrivate::addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {    
     int screenshotHandle(-1);
     CFbsBitmap* bitmap(screenshot.toSymbianCFbsBitmap());
@@ -49,7 +53,7 @@ bool AfStorageProxyPrivate::addActivity(int applicationId, const QString &activi
         screenshotHandle = bitmap->Handle();
     }
     
-    CAfEntry *entry = createSaveEntry(applicationId, activityId, activityData, metadata);
+    CAfEntry *entry = createSaveEntry(applicationId, activityId, customActivityName, activityData, metadata);
     int result = mClient->addActivity(*entry, screenshotHandle);    
     delete entry;
     delete bitmap;
@@ -57,7 +61,7 @@ bool AfStorageProxyPrivate::addActivity(int applicationId, const QString &activi
     return KErrNone == result;
 }
 
-bool AfStorageProxyPrivate::updateActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
+bool AfStorageProxyPrivate::updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {
     int screenshotHandle(-1);
     CFbsBitmap* bitmap(screenshot.toSymbianCFbsBitmap());
@@ -65,7 +69,7 @@ bool AfStorageProxyPrivate::updateActivity(int applicationId, const QString &act
         screenshotHandle = bitmap->Handle();
     }
     
-    CAfEntry *entry = createSaveEntry(applicationId, activityId, activityData, metadata);
+    CAfEntry *entry = createSaveEntry(applicationId, activityId, customActivityName, activityData, metadata);
     int result = mClient->updateActivity(*entry, screenshotHandle);    
     delete entry;
     delete bitmap;
@@ -73,7 +77,7 @@ bool AfStorageProxyPrivate::updateActivity(int applicationId, const QString &act
     return KErrNone == result;
 }
 
-bool AfStorageProxyPrivate::saveActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
+bool AfStorageProxyPrivate::saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {
     int screenshotHandle(-1);
     CFbsBitmap* bitmap(screenshot.toSymbianCFbsBitmap());
@@ -81,7 +85,7 @@ bool AfStorageProxyPrivate::saveActivity(int applicationId, const QString &activ
         screenshotHandle = bitmap->Handle();
     }
     
-    CAfEntry *entry = createSaveEntry(applicationId, activityId, activityData, metadata);
+    CAfEntry *entry = createSaveEntry(applicationId, activityId, customActivityName, activityData, metadata);
     int result = mClient->saveActivity(*entry, screenshotHandle);    
     delete entry;
     delete bitmap;
@@ -105,14 +109,14 @@ bool AfStorageProxyPrivate::removeApplicationActivities(int applicationId)
     return KErrNone == result;
 }
 
-bool AfStorageProxyPrivate::activities(QList<QVariantHash> &list)
+bool AfStorageProxyPrivate::activities(QList<QVariantHash> &list, int limit)
 {
     RPointerArray<CAfEntry> results;
     
-    int result = mClient->activities(results);
+    int result = mClient->activities(results, limit);
     list.clear();
     for (int i=0; i < results.Count(); ++i) {
-        list.append(extractMetadata(results[i]));
+        list.append(extractMetadata(results[i], false));
     }
    
     results.ResetAndDestroy();
@@ -156,7 +160,7 @@ bool AfStorageProxyPrivate::activityMetaData(QVariantHash &metadata, int applica
     CAfEntry *entry = getEntry(applicationId, activityId);
     
     if (entry) {
-        metadata = extractMetadata(entry);
+        metadata = extractMetadata(entry, true);
         delete entry;
         return true;
     }    
@@ -225,11 +229,11 @@ void AfStorageProxyPrivate::dataChangeNotificationCompleted(int result)
 CAfEntry *AfStorageProxyPrivate::createFilterEntry(int applicationId, const QString &activityId)
 {   
     CAfEntry *entry(0); 
-    QT_TRAP_THROWING(entry = CAfEntry::NewL(0, applicationId, TPtrC(static_cast<const TUint16*>(activityId.utf16())), KNullDesC(), KNullDesC8(), KNullDesC8()));
+    QT_TRAP_THROWING(entry = CAfEntry::NewL(0, applicationId, TPtrC(static_cast<const TUint16*>(activityId.utf16())), KNullDesC(), KNullDesC(), KNullDesC8(), KNullDesC8()));
     return entry;
 }
 
-CAfEntry *AfStorageProxyPrivate::createSaveEntry(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata)
+CAfEntry *AfStorageProxyPrivate::createSaveEntry(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata)
 {   
     CAfEntry *entry(0); 
     
@@ -254,12 +258,18 @@ CAfEntry *AfStorageProxyPrivate::createSaveEntry(int applicationId, const QStrin
         
         HBufC *actBuff = XQConversions::qStringToS60Desc(activityId);
         CleanupStack::PushL(actBuff);
+        
+        HBufC *customNameBuff = XQConversions::qStringToS60Desc(customActivityName);
+        CleanupStack::PushL(customNameBuff);
+        
         entry = CAfEntry::NewL(flags, 
                                applicationId, 
                                *actBuff, 
+                               *customNameBuff,
                                KNullDesC, 
                                privateBuff, 
                                publicBuff);
+        CleanupStack::PopAndDestroy(customNameBuff);
         CleanupStack::PopAndDestroy(actBuff);
         CleanupStack::PopAndDestroy(&publicBuff);
         CleanupStack::PopAndDestroy(&privateBuff);
@@ -282,15 +292,28 @@ CAfEntry *AfStorageProxyPrivate::getEntry(int applicationId, const QString &acti
     return resultEntry;
 }
 
-QVariantHash AfStorageProxyPrivate::extractMetadata(CAfEntry *entry)
+QVariantHash AfStorageProxyPrivate::extractMetadata(CAfEntry *entry, bool includePublicData)
 {
     QVariantHash metadata;
-    metadata << entry->Data(CAfEntry::Public);
+    if (includePublicData) {
+        metadata << entry->Data(CAfEntry::Public);
+    }
     metadata.insert(ActivityApplicationKeyword, entry->ApplicationId());
     metadata.insert(ActivityActivityKeyword, XQConversions::s60DescToQString(entry->ActivityId()));
+    metadata.insert(ActivityApplicationName, activityDisplayText(entry));
     metadata.insert(ActivityScreenshotKeyword, XQConversions::s60DescToQString(entry->ImageSrc()));
     metadata.insert(ActivityPersistence, (entry->Flags() & CAfEntry::Persistent) ? true : false);
     metadata.insert(ActivityVisibility, (entry->Flags() & CAfEntry::Invisible) ? false : true); 
     return metadata;
 }
 
+QString AfStorageProxyPrivate::activityDisplayText(CAfEntry *entry)
+{
+    if (entry->CustomActivityName().Compare(KNullDesC()) == 0) {
+        TApaAppInfo info;
+        mAppArcSession.GetAppInfo(info, TUid::Uid(entry->ApplicationId()));
+        return QString::fromUtf16(info.iShortCaption.Ptr(), info.iShortCaption.Length());        
+    } else {
+        return XQConversions::s60DescToQString(entry->CustomActivityName());
+    }
+}

@@ -43,10 +43,16 @@ CaUrlHandler::~CaUrlHandler()
  * Execute a given command.
  * \param entry a reference to CaEntry instance.
  * \param command a given command.
+ * \param receiver a QObject class with slot to invoke.
+ * \param member a slot to invoke.
  * \retval an error code.
  */
-int CaUrlHandler::execute(const CaEntry &entry, const QString &command)
+int CaUrlHandler::execute(const CaEntry &entry, const QString &command,
+        QObject* receiver, const char* member)
 {
+	Q_UNUSED(receiver);
+	Q_UNUSED(member);
+	
     int err(KErrGeneral);
     if (command == caCmdOpen) {
         QString attribute = entry.attribute(caAttrUrl);

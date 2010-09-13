@@ -53,9 +53,9 @@ void CAfApplicationsStorage::deleteActivityL(TUid appId)
                                     static_cast<TInt>(appId.iUid),
                                     KNullDesC,
                                     KNullDesC,
+                                    KNullDesC,
                                     KNullDesC8,
                                     KNullDesC8));
     mStorage.DeleteActivitiesL(*entry);
     CleanupStack::PopAndDestroy(entry);
 }
-

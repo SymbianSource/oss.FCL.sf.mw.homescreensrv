@@ -88,9 +88,6 @@ private:
     /**
      * USIF notifier
      * Own.
-     *
-     * Commented out since USIF notifications do not
-     * work on MCL wk20
      */
     CSifOperationsNotifier* iNotifier;
 

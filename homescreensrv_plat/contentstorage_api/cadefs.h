@@ -52,7 +52,7 @@ enum EntryFlag
     UninstallEntryFlag = 2,
     RemovableEntryFlag = 4,
     VisibleEntryFlag = 8,
-    RunningEntryFlag = 16,
+    ReservedEntryFlag = 16, //flag is unused, stays for compatibility
     NativeEntryFlag = 32,
     MissingEntryFlag = 64
 };

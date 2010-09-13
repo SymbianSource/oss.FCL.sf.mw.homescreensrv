@@ -33,12 +33,12 @@ public:
     virtual ~AfStorageProxy();
 
 public:    
-    bool addActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
-    bool updateActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
-    bool saveActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
+    bool addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
+    bool updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
+    bool saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
     bool removeActivity(int applicationId, const QString &activityId);   
     bool removeApplicationActivities(int applicationId);
-    bool activities(QList<QVariantHash> &list);
+    bool activities(QList<QVariantHash> &list, int limit = 0);
     bool applicationActivities(QStringList &list, int applicationId);
     bool activityData(QVariant &data, int applicationId, const QString &activityId);
     bool activityMetaData(QVariantHash &metadata, int applicationId, const QString &activityId);

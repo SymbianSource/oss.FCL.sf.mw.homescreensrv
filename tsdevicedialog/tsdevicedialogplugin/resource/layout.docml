@@ -35,6 +35,7 @@
         </widget>            
         <bool name="backgroundFaded" value="TRUE"/>
         <string name="dismissPolicy" value="TapOutside"/>
+        <string name="frameType" value="Weak"/>        
         <integer name="timeout" value="0"/>
         <sizepolicy horizontalPolicy="Preferred" horizontalStretch="0" verticalPolicy="Preferred" verticalStretch="0"/>
     </widget>

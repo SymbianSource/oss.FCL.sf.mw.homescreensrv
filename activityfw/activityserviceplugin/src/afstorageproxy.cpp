@@ -27,19 +27,19 @@ AfStorageProxy::~AfStorageProxy()
     delete d_ptr;
 }
 
-bool AfStorageProxy::addActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
+bool AfStorageProxy::addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {
-    return d_ptr->addActivity(applicationId, activityId, activityData, metadata, screenshot);
+    return d_ptr->addActivity(applicationId, activityId, customActivityName, activityData, metadata, screenshot);
 }
 
-bool AfStorageProxy::updateActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
+bool AfStorageProxy::updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {
-    return d_ptr->updateActivity(applicationId, activityId, activityData, metadata, screenshot);
+    return d_ptr->updateActivity(applicationId, activityId, customActivityName, activityData, metadata, screenshot);
 }
 
-bool AfStorageProxy::saveActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
+bool AfStorageProxy::saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {
-    return d_ptr->saveActivity(applicationId, activityId, activityData, metadata, screenshot);
+    return d_ptr->saveActivity(applicationId, activityId, customActivityName, activityData, metadata, screenshot);
 }
 
 bool AfStorageProxy::removeActivity(int applicationId, const QString &activityId)
@@ -52,9 +52,9 @@ bool AfStorageProxy::removeApplicationActivities(int applicationId)
     return d_ptr->removeApplicationActivities(applicationId);
 }
 
-bool AfStorageProxy::activities(QList<QVariantHash> &list)
+bool AfStorageProxy::activities(QList<QVariantHash> &list, int limit)
 {
-    return d_ptr->activities(list);
+    return d_ptr->activities(list, limit);
 }
 
 bool AfStorageProxy::applicationActivities(QStringList &list, int applicationId)

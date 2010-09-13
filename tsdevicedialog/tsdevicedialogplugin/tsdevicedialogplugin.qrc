@@ -3,5 +3,6 @@
         <file>resource/layout.docml</file>
         <file>resource/tstasksgriditem.widgetml</file>
         <file>resource/tstasksgriditem.css</file>        
+        <file>resource/hbdialog.css</file>        
     </qresource>
 </RCC>

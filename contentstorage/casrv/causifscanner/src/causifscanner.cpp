@@ -156,6 +156,10 @@ void CCaUsifScanner::CreateCaEntryFromEntryL(
         {
         aCaEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueJava );
         }
+    else if( !aEntry->SoftwareType().Compare( KSoftwareTypeWidget ) )
+        {
+        aCaEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueCWRT );
+        } 
     if( aEntry->Name().Compare( KNullDesC ) )
         {
         aCaEntry->SetTextL( aEntry->Name() );

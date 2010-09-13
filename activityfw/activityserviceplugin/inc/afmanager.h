@@ -35,7 +35,7 @@ public:
     ~AfManager();
 
 public slots:
-    QList<QVariantHash> activitiesList();
+    QList<QVariantHash> activitiesList(int limit = 0);
     void launchActivity(const QString &uri);
     void launchActivity(const QUrl &uri);
     void launchActivity(int applicationId, const QString &activityId, const QVariantHash& parameters = QVariantHash());

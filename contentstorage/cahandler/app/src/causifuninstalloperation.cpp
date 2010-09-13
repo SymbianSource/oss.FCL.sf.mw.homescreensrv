@@ -20,6 +20,7 @@
 #include "cadef.h"
 #include "cainnerentry.h"
 #include "causifuninstalloperation.h"
+#include "cauninstallerobserver.h"
 
 // ================= MEMBER FUNCTIONS =======================
 
@@ -55,7 +56,7 @@ CCaUsifUninstallOperation *CCaUsifUninstallOperation::NewL(
 // ---------------------------------------------------------------------------
 //
 CCaUsifUninstallOperation::CCaUsifUninstallOperation( TInt aPriority ) :
-    CActive(aPriority), iUninstaller()
+    CActive(aPriority), iUninstaller(), iCaUninstallerObserver(NULL)
     {
     CActiveScheduler::Add(this);
     }
@@ -81,6 +82,15 @@ void CCaUsifUninstallOperation::ConstructL(TComponentId aComponentId)
 //
 void CCaUsifUninstallOperation::RunL()
     {
+    if( iStatus != KErrNone )
+        {
+        int error = iStatus.Int();
+        // notify about error
+        if( iCaUninstallerObserver )
+            {
+            iCaUninstallerObserver->uninstallError( error );
+            }
+        }
     iUninstaller.Close();
     }
 
@@ -107,4 +117,13 @@ TInt CCaUsifUninstallOperation::RunError(TInt /* aError */)
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC ENDSKIP
 #endif //COVERAGE_MEASUREMENT
+
+// ---------------------------------------------------------------------------
+// CCaUsifUninstallOperation::AddObserver
+// ---------------------------------------------------------------------------
+//
+void CCaUsifUninstallOperation::AddObserver(CaUninstallerObserver* aCaUninstallerObserver)
+    {
+    iCaUninstallerObserver = aCaUninstallerObserver;
+    }
 

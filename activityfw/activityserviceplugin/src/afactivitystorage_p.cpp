@@ -35,7 +35,7 @@ bool AfActivityStoragePrivate::saveActivity(const QString &activityId, const QVa
     publicData.insert(ActivityApplicationKeyword, applicationId());
     publicData.insert(ActivityActivityKeyword, activityId);
 
-    return mConnection->saveActivity(applicationId(), activityId, activityData, publicData, screenshot);
+    return mConnection->saveActivity(applicationId(), activityId, publicData[ActivityApplicationName].toString(), activityData, publicData, screenshot);
 }
 
 bool AfActivityStoragePrivate::removeActivity(const QString &activityId)

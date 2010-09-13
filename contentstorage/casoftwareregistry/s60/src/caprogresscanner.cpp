@@ -76,7 +76,8 @@ void CCaProgresScanner::StartOperationHandler( TUint aKey,
     {
     //TODO: temporary solution. Some error in scr was found
     if( aStartData.OperationPhase() == EUninstalling 
-            || aStartData.OperationPhase() == EInstalling )
+            || aStartData.OperationPhase() == EInstalling 
+            || aStartData.OperationPhase() == 0)
         {
         TRAP_IGNORE(
                 iComponentId = iSoftwareRegistry.GetComponentIdL(
@@ -135,7 +136,7 @@ void CCaProgresScanner::EndOperationL( TInt aError )
     {
     if( aError == KErrNone )
         {
-        iObserver->progressChange( iComponentId, 100 );
+        iObserver->progressChange( iComponentId, 101 );
         }
     else
         {

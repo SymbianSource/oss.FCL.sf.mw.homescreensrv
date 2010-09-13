@@ -25,10 +25,6 @@
 
 #include <tstaskmonitor.h>
 
-#ifdef Q_OS_SYMBIAN
-#include <apgcli.h>
-#endif
-
 class CaNotifier;
 class TsModelItem;
 
@@ -43,19 +39,19 @@ public:
     ~TsModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, 
+    QVariant data(const QModelIndex &index,
                   int role = Qt::DisplayRole) const;
     int maxRowCount()const;
     // from QAbstractModel
-    virtual bool insertRows(int row, int count, TsModelItem* item,
-                            const QModelIndex & parent = QModelIndex());
+    virtual bool insertRows(int row, int count, TsModelItem *item,
+                            const QModelIndex &parent = QModelIndex());
     virtual bool removeRows(int row, int count,
-                            const QModelIndex & parent = QModelIndex());
+                            const QModelIndex &parent = QModelIndex());
 
-    
+
     bool moveRows(int oldPosition, int newPosition,
-                  const QModelIndex & parent = QModelIndex());
-    bool updateRows(int row, TsModelItem* item);
+                  const QModelIndex &parent = QModelIndex());
+    bool updateRows(int row, TsModelItem *item);
     void fullUpdate();
 
 public slots:
@@ -67,9 +63,7 @@ public slots:
 private:
     TsModelItem *entry(const QModelIndex &index) const;
     void getApplications();
-    void getActivities();
-    void prepareActivityEntry(QVariantHash &activity);
-    QString getApplicationName(int id);
+    void getActivities(bool fullUpdate = true);
 
 private:
     /*
@@ -83,16 +77,13 @@ private:
      * Activity Service
      */
     QObject &mActivityService;
-    
-#ifdef Q_OS_SYMBIAN
-    RApaLsSession iAppArcSession;
-#endif
 
     /*
      * Maximum number of items (only for running apps + activities)
-     */ 
+     */
     int mMaxItems;
-    
+    int mActivitiesCount;
+
     Q_DISABLE_COPY(TsModel)
 };
 

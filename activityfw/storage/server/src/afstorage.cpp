@@ -39,21 +39,21 @@ _LIT(KExtFormat, ".mbm");
  */
 CAfStorage::CAfStorage(RFs& session)
 :
-mFsSession(session)
-{
+iFsSession(session)
+    {
     // No implementation required
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
  * Destructor.
  */
 CAfStorage::~CAfStorage()
-{
-    delete mDatabaseCleaner;
-    mActDb.Close();
-    delete mFileStore;
-}
+    {
+    delete iDatabaseCleaner;
+    iActDb.Close();
+    delete iFileStore;
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -61,35 +61,35 @@ CAfStorage::~CAfStorage()
  * @param session - initialized session to file system
  */
 CAfStorage* CAfStorage::NewL(RFs& session)
-{
+    {
     CAfStorage* self = new (ELeave) CAfStorage(session);
     CleanupStack::PushL(self);
     self->ConstructL();
     CleanupStack::Pop(); // self;
     return self;
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
  * EPOC default constructor for performing 2nd stage construction
  */
 void CAfStorage::ConstructL()
-{
+    {
     RBuf path;
     CleanupClosePushL( path );
     path.CreateL(KMaxPathLength);
-    User::LeaveIfError(mFsSession.PrivatePath(path ));
+    User::LeaveIfError(iFsSession.PrivatePath(path ));
     path.Append(KDbName);
     path.Insert(0, KDbDrive);
-    BaflUtils::EnsurePathExistsL(mFsSession, path);
-    BaflUtils::FileExists(mFsSession, path) ? OpenDbL(path) : CreateDbL(path);
+    BaflUtils::EnsurePathExistsL(iFsSession, path);
+    BaflUtils::FileExists(iFsSession, path) ? OpenDbL(path) : CreateDbL(path);
     CleanupStack::PopAndDestroy(&path);
-
-    mDatabaseCleaner = new (ELeave) CAfDatabaseCleaner(mActDb);
-
+    
+    iDatabaseCleaner = new (ELeave) CAfDatabaseCleaner(iActDb);
+    
     DeleteNonPersistentActivitiesL();
     RequestCleanup();
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -97,16 +97,16 @@ void CAfStorage::ConstructL()
  * @param databaseFile - database file path
  */
 void CAfStorage::CreateDbL(const TDesC& databaseFile)
-{
-    mFileStore = CPermanentFileStore::ReplaceL(mFsSession,
+    {
+    iFileStore = CPermanentFileStore::ReplaceL(iFsSession,
                                                databaseFile,
                                                EFileRead|EFileWrite);
-    mFileStore->SetTypeL(mFileStore->Layout());// Set file store type
-    TStreamId id = mActDb.CreateL(mFileStore);// Create stream object
-    mFileStore->SetRootL(id);// Keep database id as root of store
-    mFileStore->CommitL();// Complete creation by commiting
+    iFileStore->SetTypeL(iFileStore->Layout());// Set file store type
+    TStreamId id = iActDb.CreateL(iFileStore);// Create stream object
+    iFileStore->SetRootL(id);// Keep database id as root of store
+    iFileStore->CommitL();// Complete creation by commiting
     CreateTableL();
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -114,52 +114,121 @@ void CAfStorage::CreateDbL(const TDesC& databaseFile)
  * @param databaseFile - database file path
  */
 void CAfStorage::OpenDbL(const TDesC& databaseFile)
+    {
+    TRAPD( errNo,
+           iFileStore = CPermanentFileStore::OpenL( iFsSession,
+                                                    databaseFile,
+                                                    EFileRead|EFileWrite );
+           iFileStore->SetTypeL( iFileStore->Layout() ); /* Set file store type*/
+           iActDb.OpenL( iFileStore, iFileStore->Root() );
+           VerifyTableL(); )
+    if( KErrNone != errNo )
+        {
+        //database is corrupted. recreate
+        iActDb.Close();
+        delete iFileStore;
+        iFileStore = 0;
+        CreateDbL( databaseFile );
+        }
+    }
+
+// -----------------------------------------------------------------------------
+/**
+ * Verify database structure
+ */
+void CAfStorage::VerifyDbL()
 {
-    mFileStore = CPermanentFileStore::OpenL(mFsSession,
-                                            databaseFile,
-                                            EFileRead|EFileWrite);
-    mFileStore->SetTypeL(mFileStore->Layout()); /* Set file store type*/
-    mActDb.OpenL(mFileStore,mFileStore->Root());
+    TInt errNo(KErrCorrupt);
+    CDbTableNames* tables = iActDb.TableNamesL();
+    CleanupStack::PushL( tables );
+    for( TInt iter(0); iter < tables->Count() && KErrNone != errNo; ++iter )
+        {
+        if( 0 == (*tables)[iter].Compare( KActivityTableName() ) )
+            {
+            VerifyTableL();
+            errNo = KErrNone;
+            }
+        }
+    CleanupStack::PopAndDestroy( tables );
+    User::LeaveIfError( errNo );
 }
+
+// -----------------------------------------------------------------------------
+CDbColSet* CAfStorage::ExpectedTableLC()
+    {
+    CDbColSet* actColSet = CDbColSet::NewLC();
+    
+    TDbCol appName(KApplicationColumnName, EDbColInt64);
+    appName.iAttributes = TDbCol::ENotNull;
+    actColSet->AddL( appName );
+    
+    TDbCol actName( KActivityColumnName, EDbColText16 );// Using default length
+    actName.iAttributes = TDbCol::ENotNull;
+    actColSet->AddL( actName );
+    
+    // custom name
+    actColSet->AddL( TDbCol( KCustomNameColumnName, EDbColText16 ) );
+    
+    TDbCol actFlags( KFlagsColumnName, EDbColInt32 );
+    actFlags.iAttributes = TDbCol::ENotNull;
+    actColSet->AddL(actFlags);
+    
+    TDbCol actTimestamp( KTimestampColumnName, EDbColDateTime );
+    actTimestamp.iAttributes = TDbCol::ENotNull;
+    actColSet->AddL(actTimestamp);
+    
+    actColSet->AddL( TDbCol( KDataColumnName, EDbColLongBinary ) );// Stream Data
+    
+    return actColSet;
+    }
 
 // -----------------------------------------------------------------------------
 /**
  * Create database structure
  */
 void CAfStorage::CreateTableL()
-{
-    // Add the columns to column set
-    CDbColSet* actColSet = CDbColSet::NewLC();
-
-    TDbCol appName(KApplicationColumnName, EDbColInt64);
-    appName.iAttributes = TDbCol::ENotNull;
-    actColSet->AddL(appName);
-
-    TDbCol actName(KActivityColumnName, EDbColText16);// Using default length
-    actName.iAttributes = TDbCol::ENotNull;
-    actColSet->AddL(actName);
-
-    TDbCol actFlags(KFlagsColumnName, EDbColInt32);
-    actFlags.iAttributes = TDbCol::ENotNull;
-    actColSet->AddL(actFlags);
-
-    actColSet->AddL(TDbCol(KDataColumnName, EDbColLongBinary));// Stream Data
-
+    {
+    CDbColSet* actColSet(ExpectedTableLC());
     // Create the table
-    User::LeaveIfError(mActDb.CreateTable(KActivityTableName,
+    User::LeaveIfError(iActDb.CreateTable(KActivityTableName,
                                          *actColSet));
-
     CleanupStack::PopAndDestroy(actColSet);
-}
+    }
 
+// -----------------------------------------------------------------------------
+/**
+ * Verify table structure
+ */
+void CAfStorage::VerifyTableL()
+    {
+    CDbColSet *currentTable(iActDb.ColSetL(KActivityTableName));
+    CleanupStack::PushL(currentTable);
+    CDbColSet *expectedTable(ExpectedTableLC());
+    for( TInt iter(1); iter <= expectedTable->Count(); ++iter )
+        {
+        const TDbCol& expectedColumn((*expectedTable)[iter]);
+        const TDbCol* currentColumn(currentTable->Col(expectedColumn.iName));
+        if( 0 == currentColumn ||
+            expectedColumn.iAttributes != currentColumn->iAttributes || 
+            expectedColumn.iMaxLength != currentColumn->iMaxLength || 
+            expectedColumn.iType != currentColumn->iType )
+            {
+            User::Leave(KErrCorrupt);
+            }
+        }
+    CleanupStack::PopAndDestroy( expectedTable );
+    CleanupStack::PopAndDestroy( currentTable );
+    }
 // -----------------------------------------------------------------------------
 /**
  * Delete non-persistent activities
  */
 void CAfStorage::DeleteNonPersistentActivitiesL()
-{
-    HBufC *query(BuildQueryLC(KDeleteNonPersistentActivities(), CAfEntry::Persistent, KNullDesC));
-    User::LeaveIfError(mActDb.Execute(*query));
+    {
+    HBufC *query(BuildQueryLC(KDeleteNonPersistentActivities(), 
+                              CAfEntry::Persistent, 
+                              KNullDesC));
+    User::LeaveIfError(iActDb.Execute(*query));
     RBuf privatePath;
     CleanupClosePushL(privatePath);
     privatePath.CreateL(KMaxPathLength);
@@ -169,7 +238,7 @@ void CAfStorage::DeleteNonPersistentActivitiesL()
     delete fileMan;
     CleanupStack::PopAndDestroy(&privatePath);
     CleanupStack::PopAndDestroy(query);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -182,38 +251,46 @@ void CAfStorage::DeleteNonPersistentActivitiesL()
  * @param publicData - activity public data
  */
 void CAfStorage::AddActivityL(CAfEntry& entry)
-{
+    {
     //verify if row already exists
     TInt errNo(KErrNone);
     RDbView view;
     CleanupClosePushL(view);
     TRAP( errNo, GetActivityForUpdateL(view, entry.ApplicationId(), entry.ActivityId()));
-    if (KErrNone == errNo) {
+    if( KErrNone == errNo ) 
+        {
         User::Leave(KErrAlreadyExists);
-    }
+        }
     CleanupStack::PopAndDestroy(&view);
 
     //write table
     RDbTable table;
     CleanupClosePushL(table);
-    User::LeaveIfError(table.Open(mActDb, KActivityTableName, table.EUpdatable));
+    User::LeaveIfError(table.Open(iActDb, KActivityTableName, table.EUpdatable));
     CDbColSet *row = table.ColSetL();
     CleanupStack::PushL(row);
-
+    
+    TTime time;
+    time.UniversalTime();
+    
     table.InsertL();
     TRAP(errNo,
     table.SetColL(row->ColNo(KApplicationColumnName), TInt64(entry.ApplicationId()));
     table.SetColL(row->ColNo(KActivityColumnName), entry.ActivityId());
+    table.SetColL(row->ColNo(KCustomNameColumnName), entry.CustomActivityName());    
     table.SetColL(row->ColNo(KFlagsColumnName), entry.Flags());
-    ExternalizeDataL(table, entry, row->ColNo(KDataColumnName));
+    table.SetColL(row->ColNo(KTimestampColumnName), time.DateTime());
+    ExternalizeDataL(table, entry, row->ColNo(KDataColumnName) );
+    
     table.PutL();)
-    if (KErrNone != errNo) {
+    if( KErrNone != errNo )
+        {
         table.Cancel();
         User::Leave(errNo);
-    }
+        }
     CleanupStack::PopAndDestroy(row);
     CleanupStack::PopAndDestroy(&table);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -221,7 +298,9 @@ void CAfStorage::AddActivityL(CAfEntry& entry)
  * @param entry - activity data
  */
 void CAfStorage::UpdateActivityL(CAfEntry& entry)
-{
+    {
+    TTime time;
+    time.UniversalTime();
     RDbView view;
     CleanupClosePushL(view);
     GetActivityForUpdateL(view, entry.ApplicationId(), entry.ActivityId());
@@ -231,17 +310,20 @@ void CAfStorage::UpdateActivityL(CAfEntry& entry)
     CleanupStack::PushL(colSet);
 
     view.SetColL(colSet->ColNo(KFlagsColumnName), entry.Flags());
+    view.SetColL(colSet->ColNo(KTimestampColumnName), time.DateTime());
+    view.SetColL(colSet->ColNo(KCustomNameColumnName), entry.CustomActivityName());    
     ExternalizeDataL(view, entry, colSet->ColNo(KDataColumnName));
 
     view.PutL();
     CleanupStack::PopAndDestroy(colSet);)
 
-    if (KErrNone != errNo) {
+    if(KErrNone != errNo)
+        {
         view.Cancel();
         User::Leave(errNo);
-    }
+        }
     CleanupStack::PopAndDestroy(&view);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -250,13 +332,16 @@ void CAfStorage::UpdateActivityL(CAfEntry& entry)
  */
 void CAfStorage::SaveActivityL(CAfEntry &entry)
 {
+    TTime time;
+    time.UniversalTime();
     // @todo check if this can be tidied up
     //verify if row already exists
     TInt errNo(KErrNone);
     RDbView view;
     CleanupClosePushL(view);
     TRAP(errNo, GetActivityForUpdateL(view, entry.ApplicationId(), entry.ActivityId()));
-    if (KErrNone == errNo) {
+    if( KErrNone == errNo )
+        {
         // update
         view.UpdateL();
         TRAPD(errNo,
@@ -264,22 +349,27 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
         CleanupStack::PushL(colSet);
 
         view.SetColL(colSet->ColNo(KFlagsColumnName), entry.Flags());
+        view.SetColL(colSet->ColNo(KTimestampColumnName), time.DateTime());
+        view.SetColL(colSet->ColNo(KCustomNameColumnName), entry.CustomActivityName());
         ExternalizeDataL(view, entry, colSet->ColNo(KDataColumnName));
 
         view.PutL();
         CleanupStack::PopAndDestroy(colSet);)
 
-        if (KErrNone != errNo) {
+        if (KErrNone != errNo) 
+            {
             view.Cancel();
             User::Leave(errNo);
+            }
         }
-    } else {
+    else
+        {
         // insert
 
         //write table
         RDbTable table;
         CleanupClosePushL(table);
-        User::LeaveIfError(table.Open(mActDb, KActivityTableName, table.EUpdatable));
+        User::LeaveIfError(table.Open(iActDb, KActivityTableName, table.EUpdatable));
         CDbColSet *row = table.ColSetL();
         CleanupStack::PushL(row);
 
@@ -287,7 +377,9 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
         TRAP(errNo,
         table.SetColL(row->ColNo(KApplicationColumnName), TInt64(entry.ApplicationId()));
         table.SetColL(row->ColNo(KActivityColumnName), entry.ActivityId());
+        table.SetColL(row->ColNo(KCustomNameColumnName), entry.CustomActivityName());
         table.SetColL(row->ColNo(KFlagsColumnName), entry.Flags());
+        table.SetColL(row->ColNo(KTimestampColumnName), time.DateTime());
         ExternalizeDataL(table, entry, row->ColNo(KDataColumnName));
         table.PutL();)
         if (KErrNone != errNo) {
@@ -297,7 +389,6 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
         CleanupStack::PopAndDestroy(row);
         CleanupStack::PopAndDestroy(&table);
     }
-            
     CleanupStack::PopAndDestroy(&view);
 }
 
@@ -308,20 +399,18 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
  * @param actId - activity id
  */
 void CAfStorage::DeleteActivityL(CAfEntry& entry)
-{
+    {
     HBufC *query(DeleteRowLC(entry.ApplicationId(), entry.ActivityId()));
-    User::LeaveIfError(mActDb.Execute(*query));
+    User::LeaveIfError(iActDb.Execute(*query));
     CleanupStack::PopAndDestroy(query);
-}
+    }
 
 // -----------------------------------------------------------------------------
 //
-// -----------------------------------------------------------------------------
-//
 void CAfStorage::DeleteActivitiesL(CAfEntry& entry)
-{
+    {
     HBufC *query(DeleteRowsLC(entry.ApplicationId()));
-    User::LeaveIfError(mActDb.Execute(*query));
+    User::LeaveIfError(iActDb.Execute(*query));
     RBuf privatePath;
     CleanupClosePushL(privatePath);
     privatePath.CreateL(KMaxPathLength);
@@ -337,16 +426,16 @@ void CAfStorage::DeleteActivitiesL(CAfEntry& entry)
     CleanupStack::PopAndDestroy(fileMan);
     CleanupStack::PopAndDestroy(&privatePath);
     CleanupStack::PopAndDestroy(query);
-}
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
-void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst)
-{
-    ActivitiesL(dst, KSelectRows(), CAfEntry::Public);
-}
+void CAfStorage::AllActivitiesL(RPointerArray<CAfEntry>& dst, TInt aLimit)
+    {
+    ActivitiesL(dst, KSelectRows(), CAfEntry::Public, aLimit);
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -355,11 +444,11 @@ void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst)
  * @param appId - application id
  */
 void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst,TInt appId)
-{
+    {
     HBufC *query(SelectRowsLC(appId));
     ActivitiesL(dst, *query, CAfEntry::Private);
     CleanupStack::PopAndDestroy(query);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -368,14 +457,15 @@ void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst,TInt appId)
  * @param src - condition pattern
  */
 void CAfStorage::ActivityL(RPointerArray<CAfEntry> &dst, CAfEntry& src)
-{
+    {
     HBufC *query = SelectRowLC(src.ApplicationId(), src.ActivityId());
-    ActivitiesL(dst, *query, CAfEntry::Private, 1);
-    if (0 >= dst.Count()) {
+    ActivitiesL(dst, *query, CAfEntry::Private, 1, ETrue);
+    if( 0 >= dst.Count() )
+        {
         User::Leave(KErrNotFound);
-    }
+        }
     CleanupStack::PopAndDestroy(query);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -383,9 +473,9 @@ void CAfStorage::ActivityL(RPointerArray<CAfEntry> &dst, CAfEntry& src)
  * @return file system session
  */
 RFs& CAfStorage::Fs()
-{
-    return mFsSession;
-}
+    {
+    return iFsSession;
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -395,9 +485,9 @@ RFs& CAfStorage::Fs()
  * @return formated sql query
  */
 HBufC* CAfStorage::SelectRowLC(TInt appId, const TDesC& actId) const
-{
+    {
     return BuildQueryLC(KSelectRow(),appId, actId);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -406,9 +496,9 @@ HBufC* CAfStorage::SelectRowLC(TInt appId, const TDesC& actId) const
  * @return formated sql query
  */
 HBufC* CAfStorage::SelectRowsLC(TInt appId) const
-{
+    {
     return BuildQueryLC(KSelectAppRows(), appId, KNullDesC);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -418,9 +508,9 @@ HBufC* CAfStorage::SelectRowsLC(TInt appId) const
  * @return formated sql query
  */
 HBufC* CAfStorage::DeleteRowLC(TInt appId, const TDesC& actId) const
-{
+    {
     return BuildQueryLC(KDeleteRow(),appId, actId);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -429,9 +519,9 @@ HBufC* CAfStorage::DeleteRowLC(TInt appId, const TDesC& actId) const
  * @return formated sql query
  */
 HBufC* CAfStorage::DeleteRowsLC(TInt appId) const
-{
+    {
     return BuildQueryLC(KDeleteRows(),appId, KNullDesC);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -444,7 +534,7 @@ HBufC* CAfStorage::DeleteRowsLC(TInt appId) const
 HBufC* CAfStorage::BuildQueryLC(const TDesC& format,
                                       TInt appId,
                                       const TDesC& actId) const
-{
+    {
     TBuf<16> appName;
     appName.AppendNum(appId);
     RBuf actName;
@@ -458,7 +548,7 @@ HBufC* CAfStorage::BuildQueryLC(const TDesC& format,
     CleanupStack::PopAndDestroy(&actName);
     CleanupStack::PushL(query);
     return query;
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -466,15 +556,15 @@ HBufC* CAfStorage::BuildQueryLC(const TDesC& format,
  * @param dst - destination result buffer
  * @param query - sql activity query
  */
-void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst, const TDesC& query, CAfEntry::AccessRights rights, TInt limit)
-{
+void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst, const TDesC& query, CAfEntry::AccessRights rights, TInt limit, TBool deserializeAllData)
+    {
     RDbView view;// Create a view on the database
     CleanupClosePushL(view);
-    User::LeaveIfError(view.Prepare(mActDb, TDbQuery(query), view.EReadOnly));
+    User::LeaveIfError(view.Prepare(iActDb, TDbQuery(query), view.EReadOnly));
     User::LeaveIfError(view.EvaluateAll());
-    ActivitiesL(dst, view, rights, limit);
+    ActivitiesL(dst, view, rights, limit, deserializeAllData);
     CleanupStack::PopAndDestroy(&view);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -483,48 +573,69 @@ void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst, const TDesC& query, C
  * @param query - view
  * @param rights - acess rights
  */
-void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst, RDbView& src, CAfEntry::AccessRights rights, TInt limit)
-{
+void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst, 
+                             RDbView& src, 
+                             CAfEntry::AccessRights rights, 
+                             TInt limit,
+                             TBool deserializeAllData)
+    {
     CDbColSet* row = src.ColSetL();
     CleanupStack::PushL(row);
 
     const TInt flagsOffset(row->ColNo(KFlagsColumnName)),
                applicationOffset(row->ColNo(KApplicationColumnName)),
                activityOffset(row->ColNo(KActivityColumnName)),
+               customNameOffset(row->ColNo(KCustomNameColumnName)),
                dataOffset(row->ColNo(KDataColumnName));
 
     RBuf activityName;
     CleanupClosePushL(activityName);
 
-    for (src.FirstL(); src.AtRow(); src.NextL()) {
-        if(0 < limit && dst.Count() >= limit) {
+    RBuf customName;
+    CleanupClosePushL(customName);
+    
+    
+    for (src.FirstL(); src.AtRow(); src.NextL()) 
+        {
+        if ( 0 < limit && dst.Count() >= limit )
+            {
             break;
-        }
+            }
         src.GetL();
         ReadDataL(activityName, src, activityOffset);
+        ReadDataL(customName, src, customNameOffset);
 
         CAfEntry *entry = CAfEntry::NewLC(src.ColInt32(flagsOffset),
                                           src.ColInt64(applicationOffset),
                                           activityName,
+                                          customName,
                                           KNullDesC,
                                           KNullDesC8,
                                           KNullDesC8);
-        if (CAfEntry::Public == rights && (entry->Flags() & CAfEntry::Invisible)) {
+        if( CAfEntry::Public == rights && 
+            (entry->Flags() & CAfEntry::Invisible) )
+            {
             CleanupStack::PopAndDestroy(entry);
             continue;
-        }
+            }
         InternalizeDataL(*entry, src, dataOffset);
         
-        if (CAfEntry::Public == rights || 0 >= limit) {
+        if (!deserializeAllData) {
+            entry->SetDataL(KNullDesC8(), CAfEntry::Public);
             entry->SetDataL(KNullDesC8(), CAfEntry::Private);
+        } else {
+            if (CAfEntry::Public == rights) {
+                entry->SetDataL(KNullDesC8(), CAfEntry::Private);
+            }
         }
+
         dst.AppendL(entry);
         CleanupStack::Pop(entry);
-    }
-
+        }
+    CleanupStack::PopAndDestroy(&customName);
     CleanupStack::PopAndDestroy(&activityName);
     CleanupStack::PopAndDestroy(row);
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -534,46 +645,47 @@ void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst, RDbView& src, CAfEntr
  * @param actId - activity id
  */
 void CAfStorage::GetActivityForUpdateL(RDbView& view, TInt appId, const TDesC& actId)
-{
+    {
     HBufC* query(SelectRowLC(appId, actId));
-    User::LeaveIfError(view.Prepare(mActDb, TDbQuery(*query), view.EUpdatable));
+    User::LeaveIfError(view.Prepare(iActDb, TDbQuery(*query), view.EUpdatable));
     CleanupStack::PopAndDestroy(query);
     User::LeaveIfError(view.EvaluateAll());
-    if (!view.FirstL()) {
+    if( !view.FirstL() )
+        {
         User::Leave(KErrNotFound);
-    }
+        }
 }
 
 // -----------------------------------------------------------------------------
 void CAfStorage::ReadDataL(RBuf& dst, RDbRowSet& src, TInt offset) const
-{
+    {
     const TInt length(src.ColLength(offset));
     CAfEntry::ReallocL(dst, length);
     RDbColReadStream srcStream;
     srcStream.OpenLC(src,offset);
     srcStream.ReadL(dst, src.ColLength(offset));
     CleanupStack::PopAndDestroy(&srcStream);
-}
+    }
 
 // -----------------------------------------------------------------------------
 void CAfStorage::ExternalizeDataL(RDbRowSet& dst,const CAfEntry &src, TInt offset) const
-{
+    {
     RDbColWriteStream dbStream;
     CleanupClosePushL(dbStream);
     dbStream.OpenL(dst, offset);
     src.ExternalizeDataOnlyL(dbStream);
     CleanupStack::PopAndDestroy(&dbStream);
-}
+    }
 
 // -----------------------------------------------------------------------------
 void CAfStorage::InternalizeDataL(CAfEntry & dst, RDbRowSet& src, TInt offset) const
-{
+    {
     RDbColReadStream dbStream;
     CleanupClosePushL(dbStream);
     dbStream.OpenL(src, offset);
     dst.InternalizeDataOnlyL(dbStream);
     CleanupStack::PopAndDestroy(&dbStream);
-}
+    }
 
 // -----------------------------------------------------------------------------
 //
@@ -582,19 +694,22 @@ void CAfStorage::InternalizeDataL(CAfEntry & dst, RDbRowSet& src, TInt offset) c
 void CAfStorage::StoragePathL(RBuf &dst, 
                   RFs& fileSystem, 
                   TBool persistent)
-{
-    if (dst.MaxLength() < KMaxPathLength) {
+    {
+    if (dst.MaxLength() < KMaxPathLength) 
+        {
         dst.ReAllocL(KMaxPathLength);
-    } 
+        }
     dst.Zero();
     User::LeaveIfError(fileSystem.PrivatePath(dst));
-    if(persistent) {
+    if(persistent)
+        {
         dst.Append(KPersistent);
-    }
-    else {
+        }
+    else
+        {
         dst.Append(KNonPersistent);
-    } 
-}
+        }
+    }
 
 // -----------------------------------------------------------------------------
 //
@@ -604,7 +719,7 @@ void CAfStorage::AppStoragePathL(RBuf &dst,
                      RFs& fileSystem,
                      TInt uid,
                      TBool persistent)
-{
+    {
     StoragePathL(dst, fileSystem, persistent);
     
     //Format activity path
@@ -648,7 +763,7 @@ void CAfStorage::ThumbnailPathL(RBuf &dst,
 // -----------------------------------------------------------------------------
 //
 HBufC8* CAfStorage::Md5HexDigestL(const TDesC8 &string)
-{
+    {
     _LIT8(KMd5HexFormat, "%+02x");
     CMD5* md5 = CMD5::NewL();
     CleanupStack::PushL(md5);
@@ -663,7 +778,7 @@ HBufC8* CAfStorage::Md5HexDigestL(const TDesC8 &string)
     }
     CleanupStack::PopAndDestroy(md5);
     return buf;
-}
+    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -671,20 +786,23 @@ HBufC8* CAfStorage::Md5HexDigestL(const TDesC8 &string)
  * @return ETrue if the database cleanup was in progress, EFalse otherwise
  */
 TBool CAfStorage::InterruptCleanup()
-{    
-    if (mDatabaseCleaner->IsActive()) {
-        mDatabaseCleaner->Cancel();
+    {
+    if( iDatabaseCleaner->IsActive() )
+        {
+        iDatabaseCleaner->Cancel();
         return ETrue;
-    } else {
+        } 
+    else
+        {
         return EFalse;
+        }
     }
-}
 
 // -----------------------------------------------------------------------------
 /**
  * Start database cleanup
  */
 void CAfStorage::RequestCleanup()
-{
-    mDatabaseCleaner->StartCleanup();
-}
+    {
+    iDatabaseCleaner->StartCleanup();
+    }

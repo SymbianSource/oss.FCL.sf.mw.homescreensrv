@@ -181,8 +181,8 @@ EXPORTS
 	_ZNK9CaService13removeEntriesERK5QListI14QSharedPointerI7CaEntryEE @ 180 NONAME
 	_ZNK9CaService13removeEntriesERK5QListIiE @ 181 NONAME
 	_ZNK9CaService14createNotifierERK16CaNotifierFilter @ 182 NONAME
-	_ZNK9CaService14executeCommandERK7CaEntryRK7QString @ 183 NONAME
-	_ZNK9CaService14executeCommandEiRK7QString @ 184 NONAME
+	_ZNK9CaService14executeCommandERK7CaEntryRK7QStringP7QObjectPKc @ 183 NONAME
+	_ZNK9CaService14executeCommandEiRK7QStringP7QObjectPKc @ 184 NONAME
 	_ZNK9CaService18appendEntryToGroupERK7CaEntryS2_ @ 185 NONAME
 	_ZNK9CaService18appendEntryToGroupEii @ 186 NONAME
 	_ZNK9CaService19prependEntryToGroupERK7CaEntryS2_ @ 187 NONAME

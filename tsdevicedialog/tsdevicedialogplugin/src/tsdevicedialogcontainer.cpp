@@ -22,20 +22,24 @@
 #include <HbDialog>
 #include <HbMainWindow>
 #include <HbLabel>
+#include <HbFrameDrawer>
+#include <HbFrameItem>
+#include <HbStyleLoader>
 
 #include <tspropertydefs.h>
 
 #include "tstasksgrid.h"
 #include "tstasksgriditem.h"
 
-namespace {
+namespace
+{
     const char KDocmlPath[] = ":/resource/layout.docml";
 }
 
-TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model, 
+TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model,
                                                  QObject *parent)
-:
-    QObject(parent), 
+    :
+    QObject(parent),
     mVisibilityPublisher(TsProperty::KTsPath),
     mDismissRequestSubscriber(QString("%1/%2").arg(TsProperty::KTsPath).arg(TsProperty::KDismissRequestPath))
 {
@@ -43,13 +47,23 @@ TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model,
     mLoader.load(KDocmlPath, &ok);
     Q_ASSERT(ok);
 
-    HbDialog *dialog = 
-        qobject_cast<HbDialog*>(mLoader.findWidget("tsdevicedialog"));
-    TsTasksGrid *grid = 
+    HbDialog *dialog =
+        qobject_cast<HbDialog *>(mLoader.findWidget("tsdevicedialog"));
+    TsTasksGrid *grid =
         qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
     Q_ASSERT(dialog);
     Q_ASSERT(grid);
+    
+    bool cssLoaded = HbStyleLoader::registerFilePath(":/resource/hbdialog.css");
+    Q_ASSERT(cssLoaded);
+    {
+        HbLabel *dialogHeading = qobject_cast<HbLabel *>(dialog->headingWidget());
+        Q_ASSERT(dialogHeading);
+        HbFrameDrawer *headingFrame = new HbFrameDrawer(QLatin1String("qtg_fr_popup_heading"), HbFrameDrawer::ThreePiecesHorizontal);
+        dialogHeading->setBackgroundItem(new HbFrameItem(headingFrame));
+    }
 
+    grid->setEnabledAnimations(HbAbstractItemView::None);
     grid->setModel(model);
 
     changeOrientation(dialog->mainWindow()->orientation());
@@ -60,42 +74,41 @@ TsDeviceDialogContainer::TsDeviceDialogContainer(QAbstractListModel *model,
     qRegisterMetaType<QModelIndex>("QModelIndex");
 
     // connect the grid and model
-    connect(grid, 
-            SIGNAL(activated(QModelIndex)), 
-            model, 
+    connect(grid,
+            SIGNAL(activated(QModelIndex)),
+            model,
             SLOT(openApplication(QModelIndex)));
-    connect(grid, 
-            SIGNAL(activated(QModelIndex)), 
-            dialog, 
+    connect(grid,
+            SIGNAL(activated(QModelIndex)),
+            dialog,
             SLOT(close()));
-    connect(grid, 
-            SIGNAL(deleteButtonClicked(QModelIndex)), 
-            model, SLOT(closeApplication(QModelIndex)), 
+    connect(grid,
+            SIGNAL(deleteButtonClicked(QModelIndex)),
+            model, SLOT(closeApplication(QModelIndex)),
             Qt::QueuedConnection);
 
-    connect(dialog->mainWindow(), 
-            SIGNAL(orientationChanged(Qt::Orientation)), 
-            this, 
+    connect(dialog->mainWindow(),
+            SIGNAL(orientationChanged(Qt::Orientation)),
+            this,
             SLOT(changeOrientation(Qt::Orientation)));
-    connect(dialog, 
-            SIGNAL(aboutToClose()), 
-            this, 
+    connect(dialog,
+            SIGNAL(aboutToClose()),
+            this,
             SIGNAL(deviceDialogClosed()));
 
-    // note: connect to more signals when partial model updates are implemented
-    connect(model, 
-            SIGNAL(modelReset()), 
-            this, 
-            SLOT(switchViewOnModelChange()));
+    // switch between grid and "no items" label when model is updated
+    connect(model, SIGNAL(modelReset()), this, SLOT(switchViewOnModelChange()));
+    connect(model, SIGNAL(rowsInserted(QModelIndex,int,int)), this, SLOT(switchViewOnModelChange()));
+    connect(model, SIGNAL(rowsRemoved(QModelIndex,int,int)), this, SLOT(switchViewOnModelChange()));
 
-    connect(this, 
-            SIGNAL(deviceDialogClosed()), 
-            this, 
+    connect(this,
+            SIGNAL(deviceDialogClosed()),
+            this,
             SLOT(notifyDialogClosed()));
-    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, 
+    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath,
                                   static_cast<int>(true));
     mVisibilityPublisher.sync();
-    
+
     connect(&mDismissRequestSubscriber,
             SIGNAL(contentsChanged()),
             this,
@@ -108,7 +121,7 @@ TsDeviceDialogContainer::~TsDeviceDialogContainer()
 }
 
 bool TsDeviceDialogContainer::setDeviceDialogParameters(
-                                  const QVariantMap &parameters)
+    const QVariantMap &parameters)
 {
     Q_UNUSED(parameters);
     return false;
@@ -128,15 +141,15 @@ void TsDeviceDialogContainer::closeDeviceDialog(bool byClient)
 
 HbPopup *TsDeviceDialogContainer::deviceDialogWidget() const
 {
-    HbDialog *widget = 
-        qobject_cast<HbDialog*>(mLoader.findWidget("tsdevicedialog"));
+    HbDialog *widget =
+        qobject_cast<HbDialog *>(mLoader.findWidget("tsdevicedialog"));
     Q_ASSERT(widget);
     return widget;
 }
 
 QObject *TsDeviceDialogContainer::signalSender() const
 {
-    return const_cast<TsDeviceDialogContainer*>(this);
+    return const_cast<TsDeviceDialogContainer *>(this);
 }
 
 void TsDeviceDialogContainer::changeOrientation(Qt::Orientation orientation)
@@ -152,21 +165,21 @@ void TsDeviceDialogContainer::changeOrientation(Qt::Orientation orientation)
 
 void TsDeviceDialogContainer::notifyDialogClosed()
 {
-    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath, 
+    mVisibilityPublisher.setValue(TsProperty::KVisibilityPath,
                                   static_cast<int>(false));
     mVisibilityPublisher.sync();
 }
 
 void TsDeviceDialogContainer::switchViewOnModelChange()
 {
-    TsTasksGrid *grid = 
+    TsTasksGrid *grid =
         qobject_cast<TsTasksGrid *>(mLoader.findWidget("taskgrid"));
-    HbWidget *noItemsWidget = 
+    HbWidget *noItemsWidget =
         qobject_cast<HbWidget *>(mLoader.findWidget("noitemswidget"));
     Q_ASSERT(grid);
     Q_ASSERT(noItemsWidget);
 
-    if (grid->model()->rowCount()) {
+    if (grid->model() && grid->model()->rowCount()) {
         noItemsWidget->hide();
         grid->show();
     } else {

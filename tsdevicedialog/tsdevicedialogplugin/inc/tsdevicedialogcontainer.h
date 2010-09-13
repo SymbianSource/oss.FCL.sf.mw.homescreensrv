@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef TSDEVICEDIALOGCONTAINER_H
@@ -28,12 +28,12 @@ QTM_USE_NAMESPACE
 
 class QAbstractListModel;
 
-class TsDeviceDialogContainer : public QObject, 
+class TsDeviceDialogContainer : public QObject,
                                 public HbDeviceDialogInterface
 {
-Q_OBJECT
+    Q_OBJECT
 public:
-    explicit TsDeviceDialogContainer(QAbstractListModel *model, 
+    explicit TsDeviceDialogContainer(QAbstractListModel *model,
                                      QObject *parent = 0);
     ~TsDeviceDialogContainer();
 
@@ -54,7 +54,7 @@ private slots:
     void notifyDialogClosed();
     void switchViewOnModelChange();
     void handleDismissRequest();
-    
+
 private:
     TsDocumentLoader mLoader;
     QValueSpacePublisher mVisibilityPublisher;

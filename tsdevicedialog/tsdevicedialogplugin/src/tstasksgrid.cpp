@@ -20,7 +20,7 @@
 void TsTasksGrid::polish(HbStyleParameters &params)
 {
     HbGridView::polish(params);
-    
+
     // center second item when dialog is shown
     if (model()) {
         scrollTo(model()->index(1, 0), PositionAtCenter);

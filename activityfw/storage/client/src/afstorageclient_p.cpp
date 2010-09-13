@@ -129,10 +129,10 @@ int CAfStorageClientPrivate::removeApplicationActivities(const CAfEntry &entry)
  * Function implementation
  * @see AfStorageClient::activities(RPointerArray<CAfEntry> &)
  */
-int CAfStorageClientPrivate::activities(RPointerArray<CAfEntry> &results)
+int CAfStorageClientPrivate::activities(RPointerArray<CAfEntry> &results, TInt limit)
 {
     CAfEntry *entry = CAfEntry::NewL();
-    TInt result = execute(Activities, results, *entry);
+    TInt result = execute(Activities, results, *entry, limit);
     delete entry;
     return result;
 }
@@ -243,8 +243,8 @@ int CAfStorageClientPrivate::execute(int function, const CAfEntry &sourceEntry, 
 /**
  * Function execute activity framework functinality and return results 
  */
-int CAfStorageClientPrivate::execute(int function, RPointerArray<CAfEntry>& resultsList,const CAfEntry& templateEntry)
+int CAfStorageClientPrivate::execute(int function, RPointerArray<CAfEntry>& resultsList,const CAfEntry& templateEntry, int limit)
 {
-    TRAPD(errNo, mImplementation.executeL(function, resultsList, templateEntry);)
+    TRAPD(errNo, mImplementation.executeL(function, resultsList, templateEntry, limit);)
     return errNo;
 }

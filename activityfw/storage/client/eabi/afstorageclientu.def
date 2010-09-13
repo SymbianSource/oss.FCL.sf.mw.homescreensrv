@@ -1,5 +1,5 @@
 EXPORTS
-	_ZN16CAfStorageClient10activitiesER13RPointerArrayI8CAfEntryE @ 1 NONAME
+	_ZN16CAfStorageClient10activitiesER13RPointerArrayI8CAfEntryE @ 1 NONAME ABSENT
 	_ZN16CAfStorageClient11addActivityERK8CAfEntryi @ 2 NONAME
 	_ZN16CAfStorageClient12activityDataERP8CAfEntryRKS0_ @ 3 NONAME
 	_ZN16CAfStorageClient12getThumbnailERK5TSizeRK7TDesC16Pv @ 4 NONAME
@@ -26,4 +26,5 @@ EXPORTS
 	_ZTV26CAfThumbnailRequestPrivate @ 25 NONAME
 	_ZTV30RAfStorageClientImplementation @ 26 NONAME
 	_ZTV8CAfEntry @ 27 NONAME
+	_ZN16CAfStorageClient10activitiesER13RPointerArrayI8CAfEntryEi @ 28 NONAME
 

@@ -36,7 +36,8 @@ public:
 
     explicit CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader);
 
-    int execute(const CaEntry &entry, const QString &commandName);
+    int execute(const CaEntry &entry, const QString &commandName, 
+            QObject* receiver = NULL, const char* member = NULL);
 
 private:
     CaHandler *getHandler(const CaEntry &entry,

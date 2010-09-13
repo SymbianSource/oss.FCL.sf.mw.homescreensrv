@@ -7,6 +7,7 @@ TsTasksGridItem::appname {
     color: var(qtc_default_main_pane_normal);
     font-variant: secondary;
     text-height: var(hb-param-text-height-tiny);
+    text-wrap-mode: no-wrap;    
 }
 
 TsTasksGridItem > HbPushButton#closebadge {

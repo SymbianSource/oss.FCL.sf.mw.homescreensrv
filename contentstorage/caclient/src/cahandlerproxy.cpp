@@ -52,16 +52,19 @@ CaHandlerProxy::CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader):
   Forwards execute request to an appropriate handler if found otherwise ignores the request.
   \param entry Subject for the requested command.
   \param commandName Name of the command to be executed.
+  \param receiver QObject class with slot.
+  \param member Slot from QObject class.
   \retval KErrNone on succes, error code otherwise.
   \sa e32err.h for KErrNone definition.
 */
-int CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName)
+int CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName,
+        QObject* receiver, const char* member)
 {
     CaHandler *const handler = getHandler(entry, commandName);
     int result = -1;
 
     if (handler) {
-            result = handler->execute(entry, commandName);
+            result = handler->execute(entry, commandName, receiver, member);
     }
     return result;
 }

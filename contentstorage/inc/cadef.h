@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.26 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.27 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -52,7 +52,7 @@ enum TEntryFlag
     EUninstall = 2,
     ERemovable = 4,
     EVisible = 8,
-    ERunning = 16,
+    EReserved = 16, //flag is unused, stays for compatibility
     ENative = 32,
     EMissing = 64
     };

@@ -39,7 +39,7 @@
  CaQuery query;
  query.setEntryRoles( ItemEntryRole | GroupEntryRole );
  query.setSort( MostUsedSortAttribute, Qt::DescendingOrder );
- query.setFlagsOn( UsedEntryFlag | RemovableEntryFlag | RunningEntryFlag );
+ query.setFlagsOn( UsedEntryFlag | RemovableEntryFlag );
  query.setFlagsOff( SystemEntryFlag | VisibleEntryFlag );
  // using CaQuery to get data from DB
  QList<CaEntry *> entries = CaService::instance()->getEntries( query );

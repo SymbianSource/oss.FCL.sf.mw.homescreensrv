@@ -37,8 +37,8 @@
     /param entry - Activity data
 */
 TsActivityModelItem::TsActivityModelItem(QAbstractListModel &model,
-                                         QObject& service, 
-                                         const QVariantHash & activity)
+                                         QObject &service,
+                                         const QVariantHash &activity)
     :
     mService(service),
     mActivity(activity),

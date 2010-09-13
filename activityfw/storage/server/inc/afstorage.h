@@ -32,94 +32,103 @@ class CAfStorage : public CBase
 public:
     ~CAfStorage();
 
-    static CAfStorage* NewL(RFs& session);
+    static CAfStorage* NewL(RFs& aSession);
 
-    void AddActivityL(CAfEntry &entry);
+    void AddActivityL(CAfEntry &aEntry);
+
+    void UpdateActivityL(CAfEntry &aEntry);
+
+    void SaveActivityL(CAfEntry &aEntry);
+
+    void DeleteActivityL(CAfEntry &aEntry);
+
+    void DeleteActivitiesL(CAfEntry &aEntry);
+
+    void AllActivitiesL(RPointerArray<CAfEntry> &aDst, TInt aLimit);
+
+    void ActivitiesL(RPointerArray<CAfEntry> &aDst, TInt aAppId);
     
-    void UpdateActivityL(CAfEntry &entry);
-    
-    void SaveActivityL(CAfEntry &entry);
-
-    void DeleteActivityL(CAfEntry &entry);
-
-    void DeleteActivitiesL(CAfEntry &entry);
-
-    void ActivitiesL(RPointerArray<CAfEntry> &dst);
-
-    void ActivitiesL(RPointerArray<CAfEntry> &dst, TInt appId);
-    
-    void ActivityL(RPointerArray<CAfEntry> &dst, CAfEntry &src);
+    void ActivityL(RPointerArray<CAfEntry> &aDst, CAfEntry &aSrc);
 
     RFs& Fs();
 
-    static void ThumbnailPathL(RBuf &dst, 
-                               RFs& fileSystem, 
-                               TInt uid, 
-                               const TDesC &activityName,
-                               TBool persistent);
+    static void ThumbnailPathL(RBuf &aDst, 
+                               RFs& aFileSystem, 
+                               TInt aUid, 
+                               const TDesC &aActivityName,
+                               TBool aPersistent);
 
-    static void StoragePathL(RBuf &dst, 
-                             RFs& fileSystem, 
-                             TBool persistent);
-    static void AppStoragePathL(RBuf &dst, 
-                                RFs& fileSystem,
-                                TInt uid,
-                                TBool persistent);
+    static void StoragePathL(RBuf &aDst, 
+                             RFs& aFileSystem, 
+                             TBool aPersistent);
+
+    static void AppStoragePathL(RBuf &aDst, 
+                                RFs& aFileSystem,
+                                TInt aUid,
+                                TBool aPersistent);
 private:
-    static HBufC8* Md5HexDigestL(const TDesC8 &string);
+    static HBufC8* Md5HexDigestL(const TDesC8 &aString);
     
 private:
-    CAfStorage(RFs& session);
+    CAfStorage(RFs& aSession);
 
     void ConstructL();
 
-    void CreateDbL(const TDesC& databaseFile);
+    void CreateDbL(const TDesC& aDatabaseFile);
 
-    void OpenDbL(const TDesC& databaseFile);
+    void OpenDbL(const TDesC& aDatabaseFile);
+
+    void VerifyDbL();
+
+    CDbColSet* ExpectedTableLC();
 
     void CreateTableL();
 
+    void VerifyTableL();
+
     void DeleteNonPersistentActivitiesL();
 
-    void GetActivitiesL(const TDesC& dst);
+    void GetActivitiesL(const TDesC& aDst);
 
-    HBufC* SelectRowLC(TInt appId, const TDesC& actId) const;
+    HBufC* SelectRowLC(TInt aAppId, const TDesC& aActId) const;
 
-    HBufC* SelectRowsLC(TInt appId) const;
+    HBufC* SelectRowsLC(TInt aAppId) const;
 
-    HBufC* DeleteRowLC(TInt appId, const TDesC& actId) const;
+    HBufC* DeleteRowLC(TInt aAppId, const TDesC& aActId) const;
     
-    HBufC* DeleteRowsLC(TInt appId) const;
+    HBufC* DeleteRowsLC(TInt aAppId) const;
 
-    HBufC* BuildQueryLC(const TDesC& format, TInt appId, const TDesC& actId) const;
+    HBufC* BuildQueryLC(const TDesC& aFormat, TInt aAppId, const TDesC& aActId) const;
     
-    void ActivitiesL(RPointerArray<CAfEntry>& dst, 
-                     const TDesC& query, 
-                     CAfEntry::AccessRights rights,
-                     TInt limit = 0);
+    void ActivitiesL(RPointerArray<CAfEntry>& aDst, 
+                     const TDesC& aQuery, 
+                     CAfEntry::AccessRights aRights,
+                     TInt aLimit = 0,
+                     TBool deserializeAllData = EFalse);
 
-    void ActivitiesL(RPointerArray<CAfEntry>& dst, 
-                     RDbView& query, 
-                     CAfEntry::AccessRights rights,
-                     TInt limit = 0);
+    void ActivitiesL(RPointerArray<CAfEntry>& aDst, 
+                     RDbView& aQuery, 
+                     CAfEntry::AccessRights aRights,
+                     TInt aLimit = 0,
+                     TBool deserializeAllData = EFalse);
 
-    void GetActivityForUpdateL(RDbView& query, TInt appId, const TDesC& actId);
+    void GetActivityForUpdateL(RDbView& aQuery, TInt aAppId, const TDesC& aActId);
 
-    void ReadDataL(RBuf& dst, RDbRowSet& src, TInt offset) const;
+    void ReadDataL(RBuf& aDst, RDbRowSet& aSrc, TInt aOffset) const;
 
-    void ExternalizeDataL(RDbRowSet &dst,const CAfEntry & src, TInt offset) const;
+    void ExternalizeDataL(RDbRowSet &aDst,const CAfEntry & aSrc, TInt aOffset) const;
 
-    void InternalizeDataL(CAfEntry &dst, RDbRowSet& src, TInt offset) const;
+    void InternalizeDataL(CAfEntry &aDst, RDbRowSet& aSrc, TInt aOffset) const;
 
 public:
     TBool InterruptCleanup();
     void RequestCleanup();
 
 private:
-    RFs& mFsSession;
-    RDbStoreDatabase mActDb;/* For database operations                 */
-    CFileStore* mFileStore;  /* For creating and opening database files */
-    CAfDatabaseCleaner *mDatabaseCleaner;
+    RFs& iFsSession;
+    RDbStoreDatabase iActDb;/** For database operations*/
+    CFileStore* iFileStore;  /** For creating and opening database files */
+    CAfDatabaseCleaner *iDatabaseCleaner;
 };
 
 #endif //AFSTORAGE_H

@@ -40,7 +40,7 @@ public:
     IMPORT_C int saveActivity(const CAfEntry &entry, TInt imageHandle);
     IMPORT_C int removeActivity(const CAfEntry &entry);
     IMPORT_C int removeApplicationActivities(const CAfEntry &entry);
-    IMPORT_C int activities(RPointerArray<CAfEntry> &dst);
+    IMPORT_C int activities(RPointerArray<CAfEntry> &dst, TInt limit = 0);
     IMPORT_C int applicationActivities(RPointerArray<CAfEntry> &dst, const CAfEntry &entry);
     IMPORT_C int activityData(CAfEntry *&dst, const CAfEntry &entry);
     IMPORT_C int waitActivity();

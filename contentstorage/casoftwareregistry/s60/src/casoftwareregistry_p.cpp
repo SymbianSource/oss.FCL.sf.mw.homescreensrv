@@ -34,11 +34,11 @@
 #include "caarraycleanup.inl"
 
 using namespace Usif;
-
 _LIT(KConfirmMessageKey, "MIDlet-Delete-Confirm");
 _LIT(KCaScrPropertyDomainCategory, "Domain-Category");
 _LIT(KCaScrPropertyMidletDescryption, "MIDlet-Description");
-const int maxLogsCount = 20;  // should be 50 - workaround for 
+_LIT(KNotNamedMmc, "NO NAME");
+const int maxLogsCount = 20;  // should be 50 - workaround for
 // ou1cimx1#476143 Dialog crash when label contains big amount of lines
 
 /*!
@@ -56,7 +56,7 @@ CaSoftwareRegistryPrivate::CaSoftwareRegistryPrivate(
  */
 CaSoftwareRegistryPrivate::~CaSoftwareRegistryPrivate()
 {
-    
+
 }
 
 /*!
@@ -290,19 +290,19 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
                 drives = drives.append(",");
             }
             drv = QString(QChar('A'+ i)).append(":");
-            if(DriveInfo::GetDefaultDrive(
+            if (DriveInfo::GetDefaultDrive(
                     DriveInfo::EDefaultPhoneMemory, drive ) == KErrNone
                     && QChar('A'+ i) == QChar(drive)) {
                 drives = drives.append(HbParameterLengthLimiter(
                         "txt_applib_dialog_1_device_memory").arg(
                                 QString(QChar('A'+ i))));
-            } else if(DriveInfo::GetDefaultDrive(
+            } else if (DriveInfo::GetDefaultDrive(
                     DriveInfo::EDefaultMassStorage, drive ) == KErrNone
                     && QChar('A'+ i) == QChar(drive)) {
                 drives = drives.append(HbParameterLengthLimiter(
                         "txt_applib_dialog_1_mass_storage").arg(
                                 QString(QChar('A'+ i))));
-                } else if(DriveInfo::GetDefaultDrive(
+                } else if (DriveInfo::GetDefaultDrive(
                     DriveInfo::EDefaultRemovableMassStorage, drive ) == KErrNone
                     && QChar('A'+ i) == QChar(drive)) {
                 RFs fs;
@@ -314,7 +314,8 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
                             DriveInfo::EDefaultRemovableMassStorage,
                             driveNumber );
                     User::LeaveIfError(fs.Volume(tv, driveNumber));
-                    if(tv.iName.Length()) {
+                    if (tv.iName.Length()
+                            && tv.iName.Compare(KNotNamedMmc) != KErrNone) {
                         drives = drives.append(HbParameterLengthLimiter(
                                 "txt_applib_dialog_1_2").arg(
                                         QString(QChar('A'+ i))).arg(

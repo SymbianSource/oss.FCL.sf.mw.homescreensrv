@@ -32,7 +32,6 @@
 "/epoc32/release/armv5/urel/hsactivitydbserver.exe"    - "!:\sys\bin\hsactivitydbserver.exe"
 
 "/epoc32/release/armv5/urel/afstorageclient.dll"    - "!:\sys\bin\afstorageclient.dll"
-"/epoc32/release/armv5/urel/tsutils.dll"    - "!:\sys\bin\tsutils.dll"
 "/epoc32/release/armv5/urel/afactivitylauncher.dll"    - "!:\sys\bin\afactivitylauncher.dll"
 
 "/epoc32/release/armv5/urel/hbactivityplugin.dll"    - "!:\sys\bin\hbactivityplugin.dll"

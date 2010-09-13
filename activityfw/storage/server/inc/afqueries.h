@@ -21,7 +21,7 @@
 #include <e32base.h>
 
 _LIT( KSelectRow, "SELECT * FROM Activities WHERE ApplicationId=%S AND ActivityName='%S'");
-_LIT( KSelectRows, "SELECT * FROM Activities");
+_LIT( KSelectRows, "SELECT * FROM Activities ORDER BY Timestamp DESC");
 _LIT( KSelectAppRows, "SELECT * FROM Activities WHERE ApplicationId=%S");
 _LIT( KDeleteRow, "DELETE FROM Activities WHERE ApplicationId=%S AND ActivityName='%S'");
 _LIT( KDeleteRows, "DELETE FROM Activities WHERE ApplicationId=%S");
@@ -29,7 +29,9 @@ _LIT( KDeleteNonPersistentActivities, "DELETE FROM Activities WHERE Flags<%S");
 
 _LIT(KApplicationColumnName, "ApplicationId");
 _LIT(KActivityColumnName, "ActivityName");
+_LIT(KCustomNameColumnName, "CustomName");
 _LIT(KFlagsColumnName, "Flags");
+_LIT(KTimestampColumnName, "Timestamp");
 _LIT(KDataColumnName, "Data");
 
 _LIT(KActivityTableName, "Activities");

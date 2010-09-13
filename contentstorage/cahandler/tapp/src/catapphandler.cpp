@@ -58,10 +58,15 @@ CaTappHandler::~CaTappHandler()
  Uses XQApplicationManager
  \param entry Subject of the \a command.
  \param command Description of the command.
+ \param receiver a QObject class with slot to invoke.
+ \param member a slot to invoke.
  \retval Error code described in QSERVICEMANAGER.H
  */
-int CaTappHandler::execute(const CaEntry& entry, const QString& command)
+int CaTappHandler::execute(const CaEntry& entry, const QString& command, 
+        QObject* receiver, const char* member)
 {
+	Q_UNUSED(receiver);
+	Q_UNUSED(member);
     // this returns Error enum from QSERVICEMANAGER.H
     int error = 0;
     if (command == caCmdOpen) {

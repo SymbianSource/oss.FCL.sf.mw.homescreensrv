@@ -23,7 +23,6 @@ data=\epoc32\data\z\resource\qt\plugins\afservice.qtplugin    resource\qt\plugin
 file=ABI_DIR\BUILD_DIR\hsactivitydbserver.exe                            PROGRAMS_DIR\hsactivitydbserver.exe
 
 file=ABI_DIR\BUILD_DIR\afstorageclient.dll					       SHARED_LIB_DIR\afstorageclient.dll
-file=ABI_DIR\BUILD_DIR\tsutils.dll			    		       SHARED_LIB_DIR\tsutils.dll
 file=ABI_DIR\BUILD_DIR\afactivitylauncher.dll			    		       SHARED_LIB_DIR\afactivitylauncher.dll
 
 file=ABI_DIR\BUILD_DIR\hbactivityplugin.dll					       SHARED_LIB_DIR\hbactivityplugin.dll

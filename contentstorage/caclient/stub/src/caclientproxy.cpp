@@ -241,13 +241,13 @@ void CaClientProxy::addWidgetEntry(const HsWidgetComponentDescriptor &widgetToke
         qDebug() << query.executedQuery();
     }
 
-    // Add attribute widget:traslation_file
+    // Add attribute widget:translation_file
     if (!translationFileName.isEmpty()) {
         QString queryAddWidgetTranslationFile =
             "INSERT INTO CA_ATTRIBUTE " \
             "(AT_ENTRY_ID, AT_NAME, AT_VALUE) " \
             "VALUES " \
-            "(?, 'widget:traslation_file', ?)";
+            "(?, 'widget:translation_file', ?)";
 
         query.prepare(queryAddWidgetTranslationFile);
         query.addBindValue(widgetId);

@@ -39,7 +39,8 @@ public:
 
     void executeL(int function, 
                   RPointerArray<CAfEntry> &resultsList, 
-                  const CAfEntry& templateEntry);
+                  const CAfEntry& templateEntry,
+                  TInt limit);
     
     void getThumbnailL(TSize size, 
                       const TDesC& source,

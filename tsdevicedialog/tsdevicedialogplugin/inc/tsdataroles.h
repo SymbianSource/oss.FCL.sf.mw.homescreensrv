@@ -11,13 +11,14 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:
 *
 */
 #ifndef TSDATAROLES_H
 #define TSDATAROLES_H
 
-namespace TsDataRoles {
+namespace TsDataRoles
+{
     enum EntryAttributes {
         Closable = Qt::UserRole + 1,
         Active,

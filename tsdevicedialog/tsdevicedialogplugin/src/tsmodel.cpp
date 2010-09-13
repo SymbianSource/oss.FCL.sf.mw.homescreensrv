@@ -49,8 +49,8 @@ const int maxItems(10);
     \param query used to create model
     \param pointer to parent object
 */
-TsModel::TsModel(TsTaskMonitor &applicationSrv, 
-                 QObject &activitySrv, 
+TsModel::TsModel(TsTaskMonitor &applicationSrv,
+                 QObject &activitySrv,
                  QObject *parent) :
     QAbstractListModel(parent),
     mEntries(),
@@ -58,11 +58,11 @@ TsModel::TsModel(TsTaskMonitor &applicationSrv,
     mActivityService(activitySrv),
     mMaxItems(maxItems)
 {
-    
+
 #ifdef Q_OS_SYMBIAN
     XQSettingsManager *crManager = new XQSettingsManager;
     XQCentralRepositorySettingsKey itemsNumberKey(TSDeviceDialogUid, ItemsLimit);
-    QVariant itemsNumberVariant = 
+    QVariant itemsNumberVariant =
         crManager->readItemValue(itemsNumberKey, XQSettingsManager::TypeInt);
     if (!itemsNumberVariant.isNull()) {
         int number = itemsNumberVariant.toInt();
@@ -70,19 +70,18 @@ TsModel::TsModel(TsTaskMonitor &applicationSrv,
             mMaxItems = number;
         }
     }
-    iAppArcSession.Connect();
 #endif
 
     connect(&activitySrv,
-	SIGNAL(dataChanged()),
-			 this,
-			 SLOT(updateActivities()));
+            SIGNAL(dataChanged()),
+            this,
+            SLOT(updateActivities()));
     connect(&applicationSrv,
-	        SIGNAL(taskListChanged()),
-			this,
-			SLOT(updateApplications()));
+            SIGNAL(taskListChanged()),
+            this,
+            SLOT(updateApplications()));
 
-    fullUpdate();    
+    fullUpdate();
 }
 
 /*!
@@ -90,9 +89,6 @@ TsModel::TsModel(TsTaskMonitor &applicationSrv,
 */
 TsModel::~TsModel()
 {
-#ifdef Q_OS_SYMBIAN
-    iAppArcSession.Close();
-#endif
     qDeleteAll(mEntries);
 }
 
@@ -107,7 +103,7 @@ int TsModel::rowCount(
     return mEntries.count();
 }
 
-bool TsModel::insertRows(int row, int count, TsModelItem* item, const QModelIndex & parent)
+bool TsModel::insertRows(int row, int count, TsModelItem *item, const QModelIndex &parent)
 {
     beginInsertRows(parent, row, row+count-1);
     mEntries.insert(row, item);
@@ -115,25 +111,27 @@ bool TsModel::insertRows(int row, int count, TsModelItem* item, const QModelInde
     return true;
 }
 
-bool TsModel::removeRows(int row, int count, const QModelIndex & parent)
+bool TsModel::removeRows(int row, int count, const QModelIndex &parent)
 {
+    TsModelItem *oldItem = mEntries.at(row);
     beginRemoveRows(parent, row, row + count - 1);
     mEntries.removeAt(row);
+    delete oldItem;
     endRemoveRows();
     return true;
 }
 
 
-bool TsModel::moveRows(int oldPosition, int newPosition, const QModelIndex & parent)
+bool TsModel::moveRows(int oldPosition, int newPosition, const QModelIndex &parent)
 {
-   beginMoveRows(parent, oldPosition, oldPosition, parent, newPosition);
-   mEntries.move(oldPosition, newPosition);
-   endMoveRows();
-   return true;
+    beginMoveRows(parent, oldPosition, oldPosition, parent, newPosition);
+    mEntries.move(oldPosition, newPosition);
+    endMoveRows();
+    return true;
 }
 
 
-bool TsModel::updateRows(int row, TsModelItem* item)
+bool TsModel::updateRows(int row, TsModelItem *item)
 {
     TsModelItem *oldItem = mEntries.at(row);
     mEntries[row] = item;
@@ -181,8 +179,8 @@ void TsModel::openApplication(const QModelIndex &index)
 */
 void TsModel::closeApplication(const QModelIndex &index)
 {
-    if (!index.isValid() || 
-        !entry(index)->data(TsDataRoles::Closable).toBool()) {
+    if (!index.isValid() ||
+            !entry(index)->data(TsDataRoles::Closable).toBool()) {
         return;
     }
     entry(index)->close();
@@ -193,12 +191,9 @@ void TsModel::closeApplication(const QModelIndex &index)
 */
 void TsModel::updateApplications()
 {
-    RDebug::Printf( "TsModel::updateApps \n");
-    RDebug::Printf(" from %d \n: ",this);
     QList<TsTaskChange>  changes(mApplicationService.changeList());
-    
-    if(changes.count() == 0)
-    {
+
+    if (changes.count() == 0) {
         //no applications - only activities on list
         return;
     }
@@ -211,20 +206,32 @@ void TsModel::updateApplications()
         switch (changes[iter].first.changeType()) {
             case TsTaskChangeInfo::EChangeDelete :
                 removeRows(changes[iter].first.oldOffset(), 1);
-            break;
+                //we had max rows before delete - so there is possibility to add 
+                //one activity
+                if(mEntries.count() + 1 == maxRowCount()) {
+                    beginInsertRows(QModelIndex(), mEntries.count(), mEntries.count());
+                    getActivities(false);
+                    endInsertRows();
+                }
+                break;
             case TsTaskChangeInfo::EChangeInsert :
                 insertRows(changes[iter].first.newOffset(), 1,
-                    new TsEntryModelItem(changes[iter].second));
-            break;
+                           new TsEntryModelItem(changes[iter].second));
+                //we have too many items - delete some activities if we can
+                while(mEntries.count() > maxRowCount() && mActivitiesCount > 0) {
+                    removeRows(mEntries.count()-1, 1);
+                    mActivitiesCount--;
+                }
+                break;
             case TsTaskChangeInfo::EChangeMove :
                 moveRows(changes[iter].first.oldOffset(), changes[iter].first.newOffset());
-            break;            
+                break;
             case TsTaskChangeInfo::EChangeUpdate :
                 updateRows(changes[iter].first.oldOffset(),
                            new TsEntryModelItem(changes[iter].second));
-            break;
+                break;
             default:
-            break;
+                break;
         }
     }
 
@@ -246,8 +253,10 @@ void TsModel::updateActivities()
 */
 void TsModel::fullUpdate()
 {
+    beginResetModel();
     qDeleteAll(mEntries);
     mEntries.clear();
+    mActivitiesCount = 0;
     getApplications();
     getActivities();
     endResetModel();
@@ -259,11 +268,10 @@ void TsModel::fullUpdate()
 */
 void TsModel::getApplications()
 {
-    RDebug::Printf( "CTsTaskMonitorClientImpl::RunL \n");
     //get all running applications and append to entries list
     TsModelItem *entry(0);
     QList< TsTaskChange> tasks(mApplicationService.changeList(true));
-    foreach (TsTaskChange taskData, tasks) {
+    foreach(TsTaskChange taskData, tasks) {
         if (!taskData.second.isNull()) {
             entry = new TsEntryModelItem(taskData.second);
             if (entry) {
@@ -276,53 +284,22 @@ void TsModel::getApplications()
 /*!
     Read current activities
 */
-void TsModel::getActivities()
+void TsModel::getActivities(bool fullUpdate)
 {
     //get activities
-    TsModelItem *entry(0);
-    QList<QVariantHash> activities;
-    QMetaObject::invokeMethod(&mActivityService, 
-                              "activitiesList", 
-                              Q_RETURN_ARG(QList<QVariantHash>, 
-                              activities));
-    foreach(QVariantHash activity, activities) {
-        prepareActivityEntry(activity);
-        entry = new TsActivityModelItem(*this, mActivityService, activity);
-        if (maxRowCount() <= mEntries.count()) {
-            delete entry;
-            break;
+    int maxActivitiesCount = maxRowCount() - mEntries.count() + mActivitiesCount;
+    if (maxActivitiesCount > 0) {
+        QList<QVariantHash> activities;
+        QMetaObject::invokeMethod(&mActivityService,
+                                  "activitiesList",
+                                  Q_RETURN_ARG(QList<QVariantHash>, activities),
+                                  Q_ARG(int, maxActivitiesCount));
+        int iterPos = fullUpdate ? 0 : mActivitiesCount;
+        for(int iter(iterPos); iter< activities.count(); iter++) {
+            mEntries.append(new TsActivityModelItem(*this, mActivityService, activities[iter]));
+            mActivitiesCount++;
         }
-        mEntries.append(entry);
     }
-}
-
-/*!
-    Modify activity entry replacing application id with name
-*/
-void TsModel::prepareActivityEntry(QVariantHash &activity)
-{
-    if (!activity.contains(TsActivityModelItem::applicationKeyword())) {
-        activity.insert(TsActivityModelItem::applicationKeyword(),
-                    activity.contains(ActivityApplicationKeyword) ?
-                    getApplicationName(activity[ActivityApplicationKeyword].toInt()) :
-                    QString::null);
-    }
-}
-
-/*!
-    Return application name
-    \param id - reqiested application identyfier
-*/
-QString TsModel::getApplicationName(int id)
-{
-    QString retVal;
-#ifdef Q_OS_SYMBIAN
-    TApaAppInfo info;
-    iAppArcSession.GetAppInfo( info, TUid::Uid(id));
-    retVal = QString::fromUtf16(info.iShortCaption.Ptr(),
-                                info.iShortCaption.Length());
-#endif
-    return retVal;
 }
 
 /*!
@@ -346,4 +323,3 @@ TsModelItem *TsModel::entry(const QModelIndex &index) const
 {
     return mEntries.at(index.row());
 }
-

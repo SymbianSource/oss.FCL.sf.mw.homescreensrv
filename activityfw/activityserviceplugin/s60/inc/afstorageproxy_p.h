@@ -18,10 +18,12 @@
 #ifndef AFSTORAGEPROXY_P_H
 #define AFSTORAGEPROXY_P_H
 
-#include "afasyncrequestobserver.h"
+#include <apgcli.h>
 
 #include <QVariant>
 #include <QStringList>
+
+#include "afasyncrequestobserver.h"
 
 class CAfStorageClient;
 class CAfEntry;
@@ -34,12 +36,12 @@ public:
     ~AfStorageProxyPrivate();
 
 public:    
-    bool addActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
-    bool updateActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
-    bool saveActivity(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
+    bool addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
+    bool updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
+    bool saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
     bool removeActivity(int applicationId, const QString &activityId);   
     bool removeApplicationActivities(int applicationId);
-    bool activities(QList<QVariantHash> &list);
+    bool activities(QList<QVariantHash> &list, int limit = 0);
     bool applicationActivities(QStringList &list, int applicationId);
     bool activityData(QVariant &data, int applicationId, const QString &activityId);
     bool activityMetaData(QVariantHash &metadata, int applicationId, const QString &activityId);
@@ -55,13 +57,16 @@ public: // from MAfAsyncRequestObserver
     
 private:
     CAfEntry *createFilterEntry(int applicationId = 0, const QString &activityId = QString());
-    CAfEntry *createSaveEntry(int applicationId, const QString &activityId, const QVariant &activityData, const QVariantHash &metadata);
+    CAfEntry *createSaveEntry(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata);
     CAfEntry *getEntry(int applicationId, const QString &activityId);
-    QVariantHash extractMetadata(CAfEntry *entry);
+    QVariantHash extractMetadata(CAfEntry *entry, bool includePublicData);
+    QString activityDisplayText(CAfEntry *entry);
     
 private:
     CAfStorageClient *mClient;
     AfStorageProxy *q_ptr;
+    RApaLsSession mAppArcSession;
+
 };
 
 #endif //AFSTORAGEPROXY_P_H

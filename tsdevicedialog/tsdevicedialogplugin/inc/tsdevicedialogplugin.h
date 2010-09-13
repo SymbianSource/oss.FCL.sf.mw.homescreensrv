@@ -35,13 +35,13 @@ public:
     TsDeviceDialogPlugin();
     ~TsDeviceDialogPlugin();
 
-    bool accessAllowed(const QString &deviceDialogType, 
-                       const QVariantMap &parameters, 
+    bool accessAllowed(const QString &deviceDialogType,
+                       const QVariantMap &parameters,
                        const QVariantMap &securityInfo) const;
-    HbDeviceDialogInterface *createDeviceDialog(const QString &deviceDialogType, 
+    HbDeviceDialogInterface *createDeviceDialog(const QString &deviceDialogType,
                                                 const QVariantMap &parameters);
-    bool deviceDialogInfo(const QString &deviceDialogType, 
-                          const QVariantMap &parameters, 
+    bool deviceDialogInfo(const QString &deviceDialogType,
+                          const QVariantMap &parameters,
                           DeviceDialogInfo *info) const;
     QStringList deviceDialogTypes() const;
     PluginFlags pluginFlags() const;
@@ -53,7 +53,7 @@ private:
     TsTaskMonitor *mStorage;
 
     bool mTriedToLoadTranslation;
-    
+
     Q_DISABLE_COPY(TsDeviceDialogPlugin)
 };
 

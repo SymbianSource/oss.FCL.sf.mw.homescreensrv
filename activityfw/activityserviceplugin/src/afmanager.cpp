@@ -45,10 +45,10 @@ AfManager::~AfManager()
 {
 }
 
-QList<QVariantHash> AfManager::activitiesList()
+QList<QVariantHash> AfManager::activitiesList(int limit)
 {
     QList<QVariantHash> results;
-    mServiceProvider->activities(results);
+    mServiceProvider->activities(results, limit);
     return results;
 }
 

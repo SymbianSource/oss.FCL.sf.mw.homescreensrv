@@ -21,12 +21,13 @@
 #include <QObject>
 
 #include "cahandler.h"
+#include "cauninstallerobserver.h"
 
 class CEikonEnv;
 class CCaUsifUninstallOperation;
 class CaEntry;
 
-class CaAppHandler: public QObject, public CaHandler
+class CaAppHandler: public QObject, public CaHandler, public CaUninstallerObserver
 {
     Q_OBJECT
     Q_INTERFACES(CaHandler)
@@ -39,7 +40,14 @@ public:
 
 public:
 
-    int execute(const CaEntry &entry, const QString &command);
+    int execute(const CaEntry &entry, const QString &command, 
+            QObject* receiver = NULL, const char* member = NULL);
+    
+    void uninstallError(int error); // from CaUninstallerObserver
+    
+signals:
+
+    void uninstallFailed(int errorCode);
 
 private:
 

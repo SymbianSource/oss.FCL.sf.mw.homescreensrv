@@ -18,8 +18,6 @@ TEMPLATE = subdirs
 
 CONFIG += ordered
 
-SUBDIRS += tsutils
-
 symbian:SUBDIRS +=  storage \
                     afactivitylauncher \
 
@@ -28,7 +26,6 @@ SUBDIRS +=  activityserviceplugin \
             
 tests {
     SUBDIRS +=  activityserviceplugin/tsrc \
-                tsutils/tsrc \
 }
 
 symbian:SUBDIRS += activityserviceplugin/symbianinstaller

@@ -49,16 +49,16 @@ namespace
     const char KTranslationPath[] = "resource/qt/translations";
     const char KTsDialogType[] = "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
     const char KActivityManaged [] = "com.nokia.qt.activities.ActivityManager";
-} 
- 
+}
+
 /*!
     Constructor.
  */
 TsDeviceDialogPlugin::TsDeviceDialogPlugin()
-: 
-mModel(0), 
-mStorage(0), 
-mTriedToLoadTranslation(false)
+    :
+    mModel(0),
+    mStorage(0),
+    mTriedToLoadTranslation(false)
 {
 }
 
@@ -69,8 +69,8 @@ TsDeviceDialogPlugin::~TsDeviceDialogPlugin()
 /*!
     \reimp
  */
-bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType, 
-                                         const QVariantMap &parameters, 
+bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType,
+                                         const QVariantMap &parameters,
                                          const QVariantMap &securityInfo) const
 {
     Q_UNUSED(deviceDialogType)
@@ -85,8 +85,8 @@ bool TsDeviceDialogPlugin::accessAllowed(const QString &deviceDialogType,
 /*!
     \reimp
  */
-HbDeviceDialogInterface * 
-TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType, 
+HbDeviceDialogInterface *
+TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
                                          const QVariantMap &parameters)
 {
     Q_UNUSED(parameters)
@@ -97,33 +97,33 @@ TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
             mTriedToLoadTranslation = true;
 
             QTranslator *translator = new QTranslator(this);
-            QString translationFile = 
+            QString translationFile =
                 QString("taskswitcher_%1").arg(QLocale::system().name());
-    
+
             bool translationLoaded(false);
-            #ifdef Q_OS_SYMBIAN
-                translationLoaded = 
-                    translator->load(translationFile, 
-                                     QString("z:/") + KTranslationPath);
-                if (!translationLoaded) {
-                    translationLoaded = 
-                        translator->load(translationFile, 
-                                         QString("c:/") + KTranslationPath);
-                }
-            #else
-                translationLoaded = 
-                    translator->load(translationFile, 
-                                     QString(KTranslationPath));
-            #endif //Q_OS_SYMBIAN
+#ifdef Q_OS_SYMBIAN
+            translationLoaded =
+                translator->load(translationFile,
+                                 QString("z:/") + KTranslationPath);
+            if (!translationLoaded) {
+                translationLoaded =
+                    translator->load(translationFile,
+                                     QString("c:/") + KTranslationPath);
+            }
+#else
+            translationLoaded =
+                translator->load(translationFile,
+                                 QString(KTranslationPath));
+#endif //Q_OS_SYMBIAN
 
             Q_ASSERT(translationLoaded);
             qApp->installTranslator(translator);
         }
-    
+
         // lazy loading of model
         if (!mModel) {
             mStorage = new TsTaskMonitor(this);
-            
+
             QServiceManager serviceManager;
             QObject *activityManager(serviceManager.loadInterface(KActivityManaged));
             if (activityManager) {
@@ -134,14 +134,14 @@ TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
             }
             mModel = new TsModel(*mStorage, *activityManager);
         }
-            
+
         // ensure the dismiss request property is set to false
 
         QValueSpacePublisher dismissRequestPublisher(TsProperty::KTsPath);
         dismissRequestPublisher.setValue(TsProperty::KDismissRequestPath, static_cast<int>(false));
         dismissRequestPublisher.sync();
 
-        
+
         // create device dialog
         dialogInterface = new TsDeviceDialogContainer(mModel);
     }
@@ -151,8 +151,8 @@ TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
 /*!
     \reimp
  */
-bool TsDeviceDialogPlugin::deviceDialogInfo(const QString &deviceDialogType, 
-                                            const QVariantMap &parameters, 
+bool TsDeviceDialogPlugin::deviceDialogInfo(const QString &deviceDialogType,
+                                            const QVariantMap &parameters,
                                             DeviceDialogInfo *info) const
 {
     Q_UNUSED(parameters)

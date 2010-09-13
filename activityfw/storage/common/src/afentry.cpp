@@ -55,6 +55,7 @@ CAfEntry* CAfEntry::NewLC()
 CAfEntry* CAfEntry::NewL(TInt flags,
                          TInt applicationId,
                          const TDesC &activityId,
+                         const TDesC &customActivityName,
                          const TDesC &imgSrc,
                          const TDesC8 &privateData,
                          const TDesC8 &publicData)
@@ -62,6 +63,7 @@ CAfEntry* CAfEntry::NewL(TInt flags,
     CAfEntry* self = CAfEntry::NewLC(flags, 
                                      applicationId, 
                                      activityId, 
+                                     customActivityName,
                                      imgSrc, 
                                      privateData, 
                                      publicData);
@@ -83,6 +85,7 @@ CAfEntry* CAfEntry::NewL(TInt flags,
 CAfEntry* CAfEntry::NewLC(TInt flags,
                           TInt applicationId,
                           const TDesC &activityId,
+                          const TDesC &customActivityName,
                           const TDesC &imgSrc,
                           const TDesC8 &privateData,
                           const TDesC8 &publicData)
@@ -91,6 +94,7 @@ CAfEntry* CAfEntry::NewLC(TInt flags,
     self->ConstructL(flags, 
                      applicationId, 
                      activityId, 
+                     customActivityName,
                      imgSrc, 
                      privateData, 
                      publicData);
@@ -133,6 +137,7 @@ CAfEntry::CAfEntry()
 void CAfEntry::ConstructL(TInt flags,
                           TInt applicationId,
                           const TDesC &activityId,
+                          const TDesC &customActivityName,
                           const TDesC &imgSrc,
                           const TDesC8 &privateData,
                           const TDesC8 &publicData)
@@ -140,6 +145,7 @@ void CAfEntry::ConstructL(TInt flags,
     mFlags = flags;
     mAppId = applicationId;
     CopyL(mActivityId, activityId);
+    CopyL(mCustomActivityName, customActivityName);
     CopyL(mImgSrc, imgSrc);
     CopyL(mPrivateData, privateData);
     CopyL(mPublicData, publicData);
@@ -152,6 +158,7 @@ void CAfEntry::ConstructL(TInt flags,
 CAfEntry::~CAfEntry()
 {
     mActivityId.Close();
+    mCustomActivityName.Close();
     mPrivateData.Close();
     mPublicData.Close();
     mImgSrc.Close();
@@ -164,8 +171,9 @@ CAfEntry::~CAfEntry()
  */
 TInt CAfEntry::Size() const
 {
-    return (sizeof(TInt) * 3) + //flags + appId + actId size info 
+    return (sizeof(TInt) * 4) + //flags + appId + actId size info + customActivityName size info
            mActivityId.Size() + //actId content size
+           mCustomActivityName.Size() + // customActivityName content size
            DataSize(); //data size
            
 }
@@ -192,6 +200,7 @@ void CAfEntry::ExternalizeL(RWriteStream &stream) const
     stream.WriteInt32L(mFlags);
     stream.WriteInt32L(mAppId);
     ExternalizeL(stream, mActivityId);
+    ExternalizeL(stream, mCustomActivityName);
     ExternalizeDataOnlyL(stream);
 }
 
@@ -205,6 +214,7 @@ void CAfEntry::InternalizeL(RReadStream &stream)
     mFlags = stream.ReadInt32L();
     mAppId = stream.ReadInt32L();
     InternalizeL(mActivityId, stream);
+    InternalizeL(mCustomActivityName, stream);
     InternalizeDataOnlyL(stream);
 }
 
@@ -262,6 +272,16 @@ TInt CAfEntry::ApplicationId() const
 const TDesC& CAfEntry::ActivityId() const
 {
     return mActivityId;
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Provide access to activity custom name.
+ * @return activity custom name
+ */
+const TDesC& CAfEntry::CustomActivityName() const
+{
+    return mCustomActivityName;
 }
 
 // -----------------------------------------------------------------------------

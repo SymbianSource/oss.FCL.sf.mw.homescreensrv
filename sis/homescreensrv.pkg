@@ -124,8 +124,6 @@
 "/epoc32/data/z/resource/plugins/casatmonitor.rsc"-"c:/resource/plugins/casatmonitor.rsc"
 "/epoc32/release/armv5/urel/caappscanner.dll" - "c:/sys/bin/caappscanner.dll"
 "/epoc32/data/z/resource/plugins/caappscanner.rsc"-"c:/resource/plugins/caappscanner.rsc"
-"/epoc32/release/armv5/urel/carunningappmonitor.dll" - "c:/sys/bin/carunningappmonitor.dll"
-"/epoc32/data/z/resource/plugins/carunningappmonitor.rsc"-"c:/resource/plugins/carunningappmonitor.rsc"
 "/epoc32/release/armv5/urel/cawidgetscanner.dll" - "c:/sys/bin/cawidgetscanner.dll"
 "/epoc32/data/z/resource/plugins/cawidgetscanner.rsc"-"c:/resource/plugins/cawidgetscanner.rsc"
 "/epoc32/release/armv5/urel/calocalizerscanner.dll" - "c:/sys/bin/calocalizerscanner.dll"

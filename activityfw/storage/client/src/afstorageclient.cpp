@@ -138,9 +138,9 @@ EXPORT_C int CAfStorageClient::removeApplicationActivities(const CAfEntry &entry
  * @param dst - list of results
  * @return 0 on success, error code otherwise 
  */
-EXPORT_C int CAfStorageClient::activities(RPointerArray<CAfEntry> &dst)
+EXPORT_C int CAfStorageClient::activities(RPointerArray<CAfEntry> &dst, TInt limit)
 {
-    return d_ptr->activities(dst);
+    return d_ptr->activities(dst, limit);
 }
 
 // -----------------------------------------------------------------------------

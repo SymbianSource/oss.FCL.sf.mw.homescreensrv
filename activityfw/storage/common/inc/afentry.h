@@ -49,6 +49,7 @@ public:
     static CAfEntry* NewL(TInt flags,
                           TInt applicationId,
                           const TDesC &activityId,
+                          const TDesC &customActivityName,
                           const TDesC &imgSrc,
                           const TDesC8 &privateData,
                           const TDesC8 &publicData);
@@ -56,6 +57,7 @@ public:
     static CAfEntry* NewLC(TInt flags,
                            TInt applicationId,
                            const TDesC &activityId,
+                           const TDesC &customActivityName,
                            const TDesC &imgSrc,
                            const TDesC8 &privateData,
                            const TDesC8 &publicData);
@@ -82,6 +84,8 @@ public:
     TInt ApplicationId() const;
 
     const TDesC& ActivityId() const;
+    
+    const TDesC& CustomActivityName() const;
 
     const TDesC& ImageSrc() const;
 
@@ -105,6 +109,7 @@ private:
     void ConstructL(TInt flags,
                     TInt applicationId,
                     const TDesC &activityId,
+                    const TDesC &customActivityName,
                     const TDesC &imgSrc,
                     const TDesC8 &privateData,
                     const TDesC8 &publicData);
@@ -120,6 +125,7 @@ private:
     TInt mFlags;
     TInt mAppId;
     RBuf mActivityId;
+    RBuf mCustomActivityName;
     RBuf mImgSrc;
     RBuf8 mPrivateData;
     RBuf8 mPublicData;

@@ -12,9 +12,8 @@
 * Contributors:
 *
 * Description:  Main plugin class
- *
+*
 */
-
 
 #ifndef HSAPPKEYPLUGIN_H
 #define HSAPPKEYPLUGIN_H
@@ -23,7 +22,6 @@
 #include <hb/hbcore/hbdevicedialogsymbian.h>
 
 class CEikonEnv;
-class CHbDeviceDialogSymbian;
 
 /**
 *  CAppKeyPlugin
@@ -36,65 +34,61 @@ class CHbDeviceDialogSymbian;
 class CHsAppKeyPlugin : public CSysapKeyHandlerPlugin,
                         public MHbDeviceDialogObserver
     {
-    public: // Constructors and destructor
-        /**
-        * Two-phased constructor.
-        */
-        static CHsAppKeyPlugin* NewL();
-        
-        /**
-        * Destructor.
-        */
-        virtual ~CHsAppKeyPlugin();
-    public: //MHbDeviceDialogObserver interfaces
-        void DataReceived(CHbSymbianVariantMap& aData);
-        
-        void DeviceDialogClosed(TInt aCompletionCode);
-    
-    public: // New functions
-        /**
-        * HandleKeyEventL
-        * @since Series 60 Series60_version 3.0
-        * @param const TKeyEvent& aKeyEvent, TEventCode aType
-        * @return TKeyResponse If key was consumed. Generally it should be, since the KEF calls the plugins only with the right key.
-        */
-        virtual TKeyResponse HandleKeyEventL( const TKeyEvent& aKeyEvent, 
-                                              TEventCode aType );
+public: // Constructors and destructor
+    /**
+    * Two-phased constructor.
+    */
+    static CHsAppKeyPlugin* NewL();
 
-        /**
-        * Provides the key events that the plugin wants to listen to.
-        * Plugins should overload this method if they are of version 2 or higher.
-        * iCode, iScanCode and iModifiers MUST be defined in each TKeyEvent.
-        *
-        * @since S60 5.1
-        * @return array of key events
-        */
-        void ProvideKeyEventsL( RArray<TKeyEvent>& aKeyEventArray );
-    private: // Constructors
-        /**
-        * C++ default constructor.
-        */
-        CHsAppKeyPlugin();
+    /**
+    * Destructor.
+    */
+    virtual ~CHsAppKeyPlugin();
 
-        /**
-        * By default Symbian 2nd phase constructor is private.
-        */
-        void ConstructL();
-        
-        void HandleShortPressL();
-        
-        void HandleLongPressL();
+public: //MHbDeviceDialogObserver interfaces
+    void DataReceived( CHbSymbianVariantMap& aData );
+    void DeviceDialogClosed( TInt aCompletionCode );
 
-    private: //data
-        /** Cached pointer to the CEikonEnv singelton instance */
-        CEikonEnv* iEikEnv;
-        TBool iSecondEvent;
-        CHbDeviceDialogSymbian* mDialog;
+public: // New functions
+    /**
+    * HandleKeyEventL
+    * @since Series 60 Series60_version 3.0
+    * @param const TKeyEvent& aKeyEvent, TEventCode aType
+    * @return TKeyResponse If key was consumed. Generally it should be, since the KEF calls the plugins only with the right key.
+    */
+    virtual TKeyResponse HandleKeyEventL( const TKeyEvent& aKeyEvent,
+                                          TEventCode aType );
+
+    /**
+    * Provides the key events that the plugin wants to listen to.
+    * Plugins should overload this method if they are of version 2 or higher.
+    * iCode, iScanCode and iModifiers MUST be defined in each TKeyEvent.
+    *
+    * @since S60 5.1
+    * @return array of key events
+    */
+    void ProvideKeyEventsL( RArray<TKeyEvent>& aKeyEventArray );
+
+private: // Constructors
+    /**
+    * C++ default constructor.
+    */
+    CHsAppKeyPlugin();
+
+    /**
+    * By default Symbian 2nd phase constructor is private.
+    */
+    void ConstructL();
+
+private: // helper methods
+    void HandleShortPressL();
+    void HandleLongPressL();
+    void DismissTaskSwitcher();
+
+private: //data
+    CEikonEnv* iEikEnv;
+    TBool iSecondEvent;
+    CHbDeviceDialogSymbian* iDialog;
     };
 
 #endif // HSAPPKEYPLUGIN_H
-
-// End of File
-
-
-

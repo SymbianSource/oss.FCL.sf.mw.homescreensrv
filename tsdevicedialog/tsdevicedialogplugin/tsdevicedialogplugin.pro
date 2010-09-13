@@ -59,7 +59,7 @@ symbian {
     pluginstub.path = /resource/plugins/devicedialogs
     DEPLOYMENT += pluginstub
     
-    LIBS += -lxqsettingsmanager -lapparc -lapgrfx
+    LIBS += -lxqsettingsmanager
     
     BLD_INF_RULES.prj_exports += \
     "$${LITERAL_HASH}include <platform_paths.hrh>" \

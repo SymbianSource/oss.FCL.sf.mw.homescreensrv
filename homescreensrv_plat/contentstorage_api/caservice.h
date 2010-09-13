@@ -93,9 +93,9 @@ public:
         const QList< QSharedPointer<CaEntry> > &entryList) const;
 
     int executeCommand(int entryId, const QString &command = 
-        caCmdOpen) const;
+        caCmdOpen, QObject* receiver = NULL, const char* member = NULL) const;
     int executeCommand(const CaEntry &entry, const QString &command =
-        caCmdOpen) const;
+        caCmdOpen, QObject* receiver = NULL, const char* member = NULL) const;
 
     CaNotifier * createNotifier(const CaNotifierFilter &filter) const;
 

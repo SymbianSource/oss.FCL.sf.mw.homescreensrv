@@ -24,7 +24,7 @@ class TsDocumentLoader : public HbDocumentLoader
 {
 
 private:
-    virtual QObject *createObject(const QString &type, 
+    virtual QObject *createObject(const QString &type,
                                   const QString &name);
 
 };

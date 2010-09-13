@@ -32,8 +32,8 @@ class TsActivityModelItem : public TsModelItem
 {
     Q_OBJECT
 public:
-    TsActivityModelItem(QAbstractListModel &model, 
-                        QObject &service, 
+    TsActivityModelItem(QAbstractListModel &model,
+                        QObject &service,
                         const QVariantHash &activity);
     ~TsActivityModelItem();
     QVariant data(int role) const;
@@ -57,7 +57,7 @@ private:
     const QVariantHash mActivity;
     QIcon mIcon;
     mutable bool mRequestPending;
-    
+
     Q_DISABLE_COPY(TsActivityModelItem)
 
 };

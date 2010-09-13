@@ -12,6 +12,7 @@ EXPORTS
 	?getThumbnail@CAfStorageClient@@QAEHABVTSize@@ABVTDesC16@@PAX@Z @ 11 NONAME ; int CAfStorageClient::getThumbnail(class TSize const &, class TDesC16 const &, void *)
 	?removeActivity@CAfStorageClient@@QAEHABVCAfEntry@@@Z @ 12 NONAME ; int CAfStorageClient::removeActivity(class CAfEntry const &)
 	?removeApplicationActivities@CAfStorageClient@@QAEHABVCAfEntry@@@Z @ 13 NONAME ; int CAfStorageClient::removeApplicationActivities(class CAfEntry const &)
-	?activities@CAfStorageClient@@QAEHAAV?$RPointerArray@VCAfEntry@@@@@Z @ 14 NONAME ; int CAfStorageClient::activities(class RPointerArray<class CAfEntry> &)
+	?activities@CAfStorageClient@@QAEHAAV?$RPointerArray@VCAfEntry@@@@@Z @ 14 NONAME ABSENT ; int CAfStorageClient::activities(class RPointerArray<class CAfEntry> &)
 	?activityData@CAfStorageClient@@QAEHAAPAVCAfEntry@@ABV2@@Z @ 15 NONAME ; int CAfStorageClient::activityData(class CAfEntry * &, class CAfEntry const &)
+	?activities@CAfStorageClient@@QAEHAAV?$RPointerArray@VCAfEntry@@@@H@Z @ 16 NONAME ; int CAfStorageClient::activities(class RPointerArray<class CAfEntry> &, int)
 

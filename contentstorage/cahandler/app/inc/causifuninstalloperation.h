@@ -21,6 +21,8 @@
 #include <e32base.h>
 #include <usif/sif/sif.h>
 
+class CaUninstallerObserver;
+
 using namespace Usif;
 
 /**
@@ -48,6 +50,8 @@ public:
      */
     static CCaUsifUninstallOperation *NewL(TComponentId, TInt aPriority =
             CActive::EPriorityStandard);
+    
+    void AddObserver(CaUninstallerObserver* aCaUninstallerObserver);
 
 private:
     // construction
@@ -81,6 +85,8 @@ private:
     COpaqueNamedParams* iResults;
 
     RSoftwareInstall iUninstaller;
+    
+    CaUninstallerObserver* iCaUninstallerObserver; // not owned
 };
 
 #endif // C_CAUSIFUNINSTALLOPERATION_H

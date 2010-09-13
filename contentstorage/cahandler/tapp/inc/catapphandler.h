@@ -35,7 +35,8 @@ public:
     ~CaTappHandler();
 
     Q_INVOKABLE
-    int execute(const CaEntry &entry, const QString &command);
+    int execute(const CaEntry &entry, const QString &command, 
+            QObject* receiver = NULL, const char* member = NULL);
 
 private:
     XQApplicationManager *mAiwMgr;

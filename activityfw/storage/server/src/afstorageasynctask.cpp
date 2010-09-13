@@ -108,7 +108,7 @@ void CAfStorageAsyncTask::ExecuteL(CAfStorage& dataStorage,
 void CAfStorageAsyncTask::AllActivitiesL(CAfStorage& dataStorage, 
                                          const RMessage2& msg)
 {
-    dataStorage.ActivitiesL(mInternalizedData);
+    dataStorage.AllActivitiesL(mInternalizedData, msg.Int3());
     ExternalizeL();
     WriteResponseL(msg);
 }

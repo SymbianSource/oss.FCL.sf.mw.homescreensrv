@@ -41,7 +41,7 @@ public:
     int saveActivity(const CAfEntry &entry, TInt imageHandle);
     int removeActivity(const CAfEntry &templateEntry);
     int removeApplicationActivities(const CAfEntry &templateEntry);
-    int activities(RPointerArray<CAfEntry> &dst);
+    int activities(RPointerArray<CAfEntry> &dst, TInt limit = 0);
     int applicationActivities(RPointerArray<CAfEntry> &dst, const CAfEntry &entry);
     int activityData(CAfEntry *&resultEntry, const CAfEntry &templateEntry);
     int waitActivity();
@@ -51,7 +51,7 @@ public:
 
 private:
     int execute(int function, const CAfEntry &sourceEntry, TInt imageHandle);
-    int execute(int function, RPointerArray<CAfEntry> &resultsList,const CAfEntry &templateEntry);
+    int execute(int function, RPointerArray<CAfEntry> &resultsList,const CAfEntry &templateEntry, int limit = 0);
 
 private:
     RAfStorageClientImplementation mImplementation;

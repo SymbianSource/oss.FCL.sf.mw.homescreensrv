@@ -83,6 +83,10 @@
  Proxy to client notifier.
  */
 
+namespace Hs {
+    const char packageTypeName[] = "package";
+}
+
 // Initialization of a static member variable.
 QWeakPointer<CaService> CaService::m_instance = QWeakPointer<CaService>();
 /*!
@@ -365,7 +369,14 @@ bool CaService::updateEntry(const CaEntry &entry) const
  */
 bool CaService::touch(const CaEntry &entry) const
 {
-    return m_d->touch(entry);
+    if (entry.flags() & RemovableEntryFlag &&
+        (entry.flags() & UsedEntryFlag) == 0 &&
+        entry.role() == ItemEntryRole &&
+        entry.entryTypeName() != QString(Hs::packageTypeName)) {
+        return m_d->touch(entry);
+    } else {
+    	return true;
+    }
 }
 
 /*!
@@ -827,6 +838,8 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
  Execute command.
  \param entryId id of an entry.
  \param command command.
+ \param receiver QObject class with slot.
+ \param member Slot from QObject class.
  \retval 0 if operation was successful.
 
  \example
@@ -843,14 +856,15 @@ bool CaService::prependEntriesToGroup(const CaEntry &group,
  result == 0
  \endcode
  */
-int CaService::executeCommand(int entryId, const QString &command) const
+int CaService::executeCommand(int entryId, const QString &command, 
+        QObject* receiver, const char* member) const
 {
     int result = -19;
     
     const QSharedPointer<CaEntry> temporaryEntry = getEntry(entryId);
     
     if (!temporaryEntry.isNull()) {
-        result = executeCommand(*temporaryEntry, command);
+        result = executeCommand(*temporaryEntry, command, receiver, member);
     }
     return result;
 }
@@ -859,6 +873,8 @@ int CaService::executeCommand(int entryId, const QString &command) const
  Execute command.
  \param entry entry.
  \param command command.
+ \param receiver QObject class with slot.
+ \param member Slot from QObject class.
  \retval 0 if operation was successful.
 
  \example
@@ -875,9 +891,10 @@ int CaService::executeCommand(int entryId, const QString &command) const
  result == 0
  \endcode
  */
-int CaService::executeCommand(const CaEntry &entry, const QString &command) const
+int CaService::executeCommand(const CaEntry &entry, const QString &command, 
+        QObject* receiver, const char* member) const
 {
-    return m_d->executeCommand(entry, command);
+    return m_d->executeCommand(entry, command, receiver, member);
 }
 
 /*!
@@ -1333,10 +1350,14 @@ bool CaServicePrivate::prependEntriesToGroup(int groupId,
  Executes command on entry (fe. "open", "remove")
  \param const reference to an entry on which command will be issued
  \param string containing a command
+ \param receiver QObject with slot
+ \param member slot from QObject
  \retval int which is used as an error code return value, 0 means no errors
  */
 int CaServicePrivate::executeCommand(const CaEntry &entry,
-                                      const QString &command)
+                                      const QString &command,
+                                      QObject* receiver, 
+                                      const char* member)
 {
     qDebug() << "CaServicePrivate::executeCommand"
              << "entry id:" << entry.id() << "command:" << command;
@@ -1351,7 +1372,8 @@ int CaServicePrivate::executeCommand(const CaEntry &entry,
         touch(entry);
     }
 
-    int errorCode = mCommandHandler->execute(entry, command);
+    int errorCode = mCommandHandler->execute(entry, 
+            command, receiver, member);
     mErrorCode = CaObjectAdapter::convertErrorCode(errorCode);
     
 

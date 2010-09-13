@@ -133,7 +133,7 @@ void RAfStorageClientImplementation::executeL(int function,
 }
 
 // -----------------------------------------------------------------------------
-void RAfStorageClientImplementation::executeL(int function, RPointerArray<CAfEntry> &resultsList, const CAfEntry& templateEntry)
+void RAfStorageClientImplementation::executeL(int function, RPointerArray<CAfEntry> &resultsList, const CAfEntry& templateEntry, TInt limit)
 {
     resultsList.ResetAndDestroy();
     RBuf8 buffer;
@@ -145,7 +145,7 @@ void RAfStorageClientImplementation::executeL(int function, RPointerArray<CAfEnt
     CleanupStack::PopAndDestroy(&writer);
     TPckgBuf<int> length(0), taskId(0);
     User::LeaveIfError(SendReceive(function,
-                                   TIpcArgs(&buffer, &length, &taskId)));
+                                   TIpcArgs(&buffer, &length, &taskId, limit)));
     CAfEntry::ReallocL(buffer, length());
     User::LeaveIfError(SendReceive(GetData, TIpcArgs(&taskId, &buffer)));
     resultsList << buffer;

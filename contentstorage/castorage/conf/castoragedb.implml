@@ -52,7 +52,7 @@
             <include files="${CaStorageDbSetting.OperatorCollections.Icon.localPath}"/>
         </input>
         <input>
-            <include files="${CaStorageDbSetting.OperatorURLs.OperatorURLIcon.localPath}"/>
+            <include files="${CaStorageDbSetting.OperatorURLs.URLIcon.localPath}"/>
         </input>
         </output>
     </content>

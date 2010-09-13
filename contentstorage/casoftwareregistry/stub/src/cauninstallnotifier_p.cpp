@@ -42,6 +42,5 @@ CaUninstallNotifierPrivate::~CaUninstallNotifierPrivate()
 
 void CaUninstallNotifierPrivate::makeConnect()
 {
-    connect(mUninstallObserver, SIGNAL(signalprogressChange(int, int)), 
-            m_q, SIGNAL(progressChange(int, int)));
+
 }

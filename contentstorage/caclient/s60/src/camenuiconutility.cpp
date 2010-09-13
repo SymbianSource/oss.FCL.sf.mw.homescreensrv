@@ -167,7 +167,16 @@ LOCAL_C HbIcon getDefaultIcon(const CaEntry& entry)
         icon = HbIcon("qtg_large_application");
     } else if (entry.entryTypeName() ==
         XQConversions::s60DescToQString(KCaTypePackage)) {
-        icon = HbIcon("qtg_large_application");
+        QString type = entry.attribute(XQConversions::s60DescToQString(KCaAttrAppType));
+        if (type == 
+                XQConversions::s60DescToQString(KCaAttrAppTypeValueJava)) {
+            icon = HbIcon("qtg_large_java");
+        } else if (type == 
+                XQConversions::s60DescToQString(KCaAttrAppTypeValueCWRT)) {
+            icon = HbIcon("qtg_large_widget");
+        } else {
+            icon = HbIcon("qtg_large_sisx");
+        }        
     }
     
     return icon;

@@ -24,11 +24,11 @@ class TsNoItemsLabel : public HbLabel
     Q_OBJECT
 
 public:
-    explicit TsNoItemsLabel(QGraphicsItem *parent = 0);  
-    
+    explicit TsNoItemsLabel(QGraphicsItem *parent = 0);
+
 private:
-    Q_DISABLE_COPY(TsNoItemsLabel)    
-    
+    Q_DISABLE_COPY(TsNoItemsLabel)
+
 };
 
 #endif //TSNOITEMSLABEL_H

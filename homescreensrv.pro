@@ -16,16 +16,17 @@
 
 TEMPLATE = subdirs
 
-SUBDIRS  += hswidgetmodel \
-            contentstorage \
-            homescreensrv_plat
-            
-exists(tsrc/tsrc.pro): SUBDIRS  += tsrc
-            
+SUBDIRS  += homescreensrv_plat \
+            hswidgetmodel \
+            contentstorage
+                       
+symbian:SUBDIRS += utils
 symbian:SUBDIRS += activityfw
 symbian:SUBDIRS += taskswitcher
 symbian:SUBDIRS += hsappkeyhandler
 symbian:SUBDIRS += tsdevicedialog
+
+exists(tsrc/tsrc.pro): SUBDIRS  += tsrc
 
 CONFIG += ordered
 
