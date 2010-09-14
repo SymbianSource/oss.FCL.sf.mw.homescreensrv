@@ -725,6 +725,16 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
             ChspsODT& aOdt );
 
         /**
+         * Activates default configuration defined for the application
+         * @since S60 5.2
+         * @param aHeader application which default configuration is activated
+         * @param aOdt activated application configuration
+         */
+        void ActivateDefaultAppConfL(
+            const ChspsODT& aHeader,
+            ChspsODT& aOdt );
+
+        /**
         * HandleDefinitionRespositoryEventL
         *
         * @since S60 5.0
@@ -741,6 +751,28 @@ class ChspsMaintenanceHandler : public CTimer, public MhspsMaintenanceService,
                 const ChspsODT& aOdt,
                 RArray<ThspsRepositoryInfo>& aNotificationParams);
         
+        /**
+        * RemoveAppConfFromRepositoryL
+        * Removes application confguration from definition repository
+        * @since S60 5.2
+        * @param aOdt application configuration to be removed
+        * @param aNotificationParams notifications need to be sent after removal
+        */
+        void RemoveAppConfFromRepositoryL( 
+                const ChspsODT& aOdt,
+                RArray<ThspsRepositoryInfo>& aNotificationParams );
+
+        /**
+        * RemovePluginConfFromRepositoryL
+        * Removes plugin confguration from definition repository
+        * @since S60 5.2
+        * @param aOdt plugin configuration to be removed
+        * @param aNotificationParams notifications need to be sent after removal
+        */
+        void RemovePluginConfFromRepositoryL( 
+                const ChspsODT& aOdt,
+                RArray<ThspsRepositoryInfo>& aNotificationParams );
+
         /**
         * InvalidateUninstalledPluginInstancesL
         * Removes uninstalled plugin instances from an inactive

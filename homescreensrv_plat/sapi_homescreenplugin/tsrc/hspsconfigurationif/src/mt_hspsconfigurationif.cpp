@@ -23,6 +23,7 @@
 #include <eikenv.h>
 #include <centralrepository.h>
 #include <bautils.h>
+#include <driveinfo.h>
 #include "mt_hspsconfigurationif.h"
 #include "mt_hspsliwlistprinter.h"
 #include "mt_hspsinstallationservice.h"
@@ -132,7 +133,37 @@ _LIT( KMinimalResourceFile3, "c:\\private\\20000fb1\\2456\\270513751\\536916225\
 _LIT( KMinimalResourceFile4, "c:\\private\\20000fb1\\2456\\270513751\\536916225\\1.0\\sources\\picture.jpeg"  );
 _LIT( KFinnishMifLogo, "c:\\private\\20000fb1\\2456\\270513751\\536916274\\1.0\\sources\\dummy.mif"  );
 
+const TInt16 KletterA = 'a'; // ASCII code for 'a'
+
 // ======== LOCAL FUNCTIONS ====================================================
+
+//------------------------------------------------------------------------------
+// EMMC drive finder - from hspsServerUtil 
+//------------------------------------------------------------------------------
+TInt GetEmmcDrivePath( )
+    {
+    RFs fs;
+    if ( fs.Connect() != KErrNone )
+        {
+        return KErrNotFound;
+        }
+    TInt drive = KErrNotFound;
+    if ( DriveInfo::GetDefaultDrive( 
+            DriveInfo::EDefaultMassStorage, drive ) == KErrNone )
+        {
+        TUint status;
+        if ( DriveInfo::GetDriveStatus( fs, drive, status ) == KErrNone )
+            {
+            if ( status & DriveInfo::EDriveInternal )
+                {
+                fs.Close();
+                return drive;
+                }
+            }
+        }
+    fs.Close();
+    return KErrNotFound;
+    }
 
 // ======== MEMBER FUNCTIONS ===================================================
 
@@ -3209,6 +3240,15 @@ void MT_CHSPSConfigurationIf::RestoreConfigurations_1_L()
 void MT_CHSPSConfigurationIf::Customization_1_L()
     {        
     // Pre conditions
+    // There is minimal configuration and a D drive present in emulator
+    // Outcome:
+    // The original configuration file is bypassed by a new one placed on the D 
+    // drive
+    // Possible problems:
+    // There is no E drive (EMMC) in emulator. The data are copied to the D 
+    // drive. In case there is the E drive,please check all possible references
+    // to the D drive and change, if needed. This is important for HW testing.
+    // Remark: hspsServerUtil::FindFile() determines which drives are searched.
         
     EUNIT_PRINT( _L8( "Pre conditions: Set Active configuration Minimal" ) );
     SetActiveConfigurationL( KHSPSTestAppUid, KHSPSActiveConfMinimal );    
@@ -3219,13 +3259,24 @@ void MT_CHSPSConfigurationIf::Customization_1_L()
     // Simulate customization by copying configuration files to D drive ("ROM" stuff is on C)
     CFileMan* fileManager = CFileMan::NewL( iFileserver );
     CleanupStack::PushL( fileManager );
+    
+    // Find MMC drive, if not found copy it to the D drive
+    TInt drive = GetEmmcDrivePath();
+    if ( drive == KErrNotFound )
+        {
+        drive = EDriveD;    // Set D drive
+        }
+    _LIT( Kconfigdir, "d:\\data\\mt_hsps\\installed_widget\\widgetconfiguration.xml" );
+    TBuf<200> confdir;
+    confdir.Append( Kconfigdir );
+    confdir[0] = ( TInt16 )drive + KletterA; // see ACII table
     User::LeaveIfError( 
         fileManager->Copy(
-            _L( "c:\\data\\mt_hsps\\installed_widget\\widgetconfiguration_customized.xml" ),
-            _L( "d:\\data\\mt_hsps\\installed_widget\\widgetconfiguration.xml" ),
-            CFileMan::ERecurse|CFileMan::EOverWrite 
-            )             
+        _L( "c:\\data\\mt_hsps\\installed_widget\\widgetconfiguration_customized.xml" ),
+        confdir,
+        CFileMan::ERecurse|CFileMan::EOverWrite )
         );    
+    
     CleanupStack::PopAndDestroy( fileManager );
                 
     MT_CHspsInstallationService* installationService = MT_CHspsInstallationService::NewL();    

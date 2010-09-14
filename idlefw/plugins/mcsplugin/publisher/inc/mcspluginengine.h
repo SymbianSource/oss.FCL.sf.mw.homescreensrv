@@ -147,9 +147,12 @@ public:
     void SetBackupRestore( TBool aBackupRestore );
 
     /**
-     * ShowSettingsL
-     */
-    void ShowSettingsL();
+    * Shows shortcut settings
+    *
+    * @param aEditIdx Change specified shortcut
+    * @return void
+    */
+    void ShowSettingsL( const TInt aEditIdx );
 
 private:
     // from MMCSPluginWatcherObserver

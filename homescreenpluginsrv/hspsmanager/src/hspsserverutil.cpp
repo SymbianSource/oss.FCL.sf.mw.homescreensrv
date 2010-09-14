@@ -35,6 +35,7 @@
 
 _LIT(KHspsFolder, "\\200159c0\\themes\\" );
 _LIT(KSourcesFolder, "\\sources\\");
+_LIT(KLocalesFolder, "\\locales\\");
 _LIT( KThemesFolder, "\\themes\\" );
 _LIT( KDoubleBackSlash, "\\" );
 _LIT8( KHexPrefix8, "0x" );
@@ -950,8 +951,10 @@ ChspsDomNode* hspsServerUtil::FindNodeByAttributeL(
 void hspsServerUtil::FindUniquePluginsL( 
         ChspsODT& aOdt, 
         RArray<TInt>& aPluginArray )
-    {    
-    aPluginArray.Reset();          
+    {
+    aPluginArray.Reset();
+    CleanupClosePushL( aPluginArray );
+
     ChspsDomDocument& dom = aOdt.DomDocument();
     ChspsDomDepthIterator* iter = ChspsDomDepthIterator::NewL( *dom.RootNode() );
     CleanupStack::PushL( iter );
@@ -959,32 +962,32 @@ void hspsServerUtil::FindUniquePluginsL(
     ChspsDomNode* node = iter->First();
     ChspsDomNode* prevNode = NULL;
     while( node && prevNode != node )
-       {                
-       const TDesC8& name = node->Name();
+        {
+        const TDesC8& name = node->Name();
        
-       // Plugin element was found 
-       if ( name == KPluginElement )
-           {           
-           ChspsDomList& attrList = node->AttributeList();                    
-           ChspsDomAttribute* uidAttr = static_cast<ChspsDomAttribute*>( attrList.FindByName(KPluginAttrUid) );            
-           if ( uidAttr )
-               {     
-               // Convert from hex to int
-               const TUid pluginUid = ConvertDescIntoUid( uidAttr->Value() );               
-               if ( pluginUid.iUid > 0 )
-                   {
-                   TBool isUnique = ETrue;
-                   for( TInt i=0; isUnique && i<aPluginArray.Count();i++ )
-                       {
-                       if ( aPluginArray[i] == pluginUid.iUid )
-                           {
-                           isUnique=EFalse;
-                           }
-                       }
-                   if ( isUnique )
-                       {
-                       aPluginArray.Append( pluginUid.iUid );
-                       }
+        // Plugin element was found 
+        if ( name == KPluginElement )
+            {           
+            ChspsDomList& attrList = node->AttributeList();                    
+            ChspsDomAttribute* uidAttr = static_cast<ChspsDomAttribute*>( attrList.FindByName(KPluginAttrUid) );            
+            if ( uidAttr )
+                {     
+                // Convert from hex to int
+                const TUid pluginUid = ConvertDescIntoUid( uidAttr->Value() );               
+                if ( pluginUid.iUid > 0 )
+                    {
+                    TBool isUnique = ETrue;
+                    for( TInt i=0; isUnique && i<aPluginArray.Count();i++ )
+                        {
+                        if ( aPluginArray[i] == pluginUid.iUid )
+                            {
+                            isUnique=EFalse;
+                            }
+                        }
+                    if ( isUnique )
+                        {
+                        aPluginArray.AppendL( pluginUid.iUid );
+                        }
                    }               
                }
            }
@@ -992,8 +995,10 @@ void hspsServerUtil::FindUniquePluginsL(
            prevNode = node;        
            node = iter->NextL();        
            }
-   CleanupStack::PopAndDestroy( iter );      
-}
+
+    CleanupStack::PopAndDestroy( iter );
+    CleanupStack::Pop( &aPluginArray );
+    }
 
 //----------------------------------------------------------------------------
 // CHspsServiceUtilities::HexString2Uint
@@ -1275,10 +1280,9 @@ void hspsServerUtil::FindFilesFromDirL(
         TFileName file;
         file.Append( aDirName );
         file.Append( fileEntry.iName );
-        aFiles.Append( file );
+        aFiles.AppendL( file );
         }
     CleanupStack::PopAndDestroy( fileList );
-
     CleanupStack::PopAndDestroy(); // fs
     }
 
@@ -1410,41 +1414,93 @@ void hspsServerUtil::GetAttributeValueL(
 // -----------------------------------------------------------------------------
 //
 void hspsServerUtil::CheckResourceFilesL( 
-    const ChspsODT& aOdt,
-    const TInt aConfUid )
+    ChspsODT& aAppOdt,    
+    const ChspsODT& aPluginHeader,
+    RFs& aRfs )
     {
     __UHEAP_MARK;
-
-    // Convert configuration UID to decimal string
-    TBuf<10> confUid; 
-    _LIT( KFormat, "%D" );
-    confUid.AppendFormat( KFormat, aConfUid );
-
-    RFs fs;
-    CleanupClosePushL( fs );
-    User::LeaveIfError( fs.Connect() );
     
-    TInt resCount = aOdt.ResourceCount();
-    for ( TInt i = 0; i < resCount; i++ )
-        {
-        // Check if resource file belongs to defined configuration
-        // (file path contains configuration UID string)
-        ChspsResource& res = aOdt.ResourceL( i );
-        TPtrC resFile = res.FileName();
-        if ( resFile.FindC( confUid ) != KErrNotFound )
+    // Get all languages which the HW image supports
+    CArrayFixFlat<TInt>* supportedLanguages = NULL;
+    hspsServerUtil::GetInstalledLanguagesL( supportedLanguages );
+    CleanupStack::PushL( supportedLanguages );
+    supportedLanguages->InsertL( 0, ELangNone ); // language independent resources
+    const TInt languagesCount = supportedLanguages->Count();
+    
+    // If set, the plug-in resources need to be updated
+    TBool isBroken = EFalse;        
+        
+    // Loop resources from the application configuration and
+    // fix the language specific resources.
+    // Use case: backup has been taken from another variant
+    const TInt count = aAppOdt.ResourceCount();
+    for ( TInt i = 0; i < count; i++ )
+        {        
+        ChspsResource& appResource = aAppOdt.ResourceL( i );
+             
+        // If this resource needs to be checked 
+        if ( appResource.ConfigurationUid() == aPluginHeader.ThemeUid() )
             {
-            // Check that resource files exists
-            if ( !BaflUtils::FileExists( fs, resFile ) )
+            // Test if localization matches
+            TBool wasFound = EFalse;
+            for( TInt j=0; j < languagesCount; j++ )
                 {
-                User::Leave( KErrNotFound );
+                if( appResource.Language() == supportedLanguages->At( j ) )
+                    {
+                    wasFound = ETrue;
+                    break;                                               
+                    }
+                }
+            if( !wasFound )
+                {
+                isBroken = ETrue;
+                break;
                 }
             }
         }
+   
+    if( isBroken )
+        {                                             
+        // Remove all resources 
+        RemovePluginResourcesL( aAppOdt, aPluginHeader.ThemeUid() );
+   
+        // Add back the matching resources        
+        const TInt resourceCount = aPluginHeader.ResourceCount();
+        for ( TInt i=0; i < resourceCount; i++ )
+            {                    
+            ChspsResource& resource = aPluginHeader.ResourceL( i );
+
+            // Ignore the ODT resource
+            if ( resource.FileName().FindF( KSourcesFolder ) > 0
+                || resource.FileName().FindF( KLocalesFolder ) > 0 )                               
+                {
+                
+                // Find valid resources                
+                for( TInt j=0; j < languagesCount; j++ )
+                    {
+                    if( resource.Language() == supportedLanguages->At( j ) )
+                        {
+                        // Make sure the file exists    
+                        if( !BaflUtils::FileExists( aRfs, resource.FileName() ) )
+                            {
+                            User::Leave( KErrNotFound );
+                            }
+                        // Finally append the resource array of the application configuration 
+                        ChspsResource* clonedResource = resource.CloneL();
+                        CleanupStack::PushL( clonedResource );
+                        aAppOdt.AddResourceL( clonedResource );
+                        CleanupStack::Pop( clonedResource );
+                        }
+                    }
+                
+                }
+            }                
+                
+        }
     
-    CleanupStack::PopAndDestroy(); // fs
+    CleanupStack::PopAndDestroy( supportedLanguages );
     
     __UHEAP_MARKEND;
-    
     }
 
 // -----------------------------------------------------------------------------
@@ -1992,6 +2048,13 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
                  {
                  aFs.SetSessionToPrivate( drive );
                  }
+// When Emmc drive is not present in emulator it is replaced by D drive
+#ifdef __WINSCW__
+             else 
+                 {
+                 aFs.SetSessionToPrivate( EDriveD );
+                 }
+#endif
              }
          else 
              {
@@ -2102,6 +2165,7 @@ void hspsServerUtil::FindResourcesL(
             {
             CleanupStack::PushL( dirList );
                        
+            // Loop entries
             const TInt count = dirList->Count();          
             for( TInt entryIndex = 0; entryIndex < count; entryIndex++ )
                 {
@@ -2111,12 +2175,18 @@ void hspsServerUtil::FindResourcesL(
                 file.Append( entry.iName );
                 
                 if( entry.IsDir() )
-                    {                               
+                    {   
+					                            
                     if( aDeviceLanguages )
                         {
+#if defined(WINSCW) || defined(__WINS__)
+                        // Emulator environment supports all languages, include all directories
+#else
+                        // Devices have less languages, therefore include specific directories only
                         TInt dirLanguage = 0;
                         TLex lex( entry.iName );
-                        TBool skipDir = ETrue;
+                        TBool skipDir = ETrue;                        
+                        // If conversion succeeded
                         if( lex.Val( dirLanguage ) == KErrNone && dirLanguage >= ELangTest )
                             {                   
                             for( TInt i=0; i < aDeviceLanguages->Count(); i++ )
@@ -2129,26 +2199,30 @@ void hspsServerUtil::FindResourcesL(
                                     }
                                 }
                             }
+                        
+                        // If the language is not supported by the device  
                         if( skipDir )
                             {
                             continue;
                             }
+#endif                                                
                         }
-              
-                  file.Append( KDoubleBackSlash );
-                  }
+						
+                    file.Append( KDoubleBackSlash );
+                    }
                                 
               if( entry.IsDir() && aRecursive )
                   {                   
-                  // Find files from the directory and drive
+                  // Find files from the subdirectory and the drive
                   RArray<TInt> driveArray;
                   CleanupClosePushL( driveArray );                  
-                  driveArray.Append( aDriveArray[driveIndex] );                                   
+                  driveArray.AppendL( aDriveArray[driveIndex] );                                   
                   FindResourcesL( aFs, driveArray, file, aFileArray, NULL );   
                   CleanupStack::PopAndDestroy( &driveArray );
                   }
               else
-                  {                                                  
+                  {              
+                  // Append the results array
                   HBufC* nameBuf = file.AllocLC();                
                   aFileArray.AppendL( nameBuf );
                   CleanupStack::Pop( nameBuf );                      
@@ -2170,13 +2244,13 @@ void hspsServerUtil::GetInstalledLanguagesL(
     {
     User::LeaveIfError( SysLangUtil::GetInstalledLanguages( aLanguages ) );
     CleanupStack::PushL( aLanguages );
-    
-    const TInt testLang = (TInt)ELangTest;
-    
+
+    // Check for a duplicate entry
+    const TInt KTestLang = (TInt)ELangTest;    
     TBool isIncluded = EFalse;           
     for( TInt i = 0; i < aLanguages->Count(); i++ )
         {
-        if( aLanguages->At( i ) == testLang )
+        if( aLanguages->At( i ) == KTestLang )
             {    
             isIncluded = ETrue;            
             break;
@@ -2185,7 +2259,7 @@ void hspsServerUtil::GetInstalledLanguagesL(
     
     if( !isIncluded )
         {
-        aLanguages->InsertL( 0, testLang );        
+        aLanguages->InsertL( 0, KTestLang );        
         }
     
     CleanupStack::Pop( aLanguages );

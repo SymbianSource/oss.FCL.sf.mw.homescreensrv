@@ -395,12 +395,22 @@ ThspsServiceCompletedMessage ChspsInstallationHandler::hspsInstallTheme(
     TRAPD( err, DoInstallThemeL(aManifestFileName) );
     if( !err )
         {
-        // correct headerdata is in iHeaderData set by CheckHeaderL()
-        aHeaderData = iHeaderData->Des();        
-                   
-        // Set next phase
-        iInstallationPhase = EhspsPhaseCleanup;
-        ret = EhspsInstallThemeSuccess;
+        // correct headerdata is in iHeaderData set by CheckHeaderL(), check space
+        const TUint bytesRequired = iHeaderData->Des().Length(); 
+        const TUint bytesAllocated = aHeaderData.MaxLength();
+        if( bytesRequired <= bytesAllocated )
+            {            
+            aHeaderData = iHeaderData->Des();
+            
+            // Set next phase
+            iInstallationPhase = EhspsPhaseCleanup;
+            ret = EhspsInstallThemeSuccess;
+            }
+        else
+            {
+            err = KErrOverflow;
+            iInstallationPhase = EhspsPhaseIdle;
+            }        
         }
     else
         {     
@@ -1588,8 +1598,8 @@ void ChspsInstallationHandler::NotifyOdtUpdatedL()
                 KNullDesC(),
                 (TLanguage)( fullODT->OdtLanguage() ) );
             
-            notifications.Append( info );
-            }        
+            notifications.AppendL( info );
+            }
         
         CleanupStack::PopAndDestroy(); // pluginIds.
         CleanupStack::PopAndDestroy( fullODT );
@@ -2260,11 +2270,11 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
     TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
     if ( drive != KErrNotFound )
         {
-        driveArray.Append( drive );
+        driveArray.AppendL( drive );
         }
     
-    driveArray.Append( EDriveC );
-    driveArray.Append( EDriveZ );     
+    driveArray.AppendL( EDriveC );
+    driveArray.AppendL( EDriveZ );     
     
     FindResourceFilesL( aPath, ETrue, driveArray, systemEpocLanguageCodes );
    
@@ -2281,12 +2291,7 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
 void ChspsInstallationHandler::AddLocalesL(
         const TDesC& aPath,
         const TBool aProcessOnlyDTD )
-    {
-    // Retrieve phone supported language.
-    CArrayFixFlat<TInt>* languageCodes = NULL;
-    hspsServerUtil::GetInstalledLanguagesL( languageCodes );
-    CleanupStack::PushL( languageCodes );     
-    
+    {    
     // Ensure that path contains '\' at the end.
     TFileName pathBase;
     pathBase.Copy( aPath );
@@ -2299,20 +2304,50 @@ void ChspsInstallationHandler::AddLocalesL(
             pathBase.Append( KPathDelim );
             }
         }
-            
-    TParsePtrC driveParser( pathBase );
-    TInt driveEnum = KErrNotFound;
+
+#if defined(WINSCW) || defined(__WINS__)
     
-    if( !aProcessOnlyDTD )
+    // Emulator environment supports all languages, include all directories    
+    CDir* dir( NULL );                      
+    TFindFile fileFinder( iFsSession );      
+    fileFinder.SetFindMask( KDriveAttExclude|KDriveAttRemovable|KDriveAttRemote|KDriveAttSubsted );
+    fileFinder.FindWildByPath( aPath, NULL, dir );
+    if ( dir )
         {
-        if( driveParser.DrivePresent() && driveParser.Drive().Length() > 0 )
+        CleanupStack::PushL( dir );
+                
+        for ( TInt i=0; i < dir->Count(); i++ )
             {
-            User::LeaveIfError(
-                    RFs::CharToDrive( ( driveParser.Drive() )[0],
-                            driveEnum ) );
-            }
+            const TEntry& dirEntry = (*dir)[i];
+            if ( dirEntry.IsDir() )
+                {       
+                TInt languageId = KErrNotFound;
+                TLex lex( dirEntry.iName );        
+                if( lex.Val( languageId ) == KErrNone )
+                    {             
+                    TPath path( aPath );
+                    path.Append( dirEntry.iName );
+                    path.Append( KPathDelim );
+                    
+                    DoAddLocalesL(
+                        path, 
+                        (TLanguage)languageId, 
+                        aProcessOnlyDTD );
+                    }                
+                }
+            }                       
+        CleanupStack::PopAndDestroy( dir );
         }
     
+#else        
+    
+    // Devices have less languages, therefore include specific directories only
+    CArrayFixFlat<TInt>* languageCodes = NULL;        
+    hspsServerUtil::GetInstalledLanguagesL( languageCodes );
+    CleanupStack::PushL( languageCodes );
+                       
+    TParsePtrC driveParser( pathBase );
+                        
     _LIT( KFormatNN, "%02d" );    
     TFileName localePath;
     
@@ -2356,38 +2391,57 @@ void ChspsInstallationHandler::AddLocalesL(
             }
 
         if( exists )
-            {
-            // If we found the first language specification          
-            if ( !iDefaultSpecificationSet )
-                {
-                // Assume this is the default language shown incase 
-                // there is no locale for the active UI language
-                iDefaultSpecification = (TLanguage)languageCode;
-                iDefaultSpecificationSet = ETrue;
-                }                                                            
-                
-            // Add dtd file if existing.
-            AddDtdFileL( localePath, (TLanguage)languageCode );
-            
-            if( !aProcessOnlyDTD )
-                {
-                // Find localized files from the provided directory
-                RArray<TInt> driveArray;
-                CleanupClosePushL( driveArray );                
-                driveArray.Append( driveEnum );
-                
-                FindResourceFilesL( localePath,
-                                    EFalse,
-                                    driveArray,
-                                    NULL );
-                
-                CleanupStack::PopAndDestroy(); // driveArray
-                }
+            {            
+            DoAddLocalesL(
+                localePath, 
+                (TLanguage)languageCode, 
+                aProcessOnlyDTD );
             }        
         }
     
     CleanupStack::PopAndDestroy( languageCodes );
     languageCodes = NULL;
+#endif   
+    }
+
+void ChspsInstallationHandler::DoAddLocalesL(
+        const TDesC& aPath, 
+        const TLanguage aLanguage,
+        const TBool aProcessOnlyDTD )
+    {   
+    // If we found the first language specification          
+    if ( !iDefaultSpecificationSet )
+        {
+        // Assume this is the default language shown incase 
+        // there is no locale for the active UI language
+        iDefaultSpecification = aLanguage;
+        iDefaultSpecificationSet = ETrue;
+        }                                                            
+        
+    // Add DTD files holding localized widget name and desc
+    AddDtdFileL( aPath, aLanguage );
+        
+    if( !aProcessOnlyDTD )
+        {
+        TParsePtrC driveParser( aPath );
+        TInt driveEnum = KErrNotFound;
+        if( driveParser.DrivePresent() && driveParser.Drive().Length() > 0 )
+            {
+            User::LeaveIfError( RFs::CharToDrive( ( driveParser.Drive() )[0], driveEnum ) );
+            }
+
+        // Find localized resources from the subdirectory
+        RArray<TInt> driveArray;
+        CleanupClosePushL( driveArray );                
+        driveArray.AppendL( driveEnum );
+        
+        FindResourceFilesL( aPath,
+                            EFalse,
+                            driveArray,
+                            NULL );
+        
+        CleanupStack::PopAndDestroy(); // driveArray
+        }
     }
 
 // -----------------------------------------------------------------------------

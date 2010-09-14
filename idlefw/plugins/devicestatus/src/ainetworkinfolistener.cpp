@@ -100,36 +100,35 @@ TInt CAiNetworkInfoListener::DecAccessCount()
 
 void CAiNetworkInfoListener::AddObserverL( MAiNetworkInfoObserver& aObserver )
     {
-	//Removing observer doesn't remove slots from array, removed observers are only
-	//set to NULL. Reason for this is found out later on the code. Adding observer
-	//first tries to find free slot, if it is not found, observer is appended to the
-	//array.
-    TInt freeSlot = iObservers.Find( NULL );
-
-    if( freeSlot == KErrNotFound )
+    
+    if ( iObservers.Find( &aObserver ) == KErrNotFound)
         {
-        User::LeaveIfError( iObservers.Append( &aObserver ) );
+        //Removing observer doesn't remove slots from array, removed observers are only
+        //set to NULL. Reason for this is found out later on the code. Adding observer
+        //first tries to find free slot, if it is not found, observer is appended to the
+        //array.
+        TInt freeSlot = iObservers.Find( NULL );
+    
+        if( freeSlot == KErrNotFound )
+            {
+            User::LeaveIfError( iObservers.Append( &aObserver ) );
+            }
+        else
+            {
+            User::LeaveIfError( iObservers.Insert( &aObserver, freeSlot ) );
+            }
         }
-    else
-        {
-        User::LeaveIfError( iObservers.Insert( &aObserver, freeSlot ) );
-        }
-    }
+   }
 
 void CAiNetworkInfoListener::RemoveObserver( MAiNetworkInfoObserver& aObserver )
     {
-	//Remove observer, removing is done by replacing it with NULL pointer.
-    const TInt count( iObservers.Count() );
-
-    for( TInt i( 0 ); i < count; i++ )
+    TInt slot = iObservers.Find( &aObserver );
+    
+    if (slot != KErrNotFound )
         {
-        if( iObservers[i] == &aObserver )
-            {
-            //replace it with NULL
-            iObservers.Remove( i );
-            iObservers.Insert( NULL, i );
-            break;
-            }
+        //Remove observer, removing is done by replacing it with NULL pointer.
+        iObservers.Remove( slot );
+        iObservers.Insert( NULL, slot );
         }
     }
 
@@ -155,25 +154,45 @@ TBool CAiNetworkInfoListener::MessageReceived( MNWMessageObserver::TNWMessages a
 
 void CAiNetworkInfoListener::HandleNetworkMessage( const TNWMessages aMessage )
     {
-    __PRINT(__DBG_FORMAT("XAI: Handle NW message %d"), aMessage );
+    __PRINT(__DBG_FORMAT("XAI: CAiNetworkInfoListener > Handle NW message %d"), aMessage );
+    
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iRegistrationStatus %d"), iInfo.iRegistrationStatus );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iStatus %d"), iInfo.iStatus );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iCountryCode %S"), &iInfo.iCountryCode );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iNetworkId %S"), &iInfo.iNetworkId );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iOperatorNameInfo.iType %d"), iInfo.iOperatorNameInfo.iType );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iOperatorNameInfo.iName %S"), &iInfo.iOperatorNameInfo.iName );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iDisplayTag %S"), &iInfo.iDisplayTag );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iShortName %S"), &iInfo.iShortName );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iLongName %S"), &iInfo.iLongName );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iSPName %S"), &iInfo.iSPName );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iServiceProviderNameDisplayReq %d"), iInfo.iServiceProviderNameDisplayReq );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iNPName %S"), &iInfo.iNPName );
+    __PRINT(__DBG_FORMAT("XAI: iInfo.iPLMNField %S"), &iInfo.iPLMNField );
+    
     //Insert message into the message cache. Only one messsage of one type.
     TRAPD( err, iMessageCache->InsertIsqL( aMessage, iKeyProperties ) );
     if( err == KErrAlreadyExists )
         {
+        __PRINTS("XAI: message already exists in cache");
         err = KErrNone;
         }
     if( err != KErrNone )
         {
+        __PRINTS("XAI: error inserting message to cache , return");
         return;
         }
 
+    __PRINTS("XAI: check if allowed to display operator indicator");
 	iShowOpInd 		= !NotAllowedToDisplayOperatorIndicator( aMessage );
 
 	TBool hasNetInfoChanged = HasNetworkInfoChanged( aMessage );
 	if ( !hasNetInfoChanged )
 		{
+	    __PRINTS("XAI: net info not changed, return");
 		return;
 		}
+
 	__PRINT(__DBG_FORMAT("XAI: Show operator indicator %d, info changed %d"), iShowOpInd, hasNetInfoChanged );
     const TInt count( iObservers.Count() );
 
@@ -200,7 +219,7 @@ void CAiNetworkInfoListener::HandleNetworkMessage( const TNWMessages aMessage )
 
 void CAiNetworkInfoListener::HandleNetworkError( const TNWOperation aOperation, TInt aErrorCode )
     {
-    __PRINT(__DBG_FORMAT("XAI: Error code %d"), aErrorCode );
+    __PRINT(__DBG_FORMAT("XAI: CAiNetworkInfoListener > NetworkError code %d"), aErrorCode );
 
     TNWMessages errorCode = TNWMessages( KErrGeneral );
 

@@ -54,7 +54,7 @@ _LIT8( KConfStateError,                 "Error" );              // Error state
 
 // Options for the KConfigurationAttrLocking 
 _LIT8( KConfLockingLocked,              "locked" );             // Locked state
-_LIT8( KConfLockingRemovable,           "removable" );          // Removable state
+_LIT8( KConfLockingPermanent,           "permanent" );          // Permanent state (not removable, not movable)
 _LIT8( KConfLockingNone,                "none" );               // Default
 
 // Control element

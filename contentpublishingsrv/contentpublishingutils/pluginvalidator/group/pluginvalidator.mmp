@@ -22,15 +22,15 @@ TARGET          pluginvalidator.dll
 TARGETTYPE      dll
 
 UID             0x1000008D 0x2001CB6C
- 
+
 CAPABILITY      CAP_GENERAL_DLL
 VENDORID 		VID_DEFAULT
 
 LANG 			SC
 
-SOURCEPATH      ../src 
-SOURCE          cpluginvalidator.cpp 
-SOURCE          cblacklisthandler.cpp 
+SOURCEPATH      ../src
+SOURCE          cpluginvalidator.cpp
+SOURCE          cblacklisthandler.cpp
 SOURCE          charvesterpluginvalidator.cpp
 
 USERINCLUDE     ../inc
@@ -39,7 +39,8 @@ USERINCLUDE     ../../../../inc
 MW_LAYER_SYSTEMINCLUDE
 
 LIBRARY         euser.lib
-LIBRARY	        ecom.lib
-LIBRARY		    estor.lib
-LIBRARY         centralrepository.lib 
+LIBRARY         ecom.lib
+LIBRARY         estor.lib
+LIBRARY         centralrepository.lib
+LIBRARY         flogger.lib
 //end of file

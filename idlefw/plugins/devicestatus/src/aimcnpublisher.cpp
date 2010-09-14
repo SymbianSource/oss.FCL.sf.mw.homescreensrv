@@ -71,7 +71,10 @@ void CAiMCNPublisher::Subscribe( MAiContentObserver& aObserver,
     
 void CAiMCNPublisher::RefreshL( TBool /*aClean*/ )
     {
-    //cannot be refreshed
+    iContentObserver->Publish( *iExtension, 
+                                EAiDeviceStatusContentMCNIndicator, 
+                                iMCNName, 
+                                0 );
     }
 
 
@@ -85,14 +88,15 @@ void CAiMCNPublisher::HandleNetworkInfoChange(
         {
         if ( aInfo.iMCNIndicatorType == ENWMCNIndicatorTypeActive )
             {
-            TPtrC msg = aInfo.iMCNName;
+            iMCNName.Copy( aInfo.iMCNName );
             iContentObserver->Publish( *iExtension, 
             							EAiDeviceStatusContentMCNIndicator, 
-            							msg, 
+            							iMCNName, 
             							0 );
             }
         else if ( aInfo.iMCNIndicatorType == ENWMCNIndicatorTypeNone )
             {
+            iMCNName.Copy( KNullDesC );
             iContentObserver->Clean( *iExtension, 
             							EAiDeviceStatusContentMCNIndicator,
             							0 );

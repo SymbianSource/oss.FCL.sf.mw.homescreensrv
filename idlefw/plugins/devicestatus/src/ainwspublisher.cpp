@@ -41,6 +41,7 @@ CAiNwsPublisher::CAiNwsPublisher()
 
 void CAiNwsPublisher::ConstructL()
     {
+    __PRINTS( "XAI: CAiNwsPublisher > ConstructL" );
     iListener = CAiNetworkInfoListener::InstanceL();
     iProfileApi = CRepository::NewL( KCRUidProfileEngine );
     }
@@ -57,6 +58,7 @@ CAiNwsPublisher* CAiNwsPublisher::NewL()
 
 CAiNwsPublisher::~CAiNwsPublisher()
     {
+    __PRINTS( "XAI: CAiNwsPublisher > ~CAiNwsPublisher" );
     if( iListener )
         {
         iListener->RemoveObserver( *this );
@@ -68,6 +70,7 @@ CAiNwsPublisher::~CAiNwsPublisher()
 
 void CAiNwsPublisher::ResumeL()
     {
+    __PRINTS( "XAI: CAiNwsPublisher > ResumeL" );
     iListener->AddObserverL( *this );
     }
 
@@ -77,6 +80,7 @@ void CAiNwsPublisher::Subscribe( MAiContentObserver& aObserver,
                                     MAiPublishPrioritizer& /*aPrioritizer*/,
                                     MAiPublisherBroadcaster& /*aBroadcaster*/ )
     {
+    __PRINTS( "XAI: CAiNwsPublisher > Subscribe" );
     iContentObserver = &aObserver;
     iExtension = &aExtension;
     }
@@ -89,8 +93,10 @@ void CAiNwsPublisher::RefreshL( TBool /*aClean*/ )
 
 TBool CAiNwsPublisher::RefreshL( TInt aContentId, TBool aClean )
 	{
+    __PRINTS( "XAI: CAiNwsPublisher::RefreshL" );
     if( aContentId == EAiDeviceStatusContentNWStatus )
         {
+        __PRINTS( "XAI: content EAiDeviceStatusContentNWStatus" );
    	    RefreshL( aClean );
    	    return ETrue;
     	}
@@ -98,13 +104,12 @@ TBool CAiNwsPublisher::RefreshL( TInt aContentId, TBool aClean )
     return EFalse;
 	}
 
-
-
 void CAiNwsPublisher::HandleNetworkInfoChange(
                             const MNWMessageObserver::TNWMessages& /*aMessage*/,
                             const TNWInfo& aInfo,
                             const TBool /*aShowOpInd*/ )
     {
+    __PRINTS( "XAI: CAiNwsPublisher::HandleNetworkInfoChange" );
     HandleStateChange( aInfo );
     }
 
@@ -139,16 +144,18 @@ void CAiNwsPublisher::HandleStateChange( const TNWInfo& aInfo )
 
 void CAiNwsPublisher::HandleNetworkFound()
     {
-    __PRINTS( "XAI: Network found, clean state" );
+    __PRINTS( "XAI: Network found" );
     iRegistered = ETrue;
     if ( iContentObserver && iExtension )
         {
+        __PRINTS( "XAI: Network found, clean state" );
         iContentObserver->Clean( *iExtension, EAiDeviceStatusContentNWStatus, 0 );
         }
     }
 
 void CAiNwsPublisher::HandleNetworkLost( const TNWNetworkSelectionSetting &aSelectionSetting )
     {
+    __PRINTS( "XAI: Network lost" );
     if( aSelectionSetting == ENWNetworkSelectionManual )
         {
         // See if we were registered before

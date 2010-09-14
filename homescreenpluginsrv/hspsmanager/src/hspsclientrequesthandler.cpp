@@ -741,7 +741,13 @@ TInt ChspsClientRequestHandler::AppendInitialSettingsL(
                                 }
                             else
                                 {
-                                error = KErrCorrupt;
+                                // Child counts should match, set plugin to Error state
+                                const TInt pluginUid = hspsServerUtil::GetPluginUid( parentNode ).iUid;
+                                __ASSERT_DEBUG( pluginUid > 0, User::Leave( KErrCorrupt ) );
+                                AddErrorConfigurationL( 
+                                    appDom,
+                                    *parentNode,
+                                    pluginUid );                                        
                                 }
                             }
                         else

@@ -73,6 +73,8 @@ CMenuSrvAppScanner::~CMenuSrvAppScanner()
     {
     Cancel();
     delete iMcsSatNotifier;
+    delete iSisInstallNotifier;
+    delete iJavaInstallNotifier;
     delete iNotifier;
     iEng.DequeueOperation( *this );
     delete iMmcHistory;
@@ -97,7 +99,7 @@ CMenuSrvAppScanner::~CMenuSrvAppScanner()
     delete iCenRepNotifyHandlerCPHiddenFolders;
   	delete iCenRepSession;
   	delete iFreeSpaceObserver;
-
+    iInstalledPackages.Close();
     }
 
 // ---------------------------------------------------------
@@ -160,7 +162,11 @@ void CMenuSrvAppScanner::ConstructL()
 
 	iFreeSpaceObserver = CMcsFreeSpaceObserver::NewL( *this );
 
-    //SetActive();
+	iSisInstallNotifier = CMcsInstallNotifier::NewL(
+            *this, CMcsInstallNotifier::ESisInstallNotification );
+	iJavaInstallNotifier = CMcsInstallNotifier::NewL(
+            *this, CMcsInstallNotifier::EJavaInstallNotification );
+
 	ScheduleScan();
     //iOpStatus = ETrue;
     }
@@ -248,7 +254,8 @@ void CMenuSrvAppScanner::GetHiddenFlagAndUidL( TInt aId, TBool& aHidden, TPtrC& 
 // CMenuSrvAppScanner::HideAppIfExists
 // ---------------------------------------------------------
 //
-void CMenuSrvAppScanner::HideItemIfPresentL( TInt aFolder, TInt aId, const TDesC& aUid, TBool aWasHidden )
+void CMenuSrvAppScanner::HideItemIfPresentL(
+        TInt aFolder, TInt aId, const TDesC& aUid, TBool aWasHidden )
     {
     TBool hideItem = EFalse;
     TMenuSrvAttrFilter uidAppFilter;
@@ -258,21 +265,20 @@ void CMenuSrvAppScanner::HideItemIfPresentL( TInt aFolder, TInt aId, const TDesC
     CleanupClosePushL( appItems );
     iEng.GetItemsL( appItems, aFolder, &uidAppFilter, ETrue );
 
-    for (TInt i=0; i < appItems.Count(); i++)
+    for( TInt i=0; i < appItems.Count(); i++ )
         {
-        if(appItems[i].Type() != KMenuTypeLink())
+        if( appItems[i].Type() != KMenuTypeLink() )
         	{
             const TMenuItem& item = appItems[i];
 
-            TBool itemHidden = (0 != (item.Flags() & TMenuItem::EHidden));
-            TBool itemMissing = (0 != (item.Flags() & TMenuItem::EMissing));
+            TBool itemHidden = (0 != ( item.Flags() & TMenuItem::EHidden ) );
+            TBool itemMissing = ( 0 != ( item.Flags() & TMenuItem::EMissing ) );
             if ( !itemHidden && !itemMissing )
                 {
                 hideItem = ETrue;
                 }
         	}
         }
-
     SetHiddenFlagL( aId, aWasHidden, hideItem );
 
     CleanupStack::PopAndDestroy( &appItems );
@@ -284,7 +290,7 @@ void CMenuSrvAppScanner::HideItemIfPresentL( TInt aFolder, TInt aId, const TDesC
 //
 void CMenuSrvAppScanner::SetHiddenFlagL( TInt aId, TBool aWasHidden, TBool aHide )
     {
-    if ( aWasHidden ^ aHide )
+    if ( aWasHidden != aHide )
         {
         iEng.ModifiableObjectL( aId, RMenuNotifier::EItemsAddedRemoved ).
             SetFlags( TMenuItem::EHidden, aHide );
@@ -465,6 +471,72 @@ void CMenuSrvAppScanner::HandleFreeSpaceEventL()
         User::RequestComplete( ownStatus, KErrNone );
         }
     }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CMenuSrvAppScanner::InstallationNotifyL()
+    {
+    TBool isLegacy = iEng.GetOnceLegacyFormat();
+    for( TInt i = iInstalledPackages.Count() - 1; i >= 0; i-- )
+        {
+        RArray<TMenuItem> mcsUidItems;
+        CleanupClosePushL( mcsUidItems );
+        GetMcsAppItemsL( isLegacy, iInstalledPackages[i].iUid, mcsUidItems );
+        if( mcsUidItems.Count() )
+            {
+            iEng.ModifiableObjectL( mcsUidItems[0].Id() );
+            iInstalledPackages.Remove( i );
+            }
+        CleanupStack::PopAndDestroy( &mcsUidItems );
+        }
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CMenuSrvAppScanner::RemoveFromInstalledPackages( TUid aUid )
+    {
+    TInt appIndex = iInstalledPackages.Find( aUid );
+    if( appIndex != KErrNotFound )
+        {
+        iInstalledPackages.Remove( appIndex );
+        }
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+CMenuEngObject& CMenuSrvAppScanner::ModifiableObjectL( TUid aUid, TInt aId,
+            TInt aEvent )
+    {
+    if( aEvent != RMenuNotifier::EItemsNone )
+        {
+        RemoveFromInstalledPackages( aUid );
+        }
+    return iEng.ModifiableObjectL( aId, aEvent );
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CMenuSrvAppScanner::HandleInstallNotifyL( TUid aUid,
+		CMcsInstallNotifier::TNotificationType aNotificationType )
+    {
+    iInstalledPackages.AppendL( aUid );
+    // when installing java, appscanner first gets notification from appArc,
+    // and then it is notified with instal notifier(RProperty)
+    // so we need another scan for java apps
+    if( aNotificationType == CMcsInstallNotifier::EJavaInstallNotification )
+    	{
+		ScheduleScan();
+    	}
+    }
+
 // ---------------------------------------------------------
 // CMenuSrvAppScanner::RunMenuEngOperationL
 // ---------------------------------------------------------
@@ -474,9 +546,9 @@ void CMenuSrvAppScanner::RunMenuEngOperationL()
     UpdateApplicationItemsL();
     UpdateApplicationWithHideIfInstalledItemsL();
     UpdateLinkItemsL();
+    InstallationNotifyL();
     iOpStatus = EFalse;
     }
-
 
 // ---------------------------------------------------------
 // CMenuSrvAppScanner::UpdateApplicationItemL
@@ -488,8 +560,8 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
     {
     RArray<TMenuItem> mcsUidItems;
     CleanupClosePushL( mcsUidItems );
-    TUid appuid = aApaItem.GetUid();
-    GetMcsAppItemsL( isLegacy, appuid.iUid, mcsUidItems );
+    TUid appUid = aApaItem.GetUid();
+    GetMcsAppItemsL( isLegacy, appUid.iUid, mcsUidItems );
     TBool isApaItemHidden( aApaItem.IsHidden() );
 
     // This app is not in the menu, add it now.
@@ -497,9 +569,9 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
     // do not display Menu app
     if ( !mcsUidItems.Count()
     		&& !isApaItemHidden
-    		&& appuid !=  KMmUid3  )
+    		&& appUid !=  KMmUid3  )
         {
-        if( appuid == KSatUid )
+        if( appUid == KSatUid )
             {
             if( CMcsSatHandler::CheckVisibility() )
              	{
@@ -509,7 +581,8 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
         else
           	{
           	AddAppItemL( aApaItem, aMmcId );
-            GetMcsAppItemsL( isLegacy, appuid.iUid, mcsUidItems );
+            GetMcsAppItemsL( isLegacy, appUid.iUid, mcsUidItems );
+            RemoveFromInstalledPackages( appUid );
            	}
         }//if
 
@@ -520,11 +593,10 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
         //for every item with matching UID
         for (TInt j=0; j < mcsUidItems.Count(); j++)
      		{
-       		CMenuEngObject& object =
-      		                iEng.ModifiableObjectL( mcsUidItems[j].Id() );
             TBuf<KUidChars> uidString;
-            MenuSrvUtil::UidToStringL( appuid.iUid, uidString, EFalse, EHex );
-       	    object.SetAttributeL( KMenuAttrUid(), uidString, EFalse );
+            MenuSrvUtil::UidToStringL( appUid.iUid, uidString, EFalse, EHex );
+            ModifiableObjectL( appUid, mcsUidItems[j].Id() ).SetAttributeL(
+                    KMenuAttrUid(), uidString, EFalse );
        		}//for
         }//else if
     // "hidden", "missing" and "lock_delete"  flags update
@@ -542,10 +614,10 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
         HandleHiddenFlagUpdateL( item, aApaItem );
 
         // "missing" flag handling
-        HandleMissingFlagUpdateL( item );
+        HandleMissingFlagUpdateL( item, aApaItem );
 
         //"lock_delete" flag handling
-        HandleLockDeleteFlagUpdateL(item, aApaItem );
+        HandleLockDeleteFlagUpdateL( item, aApaItem );
         // if item was just added to MCS  it is not present in aMcsItems
         // so we cannot remove it
         TInt index = aMcsItems.Find( item, TIdentityRelation<TMenuItem>( IdMatch ) );
@@ -564,19 +636,22 @@ void CMenuSrvAppScanner::UpdateApplicationItemL(
 void CMenuSrvAppScanner::HandleHiddenFlagUpdateL( const TMenuItem & aItem,
         const CMenuSrvAppAttributes& aApaItem )
 	{
-	TBool itemHidden = (0 != (aItem.Flags() & TMenuItem::EHidden));
-	if ( aApaItem.GetUid() == KSatUid )
+	TBool itemHidden = ( 0 != ( aItem.Flags() & TMenuItem::EHidden ) );
+	if( aApaItem.GetUid() == KSatUid )
 		{
-		if (itemHidden == CMcsSatHandler::CheckVisibility())
+		if( itemHidden == CMcsSatHandler::CheckVisibility() )
 			{
-			iEng.ModifiableObjectL(aItem.Id(), RMenuNotifier::EItemsAddedRemoved).
-				SetFlags( TMenuItem::EHidden, !CMcsSatHandler::CheckVisibility());
+			ModifiableObjectL( aApaItem.GetUid(), aItem.Id(),
+			        RMenuNotifier::EItemsAddedRemoved ).SetFlags(
+			                TMenuItem::EHidden,
+			                !CMcsSatHandler::CheckVisibility() );
 			}
 		}
-	else if ( itemHidden != aApaItem.IsHidden() )
+	else if( itemHidden != aApaItem.IsHidden() )
 		{
-		iEng.ModifiableObjectL(aItem.Id(), RMenuNotifier::EItemsAddedRemoved).
-			SetFlags( TMenuItem::EHidden, aApaItem.IsHidden() );
+		ModifiableObjectL( aApaItem.GetUid(), aItem.Id(),
+		        RMenuNotifier::EItemsAddedRemoved ).SetFlags(
+		                TMenuItem::EHidden, aApaItem.IsHidden() );
 		}
 	}
 
@@ -590,7 +665,7 @@ void CMenuSrvAppScanner::HandleNativeAttrUpdateL(
     //we need this to delete uninstalled java app item
     if( aApaItem.GetAppType() != iEng.ObjectL( aItem.Id() ).GetAppType() )
     	{
-    	iEng.ModifiableObjectL( aItem.Id(),
+    	ModifiableObjectL( aApaItem.GetUid(), aItem.Id(),
     			RMenuNotifier::EItemsNone ).SetAppType( aApaItem.GetAppType() );
     	}
 	}
@@ -603,27 +678,37 @@ void CMenuSrvAppScanner::HandleNativeAttrUpdateL(
 void CMenuSrvAppScanner::HandleMmcAttrUpdateL(
 		const TMenuItem& aItem, const CMenuSrvAppAttributes& aApaItem, TUint aMmcId )
 	{
-    if ( IsInMmc( aApaItem ) )
+    TPtrC val;
+    TBool dummy;
+    TBool attributeExists = iEng.ObjectL( aItem.Id() ).FindAttribute(
+            KMenuAttrMmcId(), val, dummy );
+    if( IsInMmc( aApaItem ) )
     	{
     	//app is instaled on mmc - KMenuAttrMmcId attribute update
     	TBuf<KUidChars> uidString;
         uidString.Format( KHexFormat, aMmcId );
-        iEng.ModifiableObjectL( aItem.Id(), RMenuNotifier::EItemsAddedRemoved ).
-			SetAttributeL( KMenuAttrMmcId, uidString, EFalse );
+        if( uidString.Compare( val ) )
+            {
+            ModifiableObjectL( aApaItem.GetUid(), aItem.Id() ).SetAttributeL(
+                            KMenuAttrMmcId, uidString, EFalse );
+            }
     	}
-    else if ( IsInMassStorage( aApaItem )
+    else if( IsInMassStorage( aApaItem )
     		&& aApaItem.GetAppType() == CMenuEngObject::EWidgetApp )
     	{
     	//its java app installed on mass storage, we need to leave it in xml
     	//in case of connecting usb in mass storage mode
-        iEng.ModifiableObjectL( aItem.Id(), RMenuNotifier::EItemsAddedRemoved ).
-			SetAttributeL( KMenuAttrMmcId, KMenuMassStorage, EFalse );
+        if( KMenuMassStorage().Compare( val ) )
+            {
+            ModifiableObjectL( aApaItem.GetUid(), aItem.Id() ).SetAttributeL(
+                    KMenuAttrMmcId, KMenuMassStorage, EFalse );
+            }
     	}
-    else
+    else if( attributeExists )
     	{
     	//its installed on c: drive - remove attribute
-		iEng.ModifiableObjectL( aItem.Id(), RMenuNotifier::EItemsAddedRemoved ).
-			RemoveAttribute( KMenuAttrMmcId );
+        ModifiableObjectL( aApaItem.GetUid(), aItem.Id() ).RemoveAttribute(
+                KMenuAttrMmcId );
     	}
 	}
 // ---------------------------------------------------------
@@ -641,14 +726,13 @@ void CMenuSrvAppScanner::UpdateApplicationItemsL()
     GetCrItemsL( iSrvEngUtils.GetAppItemsL() );
     TBool isLegacy = iEng.GetOnceLegacyFormat();
 
-
     //for every item in apaAndCrItems array
     for ( TInt i = ( iSrvEngUtils.GetAppItemsL().Count() - 1 ); i >= 0 ; i-- )
         {
         // if there was leave for any item we ignore it
         // and proceed to the next one
-        TRAP_IGNORE(UpdateApplicationItemL(
-        		mcsItems, *iSrvEngUtils.GetAppItemsL()[i], currentMmcId, isLegacy));
+        TRAP_IGNORE( UpdateApplicationItemL( mcsItems,
+                *iSrvEngUtils.GetAppItemsL()[i], currentMmcId, isLegacy ) );
         }
     // Here the big list contains menu items that refer to missing apps.
     HandleMissingItemsL( mcsItems );
@@ -668,16 +752,16 @@ void CMenuSrvAppScanner::HandleLockDeleteFlagUpdateL(
 		{
 		if ( ( aItem.Flags() & TMenuItem::ELockDelete ) == 0 )
 			{
-			iEng.ModifiableObjectL(aItem.Id())
-					.SetFlags( TMenuItem::ELockDelete, ETrue );
+            ModifiableObjectL( aApaItem.GetUid(), aItem.Id()).SetFlags(
+                    TMenuItem::ELockDelete, ETrue );
 			}
 		}
 	else
 		{
 		if ( ( aItem.Flags() & TMenuItem::ELockDelete ) != 0 )
 			{
-			iEng.ModifiableObjectL(aItem.Id())
-					.SetFlags( TMenuItem::ELockDelete, EFalse );
+            ModifiableObjectL( aApaItem.GetUid(), aItem.Id() ).SetFlags(
+                    TMenuItem::ELockDelete, EFalse );
 			}
 		}
 	}
@@ -686,14 +770,16 @@ void CMenuSrvAppScanner::HandleLockDeleteFlagUpdateL(
 // CMenuSrvAppScanner::HandleMissingFlagUpdateL
 // ---------------------------------------------------------
 //
-void CMenuSrvAppScanner::HandleMissingFlagUpdateL( const TMenuItem& aItem )
+void CMenuSrvAppScanner::HandleMissingFlagUpdateL(
+        const TMenuItem& aItem,  const CMenuSrvAppAttributes& aApaItem  )
 	{
 	if ( aItem.Flags() & TMenuItem::EMissing )
         {
         CLOG_WRITE_FORMAT8( "Unsetting flag EMissing on %d", item.Id() );
         //application found so we unset "missing" flag
-        iEng.ModifiableObjectL( aItem.Id(), RMenuNotifier::EItemsAddedRemoved ).
-            SetFlags( TMenuItem::EMissing, EFalse );
+        ModifiableObjectL( aApaItem.GetUid(), aItem.Id(),
+                RMenuNotifier::EItemsAddedRemoved ).SetFlags(
+                        TMenuItem::EMissing, EFalse );
         }
 	}
 
@@ -1104,8 +1190,8 @@ void CMenuSrvAppScanner::SetObjectFlagsL( TBool aFlagValue, const TMenuItem& aIt
 	TBool itemFlagPresent = (0 != (aItem.Flags() & aFlag));
 	if( aFlagValue != itemFlagPresent )
 		{
-		iEng.ModifiableObjectL( aItem.Id(), aEvent ).
-			 SetFlags( aFlag, aFlagValue );
+        iEng.ModifiableObjectL( aItem.Id(), aEvent ).
+                 SetFlags( aFlag, aFlagValue );
 		}
 	}
 

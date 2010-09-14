@@ -440,8 +440,10 @@ void CCcSrvSession::HandleApiNtfL(
     CCcSrvMsg* message = CCcSrvMsg::NewL();
     CleanupStack::PushL( message );
     message->InternalizeL( stream );
-    message->SetMessage( aMessage );
+    message->SetFunction( aMessage.Function() );
     message->SetSender( iId );
+
+    aMessage.Complete( KErrNone );
 
     // Forward notification to observers
     for ( TInt i = 0; i < iObservers.Count(); i++ )
@@ -449,9 +451,7 @@ void CCcSrvSession::HandleApiNtfL(
         message->SetReceiver( iObservers[ i ] );
         Server().SendMsgL( *message );
         }
-    
-    message->Message().Complete( KErrNone );
-    
+        
     CleanupStack::PopAndDestroy( message );
     CleanupStack::PopAndDestroy( msgBuf );
     }

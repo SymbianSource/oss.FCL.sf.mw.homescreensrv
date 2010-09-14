@@ -29,14 +29,14 @@ using namespace LIW;
 
 _LIT8(KCachedMap, "cached_map");
 
-static const int KMaxCacheItems = 18; 
+static const int KMaxCacheItems = 24;
 
 
 // ======== MEMBER FUNCTIONS ========
 
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CCPActionDataCache* CCPActionDataCache::NewL()
@@ -47,7 +47,7 @@ CCPActionDataCache* CCPActionDataCache::NewL()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CCPActionDataCache* CCPActionDataCache::NewLC()
@@ -59,7 +59,7 @@ CCPActionDataCache* CCPActionDataCache::NewLC()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCPActionDataCache::ConstructL( )
@@ -68,7 +68,7 @@ void CCPActionDataCache::ConstructL( )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CCPActionDataCache::CCPActionDataCache()
@@ -76,7 +76,7 @@ CCPActionDataCache::CCPActionDataCache()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 CCPActionDataCache::~CCPActionDataCache()
@@ -88,7 +88,7 @@ CCPActionDataCache::~CCPActionDataCache()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCPActionDataCache::HandleCacheRemoveL(const CLiwMap* aMap)
@@ -101,7 +101,7 @@ void CCPActionDataCache::HandleCacheRemoveL(const CLiwMap* aMap)
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCPActionDataCache::AppendL( const CLiwGenericParamList* aParamList)
@@ -122,7 +122,7 @@ void CCPActionDataCache::AppendL( const CLiwGenericParamList* aParamList)
         map->InsertL(KCachedMap, TLiwVariant(inputMap));
         iInternalList->AppendL(TLiwVariant(map));
         CleanupStack::PopAndDestroy(map);
-    
+
         if (iInternalList->Count() > KMaxCacheItems)
             {
             iInternalList->Remove(0);
@@ -131,7 +131,7 @@ void CCPActionDataCache::AppendL( const CLiwGenericParamList* aParamList)
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCPActionDataCache::AppendEmptyL( const CLiwMap* aIdsMap )
@@ -147,7 +147,7 @@ void CCPActionDataCache::AppendEmptyL( const CLiwMap* aIdsMap )
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CCPActionDataCache::IsCacheableL(const CLiwMap* aMap)
@@ -171,7 +171,7 @@ TBool CCPActionDataCache::IsCacheableL(const CLiwMap* aMap)
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CCPActionDataCache::ExistL(const CLiwMap* aMap)
@@ -185,7 +185,7 @@ TBool CCPActionDataCache::ExistL(const CLiwMap* aMap)
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCPActionDataCache::GetL(const CLiwMap* aMap,
@@ -211,7 +211,7 @@ void CCPActionDataCache::GetL(const CLiwMap* aMap,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CCPActionDataCache::MatchL(const CLiwMap* aCachedMap,
@@ -244,7 +244,7 @@ TBool CCPActionDataCache::MatchL(const CLiwMap* aCachedMap,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CCPActionDataCache::TypesMatchL(const CLiwMap* aCachedMap,
@@ -277,7 +277,7 @@ TBool CCPActionDataCache::TypesMatchL(const CLiwMap* aCachedMap,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 void CCPActionDataCache::ExtractRBufL(const TLiwVariant& aVariant, RBuf& aBuf)
@@ -299,7 +299,7 @@ void CCPActionDataCache::ExtractRBufL(const TLiwVariant& aVariant, RBuf& aBuf)
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CCPActionDataCache::MatchL(const CLiwMap* aLeft, const CLiwMap* aRight,
@@ -320,7 +320,7 @@ TBool CCPActionDataCache::MatchL(const CLiwMap* aLeft, const CLiwMap* aRight,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TBool CCPActionDataCache::IsSpecifiedL(const CLiwMap* aMap,
@@ -339,7 +339,7 @@ TBool CCPActionDataCache::IsSpecifiedL(const CLiwMap* aMap,
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 // ---------------------------------------------------------------------------
 //
 TInt CCPActionDataCache::FindL(const CLiwMap* aKey)

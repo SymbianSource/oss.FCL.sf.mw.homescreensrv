@@ -21,6 +21,7 @@
 #include <contentharvesterplugin.h> // harvesting plugin
 #include "charvesterpluginvalidator.h"
 #include "cblacklisthandler.h"
+#include "chplugindebug.h"
 
 const TUint32 KInProgressPropertyKey =
     {
@@ -70,6 +71,7 @@ CHarvesterPluginValidator::~CHarvesterPluginValidator()
     iInProgressProperty.Close();
     delete iBlacklist;
     delete iUpdateIdle;
+    iUpdatePluginArray.Close();
     }
 
 // ----------------------------------------------------------------------------
@@ -91,7 +93,6 @@ void CHarvesterPluginValidator::ConstructL()
     {
     iBlacklist = CBlacklistHandler::NewL();
     iUpdateIdle = CIdle::NewL( CActive::EPriorityIdle );
-    iUpdateIdle->Start( TCallBack( UpdateCallback, this ) );
     CPluginValidator::ConstructL();
     }
 
@@ -125,9 +126,13 @@ void CHarvesterPluginValidator::ManagePluginsL()
     iBlacklist->CopyBlacklistL(ETrue);
 
     // set property value to 1 (which means "in progress")
-    iInProgressProperty.Set(TUid::Uid(KHarvesterUid), KInProgressPropertyKey,
-            1);
+    iInProgressProperty.Set( TUid::Uid( KHarvesterUid ),
+            KInProgressPropertyKey, 1 );
     CPluginValidator::ManagePluginsL();
+    if( !iUpdateIdle->IsActive() )
+        {
+        iUpdateIdle->Start( TCallBack( UpdateCallback, this ) );
+        }
     // set property value to 0 (which means "finished")
     iInProgressProperty.Set( TUid::Uid( KHarvesterUid ),
         KInProgressPropertyKey, 0 );
@@ -145,15 +150,23 @@ void CHarvesterPluginValidator::LoadPluginL(TPluginInfo& aPluginInfo)
         iBlacklist->AppendL(aPluginInfo.iImplementationUid);
         TAny* plug(NULL);
         TInt err(KErrNone);
+        CPSPERF( ("CHarvesterPluginValidator::LoadPluginL Uid: 0x%X - START",
+                aPluginInfo.iImplementationUid.iUid) );
             TRAP( err, plug = REComSession::CreateImplementationL(
                             aPluginInfo.iImplementationUid,
                             aPluginInfo.iDtor_ID_Key, iParameter ) );
+        CPSPERF( ("CHarvesterPluginValidator::LoadPluginL - DONE") );
         if (err == KErrNone && plug)
             {
                 TRAP_IGNORE(
                         CleanupStack::PushL( plug );
                         aPluginInfo.iPlugin = plug;
                         iPluginArray.AppendL( aPluginInfo );
+                        if( aPluginInfo.iImplementationUid.iUid
+                                == KADatFactorySettingsServerPluginUid)
+                            iUpdatePluginArray.Insert( aPluginInfo, 0);
+                        else
+                            iUpdatePluginArray.AppendL( aPluginInfo );
                         CleanupStack::Pop( plug );
                 );
             }
@@ -169,40 +182,33 @@ void CHarvesterPluginValidator::LoadPluginL(TPluginInfo& aPluginInfo)
 void CHarvesterPluginValidator::UpdatePluginsL()
     {
     // set property value to 1 (which means "in progress")
-    iInProgressProperty.Set(TUid::Uid(KHarvesterUid), KInProgressPropertyKey, 1);
+    iInProgressProperty.Set( TUid::Uid( KHarvesterUid ),
+            KInProgressPropertyKey, 1 );
     CContentHarvesterPlugin* plugin = NULL;
-    CContentHarvesterPlugin* fsplugin =
-            static_cast<CContentHarvesterPlugin*> (GetImplementation(
-                    TUid::Uid(KADatFactorySettingsServerPluginUid)));
 
-	if (fsplugin)
+    while( iUpdatePluginArray.Count() )
         {
-        iBlacklist->AppendL(TUid::Uid(KADatFactorySettingsServerPluginUid));
-            TRAP_IGNORE( fsplugin->UpdateL() );
-        iBlacklist->RemoveL(TUid::Uid(KADatFactorySettingsServerPluginUid));
-        }
-    for (TInt i = 0; i < iPluginArray.Count(); i++)
-        {
-        plugin
-                = static_cast<CContentHarvesterPlugin*> (iPluginArray[i].iPlugin);
-        if (plugin != fsplugin)
-            {
-            //first we append UID to the blacklist
-            iBlacklist->AppendL(iPluginArray[i].iImplementationUid);
-                TRAP_IGNORE( plugin->UpdateL() );
-            //no panic during update so we can remove UID from blacklist
-            iBlacklist->RemoveL(iPluginArray[i].iImplementationUid);
-            }
+        plugin = static_cast<CContentHarvesterPlugin*> ( iUpdatePluginArray[0].iPlugin );
+        //first we append UID to the blacklist
+        iBlacklist->AppendL( iUpdatePluginArray[0].iImplementationUid );
+        CPSPERF( ("CHarvesterPluginValidator::UpdatePluginsL Uid: 0x%X - START",
+                            iUpdatePluginArray[0].iImplementationUid) );
+        TRAP_IGNORE( plugin->UpdateL() );
+        CPSPERF( ("CHarvesterPluginValidator::UpdatePluginsL - DONE") );
+        //no panic during update so we can remove UID from blacklist
+        iBlacklist->RemoveL( iUpdatePluginArray[0].iImplementationUid );
+        // plugin was updated correctly so we remove it from update plugin array
+        iUpdatePluginArray.Remove( 0 );
         }
     // set property value to 0 (which means "finished")
-    iInProgressProperty.Set(TUid::Uid(KHarvesterUid), KInProgressPropertyKey,
-            0);
+    iInProgressProperty.Set( TUid::Uid( KHarvesterUid ),
+            KInProgressPropertyKey, 0 );
     }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-//  
+//
 TInt CHarvesterPluginValidator::UpdateCallback( TAny* aValidator )
     {
     if ( aValidator )

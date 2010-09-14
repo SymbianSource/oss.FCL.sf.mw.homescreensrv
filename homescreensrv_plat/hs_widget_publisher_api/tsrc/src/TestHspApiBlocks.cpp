@@ -630,7 +630,7 @@ TInt CTestHspApi::TestHspWidgetAddWidgetItem1L( CStifItemParser& aItem )
 	
 	delete mHSPApi;
 	
-	if ( count != 1 )
+	if ( count != 4 )
 		{
 		err = KErrGeneral;
 		}	
@@ -724,7 +724,7 @@ TInt CTestHspApi::TestHspApiDeleteWidgetL( CStifItemParser& aItem )
 	CLiwGenericParamList* res = GetListL( contentType, identifier, widgetName );
 	TInt count = ExtractItemCountL( *res );
 	
-	if ( count != 1 )
+	if ( count != 4 )
 		{
 		err = KErrGeneral;
 		}	
@@ -770,7 +770,7 @@ TInt CTestHspApi::TestHspApiSetDataObserver1L( CStifItemParser& aItem )
 	CLiwGenericParamList* res = GetListL( contentType, identifier, widgetName );
 	TInt count = ExtractItemCountL( *res );
 	
-	if ( count != 1 )
+	if ( count != 4 )
 		{
 		err = KErrGeneral;
 		}
@@ -816,7 +816,7 @@ TInt CTestHspApi::TestHspApiSetDataObserver2L( CStifItemParser& aItem )
 	CLiwGenericParamList* res = GetListL( contentType, identifier, widgetName );
 	TInt count = ExtractItemCountL( *res );
 	
-	if ( count != 1 )
+	if ( count != 4 )
 		{
 		err = KErrGeneral;
 		}

@@ -241,7 +241,9 @@ void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver,
           if ( icon != NULL ) // Syntax correct but icon not found
               {
               aObserver->PublishPtr( *this, aContentId, icon , aContentId );
-              iIconArray.Append(icon);
+              CleanupStack::PushL( icon );
+              iIconArray.AppendL( icon );
+              CleanupStack::Pop( icon );
               } 
           else
               {
@@ -285,6 +287,7 @@ void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver,
                 {
                 // Take the ownership
                 CGulIcon* icon = CGulIcon::NewL(bitmap);
+                CleanupStack::PushL( icon );
                 if( aMaskHandle != KErrBadHandle )
                     {
                     CFbsBitmap* mask = new (ELeave) CFbsBitmap();
@@ -294,7 +297,8 @@ void CSapiDataPlugin::PublishImageL(MAiContentObserver* aObserver,
                         }
                     }
                 aObserver->PublishPtr( *this, aContentId, icon , aContentId );
-                iIconArray.Append(icon);
+                iIconArray.AppendL( icon );
+                CleanupStack::Pop( icon );
                 }
             else
                 {
@@ -484,8 +488,6 @@ void CSapiDataPlugin::StartL( TStartReason aReason )
 void CSapiDataPlugin::Stop( TStopReason aReason )
     {
     TRAP_IGNORE( StopL( aReason ) );
-    
-    iPluginState = EStopped;
     }
 
 // ----------------------------------------------------------------------------
@@ -495,23 +497,28 @@ void CSapiDataPlugin::Stop( TStopReason aReason )
 //
 void CSapiDataPlugin::StopL( TStopReason aReason )
     {
-    if ( aReason == ESystemShutdown )
+    if ( iPluginState != EStopped )
         {
-        iData->ChangePublisherStatusL( KSystemShutdown );
+        if ( aReason == ESystemShutdown )
+            {
+            iData->ChangePublisherStatusL( KSystemShutdown );
+            }
+        else if ( aReason == EPageShutdown )
+            {
+            iData->ChangePublisherStatusL( KPageShutdown );
+            }
+        else if ( aReason == EPluginShutdown )
+            {
+            iData->ChangePublisherStatusL( KPluginShutdown );
+            }
+    
+        if ( iData )
+            {
+            iData->ChangePublisherStatusL( KDeActive );
+            }
+        
+        iPluginState = EStopped;
         }
-    else if ( aReason == EPageShutdown )
-        {
-        iData->ChangePublisherStatusL( KPageShutdown );
-        }
-    else if ( aReason == EPluginShutdown )
-        {
-        iData->ChangePublisherStatusL( KPluginShutdown );
-        }
-
-    if ( iData )
-        {
-        iData->ChangePublisherStatusL( KDeActive );
-        }          
     }
 
 // ----------------------------------------------------------------------------

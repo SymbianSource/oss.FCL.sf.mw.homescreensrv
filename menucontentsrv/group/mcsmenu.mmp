@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:  
-*  Version     : %version: sa1spcx1#11.1.7.1.8 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: sa1spcx1#11.1.7.1.9 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -80,6 +80,7 @@ SOURCE          menusrvtypefilters.cpp
 SOURCE          mcsmmcobserver.cpp
 SOURCE          mcsfreespaceobserver.cpp
 SOURCE          mcsinstallnotifier.cpp
+SOURCE          mcsinstallstrategy.cpp
 
 SOURCE          mcsgetlistcreatorinterface.cpp
 SOURCE          mcsgetlisthandler.cpp

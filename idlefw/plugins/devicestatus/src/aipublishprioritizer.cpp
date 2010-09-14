@@ -54,14 +54,17 @@ void CAiPublishPrioritizer::TryToPublishL( MAiPublisherBroadcaster& /*aBroadcast
                                             TInt aResource, 
                                             TInt aPriority )
     {
+    __PRINT(__DBG_FORMAT("XAI: TryToPublishL - content %d, aResource %d, aPriority %d, iPriority %d"), aContent, aResource, aPriority, iPriority );
     if( aPriority >= iPriority )
         {
+        __PRINTS("XAI: prio publish - priority check ok");
         iPriority = aPriority;
         (void)iContentObserver.Publish( iPropertyExtension, 
                                             aContent, 
                                             aResource, 
                                             0 );
         }
+    __PRINTS("XAI: prio publish - done");
     }
 
 
@@ -70,7 +73,8 @@ void CAiPublishPrioritizer::TryToPublishL( MAiPublisherBroadcaster& /*aBroadcast
                                             const TDesC16& aText, 
                                             TInt aPriority )
     {
-    __PRINT(__DBG_FORMAT("XAI: prio publish - content %d, priority %d, text %S"), aContent, aPriority, &aText );
+    __PRINTS("XAI: CAiPublishPrioritizer::TryToPublishL");
+    __PRINT(__DBG_FORMAT("XAI: prio publish - content %d, aPriority %d, iPriority %d, text %S"), aContent, aPriority, iPriority, &aText );
     
     if( aPriority >= iPriority )
         {
@@ -81,6 +85,11 @@ void CAiPublishPrioritizer::TryToPublishL( MAiPublisherBroadcaster& /*aBroadcast
                                             aText, 
                                             0 );
         }
+    else
+        {
+        __PRINTS("XAI: prio publish - aPriority < iPriority !!!! ");
+        }
+        
         
     __PRINTS("XAI: prio publish - done");
     }
@@ -91,14 +100,23 @@ void CAiPublishPrioritizer::TryToPublishL( MAiPublisherBroadcaster& /*aBroadcast
                                             const TDesC8& aBuf, 
                                             TInt aPriority )
     {
+    __PRINTS("XAI: CAiPublishPrioritizer::TryToPublishL - TDesC8" );    
     if( aPriority >= iPriority )
         {
+        __PRINTS("XAI: prio publish - priority check ok");
         iPriority = aPriority;
         (void)iContentObserver.Publish( iPropertyExtension, 
                                             aContent, 
                                             aBuf, 
                                             0 );
         }
+    else
+        {
+        __PRINTS("XAI: prio publish - aPriority < iPriority !!!! ");
+        }
+        
+        
+    __PRINTS("XAI: prio publish - done");
     }
                             
 
@@ -106,7 +124,7 @@ void CAiPublishPrioritizer::TryToCleanL( MAiPublisherBroadcaster& aBroadcaster,
                                         TInt aContent, 
                                         TInt aPriority )
     {
-    __PRINT(__DBG_FORMAT("XAI: prio clean - content %d, priority %d"), aContent, aPriority );
+    __PRINT(__DBG_FORMAT("XAI: CAiPublishPrioritizer::TryToCleanL - content %d, aPriority %d, iPriority %d"), aContent, aPriority, iPriority );
     if( aPriority == EAiInvalidPriority )
         {
         // do nothing
@@ -138,4 +156,8 @@ void CAiPublishPrioritizer::TryToCleanL( MAiPublisherBroadcaster& aBroadcaster,
         	    }
         	}
         }
+    else
+        {
+        __PRINT(__DBG_FORMAT("XAI: prio clean - CLEAN failed - iPriority %d"), iPriority );
+        }        
     }

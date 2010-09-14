@@ -781,7 +781,7 @@ void ChspsThemeServerSession::FindWidgetUidsL(
         ChspsODT& aAppODT,
         RArray<TInt>& aUidArray ) 
     {    
-    aUidArray.Reset();       
+    aUidArray.Reset();
     const TInt resourceCount = aAppODT.ResourceCount();
     for( TInt resourceIndex = 0; resourceIndex < resourceCount; resourceIndex++ )
         {      
@@ -790,9 +790,9 @@ void ChspsThemeServerSession::FindWidgetUidsL(
         if ( uid > 0 &&
              aUidArray.Find( uid ) == KErrNotFound )
             {
-            aUidArray.Append( uid );
+            aUidArray.AppendL( uid );
             }
-        }                       
+        }
     }
 
 // -----------------------------------------------------------------------------

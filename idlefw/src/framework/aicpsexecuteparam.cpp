@@ -201,7 +201,7 @@ void CAiCpsExecuteParam::SetPluginIdL(const TDesC& aPluginId)
 //
 void CAiCpsExecuteParam::AddActionL(const TDesC8& aAction)
     {
-    iActions.Append(aAction.AllocL());
+    iActions.AppendL(aAction.AllocL());
     }
 
 // End of file

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-16"?>
+<configuration xmlns="http://www.s60.com/xml/confml/1" name="hsps">
+  <feature ref="KhspsThemeStatusRepositoryUid" name="KhspsThemeStatusRepositoryUid">
+    <desc>CenRep keys for Homescreenpluginsrv</desc>    
+    <setting ref="KhspsAI" name="KhspsAI" type="int" required="true">
+      <desc>Holds UID of an active application configuration plugin for AI3 client</desc>
+    </setting>
+    <setting ref="KhspsAI3TestApp" name="KhspsAI3TestApp" type="int" required="true">
+      <desc>Holds UID of an active application configuration plugin for EUnit client</desc>
+    </setting>
+    <setting ref="KhspsDeviceLanguage" name="KhspsDeviceLanguage" type="int" required="true">
+      <desc>Holds device language ID from previous startup</desc>
+    </setting>
+    <setting ref="KhspsFilesInstalled" name="KhspsFilesInstalled" type="string" required="true">
+      <desc>FW version or empty if plugins should be reinstalled in next start up</desc>
+    </setting>
+    <setting ref="KhspsCheckConfigurations" name="KhspsCheckConfigurations" type="int">
+      <desc>Holds information whether configuration states must be checked</desc>
+    </setting>
+    <setting ref="KhspsSecurityControlAccessList" name="KhspsSecurityControlAccessList" type="string" readOnly="true">
+      <desc>Access control for clients which are missing the capablities</desc>
+    </setting>
+  </feature>
+  <data>
+    <KhspsThemeStatusRepositoryUid>
+      <KhspsAI>536999055</KhspsAI>
+      <KhspsAI3TestApp>536916224</KhspsAI3TestApp>
+      <KhspsDeviceLanguage>1</KhspsDeviceLanguage>
+      <KhspsFilesInstalled></KhspsFilesInstalled>
+      <KhspsCheckConfigurations>0</KhspsCheckConfigurations>
+      <KhspsSecurityControlAccessList>0x102750F0;0x200159C6;0x20000FB1;0x10005A32;0x100058EC;0x200159c5;0x200255FF;</KhspsSecurityControlAccessList>
+    </KhspsThemeStatusRepositoryUid>
+  </data>
+  <rfs>
+    <KhspsThemeStatusRepositoryUid>
+      <KhspsAI>true</KhspsAI>
+      <KhspsAI3TestApp>true</KhspsAI3TestApp>
+      <KhspsDeviceLanguage>true</KhspsDeviceLanguage>
+      <KhspsFilesInstalled>true</KhspsFilesInstalled>
+      <KhspsCheckConfigurations>true</KhspsCheckConfigurations>
+      <KhspsSecurityControlAccessList>false</KhspsSecurityControlAccessList>
+    </KhspsThemeStatusRepositoryUid>
+  </rfs>
+</configuration>

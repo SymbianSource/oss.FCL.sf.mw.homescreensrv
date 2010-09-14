@@ -319,6 +319,7 @@ void ChspsMaintenanceHandler::ServiceSetActiveThemeL(const RMessage2& aMessage)
             CleanupStack::PopAndDestroy(headerdata);
             
             ThspsRepositoryInfo info( EhspsODTActivated );
+            info.iAppUid = odt->RootUid();
             iDefinitionRepository.RegisterNotification( info );
         }
     }
@@ -1865,7 +1866,7 @@ TInt ChspsMaintenanceHandler::RemoveConfigurationL(
                             TInt pluginCount = pluginsNode->ChildNodes().Length();
                             for( TInt pluginIndex=0; pluginIndex < pluginCount; pluginIndex++ )                                    
                                 {
-                                nodeArray.Append( (ChspsDomNode*)pluginsNode->ChildNodes().Item( pluginIndex ) );
+                                nodeArray.AppendL( (ChspsDomNode*)pluginsNode->ChildNodes().Item( pluginIndex ) );
                                 }                                
                             
                             // Remove the nodes and related resources
@@ -3209,7 +3210,8 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsRemoveThemeL( const Ch
     if( !( aSetMask.Flags() & EhspsThemeStatusLicenceeDefault ) )                      
         {       
         RArray<ThspsRepositoryInfo> notifParams;
-        
+        CleanupClosePushL( notifParams );
+
         if( !iDefinitionRepository.Locked() )
             {
             iDefinitionRepository.Lock();
@@ -3221,14 +3223,11 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsRemoveThemeL( const Ch
             TInt error( KErrNone );
             if ( aSetMask.ConfigurationType() != EhspsAppConfiguration )
                 {
-                // Fix plugin instances and get notifications from valid cases
-                TRAP( error, RemovePluginFromAppConfsL( aSetMask, notifParams ) );                    
+                TRAP( error, RemovePluginConfFromRepositoryL( aSetMask, notifParams ) );                    
                 }                                
-            
-            if( !error )
+            else
                 {
-                // Remove the actual plugin from file system
-                TRAP( error, RemoveThemeL( aSetMask ) );                
+                TRAP( error, RemoveAppConfFromRepositoryL( aSetMask, notifParams ) );                    
                 }
                                                
             if( !error )
@@ -3257,7 +3256,7 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsRemoveThemeL( const Ch
                 }                                                             
             }
         
-        notifParams.Close();
+        CleanupStack::PopAndDestroy( &notifParams );
         }
          
      return ret;
@@ -3272,7 +3271,7 @@ void ChspsMaintenanceHandler::RemovePluginFromAppConfsL(
         RArray<ThspsRepositoryInfo>& aNotificationParams )        
     {        
     __ASSERT_DEBUG( aOdt.ThemeUid(), User::Leave( KErrArgument ) );
-           
+    
     // Loop application configurations
     const TInt count = iHeaderListCache.Count();                  
     for ( TInt i = 0; i < count; i++ )
@@ -3360,7 +3359,7 @@ void ChspsMaintenanceHandler::RemovePluginFromAppConfsL(
                             lastNotification,
                             aOdt.ThemeFullName(),
                             (TLanguage)( aOdt.OdtLanguage() ) );
-                       aNotificationParams.Append(info);
+                       aNotificationParams.AppendL(info);
                        }
 #ifdef HSPS_LOG_ACTIVE  
                     if( iLogBus )
@@ -3390,18 +3389,59 @@ void ChspsMaintenanceHandler::RemovePluginFromAppConfsL(
                         ETrue,
                         aOdt.ThemeFullName(),
                         (TLanguage)( aOdt.OdtLanguage() ) );
-                    aNotificationParams.Append(info);
+                    aNotificationParams.AppendL(info);
                     }
                 }
             
-            pluginIds.Close();
             CleanupStack::PopAndDestroy( 2, appOdt ); // appOdt, pluginIds                         
             appOdt = NULL;             
             
             } // app configuration
         
         } // header loop
-       
+    }
+    
+// -----------------------------------------------------------------------------
+// RemoveAppConfFromRepositoryL
+// -----------------------------------------------------------------------------
+//
+void ChspsMaintenanceHandler::RemoveAppConfFromRepositoryL( 
+    const ChspsODT& aOdt,
+    RArray<ThspsRepositoryInfo>& /* aNotificationParams */ )        
+    {        
+    __ASSERT_DEBUG( aOdt.ThemeUid(), User::Leave( KErrArgument ) );
+    
+    ChspsODT* activeAppConf = ChspsODT::NewL();
+    CleanupStack::PushL( activeAppConf );
+    iThemeServer.GetActivateAppConfigurationL( aOdt.RootUid(), *activeAppConf );
+    if ( aOdt.ThemeUid() == activeAppConf->ThemeUid() )
+        {
+        // Active application configuration removed 
+        ActivateDefaultAppConfL( aOdt, *activeAppConf );
+        }
+
+    CleanupStack::PopAndDestroy( activeAppConf );
+    
+    // Remove the actual application configuration from file system
+    RemoveThemeL( aOdt );
+    
+    }
+
+// -----------------------------------------------------------------------------
+// RemovePluginConfFromRepositoryL
+// -----------------------------------------------------------------------------
+//
+void ChspsMaintenanceHandler::RemovePluginConfFromRepositoryL( 
+    const ChspsODT& aOdt,
+    RArray<ThspsRepositoryInfo>& aNotificationParams )        
+    {        
+    __ASSERT_DEBUG( aOdt.ThemeUid(), User::Leave( KErrArgument ) );
+
+    // Fix plugin instances and get notifications from valid cases
+    RemovePluginFromAppConfsL( aOdt, aNotificationParams );                    
+    
+    // Remove the actual plugin configuration from file system
+    RemoveThemeL( aOdt );                
     }
 
 // -----------------------------------------------------------------------------
@@ -3515,7 +3555,8 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsPluginUpdateL( const C
         User::LeaveIfError( iDefinitionRepository.GetOdtL( *odt ) );
         
         RArray<ThspsRepositoryInfo> notifParams;
-        
+        CleanupClosePushL( notifParams );
+
         TRAP( errorCode, UpdatePluginFromAppConfsL( *odt, notifParams ));
         
         if( errorCode )
@@ -3540,8 +3581,8 @@ ThspsServiceCompletedMessage ChspsMaintenanceHandler::hspsPluginUpdateL( const C
                 }
             
             } 
-        notifParams.Close();
         
+        CleanupStack::PopAndDestroy( &notifParams );
         CleanupStack::PopAndDestroy( odt );
         }
          
@@ -3617,7 +3658,7 @@ void ChspsMaintenanceHandler::UpdatePluginFromAppConfsL( ChspsODT& aOdt,
                                     status,
                                     aOdt.ThemeFullName(),
                                     (TLanguage)( aOdt.OdtLanguage() ) );
-                        aNotificationParams.Append(info);
+                        aNotificationParams.AppendL(info);
                         }
                     }
 
@@ -3625,7 +3666,6 @@ void ChspsMaintenanceHandler::UpdatePluginFromAppConfsL( ChspsODT& aOdt,
                 CleanupStack::PopAndDestroy( odt );                                   
                 }
             }
-        
         }
     }
 // -----------------------------------------------------------------------------
@@ -4507,34 +4547,47 @@ void ChspsMaintenanceHandler::RestoreDefaultAppConfL(
     // If active application configuration is not "LicenceeRestorable" 
     if ( !(aHeader->Flags() & EhspsThemeStatusLicenceeRestorable) )
         {        
-        // Try to activate a configuation with the LicenceeRestorable status
-        ChspsODT* searchMask = ChspsODT::NewL();
-        CleanupStack::PushL( searchMask );
-        searchMask->SetRootUid( aHeader->RootUid() );
-        searchMask->SetFamily( aHeader->Family() );
-        searchMask->SetFlags( EhspsThemeStatusLicenceeRestorable );
-        TInt pos( 0 );
-        iThemeServer.GetConfigurationHeader( *searchMask, aHeader, pos );
-        if ( aHeader )
-            {
-            // Activate licensee restorable configuration
-            iThemeServer.ActivateThemeL( *aHeader, aOdt );
-            ThspsRepositoryInfo info( EhspsODTActivated );
-            iDefinitionRepository.RegisterNotification( info );
-            }
-        else
-            {
-            // Licensee restorable configuration not found. There must be  
-            // at least one licensee restorable configuration per application
-            User::Leave( KErrNotFound );
-            }
-        CleanupStack::PopAndDestroy( searchMask );
+        // Try to activate default configuation
+        ActivateDefaultAppConfL( *aHeader, aOdt );
         }
     else
         {        
         // Reinstall the application configuration from ROM
         iThemeServer.ReinstallConfL( aHeader->RootUid(), aHeader->ThemeUid() );
         }
+    }
+
+// -----------------------------------------------------------------------------
+// ChspsMaintenanceHandler::ActivateDefaultAppConfL
+// (other items were commented in a header).
+// -----------------------------------------------------------------------------
+//
+void ChspsMaintenanceHandler::ActivateDefaultAppConfL(
+    const ChspsODT& aHeader,
+    ChspsODT& aOdt )
+    {    
+    ChspsODT* searchMask = ChspsODT::NewL();
+    CleanupStack::PushL( searchMask );
+    searchMask->SetRootUid( aHeader.RootUid() );
+    searchMask->SetFamily( aHeader.Family() );
+    searchMask->SetFlags( EhspsThemeStatusLicenceeRestorable );
+    
+    ChspsODT* defaultAppConf( NULL );
+    TInt pos( 0 );
+    iThemeServer.GetConfigurationHeader( *searchMask, defaultAppConf, pos );
+    if ( defaultAppConf )
+        {
+        // Activate licensee restorable configuration
+        iThemeServer.ActivateThemeL( *defaultAppConf, aOdt );
+        }
+    else
+        {
+        // Licensee restorable configuration not found. There must be  
+        // at least one licensee restorable configuration per application
+        User::Leave( KErrNotFound );
+        }
+    
+    CleanupStack::PopAndDestroy( searchMask );
     }
 
 // -----------------------------------------------------------------------------
@@ -4841,8 +4894,12 @@ TBool ChspsMaintenanceHandler::IsConfigurationLocked(
     ChspsDomAttribute* attr = 
         static_cast<ChspsDomAttribute*>( attrList.FindByName( KConfigurationAttrLocking ) );                
     if( attr )
-        {        
-        isLocked = ( attr->Value().CompareF( KConfLockingLocked ) == 0 );
+        {      
+        if( attr->Value().CompareF( KConfLockingLocked ) == 0 ||
+            attr->Value().CompareF( KConfLockingPermanent ) == 0 )
+            {
+            isLocked = ETrue;
+            }
        }
     
     return isLocked;
@@ -4906,7 +4963,7 @@ void ChspsMaintenanceHandler::RemoveUnlockedViewsL(
                     if( !isLocked || foundLocked )
                         {
                         // Mark for removal
-                        nodeArray.Append( pluginNode );
+                        nodeArray.AppendL( pluginNode );
                         }
                     else
                         {

@@ -33,6 +33,7 @@
 #include "aiprioritizer.h"
 #include "ainwidpriorities.h"
 #include "activeidle2domaincrkeys.h"
+#include "debug.h"
 
 //Delay used to animate
 const TInt KCleanOperationDelay = 2 * 1000000;
@@ -132,8 +133,10 @@ void CAiOperatorNamePublisher::HandleNetworkInfoChange(
                 const TNWInfo& /*aInfo*/,
                 const TBool aShowOpInd )
     {
+    __PRINTS("XAI: CAiOperatorNamePublisher::HandleNetworkInfoChange");    
     if ( iSuspended )
         {
+        __PRINTS("XAI: suspended");
         return;
         }
     
@@ -174,10 +177,12 @@ void CAiOperatorNamePublisher::RefreshIfActiveL( TBool aClean )
 
 void CAiOperatorNamePublisher::RefreshL( TBool aClean )
     {
+    __PRINTS("XAI: NamePublisher > RefreshL");
     iSuccess = EFalse;
 
     if ( iSuspended )
         {
+        __PRINTS("XAI: NamePublisher > RefreshL - iSuspended");
         return;
         }
     
@@ -185,6 +190,7 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
         {
         MProfile* profile = iProfileEngine->ActiveProfileLC();
         const MProfileName& name = profile->ProfileName();
+        iPriority = EAiOfflineProfile;
         iPrioritizer->TryToPublishL( *iBroadcaster,
                                       EAiDeviceStatusContentNetworkIdentity,
                                       name.Name(),
@@ -193,14 +199,22 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
         CleanupStack::PopAndDestroy();//profile
         return;
         }
-    
-    if( aClean )
+    else if ( iPriority == EAiOfflineProfile )
+        {
+        iPrioritizer->TryToCleanL( *iBroadcaster,
+                                    EAiDeviceStatusContentNetworkIdentity,
+                                    iPriority );
+        iPriority = EAiInvalidPriority;
+        }
+    else if( aClean )
         {
         iPrioritizer->TryToCleanL( *iBroadcaster,
                                     EAiDeviceStatusContentNetworkIdentity,
                                     iPriority );
         }
-
+    
+    __PRINT(__DBG_FORMAT("XAI: NamePublisher > RefreshL - iPriority = %d"), iPriority );
+    
     const TNWInfo& nwInfo = iListener->NetworkInfo();
 
 #if defined(WINSCW) || defined(__WINS__)
@@ -230,7 +244,8 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
     //Check if PLMN  must be shown.
 
     const TBool showPLMN = nwInfo.iServiceProviderNameDisplayReq & ENWDisplayPLMNRequired;
-
+    __PRINT(__DBG_FORMAT("XAI: NamePublisher > RefreshL - showPLMN = %d"), showPLMN );
+    
     TBool isInSPDI = EFalse;
     TBool showSPN = EFalse;
 
@@ -245,7 +260,8 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
     showSPN =
         showSPN ||
         ( nwInfo.iServiceProviderNameDisplayReq & ENWDisplaySPNRequired );
-
+    
+    __PRINT(__DBG_FORMAT("XAI: NamePublisher > RefreshL - showSPN  = %d"), showSPN );
     
 #if defined(WINSCW) || defined(__WINS__)
     _LIT( KOperator, "Operator" );    
@@ -278,8 +294,14 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
             	}
             else
             	{
-	            //spn & plmn (SPN.And.EONS.No)
-	            iPriority = EAiServiceProviderName;
+                __PRINTS("XAI: NamePublisher > RefreshL (showPLMN)- try publish and start delayed operation ");
+                //spn & plmn (SPN.And.EONS.No)
+                if ( !OperatorNamePriority( iPriority ) )
+                    {                    
+                    iPriority = EAiServiceProviderName;
+                    }
+	            
+			    __PRINT(__DBG_FORMAT("XAI: NamePublisher > RefreshL - try publish with priority %d"), iPriority );
 	            iPrioritizer->TryToPublishL( *iBroadcaster,
 	                                        	EAiDeviceStatusContentNetworkIdentity,
 	                                        	serviceProviderName,
@@ -322,8 +344,14 @@ void CAiOperatorNamePublisher::RefreshL( TBool aClean )
             	}
             else
             	{
+                __PRINTS("XAI: NamePublisher > RefreshL (showSPN)- try publish and start delayed operation ");
 	            //spn & plmn (SPN.And.EONS.No)
-	            iPriority = EAiServiceProviderName;
+                if ( !OperatorNamePriority( iPriority ) )
+                    {                    
+                    iPriority = EAiServiceProviderName;
+                    }
+
+      		    __PRINT(__DBG_FORMAT("XAI: NamePublisher > RefreshL - try publish with priority %d"), iPriority );
 	            iPrioritizer->TryToPublishL( *iBroadcaster,
 	                                        	EAiDeviceStatusContentNetworkIdentity,
 	                                        	serviceProviderName,
@@ -377,6 +405,7 @@ HBufC* CAiOperatorNamePublisher::ConstructOperatorNameStringL( const TDesC& aSer
 
 void CAiOperatorNamePublisher::ShowNetworkIdentityNameL( TBool aTryToPublish )
 	{
+    __PRINTS("XAI: NamePublisher > ShowNetworkIdentityNameL");
 	const TNWInfo& nwInfo = iListener->NetworkInfo();
 
 	iNetworkIdentityName.Set( KNullDesC );
@@ -388,6 +417,8 @@ void CAiOperatorNamePublisher::ShowNetworkIdentityNameL( TBool aTryToPublish )
     		nwInfo.iOperatorNameInfo.iType != RMmCustomAPI::EOperatorNameFlexiblePlmn  &&
     			nwInfo.iRegistrationStatus == ENWRegisteredOnHomeNetwork )
     	{
+        __PRINTS("XAI: NamePublisher > ShowNetworkIdentityNameL - iNPName ");
+        
     	//priority
     	iPriority = EAiNetworkOperatorName;
     	//name
@@ -408,6 +439,8 @@ void CAiOperatorNamePublisher::ShowNetworkIdentityNameL( TBool aTryToPublish )
     // *** Operator name ***
     if( nwInfo.iOperatorNameInfo.iName.Length() > 0 )
     	{
+        __PRINTS("XAI: NamePublisher > ShowNetworkIdentityNameL - iOperatorNameInfo.iName ");
+        
     	//priority
     	OperatorNamePriority( iPriority );
     	//name
@@ -632,6 +665,7 @@ void CAiOperatorNamePublisher::StartDelayedPLMNOperation()
 
 TInt CAiOperatorNamePublisher::CleanAndShowPLMNOperationCallback( TAny* aPtr )
     {
+    __PRINTS("XAI: NamePublisher > CleanAndShowPLMNOperationCallback ");
     CAiOperatorNamePublisher* self =
                     static_cast<CAiOperatorNamePublisher*>( aPtr );
 
@@ -657,14 +691,16 @@ TInt CAiOperatorNamePublisher::CleanAndShowPLMNOperationCallback( TAny* aPtr )
 
 void CAiOperatorNamePublisher::DoCleanOperationL()
     {
+    __PRINTS("XAI: NamePublisher > DoCleanOperationL");
     iPrioritizer->TryToCleanL( *iBroadcaster,
                                 EAiDeviceStatusContentNetworkIdentity,
-                                EAiServiceProviderName );
+                                iPriority );
     }
 
 
 TBool CAiOperatorNamePublisher::RefreshL( TInt aContentId, TBool aClean )
 	{
+    __PRINTS("XAI: NamePublisher > RefreshL with content");
     if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
         {
         iSuspended = EFalse;
@@ -682,6 +718,7 @@ TBool CAiOperatorNamePublisher::RefreshL( TInt aContentId, TBool aClean )
 
 TBool CAiOperatorNamePublisher::SuspendL( TInt aContentId, TBool /*aClean*/ )
     {
+    __PRINTS("XAI: NamePublisher > SuspendL with content");
     if ( aContentId == EAiDeviceStatusContentNetworkIdentity )
         {
         iSuspended = ETrue;
@@ -696,8 +733,10 @@ TBool CAiOperatorNamePublisher::RefreshContentWithPriorityL(
                                             TInt aContentId,
                                             TInt aPriority )
 	{
+    __PRINTS("XAI: NamePublisher > RefreshContentWithPriorityL");
 	if( aContentId == EAiDeviceStatusContentNetworkIdentity && aPriority == EAiServiceProviderName )
         {
+	    __PRINTS("XAI: NamePublisher > identity and priority matched ");
 	    RefreshL( EFalse );
 	    if( iSuccess )
    	        {

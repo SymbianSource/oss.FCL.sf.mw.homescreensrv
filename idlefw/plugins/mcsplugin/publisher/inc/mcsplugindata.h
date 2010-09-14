@@ -62,7 +62,7 @@ public:
     /**
      * Name of the item.
      */
-    TDesC& Name();
+    const TDesC* Name();
     
     /**
      * Set name of the item,
@@ -72,7 +72,7 @@ public:
     /**
      * Value of the item. Used for bookmark url.
      */
-    TDesC& Value();
+    const TDesC* Value();
     
     /*
      * Set value of the item.

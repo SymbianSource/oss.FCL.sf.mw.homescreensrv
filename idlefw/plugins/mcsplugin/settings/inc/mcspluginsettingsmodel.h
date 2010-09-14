@@ -52,6 +52,7 @@ struct TSettingItem
     TInt id;
     TSettingType type;
     TBool locked;
+    TBool empty;
     };
 
 /**
@@ -222,6 +223,14 @@ private:
     TBool SettingLockedL( 
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
 
+    /**
+     * Empty setting
+     * 
+     * @param aProperties
+     * @return TBool
+     */
+    TBool SettingEmptyL( 
+        RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
     
 
     /**

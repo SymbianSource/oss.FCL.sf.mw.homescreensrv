@@ -30,6 +30,7 @@
 #include <mcsmenuitem.h>
 #include <mcspluginparamval.h>
 #include <LogsUiCmdStarter.h>
+#include <APGCLI.H>
 
 // User includes
 #include "mcsplugincompletedoperation.h"
@@ -39,9 +40,12 @@
 // Constants
 _LIT( KMenuTypeShortcut, "menu:shortcut" ); ///< Menu folder type.
 _LIT( KMenuAttrParamLogs, "logs:dialed" );
+_LIT( KMenuAttrProfiles, "profiles" );
 
 /** Argument value for parameter*/
 _LIT( KMenuAttrParam, "param" );
+
+const TUid KProfilesAppUid = { 0x100058F8 };
 
 #define KMCSCmailUidValue 0x2001E277
 #define KMCSCmailMailboxDefaultViewIdValue 0x1
@@ -247,6 +251,27 @@ void CMCSPluginHandler::LaunchShortcutL( CMenuItem& aItem )
     else if ( param.Find( KMenuAttrParamLogs ) != KErrNotFound )
         {
         LogsUiCmdStarter::CmdStartL( LogsUiCmdStarterConsts::KDialledView() );
+        }
+    else if ( param.Find( KMenuAttrProfiles ) != KErrNotFound )
+        {
+        RApaLsSession apaLsSession;
+        User::LeaveIfError( apaLsSession.Connect() );
+        CleanupClosePushL( apaLsSession );
+
+        TApaAppInfo appInfo;
+        TInt retVal = apaLsSession.GetAppInfo( appInfo, KProfilesAppUid );
+
+        if ( retVal == KErrNone )
+            {
+            CApaCommandLine* cmdLine = CApaCommandLine::NewLC();
+            cmdLine->SetExecutableNameL( appInfo.iFullName );
+            cmdLine->SetCommandL( EApaCommandRun );
+            User::LeaveIfError( apaLsSession.StartApp( *cmdLine ) );
+
+            CleanupStack::PopAndDestroy( cmdLine );
+            }
+
+        CleanupStack::PopAndDestroy( &apaLsSession );
         }
     CleanupStack::PopAndDestroy( sendUi );
     }

@@ -390,14 +390,18 @@ class hspsServerUtil
 
         /**
          * Checks resource files of defined configuration
-         * Function leaves if all resource files cannot be found
+         * Function changes resoure paths according to the current
+         * device language.
+         * Function leaves if all resource files cannot be found.
          * @since S60 5.0
-         * @param aOdt is an instance of the ODT class
-         * @param aConfUid is configuration UID which resources are checked
+         * @param aOdt is the application configuration instance         
+         * @param aPluginHeader is the plugin which should be checked
+         * @param aRfs is an existing file server session
          */
         static void CheckResourceFilesL( 
-            const ChspsODT& aOdt,
-            const TInt aConfUid );
+            ChspsODT& aAppOdt,            
+            const ChspsODT& aPluginHeader,
+            RFs& aRfs );
 
         /**
          * Returns configuration's version string

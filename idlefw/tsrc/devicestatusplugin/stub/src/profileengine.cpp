@@ -200,7 +200,9 @@ void CProfileEngine::SetTempRingingVolumeL( TProfileRingingVolume /*aVolume*/ )
 
 
 TProfileRingingVolume CProfileEngine::TempRingingVolumeL() const
-    {    
+    {
+    TProfileRingingVolume vol = EProfileRingingVolumeLevel1;
+    return vol;
     }
 
 
@@ -210,7 +212,9 @@ void CProfileEngine::SetTempMediaVolumeL( TProfileRingingVolume /*aVolume*/ )
 
 
 TProfileRingingVolume CProfileEngine::TempMediaVolumeL() const
-    {    
+    {
+    TProfileRingingVolume vol = EProfileRingingVolumeLevel1;
+    return vol;
     }
 
 

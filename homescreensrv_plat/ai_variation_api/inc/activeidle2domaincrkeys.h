@@ -128,4 +128,9 @@ const TUint32 KAIWallpaperPath = 0x00000851;
  */
 const TUint32 KAIActiveViewPluginId = 0x00000852;
 
+/**
+ * Key id for finger follow view switching support
+ */
+const TUint32 KAIFingerFollowSupport = 0x00000853;
+
 #endif // __AI2INTERNALCRKEYS_H__

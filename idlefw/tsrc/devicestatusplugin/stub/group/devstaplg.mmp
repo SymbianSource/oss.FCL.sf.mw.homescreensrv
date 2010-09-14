@@ -29,11 +29,12 @@
 #include <data_caging_paths.hrh>
 #include <eunitcaps.h>
 
-#include        <platform/mw/aisystemuids.hrh>
+//#include        <platform/mw/aisystemuids.hrh>
 
 TARGET          aidevstaplg.dll
 TARGETTYPE      PLUGIN
-UID             0x10009D8D AI_UID_ECOM_DLL_CONTENTPUBLISHER_DEVSTAPLUGIN
+UID             0x10009D8D 0x102750F7 //AI_UID_ECOM_DLL_CONTENTPUBLISHER_DEVSTAPLUGIN
+
 
 CAPABILITY      EUNIT_CAPS
 

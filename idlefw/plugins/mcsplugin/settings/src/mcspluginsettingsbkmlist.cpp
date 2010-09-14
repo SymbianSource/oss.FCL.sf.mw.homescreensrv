@@ -111,7 +111,7 @@ TPtrC CMCSPluginSettingsBkmList::MdcaPoint(TInt aIndex) const
 TSettingItem CMCSPluginSettingsBkmList::FindItemL( RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
     {
     TInt index( KErrNotFound );
-    TSettingItem settingItem = { KErrNotFound, EBookmark, EFalse };
+    TSettingItem settingItem = { KErrNotFound, EBookmark, EFalse, EFalse };
     for( TInt i= 0; i < aProperties.Count(); i++ )
         {
         if( aProperties[i]->Name() == KUid )
@@ -247,7 +247,7 @@ CMenuItem* CMCSPluginSettingsBkmList::CreateMenuItemL( const TDesC& aUid,
     CleanupStack::PushL( newItem );
     newItem->SetAttributeL( KMenuAttrUid, aUid );
     newItem->SetAttributeL( KMenuAttrLongName, aName );
-    newItem->SetAttributeL( KMenuAttrView, aUrl );
+    newItem->SetAttributeL( KMenuAttrUrl, aUrl );
     newItem->SetAttributeL( KMenuAttrParameter, aName );
     iMenuItems.AppendL( newItem );
     CleanupStack::Pop( newItem );

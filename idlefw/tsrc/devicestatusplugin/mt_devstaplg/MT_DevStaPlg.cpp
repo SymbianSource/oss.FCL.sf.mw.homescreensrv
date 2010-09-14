@@ -559,7 +559,7 @@ void MT_DevStaPlg::TestContentRequest1L()
         {
         User::Leave( KErrNoMemory );
         }    
-		/*
+
     MAiPropertyExtension* ext = static_cast<MAiPropertyExtension*>( iPublisher->Extension( KExtensionUidProperty ) ); 
     MAiContentRequest* request = static_cast<MAiContentRequest*>( ext->GetPropertyL( EAiContentRequest ) );
     
@@ -657,7 +657,7 @@ void MT_DevStaPlg::TestContentRequest4L()
     
     CStubDataHolder::Instance()->SetCurrentProfileL( KProfGeneral, EProfileGeneralId );
         
-    /*
+
     MAiPropertyExtension* ext = static_cast<MAiPropertyExtension*>( iPublisher->Extension( KExtensionUidProperty ) ); 
     MAiContentRequest* request = static_cast<MAiContentRequest*>( ext->GetPropertyL( EAiContentRequest ) );
     

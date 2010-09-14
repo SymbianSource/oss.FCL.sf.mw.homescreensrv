@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
- *
+*
 */
 
 
@@ -100,7 +100,7 @@ private:
      * Callback used for delayed update
      */
     static TInt UpdateCallback( TAny* aValidator );
-    
+
 private:
 
     /**
@@ -114,12 +114,19 @@ private:
      * Own
      */
     RProperty iInProgressProperty;
-    
+
     /*
      * Idle AO used for delayed update
      * Own
      */
     CIdle* iUpdateIdle;
+
+    /**
+     * Array containing plugins to be updated.
+     * Own.
+     */
+    RArray<TPluginInfo> iUpdatePluginArray;
+
     };
 
 #endif // CHARVESTERPLUGINVALIDATOR_H

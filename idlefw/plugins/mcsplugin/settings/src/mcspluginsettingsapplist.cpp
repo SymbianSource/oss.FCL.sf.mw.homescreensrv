@@ -30,6 +30,7 @@ _LIT( KMenuAttrLocked, "locked" );
 _LIT8( KItemLocked, "locked");
 _LIT8( KProperValueFolder, "folder" );
 _LIT( KMenuAttrUndefUid, "0x99999991" );
+_LIT( KMenuAttrInvokeSettingsUid, "0x99999990" );
 _LIT( KMenuItemLongName, "long_name" );
 
 #define KMCSCmailMtmUidValue 0x2001F406
@@ -54,44 +55,10 @@ void CMCSPluginSettingsAppList::ConstructL()
 
     iMenu.OpenL( KMyMenuData );
     
-    // Get "Undefined" icon and text
-    CMenuFilter* filter = CMenuFilter::NewL();
-    CleanupStack::PushL( filter );
-
-    // 'Undefined' item
-    filter->HaveAttributeL( KMenuAttrUid, KMenuAttrUndefUid );
-
-    TMenuItem item;
-    const TInt root = iMenu.RootFolderL();
-    RArray<TMenuItem> items;
-    CleanupClosePushL( items );
-    iMenu.GetItemsL( items, root, filter, ETrue );
-
-    if ( items.Count() > 0 )
-        {
-        iUndefinedItem = CMenuItem::OpenL( iMenu, items[ 0 ] );
-        iUndefinedText = NULL;
-
-        if ( iUndefinedItem )
-            {
-            TBool exists( KErrNotFound );//CleanupStack::PushL( undefinedItem );
-            TPtrC undefined = iUndefinedItem->GetAttributeL( KMenuItemLongName, exists );
-
-            if ( exists )
-                {
-                iUndefinedText = HBufC::NewMaxL( undefined.Length() );
-                iUndefinedText->Des().Copy( undefined );
-                }
-            else
-                {
-                iUndefinedText = KNullDesC().Alloc();
-                }
-            }
-        }
-
-    CleanupStack::PopAndDestroy( &items );
-    CleanupStack::PopAndDestroy( filter );
+    iUndefinedText = MenuItemTextL( KMenuAttrUndefUid );
+    iEmptyText = MenuItemTextL( KMenuAttrInvokeSettingsUid );
     }
+
 
 // ---------------------------------------------------------------------------
 // Two-phased constructor
@@ -118,7 +85,7 @@ CMCSPluginSettingsAppList::~CMCSPluginSettingsAppList()
     iMenu.Close();
     
     delete iUndefinedText;
-    delete iUndefinedItem;
+    delete iEmptyText;
     }
 
 // ---------------------------------------------------------------------------
@@ -188,7 +155,7 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
     {
     TBool attrExists( EFalse );
-    TSettingItem settingItem = { KErrNotFound, EApplication, EFalse };
+    TSettingItem settingItem = { KErrNotFound, EApplication, EFalse, EFalse };
     TBool isFolder = EFalse;
 
     // check if the item is folder
@@ -413,5 +380,57 @@ void CMCSPluginSettingsAppList::AddMailboxL( const TDesC& aMailbox,
     User::LeaveIfError( iListItems.InsertInOrderAllowRepeats( newItem, sortMethod ) );
     CleanupStack::Pop( newItem );
     }
+
+// ---------------------------------------------------------------------------
+// Gets specified menu item text
+// ---------------------------------------------------------------------------
+//
+HBufC* CMCSPluginSettingsAppList::MenuItemTextL( const TDesC& aUid )
+    {
+    HBufC* text = NULL;
+
+    // Get specified icon and text
+    CMenuFilter* filter = CMenuFilter::NewL();
+    CleanupStack::PushL( filter );
+    
+    // Filter specified item
+    filter->HaveAttributeL( KMenuAttrUid, aUid );
+    
+    const TInt root = iMenu.RootFolderL();
+    RArray<TMenuItem> items;
+    CleanupClosePushL( items );
+    iMenu.GetItemsL( items, root, filter, ETrue );
+    
+    CMenuItem* item = NULL;
+    
+    if ( items.Count() > 0 )
+        {
+        item = CMenuItem::OpenL( iMenu, items[ 0 ] );
+        
+        if ( item )
+            {
+            TBool exists( KErrNotFound );
+            TPtrC itemName = item->GetAttributeL( KMenuItemLongName, exists );
+    
+            if ( exists )
+                {
+                text = HBufC::NewMaxL( itemName.Length() );
+                text->Des().Copy( itemName );
+                }
+            delete item;
+            }
+        }
+
+    if( !text )
+        {
+        text = KNullDesC().Alloc();
+        }    
+
+    CleanupStack::PopAndDestroy( &items );
+    CleanupStack::PopAndDestroy( filter );
+    
+    return text;
+    }
+
 
 // End of File.

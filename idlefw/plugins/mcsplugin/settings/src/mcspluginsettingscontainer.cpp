@@ -472,4 +472,16 @@ void CMCSPluginSettingsContainer::HandleNotifyL()
     iNotifyWatcher->WatchNotify( this );
     }
 
+// ---------------------------------------------------------------------------
+// Sets the currently selected item
+// ---------------------------------------------------------------------------
+//
+void CMCSPluginSettingsContainer::SetCurrentItemIndex( TInt aIdx )
+    {
+    if( iListBox )
+        {
+        iListBox->SetCurrentItemIndex( aIdx );
+        }
+    }
+
 // End of File.

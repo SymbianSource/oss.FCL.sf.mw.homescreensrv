@@ -624,7 +624,8 @@ TBool ChspsThemeServer::HandleDefinitionRespositoryEvent( ThspsRepositoryInfo aR
 
     if( aRepositoryInfo.iEventType & EhspsODTUpdated ||
         aRepositoryInfo.iEventType & EhspsODTModified ||
-        aRepositoryInfo.iEventType & EhspsPluginReplaced )
+        aRepositoryInfo.iEventType & EhspsPluginReplaced ||
+        aRepositoryInfo.iEventType == EhspsODTActivated )
         {
         SetResourceFileCopyRequired( aRepositoryInfo.iAppUid );
         }    
@@ -3380,10 +3381,20 @@ void ChspsThemeServer::ValidateRestoredConfigurationL(
                 header->ThemeVersion() ) );
             if ( err == KErrNone )
                 {
-                // Check that configuration resource files are found
-                TRAP( err, hspsServerUtil::CheckResourceFilesL( 
-                    aOdt, 
-                    uids[ i ] ) );
+                ChspsODT* odt = ChspsODT::NewL();
+                CleanupStack::PushL( odt );
+                err = GetConfigurationL( 0, header->ThemeUid(), *odt );                                
+                if ( err == KErrNone )
+                    {   
+	                // Check that configuration resource files are found
+                    TRAP( err,
+                            hspsServerUtil::CheckResourceFilesL(
+                                    aOdt,                                
+                                    *odt,
+                                    iFsSession );
+                            );    
+                    }
+                CleanupStack::PopAndDestroy();
                 }
             }
         
@@ -3632,7 +3643,7 @@ TBool ChspsThemeServer::HandleFamilyChangeL(
                     }                                                     
                 if ( !alreadyIncluded )
                     {                
-                    notificationTargets.Append( header );
+                    notificationTargets.AppendL( header );
 
                     // Check if active configuration supports the current family
                     TBool updateRequired = ETrue;

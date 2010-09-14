@@ -194,7 +194,24 @@ TInt CAiContentObserverOptimizer::Clean( CHsContentPublisher& aPlugin,
                                      TInt aContent,
                                      TInt aIndex )
     {
-    return iObserver.Clean( aPlugin, aContent, aIndex );    
+    if ( IsInBlackList( aContent, aIndex ) )
+        {
+        return KErrNotFound;
+        }    
+    TInt err = iObserver.Clean( aPlugin, aContent, aIndex );
+    // Publish went through OK, we need to commit the transaction
+    if ( err == KErrNone && iTransactionStarted )
+        {
+        iCommitNeeded = ETrue;
+        }
+    // publish failed because the ui declaration doesn't
+    // include this content => add to black list and 
+    // don't try to publish again
+    else if ( err == KErrNotFound || err == KErrNotSupported )
+        {
+        AddToBlackList( aContent, aIndex );
+        }
+    return err;
     }
 
 MAiContentObserver& CAiContentObserverOptimizer::Observer() const

@@ -32,24 +32,24 @@ class MMcsInstallListener;
  *  @lib mcsmenu.lib
  *  @since S60 v5.0
  */
-NONSHARABLE_CLASS( CMcsDrmHandler ): 
+NONSHARABLE_CLASS( CMcsDrmHandler ):
     public CBase,
     public MMcsInstallListener,
     public MMcsDrmObserver,
     public MMcsDrmAppScanner
     {
 public:
-    
+
     /**
     * Two-phased constructor. Leaves on failure.
     * @return The constructed object.
     */
-    
-    static CMcsDrmHandler* NewL( 
+
+    static CMcsDrmHandler* NewL(
         CMenuSrvEng& aSrvEng,
         CMenuSrvEngUtils& aUtils,
         CMcsCacheHandler& aCacheHandler );
-    
+
     /**
     * Destructor.
     * @since S60 v5.0
@@ -58,24 +58,25 @@ public:
     * @panic None.
     */
     virtual ~CMcsDrmHandler();
-    
+
     void HandleDrmEvent( TUid aUid );
-    
+
     void HandleDrmAppEvent();
-    
+
     void EngineEvents( TInt aFolder, TInt aEvents );
 
     /**
      * Handle Install Event
      */
-    void HandleInstallNotifyL(TInt aPackageUid);    
-    
+    void HandleInstallNotifyL( TUid aPackageUid,
+    		CMcsInstallNotifier::TNotificationType aNotificationType  );
+
 private:
 
     /**
     * Constructor.
     */
-    CMcsDrmHandler( 
+    CMcsDrmHandler(
         CMenuSrvEng& aSrvEng,
         CMenuSrvEngUtils& aUtils,
         CMcsCacheHandler& aCacheHandler  );
@@ -84,27 +85,27 @@ private:
     * 2nd phase constructor.
     */
     void ConstructL();
-    
-    void AddRemoveObserversL( 
+
+    void AddRemoveObserversL(
     		const RArray<TUid>& aDrmProtectedArray );
-    
+
     TInt AppFolderIdL( TUid aUid );
-    
+
 private:    // data
-    
+
     RMcsDrmObserverManager iObserversManager;
-    
-    
+
+
     CMenuSrvEng& iSrvEng; ///< Menu Engine. Not own.
-    
+
     CMenuSrvEngUtils& iUtils;
-    
+
     CMcsCacheHandler& iCacheHandler;
-    
+
     CMcsDrmScanner* iScanner;
-    
+
     CMcsInstallNotifier* iInstallNotifier;
-    
+
     };
 
 #endif // __MCSDRMHANDLER_H__

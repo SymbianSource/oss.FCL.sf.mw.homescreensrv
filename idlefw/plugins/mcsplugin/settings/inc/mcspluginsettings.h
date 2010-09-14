@@ -159,6 +159,11 @@ private:
      */
     void HandleListBoxSelectionL();
 
+    /**
+     * Callback function to be used with CPeriodic.
+     */
+    static TInt TimerCallbackL( TAny *aPtr );
+    
 private:  // data
 
     /**
@@ -166,6 +171,12 @@ private:  // data
      * Own.
      */
     CMCSPluginSettingsModel* iModel;
+    
+    /** 
+     * Timer to change specified shortcut when view is activated.
+     * Own. 
+     */
+    CPeriodic* iTimer;    
 };
 
 #endif // MCSPLUGINSETTINGS_H

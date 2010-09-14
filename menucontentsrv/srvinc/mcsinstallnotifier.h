@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies). 
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,8 +11,8 @@
 *
 * Contributors:
 *
-* Description:  This class implements MMcsGetListCreatorInterface. It builds tree 
-*   output list for getlist operation 
+* Description:  This class implements MMcsGetListCreatorInterface. It builds tree
+*   output list for getlist operation
 *
 *
 */
@@ -20,9 +20,92 @@
 #ifndef MCSINSTALLNOTIFIER_H_
 #define MCSINSTALLNOTIFIER_H_
 
+#include <sacls.h>
 #include <e32base.h>
 #include <e32property.h>
 
+class CMcsNotifierStrategy;
+class MMcsInstallListener;
+
+/**
+ *  MCS Install notifier.
+ *
+ *  @since S60 v5.0
+ */
+NONSHARABLE_CLASS( CMcsInstallNotifier ) : public CActive
+	{
+public:
+
+    /**
+     * Enum defining notification type.
+     */
+    enum TNotificationType
+        {
+        ENoNotification,            ///< No notification.
+        ESisInstallNotification,    ///< System installation notification.
+        EJavaInstallNotification,   ///< Java instalation and uninstallation notification.
+        };
+
+    /**
+     * Creates an instance of CCaInstallNotifier.
+     * @param aNotifier Reference to notifier interface.
+     * @param aNotificationType Notification type.
+     */
+	static CMcsInstallNotifier* NewL( MMcsInstallListener& aListener,
+			TNotificationType aNotificationType );
+
+	/**
+	 * Destructor.
+	 */
+	virtual ~CMcsInstallNotifier();
+
+private:
+
+    /**
+     * Constructor.
+     * @param aListener Reference to listener interface.
+     */
+	CMcsInstallNotifier( MMcsInstallListener& aListener );
+
+	/**
+     * Symbian 2nd phase constructor.
+     * @param aNotificationType Notification type.
+     */
+    void ConstructL( TNotificationType aNotificationType );
+
+    /**
+     * From CActive.
+     */
+    void DoCancel();
+
+    /**
+     * From CActive.
+     */
+    void RunL();
+
+    /**
+     * From CActive.
+     */
+    TInt RunError( TInt aError );
+
+private:
+
+    /**
+     * RProperty - own.
+     */
+    RProperty iProperty;
+
+    /**
+     * MMcsInstallListener - own.
+     */
+    MMcsInstallListener& iListener;
+
+    /*
+     * Notification strategy - own.
+     */
+    CMcsNotifierStrategy* iNotifierStrategy;
+
+    };
 
 /**
  * Interface for updating after installer events.
@@ -31,109 +114,16 @@
  */
 class MMcsInstallListener
     {
-protected:
-    /**
-     * Enum defining the purpouse of the installation event.
-     */
-    enum TInstOp
-    	{
-    	EInstOpNone = 0x00000000,
-    	EInstOpInstall = 0x00000001,
-    	EInstOpUninstall = 0x00000002,
-    	EInstOpRestore = 0x00000004
-		};
 public:
-    virtual void HandleInstallNotifyL(TInt aEvent) = 0;
+
+    /**
+     * Pure virtual method.
+     * @param aUid uid of installed application.
+     * @param aOperation operation type, see TSASwisOperation.
+     */
+    virtual void HandleInstallNotifyL( TUid aUid,
+    		CMcsInstallNotifier::TNotificationType aNotificationType ) = 0;
     };
-
-
-/**
- *  MCS Install notifier.
- *
- *  @since S60 v5.0
- */
-NONSHARABLE_CLASS( CMcsInstallNotifier ) :
-	public CActive
-	{
-    /**
-     * Enum defining the purpouse of the installation event.
-     */
-    enum TInstOp
-    	{
-    	EInstOpNone = 0x00000000,
-    	EInstOpInstall = 0x00000001,
-    	EInstOpUninstall = 0x00000002,
-    	EInstOpRestore = 0x00000004
-		};
-    
-    enum TInstOpStatus
-        {
-        EInstOpStatusNone = 0x00000000,
-        EInstOpStatusSuccess = 0x00000100,
-        EInstOpStatusAborted = 0x00000200
-        };
-public:	
-		
-    /**
-     * Creates an instance of CMCSInstallNotifier implementation.
-     * @param aNotifier Reference to notifier interface.
-     * @param aCategory Package uid.
-     * @param aKey Key for central repository.
-     */
-	static CMcsInstallNotifier* NewL(MMcsInstallListener& aListener, TInt aKey );
-	
-	/**
-	 * Destructor.
-	 */
-	virtual ~CMcsInstallNotifier();
-	
-private:
-	
-    /**
-     * Constructor.
-     * @param aNotifier Reference to notifier interface.
-     * @param aCategory Package uid.
-     * @param aKey Key for central repository.
-     */
-	CMcsInstallNotifier( MMcsInstallListener& aListener, TInt aKey );
-	
-	/**
-	     * Symbian 2nd phase constructor.
-	     */
-	    void ConstructL();
-
-	    /**
-	     * From CActive.
-	     */
-	    void DoCancel();
-
-	    /**
-	     * From CActive.
-	     */
-	    void RunL();
-
-	    /**
-	     * From CActive.
-	     */
-	    TInt RunError( TInt aError );
-	    
-private:
-    /**.
-     * Own.
-     */
-    RProperty iProperty;
-
-    /**
-     * Interface for notifying changes in folder.
-     * Not Own.
-     */
-    MMcsInstallListener& iListener;
-
-    /*
-     * 
-     */
-    TInt iKey;
-	};
 
 
 #endif /* MCSINSTALLNOTIFIER_H_ */

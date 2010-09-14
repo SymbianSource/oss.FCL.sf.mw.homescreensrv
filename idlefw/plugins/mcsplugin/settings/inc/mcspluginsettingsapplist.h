@@ -130,6 +130,11 @@ public:
      */
     TPtrC UndefinedText() { return *iUndefinedText; };
 
+    /**
+     * Returns title for empty item
+     */
+    TPtrC EmptyText() { return *iEmptyText; };
+    
 private:
     /**
      * Constructor
@@ -169,6 +174,14 @@ private:
      */
     void AddMailboxL( const TDesC& aMailbox, const TDesC& aMailboxId );
 
+    /**
+     * Returns title for requested item
+     *
+     * @param aUid Shortcut items uid
+     * @return HBufC title
+     */    
+    HBufC* MenuItemTextL( const TDesC& aUid );
+    
 private:  // data
 
     /**
@@ -192,10 +205,11 @@ private:  // data
      */
     HBufC* iUndefinedText;
     
-    /*
-     * Undefined MCS item, own
+    /**
+     * Name of "Empty" application, own
      */
-    CMenuItem* iUndefinedItem;
+    HBufC* iEmptyText;
+
 };
 
 #endif // CMCSPLUGINSETTINGSAPPLIST_H

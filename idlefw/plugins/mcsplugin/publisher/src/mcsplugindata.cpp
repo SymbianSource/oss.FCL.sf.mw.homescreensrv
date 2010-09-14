@@ -111,9 +111,9 @@ TMenuItem& CMCSData::MenuItem()
 // 
 // ---------------------------------------------------------------------------
 //
-TDesC& CMCSData::Name()
+const TDesC* CMCSData::Name()
     {
-    return *iName;
+    return iName;
     }
     
 // ---------------------------------------------------------------------------
@@ -131,9 +131,9 @@ void CMCSData::SetNameL( const TDesC& aName )
 // 
 // ---------------------------------------------------------------------------
 //
-TDesC& CMCSData::Value()
+const TDesC* CMCSData::Value()
     {
-    return *iValue;
+    return iValue;
     }
     
 // ---------------------------------------------------------------------------
@@ -265,20 +265,20 @@ void CMCSPluginData::UpdateDataL()
             
             // id of all bookmarks is zero so name has to be check
             // in case of bookmark has changed
-            if ( id >= 0 && ( data->MenuItem().Id() != id ||
-                    ( id == 0 && data->Name().CompareF(
-                            iData[ i ]->Name() ) != 0 ) ) )
+            if( data->MenuItem().Id() != id ||
+                ( id == 0 && data->Name() != NULL && iData[i]->Name() != NULL && 
+                  data->Name()->CompareF( *iData[i]->Name() ) != 0 ) )
                 {
                 data->SetDirty( ETrue );
                 CMCSData* oldData = iData[i];
                 iData.Remove( i );
                 delete oldData;
-                
                 iData.InsertL( data, i );
-                CleanupStack::Pop( data );
+                CleanupStack::Pop( data );            
                 }
             else
                 {
+                // keep old data
                 CleanupStack::PopAndDestroy( data );
                 }
             }
@@ -572,8 +572,8 @@ void CMCSPluginData::SaveUndefinedItemL( const TInt& aIndex )
                 }
             }
         }
-    // ETrue tells that modified settings are stored also to plugin reference
-    iPluginSettings->SetSettingsL( iInstanceUid, settingItems, ETrue );
+    // EFalse tells that modified settings are not stored to plugin reference
+    iPluginSettings->SetSettingsL( iInstanceUid, settingItems, EFalse );
     CleanupStack::PopAndDestroy(); // settingItems
     }
 

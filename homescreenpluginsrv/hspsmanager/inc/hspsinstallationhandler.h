@@ -585,6 +585,11 @@ class ChspsInstallationHandler : public CBase,
         void AddLocalesL(
                 const TDesC& aPath,
                 const TBool aProcessOnlyDTD );
+                
+        void DoAddLocalesL(
+                const TDesC& aPath, 
+                const TLanguage aLanguage,
+                const TBool aProcessOnlyDTD );
         
         /**
          * Adds localized dtd resources from the provided subdirectory
