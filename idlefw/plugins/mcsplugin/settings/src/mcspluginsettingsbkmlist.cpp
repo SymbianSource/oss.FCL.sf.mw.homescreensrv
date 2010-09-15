@@ -28,6 +28,7 @@ _LIT( KMenuUrl, "menu:url" );
 _LIT( KUrl, "url" );
 _LIT8( KUid, "uid" );
 _LIT( KMenuAttrParameter, "param" );
+_LIT8( KMenuAttrParameter8, "param" );
 
 // ======== MEMBER FUNCTIONS ========
 
@@ -85,7 +86,13 @@ CMCSPluginSettingsBkmList::~CMCSPluginSettingsBkmList()
 //
 TInt CMCSPluginSettingsBkmList::MdcaCount() const
     {
-    return iListItems.Count();
+    TInt listItemsCount( 0 );
+    for( TInt i = 0; i< iListItems.Count(); i++ )
+        {
+        if( !iListItems[i]->iHidden )
+            listItemsCount++;
+        }
+    return listItemsCount;
     }
 
 // ---------------------------------------------------------------------------
@@ -104,38 +111,79 @@ TPtrC CMCSPluginSettingsBkmList::MdcaPoint(TInt aIndex) const
     }
 
 // ---------------------------------------------------------------------------
+// Checks with a given index if bookmark has been hidden from menulist.
+// ---------------------------------------------------------------------------
+//
+TBool CMCSPluginSettingsBkmList::ItemHidden( TInt aIndex )
+    {
+    if ( aIndex < 0 || aIndex >= iListItems.Count( ))
+        {
+        return EFalse;
+        }
+    return iListItems[aIndex]->iHidden;
+    }
+
+// ---------------------------------------------------------------------------
 // Iterates thru the bookmark list and tries to find a menuitem which 
 // matches given property map from HSPS
 // ---------------------------------------------------------------------------
 //
-TSettingItem CMCSPluginSettingsBkmList::FindItemL( RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
+TSettingItem CMCSPluginSettingsBkmList::FindItemL(
+    RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
     {
+    HBufC* uid( NULL );
+    HBufC* param( NULL );
     TInt index( KErrNotFound );
     TSettingItem settingItem = { KErrNotFound, EBookmark, EFalse, EFalse };
+    
+    // read property values
     for( TInt i= 0; i < aProperties.Count(); i++ )
         {
         if( aProperties[i]->Name() == KUid )
             {
-            HBufC* value( NULL );
-            value = AiUtility::CopyToBufferL( value, aProperties[i]->Value());
-            for( TInt j = 0; j < iListItems.Count(); j++ )
-                {
-                TPtrC uid = *iListItems[j]->iUid;
-                if( uid.Compare( *value ) == 0 )
-                    {
-                    index = j;
-                    break;
-                    }
-                }
-            delete value;
+            uid = AiUtility::CopyToBufferL(
+                  uid, aProperties[i]->Value() );
+            CleanupStack::PushL( uid );
             }
-        if( index != KErrNotFound )
+        else if( aProperties[i]->Name() == KMenuAttrParameter8 )
             {
-            settingItem.id = index;
-            settingItem.type = EBookmark;
+            param = AiUtility::CopyToBufferL(
+                    param, aProperties[i]->Value() );
+            CleanupStack::PushL( param );
+            }
+        }
+    
+    // try to find a match
+    for( TInt j = 0; j < iListItems.Count(); j++ )
+        {
+        TPtrC value = *iListItems[j]->iUid;
+        if( value.Compare( *uid ) == 0 )
+            {
+            index = j;
             break;
             }
         }
+    
+    // menuitem not found, add a new one
+    if( index == KErrNotFound && uid && param )
+        {
+        CBkmListItem* listItem = CBkmListItem::NewLC( *uid, *param );
+        listItem->iType = EFavBookmark;
+        listItem->iUrl = KNullDesC().AllocL();
+        listItem->iHidden = ETrue;
+        iListItems.Append( listItem );
+        CleanupStack::Pop( listItem );
+        
+        TInt listItemsCount = iListItems.Count();
+        TPtrC value = *iListItems[--listItemsCount]->iUid;
+        if( value.Compare( *uid ) == 0 )
+            index = listItemsCount;
+        }
+    
+    if( param ) CleanupStack::PopAndDestroy( param );
+    if( uid ) CleanupStack::PopAndDestroy( uid );
+    
+    settingItem.id = index;
     return settingItem;
     }
 
@@ -319,7 +367,7 @@ void CMCSPluginSettingsBkmList::AddBookmarkL( const TDesC&  aUid,
 //Nested class to store individual bookmark list items
 // ---------------------------------------------------------------------------
 //
-CMCSPluginSettingsBkmList::CBkmListItem::CBkmListItem()
+CMCSPluginSettingsBkmList::CBkmListItem::CBkmListItem() : iHidden( EFalse )
     {
     }
 

@@ -177,7 +177,7 @@ private:    // from MMcsInstallListener
     * @param aOperation operation type.
     */
     void HandleInstallNotifyL( TUid aUid,
-    		CMcsInstallNotifier::TNotificationType aNotificationType  );
+        CMcsInstallNotifier::TNotificationType aNotificationType  );
 
 private:    // new methods
 
@@ -255,7 +255,7 @@ private:    // new methods
 
     /**
     */
-    void SetHidden( const TDesC& aHiddenAppUid,
+    void SetHiddenL( const TDesC& aHiddenAppUid,
                                 RPointerArray<CMenuSrvAppAttributes>& aArray );
 
     /**
@@ -389,7 +389,7 @@ private:    // new methods
     * @return ETrue if drive is in use.
     */
     TBool IsDriveInUse(
-    		const DriveInfo::TDefaultDrives& aDefaultDrive );
+        const DriveInfo::TDefaultDrives& aDefaultDrive );
 
     /**
     TODO
@@ -430,7 +430,7 @@ private:    // new methods
     TODO
     */
     void UpdateApplicationItemL(
-    		RArray<TMenuItem>& aMcsItems,
+        RArray<TMenuItem>& aMcsItems,
             const CMenuSrvAppAttributes& aApaItem,
             TUint aMmcId,
             TBool isLegacy );

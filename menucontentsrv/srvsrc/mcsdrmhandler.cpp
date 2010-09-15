@@ -87,8 +87,8 @@ CMcsDrmHandler::CMcsDrmHandler(
 void CMcsDrmHandler::ConstructL()
     {
     iScanner = CMcsDrmScanner::NewL( *this, iSrvEng, iUtils );
-	iInstallNotifier = CMcsInstallNotifier::NewL(
-	        *this, CMcsInstallNotifier::EJavaInstallNotification );
+  iInstallNotifier = CMcsInstallNotifier::NewL(
+          *this, CMcsInstallNotifier::EJavaInstallNotification );
 
     }
 
@@ -128,10 +128,10 @@ TInt CMcsDrmHandler::AppFolderIdL( TUid aUid )
 void CMcsDrmHandler::HandleDrmEvent( TUid aUid )
     {
     TRAP_IGNORE(
-    		iSrvEng.Engine().AppendNotifyL( AppFolderIdL( aUid ),
-    				RMenuNotifier::EItemAttributeChanged );
-    		iScanner->RemoveObserverAndScanL( aUid );
-				);
+        iSrvEng.Engine().AppendNotifyL( AppFolderIdL( aUid ),
+            RMenuNotifier::EItemAttributeChanged );
+        iScanner->RemoveObserverAndScanL( aUid );
+        );
     }
 
 // -----------------------------------------------------------------------------
@@ -147,7 +147,7 @@ void CMcsDrmHandler::HandleDrmAppEvent()
 // -----------------------------------------------------------------------------
 //
 void CMcsDrmHandler::AddRemoveObserversL(
-	const RArray<TUid>& aDrmProtectedArray )
+        const RArray<TUid>& aDrmProtectedArray )
     {
     iObserversManager.RemoveMissingObservers( aDrmProtectedArray );
     iObserversManager.CreateObserversL( aDrmProtectedArray, *this );
@@ -169,11 +169,11 @@ void CMcsDrmHandler::EngineEvents( TInt /*aFolder*/, TInt aEvents )
 // ---------------------------------------------------------
 //
 void CMcsDrmHandler::HandleInstallNotifyL( TUid aPackageUid,
-		CMcsInstallNotifier::TNotificationType aNotificationType )
-	{
+    CMcsInstallNotifier::TNotificationType /*aNotificationType*/ )
+    {
     if( aPackageUid != TUid::Null() )
         {
-        if ( ( iScanner->DrmExpiredAppArray()).Find( aPackageUid )
+        if( ( iScanner->DrmExpiredAppArray() ).Find( aPackageUid )
                 != KErrNotFound )
             {
             HandleDrmEvent( aPackageUid );
@@ -183,21 +183,20 @@ void CMcsDrmHandler::HandleInstallNotifyL( TUid aPackageUid,
             iObserversManager.RefreshObserverL(
                     iScanner->DrmProtectedAppArray(), aPackageUid, *this );
             }
-		}
-	else
-	    {
-	    for ( TInt i = 0; i< iScanner->DrmProtectedAppArray().Count(); i++ )
-	        {
+        }
+    else
+        {
+        for( TInt i = 0; i < iScanner->DrmProtectedAppArray().Count(); i++ )
+            {
             iObserversManager.RefreshObserverL(
                     iScanner->DrmProtectedAppArray(),
-                    iScanner->DrmProtectedAppArray()[i],
-                    *this );
-	        }
-	    for ( TInt i = 0; i< iScanner->DrmExpiredAppArray().Count(); i++ )
-	        {
-	        HandleDrmEvent( iScanner->DrmExpiredAppArray()[i] );
-	        }
-	    }
+                    iScanner->DrmProtectedAppArray()[i], *this );
+            }
+        for( TInt i = 0; i < iScanner->DrmExpiredAppArray().Count(); i++ )
+            {
+            HandleDrmEvent( iScanner->DrmExpiredAppArray()[i] );
+            }
+        }
     }
 
 

@@ -215,7 +215,7 @@ TSettingItem CMCSPluginSettingsAppList::FindItemL(
 
                 // otherwise, compare attributes from HSPS and from menuitem
                 // if there is no match, move to the next item in the list
-                if ( attr != *attrValue )
+                if ( attr.CompareF( *attrValue ) != 0 )
                     {
                     match = EFalse;
                     }

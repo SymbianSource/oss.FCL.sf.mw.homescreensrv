@@ -263,18 +263,6 @@ void CAiProfilePlugin::PublishL()
         		}
         	}
 
-		// in case of Offline profile profile indicator is not shown
-        if ( observer->CanPublish( *this, EAiProfileContentActiveProfileName, EAiProfileContentActiveProfileName ) &&
-        		iEngine->IsOffline() )
-        	{
-    		observer->Clean( *this, EAiProfileActiveProfileSilentChar, EAiProfileActiveProfileSilentChar );
-    		observer->Clean( *this, EAiProfileActiveProfileIcon, 1 );
-    		observer->Clean( *this, EAiProfileActiveProfileIcon, 2 );
-            
-    		// uncomment also this and respective policy lines in profiles.xml if whole widget needs to be hidden in AI3 
-    		//observer->Clean( *this, EAiProfileContentActiveProfileName, EAiProfileContentActiveProfileName );        		    		
-    		}
-        
         if ( err == KErrNone )
             {
             err = observer->Commit( transactionId );

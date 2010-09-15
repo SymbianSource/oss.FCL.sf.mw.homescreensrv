@@ -30,7 +30,7 @@
 #include <mcsmenuitem.h>
 #include <mcspluginparamval.h>
 #include <LogsUiCmdStarter.h>
-#include <APGCLI.H>
+#include <apgcli.h>
 
 // User includes
 #include "mcsplugincompletedoperation.h"

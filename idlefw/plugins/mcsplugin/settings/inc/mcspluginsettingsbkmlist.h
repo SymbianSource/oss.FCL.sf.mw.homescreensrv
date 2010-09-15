@@ -109,6 +109,13 @@ public:
     TSettingItem FindItemL( 
         RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties );
 
+    /**
+     * Checks with a given index if bookmark has been hidden from menulist
+     * 
+     * @param aIndex Index of the bookmark in the list
+     * @return ETrue if the bookmark is hidden, EFalse otherwise
+     */
+    TBool ItemHidden( TInt aIndex );
 
 protected:
 
@@ -236,6 +243,11 @@ private:
          * Target bookmark parameters
          */
         HBufC* iUrl;
+        
+        /**
+         * Target bookmark hidden
+         */
+        TBool iHidden;
 
     private:
 

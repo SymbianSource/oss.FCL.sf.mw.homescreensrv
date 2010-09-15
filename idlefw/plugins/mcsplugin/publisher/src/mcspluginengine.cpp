@@ -50,8 +50,7 @@ _LIT( KResourceDrive, "Z:" );
 _LIT( KResourceFile, "mcspluginres.rsc" );
 _LIT( KResPath, "\\resource\\" );
 _LIT( KMMApplication, "mm://" );
-_LIT( KSetFocusString, "!setfocus?applicationgroup_name=" );
-_LIT( KApplicationGroupName, "applicationgroup_name" );
+_LIT( KSetOpenItemString, "!openitem?id="  );
 _LIT( KIcon, "icon" );
 _LIT( KMenuAttrUndefUid, "0x99999991" );
 _LIT( KMenuIconFile, "aimcsplugin.mif" );
@@ -72,6 +71,9 @@ const TUid KBrowserUid = { 0x10008D39 };
 // maximum custom message length
 const TInt KMaxCustomMsg = 256;
 const TInt KUndefinedIndex = -1;
+
+// maximun integer character length
+const TInt  KMaxLength = 12;
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
@@ -592,24 +594,15 @@ void CMCSPluginEngine::LaunchFolderItemL( CMCSData& aData )
     HBufC8* message; 
 
     // prepare message for launching folder
-    TBool hasApplicationGroupName( EFalse );
+    TBuf<KMaxLength>  itemId;
+    itemId.Num( item->Id() );
     
-    TPtrC applicationGroupName( item->GetAttributeL(
-        KApplicationGroupName, hasApplicationGroupName ) );
-                                                      
-    if ( !hasApplicationGroupName )
-        {
-        CleanupStack::PopAndDestroy( item );
-        return;
-        }
-    
-    message = HBufC8::NewLC( KMMApplication().Length() + 
-                             KSetFocusString().Length() +
-                             applicationGroupName.Length() );
-
+    message = HBufC8::NewLC( KMMApplication().Length()
+                            + KSetOpenItemString().Length()
+                            + itemId.Length() );
     message->Des().Copy( KMMApplication );
-    message->Des().Append( KSetFocusString );
-    message->Des().Append( applicationGroupName );
+    message->Des().Append( KSetOpenItemString );
+    message->Des().Append( itemId );
 
     // find MM application
     TApaTaskList taskList( CCoeEnv::Static()->WsSession() );

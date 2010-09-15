@@ -186,7 +186,14 @@ void CMCSPluginSettingsContainer::HandleChangeCommandL()
                     {
                         appListIndex = -1;
                     }
-
+                
+                // if the selected item is hidden, set selected item to -1
+                TBool itemHidden = iModel->BkmList()->ItemHidden( appListIndex );
+                if ( itemHidden )
+                    {
+                    appListIndex = -1;
+                    }
+                
                 changed = HandleBookmarkChangeCommandL( appListIndex, current );
 
                 }
