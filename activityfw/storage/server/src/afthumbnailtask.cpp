@@ -39,7 +39,7 @@ CAfThumbnailTask::CAfThumbnailTask(MAfTaskStorage& storage,
  */
 CAfThumbnailTask::~CAfThumbnailTask()
 {
-    delete mService;
+    delete mBitmap;
 }
 
 // -----------------------------------------------------------------------------
@@ -49,12 +49,12 @@ CAfThumbnailTask::~CAfThumbnailTask()
 void CAfThumbnailTask::ExecuteLD(MAfTaskStorage& taskStorage,
                                  const RMessage2& message)
 {
-    CAfThumbnailTask *self = new (ELeave)CAfThumbnailTask(taskStorage, 
-                                                                      message);
+    CAfThumbnailTask *self = new (ELeave)CAfThumbnailTask(taskStorage, message);
     CleanupStack::PushL(self);
     self->ConstructL();
     taskStorage.PushL(self);
     CleanupStack::Pop(self);
+    message.Complete(KErrNone);
 }
 
 // -----------------------------------------------------------------------------
@@ -63,43 +63,20 @@ void CAfThumbnailTask::ExecuteLD(MAfTaskStorage& taskStorage,
  */
 void CAfThumbnailTask::ConstructL()
 {
-    TPckgBuf<int> width(0), height(0);
     RBuf path;
     CleanupClosePushL(path);
-    mMsg.ReadL(0, width);
-    mMsg.ReadL(1, height);
     path.CreateL(mMsg.GetDesLengthL(2));
     mMsg.ReadL(2, path);
     
-    CFbsBitmap *bitmap = new (ELeave) CFbsBitmap();
-    CleanupStack::PushL(bitmap);
-    User::LeaveIfError(bitmap->Load(path));
-    mService = CTsGraphicFileScalingHandler::NewL(*this, 
-                                                  *bitmap, 
-                                                  TSize(width(), height()), 
-                                                  CTsGraphicFileScalingHandler::EKeepAspectRatioByExpanding);
-    CleanupStack::PopAndDestroy(bitmap);
-    CleanupStack::PopAndDestroy(&path);
-}
+    mBitmap = new (ELeave) CFbsBitmap;
+    User::LeaveIfError(mBitmap->Load(path));
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void CAfThumbnailTask::ImageReadyCallBack(TInt error,const CFbsBitmap *bitmap)
-{
-    if (EFalse == mMsg.IsNull() &&
-        KErrNone == error) {
-        mMsg.Write(0, TPckgBuf<int>(const_cast<CFbsBitmap*>(bitmap)->Handle()));
-        mMsg.Write(1, TPckgBuf<void *>(this));
-        mMsg.Complete(error);
-    } else {
-        if (EFalse == mMsg.IsNull()) {
-         mMsg.Complete(error);
-        }
-        mStorage.Pop(this);
-        delete this;
-    }
+    CleanupStack::PopAndDestroy(&path);
+
+
+    mMsg.Write(0, TPckgBuf<int>(mBitmap->Handle()));
+    mMsg.Write(1, TPckgBuf<void *>(this));    
+
 }
 
 // -----------------------------------------------------------------------------
@@ -115,7 +92,7 @@ const TDesC8& CAfThumbnailTask::Data() const
 //
 // -----------------------------------------------------------------------------
 //
-void CAfThumbnailTask::BroadcastReceivedL(const RMessage2&)
+void CAfThumbnailTask::BroadcastReceivedL(const RMessage2&, TBool)
 {
 }
 

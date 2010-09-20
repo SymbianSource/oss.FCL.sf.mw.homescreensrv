@@ -20,6 +20,9 @@ TARGET = afservice
 CONFIG += plugin 
 include(activityserviceplugin.pri)
 
+CONFIG += qtservice 
+QTSERVICE.DESCRIPTOR = data/afservice.xml
+
 DEFINES += AFACTIVITIES_LIB
 
 INCLUDEPATH += ./inc \
@@ -90,7 +93,7 @@ symbian {
     xml.sources = ./data/afservice.xml
     xml.path = $$RESOURCE_FILES_DIR/activity
     
-    DEPLOYMENT += xml
+    DEPLOYMENT += xml plugin
 
     #temporary workaround
     BLD_INF_RULES.prj_exports += "data/afservice.xml z:/resource/activity/afservice.xml"

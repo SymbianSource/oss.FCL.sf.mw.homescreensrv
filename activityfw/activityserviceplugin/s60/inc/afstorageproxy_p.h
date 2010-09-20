@@ -36,8 +36,6 @@ public:
     ~AfStorageProxyPrivate();
 
 public:    
-    bool addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
-    bool updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
     bool saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot);
     bool removeActivity(int applicationId, const QString &activityId);   
     bool removeApplicationActivities(int applicationId);
@@ -47,7 +45,7 @@ public:
     bool activityMetaData(QVariantHash &metadata, int applicationId, const QString &activityId);
     bool waitActivity();    
     bool launchActivity(int applicationId, const QString &activityUri);
-    bool getThumbnail(const QSize &size, const QString &imagePath, void *userData);
+    bool getThumbnail(const QString &imagePath, void *userData);
     bool notifyDataChange();
 
 public: // from MAfAsyncRequestObserver
@@ -61,6 +59,9 @@ private:
     CAfEntry *getEntry(int applicationId, const QString &activityId);
     QVariantHash extractMetadata(CAfEntry *entry, bool includePublicData);
     QString activityDisplayText(CAfEntry *entry);
+    
+    TTime convertQDateTimeToTTime(const QDateTime &timestamp) const;
+    QDateTime convertTTimeToQDateTime(const TTime &s60Time) const;
     
 private:
     CAfStorageClient *mClient;

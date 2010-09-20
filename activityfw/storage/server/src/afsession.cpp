@@ -92,8 +92,6 @@ void CAfSession::ConstructL()
 void CAfSession::ServiceL(const RMessage2& message)
 {
     switch (message.Function()) {
-    case AddActivity:
-    case UpdateActivity:
     case SaveActivity:
     case RemoveActivity:
     case RemoveApplicationActivities:

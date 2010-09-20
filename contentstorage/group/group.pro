@@ -30,8 +30,7 @@ BLD_INF_RULES.prj_exports += \
      "$${LITERAL_HASH}endif" \
      "../data/backup_registration.xml z:/private/20022F90/backup_registration.xml"
 
-BLD_INF_RULES.prj_mmpfiles += "casathandler.mmp" \
-    "../castorage/group/castorage.mmp" \
+BLD_INF_RULES.prj_mmpfiles += "../castorage/group/castorage.mmp" \
     "../casatinterface/group/MenuInterface.mmp" \
     "../casrv/casrvmgr/group/casrvmanager.mmp" \
     "camenu.mmp" \
@@ -45,7 +44,6 @@ tests_krakow {
         BLD_INF_RULES.prj_mmpfiles += \
 #        "$${LITERAL_HASH}include \"../castorage/internal/tsrc/castoragetester/group/bld.inf\" " \  # disabled, needs CONTENT_ARSENAL_STORAGE_UT flag
 #        "$${LITERAL_HASH}include \"../internal/MT_casrv/group/bld.inf\" " \ # disabled, needs CONTENT_ARSENAL_STORAGE_UT flag
-        "$${LITERAL_HASH}include \"../internal/MT_sathandler/group/bld.inf\" " \
         "$${LITERAL_HASH}include \"../internal/MT_handler/group/bld.inf\" " \
 #        "$${LITERAL_HASH}include \"../casrv/caappscanner/internal/MT_cappscanner/group/bld.inf\" " \ # disabled, needs CONTENT_ARSENAL_STORAGE_UT flag
         "$${LITERAL_HASH}include \"../casrv/casatmonitor/internal/MT_satmonitor/group/bld.inf\" " \

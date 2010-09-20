@@ -22,6 +22,7 @@
 #include <e32base.h>
 #include <w32std.h>
 #include "tsdataobserver.h"
+#include "tsenv.h"
 
 class CTsResourceManager;
 class CTsWindowGroupsMonitor;
@@ -54,6 +55,7 @@ private:
                        const CTsServiceProvider& aServiceProvider);
 
 private:
+    TsEnv iEnv;
     CTsResourceManager* iResources;
     CTsWindowGroupsMonitor* iMonitor;
     CTsSerializedDataProvider* iSerializer;

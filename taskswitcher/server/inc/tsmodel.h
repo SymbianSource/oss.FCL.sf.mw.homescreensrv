@@ -36,6 +36,7 @@ protected: //data access. should be used by TModelItem
     virtual TTsModelItemKey KeyL( TInt aOffset ) const = 0;
     virtual TBool IsActiveL( TInt aOffset ) const = 0;
     virtual TBool IsClosableL( TInt aOffset ) const = 0;
+    virtual TBool IsMandatoryL( TInt aOffset ) const = 0;
 
 protected: //operations execution
     virtual TBool CloseL( TTsModelItemKey aKey ) const = 0;

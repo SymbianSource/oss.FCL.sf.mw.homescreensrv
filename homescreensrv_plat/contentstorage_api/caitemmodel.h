@@ -48,6 +48,7 @@ public:
         TypeRole,
         FlagsRole,
         TextRole,//contains title represented as QString,
+        DescriptionRole, // contains item description
         FullTextRole, //'title description' convinient for operations such as search
         UninstalRole,  //contains progress status as decimal number in QString
         CollectionTitleRole //contains title represented as QString,

@@ -19,7 +19,7 @@
 #include "tsrunningappserver.h"
 #include "tsrunningappsession.h"
 #include "tsbacksteppingactivation.h"
-
+#include "tswindowgroupsmonitor.h"
 #include "tsmodel.h"
 #include "tsstorage.h"
 #include "tsservicesprovider.h"
@@ -78,10 +78,10 @@ void CTsRunningAppServer::ConstructL()
     RPointerArray<MTsModel> providers;
     CleanupClosePushL(providers);
     
-    iAppsModel = CTsRunningAppModel::NewL(*iResources, *iMonitor);
+    iAppsModel = CTsRunningAppModel::NewL(*iResources, *iMonitor, iEnv);
     providers.AppendL(iAppsModel);
     
-    CTsServiceProviderConfig *cfg = CTsServiceProviderConfig::NewLC();
+    CTsServiceProviderConfig *cfg = CTsServiceProviderConfig::NewLC(&iEnv);
     iServiceProvider = CTsServiceProvider::NewL(*cfg);
     CleanupStack::PopAndDestroy(cfg);
     addProviders(providers, *iServiceProvider);

@@ -22,7 +22,6 @@
 #include <apgcli.h>
 #include <eikenv.h>
 #include <eikappui.h>
-#include <vwsdef.h>
 #include <AknDef.h>
 #include <AknTaskList.h>
 
@@ -47,8 +46,6 @@ static const char caTypeApp[] = "application";
 static const char caTypePackage[] = "package";
 static const char caTypeWidget[] = "widget";
 static const char caAttrView[] = "view";
-static const char caCmdClose[] = "close";
-static const char caAttrWindowGroupId[] = "window_group_id";
 static const char caAttrComponentId[] = "component_id";
 
 /*!
@@ -103,11 +100,6 @@ int CaAppHandler::execute(const CaEntry &entry, const QString &command,
                 entry.attribute(APPLICATION_UID_ATTRIBUTE_NAME);
             int uid = uidValue.toInt();
             TRAP(result, launchApplicationL(TUid::Uid(uid), viewId));
-        }
-    } else if (command == caCmdClose && entry.entryTypeName() == caTypeApp ) {
-        QString windowGroupId = entry.attribute(caAttrWindowGroupId);
-        if (!windowGroupId.isNull()) {
-            result = closeApplication(entry.flags(), windowGroupId.toInt());
         }
     } else if (command == caCmdRemove) {
         QString componentId(entry.attribute(caAttrComponentId));
@@ -178,28 +170,6 @@ void CaAppHandler::launchApplicationL(const TUid uid, TInt viewId)
     }
 }
 
-/*!
- * Closes application.
- * \param flags an entry flags.
- * \param windowGroupId window group id.
- * \retval an error code.
- */
-int CaAppHandler::closeApplication(const EntryFlags &flags, int windowGroupId)
-{
-    int result(KErrNone);
-    if (windowGroupId > 0) {
-        RWsSession wsSession;
-        result = wsSession.Connect();
-        if (result==KErrNone) {
-            TWsEvent event;
-            event.SetTimeNow();
-            event.SetType(KAknShutOrHideApp);
-            wsSession.SendEventToWindowGroup(windowGroupId, event);
-        }
-        wsSession.Close();
-    }
-    return result;
-}
 
 /*!
  * Uninstall application.

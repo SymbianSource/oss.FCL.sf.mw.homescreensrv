@@ -100,7 +100,7 @@ void CCaSatMonitor::SatChangeL()
         {
         RBuf satName;
         satName.CleanupClosePushL();
-        satName.Create( KCenRepBufferSize );
+        satName.CreateL( KCenRepBufferSize );
         User::LeaveIfError( GetSatName( satName ) );
 
         if( !resultArray.Count() )

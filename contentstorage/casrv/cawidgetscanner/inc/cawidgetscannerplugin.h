@@ -21,12 +21,13 @@
 #include <casrvplugin.h>
 #include <f32file.h>
 #include "cammcwatcher.h"
+#include "cainstallnotifier.h"
 
 class TPluginParams;
-class CCaWidgetScannerInstallNotifier;
 class CCaWidgetStorageHandler;
 
-class CCaWidgetScannerPlugin : public CCaSrvPlugin, MMmcWatcherCallback
+class CCaWidgetScannerPlugin :
+            public CCaSrvPlugin, MMmcWatcherCallback, MCaInstallListener
     {
 
 public:
@@ -47,6 +48,8 @@ public:
      * SynchronizeL - synchronizes widgets on device with database
      */
     void SynchronizeL();
+
+    void HandleInstallNotifyL();
 
 private:
     //from MWidgetMmcWatcherCallback
@@ -78,7 +81,7 @@ private:
     /**
      * Sis installation notifier. Own
      */
-    CCaWidgetScannerInstallNotifier* iInstallNotifier;
+    CCaInstallNotifier* iInstallNotifier;
 
     /**
      * Content Storage Handler. Own.

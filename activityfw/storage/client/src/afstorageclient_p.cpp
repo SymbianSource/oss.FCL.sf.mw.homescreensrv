@@ -77,26 +77,6 @@ void CAfStorageClientPrivate::ConstructL()
 // -----------------------------------------------------------------------------
 /**
  * Function implementation
- * @see AfStorageClient::addActivity(const CAfEntry &,const QPixmap&)
- */
-int CAfStorageClientPrivate::addActivity(const CAfEntry &entry, TInt imageHandle)
-{
-    return execute(AddActivity, entry, imageHandle);
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Function implementation
- * @see AfStorageClient::updateActivity(const CAfEntry &,const QPixmap&)
- */
-int CAfStorageClientPrivate::updateActivity(const CAfEntry &entry, TInt imageHandle)
-{
-    return execute(UpdateActivity, entry, imageHandle);
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Function implementation
  * @see AfStorageClient::saveActivity(const CAfEntry &,const QPixmap&)
  */
 int CAfStorageClientPrivate::saveActivity(const CAfEntry &entry, TInt imageHandle)
@@ -180,11 +160,11 @@ int CAfStorageClientPrivate::waitActivity()
 // -----------------------------------------------------------------------------
 /**
  * Function implementation
- * @see AfStorageClient::getThumbnail(const TSize &size, const TDesC &imagePath, void *userData)
+ * @see AfStorageClient::getThumbnail(const TDesC &imagePath, void *userData)
  */
-int CAfStorageClientPrivate::getThumbnail(const TSize &size, const TDesC &imagePath, void *userData)
+int CAfStorageClientPrivate::getThumbnail(const TDesC &imagePath, void *userData)
 {
-    TRAPD(errNo, mImplementation.getThumbnailL(size, imagePath, userData);)
+    TRAPD(errNo, mImplementation.getThumbnailL(imagePath, userData);)
     return errNo;
 }
 
@@ -219,8 +199,6 @@ int CAfStorageClientPrivate::execute(int function, const CAfEntry &sourceEntry, 
 {
     TRAPD(errNo,
         switch (function) {
-        case AddActivity:
-        case UpdateActivity:
         case SaveActivity:
         case RemoveActivity:
         case RemoveApplicationActivities:

@@ -153,11 +153,10 @@ void RAfStorageClientImplementation::executeL(int function, RPointerArray<CAfEnt
 }
 
 // -----------------------------------------------------------------------------
-void RAfStorageClientImplementation::getThumbnailL(TSize size, 
-                                                   const TDesC& source, 
+void RAfStorageClientImplementation::getThumbnailL(const TDesC& source, 
                                                    TAny *userData )
 {
-    CAfThumbnailRequestPrivate::NewLD(mObserver, *this, size, source, userData);
+    CAfThumbnailRequestPrivate::NewLD(mObserver, *this, source, userData);
 }
 
 // -----------------------------------------------------------------------------

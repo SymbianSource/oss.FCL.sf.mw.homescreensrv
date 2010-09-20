@@ -17,20 +17,30 @@
 #ifndef TSMODELITEM_H
 #define TSMODELITEM_H
 
-#include <QObject>
 #include <QVariant>
+#include <QSharedPointer>
+
+#include "tsmodelitem.h"
+
+class TsTask;
 
 /*!
     Abstract class which define model item for taskswitcher
 */
-class TsModelItem: public QObject
+class TsModelItem
 {
-    Q_OBJECT
 
 public:
-    virtual QVariant data(int role) const =0;
-    virtual void close() =0;
-    virtual void open() =0;
+    TsModelItem(QSharedPointer<TsTask> entry);
+    ~TsModelItem();
+    QVariant data(int role) const;
+    void close();
+    void open();
+
+private:
+    const QSharedPointer<TsTask> mEntry;
+    Q_DISABLE_COPY(TsModelItem)
+    
 };
 
 #endif // TSMODELITEM_H

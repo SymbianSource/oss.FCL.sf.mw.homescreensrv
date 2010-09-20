@@ -83,7 +83,8 @@ void CCaProgresScanner::StartOperationHandler( TUint aKey,
                 iComponentId = iSoftwareRegistry.GetComponentIdL(
                         aStartData.GlobalComponentId(), 
                         aStartData.SoftwareType() );
-                SubscribeL( aKey ) );
+                SubscribeL( aKey ); 
+                );
         }
     }
 
@@ -141,7 +142,7 @@ void CCaProgresScanner::EndOperationL( TInt aError )
     else
         {
         //information for observer that uninstallation was failed
-        iObserver->progressChange( iComponentId, aError ); 
+        iObserver->progressChange( iComponentId, KErrGeneral ); 
         }
     CancelSubscribeL();
     }

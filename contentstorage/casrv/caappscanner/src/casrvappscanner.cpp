@@ -876,7 +876,26 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 changed = SetCWRTAppL( aEntry ) || changed;
                 }
             }
+        
+        TApaAppCapabilityBuf appCap;
+        TInt screenNumber = 0;
+        
+        User::LeaveIfError( iApaLsSession.GetAppCapability
+            ( appCap, info->iUid ) );
+        User::LeaveIfError( iApaLsSession.GetDefaultScreenNumber
+            ( screenNumber, info->iUid ) );
+        
+        const TBool hidden = appCap().iAppIsHidden || screenNumber != 0;
+        
+        const TBool visible = aEntry->GetFlags() & EVisible;
+        
+        if ( hidden && visible ) 
+            {
+            changed = ETrue;
+            aEntry->SetFlags(aEntry->GetFlags() & ~EVisible);
+            }
         }
+    
     CleanupStack::PopAndDestroy( info );
     return changed;
     }
@@ -1259,3 +1278,4 @@ TBool CCaSrvAppScanner::UpdateComponentIdL( CCaInnerEntry& aEntry )
         }
     return updated;
     }
+

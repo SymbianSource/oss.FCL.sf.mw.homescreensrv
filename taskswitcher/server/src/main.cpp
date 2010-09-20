@@ -26,35 +26,30 @@
 
 int main(int argc, char *argv[]) 
 {
-    QApplication app(argc, argv);
-    
-    // hide server from TaskSwitcher
-    CEikonEnv * env = CEikonEnv::Static();
-    if(env) {
+    RSemaphore semaphore;
+    int errNo( semaphore.CreateGlobal(KTsServerReadySemaphore, 0) );
+    if (KErrNone == errNo) {
+        QApplication app(argc, argv);
+        // maintain instance of caservice (needed for getting application icons)
+        QSharedPointer<CaService> service = CaService::instance();
+        TRAP(errNo,
+        // hide server from TaskSwitcher
+        CEikonEnv * env = CEikonEnv::Static();
+        User::LeaveIfNull( env );
         env->RootWin().SetOrdinalPosition(0, ECoeWinPriorityNeverAtFront);
-
-        CApaWindowGroupName *wgName = CApaWindowGroupName::NewLC(env->WsSession());    
+        CApaWindowGroupName *wgName = CApaWindowGroupName::NewLC(env->WsSession());
         wgName->SetHidden(ETrue); // hides us from FSW and protects us from OOM FW etc.
-        wgName->SetSystem(ETrue); // Allow only application with PowerManagement cap to shut us down    
-        wgName->SetCaptionL(KRunningAppServerName);    
+        wgName->SetSystem(ETrue); // Allow only application with PowerManagement cap to shut us down
+        wgName->SetCaptionL(KRunningAppServerName);
         wgName->SetWindowGroupName(env->RootWin());
         CleanupStack::PopAndDestroy(wgName);
-    }
-    
-    // maintain instance of caservice (needed for getting application icons)
-    QSharedPointer<CaService> service = CaService::instance();    
-    
-    CServer2* serverObject = CTsRunningAppServer::NewLC();    
-    CleanupStack::Pop(serverObject);
-    
-    RSemaphore semaphore;
-    if (KErrNone == semaphore.OpenGlobal(KTsServerReadySemaphore)) {
+        CServer2* serverObject = CTsRunningAppServer::NewLC();
         semaphore.Signal();
+        QT_TRYCATCH_LEAVING(errNo = app.exec());
+        User::LeaveIfError(errNo);
+        CleanupStack::PopAndDestroy(serverObject);
+        )//TRAP
+        semaphore.Close();
     }
-    semaphore.Close();
-    
-    int result = app.exec();
-    
-    delete serverObject;
-    return result;
+    return errNo;
 }

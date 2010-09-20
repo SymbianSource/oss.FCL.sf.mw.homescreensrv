@@ -28,16 +28,52 @@
 // cfbsbitmap
 #include <apgicnfl.h>
 
+#include <rsatsession.h>
+#include <tsaticoninfo.h>
+#include <rsatservice.h>// MCL
+
+#include <e32property.h>
+#include <bitdev.h>
+
+#include <AknIconUtils.h>
+
+
 #include <HbIcon>
 
+#include "ca2internalCRkeys.h"
 #include "camenuiconutility.h"
-#include "cabitmapadapter.h"
 #include "caentry.h"
 #include "caquery.h"
 #include "caservice.h"
 #include "cadef.h"
 
 const char appUidAttributeName[] = "application:uid";
+
+LOCAL_C void getIconFromFile(HbIcon& icon, const QSizeF &size)
+{
+    if ((icon.iconName().contains(QChar('.')) ||
+        (icon.iconName().contains(QChar('/'))) ||
+        (icon.iconName().contains(QChar('\\'))) )
+        && !icon.isNull() && icon.size().isValid()) {
+        icon.setSize(size);
+        icon = HbIcon(QIcon(icon.pixmap()));
+    }    
+}
+
+/*!
+ Convert from bitmap and mask to qpixmap
+ \param input bitmap.
+ \param pixmap to prepare.
+ \retval void.
+ */
+LOCAL_C void fromBitmapAndMaskToPixmap(CFbsBitmap* fbsBitmap,
+        CFbsBitmap* fbsMask, QPixmap& pixmap)
+{
+    pixmap = pixmap.fromSymbianCFbsBitmap(fbsBitmap);
+    QPixmap mask;
+    mask = mask.fromSymbianCFbsBitmap(fbsMask);
+    pixmap.setAlphaChannel(mask);
+}
 
 /*!
  Get icon from entry.
@@ -50,17 +86,14 @@ LOCAL_C HbIcon getIconFromEntry(const CaEntry& entry, const QSizeF &size)
     QString skinId(entry.iconDescription().skinId());
     if (!skinId.isEmpty()) {
         icon = HbIcon(skinId);
+        getIconFromFile(icon, size);
     }
     
     if (icon.isNull() || !(icon.size().isValid())) {
         QString fileName(entry.iconDescription().filename());
         if (!fileName.isEmpty()) {
             icon = HbIcon(fileName);
-            if (fileName.contains(QChar('.'))
-                    && !icon.isNull() && icon.size().isValid()) {
-                icon.setSize(size);
-                icon = HbIcon(QIcon(icon.pixmap()));
-            }
+            getIconFromFile(icon, size);
         }
     }
     return icon;
@@ -105,7 +138,7 @@ LOCAL_C HbIcon getIconFromApparcL(int uidValue, const QSizeF &size)
         
         QPixmap pixmap;
         if ((err == KErrNone) && (iconsCount > 0)) {
-            CaBitmapAdapter::fromBitmapAndMaskToPixmapL(apaMaskedBitmap,
+            fromBitmapAndMaskToPixmap(apaMaskedBitmap,
                     apaMaskedBitmap->Mask(), pixmap);
     
             pixmap = pixmap.scaled(size.toSize(), 
@@ -215,18 +248,161 @@ HbIcon CaMenuIconUtility::getApplicationIcon(int uid,
     return icon;
 }
 
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (Icon can be created only from SIM)
+/*!
+ Get bitmap.
+ \param aIconEF icon information array
+ \retval bitmap.
+ */
+LOCAL_C CFbsBitmap* getSatBitmapL()
+    {
+    RSatSession satSession;
+    CleanupClosePushL(satSession);
+    RSatService satIcon;
+    CleanupClosePushL(satIcon);
+
+    satSession.ConnectL();
+    satIcon.OpenL(satSession);
+
+    
+    TInt iconId(KErrNone);
+    RProperty::Get(KCRUidCa, KCaSatUIIconId, iconId);
+    
+    CFbsBitmap* bitmap(NULL);
+
+    if (iconId != KErrNone) {
+        RIconEf iconEf;
+        satIcon.GetIconInfoL(TUint8(iconId), iconEf);
+        CleanupClosePushL(iconEf);
+
+        TInt selectedIconIndex(KErrNotFound);
+        TSize selectedIconSize(0, 0);
+        
+        for (TInt i = 0; i < iconEf.Count(); ++i) {
+            if ((iconEf[i].IconSize().iHeight * iconEf[i].IconSize().iWidth)
+                >= (selectedIconSize.iHeight * selectedIconSize.iWidth))
+                if (bitmap) {
+                    delete bitmap;
+                    bitmap = NULL;
+                }
+            // test and select index of icon which is not too big
+            bitmap = satIcon.GetIconL( iconEf[ i ] );
+            if (bitmap) //!bitmap if iIcon is too big
+            {
+                selectedIconSize = iconEf[i].IconSize();
+                selectedIconIndex = i;
+            }
+        }
+        if (selectedIconIndex != KErrNotFound) {
+            if (bitmap) {
+                delete bitmap;
+                bitmap = NULL;
+            }
+            bitmap = satIcon.GetIconL( iconEf[ selectedIconIndex ] );
+        }
+        CleanupStack::PopAndDestroy(&iconEf);
+    }
+    
+    CleanupStack::PopAndDestroy(&satIcon);
+    CleanupStack::PopAndDestroy(&satSession);
+    
+    return bitmap;
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (Icon can be created only from SIM)
+/*!
+ Get bitmap.
+ \param aIconEF icon information array
+ \retval bitmap.
+ */
+LOCAL_C CFbsBitmap* getSatMaskL(CFbsBitmap* aBitmap)
+    {
+    CFbsBitmap* mask(new (ELeave) CFbsBitmap);
+    CleanupStack::PushL(mask);
+
+    User::LeaveIfError(mask->Create(aBitmap->SizeInPixels(), EGray256));
+
+    CFbsBitmapDevice* maskDevice = CFbsBitmapDevice::NewL(mask);
+    CleanupStack::PushL(maskDevice);
+    CFbsBitGc* maskGc;
+    User::LeaveIfError(maskDevice->CreateContext(maskGc));
+    CleanupStack::PushL(maskGc);
+    maskGc->SetBrushStyle(CGraphicsContext::ESolidBrush);
+    maskGc->SetDrawMode(CGraphicsContext::EDrawModePEN);
+    maskGc->SetBrushColor(KRgbBlack);
+    maskGc->Clear();
+    maskGc->SetBrushColor(KRgbWhite);
+    maskGc->DrawRect(TRect(TPoint(), aBitmap->SizeInPixels()));
+    CleanupStack::PopAndDestroy(maskGc);
+    CleanupStack::PopAndDestroy(maskDevice);
+    CleanupStack::Pop(mask);
+    return mask;
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC SKIP
+#endif //COVERAGE_MEASUREMENT (Icon can be created only from SIM)
+/*!
+ Get icon from entry.
+ \param entry const reference to CaEntry.
+ \retval icon.
+ */
+LOCAL_C HbIcon getSatIconL()
+{
+    HbIcon icon;
+    QPixmap pixmap;
+    CFbsBitmap* bitmap(NULL);
+    CFbsBitmap* mask(NULL);
+    bitmap = getSatBitmapL();
+    if(bitmap)
+    {
+        mask = getSatMaskL(bitmap);
+        fromBitmapAndMaskToPixmap(bitmap, mask, pixmap);
+        icon = HbIcon(QIcon(pixmap));
+    }
+   
+
+    delete mask;
+    delete bitmap;
+    return icon;
+
+}
+#ifdef COVERAGE_MEASUREMENT
+#pragma CTC ENDSKIP
+#endif //COVERAGE_MEASUREMENT
+
+
 /*!
  Get icon.
  \param entry const reference to CaEntry.
  \param sie const reference to icon size.
  \retval icon.
  */
-HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
-        const QSizeF &size)
+HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry, const QSizeF &size)
 {
     HbIcon icon;
+
     icon = getIconFromEntry(entry, size);
- 
+    
+    if ((icon.isNull() || !(icon.size().isValid())) &&
+        entry.attribute(appUidAttributeName).toInt() == KSatUid.iUid) {
+        TRAP_IGNORE(icon = getSatIconL());
+    }
+    
     if (icon.isNull() || !(icon.size().isValid())) {
         QString uidString(entry.attribute(appUidAttributeName));
         bool uidOk(false);
@@ -239,16 +415,18 @@ HbIcon CaMenuIconUtility::getEntryIcon(const CaEntry& entry,
             TRAP_IGNORE(icon = getIconFromApparcL(uidValue, size));
         }
     }
- 
+
     if (icon.isNull() || !(icon.size().isValid())) {
         icon = getDefaultIcon(entry);
     }
- 
+
     if (entry.entryTypeName() == XQConversions::s60DescToQString(
-            KCaTypeWidget)) {
+        KCaTypeWidget)) {
         icon.addProportionalBadge(Qt::AlignBottom | Qt::AlignRight,
-		    HbIcon("qtg_small_homescreen"), QSizeF(0.5, 0.5));
+            HbIcon("qtg_small_homescreen"), QSizeF(0.5, 0.5));
     }
     return icon;
 }
+
+
 

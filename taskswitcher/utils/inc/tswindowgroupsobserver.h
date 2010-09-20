@@ -19,6 +19,30 @@
 
 #include "tsresourcemanager.h"
 
+class MTsRunningApplication
+    {
+public:
+    virtual TUid UidL()const =0;
+    virtual const TDesC& CaptionL() const =0;
+    virtual TBool IsHiddenL() const =0;
+    virtual TBool IsSystemL() const =0;
+    virtual TInt WindowGroupId() const =0;
+    virtual TInt ParentWindowGroupId() const =0;
+    virtual TBool IsEmbeded() const =0;
+    
+
+    };
+
+class MTsRunningApplicationStorage
+    {
+public:
+    virtual const MTsRunningApplication& operator[] (TInt aOffset) const=0;
+    virtual TInt Count() const =0;
+    virtual TInt ParentIndex( const MTsRunningApplication& aRaunningApp ) const =0;
+    virtual TArray<TInt> BlockedWindowGroups() const =0;
+
+    };
+
 /**
  * Interface declare mathods to notify about window server events
  */
@@ -26,12 +50,12 @@ class MTsWindowGroupsObserver
 {
 public:
     /**
-     * Method notidy about window group changes.
-     * @param rsc - resource manager
-     * @param wgs - list of window groups associated with running applications
+     * Method notify about window group changes.
+     * @param aResources - resource manager
+     * @param aStorage - list of running applications
      */
-    virtual void HandleWindowGroupChanged(MTsResourceManager &rsc, 
-                                          const TArray<RWsSession::TWindowGroupChainInfo> & wgs) =0;
+    virtual void HandleWindowGroupChanged(MTsResourceManager &aResources, 
+                                          const MTsRunningApplicationStorage& aStorage) =0;
 };
 
 /**
@@ -84,90 +108,4 @@ private:
     MTsWindowGroupsMonitor & mMonitor;
 };
 
-/**
- * Window server monitor implementation.
- */
-class CTsWindowGroupsMonitor: public CActive, 
-                              public MTsWindowGroupsMonitor
-                              
-{
-public:
-    /**
-     * Two phase constructor
-     */
-    static CTsWindowGroupsMonitor* NewL(MTsResourceManager &);
-    
-    /**
-     * Destructor
-     */
-    ~CTsWindowGroupsMonitor();
-    
-    /**
-     * @see MTsWindowGroupsMonitor::SubscribeL
-     */
-    void SubscribeL(MTsWindowGroupsObserver &);
-    
-    /**
-     * @see MTsWindowGroupsMonitor::Cancel
-     */
-    void Cancel(MTsWindowGroupsObserver &);
-
-protected:
-    /**
-     * @see CActive::RunL
-     */
-    void RunL();
-    
-    /**
-     * @see CActive::DoCancel
-     */
-    void DoCancel();
-    
-    /**
-     * @see CActive::RunError
-     */
-    TInt RunError(TInt error);
-
-private:
-    /**
-     * First phase constructor
-     */
-    CTsWindowGroupsMonitor(MTsResourceManager &);
-    
-    /**
-     * Second phase constructor
-     */
-    void ConstructL();
-    
-    /**
-     * Function subscribe for event to window server and activate object
-     */
-    void Subscribe();
-    
-    /**
-     * Function provide window server event to observers
-     */
-    void ProvideEventL();
-    
-    /**
-     * Function provide window server event to observer
-     */
-    void ProvideEventL(TWsEvent, MTsWindowGroupsObserver &);
-
-private:
-    /**
-     * Registry of subscribed observers
-     */
-    RPointerArray<MTsWindowGroupsObserver> mObservers;
-    
-    /**
-     * Resources manager
-     */
-    MTsResourceManager &mResources;
-    
-    /**
-     * Monitor window group
-     */
-    RWindowGroup mWg;
-};
 #endif //TSWINDOWGROUPSOBSERVER_H

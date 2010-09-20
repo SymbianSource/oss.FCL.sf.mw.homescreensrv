@@ -42,42 +42,43 @@ TInt RTsSession::Connect()
 }
 
 TInt RTsSession::StartServer()
-{
-    TInt error;
-
+    {
     RSemaphore semaphore;
-    error = semaphore.CreateGlobal(KTsServerReadySemaphore, 0);
-    
-    if (KErrNone == error || KErrAlreadyExists == error) {
+    CleanupClosePushL(semaphore);
+    TInt error = semaphore.OpenGlobal(KTsServerReadySemaphore);
+    if (KErrNone != error) {
         RProcess server;
+        CleanupClosePushL(server);
         error = server.Create(KRunningAppServerName, KNullDesC, TUidType(KNullUid, KNullUid, KRunningAppServerUid));
-        if (KErrNone == error) {
+        if (KErrNone == error) 
+            {
             TRequestStatus status;
             server.Rendezvous(status);
-            
-            if (status != KRequestPending) {
+            if (status != KRequestPending) 
+                {
                 server.Kill(0);
                 User::WaitForRequest(status);
-            } else {
+                }
+            else
+                {
                 server.Resume();
                 User::WaitForRequest(status);
-
-                // wait for server
-                semaphore.Wait();
-            }
-
-            if (KErrCancel == status.Int()) {
+                }
+            
+            if(KErrCancel == status.Int())
+                {
                 error = KErrNone;
-            } else {
+                }
+            else
+                {
                 error = (EExitPanic == server.ExitType()) ? KErrGeneral : status.Int();
+                }
             }
+        CleanupStack::PopAndDestroy(&server);
         }
-        server.Close();
-    }
-    semaphore.Close();
-
+    CleanupStack::PopAndDestroy(&semaphore);
     return error;
-}
+    }
 
 
 HBufC8* RTsSession::TasksContentLC()

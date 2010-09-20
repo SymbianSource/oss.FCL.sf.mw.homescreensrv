@@ -39,7 +39,7 @@ public slots:
     void launchActivity(const QString &uri);
     void launchActivity(const QUrl &uri);
     void launchActivity(int applicationId, const QString &activityId, const QVariantHash& parameters = QVariantHash());
-    void getThumbnail(QSize resolution,const QString &thumbnailPath, void *data =0);
+    void getThumbnail(const QString &thumbnailPath, void *data =0);
 
 signals:
     void thumbnailReady(QPixmap, void *);

@@ -15,13 +15,16 @@
 *
 */
 #include "tsbacksteppingfilter.h"
+#include "tsidlist.h"
 
-const TInt KBlockedApps [] = {0x100058b3/* <-- phoneui.exe */,
-                              0x2001843A/* <-- javainstaller */};
+const TInt KBlockedApps [] = {0x100058b3/* <-- phoneui */,
+                              0x2001843A/* <-- javainstaller */,
+                              0x200267D2/* <-- widgetinstallerapp */};
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBacksteppingFilter::NewL
+ * Symbian two-phase constructor. Allocate and initialize list blocked applications
+ * @return backstepping filtering
  */
 CTsBacksteppingFilter* CTsBacksteppingFilter::NewL()
     {
@@ -34,25 +37,27 @@ CTsBacksteppingFilter* CTsBacksteppingFilter::NewL()
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBacksteppingFilter::~CTsBacksteppingFilter
+ * Destructor
  */
 CTsBacksteppingFilter::~CTsBacksteppingFilter()
     {
-    iBlockedApps.Close();
+    delete iBlockedApps;
     }
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBacksteppingFilter::isBlocked
+ * Inform if application is blocked for backstepping engine
+ * @param aApplicationUid - tested application UID
+ * @return EFalse if application is not blocked for backstepping engine, other value in other cases
  */
 TBool CTsBacksteppingFilter::isBlocked( TUid aApplicationUid ) const
     {
-    return KErrNotFound != iBlockedApps.Find( aApplicationUid );
+    return iBlockedApps->IsPresent( aApplicationUid.iUid );
     }
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBacksteppingFilter::CTsBacksteppingFilter
+ * Constructor
  */
 CTsBacksteppingFilter::CTsBacksteppingFilter()
     {
@@ -61,13 +66,11 @@ CTsBacksteppingFilter::CTsBacksteppingFilter()
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBacksteppingFilter::ConstructL
+ * Symbian second-phase constructor. Initilaize blocked applications list
  */
 void CTsBacksteppingFilter::ConstructL()
     {
-    const TInt count(sizeof( KBlockedApps ) / sizeof(TInt)); 
-    for( TInt offset(0);offset < count; ++offset )
-        {
-        iBlockedApps.AppendL(TUid::Uid(KBlockedApps[offset]));
-        }
+    const TInt count( sizeof( KBlockedApps ) / sizeof( TInt ) );
+    iBlockedApps = CTsIdList::NewL();
+    iBlockedApps->AppendL( KBlockedApps, count );
     }

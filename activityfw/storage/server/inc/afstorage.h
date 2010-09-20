@@ -34,10 +34,6 @@ public:
 
     static CAfStorage* NewL(RFs& aSession);
 
-    void AddActivityL(CAfEntry &aEntry);
-
-    void UpdateActivityL(CAfEntry &aEntry);
-
     void SaveActivityL(CAfEntry &aEntry);
 
     void DeleteActivityL(CAfEntry &aEntry);

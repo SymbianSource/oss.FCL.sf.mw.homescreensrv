@@ -27,16 +27,6 @@ AfStorageProxy::~AfStorageProxy()
     delete d_ptr;
 }
 
-bool AfStorageProxy::addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
-{
-    return d_ptr->addActivity(applicationId, activityId, customActivityName, activityData, metadata, screenshot);
-}
-
-bool AfStorageProxy::updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
-{
-    return d_ptr->updateActivity(applicationId, activityId, customActivityName, activityData, metadata, screenshot);
-}
-
 bool AfStorageProxy::saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
 {
     return d_ptr->saveActivity(applicationId, activityId, customActivityName, activityData, metadata, screenshot);
@@ -82,9 +72,9 @@ bool AfStorageProxy::launchActivity(int applicationId, const QString &activityUr
     return d_ptr->launchActivity(applicationId, activityUri);
 }
 
-bool AfStorageProxy::getThumbnail(const QSize &size, const QString &imagePath, void *userData)
+bool AfStorageProxy::getThumbnail(const QString &imagePath, void *userData)
 {
-    return d_ptr->getThumbnail(size, imagePath, userData);
+    return d_ptr->getThumbnail(imagePath, userData);
 }
 
 bool AfStorageProxy::notifyDataChange()

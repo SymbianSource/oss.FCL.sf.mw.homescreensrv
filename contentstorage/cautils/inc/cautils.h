@@ -34,6 +34,11 @@ public:
      * @return error code
      */
     IMPORT_C static TInt GetTUint( const TDesC& aStr, TUint& aInt );
+    
+    /**
+     * Gets TUint from a aStr - HEX or Decimal
+     */
+    IMPORT_C static void InitTextResolverSymbianL( const TDesC& aFilename );
 
     /**
      * Template method for marshaling data.

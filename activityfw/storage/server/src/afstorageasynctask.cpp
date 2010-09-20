@@ -72,7 +72,7 @@ const TDesC8& CAfStorageAsyncTask::CAfStorageAsyncTask::Data() const
  * Interface implementation
  * @see CActivityTask::BroadcastReceivedL(const RMessage2 &)
  */
-void CAfStorageAsyncTask::BroadcastReceivedL(const RMessage2& )
+void CAfStorageAsyncTask::BroadcastReceivedL(const RMessage2&, TBool)
 {
     // No implementation required
 }

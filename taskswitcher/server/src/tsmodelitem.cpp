@@ -145,6 +145,16 @@ TBool TTsModelItem::LaunchL() const
 
 // -----------------------------------------------------------------------------
 /**
+ * @return EFalse if entry is not mandatory, other value in other cases  
+ */
+TBool TTsModelItem::IsMandatoryL() const
+    {
+    ValidateL();
+    return iModel.IsMandatoryL( iIndex );
+    }
+
+// -----------------------------------------------------------------------------
+/**
  * Validate item instance 
  */
 void TTsModelItem::ValidateL() const

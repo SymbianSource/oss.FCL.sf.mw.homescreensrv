@@ -14,6 +14,8 @@
 # Description:
 #
 
+CONFIG += hb
+
 TEMPLATE = lib
 symbian:{
 defFilePath = ./..
@@ -32,7 +34,8 @@ INCLUDEPATH += $$MW_LAYER_SYSTEMINCLUDE
 
 LIBS += -leuser \
         -lbafl \
-        -lestor
+        -lestor \
+        -lefsrv
         
 CONFIG -= stl
 include(cautils.pri)

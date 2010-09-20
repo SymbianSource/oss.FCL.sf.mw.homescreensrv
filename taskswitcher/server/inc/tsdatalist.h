@@ -27,6 +27,7 @@
 #include "tsentry.h"
 #include "tsdatastorage.h"
 #include "tsdataobserver.h"
+#include "tsenv.h"
 
 class CApaWindowGroupName;
 class CFbsBitmap;
@@ -37,35 +38,34 @@ NONSHARABLE_CLASS( CTsDataList ) : public CTsWindowGroupsObserver,
 public:
     static CTsDataList* NewL( MTsResourceManager& aResources, 
                               MTsWindowGroupsMonitor& aMonitor, 
-                              MTsDataObserver& aObserver );
+                              MTsDataObserver& aObserver,
+                              TsEnv& aEnv );
 
     ~CTsDataList();
 
 private:
     CTsDataList( MTsResourceManager& aResources,
                  MTsWindowGroupsMonitor& aMonitor, 
-                 MTsDataObserver& aObserver );
+                 MTsDataObserver& aObserver,
+                 TsEnv& aEnv);
 
     void ConstructL();
 
 public:
     const RTsFswArray& Data() const;
-    void HandleWindowGroupChanged( MTsResourceManager &,
-                                   const TArray<RWsSession::TWindowGroupChainInfo> & );
+    void HandleWindowGroupChanged( MTsResourceManager &aResources, 
+                                   const MTsRunningApplicationStorage& aStorage );
     TBool IsHiddenUid( TUid aUid );
     TBool IsSupported(TInt aFunction) const;
     void HandleDataL(TInt aFunction,RReadStream& aDataStream);
 
 private:
     void CollectAppsL( RTsFswArray& aAppsList,
-                       const TArray<RWsSession::TWindowGroupChainInfo> &aWgList );
+                       const MTsRunningApplicationStorage& aStorage );
     void AddEntryL( const TTsEntryKey& aKey, 
-                    const TUid& aAppUid,
-                    CApaWindowGroupName* aWgName,
+                    const MTsRunningApplication& aRunningApp,
                     RTsFswArray& aNewList );
-    HBufC* FindAppNameLC( CApaWindowGroupName* aWindowName,
-                          const TUid& aAppUid,
-                          TInt aWgId );
+    HBufC* FindAppNameLC( const MTsRunningApplication& aRunningApp );
     TBool CheckIfExists( const CTsEntry& aEntry,
                          const RTsFswArray& aNewList ) const;
     void RegisterScreenshotL( RReadStream& aDataStream );
@@ -90,6 +90,7 @@ private:
     RTsFswArray iVisibleData;
     RArray<TUid> iHiddenUids/** list of hidden uids */;
     CFbsBitmap* iDefaultIcon /** default icon*/;
+    TsEnv& iEnv;
     };
 
 #endif //TSDATALIST_H

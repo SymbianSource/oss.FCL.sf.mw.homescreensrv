@@ -44,7 +44,8 @@ LIBS += -leuser \
         -lsifnotification \
         -lxqutils \
         -lPlatformEnv \
-        -lefsrv
+        -lefsrv \
+        -lcautils
         
 include(casoftwareregistry_s60.pri)
 }

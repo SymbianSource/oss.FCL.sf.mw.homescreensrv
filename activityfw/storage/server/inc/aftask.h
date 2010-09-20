@@ -31,7 +31,7 @@ public:
      * Notify instance about incoming broadcast message.
      * @param msg - broadcast message
      */
-    virtual void BroadcastReceivedL(const RMessage2& msg) =0;
+    virtual void BroadcastReceivedL(const RMessage2& msg, TBool applicationUninstalled = EFalse) =0;
     
     /**
      * Returns ETrue if task is related with session argument

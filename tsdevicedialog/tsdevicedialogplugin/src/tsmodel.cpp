@@ -23,25 +23,14 @@
 
 #include <afstorageglobals.h>
 
-#ifdef Q_OS_SYMBIAN
-#include <XQSettingsManager>
-#include <apaid.h>
-
-const int TSDeviceDialogUid = 0x2002677F;
-const int ItemsLimit = 0x00000001;
-#endif
-
 #include "tsmodelitem.h"
-#include "tsentrymodelitem.h"
-#include "tsactivitymodelitem.h"
 #include "tsdataroles.h"
 #include "tstaskchangeinfo.h"
 
-const int maxItems(10);
 /*!
     \class TsModel
     \ingroup group_tsdevicedialogplugin
-    \brief Model storing running application and activieties.
+    \brief Model storing running tasks.
 */
 
 /*!
@@ -49,33 +38,11 @@ const int maxItems(10);
     \param query used to create model
     \param pointer to parent object
 */
-TsModel::TsModel(TsTaskMonitor &applicationSrv,
-                 QObject &activitySrv,
-                 QObject *parent) :
+TsModel::TsModel(TsTaskMonitor &applicationSrv, QObject *parent) :
     QAbstractListModel(parent),
     mEntries(),
-    mApplicationService(applicationSrv),
-    mActivityService(activitySrv),
-    mMaxItems(maxItems)
+    mApplicationService(applicationSrv)
 {
-
-#ifdef Q_OS_SYMBIAN
-    XQSettingsManager *crManager = new XQSettingsManager;
-    XQCentralRepositorySettingsKey itemsNumberKey(TSDeviceDialogUid, ItemsLimit);
-    QVariant itemsNumberVariant =
-        crManager->readItemValue(itemsNumberKey, XQSettingsManager::TypeInt);
-    if (!itemsNumberVariant.isNull()) {
-        int number = itemsNumberVariant.toInt();
-        if (number > 0) {
-            mMaxItems = number;
-        }
-    }
-#endif
-
-    connect(&activitySrv,
-            SIGNAL(dataChanged()),
-            this,
-            SLOT(updateActivities()));
     connect(&applicationSrv,
             SIGNAL(taskListChanged()),
             this,
@@ -96,8 +63,7 @@ TsModel::~TsModel()
     Returns count of rows in model
     \retval number of rows
 */
-int TsModel::rowCount(
-    const QModelIndex &parent) const
+int TsModel::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return mEntries.count();
@@ -147,20 +113,9 @@ bool TsModel::updateRows(int row, TsModelItem *item)
     \param role which data role to return
     \retval models data
 */
-QVariant TsModel::data(const QModelIndex &index,
-                       int role) const
+QVariant TsModel::data(const QModelIndex &index, int role) const
 {
     return index.isValid() ? entry(index)->data(role) : QVariant();
-}
-
-/*!
-    Returns maximum anount of data allowed for model
-    \retval maximum data count
-*/
-
-int TsModel::maxRowCount()const
-{
-    return mMaxItems;
 }
 
 /*!
@@ -191,10 +146,9 @@ void TsModel::closeApplication(const QModelIndex &index)
 */
 void TsModel::updateApplications()
 {
-    QList<TsTaskChange>  changes(mApplicationService.changeList());
+    QList<TsTaskChange> changes(mApplicationService.changeList());
 
     if (changes.count() == 0) {
-        //no applications - only activities on list
         return;
     }
     //check 1st item whether we have cancel change - if so reset model
@@ -206,59 +160,33 @@ void TsModel::updateApplications()
         switch (changes[iter].first.changeType()) {
             case TsTaskChangeInfo::EChangeDelete :
                 removeRows(changes[iter].first.oldOffset(), 1);
-                //we had max rows before delete - so there is possibility to add 
-                //one activity
-                if(mEntries.count() + 1 == maxRowCount()) {
-                    beginInsertRows(QModelIndex(), mEntries.count(), mEntries.count());
-                    getActivities(false);
-                    endInsertRows();
-                }
                 break;
             case TsTaskChangeInfo::EChangeInsert :
                 insertRows(changes[iter].first.newOffset(), 1,
-                           new TsEntryModelItem(changes[iter].second));
-                //we have too many items - delete some activities if we can
-                while(mEntries.count() > maxRowCount() && mActivitiesCount > 0) {
-                    removeRows(mEntries.count()-1, 1);
-                    mActivitiesCount--;
-                }
+                           new TsModelItem(changes[iter].second));
                 break;
             case TsTaskChangeInfo::EChangeMove :
                 moveRows(changes[iter].first.oldOffset(), changes[iter].first.newOffset());
                 break;
             case TsTaskChangeInfo::EChangeUpdate :
                 updateRows(changes[iter].first.oldOffset(),
-                           new TsEntryModelItem(changes[iter].second));
+                           new TsModelItem(changes[iter].second));
                 break;
             default:
                 break;
         }
     }
-
-    //because delete entries are at end of changelist - iterate backwards
-
 }
 
 /*!
-    Updates model with fresh entries
-*/
-void TsModel::updateActivities()
-{
-    //as for now we need full update when activities change
-    fullUpdate();
-}
-
-/*!
-    reset model using full application and activities lists
+    reset model
 */
 void TsModel::fullUpdate()
 {
     beginResetModel();
     qDeleteAll(mEntries);
     mEntries.clear();
-    mActivitiesCount = 0;
     getApplications();
-    getActivities();
     endResetModel();
 
 }
@@ -269,48 +197,11 @@ void TsModel::fullUpdate()
 void TsModel::getApplications()
 {
     //get all running applications and append to entries list
-    TsModelItem *entry(0);
-    QList< TsTaskChange> tasks(mApplicationService.changeList(true));
+    QList<TsTaskChange> tasks(mApplicationService.changeList(true));
     foreach(TsTaskChange taskData, tasks) {
         if (!taskData.second.isNull()) {
-            entry = new TsEntryModelItem(taskData.second);
-            if (entry) {
-                mEntries.append(entry);
-            }
+            mEntries.append(new TsModelItem(taskData.second));
         }
-    }
-}
-
-/*!
-    Read current activities
-*/
-void TsModel::getActivities(bool fullUpdate)
-{
-    //get activities
-    int maxActivitiesCount = maxRowCount() - mEntries.count() + mActivitiesCount;
-    if (maxActivitiesCount > 0) {
-        QList<QVariantHash> activities;
-        QMetaObject::invokeMethod(&mActivityService,
-                                  "activitiesList",
-                                  Q_RETURN_ARG(QList<QVariantHash>, activities),
-                                  Q_ARG(int, maxActivitiesCount));
-        int iterPos = fullUpdate ? 0 : mActivitiesCount;
-        for(int iter(iterPos); iter< activities.count(); iter++) {
-            mEntries.append(new TsActivityModelItem(*this, mActivityService, activities[iter]));
-            mActivitiesCount++;
-        }
-    }
-}
-
-/*!
-    Called when some item was changed
-    \param itemPtr - address of updated item
-*/
-void TsModel::entryChanged(TsModelItem *itemPtr)
-{
-    const int itemIndex = mEntries.indexOf(itemPtr);
-    if (itemIndex != -1) {
-        emit dataChanged(index(itemIndex, 0), index(itemIndex, 0));
     }
 }
 

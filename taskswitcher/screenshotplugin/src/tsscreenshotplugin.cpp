@@ -23,8 +23,9 @@
 #include <qnamespace.h>
 
 #include "tsscreenshotplugin.h"
-#include "tsorientationmonitor.h"
+#include "tsscreenshotnotifier.h"
 #include "tsscreenshotmsg.h"
+#include "tsidlist.h"
 
 const TInt KInvalidGroupId(~0);
 const TUid KHbPsHardwareCoarseOrientationCategoryUid = {0x20022E82};
@@ -57,14 +58,9 @@ void CTsScreenshotPlugin::ConstructL( MWsGraphicDrawerEnvironment& aEnv,
                              TWservCrEvent::EWindowGroupChanged |
                              TWservCrEvent::EDeviceOrientationChanged);
     iWindowGroupId = KInvalidGroupId;
-    TRAP_IGNORE( ConstructL() );
+    iBlockedList = CTsIdList::NewL(); 
     }
 
-// -----------------------------------------------------------------------------
-void CTsScreenshotPlugin::ConstructL()
-    {
-    iMonitor = CTsOrientationMonitor::NewL( *this );
-    }
 
 // -----------------------------------------------------------------------------
 /**
@@ -72,7 +68,7 @@ void CTsScreenshotPlugin::ConstructL()
  */
 CTsScreenshotPlugin::~CTsScreenshotPlugin()
     {
-    delete iMonitor;
+    delete iBlockedList;
     Env().UnregisterEventHandler(this);
     iCache.ResetAndDestroy();
     }
@@ -122,6 +118,13 @@ void CTsScreenshotPlugin::HandleMessageL( const TDesC8& aMsg )
             }
         CleanupStack::PopAndDestroy( screenshotMsg );
         }
+    else if( IgnoreWindowGroups == function )
+        {
+        CTsIdList* list = CTsIdList::NewLC( msgStream );
+        delete iBlockedList;
+        iBlockedList = list;
+        CleanupStack::Pop( list );
+        }
     CleanupStack::PopAndDestroy( &msgStream );
     }
 
@@ -142,7 +145,10 @@ void CTsScreenshotPlugin::DoHandleEvent(const TWservCrEvent& aEvent)
         iWindowGroupId = aEvent.WindowGroupIdentifier();
         break;
     case TWservCrEvent::EDeviceOrientationChanged:
-        TakeScreenshot( iWindowGroupId );
+        if( !iBlockedList->IsPresent( iWindowGroupId ) )
+            {
+            TakeScreenshot( iWindowGroupId );
+            }
         break;
         }
     }
@@ -182,34 +188,19 @@ void CTsScreenshotPlugin::TakeScreenshotL( TInt aId )
     CFbsBitmap *bitmap = new (ELeave) CFbsBitmap();
     CleanupStack::PushL(bitmap);
     
-    
     User::LeaveIfError(bitmap->Create(screenConfig->SizeInPixels(), 
                                 screenConfig->DisplayMode()));
     
     screenDevice->CopyScreenToBitmapL(bitmap, 
                                       screenConfig->SizeInPixels());
     
-    
     //prepare and send message
-    RBuf8 message;
-    CleanupClosePushL(message);
-    message.CreateL(CTsScreenshotMsg::Size() + sizeof(TInt));
-    RDesWriteStream stream(message);
-    CleanupClosePushL(stream);
-    stream.WriteInt32L(RegisterScreenshotMessage);
-    
-    CTsScreenshotMsg * screenshotMsg = 
-        CTsScreenshotMsg::NewLC(aId, 
-                                *bitmap, 
-                                Low, 
-                                OrientationToAngle());
-    stream << (*screenshotMsg);
-    CleanupStack::PopAndDestroy(screenshotMsg);
-    CleanupStack::PopAndDestroy(&stream);
-    User::LeaveIfError(SendMessage(message));
-    CleanupStack::PopAndDestroy(&message);
-    iCache.AppendL(bitmap);
+    CTsScreenshotNotifier* notifier = 
+        CTsScreenshotNotifier::NewL(*this, aId, bitmap, OrientationToAngle());
     CleanupStack::Pop(bitmap);
+    CleanupStack::PushL(notifier);
+    iCache.AppendL(notifier);
+    CleanupStack::Pop(notifier);
     }
 
 // -----------------------------------------------------------------------------
@@ -226,7 +217,6 @@ TInt CTsScreenshotPlugin::OrientationToAngle()
         case EDisplayOrientation90CW: retVal = 270;break;
         case EDisplayOrientation180: retVal = 180;break;
         case EDisplayOrientation270CW: retVal = 90;break;
-        case EDisplayOrientationNormal:retVal = iAngle; break;
         case EDisplayOrientationAuto:
             {
             RProperty::Get( KHbPsHardwareCoarseOrientationCategoryUid, 
@@ -240,9 +230,9 @@ TInt CTsScreenshotPlugin::OrientationToAngle()
     }
 
 // -----------------------------------------------------------------------------
-void CTsScreenshotPlugin::OrientationChanged( TInt aAngle )
+void CTsScreenshotPlugin::SendMessageL( const TDesC8& aMessage )
     {
-    iAngle = aAngle;
+    User::LeaveIfError( SendMessage( aMessage ) );
     }
 
 // -----------------------------------------------------------------------------
@@ -267,6 +257,6 @@ void CTsScreenshotPlugin::NotifyWindowGroupToBackgroundL( TInt windowGroupId )
         stream.WriteInt32L(windowGroupId);
         CleanupStack::PopAndDestroy(&stream);
         }
-    User::LeaveIfError(SendMessage(message));
+    SendMessageL(message);
     CleanupStack::PopAndDestroy(&message);
     }

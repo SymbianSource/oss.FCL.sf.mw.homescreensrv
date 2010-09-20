@@ -37,6 +37,7 @@ enum RunningAppCmd {
     OpenTaskMessage,
     CloseTaskMessage,
     WindowGroupToBackgroundMessage,
+    IgnoreWindowGroups
 };
 
 enum UpdatePriority {

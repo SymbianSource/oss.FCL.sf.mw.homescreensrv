@@ -73,7 +73,7 @@ void CAfServer::ConstructL()
     User::LeaveIfError(mFsSession.Connect());
     User::LeaveIfError(RFbsSession::Connect(mFsSession));
     mStorage = CAfStorage::NewL(mFsSession);
-    mAppEngine = CAfApplicationsEngine::NewL(mApaSession, *mStorage);
+    mAppEngine = CAfApplicationsEngine::NewL(mApaSession, *mStorage, *this);
 }
 
 // -----------------------------------------------------------------------------

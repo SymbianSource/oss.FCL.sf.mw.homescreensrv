@@ -52,7 +52,8 @@ public:
                           const TDesC &customActivityName,
                           const TDesC &imgSrc,
                           const TDesC8 &privateData,
-                          const TDesC8 &publicData);
+                          const TDesC8 &publicData,
+                          const TTime &timestamp);
 
     static CAfEntry* NewLC(TInt flags,
                            TInt applicationId,
@@ -60,7 +61,8 @@ public:
                            const TDesC &customActivityName,
                            const TDesC &imgSrc,
                            const TDesC8 &privateData,
-                           const TDesC8 &publicData);
+                           const TDesC8 &publicData,
+                           const TTime &timestamp);
     
     static CAfEntry* NewLC(const RMessage2& msg,
                            int offset =0);
@@ -86,6 +88,8 @@ public:
     const TDesC& ActivityId() const;
     
     const TDesC& CustomActivityName() const;
+    
+    TTime Timestamp() const;
 
     const TDesC& ImageSrc() const;
 
@@ -112,7 +116,8 @@ private:
                     const TDesC &customActivityName,
                     const TDesC &imgSrc,
                     const TDesC8 &privateData,
-                    const TDesC8 &publicData);
+                    const TDesC8 &publicData,
+                    const TTime &timestamp);
 
     static void InternalizeL(RBuf8 &dst, RReadStream &src);
 
@@ -129,6 +134,7 @@ private:
     RBuf mImgSrc;
     RBuf8 mPrivateData;
     RBuf8 mPublicData;
+    TTime mTimestamp;
 
 };
 

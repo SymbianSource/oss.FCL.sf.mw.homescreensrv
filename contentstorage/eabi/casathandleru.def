@@ -1,6 +1,0 @@
-EXPORTS
-	_ZN13CCaSatHandler15CheckVisibilityEv @ 1 NONAME
-	_ZN13CCaSatHandler4NewLEv @ 2 NONAME
-	_ZN13CCaSatHandler7GetNameER6TDes16 @ 3 NONAME
-	_ZN13CCaSatHandler9LoadIconLEv @ 4 NONAME
-

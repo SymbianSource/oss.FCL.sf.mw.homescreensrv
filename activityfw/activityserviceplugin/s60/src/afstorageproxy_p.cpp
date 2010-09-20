@@ -21,6 +21,7 @@
 
 #include <QSize>
 #include <QPixmap>
+#include <QDateTime>
 
 #include <XQConversions>
 
@@ -43,38 +44,6 @@ AfStorageProxyPrivate::~AfStorageProxyPrivate()
 {
     delete mClient;
     mAppArcSession.Close();
-}
-
-bool AfStorageProxyPrivate::addActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
-{    
-    int screenshotHandle(-1);
-    CFbsBitmap* bitmap(screenshot.toSymbianCFbsBitmap());
-    if (bitmap) {
-        screenshotHandle = bitmap->Handle();
-    }
-    
-    CAfEntry *entry = createSaveEntry(applicationId, activityId, customActivityName, activityData, metadata);
-    int result = mClient->addActivity(*entry, screenshotHandle);    
-    delete entry;
-    delete bitmap;
-    
-    return KErrNone == result;
-}
-
-bool AfStorageProxyPrivate::updateActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
-{
-    int screenshotHandle(-1);
-    CFbsBitmap* bitmap(screenshot.toSymbianCFbsBitmap());
-    if (bitmap) {
-        screenshotHandle = bitmap->Handle();
-    }
-    
-    CAfEntry *entry = createSaveEntry(applicationId, activityId, customActivityName, activityData, metadata);
-    int result = mClient->updateActivity(*entry, screenshotHandle);    
-    delete entry;
-    delete bitmap;
-    
-    return KErrNone == result;
 }
 
 bool AfStorageProxyPrivate::saveActivity(int applicationId, const QString &activityId, const QString &customActivityName, const QVariant &activityData, const QVariantHash &metadata, const QPixmap &screenshot)
@@ -181,10 +150,10 @@ bool AfStorageProxyPrivate::launchActivity(int applicationId, const QString &act
     return KErrNone == result;
 }
 
-bool AfStorageProxyPrivate::getThumbnail(const QSize &size, const QString &imagePath, void *userData)
+bool AfStorageProxyPrivate::getThumbnail(const QString &imagePath, void *userData)
 {
     HBufC *source = XQConversions::qStringToS60Desc(imagePath);
-    int result = mClient->getThumbnail(TSize(size.width(), size.height()), *source, userData);
+    int result = mClient->getThumbnail(*source, userData);
     delete source;
     return KErrNone == result;
 }
@@ -229,7 +198,7 @@ void AfStorageProxyPrivate::dataChangeNotificationCompleted(int result)
 CAfEntry *AfStorageProxyPrivate::createFilterEntry(int applicationId, const QString &activityId)
 {   
     CAfEntry *entry(0); 
-    QT_TRAP_THROWING(entry = CAfEntry::NewL(0, applicationId, TPtrC(static_cast<const TUint16*>(activityId.utf16())), KNullDesC(), KNullDesC(), KNullDesC8(), KNullDesC8()));
+    QT_TRAP_THROWING(entry = CAfEntry::NewL(0, applicationId, TPtrC(static_cast<const TUint16*>(activityId.utf16())), KNullDesC(), KNullDesC(), KNullDesC8(), KNullDesC8(), TTime()));
     return entry;
 }
 
@@ -268,7 +237,8 @@ CAfEntry *AfStorageProxyPrivate::createSaveEntry(int applicationId, const QStrin
                                *customNameBuff,
                                KNullDesC, 
                                privateBuff, 
-                               publicBuff);
+                               publicBuff,
+                               convertQDateTimeToTTime(metadata[ActivityTimestamp].toDateTime()));
         CleanupStack::PopAndDestroy(customNameBuff);
         CleanupStack::PopAndDestroy(actBuff);
         CleanupStack::PopAndDestroy(&publicBuff);
@@ -304,6 +274,7 @@ QVariantHash AfStorageProxyPrivate::extractMetadata(CAfEntry *entry, bool includ
     metadata.insert(ActivityScreenshotKeyword, XQConversions::s60DescToQString(entry->ImageSrc()));
     metadata.insert(ActivityPersistence, (entry->Flags() & CAfEntry::Persistent) ? true : false);
     metadata.insert(ActivityVisibility, (entry->Flags() & CAfEntry::Invisible) ? false : true); 
+    metadata.insert(ActivityTimestamp, convertTTimeToQDateTime(entry->Timestamp())); 
     return metadata;
 }
 
@@ -316,4 +287,24 @@ QString AfStorageProxyPrivate::activityDisplayText(CAfEntry *entry)
     } else {
         return XQConversions::s60DescToQString(entry->CustomActivityName());
     }
+}
+
+// -----------------------------------------------------------------------------
+TTime AfStorageProxyPrivate::convertQDateTimeToTTime(const QDateTime &timestamp) const
+{
+    return TTime( _L( "19700000:" ) ) + TTimeIntervalSeconds( timestamp.toTime_t() ) +
+                         TTimeIntervalMicroSeconds( timestamp.time().msec() * 1000 );
+}
+
+// -----------------------------------------------------------------------------
+QDateTime AfStorageProxyPrivate::convertTTimeToQDateTime(const TTime &s60Time) const
+{
+    TTime posixEpoch(_L("19700000:"));
+    TTimeIntervalSeconds secondsFrom;
+    TTimeIntervalMicroSeconds microSecondsFrom;
+    s60Time.SecondsFrom(posixEpoch, secondsFrom);
+    microSecondsFrom = s60Time.MicroSecondsFrom(posixEpoch);
+    QDateTime retVal = QDateTime::fromTime_t(secondsFrom.Int());
+    retVal = retVal.addMSecs((microSecondsFrom.Int64() % TInt64(1000000) ) / TInt64(1000));
+    return retVal;    
 }

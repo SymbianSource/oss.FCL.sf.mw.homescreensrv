@@ -35,7 +35,6 @@ CAPABILITY CAP_ECOM_PLUGIN
 
 SOURCEPATH      ../src
 SOURCE          cawidgetscannerplugin.cpp
-SOURCE          cawidgetscannerinstallnotifier.cpp
 SOURCE          cawidgetscannerparser.cpp
 SOURCE          cawidgetdescription.cpp
 SOURCE          cawidgetstoragehandler.cpp

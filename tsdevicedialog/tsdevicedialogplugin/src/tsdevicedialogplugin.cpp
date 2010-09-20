@@ -23,7 +23,6 @@
 #include <QtPlugin>
 
 #include <QValueSpacePublisher>
-#include <QServiceManager>
 
 #include <HbDeviceDialog>
 #include <HbMainWindow>
@@ -48,7 +47,6 @@ namespace
 {
     const char KTranslationPath[] = "resource/qt/translations";
     const char KTsDialogType[] = "com.nokia.taskswitcher.tsdevicedialogplugin/1.0";
-    const char KActivityManaged [] = "com.nokia.qt.activities.ActivityManager";
 }
 
 /*!
@@ -60,11 +58,15 @@ TsDeviceDialogPlugin::TsDeviceDialogPlugin()
     mStorage(0),
     mTriedToLoadTranslation(false)
 {
+    // ensure the visibility property is set to false, so the TaskSwitcher
+    // in case when hbdevicedialogappserver crashes when TS is visible.
+    QValueSpacePublisher visibilityPublisher(TsProperty::KTsPath);
+    visibilityPublisher.setValue(TsProperty::KVisibilityPath, static_cast<int>(false));
+    visibilityPublisher.sync();
 }
 
 TsDeviceDialogPlugin::~TsDeviceDialogPlugin()
 {
-    delete mModel;
 }
 /*!
     \reimp
@@ -123,16 +125,7 @@ TsDeviceDialogPlugin::createDeviceDialog(const QString &deviceDialogType,
         // lazy loading of model
         if (!mModel) {
             mStorage = new TsTaskMonitor(this);
-
-            QServiceManager serviceManager;
-            QObject *activityManager(serviceManager.loadInterface(KActivityManaged));
-            if (activityManager) {
-                activityManager->setParent(this); //make it autodestructed
-            } else {
-                activityManager = this; //activity plugin is not present. provide invalid instance because its not critical functionality.
-                //QMetaObject::invokeMethod is safe to use in such a case.
-            }
-            mModel = new TsModel(*mStorage, *activityManager);
+            mModel = new TsModel(*mStorage, this);
         }
 
         // ensure the dismiss request property is set to false

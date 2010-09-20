@@ -242,98 +242,11 @@ void CAfStorage::DeleteNonPersistentActivitiesL()
 
 // -----------------------------------------------------------------------------
 /**
- * Register new activity
- * @param appId - application id
- * @param actId - activity id
- * @param flags - activity flags
- * @param imgSrc - activity thumbnail source
- * @param privateData - activity private data
- * @param publicData - activity public data
- */
-void CAfStorage::AddActivityL(CAfEntry& entry)
-    {
-    //verify if row already exists
-    TInt errNo(KErrNone);
-    RDbView view;
-    CleanupClosePushL(view);
-    TRAP( errNo, GetActivityForUpdateL(view, entry.ApplicationId(), entry.ActivityId()));
-    if( KErrNone == errNo ) 
-        {
-        User::Leave(KErrAlreadyExists);
-        }
-    CleanupStack::PopAndDestroy(&view);
-
-    //write table
-    RDbTable table;
-    CleanupClosePushL(table);
-    User::LeaveIfError(table.Open(iActDb, KActivityTableName, table.EUpdatable));
-    CDbColSet *row = table.ColSetL();
-    CleanupStack::PushL(row);
-    
-    TTime time;
-    time.UniversalTime();
-    
-    table.InsertL();
-    TRAP(errNo,
-    table.SetColL(row->ColNo(KApplicationColumnName), TInt64(entry.ApplicationId()));
-    table.SetColL(row->ColNo(KActivityColumnName), entry.ActivityId());
-    table.SetColL(row->ColNo(KCustomNameColumnName), entry.CustomActivityName());    
-    table.SetColL(row->ColNo(KFlagsColumnName), entry.Flags());
-    table.SetColL(row->ColNo(KTimestampColumnName), time.DateTime());
-    ExternalizeDataL(table, entry, row->ColNo(KDataColumnName) );
-    
-    table.PutL();)
-    if( KErrNone != errNo )
-        {
-        table.Cancel();
-        User::Leave(errNo);
-        }
-    CleanupStack::PopAndDestroy(row);
-    CleanupStack::PopAndDestroy(&table);
-    }
-
-// -----------------------------------------------------------------------------
-/**
- * Update activity
- * @param entry - activity data
- */
-void CAfStorage::UpdateActivityL(CAfEntry& entry)
-    {
-    TTime time;
-    time.UniversalTime();
-    RDbView view;
-    CleanupClosePushL(view);
-    GetActivityForUpdateL(view, entry.ApplicationId(), entry.ActivityId());
-    view.UpdateL();
-    TRAPD(errNo,
-    CDbColSet* colSet = view.ColSetL();
-    CleanupStack::PushL(colSet);
-
-    view.SetColL(colSet->ColNo(KFlagsColumnName), entry.Flags());
-    view.SetColL(colSet->ColNo(KTimestampColumnName), time.DateTime());
-    view.SetColL(colSet->ColNo(KCustomNameColumnName), entry.CustomActivityName());    
-    ExternalizeDataL(view, entry, colSet->ColNo(KDataColumnName));
-
-    view.PutL();
-    CleanupStack::PopAndDestroy(colSet);)
-
-    if(KErrNone != errNo)
-        {
-        view.Cancel();
-        User::Leave(errNo);
-        }
-    CleanupStack::PopAndDestroy(&view);
-    }
-
-// -----------------------------------------------------------------------------
-/**
  * Save activity
  * @param entry - activity data
  */
 void CAfStorage::SaveActivityL(CAfEntry &entry)
 {
-    TTime time;
-    time.UniversalTime();
     // @todo check if this can be tidied up
     //verify if row already exists
     TInt errNo(KErrNone);
@@ -349,7 +262,7 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
         CleanupStack::PushL(colSet);
 
         view.SetColL(colSet->ColNo(KFlagsColumnName), entry.Flags());
-        view.SetColL(colSet->ColNo(KTimestampColumnName), time.DateTime());
+        view.SetColL(colSet->ColNo(KTimestampColumnName), entry.Timestamp());
         view.SetColL(colSet->ColNo(KCustomNameColumnName), entry.CustomActivityName());
         ExternalizeDataL(view, entry, colSet->ColNo(KDataColumnName));
 
@@ -365,7 +278,7 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
     else
         {
         // insert
-
+        
         //write table
         RDbTable table;
         CleanupClosePushL(table);
@@ -379,7 +292,7 @@ void CAfStorage::SaveActivityL(CAfEntry &entry)
         table.SetColL(row->ColNo(KActivityColumnName), entry.ActivityId());
         table.SetColL(row->ColNo(KCustomNameColumnName), entry.CustomActivityName());
         table.SetColL(row->ColNo(KFlagsColumnName), entry.Flags());
-        table.SetColL(row->ColNo(KTimestampColumnName), time.DateTime());
+        table.SetColL(row->ColNo(KTimestampColumnName), entry.Timestamp());
         ExternalizeDataL(table, entry, row->ColNo(KDataColumnName));
         table.PutL();)
         if (KErrNone != errNo) {
@@ -586,7 +499,8 @@ void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst,
                applicationOffset(row->ColNo(KApplicationColumnName)),
                activityOffset(row->ColNo(KActivityColumnName)),
                customNameOffset(row->ColNo(KCustomNameColumnName)),
-               dataOffset(row->ColNo(KDataColumnName));
+               dataOffset(row->ColNo(KDataColumnName)),
+               timestampOffset(row->ColNo(KTimestampColumnName));
 
     RBuf activityName;
     CleanupClosePushL(activityName);
@@ -611,7 +525,8 @@ void CAfStorage::ActivitiesL(RPointerArray<CAfEntry>& dst,
                                           customName,
                                           KNullDesC,
                                           KNullDesC8,
-                                          KNullDesC8);
+                                          KNullDesC8,
+                                          src.ColTime(timestampOffset));
         if( CAfEntry::Public == rights && 
             (entry->Flags() & CAfEntry::Invisible) )
             {

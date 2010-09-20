@@ -58,14 +58,7 @@ CCaUsifScanner::CCaUsifScanner( CCaStorageProxy& aStorageProxy,
 //
 void CCaUsifScanner::ConstructL()
     {
-    iSystemInstallNotifier = CCaInstallNotifier::NewL( *this,
-            CCaInstallNotifier::ESisInstallNotification );
-
-    iUsifUninstallNotifier = CCaInstallNotifier::NewL( *this,
-            CCaInstallNotifier::EUsifUninstallNotification );
-
-    iJavaInstallNotifier = CCaInstallNotifier::NewL( *this,
-                CCaInstallNotifier::EJavaInstallNotification );
+    iInstallNotifier = CCaInstallNotifier::NewL( *this );
 
     User::LeaveIfError( iFs.Connect() );
     iMmcWatcher = CCaMmcWatcher::NewL( iFs, this );
@@ -81,9 +74,7 @@ CCaUsifScanner::~CCaUsifScanner()
     {
     delete iMmcWatcher;
     iFs.Close();
-    delete iJavaInstallNotifier;
-    delete iUsifUninstallNotifier;
-    delete iSystemInstallNotifier;
+    delete iInstallNotifier;
     }
 
 // ---------------------------------------------------------------------------
@@ -110,7 +101,7 @@ CCaUsifScanner::~CCaUsifScanner()
 //
 // ---------------------------------------------------------------------------
 //
-void CCaUsifScanner::HandleInstallNotifyL( TInt /*aUid*/)
+void CCaUsifScanner::HandleInstallNotifyL()
     {
     UpdateUsifListL();
     }
@@ -159,7 +150,7 @@ void CCaUsifScanner::CreateCaEntryFromEntryL(
     else if( !aEntry->SoftwareType().Compare( KSoftwareTypeWidget ) )
         {
         aCaEntry->AddAttributeL( KCaAttrAppType, KCaAttrAppTypeValueCWRT );
-        } 
+        }
     if( aEntry->Name().Compare( KNullDesC ) )
         {
         aCaEntry->SetTextL( aEntry->Name() );
@@ -205,32 +196,32 @@ void CCaUsifScanner::AddPackageL()
             CCaInnerEntry *caEntry = CCaInnerEntry::NewLC();
             CreateCaEntryFromEntryL( resultUsifArray[i], caEntry );
             // in case we rebuild our db mark as missing
-            if( !(iSoftwareRegistry.IsComponentPresentL( 
+            if( !(iSoftwareRegistry.IsComponentPresentL(
                     resultUsifArray[i]->ComponentId())) )
                 {
                 caEntry->SetFlags( caEntry->GetFlags() | EMissing );
                 }
             iStorageProxy.AddL( caEntry );
             CleanupStack::PopAndDestroy( caEntry );
-            } 
+            }
         // found in the CaStorage, mark is as missing
-        else if( !(iSoftwareRegistry.IsComponentPresentL( 
-                resultUsifArray[i]->ComponentId() ))  ) 
+        else if( !(iSoftwareRegistry.IsComponentPresentL(
+                resultUsifArray[i]->ComponentId() ))  )
             {
             if( !( entries[entryIndex]->GetFlags() & EMissing ) )
                 {
-                entries[entryIndex]->SetFlags( 
+                entries[entryIndex]->SetFlags(
                         ( entries[entryIndex]->GetFlags() | EMissing ) );
-                iStorageProxy.AddL( 
+                iStorageProxy.AddL(
                         entries[entryIndex], EFalse, EItemDisappeared );
                 }
             }
         // found in the storage remove missing flag as this is Present in scr
         else if (entries[entryIndex]->GetFlags() & EMissing)
             {
-            entries[entryIndex]->SetFlags( 
+            entries[entryIndex]->SetFlags(
                     entries[entryIndex]->GetFlags() & ~EMissing );
-            iStorageProxy.AddL( entries[entryIndex]);            
+            iStorageProxy.AddL( entries[entryIndex]);
             }
         }
 

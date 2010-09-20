@@ -12,6 +12,9 @@
                 <bool name="itemRecycling" value="TRUE"/>
                 <enums name="horizontalScrollBarPolicy" value="ScrollBarAlwaysOff"/>
                 <bool name="swapDimensionsOnOrientationChange" value="FALSE"/>
+                <string name="scrollDirections" value="Horizontal"/>
+                <integer name="rowCount" value="1"/>
+                <integer name="columnCount" value="2"/>                
             </widget>            
             <widget name="noitemswidget" type="HbWidget">
                 <widget name="noitemslabel" type="TsNoItemsLabel">
@@ -43,20 +46,10 @@
         <widget name="tsdevicedialog">
             <sizehint type="PREFERRED" width="48un" height="40un"/>
         </widget>
-        <widget name="taskgrid">
-            <string name="scrollDirections" value="Horizontal"/>
-            <integer name="rowCount" value="1"/>
-            <integer name="columnCount" value="2"/>
-        </widget>
     </section>
     <section name="landscape">
         <widget name="tsdevicedialog">
             <sizehint type="PREFERRED" width="60un" height="40un"/>
-        </widget>
-        <widget name="taskgrid">
-            <string name="scrollDirections" value="Horizontal"/>
-            <integer name="rowCount" value="1"/>
-            <integer name="columnCount" value="2"/>
         </widget>
     </section>
 </hbdocument>

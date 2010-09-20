@@ -74,32 +74,6 @@ void CAfStorageClient::ConstructL(MAfAsyncRequestObserver &observer)
 
 // -----------------------------------------------------------------------------
 /**
- * Function add new activity
- * @param entry - activity entry data structure
- * @param imageHandle - handle for activity thumbnail
- * @return 0 on success, error code otherwise
- */
-EXPORT_C int CAfStorageClient::addActivity(const CAfEntry &entry, TInt imageHandle)
-{
-    RDebug::Print(_L("This method is deprecated, please use CAfStorageClient::saveActivity instead"));
-    return d_ptr->addActivity(entry, imageHandle);
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Function update existing activity
- * @param entry - activity entry data structure
- * @param imageHandle - handle for activity thumbnail
- * @return 0 on success, error code otherwise
- */
-EXPORT_C int CAfStorageClient::updateActivity(const CAfEntry &entry, TInt imageHandle)
-{
-    RDebug::Print(_L("This method is deprecated, please use CAfStorageClient::saveActivity instead"));
-    return d_ptr->updateActivity(entry, imageHandle);
-}
-
-// -----------------------------------------------------------------------------
-/**
  * Function save an activity (add new one or update existing one)
  * @param entry - activity entry data structure
  * @param imageHandle - handle for activity thumbnail
@@ -189,9 +163,9 @@ EXPORT_C int CAfStorageClient::launchActivity(const CAfEntry &entry)
 }
 
 // -----------------------------------------------------------------------------
-EXPORT_C int CAfStorageClient::getThumbnail(const TSize &size, const TDesC &imagePath, void *userData)
+EXPORT_C int CAfStorageClient::getThumbnail(const TDesC &imagePath, void *userData)
 {
-    return d_ptr->getThumbnail(size, imagePath, userData);
+    return d_ptr->getThumbnail(imagePath, userData);
 }
 
 // -----------------------------------------------------------------------------

@@ -50,7 +50,8 @@ symbian: {
         -lecom \
         -lcautils \
         -lcamenu \
-        -lefsrv
+        -lefsrv \
+        -lcautils
 }
 
 exportResources(./*.qm, resource/qt/translations)

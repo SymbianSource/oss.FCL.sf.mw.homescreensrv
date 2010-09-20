@@ -12,7 +12,7 @@
 * Contributors:
 *
 * Description:
-*  Version     : %version: 19.1.11 % << Don't touch! Updated by Synergy at check-out.
+*  Version     : %version: 19.1.12 % << Don't touch! Updated by Synergy at check-out.
 *
 */
 
@@ -34,7 +34,6 @@ SOURCE          casrvsession.cpp
 SOURCE          casrv.cpp
 SOURCE          casrvmmchistory.cpp
 SOURCE          cainstallnotifier.cpp
-SOURCE          cainstallstrategy.cpp
 SOURCE          cammcwatcher.cpp
 SOURCE          casrvengutils.cpp
 SOURCE	        casrvnotifier.cpp
@@ -66,6 +65,7 @@ LIBRARY         bafl.lib
 LIBRARY         casrvmanager.lib
 
 LIBRARY         scrclient.lib
+LIBRARY         sifnotification.lib
 
 // HB LIBRARIES
 SYSTEMINCLUDE		/epoc32/include/mw/hb/hbcore

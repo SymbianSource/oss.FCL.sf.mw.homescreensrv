@@ -33,8 +33,9 @@ SYSTEMINCLUDE   /epoc32/include/mw/qtcore
 SOURCEPATH      ../src
 SOURCE          tsscreenshotmain.cpp
 SOURCE          tsscreenshotplugin.cpp
-SOURCE          tsorientationmonitor.cpp
+SOURCE          tsscreenshotnotifier.cpp
 SOURCE          ../../utils/src/tsscreenshotmsg.cpp
+SOURCE          ../../utils/src/tsidlist.cpp
 
 RESOURCE        tsscreenshotplugin.rss
 

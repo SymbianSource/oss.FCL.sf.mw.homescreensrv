@@ -28,7 +28,6 @@
 
 class CCaStorageProxy;
 class CCaInnerEntry;
-class CCaInstallNotifier;
 class CCaMmcWatcher;
 class TPluginParams;
 
@@ -70,7 +69,7 @@ public:
      * @since S60 v5.0
      * @param aUid installed uid.
      */
-    void HandleInstallNotifyL( TInt aUid );
+    void HandleInstallNotifyL();
 
 public:
     // From MMmcWatcherCallback.
@@ -163,17 +162,7 @@ private:
     /**
      * Install notifier. Own.
      */
-    CCaInstallNotifier *iSystemInstallNotifier;
-
-    /**
-     * Uninstall notifier. Own.
-     */
-    CCaInstallNotifier *iUsifUninstallNotifier;
-
-    /**
-     * Install and uninstall notifier. Own.
-     */
-    CCaInstallNotifier *iJavaInstallNotifier;
+    CCaInstallNotifier *iInstallNotifier;
 
     /**
      * File session. Own

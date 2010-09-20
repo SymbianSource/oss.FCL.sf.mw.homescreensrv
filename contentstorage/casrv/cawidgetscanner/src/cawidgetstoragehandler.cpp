@@ -353,12 +353,11 @@ TBool CCaWidgetStorageHandler::MassStorageNotInUse()
     {
     TBool massStorageNotInUse( ETrue );
     TInt drive;
-    if( DriveInfo::GetDefaultDrive( DriveInfo::EDefaultMassStorage, drive ) ==
-        KErrNone )
+    if( DriveInfo::GetDefaultDrive( 
+            DriveInfo::EDefaultMassStorage, drive ) == KErrNone )
         {
-        TUint status;
-        if( DriveInfo::GetDriveStatus( iFs, drive, status ) == KErrNone &&
-            ( status & DriveInfo::EDriveInUse ) )
+        TVolumeInfo volumeInfo;
+        if( iFs.Volume( volumeInfo, drive ) == KErrNotReady )
             {
             massStorageNotInUse = EFalse;
             }

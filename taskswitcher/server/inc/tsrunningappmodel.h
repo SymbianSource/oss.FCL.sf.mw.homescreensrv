@@ -25,6 +25,7 @@
 
 class CTsDataList;
 class CTsScreenshotProvider;
+class TsEnv;
 
 NONSHARABLE_CLASS(CTsRunningAppModel) : public CBase, 
                                         public MTsModel, 
@@ -34,15 +35,18 @@ NONSHARABLE_CLASS(CTsRunningAppModel) : public CBase,
 
 public:
     static CTsRunningAppModel *NewL( MTsResourceManager &aResources, 
-                                     MTsWindowGroupsMonitor &aMonitor );
+                                     MTsWindowGroupsMonitor &aMonitor,
+                                     TsEnv& aEnv );
     static CTsRunningAppModel *NewLC( MTsResourceManager &aResources, 
-                                      MTsWindowGroupsMonitor &aMonitor );
+                                      MTsWindowGroupsMonitor &aMonitor,
+                                      TsEnv& aEnv );
     ~CTsRunningAppModel();
     
 private:
     CTsRunningAppModel( MTsResourceManager &aResources );
     void ConstructL( MTsResourceManager &aResources, 
-                     MTsWindowGroupsMonitor &aMonitor );
+                     MTsWindowGroupsMonitor &aMonitor,
+                     TsEnv& aEnv);
 
 // MHsDataObserver interface implementation
 public:
@@ -65,6 +69,7 @@ public:
     virtual TTsModelItemKey KeyL( TInt aOffset ) const;
     virtual TBool IsActiveL( TInt aOffset ) const;
     virtual TBool IsClosableL( TInt aOffset ) const;
+    virtual TBool IsMandatoryL( TInt aOffset ) const;
 
 public:
     virtual TBool CloseL( TTsModelItemKey aKey ) const;

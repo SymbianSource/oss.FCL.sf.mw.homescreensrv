@@ -37,3 +37,7 @@
 "" - "Z:\sys\bin\tsscreenshotplugin.dll"
 "" - "Z:\resource\plugins\tsscreenshotplugin.rsc"
 "" - "Z:\sys\bin\tsbackstepping.dll"
+
+"" - "Z:\sys\bin\activitytsplugin.dll"
+"" - "Z:\resource\qt\plugins\activitytsplugin.qtplugin"
+"" - "Z:\resource\taskswitcher\activitytsplugin.xml"

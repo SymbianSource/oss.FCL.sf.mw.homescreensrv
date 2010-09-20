@@ -97,9 +97,9 @@ void AfManager::launchActivity(int applicationId, const QString &activityId, con
     launchActivity(activity);
 }
 
-void AfManager::getThumbnail(QSize resolution,const QString &thumbnailPath, void *data)
+void AfManager::getThumbnail(const QString &thumbnailPath, void *data)
 {
-    mServiceProvider->getThumbnail(resolution, thumbnailPath, data);
+    mServiceProvider->getThumbnail(thumbnailPath, data);
 }
 
 void AfManager::launchActivity(const QVariantHash& activity)

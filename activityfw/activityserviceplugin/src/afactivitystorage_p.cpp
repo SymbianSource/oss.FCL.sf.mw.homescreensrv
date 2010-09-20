@@ -18,6 +18,7 @@
 #include "afactivitystorage_p.h"
 
 #include <QPixmap>
+#include <QDateTime>
 
 #include <afstorageglobals.h>
 
@@ -34,6 +35,7 @@ bool AfActivityStoragePrivate::saveActivity(const QString &activityId, const QVa
     
     publicData.insert(ActivityApplicationKeyword, applicationId());
     publicData.insert(ActivityActivityKeyword, activityId);
+    publicData.insert(ActivityTimestamp, QDateTime::currentDateTime());
 
     return mConnection->saveActivity(applicationId(), activityId, publicData[ActivityApplicationName].toString(), activityData, publicData, screenshot);
 }

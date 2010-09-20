@@ -21,7 +21,8 @@ SUBDIRS += client
 symbian {
     SUBDIRS += backstepping \
                server \
-               screenshotplugin
+               screenshotplugin \
+               activitytsplugin \
                
     BLD_INF_RULES.prj_exports +=    "inc/tstaskmonitorglobals.h |../inc/tstaskmonitorglobals.h"
     

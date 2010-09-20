@@ -20,7 +20,6 @@ SUBDIRS  += homescreensrv_plat \
             hswidgetmodel \
             contentstorage
                        
-symbian:SUBDIRS += utils
 symbian:SUBDIRS += activityfw
 symbian:SUBDIRS += taskswitcher
 symbian:SUBDIRS += hsappkeyhandler

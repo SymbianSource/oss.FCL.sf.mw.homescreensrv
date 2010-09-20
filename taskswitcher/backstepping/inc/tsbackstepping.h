@@ -33,22 +33,16 @@ public:
 private:
     CTsBackstepping( MTsWindowGroupsMonitor& );
     void ConstructL();
-    void HandleWindowGroupChanged( 
-                            MTsResourceManager&, 
-                            const TArray<RWsSession::TWindowGroupChainInfo>& );
-    void HandleWindowGroupChangedL( 
-                        MTsResourceManager&, 
-                        const TArray<RWsSession::TWindowGroupChainInfo>& );
-    TInt HomescreenOffsetL( 
-                        MTsResourceManager&, 
-                        const TArray<RWsSession::TWindowGroupChainInfo>& )const;
-    TInt ParentOffsetL( TInt, 
-                        const TArray<RWsSession::TWindowGroupChainInfo>& )const;
-    inline TBool IsEmbededApp( const RWsSession::TWindowGroupChainInfo& ) const;
-    TUid GetUidFromWindowGroupL(MTsResourceManager &aResources, TInt aWindowGroupId) const;
+    void HandleWindowGroupChanged( MTsResourceManager &rsc, 
+                                   const MTsRunningApplicationStorage& aStorage );
+    void HandleWindowGroupChangedL( MTsResourceManager &rsc, 
+                                    const MTsRunningApplicationStorage& aStorage );
+    TInt HomescreenOffsetL( const MTsRunningApplicationStorage& aStorage )const;
+    void SwitchToIdleStateL( MTsResourceManager& aResources, TBool aIsFirst );
 
 private:
     CTsBacksteppingFilter *iFilter;
+    TBool iHsWasFirst;
 
 };
 

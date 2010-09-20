@@ -53,8 +53,6 @@ private:
 
     void launchApplicationL(const TUid uid, TInt viewId);
 
-    int closeApplication(const EntryFlags &flags, TInt windowGroupId);
-
     int handleRemove(const EntryFlags &flags,
         const QString &typeName,
         const QString &componentId);

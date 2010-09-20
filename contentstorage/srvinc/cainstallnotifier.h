@@ -18,12 +18,8 @@
 #ifndef CAINSTALLNOTIFIER_H
 #define CAINSTALLNOTIFIER_H
 
-#include <sacls.h>
 #include <e32base.h>
-#include <e32property.h>
-#include "castorage_global.h"
-
-class CNotifierStrategy;
+#include <usif/sif/sifnotification.h>
 
 /**
  * Interface for updating after installer events.
@@ -39,7 +35,7 @@ public:
      * Pure virtual method.
      * @param aEvent event type.
      */
-    virtual void HandleInstallNotifyL(TInt aEvent) = 0;
+    virtual void HandleInstallNotifyL() = 0;
     };
 
 /**
@@ -47,7 +43,8 @@ public:
  *
  *  @since S60 v5.0
  */
-NONSHARABLE_CLASS( CCaInstallNotifier ) : public CActive
+NONSHARABLE_CLASS( CCaInstallNotifier ) : public CBase,
+        public Usif::MSifOperationsHandler
     {
 
 public:
@@ -59,8 +56,7 @@ public:
         {
         ENoNotification,            ///< No notification.
         ESisInstallNotification,    ///< System installation notification.
-        EJavaInstallNotification,   ///< Java instalation and uninstallation notification.
-        EUsifUninstallNotification, ///< Usif's uninstalation notification.
+        EAllTypesNotification,    ///< System installation notification.
         };
 
     /**
@@ -69,7 +65,39 @@ public:
      * @param aNotificationType Notification type.
      */
 IMPORT_C static CCaInstallNotifier* NewL( MCaInstallListener& aListener,
-            TNotificationType aNotificationType );
+            TNotificationType aNotificationType = EAllTypesNotification );
+
+    /**
+     * Called when a new operation is started. The client should use the S
+     * ubscribeL() method (@see CSifOperationsNotifier) to register for progress
+     * and end notification for this operation. This function should return
+     * quickly as this is run as part of an active object request completion
+     * handler.
+
+     * @param aKey The Start End key of the operation.
+     * @param aStartData Start operation related information.
+     */
+    void StartOperationHandler(
+            TUint aKey, const Usif::CSifOperationStartData& aStartData);
+
+    /**
+     * Called when an operation completes.
+     * This function should return quickly as this is run as part of an active
+     * object request completion handler.
+
+     * @param aEndData End operation related information.
+     */
+    void EndOperationHandler(const Usif::CSifOperationEndData& aEndData);
+
+    /**
+     * Called whenever a progress update is available.
+     * This function should return quickly as this is run as part of an active
+     * object request completion handler.
+
+     * @param aProgressData Progress operation related information.
+     */
+    void ProgressOperationHandler(
+            const Usif::CSifOperationProgressData& aProgressData);
 
     /**
      * Destructor.
@@ -90,28 +118,7 @@ private:
      */
     void ConstructL( TNotificationType aNotificationType );
 
-    /**
-     * From CActive.
-     */
-    void DoCancel();
-
-    /**
-     * From CActive.
-     */
-    void RunL();
-
-    /**
-     * From CActive.
-     */
-    TInt RunError( TInt aError );
-
 private:
-
-    /**
-     * RProperty.
-     * Own.
-     */
-    RProperty iProperty;
 
     /**
      * Interface for notifying changes in folder.
@@ -119,10 +126,15 @@ private:
      */
     MCaInstallListener& iListener;
 
-    /*
-     * Notification strategy.
+    /**
+     * USIF notifier
+     * Own.
      */
-    CNotifierStrategy* iNotifierStrategy;
+    Usif::CSifOperationsNotifier* iNotifier;
+
+    TUint iKey;
+
+    TNotificationType iNotificationType;
 
     };
 

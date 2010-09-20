@@ -58,7 +58,8 @@ CAfEntry* CAfEntry::NewL(TInt flags,
                          const TDesC &customActivityName,
                          const TDesC &imgSrc,
                          const TDesC8 &privateData,
-                         const TDesC8 &publicData)
+                         const TDesC8 &publicData,
+                         const TTime &timestamp)
 {
     CAfEntry* self = CAfEntry::NewLC(flags, 
                                      applicationId, 
@@ -66,7 +67,8 @@ CAfEntry* CAfEntry::NewL(TInt flags,
                                      customActivityName,
                                      imgSrc, 
                                      privateData, 
-                                     publicData);
+                                     publicData,
+                                     timestamp);
     CleanupStack::Pop(self);
     return self;
 }
@@ -88,7 +90,8 @@ CAfEntry* CAfEntry::NewLC(TInt flags,
                           const TDesC &customActivityName,
                           const TDesC &imgSrc,
                           const TDesC8 &privateData,
-                          const TDesC8 &publicData)
+                          const TDesC8 &publicData,
+                          const TTime &timestamp)
 {
     CAfEntry *self = CAfEntry::NewLC();
     self->ConstructL(flags, 
@@ -97,7 +100,8 @@ CAfEntry* CAfEntry::NewLC(TInt flags,
                      customActivityName,
                      imgSrc, 
                      privateData, 
-                     publicData);
+                     publicData,
+                     timestamp);
     return self;
 }
 
@@ -140,7 +144,8 @@ void CAfEntry::ConstructL(TInt flags,
                           const TDesC &customActivityName,
                           const TDesC &imgSrc,
                           const TDesC8 &privateData,
-                          const TDesC8 &publicData)
+                          const TDesC8 &publicData,
+                          const TTime &timestamp)
 {
     mFlags = flags;
     mAppId = applicationId;
@@ -149,6 +154,7 @@ void CAfEntry::ConstructL(TInt flags,
     CopyL(mImgSrc, imgSrc);
     CopyL(mPrivateData, privateData);
     CopyL(mPublicData, publicData);
+    mTimestamp = timestamp;
 }
 
 // -----------------------------------------------------------------------------
@@ -174,6 +180,7 @@ TInt CAfEntry::Size() const
     return (sizeof(TInt) * 4) + //flags + appId + actId size info + customActivityName size info
            mActivityId.Size() + //actId content size
            mCustomActivityName.Size() + // customActivityName content size
+           TPckgBuf<TTime>().Size() + // timestamp size
            DataSize(); //data size
            
 }
@@ -201,6 +208,7 @@ void CAfEntry::ExternalizeL(RWriteStream &stream) const
     stream.WriteInt32L(mAppId);
     ExternalizeL(stream, mActivityId);
     ExternalizeL(stream, mCustomActivityName);
+    stream.WriteL(TPckgBuf<TTime>(mTimestamp));
     ExternalizeDataOnlyL(stream);
 }
 
@@ -215,6 +223,9 @@ void CAfEntry::InternalizeL(RReadStream &stream)
     mAppId = stream.ReadInt32L();
     InternalizeL(mActivityId, stream);
     InternalizeL(mCustomActivityName, stream);
+    TPckgBuf<TTime> timestampBuf;
+    stream.ReadL(timestampBuf);
+    mTimestamp = timestampBuf();
     InternalizeDataOnlyL(stream);
 }
 
@@ -304,6 +315,16 @@ const TDesC8& CAfEntry::Data(CAfEntry::AccessRights rights) const
 void CAfEntry::SetDataL(const TDesC8& src, CAfEntry::AccessRights rights)
 {
     CopyL(Private == rights ? mPrivateData : mPublicData, src);
+}
+
+// -----------------------------------------------------------------------------
+/**
+ * Provide access to activity timestamp
+ * @return activity timestamp 
+ */
+TTime CAfEntry::Timestamp() const
+{
+    return mTimestamp;
 }
 
 // -----------------------------------------------------------------------------

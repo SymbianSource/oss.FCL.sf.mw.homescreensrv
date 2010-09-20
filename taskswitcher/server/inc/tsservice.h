@@ -48,6 +48,7 @@ protected: //from MTsModel
     TTsModelItemKey KeyL( TInt aOffset ) const;
     TBool IsActiveL( TInt aOffset ) const;
     TBool IsClosableL( TInt aOffset ) const;
+    TBool IsMandatoryL( TInt aOffset ) const;
     TBool CloseL( TTsModelItemKey aKey ) const;
     TBool LaunchL( TTsModelItemKey aKey ) const;
     

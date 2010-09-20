@@ -16,7 +16,9 @@
  */
 
 #include "cainstallnotifier.h"
-#include "cainstallstrategy.h"
+#include "cadef.h"
+
+using namespace Usif;
 
 EXPORT_C CCaInstallNotifier* CCaInstallNotifier::NewL(
         MCaInstallListener& aListener, TNotificationType aNotificationType )
@@ -30,53 +32,53 @@ EXPORT_C CCaInstallNotifier* CCaInstallNotifier::NewL(
 
 CCaInstallNotifier::~CCaInstallNotifier()
     {
-    Cancel();
-    iProperty.Close();
-    delete iNotifierStrategy;
+    delete iNotifier;
     }
 
 CCaInstallNotifier::CCaInstallNotifier( MCaInstallListener& aListener ) :
-    CActive( EPriorityNormal ), iListener( aListener )
-    {
-    CActiveScheduler::Add( this );
-    SetActive();
-    }
+        iListener( aListener )
+{
+}
 
 void CCaInstallNotifier::ConstructL( TNotificationType aNotificationType )
-    {
-    switch( aNotificationType )
-		{
-        case ESisInstallNotification:
-        	iNotifierStrategy = CCaSwiInstallStrategy::NewL( iProperty );
-            break;
-        case EUsifUninstallNotification:
-        	iNotifierStrategy = CCaUsifUninstallStrategy::NewL( iProperty );
-            break;
-        case EJavaInstallNotification:
-        	iNotifierStrategy = CCaJavaInstallStrategy::NewL( iProperty );
-            break;
-        default:
-        	User::Leave( KErrNotSupported );
-            break;
-		}
-    iProperty.Subscribe( iStatus );
-    }
+{
+    iNotifier = CSifOperationsNotifier::NewL( *this );
+    iNotificationType = aNotificationType;
+}
 
-void CCaInstallNotifier::DoCancel()
-    {
-    iProperty.Cancel();
-    }
+void CCaInstallNotifier::EndOperationHandler(const CSifOperationEndData& aEndData)
+{
+    TRAP_IGNORE
+        (
+        if( aEndData.ErrorCode() == KErrNone )
+            {
+            iListener.HandleInstallNotifyL();
+            }
+        iNotifier->CancelSubscribeL( iKey );
+        )
+}
 
-void CCaInstallNotifier::RunL()
-    {
-    SetActive();
-    iProperty.Subscribe( iStatus );
-    iNotifierStrategy->NotifyListenerL( iProperty, iListener );
-    }
+void CCaInstallNotifier::ProgressOperationHandler(
+        const CSifOperationProgressData& /*aProgressData*/)
+{
+}
 
-TInt CCaInstallNotifier::RunError( TInt /*aError*/)
-    {
-    // No need to do anything
-    return KErrNone;
-    }
-
+void CCaInstallNotifier::StartOperationHandler(
+        TUint aKey, const CSifOperationStartData& aStartData)
+{
+    TRAP_IGNORE
+        (
+        if( iNotificationType == EAllTypesNotification )
+            {
+            iKey = aKey;
+            iNotifier->SubscribeL( aKey, ETrue );
+            }
+        else if ( iNotificationType == ESisInstallNotification
+                && aStartData.SoftwareType().Compare(
+                        KCaAttrAppTypeValueNative ) == KErrNone )
+            {
+            iKey = aKey;
+            iNotifier->SubscribeL( aKey, ETrue );
+            }
+        )
+}

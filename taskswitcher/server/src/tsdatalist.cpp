@@ -49,11 +49,13 @@ const TUid KHsApplicationUid = { 0x20022F35 };
  */
 CTsDataList* CTsDataList::NewL( MTsResourceManager& aResources,
                                 MTsWindowGroupsMonitor& aMonitor, 
-                                MTsDataObserver& aObserver )
+                                MTsDataObserver& aObserver,
+                                TsEnv& aEnv )
     {
     CTsDataList* self = new (ELeave) CTsDataList( aResources, 
                                                   aMonitor, 
-                                                  aObserver );
+                                                  aObserver,
+                                                  aEnv);
     CleanupStack::PushL( self );
     self->ConstructL();
     CleanupStack::Pop( self );
@@ -66,11 +68,13 @@ CTsDataList* CTsDataList::NewL( MTsResourceManager& aResources,
  */
 CTsDataList::CTsDataList(MTsResourceManager& aResources,
                          MTsWindowGroupsMonitor &aMonitor, 
-                         MTsDataObserver& aObserver ) 
+                         MTsDataObserver& aObserver,
+                         TsEnv& aEnv) 
 :
     CTsWindowGroupsObserver( aMonitor ),
     iResources( aResources ),
-    iObserver( aObserver )
+    iObserver( aObserver ),
+    iEnv( aEnv )
     {
     }
 
@@ -120,13 +124,13 @@ const RTsFswArray& CTsDataList::Data() const
  * @see MTsWindowGroupsObserver HandleWindowGroupChanged
  */
 void CTsDataList::HandleWindowGroupChanged(
-                      MTsResourceManager &, 
-                      const TArray<RWsSession::TWindowGroupChainInfo>& aWgList)
+                      MTsResourceManager &/*aResources*/, 
+                      const MTsRunningApplicationStorage& aStorage)
     {
     TRAP_IGNORE(RDebug::Print(_L("[TaskSwitcher] processing started"));
                 RTsFswArray newAppsList;
                 CleanupResetAndDestroyPushL(newAppsList);
-                CollectAppsL(newAppsList, aWgList);
+                CollectAppsL(newAppsList, aStorage);
                 RDebug::Print(_L("[TaskSwitcher] gathered app info"));
                 FitDataToListL(newAppsList);
                 CleanupStack::PopAndDestroy(&newAppsList);
@@ -140,39 +144,33 @@ void CTsDataList::HandleWindowGroupChanged(
  * @param aAppsList array to add to
  */
 void CTsDataList::CollectAppsL(RTsFswArray& aAppsList, 
-                               const TArray<RWsSession::TWindowGroupChainInfo> &aWgList)
+                               const MTsRunningApplicationStorage& aStorage)
     {
-    for( TInt i(0); i < aWgList.Count(); ++i )
+    for( TInt i(0); i < aStorage.Count(); ++i )
         {
         TTsEntryKey key;
-        TInt err = TsEntryKeyGeneraror::Generate(key, aWgList[i].iId, aWgList);
+        TInt err = TsEntryKeyGeneraror::Generate( key, 
+                                                  aStorage[i].WindowGroupId(), 
+                                                  aStorage );
         //skip this entry if it is already on list or generate key failed
         if( err!=KErrNone || FindEntry( aAppsList, key ) >= 0 ) 
             {
             continue;
             }
 
-        // get window group name
-        CApaWindowGroupName* windowName = 
-            CApaWindowGroupName::NewLC( iResources.WsSession(), 
-                                        key.WindowGroupId() );
-        TUid appUid = windowName->AppUid();
-        
-         // get screen number (-1=console, 0=main screen, 1=cover ui)
+        // get screen number (-1=console, 0=main screen, 1=cover ui)
         TInt appScreen = 0;
         TInt scrNumErr = 
             iResources.ApaSession().GetDefaultScreenNumber( appScreen, 
-                                                            appUid );
+                                                            aStorage[i].UidL() );
         
-        if( appUid.iUid && 
-            !windowName->Hidden() && 
+        if( aStorage[i].UidL().iUid && 
+            !aStorage[i].IsHiddenL() && 
             (appScreen == 0 || appScreen == -1) && 
             scrNumErr == KErrNone )
             {
-            AddEntryL( key, appUid, windowName, aAppsList );
+            AddEntryL( key, aStorage[i], aAppsList );
             }
-
-        CleanupStack::PopAndDestroy( windowName );
         }
     }
 
@@ -180,33 +178,28 @@ void CTsDataList::CollectAppsL(RTsFswArray& aAppsList,
 /**
  * Called from CollectTasksL for each entry in the task list.
  * @param   aKey       entry key
- * @param   aAppUid    application uid
- * @param   aWgName    window group name or NULL
+ * @param   aRunningApp  running application entry
  * @param   aNewList   list to add to
  */
 void CTsDataList::AddEntryL( const TTsEntryKey& aKey, 
-                             const TUid& aAppUid,
-                             CApaWindowGroupName* aWgName, 
+                             const MTsRunningApplication& aRunningApp, 
                              RTsFswArray& aNewList )
     {
-    CTsEntry* entry = CTsEntry::NewLC( aKey, iObserver );
+    CTsEntry* entry = CTsEntry::NewLC( aKey, iObserver, &iEnv );
     // check if present in old list and if yes then take some of the old data
     TBool found = ConsiderOldDataL( aKey );
     // if not present previously then find out app name
     // and check if screenshot is already available
     if( !found )
         {
-        entry->SetAppUid(aAppUid);
-        HBufC* name = FindAppNameLC( aWgName, aAppUid, aKey.WindowGroupId() );
+        entry->SetAppUid(aRunningApp.UidL());
+        HBufC* name = FindAppNameLC( aRunningApp );
         entry->SetAppNameL(*name);
         CleanupStack::PopAndDestroy( name );
         //transfer ownership to entry
-        entry->SetAppIcon( GetAppIconL( aAppUid ) );
+        entry->SetAppIcon( GetAppIconL( aRunningApp.UidL() ) );
         }
-    if(aWgName)
-        {
-        entry->SetCloseableApp( !aWgName->IsSystem() );
-        }
+    entry->SetCloseableApp( !aRunningApp.IsSystemL());
     // add to new list, ownership is transferred
     aNewList.AppendL( entry );
     CleanupStack::Pop( entry );
@@ -240,26 +233,24 @@ TBool CTsDataList::ConsiderOldDataL( const TTsEntryKey& aKey )
  * @param   aWgId       window group id
  * @return  application name, ownership transferred to caller
  */
-HBufC* CTsDataList::FindAppNameLC( CApaWindowGroupName* aWindowName, 
-                                   const TUid& aAppUid, 
-                                   TInt aWgId )
+HBufC* CTsDataList::FindAppNameLC( const MTsRunningApplication& aRunningApp )
     {
     //Retrieve the app name
     TApaAppInfo info;
-    iResources.ApaSession().GetAppInfo( info, aAppUid );
+    iResources.ApaSession().GetAppInfo( info, aRunningApp.UidL() );
     TPtrC caption = info.iShortCaption;
 
     HBufC* tempName( 0 );
-    if (!caption.Length() && aWindowName) // if not set - use thread name instead
+    if (!caption.Length() ) // if not set - use thread name instead
         {
-        if (aWindowName->Caption().Length()) 
+        if( aRunningApp.CaptionL().Length() )
             {
-            tempName = aWindowName->Caption().AllocLC();
+            tempName = aRunningApp.CaptionL().AllocLC();
             }
         else
             {
             TThreadId threadId;
-            if(KErrNone == iResources.WsSession().GetWindowGroupClientThreadId( aWgId, threadId ) ) 
+            if(KErrNone == iResources.WsSession().GetWindowGroupClientThreadId( aRunningApp.WindowGroupId(), threadId ) ) 
                 {
                 RThread thread;
                 CleanupClosePushL( thread );

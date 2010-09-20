@@ -55,8 +55,11 @@ LIBS += -lavkon \
         -lscrclient \
         -laknicon \
         -lapgrfx \
-        -lapparc
+        -lapparc \
+        -lSatClient
+		
 
+		
 include(caclient_s60.pri)
 }
 

@@ -20,6 +20,32 @@
 //
 // -----------------------------------------------------------------------------
 //
+TInt TsEntryKeyGeneraror::Generate( TTsEntryKey& aReturnKey, 
+                                    TInt aWindowGroupId, 
+                                    const MTsRunningApplicationStorage& aStorage)
+{
+    for (TInt iter(0); iter < aStorage.Count(); ++iter) {
+        if (aStorage[iter].WindowGroupId() == aWindowGroupId) {
+            aReturnKey = TTsEntryKey( aWindowGroupId );
+            if (aStorage[iter].WindowGroupId() == aStorage[iter].ParentWindowGroupId()) 
+                {
+                return KErrBadHandle;
+                }
+            else if ( aStorage[iter].IsEmbeded() ) 
+                {
+                return TsEntryKeyGeneraror::Generate(aReturnKey, aStorage[iter].ParentWindowGroupId(), aStorage);
+                
+                }
+            else 
+                {
+                return KErrNone;
+                }
+        }
+    }
+    return KErrNotFound;
+}
+
+// -----------------------------------------------------------------------------
 TInt TsEntryKeyGeneraror::Generate(TTsEntryKey& returnKey, TInt windowGroupId, 
     const TArray<RWsSession::TWindowGroupChainInfo>& groupChain)
 {
@@ -39,4 +65,3 @@ TInt TsEntryKeyGeneraror::Generate(TTsEntryKey& returnKey, TInt windowGroupId,
     }
     return KErrNotFound;
 }
-

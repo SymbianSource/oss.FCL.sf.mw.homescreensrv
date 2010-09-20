@@ -35,13 +35,14 @@ SOURCE         tsbacksteppingfilter.cpp
 SOURCE         tsbacksteppingactivation.cpp
 
 SOURCEPATH     ../../utils/src
-SOURCE        tswindowgroupsmonitor.cpp
 SOURCE        tswindowgroupsobserver.cpp
 SOURCE        tsresourcemanager.cpp
+SOURCE        tsidlist.cpp
 
 LIBRARY        euser.lib 
 LIBRARY        ws32.lib // for RWsSession
 LIBRARY        apgrfx.lib // for TApaTask / TApaTasksList
 LIBRARY        afactivitylauncher.lib
+LIBRARY        estor.lib
 
 DEBUGLIBRARY    flogger.lib

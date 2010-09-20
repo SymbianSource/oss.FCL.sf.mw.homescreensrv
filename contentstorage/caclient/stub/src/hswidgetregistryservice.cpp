@@ -169,10 +169,10 @@ QList<HsWidgetComponentDescriptor> HsWidgetRegistryServicePrivate::readManifestF
             
             HsWidgetComponentDescriptor widgetDescriptor = componentParser.widgetComponentDescriptor();            
             widgetDescriptor.library = manifestFilePath + "/" + widgetDescriptor.uri + ".dll";
-            if (widgetDescriptor.iconUri.length() > 0 ) {
+            if (widgetDescriptor.iconUri.length() > 0 && widgetDescriptor.iconUri.contains('.')) {
                 widgetDescriptor.iconUri = manifestFilePath + "/" + widgetDescriptor.iconUri;
             }            
-            if (widgetDescriptor.previewImage.length() > 0 ) {
+            if (widgetDescriptor.previewImage.length() > 0 && widgetDescriptor.previewImage.contains('.')) {
                 widgetDescriptor.previewImage = manifestFilePath + "/" + widgetDescriptor.previewImage;
             }            
 

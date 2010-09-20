@@ -21,10 +21,9 @@
 
 // ================= MEMBER FUNCTIONS =======================
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::NewL
-// Second phase constructor
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 EXPORT_C CCaMmcWatcher* CCaMmcWatcher::NewL( RFs& aFs,
         MMmcWatcherCallback* aObserver )
@@ -34,10 +33,9 @@ EXPORT_C CCaMmcWatcher* CCaMmcWatcher::NewL( RFs& aFs,
     return self;
     }
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::NewLC
-// Second phase constructor
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 EXPORT_C CCaMmcWatcher* CCaMmcWatcher::NewLC( RFs& aFs,
         MMmcWatcherCallback* aObserver )
@@ -49,20 +47,18 @@ EXPORT_C CCaMmcWatcher* CCaMmcWatcher::NewLC( RFs& aFs,
     return self;
     }
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::~CCaWidgetMmcWatcher
-// Destructor
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 CCaMmcWatcher::~CCaMmcWatcher()
     {
     Cancel();
     }
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::CCaWidgetMmcWatcher
-// Default constructor
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 CCaMmcWatcher::CCaMmcWatcher( RFs& aFs,
         MMmcWatcherCallback* aObserver )
@@ -73,20 +69,18 @@ CCaMmcWatcher::CCaMmcWatcher( RFs& aFs,
     CActiveScheduler::Add(this);
     }
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::ConstructL
-// default Symbian OS constructor
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 void CCaMmcWatcher::ConstructL()
     {
     WaitForChangeL();
     }
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::WaitForChangeL
-// Request notification for disk change
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 void CCaMmcWatcher::WaitForChangeL()
     {
@@ -98,9 +92,9 @@ void CCaMmcWatcher::WaitForChangeL()
     SetActive();
     }
 
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::DoCancel
-// ---------------------------------------------------------
+// ----------------------------------------------------------------------------
+// 
+// ----------------------------------------------------------------------------
 //
 void CCaMmcWatcher::DoCancel()
     {
@@ -111,7 +105,7 @@ void CCaMmcWatcher::DoCancel()
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT (error is ignored)
 // ---------------------------------------------------------------------------
-// CCaWidgetMmcWatcher::RunError
+// 
 // ---------------------------------------------------------------------------
 //
 TInt CCaMmcWatcher::RunError( TInt /*aError*/ )
@@ -126,9 +120,9 @@ TInt CCaMmcWatcher::RunError( TInt /*aError*/ )
 #ifdef COVERAGE_MEASUREMENT
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT (memory card removal)
-// ---------------------------------------------------------
-// CCaWidgetMmcWatcher::RunL
-// ---------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 
+// ---------------------------------------------------------------------------
 //
 void CCaMmcWatcher::RunL()
     {

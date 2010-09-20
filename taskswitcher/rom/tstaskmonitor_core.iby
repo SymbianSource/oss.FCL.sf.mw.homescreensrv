@@ -22,6 +22,10 @@ file=ABI_DIR\BUILD_DIR\hsrunningappmonitor.exe      PROGRAMS_DIR\hsrunningappmon
 data=\epoc32\data\z\resource\apps\hsrunningappmonitor.rsc      resource\apps\hsrunningappmonitor.rsc
 data=ZPRIVATE\10003a3f\import\apps\hsrunningappmonitor_reg.rsc      private\10003a3f\import\apps\hsrunningappmonitor_reg.rsc
 
+// activities plugin
+file=ABI_DIR\BUILD_DIR\activitytsplugin.dll					       SHARED_LIB_DIR\activitytsplugin.dll
+data=\epoc32\data\z\resource\qt\plugins\activitytsplugin.qtplugin    resource\qt\plugins\activitytsplugin.qtplugin
+data=\epoc32\data\z\resource\taskswitcher\activitytsplugin.xml    resource\taskswitcher\activitytsplugin.xml
 
 file=ABI_DIR\BUILD_DIR\tsbackstepping.dll                   SHARED_LIB_DIR\tsbackstepping.dll
 

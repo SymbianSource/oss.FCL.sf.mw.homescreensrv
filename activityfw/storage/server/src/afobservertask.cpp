@@ -79,11 +79,19 @@ const TDesC8& CAfObserverTask::Data() const
  * Interface implementation
  * @see CActivityTask::BroadcastReceivedL(const RMessage2&)
  */
-void CAfObserverTask::BroadcastReceivedL(const RMessage2& msg)
+void CAfObserverTask::BroadcastReceivedL(const RMessage2& msg, TBool applicationUninstalled)
 {
-    if(EFalse != mMsg.IsNull()) {
+    if (!applicationUninstalled && mMsg.IsNull()) {
         mGlobalStorage.Pop(this);//
         mLocalStorage.Pop(this);
+        delete this;
+    } else if(NotifyChange == mMsg.Function() &&
+              (applicationUninstalled ||
+               SaveActivity == msg.Function() ||
+               RemoveActivity == msg.Function() ||
+               RemoveApplicationActivities == msg.Function())){
+        mMsg.Complete(KErrNone);
+        mGlobalStorage.Pop(this);
         delete this;
     } else if (WaitActivity == mMsg.Function() &&
                LaunchActivity == msg.Function()) {
@@ -112,15 +120,6 @@ void CAfObserverTask::BroadcastReceivedL(const RMessage2& msg)
                mMsg.Session() == msg.Session()) {
         mGlobalStorage.Pop(this);
         mMsg.Complete(KErrCancel);
-        delete this;
-    } else if(NotifyChange == mMsg.Function() &&
-              (AddActivity == msg.Function() ||
-               UpdateActivity == msg.Function() ||
-               SaveActivity == msg.Function() ||
-               RemoveActivity == msg.Function() ||
-               RemoveApplicationActivities == msg.Function())){
-        mMsg.Complete(KErrNone);
-        mGlobalStorage.Pop(this);
         delete this;
     }
 }

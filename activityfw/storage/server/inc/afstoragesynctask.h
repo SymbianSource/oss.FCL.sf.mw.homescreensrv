@@ -38,12 +38,6 @@ public:
                          const RMessage2& msg);
 
 private:
-    static void AddActivityL(CAfStorage& dataStorage, 
-                             const RMessage2& msg);
-
-    static void UpdateActivityL(CAfStorage& dataStorage, 
-                                const RMessage2& msg);
-
     static void SaveActivityL(CAfStorage& dataStorage, 
                                 const RMessage2& msg);
                                 

@@ -36,8 +36,6 @@ private:
 
 public:
     int connect();
-    int addActivity(const CAfEntry &sourceEntry, TInt imageHandle);
-    int updateActivity(const CAfEntry &sourceEntry, TInt imageHandle);
     int saveActivity(const CAfEntry &entry, TInt imageHandle);
     int removeActivity(const CAfEntry &templateEntry);
     int removeApplicationActivities(const CAfEntry &templateEntry);
@@ -45,7 +43,7 @@ public:
     int applicationActivities(RPointerArray<CAfEntry> &dst, const CAfEntry &entry);
     int activityData(CAfEntry *&resultEntry, const CAfEntry &templateEntry);
     int waitActivity();
-    int getThumbnail(const TSize &size, const TDesC &imagePath, void *userData);
+    int getThumbnail(const TDesC &imagePath, void *userData);
     int notifyDataChange();
     int launchActivity(const CAfEntry &templateEntry);
 

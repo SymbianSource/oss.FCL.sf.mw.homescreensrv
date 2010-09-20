@@ -25,6 +25,7 @@
 #include <usif/scr/scr.h>
 #include <xqconversions.h>
 #include <driveinfo.h>
+#include <hbtextresolversymbian.h>
 
 #include "cauninstallnotifier.h"
 #include "cauninstallnotifier_p.h"
@@ -32,6 +33,7 @@
 #include "casoftwareregistry_p.h"
 #include "cadefs.h"
 #include "caarraycleanup.inl"
+#include "cautils.h"
 
 using namespace Usif;
 _LIT(KConfirmMessageKey, "MIDlet-Delete-Confirm");
@@ -231,10 +233,22 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
                     if (domainProperty &&
                         domainProperty->PropertyType() ==
                             CPropertyEntry::ELocalizedProperty) {
+                        const TDesC& domainPropertyValue = static_cast<CLocalizablePropertyEntry*>(
+                                domainProperty)->StrValue();
+                        TInt splitIndex = domainPropertyValue.Locate(',');
+                        RBuf qmFileName;
+                        qmFileName.CleanupClosePushL();
+                        qmFileName.CreateL(domainPropertyValue.Right(
+                                domainPropertyValue.Length() - splitIndex - 1),
+                                domainPropertyValue.Length() - splitIndex);
+                        qmFileName.Append('_');
+                        MenuUtils::InitTextResolverSymbianL(qmFileName);
+                        HBufC* translatedProtectionDomain = HbTextResolverSymbian::LoadLC(
+                                domainPropertyValue.Left(splitIndex));
                         result[CaSoftwareRegistry::componentProtectionDomainKey()] =
-                            XQConversions::s60DescToQString(
-                                static_cast<CLocalizablePropertyEntry*>(
-                                    domainProperty)->StrValue());
+                                XQConversions::s60DescToQString(*translatedProtectionDomain);
+                        CleanupStack::PopAndDestroy(translatedProtectionDomain);
+                        CleanupStack::PopAndDestroy(&qmFileName);
                     }
 
                     CPropertyEntry *midletDescryption =

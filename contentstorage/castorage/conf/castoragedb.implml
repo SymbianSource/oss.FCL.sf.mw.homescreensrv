@@ -24,6 +24,8 @@
         </output>
         <output dir="temp/castoragedb/" file="castoragedb_variant.sql" encoding="UTF-8">
             <template file="castoragedb_templates/castoragedb_variant.sql"/>
+            <!-- lambda a: int((int(a,16)+2**31)%2**32-2**31) -->
+            <filter name="hex2dec">lambda a: int((int(a,16)+2147483648)%4294967296-2147483648)</filter>
         </output>
     </templateml>
     

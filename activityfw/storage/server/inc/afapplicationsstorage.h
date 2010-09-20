@@ -27,16 +27,17 @@ class CAfApplicationsStorage: public CBase,
                                public MAfApplicationsObserver
 {
 public:
-    static CAfApplicationsStorage* NewL(CAfStorage& storage, const MAfApplicationsRegistry& provider);
+    static CAfApplicationsStorage* NewL(CAfStorage& storage, const MAfApplicationsRegistry& provider, MAfApplicationsObserver &observer);
     ~CAfApplicationsStorage();
     void applicationsChanged();
     
 private:
-    CAfApplicationsStorage(CAfStorage& storage, const MAfApplicationsRegistry& provider);
+    CAfApplicationsStorage(CAfStorage& storage, const MAfApplicationsRegistry& provider, MAfApplicationsObserver &observer);
     void deleteActivityL(TUid appId);
 private:
     CAfStorage& mStorage;
     const MAfApplicationsRegistry &mProvider;
+    MAfApplicationsObserver &mObserver;
 };
 
 #endif // AFAPPLICATIONSSTORAGE_H

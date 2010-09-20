@@ -144,6 +144,12 @@ TBool CTsService::IsClosableL( TInt aOffset ) const
     }
 
 // -----------------------------------------------------------------------------
+TBool CTsService::IsMandatoryL( TInt aOffset ) const
+    {
+    return IntValueL(aOffset, "TaskIsMandatory" );
+    }
+
+// -----------------------------------------------------------------------------
 TBool CTsService::CloseL( TTsModelItemKey aKey ) const
     {
     bool result(false);

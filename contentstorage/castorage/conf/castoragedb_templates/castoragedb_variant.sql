@@ -12,7 +12,10 @@ SELECT "castoragedb_variant - BEGIN" AS " ";
             {%- set Icon = c ~ Icon %}
         {%- endif %}
         {%- if loop.last -%}
-            {{ "z:\\private\\20022F35\\customsvg\\" ~ Icon }}
+            {%- if Icon == "dummy" %}
+            {% else -%}
+                {{ "z:\\private\\20022F35\\customsvg\\" ~ Icon }}
+            {%- endif -%}
         {%- endif %}
     {%- endfor %}
 {%- endmacro %}
@@ -24,7 +27,7 @@ SELECT "castoragedb_variant - BEGIN" AS " ";
         {%- set URL = feat_tree.CaStorageDbSetting[URLs].URL._value[i] or '' -%}
         {%- set URLIcon = feat_tree.CaStorageDbSetting[URLs].URLIcon.localPath._value[i] or '' -%}
         {%- set IconSkinId = feat_tree.CaStorageDbSetting[URLs].IconSkinId._value[i] or '' -%}
-        {%- if IconSkinId == "" and URLIcon != "" and URLIcon != "dummy" -%}
+        {%- if URLIcon != "" -%}
             {%- set URLIcon = stripPath(URLIcon) -%}
         {%- endif %}
         INSERT INTO URL ( URL_TITLE, URL_SHORT_TITLE, URL_DEST, ICON_FILENAME, ICON_SKIN_ID ) 
@@ -46,9 +49,18 @@ SELECT "castoragedb_variant - BEGIN" AS " ";
         {%- endif %}
         {%- set IconFileName = feat_tree.CaStorageDbSetting[Collections].Icon.localPath._value[col] or '' -%}
         {%- set IconSkinId = feat_tree.CaStorageDbSetting[Collections].IconSkinId._value[col] or '' -%}
-        {%- if IconSkinId == "" and IconFileName != "" and IconFileName != "dummy" -%}
+        {%- if IconFileName != "" -%}
             {%- set IconFileName = stripPath(IconFileName) -%}
         {%- endif %}
+        {%- if ShortName == "" -%}
+            {%- set ShortName = Name -%}
+        {%- endif %}
+        {%- if TitleName == "" -%}
+            {%- set TitleName = Name -%}
+        {%- endif %}
+        {%- if GroupName == "" -%}
+            {%- set GroupName = Name -%}
+        {%- endif %}        
     INSERT INTO COLLECTION (COLLECTION_NAME, COL_APP_GROUP_NAME, FLAGS,  COL_TITLE_NAME {% if LocalizeNames -%}, TRANSLATION_FILE{%- endif %}, COL_SHORT_NAME, ICON_FILENAME, ICON_SKIN_ID) 
     VALUES ( '{{Name}}', '{{GroupName}}', {% if Locked -%} 0 {% else %} 4 {%- endif %}, "{{TitleName}}"{% if LocalizeNames -%}, "{{TranslationFile}}"{%- endif %}, "{{ShortName}}", "{{IconFileName}}", "{{IconSkinId}}");
     {% endfor %}
@@ -70,7 +82,7 @@ SELECT "castoragedb_variant - BEGIN" AS " ";
         {%- endif %}
         
         {% if Type == "1" -%} INSERT INTO ITEM_TO_COLLECTION (ITEM_TYPE, ITEM_NAME, ITEM_DEST, COLLECTION_NAME) 
-          VALUES ("application", '', {{Application}},  '{{Collection}}' );{%- endif %}
+          VALUES ("application", '', {{Application|hex2dec}},  '{{Collection}}' );{%- endif %}
           
         {% if Type == "2" -%} INSERT INTO WIDGET_TO_COLLECTION (ITEM_TYPE, ITEM_NAME, URI, COLLECTION_NAME ) 
           VALUES ("widget", '{{HomescreenWidget}}', "{{HomescreenWidget}}", '{{Collection}}' ); {%- endif %}

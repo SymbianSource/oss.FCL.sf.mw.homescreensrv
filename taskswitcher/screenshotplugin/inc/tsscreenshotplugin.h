@@ -21,13 +21,16 @@
 #include <graphics/wsgraphicdrawerinterface.h>
 #include <graphics/wsgraphicdrawer.h>
 
-#include "tsorientationobserver.h"
+#include "tsnotifier.h"
 
 class CTsOrientationMonitor;
+class CTsScreenshotNotifier;
+class CTsIdList;
 
 class CTsScreenshotPlugin: public CWsGraphicDrawer, 
                            public MWsEventHandler,
-                           public MTsOrientationObserver
+                           public MTsNotifier
+                           
 {
 public:
     static CTsScreenshotPlugin* NewL();
@@ -41,7 +44,6 @@ private:
                     const TGraphicDrawerId& aId, 
                     MWsClient& aOwner, 
                     const TDesC8& aData);
-    void ConstructL();
     void DoHandleEvent(const TWservCrEvent& aEvent);
     void TakeScreenshot(TInt);
     void TakeScreenshotL(TInt);
@@ -49,14 +51,13 @@ private:
     void NotifyWindowGroupToBackgroundL(TInt aWindowGroupId);
     TInt OrientationToAngle();
     
-private://from MTsOrientationObserver
-    void OrientationChanged( TInt aAngle );
-    
+public:
+    void SendMessageL( const TDesC8& aMessage );
+
 private:
-    RPointerArray<CFbsBitmap> iCache;
-    CTsOrientationMonitor* iMonitor;
+    CTsIdList* iBlockedList;
+    RPointerArray<CTsScreenshotNotifier> iCache;
     TInt iWindowGroupId;
-    TInt iAngle;
 };
 
 #endif //TSSCREENSHOTPLUGIN_H

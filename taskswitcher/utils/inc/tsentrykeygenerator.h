@@ -24,13 +24,18 @@
 #include <w32std.h>
 
 #include "tsentrykey.h"
+#include "tswindowgroupsobserver.h"
 
 
 class TsEntryKeyGeneraror
 {
 public:
-    static TInt Generate(TTsEntryKey& returnKey, TInt windowGroupId, 
-                                 const TArray<RWsSession::TWindowGroupChainInfo>& groupChain);
+    static TInt Generate( TTsEntryKey& aReturnKey, 
+                          TInt aWindowGroupId, 
+                          const MTsRunningApplicationStorage& aStorage );
+    static TInt Generate(TTsEntryKey& returnKey, 
+                TInt windowGroupId, 
+                const TArray<RWsSession::TWindowGroupChainInfo>& groupChain);
 };
 
 #endif //TSENTRYKEYGENERATOR_H

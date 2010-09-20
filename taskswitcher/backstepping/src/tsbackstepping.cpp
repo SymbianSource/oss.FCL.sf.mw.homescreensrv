@@ -29,12 +29,17 @@
 
 #include "tsbacksteppingfilter.h"
 
+/**
+ * String to switch hsapplication to IDLE state using activity framework
+ */
 _LIT(KHsActivactionUri, "appto://20022F35?activityname=HsIdleView&activityinbackground=true");
 
 // -----------------------------------------------------------------------------
 /** 
- *  CTsBackstepping::NewL
- *  two phase constructor
+ *  Symbian two-phases constructor. Allocate create and initialize backstepping engine
+ *  Instance is pushed int cleanup stack.
+ *  @param aMonitor - window group changes monitor
+ *  @return address to backstepping engine
  */
 CTsBackstepping* CTsBackstepping::NewL( MTsWindowGroupsMonitor& aMonitor )
     {
@@ -45,8 +50,9 @@ CTsBackstepping* CTsBackstepping::NewL( MTsWindowGroupsMonitor& aMonitor )
 
 // -----------------------------------------------------------------------------
 /** 
- *  CTsBackstepping::NewLC
- *  two phase constructor
+ *  Symbian two-phases constructor. Allocate create and initialize backstepping engine
+ *  @param aMonitor - window group changes monitor
+ *  @return address to backstepping engine
  */
 CTsBackstepping* CTsBackstepping::NewLC( MTsWindowGroupsMonitor& aMonitor )
     { 
@@ -58,12 +64,12 @@ CTsBackstepping* CTsBackstepping::NewLC( MTsWindowGroupsMonitor& aMonitor )
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBackstepping::CTsBackstepping
- * constructor
+ * Constructor.
+ * @param aMonitor - window group changes monitor
  */
 CTsBackstepping::CTsBackstepping( MTsWindowGroupsMonitor &aMonitor )
 :
-CTsWindowGroupsObserver( aMonitor )
+CTsWindowGroupsObserver( aMonitor ), iHsWasFirst(ETrue)
     {
     }
 
@@ -79,8 +85,9 @@ CTsBackstepping::~CTsBackstepping()
 
 // -----------------------------------------------------------------------------
 /** 
- *  CTsBackstepping::ConstructL
- *  two phase constructor
+ *  Symbian second-phase constructor. 
+ *  Subscribe to window group monitor events (using BaseConstructL) and allocate
+ *  filtering list
  */
 void CTsBackstepping::ConstructL ()
     {
@@ -89,48 +96,50 @@ void CTsBackstepping::ConstructL ()
     }
 
 // -----------------------------------------------------------------------------
-/** 
- * CTsBackstepping::AnalyseWindowStackL
- * Analyzes window stack and move homescreen to proper position
+/**
+ * Analyzes window stack and move homescreen to proper position 
+ * Interface implementation.
+ * @see MTsWindowGroupsObserver::HandleWindowGroupChanged
  */
 void CTsBackstepping::HandleWindowGroupChanged( 
-               MTsResourceManager &aResource, 
-               const TArray<RWsSession::TWindowGroupChainInfo> &aWindowGroups )
+                                MTsResourceManager &aResources, 
+                                const MTsRunningApplicationStorage& aStorage )
+
     {
     RDebug::Print(_L("[Backstepping] started"));
-    TRAP_IGNORE( HandleWindowGroupChangedL( aResource, aWindowGroups ) );
+    TRAP_IGNORE( HandleWindowGroupChangedL( aResources, aStorage ) );
     RDebug::Print(_L("[Backstepping] finished"));
     }
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBackstepping::AnalyseWindowStackL
  * Analyzes window stack and move homescreen to proper position
+ * @see MTsWindowGroupsObserver::HandleWindowGroupChanged from param info
  */
 void CTsBackstepping::HandleWindowGroupChangedL( 
-                MTsResourceManager& aResource,
-                const TArray<RWsSession::TWindowGroupChainInfo>& aWindowGroups )
+                                 MTsResourceManager &aResources, 
+                                 const MTsRunningApplicationStorage& aStorage )
     {
     // calculate the desired position of Homescreen
-    const TInt currentHsOffset( HomescreenOffsetL( aResource, aWindowGroups ) );
+    const TInt currentHsOffset( HomescreenOffsetL( aStorage ) );
     TInt optimalOffset(1);
     TInt targetHsOffset(currentHsOffset);
+    TBool isFirst(ETrue);
     for( TInt offset(0); offset < currentHsOffset; ++offset ) 
         {
-        TUid uid = GetUidFromWindowGroupL( aResource, 
-                                           aWindowGroups[offset].iId );
-        RDebug::Print(_L("[Backstepping] application: %d"), uid.iUid);
-                                           
-        if( TUid::Null() != uid )
+        RDebug::Print( _L("[Backstepping] application: %08x"), 
+                       aStorage[offset].UidL().iUid );
+        if( TUid::Null() != aStorage[offset].UidL() )
             {
-            if( IsEmbededApp( aWindowGroups[offset] ) )
+            isFirst = EFalse;
+            if( aStorage[offset].IsEmbeded())
                 {
-                targetHsOffset = ParentOffsetL( offset, aWindowGroups ) + 1;
+                targetHsOffset = aStorage.ParentIndex(aStorage[offset])+ 1;
                 } 
-            else if (!iFilter->isBlocked(uid))
+            else if (!iFilter->isBlocked( aStorage[offset].UidL() ))
                 {
                 if(offset + 1 < currentHsOffset && 
-                   GetUidFromWindowGroupL( aResource, aWindowGroups[offset+1].iId) == TUid::Null() ) 
+                   aStorage[offset+1].UidL() == TUid::Null() ) 
                     {
                     ++optimalOffset;
                     }
@@ -143,48 +152,30 @@ void CTsBackstepping::HandleWindowGroupChangedL(
             ++optimalOffset;
             }
         }
-
-    // switch Homescreen to Idle state if Homescreen is not in foreground and is in different state
-    if( 0 != targetHsOffset)
-        {
-        TInt hsState( EHomeScreenIdleState );
-        User::LeaveIfError(RProperty::Get( KHsCategoryUid, 
-                                           KHsCategoryStateKey, 
-                                           hsState ) );
-        if(!(hsState & EHomeScreenWidgetViewActive ) )
-            {
-            RDebug::Print(_L("[Backstepping] about to switch HS activity"));
-            
-            CAfActivityLauncher *activityEnabler = 
-                CAfActivityLauncher::NewLC( aResource.ApaSession(), 
-                                            aResource.WsSession() );
-            activityEnabler->launchActivityL( KHsActivactionUri );
-            CleanupStack::PopAndDestroy( activityEnabler );
-            }
-        }
+    SwitchToIdleStateL(aResources, isFirst);
     // change windows order if necessary
     if(targetHsOffset != currentHsOffset)
         {
         RDebug::Print(_L("[Backstepping] about to change window groups order"));
-        
-        const TInt hsWindowGroup( aWindowGroups[currentHsOffset].iId );
-        aResource.WsSession().SetWindowGroupOrdinalPosition( hsWindowGroup, 
-                                                             targetHsOffset );
+        aResources.WsSession().SetWindowGroupOrdinalPosition( 
+                                    aStorage[currentHsOffset].WindowGroupId(), 
+                                    targetHsOffset );
         }
     }
 
 // -----------------------------------------------------------------------------
 /** 
- * CTsBackstepping::HomescreenOffsetL
+ * Find and return current position of hsapplication on window server stack
+ * @param aStorage - storage with running app info
+ * @return position of hsapplication on window server stack
  */
 TInt CTsBackstepping::HomescreenOffsetL( 
-        MTsResourceManager& aResource,
-        const TArray<RWsSession::TWindowGroupChainInfo>& aWindowGroups ) const 
+                        const MTsRunningApplicationStorage& aStorage ) const 
     {
     TInt offset( KErrNotFound );
-    for( TInt iter(0); KErrNotFound == offset && iter < aWindowGroups.Count(); ++iter )
+    for( TInt iter(0); KErrNotFound == offset && iter < aStorage.Count(); ++iter )
         {
-        if( KHsCategoryUid == GetUidFromWindowGroupL( aResource, aWindowGroups[iter].iId ) )
+        if( KHsCategoryUid == aStorage[iter].UidL() )
             {
             offset = iter;
             }
@@ -194,49 +185,32 @@ TInt CTsBackstepping::HomescreenOffsetL(
     }
 
 // -----------------------------------------------------------------------------
-/** 
- * CTsBackstepping::ParentOffsetL
+/**
+ * Change hsapplication state to IDLE if moves to background
+ * @param aResources - OS resources manager
+ * @param aIsFrst - flag to inform if hsapplication is in foreground
  */
-TInt CTsBackstepping::ParentOffsetL( 
-        TInt aOffset,
-        const TArray<RWsSession::TWindowGroupChainInfo>& aWindowGroups )const 
+void CTsBackstepping::SwitchToIdleStateL(MTsResourceManager& aResources, 
+                                         TBool aIsFirst)
     {
-    for( TInt iter(aOffset + 1); iter < aWindowGroups.Count(); ++iter )
+    // switch Homescreen to Idle state if Homescreen is not in foreground and is in different state
+    if( iHsWasFirst && !aIsFirst )
         {
-        if(aWindowGroups[iter].iId == aWindowGroups[aOffset].iParentId)
+        TInt hsState( EHomeScreenIdleState );
+        User::LeaveIfError(RProperty::Get( KHsCategoryUid, 
+                                           KHsCategoryStateKey, 
+                                           hsState ) );
+        if(!(hsState & EHomeScreenWidgetViewActive ) )
             {
-            return IsEmbededApp( aWindowGroups[iter] ) ? 
-                   ParentOffsetL( iter, aWindowGroups ) : iter; 
+            RDebug::Print(_L("[Backstepping] about to switch HS activity"));
+            CAfActivityLauncher *activityEnabler = 
+                CAfActivityLauncher::NewLC( aResources.ApaSession(), 
+                                            aResources.WsSession() );
+            activityEnabler->launchActivityL( KHsActivactionUri );
+            CleanupStack::PopAndDestroy( activityEnabler );
             }
         }
-    User::Leave( KErrNotFound) ;
-    return KErrNotFound;
-    }
-
-// -----------------------------------------------------------------------------
-/** 
- * CTsBackstepping::IsEmbededApp
- */
-TBool CTsBackstepping::IsEmbededApp( 
-            const RWsSession::TWindowGroupChainInfo &aWindowGroupInfo ) const 
-    {
-    return 0 < aWindowGroupInfo.iParentId;
-    }
-
-// -----------------------------------------------------------------------------
-/** 
- * CTsBackstepping::GetUidFromWindowGroupL
- */
-TUid CTsBackstepping::GetUidFromWindowGroupL( MTsResourceManager &aResource, 
-                                              TInt aWindowGroupId ) const
-    {
-    TUid retVal(TUid::Null());
-    CApaWindowGroupName *windowGroupName = 
-            CApaWindowGroupName::NewLC( aResource.WsSession() );
-    windowGroupName->ConstructFromWgIdL( aWindowGroupId );
-    retVal = windowGroupName->AppUid();
-    CleanupStack::PopAndDestroy( windowGroupName );
-    return retVal;
+    iHsWasFirst = aIsFirst;
     }
 
 // end of file

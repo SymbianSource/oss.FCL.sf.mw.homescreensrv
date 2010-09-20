@@ -99,6 +99,7 @@ EXPORTS
 	?SetParentId@CCaInnerQuery@@QAEXH@Z @ 98 NONAME ; void CCaInnerQuery::SetParentId(int)
 	?GetIds@CCaInnerNotifierFilter@@QBE?AV?$RArray@H@@XZ @ 99 NONAME ; class RArray<int> CCaInnerNotifierFilter::GetIds(void) const
 	?SetStringIdL@CCaLocalizationEntry@@QAEXABVTDesC16@@@Z @ 100 NONAME ; void CCaLocalizationEntry::SetStringIdL(class TDesC16 const &)
-	?SetTextId@CCaLocalizationEntry@@QAEXI@Z @ 101 NONAME ; void CCaLocalizationEntry::SetTextId(unsigned int)
-	?RemoveAttribute@RCaEntryAttrArray@@QAEXABVTDesC16@@@Z @ 102 NONAME ; void RCaEntryAttrArray::RemoveAttribute(class TDesC16 const &)
+	?InitTextResolverSymbianL@MenuUtils@@SAXABVTDesC16@@@Z @ 101 NONAME ; void MenuUtils::InitTextResolverSymbianL(class TDesC16 const &)
+	?SetTextId@CCaLocalizationEntry@@QAEXI@Z @ 102 NONAME ; void CCaLocalizationEntry::SetTextId(unsigned int)
+	?RemoveAttribute@RCaEntryAttrArray@@QAEXABVTDesC16@@@Z @ 103 NONAME ; void RCaEntryAttrArray::RemoveAttribute(class TDesC16 const &)
 

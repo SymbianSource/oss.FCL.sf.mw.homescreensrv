@@ -15,30 +15,34 @@
 *
 */
 
-#include "tsrunningappmodel.h"
-
 #include <AknDef.h>
 #include <apgwgnam.h>
 #include <apgtask.h>
+
+#include "tsrunningappmodel.h"
+
+#include "tsrunningappstorage.h"
 
 #include "tsdatalist.h"
 #include "tsmodelobserver.h"
 #include "tsscreenshotprovider.h"
 
 CTsRunningAppModel *CTsRunningAppModel::NewL( MTsResourceManager& aResources, 
-                                              MTsWindowGroupsMonitor& aMonitor )
+                                              MTsWindowGroupsMonitor& aMonitor,
+                                              TsEnv& aEnv )
     {
-    CTsRunningAppModel *self = CTsRunningAppModel::NewLC( aResources, aMonitor );
+    CTsRunningAppModel *self = CTsRunningAppModel::NewLC( aResources, aMonitor, aEnv );
     CleanupStack::Pop( self );
     return self;
     }
 
 CTsRunningAppModel *CTsRunningAppModel::NewLC( MTsResourceManager& aResources, 
-                                               MTsWindowGroupsMonitor& aMonitor )
+                                               MTsWindowGroupsMonitor& aMonitor,
+                                               TsEnv& aEnv )
     {
     CTsRunningAppModel *self = new (ELeave) CTsRunningAppModel( aResources );
     CleanupStack::PushL( self );
-    self->ConstructL( aResources, aMonitor );
+    self->ConstructL( aResources, aMonitor, aEnv );
     return self;
     }
 
@@ -55,15 +59,19 @@ CTsRunningAppModel::CTsRunningAppModel( MTsResourceManager& aResources )
     }
 
 void CTsRunningAppModel::ConstructL( MTsResourceManager& aResources, 
-                                     MTsWindowGroupsMonitor& aMonitor )
+                                     MTsWindowGroupsMonitor& aMonitor,
+                                     TsEnv& aEnv)
     {
-    iDataList = CTsDataList::NewL( aResources, aMonitor, *this );
-    iScreenshotProvider = CTsScreenshotProvider::NewL( *iDataList );
-
+    iDataList = CTsDataList::NewL( aResources, aMonitor, *this, aEnv );
+    iScreenshotProvider = CTsScreenshotProvider::NewL(*iDataList, aMonitor );
+    
     RArray<RWsSession::TWindowGroupChainInfo> wgList;
     CleanupClosePushL( wgList );
     User::LeaveIfError( aResources.WsSession().WindowGroupList( 0, &wgList ) );
-    iDataList->HandleWindowGroupChanged( aResources, wgList.Array() );
+    CTsRunningAppStorage* storage = CTsRunningAppStorage::NewLC();
+    storage->HandleWindowGroupChanged(aResources, wgList.Array());
+    iDataList->HandleWindowGroupChanged( aResources, *storage );
+    CleanupStack::PopAndDestroy(storage);
     CleanupStack::PopAndDestroy( &wgList );
     }
 
@@ -146,6 +154,11 @@ TBool CTsRunningAppModel::IsActiveL( TInt /*aOffset*/ ) const
 TBool CTsRunningAppModel::IsClosableL( TInt aOffset ) const
     {
     return iDataList->Data()[aOffset]->CloseableApp();
+    }
+
+TBool CTsRunningAppModel::IsMandatoryL( TInt /*aOffset*/ ) const
+    {
+    return ETrue;
     }
 
 TBool CTsRunningAppModel::CloseL( TTsModelItemKey aKey ) const

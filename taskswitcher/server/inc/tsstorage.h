@@ -40,6 +40,7 @@ private:
     void ResetModelL();
     void PullDataL(const MTsModel& aSrc);
     void ReorderDataL();
+    void TrimDataL();
 
 public://from MTsModelObserver
     void DataChanged(MTsModel& aModel);
@@ -56,6 +57,7 @@ private://from MTsModel
     TTsModelItemKey KeyL( TInt aOffset ) const;
     TBool IsActiveL( TInt aOffset ) const;
     TBool IsClosableL( TInt aOffset ) const;
+    TBool IsMandatoryL( TInt aOffset ) const;
     TBool CloseL( TTsModelItemKey aKey ) const;
     TBool LaunchL( TTsModelItemKey aKey ) const;
     TTsModelItem FindL( TTsModelItemKey aKey ) const;

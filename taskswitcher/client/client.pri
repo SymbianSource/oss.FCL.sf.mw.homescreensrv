@@ -36,7 +36,6 @@ symbian {
                 $$PWD/s60/inc/tstaskmonitorclient.h \
                 $$PWD/s60/inc/tstaskmonitorclientimpl.h \
                 $$PWD/s60/inc/tssession.h \
-                $$PWD/../utils/inc/tsentry.h \
                 $$PWD/../utils/inc/tsentrykey.h \
                 $$PWD/../utils/inc/tsutils.h \
                 $$PWD/../utils/inc/tsscreenshotmsg.h \
@@ -52,7 +51,6 @@ symbian {
     SOURCES +=  $$PWD/s60/src/tstaskmonitorclient.cpp \
                 $$PWD/s60/src/tstaskmonitorclientimpl.cpp \
                 $$PWD/s60/src/tssession.cpp \
-                $$PWD/../utils/src/tsentry.cpp \
                 $$PWD/../utils/src/tsentrykey.cpp \
                 $$PWD/../utils/src/tsscreenshotmsg.cpp \
                 $$PWD/../utils/src/tsunregscreenshotmsg.cpp \
@@ -68,12 +66,6 @@ symbian {
                 -lestor \
                 -lfbscli \
                 
-    # tsimageutils and its dependencies
-    LIBS    +=  -ltsimageutils.lib \
-                -lbitmaptransforms \
-                -limageconversion \
-                -lefsrv \
-
 } else {
     INCLUDEPATH +=  $$PWD/stub/inc \
 

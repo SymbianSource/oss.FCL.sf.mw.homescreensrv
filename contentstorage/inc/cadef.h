@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.27 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.28 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -76,7 +76,6 @@ _LIT( KCaTypeUrl, "url" );
 _LIT( KCaTypePackage, "package" );
 _LIT( KCaAttrView, "view" ); ///< View.
 _LIT( KCaAttrUrl, "url" );
-_LIT( KCaAttrWindowGroupId, "window_group_id" );
 _LIT( KCaTypeCollectionDownload, "collection::downloaded" );
 _LIT( KCaPackageUid,"packageuid");
 _LIT( KCaAttrInstallationTime, "installationTime");
@@ -171,7 +170,6 @@ _LIT( KCaComponentId, "component_id" ); ///< Component Id.
 
 _LIT8( KCaCmdOpen, "open" ); ///< Open item.
 _LIT8( KCaCmdRemove, "remove" ); ///< Remove item.
-_LIT8( KCaCmdClose, "close" ); ///< Close item.
 
 
 //Properties in database

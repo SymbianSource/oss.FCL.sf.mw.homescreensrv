@@ -86,7 +86,7 @@ void CaMbmIconEngine::getPixmapFromBitmap(const QSize &size, QPixmap& pixmap)
         QPixmap mask;
         mask = mask.fromSymbianCFbsBitmap(maskBitmap);
         pixmap.setAlphaChannel(mask);
-        pixmap = pixmap.scaled(size, Qt::KeepAspectRatioByExpanding);
+        pixmap = pixmap.scaled(size, Qt::IgnoreAspectRatio);
     }
 }
 

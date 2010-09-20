@@ -28,6 +28,4 @@ tests {
     SUBDIRS +=  activityserviceplugin/tsrc \
 }
 
-symbian:SUBDIRS += activityserviceplugin/symbianinstaller
-
 symbian:include(rom.pri)

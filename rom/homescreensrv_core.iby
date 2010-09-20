@@ -41,7 +41,6 @@ file=ABI_DIR\BUILD_DIR\caclient.dll     SHARED_LIB_DIR\caclient.dll
 file=ABI_DIR\BUILD_DIR\cautils.dll     SHARED_LIB_DIR\cautils.dll
 file=ABI_DIR\BUILD_DIR\camenu.dll     SHARED_LIB_DIR\camenu.dll
 file=ABI_DIR\BUILD_DIR\camenuserver.exe     PROGRAMS_DIR\camenuserver.exe
-file=ABI_DIR\BUILD_DIR\casathandler.dll     SHARED_LIB_DIR\casathandler.dll
 file=ABI_DIR\BUILD_DIR\castorage.dll     SHARED_LIB_DIR\castorage.dll
 file=ABI_DIR\BUILD_DIR\MenuInterface.dll     SHARED_LIB_DIR\MenuInterface.dll
 file=ABI_DIR\BUILD_DIR\casrvmanager.dll     SHARED_LIB_DIR\casrvmanager.dll
@@ -53,6 +52,7 @@ ECOM_PLUGIN( calocalizerscanner.dll, calocalizerscanner.rsc )
 ECOM_PLUGIN( causifscanner.dll, causifscanner.rsc )
 
 data=ZPRIVATE\20022F90\castorage.db          private\20022F90\castorage.db
+data=ZPRIVATE\20022F90\backup_registration.xml          private\20022F90\backup_registration.xml
 
 // ----  hswidgetmodel --------------------------------------------
 file=ABI_DIR\BUILD_DIR\hswidgetmodel.dll    SHARED_LIB_DIR\hswidgetmodel.dll

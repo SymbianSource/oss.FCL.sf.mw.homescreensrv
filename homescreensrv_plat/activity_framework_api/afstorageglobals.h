@@ -29,5 +29,6 @@ const char ActivityVisibility [] = ":ActivityVisibility";
 const char ActivityScreenshotKeyword [] = "screenshot";
 const char ActivityDataKeyword [] = ":ActivityData";
 const char ActivityApplicationName[] = ":ApplicationName";
+const char ActivityTimestamp[] = ":ActivityTimestamp";
 
 #endif //AFSTORAGEGLOBALS_H

@@ -22,16 +22,17 @@ class QObject;
 class CTsServiceProviderConfig: public CBase
 {
 public:
-    static CTsServiceProviderConfig* NewLC();
+    static CTsServiceProviderConfig* NewLC(QObject *aEnv);
     ~CTsServiceProviderConfig();
 
     TInt Count() const;
     QObject* LoadL(TInt aOffset)const;
 private:
-    CTsServiceProviderConfig();
+    CTsServiceProviderConfig(QObject* aEnv);
     void ConstructL();
 
 private:
+    QObject* iEnv;
     RPointerArray<TAny> iServices;
 };
 

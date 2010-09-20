@@ -671,46 +671,45 @@ void CCaWidgetDescription::LocalizeTextsL()
     if( iTranslationFileName.Length() )
         {
         RBuf translationFileName;
-        translationFileName.Create( iTranslationFileName.Length() + 1 );
         CleanupClosePushL( translationFileName );
+        translationFileName.CreateL( iTranslationFileName.Length() + 1 );
         translationFileName.Copy( iTranslationFileName );
         translationFileName.Append( KWidgetScannerUnderline );
-           
-        
-        if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathC ) )
-          {
-          if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathZ ) )
-              {
-              // this should not be called too often 
-              TChar currentDriveLetter;
-              TDriveList driveList;
-              RFs fs;
-              User::LeaveIfError( fs.Connect() );
-              User::LeaveIfError( fs.DriveList( driveList ) );
 
-              RBuf path;
-              path.Create( KLocalizationFilepath().Length() + 1 );
-              CleanupClosePushL( path );
-              
-              for( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
-                  {
-                  if( driveList[driveNr] )
-                      {
-                      User::LeaveIfError( fs.DriveToChar( driveNr,
-                              currentDriveLetter ) );
-                      path.Append( currentDriveLetter );
-                      path.Append( KLocalizationFilepath );
-                      if( HbTextResolverSymbian::Init( translationFileName, path ) )
-                          {
-                          break;
-                          }
-                      }
-                  path.Zero();
-                  }
-              CleanupStack::PopAndDestroy( &path );
-              fs.Close();
-              }
-           }
+        if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathC ) )
+            {
+            if( !HbTextResolverSymbian::Init( translationFileName, KLocalizationFilepathZ ) )
+                {
+                // this should not be called too often 
+                TChar currentDriveLetter;
+                TDriveList driveList;
+                RFs fs;
+                User::LeaveIfError( fs.Connect() );
+                User::LeaveIfError( fs.DriveList( driveList ) );
+
+                RBuf path;
+                CleanupClosePushL( path );
+                path.CreateL( KLocalizationFilepath().Length() + 1 );
+
+                for( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
+                    {
+                    if( driveList[driveNr] )
+                        {
+                        User::LeaveIfError( fs.DriveToChar( driveNr,
+                            currentDriveLetter ) );
+                        path.Append( currentDriveLetter );
+                        path.Append( KLocalizationFilepath );
+                        if( HbTextResolverSymbian::Init( translationFileName, path ) )
+                            {
+                            break;
+                            }
+                        }
+                    path.Zero();
+                    }
+                CleanupStack::PopAndDestroy( &path );
+                fs.Close();
+                }
+            }
         
         HBufC* tmp;
         

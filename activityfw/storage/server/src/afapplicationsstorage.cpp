@@ -17,19 +17,22 @@
 #include "afapplicationsstorage.h"
 //------------------------------------------------------------------------------
 CAfApplicationsStorage* CAfApplicationsStorage::NewL(CAfStorage& storage, 
-                                                     const MAfApplicationsRegistry& provider)
+                                                     const MAfApplicationsRegistry& provider, 
+                                                     MAfApplicationsObserver &observer)
 {
-    CAfApplicationsStorage *self = new (ELeave)CAfApplicationsStorage(storage, provider);
+    CAfApplicationsStorage *self = new (ELeave)CAfApplicationsStorage(storage, provider, observer);
     return self;
     
 }
 
 //------------------------------------------------------------------------------
 CAfApplicationsStorage::CAfApplicationsStorage(CAfStorage& storage, 
-                                               const MAfApplicationsRegistry& provider)
+                                               const MAfApplicationsRegistry& provider, 
+                                               MAfApplicationsObserver &observer)
 :
     mStorage(storage),
-    mProvider(provider)
+    mProvider(provider),
+    mObserver(observer)
 {
 }
 
@@ -44,6 +47,10 @@ void CAfApplicationsStorage::applicationsChanged()
     for (TInt iter(0); iter < removedApp.Count(); ++iter) {
         TRAP_IGNORE(deleteActivityL(removedApp[iter]));
     }
+
+    if ( removedApp.Count() > 0 ) {
+        mObserver.applicationsChanged();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -55,7 +62,8 @@ void CAfApplicationsStorage::deleteActivityL(TUid appId)
                                     KNullDesC,
                                     KNullDesC,
                                     KNullDesC8,
-                                    KNullDesC8));
+                                    KNullDesC8,
+                                    TTime()));
     mStorage.DeleteActivitiesL(*entry);
     CleanupStack::PopAndDestroy(entry);
 }

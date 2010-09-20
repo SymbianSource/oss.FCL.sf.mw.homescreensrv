@@ -27,12 +27,10 @@
 
 #include "aftask.h"
 #include "aftaskstorage.h"
-#include "tsgraphicfilescalinghandler.h"
 
 class CFbsBitmap;
 
-class CAfThumbnailTask : public CAfTask,
-                         public MImageReadyCallBack
+class CAfThumbnailTask : public CAfTask
 {
 public:
     ~CAfThumbnailTask();
@@ -45,18 +43,16 @@ private:
 
     void ConstructL();
 
-    void ImageReadyCallBack(TInt error, const CFbsBitmap *bitmap );
-
     const TDesC8& Data()const;
 
-    void BroadcastReceivedL(const RMessage2& );
+    void BroadcastReceivedL(const RMessage2&, TBool applicationUninstalled = EFalse);
 
     TBool IsSessionTask(const CSession2* session);
 
 private:
     MAfTaskStorage& mStorage; 
     const RMessage2 mMsg;
-    CBase* mService;
+    CFbsBitmap* mBitmap;
 };
 
 #endif // AFTHUMBNAILTASK_H

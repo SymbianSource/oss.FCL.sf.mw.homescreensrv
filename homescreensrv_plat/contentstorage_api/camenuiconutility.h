@@ -32,6 +32,11 @@ public:
     
     static HbIcon getEntryIcon(const CaEntry& entry,
             const QSizeF &size = QSizeF(50,80));
+    
+
+    
+    
+    
 };
 
 #endif // __CAMENUICONUTILITY_H__

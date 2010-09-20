@@ -314,8 +314,15 @@ void CCaSqlQuery::BindValuesForCustomSortL( const TInt aGroupId, const TInt aEnt
 void CCaSqlQuery::BindTextL( TInt aParameterIndex,
         const TDesC& aParameterValue )
     {
-    User::LeaveIfError( iStatement.BindText( aParameterIndex,
-            aParameterValue ) );
+    if( aParameterValue.Length() )
+        {
+        User::LeaveIfError( iStatement.BindText( aParameterIndex, 
+                aParameterValue ) );
+        }
+    else
+        {
+        User::LeaveIfError( iStatement.BindNull( aParameterIndex) );
+        }
     }
 
 // ---------------------------------------------------------------------------

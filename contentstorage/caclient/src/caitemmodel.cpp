@@ -477,6 +477,9 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
         case CaItemModel::TextRole:
             variant = QVariant(pEntry->text());
             break;
+        case CaItemModel::DescriptionRole:
+            variant = QVariant(pEntry->description());
+            break;            
         case CaItemModel::FullTextRole:
             variant = QVariant(pEntry->text() + QString(" ") + pEntry->description());
             break;

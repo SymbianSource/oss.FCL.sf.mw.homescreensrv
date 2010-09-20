@@ -16,7 +16,7 @@
 
 TEMPLATE = lib
 CONFIG += hb plugin mobility
-MOBILITY = serviceframework publishsubscribe
+MOBILITY = publishsubscribe
 
 include (../common.pri)
 
@@ -24,8 +24,6 @@ HEADERS +=  inc/tsdevicedialogcontainer.h \
             inc/tsdevicedialogplugin.h \
             inc/tsmodel.h \
             inc/tsmodelitem.h \
-            inc/tsentrymodelitem.h \
-            inc/tsactivitymodelitem.h \
             inc/tstasksgrid.h \
             inc/tstasksgriditem.h \
             inc/tsdocumentloader.h \
@@ -35,8 +33,7 @@ HEADERS +=  inc/tsdevicedialogcontainer.h \
 SOURCES +=  src/tsdevicedialogcontainer.cpp \
             src/tsdevicedialogplugin.cpp \
             src/tsmodel.cpp \
-            src/tsentrymodelitem.cpp \
-            src/tsactivitymodelitem.cpp \
+            src/tsmodelitem.cpp \
             src/tstasksgrid.cpp \
             src/tstasksgriditem.cpp \
             src/tsdocumentloader.cpp \
@@ -52,14 +49,14 @@ TRANSLATIONS = taskswitcher.ts
 
 RESOURCES += tsdevicedialogplugin.qrc
                
+DOCML += resource/layout.docml
+               
 symbian {
     TARGET.CAPABILITY = CAP_ECOM_PLUGIN
     TARGET.UID3 = 0x2002677F
     pluginstub.sources = tsdevicedialogplugin.dll
     pluginstub.path = /resource/plugins/devicedialogs
     DEPLOYMENT += pluginstub
-    
-    LIBS += -lxqsettingsmanager
     
     BLD_INF_RULES.prj_exports += \
     "$${LITERAL_HASH}include <platform_paths.hrh>" \

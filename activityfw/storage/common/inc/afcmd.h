@@ -28,9 +28,7 @@ const TInt KResponseDataOffset(1);
 
 
 enum ActivityCmd {
-    AddActivity =0,
-    UpdateActivity,
-    RemoveActivity,
+    RemoveActivity=0,
     RemoveApplicationActivities,
     Activities,
     ApplicationActivities,

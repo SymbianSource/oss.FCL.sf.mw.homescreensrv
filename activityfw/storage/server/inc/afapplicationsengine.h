@@ -19,26 +19,32 @@
 
 #include <e32base.h>
 #include "afstorage.h"
+#include "afapplicationsobserver.h"
 
 class RApaLsSession;
 class CAfApplicationsCollection;
 class CAfApplicationsStorage;
 class CAfApplicationsMonitor;
+class MAfTaskStorage;
 
-class CAfApplicationsEngine: public CBase
+class CAfApplicationsEngine: public CBase, public MAfApplicationsObserver
 {
 public:
-    static CAfApplicationsEngine* NewL(RApaLsSession& serviceProvider, CAfStorage& storage);
+    static CAfApplicationsEngine* NewL(RApaLsSession& serviceProvider, CAfStorage& storage, MAfTaskStorage& taskStorage);
     ~CAfApplicationsEngine();
 
 private:
-    CAfApplicationsEngine();
-    void ConstructL(CAfStorage& storage, RApaLsSession& serviceProvider);
+    CAfApplicationsEngine(MAfTaskStorage& taskStorage);
+    void ConstructL(RApaLsSession& serviceProvider, CAfStorage& storage);
+
+public: // from MAfApplicationsObserver
+    virtual void applicationsChanged();	
 
 private:
     CAfApplicationsCollection *mCollection;
     CAfApplicationsMonitor *mMonitor;
     CAfApplicationsStorage *mStorage;
+    MAfTaskStorage& mTaskStorage;
 };
 
 #endif //AFAPPLICATIONSENGINE_H

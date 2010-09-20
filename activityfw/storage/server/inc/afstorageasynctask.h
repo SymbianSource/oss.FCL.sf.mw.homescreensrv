@@ -36,7 +36,7 @@ public:
 
     const TDesC8& Data() const;
 
-    void BroadcastReceivedL(const RMessage2 &);
+    void BroadcastReceivedL(const RMessage2 &, TBool applicationUninstalled = EFalse);
 
 private:
     CAfStorageAsyncTask();

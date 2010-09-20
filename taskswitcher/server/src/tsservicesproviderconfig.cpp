@@ -20,16 +20,18 @@
 
 const char ServicesInterface [] = "com.nokia.qt.taskswitcher.dataprovider";
 // -----------------------------------------------------------------------------
-CTsServiceProviderConfig* CTsServiceProviderConfig::NewLC()
+CTsServiceProviderConfig* CTsServiceProviderConfig::NewLC(QObject* aEnv)
     {
-    CTsServiceProviderConfig *self = new (ELeave)CTsServiceProviderConfig();
+    CTsServiceProviderConfig *self = new (ELeave)CTsServiceProviderConfig(aEnv);
     CleanupStack::PushL(self);
     self->ConstructL();
     return self;
     }
 
 // -----------------------------------------------------------------------------
-CTsServiceProviderConfig::CTsServiceProviderConfig()
+CTsServiceProviderConfig::CTsServiceProviderConfig(QObject* aEnv)
+:
+        iEnv(aEnv)
 {
     //No implementation required
 }
@@ -81,5 +83,15 @@ QObject* CTsServiceProviderConfig::LoadL(TInt aOffset)const
     QTM_NAMESPACE::QServiceManager serviceManager;
     retVal = serviceManager.loadInterface(*service); )
     User::LeaveIfNull( retVal );
+    QObject::connect(retVal, 
+                     SIGNAL(createThumbnail(QPixmap,int,const void*)),
+                     iEnv,
+                     SLOT(createThumbnail(QPixmap,int,const void*)));
+    
+    QObject::connect(iEnv, 
+                     SIGNAL(thumbnailCreated(QPixmap, const void*)),
+                     retVal,
+                     SLOT(thumbnailCreated(QPixmap, const void*)));
+
     return retVal;
     }

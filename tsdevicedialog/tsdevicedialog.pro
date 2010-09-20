@@ -18,7 +18,6 @@ TEMPLATE = subdirs
 
 coverage {
     SUBDIRS += ../homescreensrv_plat
-    SUBDIRS += ../utils
     SUBDIRS += ../activityfw
     SUBDIRS += ../hsappkeyhandler
     SUBDIRS += ../taskswitcher
@@ -38,7 +37,6 @@ tests {
     SUBDIRS += ../taskswitcher/client/tsrc
     SUBDIRS += ../taskswitcher/server/tsrc
     SUBDIRS += ../taskswitcher/screenshotplugin/tsrc
-    SUBDIRS += ../utils/tsimageutils/tsrc
     SUBDIRS += ../taskswitcher/utils/tsrc
     SUBDIRS += ../taskswitcher/backstepping/tsrc
 }

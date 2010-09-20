@@ -16,18 +16,21 @@
  */
 
 #define __E32SVR_H__
+
 #include <s32strm.h>
 #include <fbs.h>
+
 #include "tsentry.h"
 #include "tsdataobserver.h"
+#include "tsthumbnailprovider.h"
 
 // --------------------------------------------------------------------------
 // CTsFswEntry::NewL
 // --------------------------------------------------------------------------
 //
-CTsEntry* CTsEntry::NewL(const TTsEntryKey &key, MTsDataObserver &observer)
+CTsEntry* CTsEntry::NewL(const TTsEntryKey &key, MTsDataObserver &observer, QObject* obj)
 {
-    CTsEntry* self = NewLC(key, observer);
+    CTsEntry* self = NewLC(key, observer, obj);
     CleanupStack::Pop(self);
     return self;
 }
@@ -36,10 +39,11 @@ CTsEntry* CTsEntry::NewL(const TTsEntryKey &key, MTsDataObserver &observer)
 // CTsFswEntry::NewLC
 // --------------------------------------------------------------------------
 //
-CTsEntry* CTsEntry::NewLC(const TTsEntryKey &key, MTsDataObserver &observer)
+CTsEntry* CTsEntry::NewLC(const TTsEntryKey &key, MTsDataObserver &observer, QObject* obj)
 {
     CTsEntry* self = new (ELeave) CTsEntry(key, observer);
     CleanupStack::PushL(self);
+    self->ConstructL(obj);
     return self;
 }
 
@@ -52,7 +56,7 @@ CTsEntry::~CTsEntry()
     delete mAppName;
     delete mAppIconBitmap;
     delete mScreenshot;
-    delete mImgTool;
+    delete iProvider;
 }
 
 // --------------------------------------------------------------------------
@@ -67,6 +71,15 @@ CTsEntry::CTsEntry(const TTsEntryKey &key, MTsDataObserver &observer)
     mObserver(observer)
 {
     RefreshUpdateTimestamp();
+}
+
+// --------------------------------------------------------------------------
+void CTsEntry::ConstructL(QObject* object)
+{
+    QT_TRYCATCH_LEAVING(
+       iProvider = new TsThumbnailProvider(*this, object);
+    )
+    
 }
 
 // --------------------------------------------------------------------------
@@ -222,11 +235,7 @@ void CTsEntry::SetScreenshotL(const CFbsBitmap &bitmapArg, UpdatePriority priori
     mScreenshot = bitmap;
     RefreshUpdateTimestamp();
 
-    delete mImgTool;
-    mImgTool = 0;
-
-    mImgTool = CTsGraphicFileScalingHandler::NewL(*this, *mScreenshot, TSize(128, 128),
-    CTsGraphicFileScalingHandler::EKeepAspectRatioByExpanding, angle);
+    iProvider->createThumbnail( *mScreenshot, angle);
 }
 
 // --------------------------------------------------------------------------
@@ -256,17 +265,15 @@ CFbsBitmap* CTsEntry::Screenshot() const
 }
 
 // --------------------------------------------------------------------------
-// CTsFswEntry::Priority
+// CTsFswEntry::thumbnailCreated
 // --------------------------------------------------------------------------
 //
-void CTsEntry::ImageReadyCallBack(TInt error, const CFbsBitmap *bitmap)
+void CTsEntry::thumbnailCreated(const CFbsBitmap& aThumbnail)
 {
-    if (KErrNone == error && 0 != bitmap) {
-        mScreenshot->Reset();
-        mScreenshot->Duplicate(bitmap->Handle());
-        RefreshUpdateTimestamp();
-        mObserver.DataChanged();
-    }
+    mScreenshot->Reset();
+    mScreenshot->Duplicate(aThumbnail.Handle());
+    RefreshUpdateTimestamp();
+    mObserver.DataChanged();
 }
 
 // end of file

@@ -28,7 +28,6 @@ class CAfThumbnailRequestPrivate : public CActive
 public:
     static void NewLD(MAfAsyncRequestObserver &observer, 
                       MAfAsyncSession & session,
-                      TSize resolution,
                       const TDesC& source,
                       TAny* userData);
 
@@ -46,7 +45,7 @@ private:
                                MAfAsyncSession &, 
                                TAny*);
 
-    void ConstructL(TSize resolution, const TDesC& source);
+    void ConstructL(const TDesC& source);
 
 private:
     MAfAsyncRequestObserver &mObserver;

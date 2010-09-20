@@ -17,11 +17,8 @@
 
 #ifndef TSBACKSTEPPINGFILTER_H
 #define TSBACKSTEPPINGFILTER_H
-
-#include <w32std.h>
-#include <tswindowgroupsobserver.h>
-
-
+#include <e32base.h>
+class CTsIdList;
 NONSHARABLE_CLASS(CTsBacksteppingFilter) : public CBase
     {
 public:
@@ -34,7 +31,7 @@ private:
     void ConstructL();
 
 private:
-    RArray<TUid> iBlockedApps;
+    CTsIdList* iBlockedApps;
 
     };
 

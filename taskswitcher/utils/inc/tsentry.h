@@ -20,14 +20,18 @@
 
 #include <e32base.h>
 #include <e32cmn.h>
-#include <tsgraphicfilescalinghandler.h>
 
 #include "tsentrykey.h"
 #include "tstaskmonitorglobals.h"
+#include "tsthumbnailobserver.h"
 
 class CTsEntry;
 class CFbsBitmap;
+class QObject;
 class MTsDataObserver;
+class TsThumbnailProvider;
+
+
 
 typedef RPointerArray<CTsEntry> RTsFswArray;
 
@@ -35,11 +39,11 @@ typedef RPointerArray<CTsEntry> RTsFswArray;
  * An entry in the task list.
  */
 NONSHARABLE_CLASS( CTsEntry ) : public CBase,
-                                private MImageReadyCallBack
+                                private MTsThumbnailObserver
 {
 public:
-    static CTsEntry *NewL(const TTsEntryKey &key, MTsDataObserver &observer);
-    static CTsEntry *NewLC(const TTsEntryKey &key, MTsDataObserver &observer);
+    static CTsEntry *NewL(const TTsEntryKey &key, MTsDataObserver &observer, QObject* obj);
+    static CTsEntry *NewLC(const TTsEntryKey &key, MTsDataObserver &observer, QObject* obj);
     ~CTsEntry();
 
 public:
@@ -64,10 +68,10 @@ public:
     void RefreshUpdateTimestamp();
 
 private:
-    CTsEntry(const TTsEntryKey &aKey, MTsDataObserver &observer);    
-    
-public: // from MImageReadyCallBack
-    void ImageReadyCallBack(TInt error, const CFbsBitmap *bitmap);
+    CTsEntry(const TTsEntryKey &aKey, MTsDataObserver &observer);
+    void ConstructL(QObject* object);
+public:
+    void thumbnailCreated(const CFbsBitmap& aThumbnail);
 
 private:
     TUid mAppUid;
@@ -80,13 +84,10 @@ private:
     UpdatePriority mPriority;
     TTime mTimestamp;
     TTime mUpdateTimestamp;
-    
-private:     
-    CTsGraphicFileScalingHandler *mImgTool;
-
-private:    
+    TsThumbnailProvider* iProvider;
+private:
     MTsDataObserver &mObserver;
-    
+
 };
 
 #endif

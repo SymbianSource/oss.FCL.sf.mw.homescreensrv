@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
  * All rights reserved.
  * This component and the accompanying materials are made available
@@ -22,7 +22,6 @@
 
 #include "cawidgetscannerplugin.h"
 #include "cawidgetstoragehandler.h"
-#include "cawidgetscannerinstallnotifier.h"
 
 // Function used to return an instance of the proxy table.
 const TImplementationProxy ImplementationTable[] =
@@ -34,11 +33,11 @@ const TImplementationProxy ImplementationTable[] =
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT (proxy for instantiation)
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
-EXPORT_C const TImplementationProxy*
-ImplementationGroupProxy( TInt& aTableCount )
+EXPORT_C const TImplementationProxy* ImplementationGroupProxy(
+            TInt& aTableCount )
     {
     aTableCount = sizeof( ImplementationTable ) / sizeof(TImplementationProxy);
     return ImplementationTable;
@@ -50,7 +49,7 @@ ImplementationGroupProxy( TInt& aTableCount )
 // ============================ MEMBER FUNCTIONS ===============================
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
 CCaWidgetScannerPlugin::CCaWidgetScannerPlugin()
@@ -58,23 +57,23 @@ CCaWidgetScannerPlugin::CCaWidgetScannerPlugin()
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
 void CCaWidgetScannerPlugin::ConstructL( TPluginParams* aPluginParams )
     {
     User::LeaveIfError( iFs.Connect() );
     iMmcWatcher = CCaMmcWatcher::NewL( iFs, this );
-    iInstallNotifier = CCaWidgetScannerInstallNotifier::NewL( this,
-            KUidSystemCategory, KSAUidSoftwareInstallKeyValue );
+    iInstallNotifier = CCaInstallNotifier::NewL( *this, 
+            CCaInstallNotifier::ESisInstallNotification );
     iStorageHandler = CCaWidgetStorageHandler::NewL(
             aPluginParams->storageProxy,
-			*aPluginParams->softwareRegistry, iFs );
+            *aPluginParams->softwareRegistry, iFs );
     SynchronizeL();
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
 CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewL(
@@ -86,7 +85,7 @@ CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewL(
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
 CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewLC(
@@ -99,14 +98,14 @@ CCaWidgetScannerPlugin * CCaWidgetScannerPlugin::NewLC(
     }
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 //
 CCaWidgetScannerPlugin::~CCaWidgetScannerPlugin()
     {
-    delete iMmcWatcher;
-    delete iInstallNotifier;
     delete iStorageHandler;
+    delete iInstallNotifier;
+    delete iMmcWatcher;
     iFs.Close();
     }
 
@@ -119,6 +118,15 @@ void CCaWidgetScannerPlugin::SynchronizeL()
     iStorageHandler->SynchronizeL();
     }
 
+
+// ----------------------------------------------------------------------------
+//
+// ----------------------------------------------------------------------------
+//
+void CCaWidgetScannerPlugin::HandleInstallNotifyL()
+    {
+    SynchronizeL();
+    }
 // ----------------------------------------------------------------------------
 //
 // ----------------------------------------------------------------------------

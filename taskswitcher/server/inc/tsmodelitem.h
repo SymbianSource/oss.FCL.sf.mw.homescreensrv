@@ -35,6 +35,7 @@ public:
     TBool IsClosableL() const;
     TBool CloseL() const;
     TBool LaunchL() const;
+    TBool IsMandatoryL() const;
     
 public:
     void ExternalizeL( RWriteStream& aStream ) const;

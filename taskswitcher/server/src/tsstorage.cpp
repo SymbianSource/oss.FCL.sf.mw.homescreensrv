@@ -17,6 +17,8 @@
 #include <tstaskmonitorglobals.h>
 #include "tsstorage.h"
 #include "tsmodelitemkeymsg.h"
+
+const TInt KTsDataLimit(10);
 // -----------------------------------------------------------------------------
 /**
  * Two phase construction. Create and initialize storage instance.
@@ -199,6 +201,16 @@ TBool CTsStorage::IsClosableL( TInt aOffset ) const
 // -----------------------------------------------------------------------------
 /**
  * Interface implementation
+ * @see MTsModel::IsMandatoryL(TInt) const
+ */
+TBool CTsStorage::IsMandatoryL( TInt aOffset ) const
+    {
+    return iData[aOffset].IsMandatoryL();
+    }
+
+// -----------------------------------------------------------------------------
+/**
+ * Interface implementation
  * @see MTsModel::CloseL(TTsModelItemKey)
  */
 TBool CTsStorage::CloseL( TTsModelItemKey aKey ) const 
@@ -282,7 +294,8 @@ void CTsStorage::ReorderDataL()
         for( TInt next(prev + 1); next < iData.Count(); ++next )
             {
             const TTsModelItem prevItem(iData[prev]), nextItem(iData[next]);
-            if( prevItem.TimestampL() < nextItem.TimestampL() )
+            if( ( !prevItem.IsMandatoryL() && nextItem.IsMandatoryL() ) ||
+                ( prevItem.TimestampL() < nextItem.TimestampL() && prevItem.IsMandatoryL() == nextItem.IsMandatoryL() ) )
                 {
                 iData.Remove(prev);
                 iData.InsertL(nextItem, prev);
@@ -291,5 +304,17 @@ void CTsStorage::ReorderDataL()
                 iData.InsertL(prevItem, next);
                 }
             }
+        }
+    TrimDataL();
+    }
+
+// -----------------------------------------------------------------------------
+void CTsStorage::TrimDataL()
+    {
+    const TInt lastItemOffset(iData.Count() -1);
+    if(KTsDataLimit <= lastItemOffset && !iData[lastItemOffset].IsMandatoryL())
+        {
+        iData.Remove(lastItemOffset);
+        TrimDataL();
         }
     }

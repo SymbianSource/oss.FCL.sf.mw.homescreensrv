@@ -33,13 +33,12 @@
  */
 void CAfThumbnailRequestPrivate::NewLD(MAfAsyncRequestObserver &observer, 
                                        MAfAsyncSession & session,
-                                       TSize resolution, 
                                        const TDesC& source,
                                        TAny* userData)
 {
     CAfThumbnailRequestPrivate* self = new(ELeave)CAfThumbnailRequestPrivate(observer, session, userData);
     CleanupStack::PushL(self);
-    self->ConstructL(resolution, source);
+    self->ConstructL(source);
     session.PushL(self);
     CleanupStack::Pop(self);
 }
@@ -66,13 +65,12 @@ mUserData(userData)
 // -----------------------------------------------------------------------------
 /**
  * Second phase constructor
- * @param resolution - requested thumbnail resolution
  * @param source - thumbnail source location
  */
-void CAfThumbnailRequestPrivate::ConstructL(TSize resolution, const TDesC& source)
+void CAfThumbnailRequestPrivate::ConstructL(const TDesC& source)
 {
-    mIds[0] = resolution.iWidth;
-    mIds[1] = resolution.iHeight;
+    mIds[0] = 0;
+    mIds[1] = 0;
     CAfEntry::CopyL(mImgSrc, source);
     mSession.sendAsync(GetThumbnail, 
                        TIpcArgs(&mIds[0],&mIds[1], &mImgSrc),

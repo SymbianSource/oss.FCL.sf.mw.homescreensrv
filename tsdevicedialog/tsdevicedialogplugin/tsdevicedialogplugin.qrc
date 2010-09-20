@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>resource/layout.docml</file>
+        <file alias="resource/layout.docml">resource/layout.docml.bin</file>
         <file>resource/tstasksgriditem.widgetml</file>
         <file>resource/tstasksgriditem.css</file>        
         <file>resource/hbdialog.css</file>        

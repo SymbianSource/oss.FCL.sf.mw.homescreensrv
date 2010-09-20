@@ -34,14 +34,12 @@ class TsModel : public QAbstractListModel
 
 public:
     TsModel(TsTaskMonitor &applicationSrv,
-            QObject &activitySrv,
             QObject *parent = 0);
     ~TsModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index,
                   int role = Qt::DisplayRole) const;
-    int maxRowCount()const;
     // from QAbstractModel
     virtual bool insertRows(int row, int count, TsModelItem *item,
                             const QModelIndex &parent = QModelIndex());
@@ -58,12 +56,10 @@ public slots:
     void openApplication(const QModelIndex &index);
     void closeApplication(const QModelIndex &index);
     void updateApplications();
-    void updateActivities();
-    void entryChanged(TsModelItem *);
+    
 private:
     TsModelItem *entry(const QModelIndex &index) const;
     void getApplications();
-    void getActivities(bool fullUpdate = true);
 
 private:
     /*
@@ -72,17 +68,6 @@ private:
     QList<TsModelItem *> mEntries;
 
     TsTaskMonitor &mApplicationService;
-
-    /*
-     * Activity Service
-     */
-    QObject &mActivityService;
-
-    /*
-     * Maximum number of items (only for running apps + activities)
-     */
-    int mMaxItems;
-    int mActivitiesCount;
 
     Q_DISABLE_COPY(TsModel)
 };

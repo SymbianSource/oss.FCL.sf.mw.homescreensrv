@@ -42,9 +42,8 @@ public:
                   const CAfEntry& templateEntry,
                   TInt limit);
     
-    void getThumbnailL(TSize size, 
-                      const TDesC& source,
-                      TAny *userData );
+    void getThumbnailL(const TDesC& source,
+                       TAny *userData );
 
     void connectL();
 

@@ -58,7 +58,7 @@
 			</setting>
 			<setting ref="Application" name="Application" type="string" relevant="Type='1'" required="true">
 				<desc>Application item for Operator collection.</desc>
-				<xs:pattern value="^[-+]?[0-9]{1,10}"/>
+				<xs:pattern value="^0x[0-9a-fA-F]{1,8}$"/>
 				<!-- option map="DFSFeatures/Application"/>
 				<option map="CIA_PreinstalledContent/PreInstalledJavaRom"/>
 				<option map="CIA_PreinstalledContent/PreInstalledSymbianROM"/>
@@ -139,7 +139,7 @@
 			</setting>
 			<setting ref="Application" name="Application" type="string" relevant="Type='1'" required="true">
 				<desc>Application item for Operator collection.</desc>
-				<xs:pattern value="^[-+]?[0-9]{1,10}"/>
+				<xs:pattern value="^0x[0-9a-fA-F]{1,8}$"/>
 				<!-- option map="DFSFeatures/Application"/>
 				<option map="CIA_PreinstalledContent/PreInstalledJavaRom"/>
 				<option map="CIA_PreinstalledContent/PreInstalledSymbianROM"/>

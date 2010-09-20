@@ -29,7 +29,8 @@ INCLUDEPATH +=  inc \
                 ../utils/inc \
                 ../backstepping/inc \
                 
-SOURCES +=  src/tsdataobservertask.cpp \
+SOURCES +=  src/tsenv.cpp \
+            src/tsdataobservertask.cpp \
             src/tsdataprovidertask.cpp \
             src/tsrunningappserver.cpp \
             src/tsrunningappsession.cpp \
@@ -48,17 +49,22 @@ SOURCES +=  src/tsdataobservertask.cpp \
             src/tsservicesproviderconfig.cpp \
             src/tsserviceobserver.cpp \
             src/tsmodelitemkeymsg.cpp \
+            src/tswindowgroupsmonitor.cpp \
+            src/tsrunningapp.cpp \
+            src/tsrunningappstorage.cpp \
             ../utils/src/tsentrykey.cpp \
             ../utils/src/tsentrykeygenerator.cpp \
             ../utils/src/tsentry.cpp \
             ../utils/src/tsscreenshotmsg.cpp \
             ../utils/src/tsunregscreenshotmsg.cpp \
             ../utils/src/tsvisibilitymsg.cpp \
-            ../utils/src/tswindowgroupsmonitor.cpp \
             ../utils/src/tswindowgroupsobserver.cpp \
             ../utils/src/tsresourcemanager.cpp \
+            ../utils/src/tsthumbnailprovider.cpp \
+            ../utils/src/tsidlist.cpp \
             
-HEADERS +=  inc/tsdataobservertask.h \
+HEADERS +=  inc/tsenv.h \
+            inc/tsdataobservertask.h \
             inc/tsdataprovider.h \
             inc/tsdataprovidertask.h \
             inc/tsrunningappserver.h \
@@ -79,6 +85,9 @@ HEADERS +=  inc/tsdataobservertask.h \
             inc/tsservicesproviderconfig.h \
             inc/tsserviceobserver.h \
             inc/tsmodelitemkeymsg.h \
+            inc/tswindowgroupsmonitor.h \
+            inc/tsrunningapp.h \
+            inc/tsrunningappstorage.h \
             ../utils/inc/tsdataobserver.h \
             ../utils/inc/tsentry.h \
             ../utils/inc/tsentrykey.h \
@@ -89,6 +98,9 @@ HEADERS +=  inc/tsdataobservertask.h \
             ../utils/inc/tsvisibilitymsg.h \
             ../utils/inc/tsresourcemanager.h \
             ../utils/inc/tswindowgroupsobserver.h \
+            ../utils/inc/tsthumbnailprovider.h \
+            ../utils/inc/tsthumbnailobserver.h \
+            ../utils/inc/tsidlist.h \
 
 LIBS += -lxqutils \
         -ltsbackstepping \
@@ -102,13 +114,6 @@ LIBS += -lxqutils \
         -lcaclient \        #for getApplicationIcon
         -lcone
 
-# tsimageutils and its dependencies
-LIBS += -ltsimageutils.lib \
-        -lbitmaptransforms \
-        -limageconversion \
-        -lefsrv \
-        
-        
 symbian {
     TARGET.UID3 = 0x200267B0
     TARGET.CAPABILITY = All -TCB

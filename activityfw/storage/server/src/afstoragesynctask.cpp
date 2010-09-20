@@ -35,12 +35,6 @@ void AfStorageSyncTask::ExecuteL(MAfTaskStorage& observers,
                                  const RMessage2& msg)
 {
     switch (msg.Function()) {
-    case AddActivity: 
-        AddActivityL(dataStorage, msg);
-        break;
-    case UpdateActivity:
-        UpdateActivityL(dataStorage, msg);
-        break;
     case SaveActivity:
         SaveActivityL(dataStorage, msg);
         break;        
@@ -59,64 +53,6 @@ void AfStorageSyncTask::ExecuteL(MAfTaskStorage& observers,
         msg.Complete(KErrNone);
     }
     NotifyChangeL(observers, msg);
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Handle adding new activity.
- * @param dataStorage - data storage
- * @param msg - request message
- */
-void AfStorageSyncTask::AddActivityL(CAfStorage& dataStorage, 
-                                     const RMessage2& msg)
-{
-    //Read message and bitmap handle
-    TPckgBuf<TInt> bitmapHdl(0);
-    CAfEntry *entry = CAfEntry::NewLC(msg);
-    msg.ReadL(1, bitmapHdl);
-    
-    RBuf thumbnailPath;
-    CleanupClosePushL(thumbnailPath);
-    dataStorage.ThumbnailPathL(thumbnailPath, 
-                   dataStorage.Fs(), 
-                   entry->ApplicationId(), 
-                   entry->ActivityId(),
-                   entry->Flags() & CAfEntry::Persistent);
-    CreateThumbnailL(thumbnailPath, bitmapHdl());
-    entry->SetImageSrcL(thumbnailPath);
-    dataStorage.AddActivityL(*entry);
-    CleanupStack::PopAndDestroy(&thumbnailPath);
-    CleanupStack::PopAndDestroy(entry);
-}
-
-// -----------------------------------------------------------------------------
-/**
- * Handle updating existing activiy
- * @param dataStorage - data storage
- * @param msg - request message
- */
-void AfStorageSyncTask::UpdateActivityL(CAfStorage& dataStorage, 
-                                        const RMessage2& msg)
-{
-    TPckgBuf<TInt> bitmapHdl(0);
-    CAfEntry *entry = CAfEntry::NewLC(msg);
-    msg.ReadL(1, bitmapHdl);
-        
-    RBuf thumbnailPath;
-    CleanupClosePushL(thumbnailPath);
-    DeleteActivityScreenshotL(dataStorage, 
-                    entry->ApplicationId(), 
-                    entry->ActivityId());
-    dataStorage.ThumbnailPathL(thumbnailPath, 
-                   dataStorage.Fs(), 
-                   entry->ApplicationId(), 
-                   entry->ActivityId(),
-                   entry->Flags() & CAfEntry::Persistent);
-    CreateThumbnailL(thumbnailPath, bitmapHdl());
-    entry->SetImageSrcL(thumbnailPath);
-    dataStorage.UpdateActivityL(*entry);
-    CleanupStack::PopAndDestroy(&thumbnailPath);
-    CleanupStack::PopAndDestroy(entry);
 }
 
 // -----------------------------------------------------------------------------

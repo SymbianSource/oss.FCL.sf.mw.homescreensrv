@@ -29,6 +29,7 @@
 #include "cainnerquery.h"
 #include "cainnerentry.h"
 #include "casqlcommands.h"
+#include "cautils.h"
 
 
 
@@ -174,45 +175,10 @@ HBufC* CCaLocalizerScannerProxy::GetLocalizedNameLC(
     {
 	if( iRecentQmFile.Compare( aLocEntry->GetQmFilename() ) )
 		{
-	    
-	       if( !HbTextResolverSymbian::Init( aLocEntry->GetQmFilename(), KLocalizationFilepathC ) )
-	          {
-	          if( !HbTextResolverSymbian::Init( aLocEntry->GetQmFilename(), KLocalizationFilepathZ ) )
-	              {
-	              // this should not be called too often 
-	              TChar currentDriveLetter;
-	              TDriveList driveList;
-	              RFs fs;
-	              User::LeaveIfError( fs.Connect() );
-	              User::LeaveIfError( fs.DriveList( driveList ) );
-
-	              RBuf path;
-	              path.Create( KLocalizationFilepath().Length() + 1 );
-	              CleanupClosePushL( path );
-	              
-	              for ( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
-	                  {
-	                  if ( driveList[driveNr] )
-	                      {
-	                      User::LeaveIfError( fs.DriveToChar( driveNr,
-	                              currentDriveLetter ) );
-	                      path.Append( currentDriveLetter );
-	                      path.Append( KLocalizationFilepath );
-	                      if( HbTextResolverSymbian::Init( aLocEntry->GetQmFilename(), path ) )
-	                          {
-	                          break;
-	                          }
-	                      }
-	                  path.Zero();
-	                  }
-	              CleanupStack::PopAndDestroy( &path );
-	              fs.Close();
-	              }
-	           }
-	    
+		MenuUtils::InitTextResolverSymbianL(aLocEntry->GetQmFilename());
         // keeping last qm filename to avoid another initialization
 	    iRecentQmFile.Close();
-	    iRecentQmFile.Create( aLocEntry->GetQmFilename().Length() );
+	    iRecentQmFile.CreateL( aLocEntry->GetQmFilename().Length() );
 	    iRecentQmFile.Copy( aLocEntry->GetQmFilename() );
 		}
 	return HbTextResolverSymbian::LoadLC( aLocEntry->GetStringId() );
