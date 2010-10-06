@@ -47,3 +47,6 @@ symbian: {
 
 
 include(tapp.pri)
+
+
+symbian:MMP_RULES += SMPSAFE

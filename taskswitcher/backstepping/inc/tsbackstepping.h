@@ -19,11 +19,11 @@
 #define __CBACKSTEPPING_H
 
 #include <w32std.h>
-#include <tswindowgroupsobserver.h>
+#include "tswindowgroupsobserverbase.h"
 
 class CTsBacksteppingFilter;
 
-NONSHARABLE_CLASS(CTsBackstepping) : public CTsWindowGroupsObserver
+NONSHARABLE_CLASS(CTsBackstepping) : public CTsWindowGroupsObserverBase
 {
 public:
     static CTsBackstepping* NewL( MTsWindowGroupsMonitor& );

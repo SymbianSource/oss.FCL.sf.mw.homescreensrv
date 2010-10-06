@@ -21,18 +21,21 @@
 #include "tsservicesproviderconfig.h"
 
 class CTsService;
+class MTsResourceManager;
 
 class CTsServiceProvider: public CBase
 {
 public:
-    static CTsServiceProvider* NewL( const CTsServiceProviderConfig& aConfig );
+    static CTsServiceProvider* NewL( MTsResourceManager& aResources, 
+                                     const CTsServiceProviderConfig& aConfig );
     ~CTsServiceProvider();
     MTsModel& operator[]( TInt aOffset ) const;
     TInt Count() const;
 
 private:
     CTsServiceProvider();
-    void Construct( const CTsServiceProviderConfig& aConfig );
+    void Construct( MTsResourceManager& aResources,
+                    const CTsServiceProviderConfig& aConfig );
 
 private:
     RPointerArray<CTsService> iServices;

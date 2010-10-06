@@ -46,6 +46,9 @@ ActivityTsEntry::ActivityTsEntry(const QVariantHash &activityData) : mBitmap(0)
 
     mData.insert("TaskName", activityData.value(ActivityApplicationName));
     mData.insert("TaskScreenshot", -1);
+    
+    mData.insert(ActivityApplicationKeyword, activityData.value(ActivityApplicationKeyword));
+    mData.insert(ActivityActivityKeyword, activityData.value(ActivityActivityKeyword));
 }
 
 ActivityTsEntry::~ActivityTsEntry()

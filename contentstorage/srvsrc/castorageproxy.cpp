@@ -75,6 +75,7 @@ CCaStorageProxy* CCaStorageProxy::NewLC()
 //
 CCaStorageProxy::~CCaStorageProxy()
     {
+    iTitleUserColName.Close();
     delete iStorage;
     iHandlerNotifier.Close();
     }
@@ -87,6 +88,17 @@ EXPORT_C void CCaStorageProxy::GetEntriesL(const CCaInnerQuery* aQuery,
         RPointerArray<CCaInnerEntry>& aResultContainer )
     {
     iStorage->GetEntriesL( aQuery, aResultContainer );
+    if( aResultContainer.Count() == 1 
+            && aResultContainer[0]->
+            GetEntryTypeName().Compare( KCaTypeCollection ) == KErrNone )
+        {
+        TPtrC titleName;
+        if( !aResultContainer[0]->FindAttribute( KCaAttrTitleName, titleName ) )
+            {
+            AddTitleNameL( aResultContainer[0] );
+            }
+        }
+    
     }
 
 // ---------------------------------------------------------------------------
@@ -454,7 +466,7 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeTextL( CCaInnerEntry* aEntry )
     {
 	CCaLocalizationEntry* result = NULL;
 	TInt textLength = aEntry->GetText().Length();
-	if (textLength > 0)
+	if( textLength > 0 )
 		{
 		TChar delimiter = '/'; // cannot add it as global
 		RBuf title;
@@ -464,12 +476,14 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeTextL( CCaInnerEntry* aEntry )
 		if ( pos > 0 && pos + 1 < textLength )   // 1 is for delimiters
 			{
 			TPtrC16 logString = title.Mid( pos + 1 ); 
-			TInt qmFileNameLength = textLength - charsToFilename - 1 - logString.Length();
+			TInt qmFileNameLength = 
+			        textLength - charsToFilename - 1 - logString.Length();
 			TPtrC16 qmFile = title.Mid( charsToFilename, qmFileNameLength );
 			if ( InitializeTranslatorL( qmFile ) )
 				{
 			    result = CCaLocalizationEntry::NewLC();			
-				HBufC* translatedString = HbTextResolverSymbian::LoadLC( logString );
+				HBufC* translatedString = 
+				        HbTextResolverSymbian::LoadLC( logString );
 				if ( translatedString->Compare( logString ) )
 					{
 					result->SetStringIdL( logString );
@@ -505,7 +519,7 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeDescriptionL( CCaInnerEntry* aEnt
     {
 	CCaLocalizationEntry* result = NULL;
 	TInt dscLength = aEntry->GetDescription().Length();
-	if ( dscLength )
+	if( dscLength )
 		{
 		TChar delimiter = '/'; // cannot add it as global
 		RBuf description;
@@ -551,7 +565,32 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeDescriptionL( CCaInnerEntry* aEnt
 //
 // ---------------------------------------------------------
 //
-TBool CCaStorageProxy::InitializeTranslatorL( TDesC& aQmFilename )
+void CCaStorageProxy::AddTitleNameL( CCaInnerEntry* aEntry )
+    {
+    if( !iTitleUserColName.Length() )
+        {
+        if ( InitializeTranslatorL( KCaQmFile ) )
+            {
+            HBufC* translatedString = 
+                    HbTextResolverSymbian::LoadLC( KDefaultLocTitleName );
+            if ( translatedString->Compare( KDefaultLocTitleName ) )
+                {
+                iTitleUserColName.CreateL( *translatedString );
+                }
+            CleanupStack::PopAndDestroy( translatedString );
+            }
+        }
+    if( iTitleUserColName.Length() )
+        {
+        aEntry->AddAttributeL( KCaAttrTitleName, iTitleUserColName );
+        }
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TBool CCaStorageProxy::InitializeTranslatorL( const TDesC& aQmFilename )
     {
 	TBool result = HbTextResolverSymbian::Init( aQmFilename, KLocalizationFilepathC );
 	if ( !result )
@@ -560,6 +599,7 @@ TBool CCaStorageProxy::InitializeTranslatorL( TDesC& aQmFilename )
 		TChar currentDriveLetter;
 		TDriveList driveList;
 		RFs fs;
+		CleanupClosePushL( fs );
 		User::LeaveIfError( fs.Connect() );
 		User::LeaveIfError( fs.DriveList( driveList ) );
 
@@ -583,7 +623,7 @@ TBool CCaStorageProxy::InitializeTranslatorL( TDesC& aQmFilename )
 			path.Zero();
 			}
 		CleanupStack::PopAndDestroy( &path );
-		fs.Close();
+		CleanupStack::PopAndDestroy( &fs );
 		
 		if( !result )
 			{

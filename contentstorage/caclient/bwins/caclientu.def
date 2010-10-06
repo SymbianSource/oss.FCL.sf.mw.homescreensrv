@@ -197,4 +197,5 @@ EXPORTS
 	??_ECaService@@UAE@I@Z @ 196 NONAME ; CaService::~CaService(unsigned int)
 	?removeEntryFromGroup@CaService@@QBE_NHH@Z @ 197 NONAME ; bool CaService::removeEntryFromGroup(int, int) const
 	?index@CaItemModel@@UBE?AVQModelIndex@@HHABV2@@Z @ 198 NONAME ; class QModelIndex CaItemModel::index(int, int, class QModelIndex const &) const
+	?removeAttribute@CaEntry@@QAEXABVQString@@@Z @ 199 NONAME ; void CaEntry::removeAttribute(class QString const &)
 

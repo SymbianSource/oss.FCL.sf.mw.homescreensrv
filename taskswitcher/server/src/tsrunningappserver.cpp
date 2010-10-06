@@ -18,8 +18,9 @@
 #include "tstaskmonitorglobals.h"
 #include "tsrunningappserver.h"
 #include "tsrunningappsession.h"
+#include "tsresourcemanagerimp.h"
 #include "tsbacksteppingactivation.h"
-#include "tswindowgroupsmonitor.h"
+#include "tswindowgroupsmonitorimp.h"
 #include "tsmodel.h"
 #include "tsstorage.h"
 #include "tsservicesprovider.h"
@@ -48,7 +49,6 @@ CTsRunningAppServer::~CTsRunningAppServer()
     delete iAppsModel;
     delete iServiceProvider;
     delete iSerializer;
-    delete iMonitor;
     }
 
 // -----------------------------------------------------------------------------
@@ -71,18 +71,17 @@ void CTsRunningAppServer::ConstructL()
     {
     StartL(KRunningAppServerName);
     iResources = CTsResourceManager::NewL();
-    iMonitor = CTsWindowGroupsMonitor::NewL(*iResources);
     
     iSerializer = CTsSerializedDataProvider::NewL(*this);
     
     RPointerArray<MTsModel> providers;
     CleanupClosePushL(providers);
     
-    iAppsModel = CTsRunningAppModel::NewL(*iResources, *iMonitor, iEnv);
+    iAppsModel = CTsRunningAppModel::NewL(*iResources, iEnv);
     providers.AppendL(iAppsModel);
     
     CTsServiceProviderConfig *cfg = CTsServiceProviderConfig::NewLC(&iEnv);
-    iServiceProvider = CTsServiceProvider::NewL(*cfg);
+    iServiceProvider = CTsServiceProvider::NewL( *iResources, *cfg);
     CleanupStack::PopAndDestroy(cfg);
     addProviders(providers, *iServiceProvider);
 
@@ -93,7 +92,7 @@ void CTsRunningAppServer::ConstructL()
     // load initial data
     iStorage->DataChanged();
 
-    TRAP_IGNORE(iBacksteppingEngine = CTsBacksteppingActivation::NewL(*iMonitor);)
+    TRAP_IGNORE(iBacksteppingEngine = CTsBacksteppingActivation::NewL(iResources->WsMonitor());)
     }
 
 // -----------------------------------------------------------------------------

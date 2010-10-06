@@ -23,6 +23,8 @@
 #include "tsservice.h"
 #include "tsmodelobserver.h"
 #include "tsserviceobserver.h"
+#include "tsresourcemanager.h"
+
 
 // -----------------------------------------------------------------------------
 LOCAL_C QVariantHash valueL( QObject *aModel, TInt aOffset )
@@ -40,11 +42,11 @@ LOCAL_C QVariantHash valueL( QObject *aModel, TInt aOffset )
     }
 
 // -----------------------------------------------------------------------------
-CTsService* CTsService::NewLC(QObject* model)
+CTsService* CTsService::NewLC(MTsResourceManager& resources, QObject* model)
     {
     CTsService *self = new (ELeave)CTsService();
     CleanupStack::PushL(self);
-    self->ConstructL(model);
+    self->ConstructL(resources, model);
     return self;
     }
 
@@ -55,7 +57,7 @@ CTsService::CTsService()
     }
 
 // -----------------------------------------------------------------------------
-void CTsService::ConstructL( QObject* model )
+void CTsService::ConstructL( MTsResourceManager& resources, QObject* model )
     {
     iModel = model;
     User::LeaveIfNull(iModel);
@@ -67,6 +69,9 @@ void CTsService::ConstructL( QObject* model )
                      SIGNAL(dataChanged()),
                      iServiceObserver,
                      SLOT(dataChanged()));
+    QMetaObject::invokeMethod(iModel,
+                              "setResources",
+                              Q_ARG(MTsResourceManager&, resources));
     }
 
 // -----------------------------------------------------------------------------
@@ -146,7 +151,9 @@ TBool CTsService::IsClosableL( TInt aOffset ) const
 // -----------------------------------------------------------------------------
 TBool CTsService::IsMandatoryL( TInt aOffset ) const
     {
-    return IntValueL(aOffset, "TaskIsMandatory" );
+    const QVariantHash values(valueL(iModel, aOffset));
+    const QString key("TaskIsMandatory");
+    return values.contains(key) ? values.value(key).toInt() : ETrue;
     }
 
 // -----------------------------------------------------------------------------

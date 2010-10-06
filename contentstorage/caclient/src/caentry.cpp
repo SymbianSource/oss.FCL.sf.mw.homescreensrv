@@ -403,6 +403,27 @@ void CaEntry::setAttribute(const QString &name, const QString &value)
 }
 
 /*!
+ Removes attribute.
+ \param name name of an attribute.
+
+ \code
+ ...
+ QString attrName_1( "name_1" );
+ QString attrValue_1( "value_1" );
+ QString attrName_2( "name_2" );
+ QString attrValue_2( "value_2" );
+ resultEntry->setAttribute( attrName_1, attrValue_1 );
+ resultEntry->setAttribute( attrName_2, attrValue_2 );
+ resultEntry->removeAttribute( attrName_2 );
+
+ \endcode
+ */
+void CaEntry::removeAttribute(const QString &name)
+{
+    m_d->removeAttribute(name);
+}
+
+/*!
  Creates an icon.
  \param  size icon size to display
  \retval created icon (HbIcon).
@@ -640,6 +661,14 @@ void CaEntryPrivate::setAttribute(const QString &name, const QString &value)
     mAttributes.insert(name, value);
 }
 
+/*!
+ Removes attribute.
+ \param name name of an attribute.
+ */
+void CaEntryPrivate::removeAttribute(const QString &name)
+{
+    mAttributes.remove(name);
+}
 /*!
  Creates an icon.
  \param  size icon size to display

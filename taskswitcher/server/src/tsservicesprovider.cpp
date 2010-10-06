@@ -24,10 +24,11 @@
  * @return address to initialized services provider instance 
  */
 CTsServiceProvider* CTsServiceProvider::NewL( 
+                                       MTsResourceManager& aResources,
                                        const CTsServiceProviderConfig& aConfig )
     {
     CTsServiceProvider* self = new (ELeave)CTsServiceProvider();
-    self->Construct( aConfig );
+    self->Construct( aResources, aConfig );
     return self;
     }
 
@@ -46,12 +47,13 @@ CTsServiceProvider::CTsServiceProvider()
  * @param aConfig - serivces provider configurator
  * 
  */
-void CTsServiceProvider::Construct( const CTsServiceProviderConfig& aConfig )
+void CTsServiceProvider::Construct( MTsResourceManager& aResources, 
+                                    const CTsServiceProviderConfig& aConfig )
     {
     CTsService* srvPtr(0);
     for( TInt iter(0); iter < aConfig.Count(); ++iter ) 
         {
-        TRAP_IGNORE( srvPtr = CTsService::NewLC( aConfig.LoadL( iter ) );
+        TRAP_IGNORE( srvPtr = CTsService::NewLC(aResources, aConfig.LoadL( iter ) );
                      iServices.AppendL( srvPtr );
                      CleanupStack::Pop( srvPtr ); )
         }

@@ -214,4 +214,5 @@ EXPORTS
 	_ZTV21CaClientNotifierProxy @ 213 NONAME
 	_ZTV7CaEntry @ 214 NONAME
 	_ZTV9CaService @ 215 NONAME
+	_ZN7CaEntry15removeAttributeERK7QString @ 216 NONAME
 

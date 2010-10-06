@@ -25,7 +25,6 @@
 #include "tsenv.h"
 
 class CTsResourceManager;
-class CTsWindowGroupsMonitor;
 class MTsModel;
 class CTsRunningAppModel;
 class CTsStorage;
@@ -57,7 +56,6 @@ private:
 private:
     TsEnv iEnv;
     CTsResourceManager* iResources;
-    CTsWindowGroupsMonitor* iMonitor;
     CTsSerializedDataProvider* iSerializer;
     CTsStorage* iStorage; 
     CTsServiceProvider* iServiceProvider;

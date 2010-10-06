@@ -43,3 +43,6 @@ LIBRARY         camenu.lib
 LIBRARY         cautils.lib
 
 
+
+
+SMPSAFE

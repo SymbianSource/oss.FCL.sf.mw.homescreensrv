@@ -41,3 +41,7 @@
 "" - "Z:\sys\bin\activitytsplugin.dll"
 "" - "Z:\resource\qt\plugins\activitytsplugin.qtplugin"
 "" - "Z:\resource\taskswitcher\activitytsplugin.xml"
+
+""-"Z:\resource\qt\translations\taskswitcher.qm"
+""-"Z:\sys\bin\tsdevicedialogplugin.dll"
+""-"Z:\resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin"

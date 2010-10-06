@@ -45,3 +45,6 @@ LIBRARY        afstorageclient.lib
 STATICLIBRARY  afstoragecommon.lib
 
 DEBUGLIBRARY    flogger.lib
+
+
+SMPSAFE

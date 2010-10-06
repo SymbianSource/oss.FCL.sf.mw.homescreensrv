@@ -27,12 +27,16 @@
 #include <apgwgnam.h>
 #include <QSizeF>
 #include <camenuiconutility.h>
+#include <apgcli.h>
 
 #include "tsdatalist.h"
 #include "tsentrykeygenerator.h"
 #include "tsscreenshotmsg.h"
 #include "tsunregscreenshotmsg.h"
 #include "tsvisibilitymsg.h"
+#include "tsresourcemanager.h"
+#include "tsrunningapp.h"
+#include "tsrunningappstorage.h"
 
 // size for the created app icons
 const TInt KAppIconWidth = 128;
@@ -48,12 +52,10 @@ const TUid KHsApplicationUid = { 0x20022F35 };
  * Two-phased constructor.
  */
 CTsDataList* CTsDataList::NewL( MTsResourceManager& aResources,
-                                MTsWindowGroupsMonitor& aMonitor, 
                                 MTsDataObserver& aObserver,
                                 TsEnv& aEnv )
     {
     CTsDataList* self = new (ELeave) CTsDataList( aResources, 
-                                                  aMonitor, 
                                                   aObserver,
                                                   aEnv);
     CleanupStack::PushL( self );
@@ -67,11 +69,10 @@ CTsDataList* CTsDataList::NewL( MTsResourceManager& aResources,
  * Constructor.
  */
 CTsDataList::CTsDataList(MTsResourceManager& aResources,
-                         MTsWindowGroupsMonitor &aMonitor, 
                          MTsDataObserver& aObserver,
                          TsEnv& aEnv) 
 :
-    CTsWindowGroupsObserver( aMonitor ),
+    CTsWindowGroupsObserverBase( aResources.WsMonitor() ),
     iResources( aResources ),
     iObserver( aObserver ),
     iEnv( aEnv )

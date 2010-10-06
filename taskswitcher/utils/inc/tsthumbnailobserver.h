@@ -20,9 +20,12 @@
 
 class CFbsBitmap;
 class MTsThumbnailObserver
-{
+    {
 public:
-    virtual void thumbnailCreated(const CFbsBitmap& aThumbnail) =0;
-    
-};
+    /**
+     * 
+     */
+    virtual void ThumbnailCreated(const CFbsBitmap& aThumbnail) =0;
+
+    };
 #endif //TSTHUMBNAILOBSERVER_H

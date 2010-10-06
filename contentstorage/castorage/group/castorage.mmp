@@ -44,3 +44,6 @@ LIBRARY       cautils.lib
 DEBUGLIBRARY    flogger.lib
 
 
+
+
+SMPSAFE

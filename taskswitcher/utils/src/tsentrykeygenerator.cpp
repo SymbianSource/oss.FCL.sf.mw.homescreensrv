@@ -15,6 +15,8 @@
  *
 */
 #include "tsentrykeygenerator.h"
+#include "tsrunningapp.h"
+#include "tsrunningappstorage.h"
 
 // -----------------------------------------------------------------------------
 //

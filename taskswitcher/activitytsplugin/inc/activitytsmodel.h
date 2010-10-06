@@ -22,8 +22,12 @@
 #include <QVariantHash>
 
 #include "activitytsentry.h"
+#include "tswindowgroupsobserver.h"
 
-class ActivityTsModel : public QObject
+class MTsWindowGroupsMonitor;
+
+class ActivityTsModel : public QObject,
+                        public MTsWindowGroupsObserver
 {
     Q_OBJECT
 
@@ -31,6 +35,14 @@ public:
     ActivityTsModel(QObject *parent = 0);
     virtual ~ActivityTsModel();
 
+public: //from MTsWindowGroupsObserver
+    void HandleWindowGroupChanged(MTsResourceManager& resources, 
+                                  const MTsRunningApplicationStorage& storage);
+
+private:
+    bool filterActivity();
+    ActivityTsEntry *findEntryWithScreenshot(const QList<ActivityTsEntry*> &entryList, const QVariantHash &activityEntry);
+    
 public slots:
     QList<QVariantHash> taskList() const;
     QList<QVariantHash> taskList(int limit) const;
@@ -42,21 +54,24 @@ signals:
     void dataChanged();
     
 private slots:
-    void getActivities();    
+    void getActivities();
     
-public slots:    
+public slots:
     void convertScreenshotToThumbnail(const QPixmap &thumbnail, void *userData);
     void thumbnailCreated(const QPixmap &thumbnail, const void *userData);
-    
+    void setResources(MTsResourceManager& resources);
+
 signals:
     void createThumbnail(const QPixmap &source, int angle, const void *userData);
     
 private:
+    MTsWindowGroupsMonitor* mMonitor;
     QObject *mAfManager;
     int mMaxItems;
-    
     QList<ActivityTsEntry*> mData;
+    QList<ActivityTsEntry*> mPublishedData;
     
+    QList<int> mRunningAppsUid;
 };
 
 #endif // ACTIVITYTSMODEL_H

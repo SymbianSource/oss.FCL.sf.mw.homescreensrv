@@ -15,6 +15,6 @@
 #
 
 BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
-BLD_INF_RULES.prj_exports += "rom/activitymanager_core.iby  CORE_APP_LAYER_IBY_EXPORT_PATH(activitymanager_core.iby)"
+BLD_INF_RULES.prj_exports += "rom/activitymanager_core.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(activitymanager_core.iby)"
 BLD_INF_RULES.prj_exports += "./sis/stubs/activitymanager_stub.sis  /epoc32/release/winscw/udeb/z/system/install/activitymanager_stub.sis"
 BLD_INF_RULES.prj_exports += "./sis/stubs/activitymanager_stub.sis  /epoc32/data/z/system/install/activitymanager_stub.sis"

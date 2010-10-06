@@ -60,7 +60,8 @@ public:
     QMap<QString, QString> attributes() const;
     QString attribute(const QString &name) const;
     void setAttribute(const QString &name, const QString &value);
-
+    void removeAttribute(const QString &name);
+    
     HbIcon makeIcon(const QSizeF &size) const;
 
     EntryRole role() const;

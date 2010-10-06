@@ -53,3 +53,6 @@ LIBRARY     cautils.lib
 LIBRARY     camenu.lib
 LIBRARY     bafl.lib
 LIBRARY     efsrv.lib
+
+LIBRARY		PlatformEnv.lib
+SMPSAFE

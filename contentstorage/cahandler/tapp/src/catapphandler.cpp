@@ -41,7 +41,7 @@ QTM_USE_NAMESPACE
  */
 CaTappHandler::CaTappHandler(QObject *parent)
 {
-	Q_UNUSED(parent);
+    Q_UNUSED(parent);
     mAiwMgr = new XQApplicationManager();
 }
 

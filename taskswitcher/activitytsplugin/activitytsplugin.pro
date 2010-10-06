@@ -27,6 +27,7 @@ QTSERVICE.DESCRIPTOR = data/activitytsplugin.xml
 
 INCLUDEPATH +=  inc \
                 ../../../inc \
+                ../utils/inc
 
 HEADERS +=  inc/activitytsplugin.h \
             inc/activitytsmodel.h \
@@ -35,6 +36,7 @@ HEADERS +=  inc/activitytsplugin.h \
 SOURCES +=  src/activitytsplugin.cpp \
             src/activitytsmodel.cpp \
             src/activitytsentry.cpp \
+            
 
 symbian {
     load(data_caging_paths)
@@ -56,4 +58,6 @@ symbian {
 
     #temporary workaround
     BLD_INF_RULES.prj_exports += "data/activitytsplugin.xml z:/resource/taskswitcher/activitytsplugin.xml"
+    
+    MMP_RULES += SMPSAFE
 }

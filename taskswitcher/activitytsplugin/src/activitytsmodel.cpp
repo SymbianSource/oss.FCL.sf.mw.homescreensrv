@@ -26,6 +26,10 @@
 #include <XQSettingsManager>
 
 #include "afstorageglobals.h"
+#include "tsrunningapp.h"
+#include "tsrunningappstorage.h"
+#include "tswindowgroupsmonitor.h"
+#include "tsresourcemanager.h"
 
 QTM_USE_NAMESPACE
 
@@ -36,7 +40,11 @@ namespace {
     const int KItemsLimit = 0x00000001;
 }
 
-ActivityTsModel::ActivityTsModel(QObject *parent) : QObject(parent), mAfManager(0) , mMaxItems(10)
+ActivityTsModel::ActivityTsModel(QObject *parent) : 
+QObject(parent),
+mMonitor(0),
+mAfManager(0) , 
+mMaxItems(10)
 {
     {
         QServiceManager serviceManager;
@@ -67,23 +75,53 @@ ActivityTsModel::ActivityTsModel(QObject *parent) : QObject(parent), mAfManager(
 
 ActivityTsModel::~ActivityTsModel()
 {
+    if (mMonitor) {
+       mMonitor->Cancel(*this); 
+    }
     qDeleteAll(mData);
+}
+
+void ActivityTsModel::HandleWindowGroupChanged(
+                                  MTsResourceManager& resources, 
+                                  const MTsRunningApplicationStorage& storage)
+{
+    Q_UNUSED(resources);
+    mRunningAppsUid.clear();
+    for (int i(0); i < storage.Count(); ++i) {
+        mRunningAppsUid.append(storage[i].UidL().iUid);
+    }
+    if(filterActivity()) {
+        emit dataChanged();
+    }
+}
+
+bool ActivityTsModel::filterActivity()
+{
+    bool retVal(false);
+    mPublishedData.clear();
+    for (int i(0); i < mData.count(); ++i) {
+        if(!mRunningAppsUid.contains(mData[i]->data().value(ActivityApplicationKeyword).toInt())) {
+            mPublishedData.append(mData[i]);
+            retVal = true;
+        }
+    }
+    return retVal;
 }
 
 QList<QVariantHash> ActivityTsModel::taskList() const
 {
-    return taskList(mData.count());
+    return taskList(mPublishedData.count());
 }
 
 QList<QVariantHash> ActivityTsModel::taskList(int limit) const
 {
     QList<QVariantHash> result;
-    for (int i(0); i < limit && i < mData.count(); ++i) {
-        result.append(mData[i]->data());
+    for (int i(0); i < limit && i < mPublishedData.count(); ++i) {
+        result.append(mPublishedData[i]->data());
     }
     return result;
 }
-    
+
 bool ActivityTsModel::openTask(const QVariant &id)
 {
     foreach (const ActivityTsEntry *entry, mData) {
@@ -105,8 +143,8 @@ bool ActivityTsModel::closeTask(const QVariant &id)
 }
 
 void ActivityTsModel::getActivities()
-{
-    qDeleteAll(mData);
+{   
+    QList<ActivityTsEntry*> oldData(mData);
     mData.clear();
     
     QList<QVariantHash> activities;
@@ -114,18 +152,40 @@ void ActivityTsModel::getActivities()
                               "activitiesList",
                               Q_RETURN_ARG(QList<QVariantHash>, activities),
                               Q_ARG(int, mMaxItems));
-                              
+
     foreach (const QVariantHash &activityEntry, activities) {
-        mData.append(new ActivityTsEntry(activityEntry));
+        ActivityTsEntry *reusableEntry = findEntryWithScreenshot(oldData, activityEntry);
+        if (reusableEntry) {
+            mData.append(reusableEntry);
+            oldData.removeAll(reusableEntry);
+        } else {
+            mData.append(new ActivityTsEntry(activityEntry));
         
-        QMetaObject::invokeMethod(
+            QMetaObject::invokeMethod(
                 mAfManager,
                 "getThumbnail",
                 Q_ARG(QString, activityEntry.value(ActivityScreenshotKeyword).toString()),
                 Q_ARG(void *, mData.last()));
+        }
     }
+    qDeleteAll(oldData);
     
+    filterActivity();
     emit dataChanged();
+}
+
+ActivityTsEntry *ActivityTsModel::findEntryWithScreenshot(const QList<ActivityTsEntry*> &entryList, const QVariantHash &activityEntry) 
+{
+    foreach (ActivityTsEntry *entry, entryList) {
+        const QVariantHash data = entry->data();
+        if ((data.value(ActivityApplicationKeyword) == activityEntry.value(ActivityApplicationKeyword)) &&
+            (data.value(ActivityActivityKeyword) == activityEntry.value(ActivityActivityKeyword)) &&
+            (data.value("TaskTimestamp") == activityEntry.value(ActivityTimestamp)) &&
+            (data.value("TaskScreenshot") != -1)) {
+            return entry;
+        }
+    }
+    return 0;
 }
 
 void ActivityTsModel::convertScreenshotToThumbnail(const QPixmap &thumbnail, void *userData)
@@ -134,7 +194,7 @@ void ActivityTsModel::convertScreenshotToThumbnail(const QPixmap &thumbnail, voi
 }
 
 void ActivityTsModel::thumbnailCreated(const QPixmap &thumbnail, const void *userData)
-{    
+{
     foreach (ActivityTsEntry *activity, mData) {
         if (activity == userData) {
             activity->setThumbnail(thumbnail.toSymbianCFbsBitmap());
@@ -142,4 +202,13 @@ void ActivityTsModel::thumbnailCreated(const QPixmap &thumbnail, const void *use
             break;
         }
     }
+}
+
+void ActivityTsModel::setResources(MTsResourceManager& resources)
+{
+    if (mMonitor) {
+        mMonitor->Cancel(*this);
+    }
+    mMonitor = &resources.WsMonitor();
+    mMonitor->SubscribeL(*this);
 }

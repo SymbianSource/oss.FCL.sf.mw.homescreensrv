@@ -23,7 +23,7 @@
 
 #include <HbIcon>
 
-#include "tswindowgroupsobserver.h"
+#include "tswindowgroupsobserverbase.h"
 #include "tsentry.h"
 #include "tsdatastorage.h"
 #include "tsdataobserver.h"
@@ -31,13 +31,13 @@
 
 class CApaWindowGroupName;
 class CFbsBitmap;
+class MTsRunningApplication;
 
-NONSHARABLE_CLASS( CTsDataList ) : public CTsWindowGroupsObserver,
+NONSHARABLE_CLASS( CTsDataList ) : public CTsWindowGroupsObserverBase,
                                    public MTsDataStorage
     {
 public:
     static CTsDataList* NewL( MTsResourceManager& aResources, 
-                              MTsWindowGroupsMonitor& aMonitor, 
                               MTsDataObserver& aObserver,
                               TsEnv& aEnv );
 
@@ -45,7 +45,6 @@ public:
 
 private:
     CTsDataList( MTsResourceManager& aResources,
-                 MTsWindowGroupsMonitor& aMonitor, 
                  MTsDataObserver& aObserver,
                  TsEnv& aEnv);
 

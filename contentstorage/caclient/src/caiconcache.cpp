@@ -153,7 +153,11 @@ void CaIconCache::remove(const CaEntry &entry, ChangeType changeType)
 QString CaIconCache::key(const CaEntry &entry, const QSizeF &size)
 {
     QString key;
-    if (!entry.iconDescription().filename().isEmpty()) {
+    if (!entry.iconDescription().skinId().isEmpty()) {
+        key.append(entry.iconDescription().skinId());
+        key.append(separator);
+        key.append(entry.entryTypeName());
+    } else if (!entry.iconDescription().filename().isEmpty()) {
         key.append(entry.iconDescription().filename());
         key.append(separator);
         key.append(entry.entryTypeName());
@@ -161,8 +165,8 @@ QString CaIconCache::key(const CaEntry &entry, const QSizeF &size)
         key.append(separator);
         key.append(entry.id());
     }
+    key.append(separator);
     if (size.isValid()) {
-        key.append(separator);
         key += QString::number(size.height());
         key.append(separator);
         key += QString::number(size.width());

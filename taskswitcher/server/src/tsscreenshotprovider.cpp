@@ -16,6 +16,9 @@
 */
 #include <s32mem.h>
 
+#include "tswindowgroupsmonitor.h"
+#include "tsrunningapp.h"
+#include "tsrunningappstorage.h"
 #include "tsscreenshotprovider.h"
 #include "tstaskmonitorglobals.h"
 #include "tsscreenshotmsg.h"
@@ -23,7 +26,8 @@
 
 
 const TUid KPluginUID = {0x200267AE};
-const TInt KSkippedApp [] = {0x20022F35 /* <-- hsapplication */};
+const TInt KSkippedApp [] = {0x20022F35 /* <-- hsapplication */,
+                             0x100058F3 /* <-- sysapp*/};
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -33,8 +37,7 @@ CTsScreenshotProvider* CTsScreenshotProvider::NewL( MTsDataStorage& aStorage,
     {
     CTsScreenshotProvider *self = new (ELeave)CTsScreenshotProvider(aStorage, aMonitor);
     CleanupStack::PushL( self );
-    self->BaseConstructL(KPluginUID, KNullDesC8);
-    aMonitor.SubscribeL(*self);
+    self->ConstructL();
     CleanupStack::Pop( self );
     return self;
     }
@@ -49,9 +52,19 @@ CTsScreenshotProvider::CTsScreenshotProvider( MTsDataStorage& aStorage,
     //No implementation required
     }
 
+// -----------------------------------------------------------------------------
+void CTsScreenshotProvider::ConstructL()
+    {
+    BaseConstructL(KPluginUID, KNullDesC8);
+    iCache = CTsIdList::NewL();
+    iMonitor.SubscribeL(*this);
+    }
+
+// -----------------------------------------------------------------------------
 CTsScreenshotProvider::~CTsScreenshotProvider()
     {
     iMonitor.Cancel(*this);
+    delete iCache;
     }
 
 // -----------------------------------------------------------------------------
@@ -75,39 +88,40 @@ void CTsScreenshotProvider::HandleWindowGroupChangedL(
     {
     const TInt count(sizeof( KSkippedApp ) / sizeof(TInt));
     CTsIdList* list = CTsIdList::NewLC();
-    list->AppendL(aStorage.BlockedWindowGroups());//filtered servers
-    for( TInt iter(0); iter < aStorage.Count(); ++iter )
+    for( TInt allowed(0); allowed < aStorage.Count(); ++allowed )
         {
-        if(aStorage[iter].IsHiddenL())
+        if(!aStorage[allowed].IsHiddenL())
             {
-            list->AppendL(aStorage[iter].WindowGroupId());
-            }
-        else
-            {
-            for(TInt blocked(0); blocked < count; ++blocked)
+            TBool isBlocked(EFalse);
+            for( TInt blocked(0); !isBlocked && blocked < count; ++blocked )
                 {
-                if(aStorage[iter].UidL().iUid == KSkippedApp[blocked])
-                    {
-                    list->AppendL(aStorage[iter].WindowGroupId());
-                    }
+                isBlocked = (KSkippedApp[blocked] == aStorage[allowed].UidL().iUid);
+                }
+            if(!isBlocked)
+                {
+                list->AppendL(aStorage[allowed].WindowGroupId());
                 }
             }
         }
-    
-    RBuf8 message;
-    CleanupClosePushL(message);
-    message.CreateL(list->Size() + sizeof(TInt));
-    
-    RDesWriteStream stream;
-    CleanupClosePushL(stream);
-    stream.Open(message);
-    stream.WriteInt32L(IgnoreWindowGroups);
-    stream << (*list);
-    CleanupStack::PopAndDestroy(&stream);
-    
-    SendMessage(message);
-    CleanupStack::PopAndDestroy(&message);
-    CleanupStack::PopAndDestroy(list);
+    if( *iCache != *list )
+        {
+        RBuf8 message;
+        CleanupClosePushL(message);
+        message.CreateL(list->Size() + sizeof(TInt));
+            
+        RDesWriteStream stream;
+        CleanupClosePushL(stream);
+        stream.Open(message);
+        stream.WriteInt32L(AllowedWindowGroups);
+        stream << (*list);
+        CleanupStack::PopAndDestroy(&stream);
+        
+        SendMessage(message);
+        CleanupStack::PopAndDestroy(&message);
+        }
+    delete iCache;
+    iCache = list;
+    CleanupStack::Pop(list);
     }
 
 // -----------------------------------------------------------------------------

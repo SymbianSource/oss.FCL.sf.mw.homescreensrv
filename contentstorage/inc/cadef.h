@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.28 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.30 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -85,6 +85,7 @@ _LIT( KCaAttrAppTypeValueJava, "java");
 _LIT( KCaAttrAppTypeValueCWRT, "cwrt");
 _LIT( KCaAttrAppTypeValueNative, "native");
 _LIT( KCaAttrComponentId, "component_id" );
+_LIT( KCaAttrDrivesIconIds, "drivesIconIds");
 _LIT( KCaAttrAppSettingsPlugin, "app_settings_plugin");
 _LIT( KCaScrPropertyAppSettings, "settingsName");
 _LIT( KPreviewImageAttrName, "preview_image_name" );
@@ -109,6 +110,10 @@ _LIT( KLocalizationCaEntry, "CA_ENTRY" );
 _LIT( KLocalizationEnText, "EN_TEXT" );
 _LIT( KLocalizationEnDescription, "EN_DESCRIPTION" );
 const TInt charsToFilename= 6;  // <loc://> loc://email/qtn_gmail_mail_account
+
+_LIT( KCaQmFile, "contentstorage_" );//default content storage qm file
+//Defaul localize string for collection
+_LIT( KDefaultLocTitleName, "txt_applib_subtitle_collections_user" );
 
 
 const TInt KGranularityOne = 1;
@@ -160,6 +165,7 @@ const TInt KCenRepBufferSize = 255;
 // Menu clients always need to check that the necessary attributes are present.
 //
 _LIT( KCaAttrShortName, "short_name" ); ///< Short name.
+_LIT( KCaAttrTitleName, "title_name" ); ///< Title name.
 _LIT( KCaComponentId, "component_id" ); ///< Component Id.
 
 // Built-in types and attributes.

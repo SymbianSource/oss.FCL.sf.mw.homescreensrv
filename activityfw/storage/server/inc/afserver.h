@@ -29,7 +29,7 @@
 
 class CAfStorage;
 
-class CAfServer : public CServer2,
+class CAfServer : public CPolicyServer,
                   public MAfTaskStorage
 {
 public:

@@ -49,3 +49,6 @@ LIBRARY apgrfx.lib
 LIBRARY afactivitylauncher.lib
 DEBUGLIBRARY flogger.lib
 // End of file
+
+
+SMPSAFE

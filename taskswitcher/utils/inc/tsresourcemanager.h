@@ -17,16 +17,15 @@
 #ifndef TSRESOURCEMANAGER_H
 #define TSRESOURCEMANAGER_H
 
-#include <e32base.h>
-#include <e32event.h>
-#include <w32std.h>
-#include <apgcli.h>
+class RApaLsSession;
+class RWsSession;
+class MTsWindowGroupsMonitor;
 
 /**
- * Interface decalre methods to access initialized OS resources
+ * Interface declare methods to access initialized OS resources
  */
 class MTsResourceManager
-{
+    {
 public:
     /**
      * Access to initialized window server session
@@ -37,46 +36,10 @@ public:
      * Access to initilaized APA session
      */
     virtual RApaLsSession& ApaSession() =0;
-};
-
-/**
- * Resource manager implemetatioin
- */
-class CTsResourceManager: public CBase,
-                          public MTsResourceManager
-{
-public:
-    /**
-     * Two phase constructor
-     */
-    static CTsResourceManager* NewL();
     
     /**
-     * Destructor
+     * Access to window groups monitor
      */
-    ~CTsResourceManager();
-    
-    /**
-     * @see MTsResourceManager::WsSession
-     */
-    RWsSession& WsSession();
-    
-    /**
-     * @see MTsResourceManager::ApaSession
-     */
-    RApaLsSession& ApaSession();
-
-private:
-    /**
-     * Second phase constructor
-     */
-    void ConstructL();
-
-private:
-   RWsSession mWsSession;
-   RApaLsSession mApaSeesion;
-};
-
-
-
+    virtual MTsWindowGroupsMonitor& WsMonitor() =0;
+    };
 #endif // TSRESOURCEMANAGER_H

@@ -51,3 +51,6 @@ LIBRARY         SensrvClient.lib
 LIBRARY         sensrvutil.lib 
 LIBRARY         centralrepository.lib
 DEBUGLIBRARY    flogger.lib
+
+
+SMPSAFE

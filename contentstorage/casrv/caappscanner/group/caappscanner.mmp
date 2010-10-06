@@ -56,3 +56,6 @@ LIBRARY         bafl.lib
 LIBRARY         efsrv.lib
 LIBRARY         platformenv.lib
 LIBRARY         scrclient.lib
+
+
+SMPSAFE

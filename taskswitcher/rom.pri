@@ -15,6 +15,8 @@
 #
 
 BLD_INF_RULES.prj_exports += "$${LITERAL_HASH}include <platform_paths.hrh>"
-BLD_INF_RULES.prj_exports += "rom/tstaskmonitor_core.iby  CORE_APP_LAYER_IBY_EXPORT_PATH(tstaskmonitor_core.iby)"
+BLD_INF_RULES.prj_exports += "rom/tstaskmonitor_core.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(tstaskmonitor_core.iby)"
 BLD_INF_RULES.prj_exports += "./sis/stubs/taskmonitor_stub.sis  /epoc32/release/winscw/udeb/z/system/install/taskmonitor_stub.sis"
 BLD_INF_RULES.prj_exports += "./sis/stubs/taskmonitor_stub.sis  /epoc32/data/z/system/install/taskmonitor_stub.sis"
+BLD_INF_RULES.prj_exports += "rom/tsdevicedialog_core.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(tsdevicedialog_core.iby)"
+BLD_INF_RULES.prj_exports += "rom/tsdevicedialog_resources.iby  LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(tsdevicedialog_resources.iby)"

@@ -163,7 +163,7 @@ CCaWidgetDescription::~CCaWidgetDescription()
 //
 CCaWidgetDescription *CCaWidgetDescription::CloneL()
     {   
-    CCaWidgetDescription* clone = CCaWidgetDescription::NewL();
+    CCaWidgetDescription* clone = CCaWidgetDescription::NewLC();
     
     clone->SetPathL( GetPath() );
     clone->SetMmcIdL( GetMmcId() );
@@ -181,6 +181,7 @@ CCaWidgetDescription *CCaWidgetDescription::CloneL()
     clone->SetServiceXmlL( GetServiceXml() );
     clone->SetManifestFilePathNameL( GetManifestFilePathName() );
     
+    CleanupStack::Pop( clone );
     return clone;
     }
 

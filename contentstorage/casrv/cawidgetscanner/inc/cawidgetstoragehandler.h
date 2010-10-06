@@ -150,6 +150,18 @@ private:
     void UpdateCompIdAndRemovableFlagL( const TDesC& aManifestFilePathName,
             CCaInnerEntry& aEntry ) const;
 
+    /**
+     * Make not empty collections with not hidden items visible.
+     */
+    void MakeNotEmptyCollectionsVisibleL();
+    
+    /**
+     * Make collection visible if it has visible entry.
+     * @param aEntry a collection entry.
+     */
+    void MakeCollectionVisibleIfHasVisibleEntryL(
+            CCaInnerEntry* aEntry );
+
 private:
     // Data
 

@@ -19,6 +19,7 @@
 #define AFACTIVITIES_GLOBAL_H
 
 #include <qglobal.h>
+#include <qmetatype.h>
 
 #ifdef AFACTIVITIES_LIB
     #define AFACTIVITIES_EXPORT Q_DECL_EXPORT
@@ -42,5 +43,7 @@ namespace Af {
     const char KActivityUriNameKey[] = "activityname";
     const char KActivityUriBackgroundKey[] = "activityinbackground";
 }
+
+Q_DECLARE_METATYPE( Af::ActivationReason )
 
 #endif // AFACTIVITIES_GLOBAL_H

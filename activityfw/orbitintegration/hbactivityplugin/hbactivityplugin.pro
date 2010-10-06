@@ -38,3 +38,6 @@ symbian {
     TARGET.EPOCALLOWDLLDATA = 1
     TARGET.CAPABILITY = ALL -TCB
 }
+
+
+symbian:MMP_RULES += SMPSAFE

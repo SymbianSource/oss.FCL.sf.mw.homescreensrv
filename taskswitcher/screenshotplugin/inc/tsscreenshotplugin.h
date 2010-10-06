@@ -55,7 +55,7 @@ public:
     void SendMessageL( const TDesC8& aMessage );
 
 private:
-    CTsIdList* iBlockedList;
+    CTsIdList* iAllowedList;
     RPointerArray<CTsScreenshotNotifier> iCache;
     TInt iWindowGroupId;
 };

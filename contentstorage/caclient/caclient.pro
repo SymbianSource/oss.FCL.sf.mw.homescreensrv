@@ -57,9 +57,7 @@ LIBS += -lavkon \
         -lapgrfx \
         -lapparc \
         -lSatClient
-		
 
-		
 include(caclient_s60.pri)
 }
 
@@ -73,3 +71,6 @@ QT += sql
 include(caclient_stub.pri)
 include(installs_win32.pri)
 }
+
+
+symbian:MMP_RULES += SMPSAFE

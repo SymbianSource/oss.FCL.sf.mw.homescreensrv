@@ -36,3 +36,6 @@ MW_LAYER_SYSTEMINCLUDE
 LIBRARY         euser.lib
 
 LANG			SC
+
+
+SMPSAFE

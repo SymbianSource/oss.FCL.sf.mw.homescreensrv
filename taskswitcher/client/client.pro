@@ -38,3 +38,6 @@ symbian {
 }
 
 include(client.pri)
+
+
+symbian:MMP_RULES += SMPSAFE

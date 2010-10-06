@@ -53,3 +53,6 @@ LIBRARY         castorage.lib
 LIBRARY         camenu.lib
 LIBRARY         bafl.lib
 LIBRARY         estor.lib
+
+
+SMPSAFE

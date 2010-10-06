@@ -103,6 +103,7 @@ void CCaWidgetStorageHandler::SynchronizeL()
     FetchWidgetsL();
     AddWidgetsL( iParser->WidgetsScanL( iWidgetDBCache ) );
     RemoveWidgetsL();
+    MakeNotEmptyCollectionsVisibleL();
     }
 
 // ----------------------------------------------------------------------------
@@ -368,7 +369,6 @@ TBool CCaWidgetStorageHandler::MassStorageNotInUse()
 //
 // ----------------------------------------------------------------------------
 //
-
 void CCaWidgetStorageHandler::SetLocalizationsL(
         const CCaWidgetDescription* aWidget, TInt aEntryId )
     {
@@ -415,7 +415,6 @@ void CCaWidgetStorageHandler::SetLocalizationsL(
 //
 // ----------------------------------------------------------------------------
 //
-
 void CCaWidgetStorageHandler::UpdateCompIdAndRemovableFlagL(
         const TDesC& aManifestFilePathName, CCaInnerEntry& aEntry ) const
     {
@@ -460,6 +459,63 @@ void CCaWidgetStorageHandler::UpdateCompIdAndRemovableFlagL(
         }
 
     CleanupStack::PopAndDestroy( &componentIds );
+    }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CCaWidgetStorageHandler::MakeNotEmptyCollectionsVisibleL()
+    {
+    RPointerArray<CCaInnerEntry> resultArray;
+    CleanupResetAndDestroyPushL( resultArray );
+    CCaInnerQuery* hiddenCollectionsQuery = CCaInnerQuery::NewLC();
+    CDesC16ArrayFlat* entryType = new ( ELeave ) CDesC16ArrayFlat(
+            KGranularityOne );
+    CleanupStack::PushL( entryType );
+    entryType->AppendL( KCaTypeCollection );
+    hiddenCollectionsQuery->SetEntryTypeNames( entryType );
+    hiddenCollectionsQuery->SetFlagsOff( EVisible );
+    iStorage->GetEntriesL( hiddenCollectionsQuery, resultArray );
+    CleanupStack::Pop( entryType );
+    CleanupStack::PopAndDestroy( hiddenCollectionsQuery );
+    if( resultArray.Count()>0 )
+        {
+        for( TInt i=0; i<resultArray.Count(); i++ )
+            {
+            // for any not visible collection
+            MakeCollectionVisibleIfHasVisibleEntryL( resultArray[i] );
+            }
+        }
+    CleanupStack::PopAndDestroy( &resultArray );
+   }
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CCaWidgetStorageHandler::MakeCollectionVisibleIfHasVisibleEntryL(
+        CCaInnerEntry* aEntry )
+    {
+    RPointerArray<CCaInnerEntry> resultEntriesArray;
+    CleanupResetAndDestroyPushL( resultEntriesArray );
+    CCaInnerQuery* visibleEntriesQuery = CCaInnerQuery::NewLC();
+    visibleEntriesQuery->SetParentId( aEntry->GetId() );
+    visibleEntriesQuery->SetFlagsOn( EVisible );
+    visibleEntriesQuery->SetFlagsOff( EMissing );
+    iStorage->GetEntriesL( visibleEntriesQuery, resultEntriesArray );
+    if( resultEntriesArray.Count()>0 )
+        {
+        // set collection visible if hidden
+        if( !( aEntry->GetFlags() & EVisible ) )
+            {
+            aEntry->SetFlags( aEntry->GetFlags() | EVisible );
+            // update here this collection
+            iStorage->AddL( aEntry );
+            }
+        }
+    CleanupStack::PopAndDestroy( visibleEntriesQuery );
+    CleanupStack::PopAndDestroy( &resultEntriesArray );
     }
 
 //  End of File

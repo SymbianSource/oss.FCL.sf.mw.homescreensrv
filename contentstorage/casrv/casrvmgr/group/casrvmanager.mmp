@@ -38,3 +38,6 @@ LIBRARY       ECom.lib
 DEBUGLIBRARY  flogger.lib
 
 // End of File
+
+
+SMPSAFE

@@ -17,6 +17,11 @@
 #include <fbs.h>
 #include "tsthumbnailprovider.h"
 //------------------------------------------------------------------------------
+/**
+ * Constructor - initialize provider instance
+ * @param observer - thumnail observer
+ * @param obj - object which request and receive new thumnails using signal/slot interface
+ */
 TsThumbnailProvider::TsThumbnailProvider(MTsThumbnailObserver& observer, QObject* obj)
 :
     mObserver(observer)
@@ -32,6 +37,9 @@ TsThumbnailProvider::TsThumbnailProvider(MTsThumbnailObserver& observer, QObject
             SLOT(thumbnailCreated(QPixmap, const void*)));
 }
 //------------------------------------------------------------------------------
+/**
+ * Function create interface for Symbian clients.
+ */
 void TsThumbnailProvider::createThumbnail(CFbsBitmap& source, int angle)
 {
     emit createThumbnail(QPixmap::fromSymbianCFbsBitmap(&source), 
@@ -40,6 +48,9 @@ void TsThumbnailProvider::createThumbnail(CFbsBitmap& source, int angle)
 }
 
 //------------------------------------------------------------------------------
+/**
+ * Retrieve requests done by Symbian interface and forward results to observer
+ */
 void TsThumbnailProvider::thumbnailCreated(const QPixmap& thumbnail,
                                            const void *userData)
 {
@@ -48,7 +59,7 @@ void TsThumbnailProvider::thumbnailCreated(const QPixmap& thumbnail,
     }
     CFbsBitmap *bitmap(thumbnail.toSymbianCFbsBitmap());
     if(0 != bitmap) {
-        mObserver.thumbnailCreated(*bitmap);
+        mObserver.ThumbnailCreated(*bitmap);
     }
     delete bitmap;
 }

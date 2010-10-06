@@ -15,15 +15,15 @@
 #
 
 HEADERS += ./inc/*.h \
-    ./../homescreensrv_plat/contentstorage_api/caclient_global.h \
-    ./../homescreensrv_plat/contentstorage_api/cadefs.h \
-    ./../homescreensrv_plat/contentstorage_api/caentry.h \
-    ./../homescreensrv_plat/contentstorage_api/caicondescription.h \
-    ./../homescreensrv_plat/contentstorage_api/caitemmodel.h \
-    ./../homescreensrv_plat/contentstorage_api/camenuiconutility.h \
-    ./../homescreensrv_plat/contentstorage_api/canotifier.h \
-    ./../homescreensrv_plat/contentstorage_api/canotifierfilter.h \
-    ./../homescreensrv_plat/contentstorage_api/caquery.h \
-    ./../homescreensrv_plat/contentstorage_api/caservice.h
+    ./../homescreensrv_plat/contentstorage_api/inc/caclient_global.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/cadefs.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/caentry.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/caicondescription.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/caitemmodel.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/camenuiconutility.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/canotifier.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/canotifierfilter.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/caquery.h \
+    ./../homescreensrv_plat/contentstorage_api/inc/caservice.h
     
 SOURCES += ./src/*.cpp

@@ -24,7 +24,10 @@ AfActivation::AfActivation(QObject *parent) : QObject(parent), d_ptr(0)
 {
     QSharedPointer<AfStorageProxy> connection(new AfStorageProxy());    
     QT_TRAP_THROWING(
-        User::LeaveIfError(connection->waitActivity());
+        if(!connection->waitActivity())
+        {
+            User::Leave(KErrGeneral);
+        }
     )
     
     d_ptr = new AfActivationPrivate(connection, this);

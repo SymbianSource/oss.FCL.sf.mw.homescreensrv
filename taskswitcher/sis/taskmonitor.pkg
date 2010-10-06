@@ -36,3 +36,7 @@
 "/epoc32/release/armv5/urel/activitytsplugin.dll" - "!:\sys\bin\activitytsplugin.dll"
 "/epoc32/data/z/resource/qt/plugins/activitytsplugin.qtplugin" - "!:\resource\qt\plugins\activitytsplugin.qtplugin"
 "/epoc32/data/z/resource/taskswitcher/activitytsplugin.xml" - "!:\resource\taskswitcher\activitytsplugin.xml"
+
+"/epoc32/data/z/resource/qt/translations/taskswitcher.qm"-"!:\resource\qt\translations\taskswitcher.qm"
+"/epoc32/release/armv5/urel/tsdevicedialogplugin.dll"-"!:\sys\bin\tsdevicedialogplugin.dll"
+"/epoc32/data/z/resource/plugins/devicedialogs/tsdevicedialogplugin.qtplugin"-"!:\resource\plugins\devicedialogs\tsdevicedialogplugin.qtplugin"

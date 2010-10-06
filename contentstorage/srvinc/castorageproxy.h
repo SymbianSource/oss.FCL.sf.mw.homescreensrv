@@ -201,7 +201,9 @@ private:
     
     CCaLocalizationEntry* LocalizeDescriptionL( CCaInnerEntry* aEntry );
     
-    TBool InitializeTranslatorL( TDesC& aQmFilename );
+    void AddTitleNameL( CCaInnerEntry* aEntry );
+    
+    TBool InitializeTranslatorL( const TDesC& aQmFilename );
 
 private:
     //Data
@@ -215,6 +217,11 @@ private:
      * Sessions using this engine. Own.
      */
     RPointerArray<MCaSessionNorifier> iHandlerNotifier;
+
+    /**
+     * Translated user collection name. Own.
+     */
+    RBuf iTitleUserColName;
     
     CA_STORAGE_TEST_FRIEND_CLASS( TestCaClient )
     

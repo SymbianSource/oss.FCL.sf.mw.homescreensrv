@@ -23,6 +23,7 @@ symbian {
                server \
                screenshotplugin \
                activitytsplugin \
+               tsdevicedialogplugin \
                
     BLD_INF_RULES.prj_exports +=    "inc/tstaskmonitorglobals.h |../inc/tstaskmonitorglobals.h"
     

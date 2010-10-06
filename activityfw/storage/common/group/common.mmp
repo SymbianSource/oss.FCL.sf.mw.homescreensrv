@@ -30,3 +30,6 @@ SOURCE      afentry.cpp
 #ifdef ENABLE_ABIV2_MODE
 DEBUGGABLE_UDEBONLY
 #endif
+
+
+SMPSAFE

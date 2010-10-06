@@ -21,17 +21,52 @@
 #include "afstorage.h"
 #include "aftask.h"
 #include "afapplicationsengine.h"
+#include "afcmd.h"
 
 _LIT( KActivityServerName, "hsactivitydbserver" );
 _LIT(KObserverAlreadyExists, "Observer task exists");
 
+
+
+const TInt KSecureServerRanges[] =
+    {
+    SaveActivity,
+    Activities,
+    ApplicationActivities, 
+    CancelNotify + 1
+    };
+
+const TUint8 KSecureServerElementsIndex[] =
+    {
+    0,
+    1,
+    CPolicyServer::EAlwaysPass,
+    CPolicyServer::ENotSupported
+    };
+
+const TInt KSecureServerRangeCount(sizeof(KSecureServerRanges) / sizeof(TInt));
+
+const CPolicyServer::TPolicyElement KSecureServerElements[] =
+    {
+    {_INIT_SECURITY_POLICY_C1(ECapabilityWriteDeviceData), CPolicyServer::EFailClient},
+    {_INIT_SECURITY_POLICY_C1(ECapabilityReadDeviceData ), CPolicyServer::EFailClient}
+    };
+
+const CPolicyServer::TPolicy KSecureServerPolicy =
+    {
+    CPolicyServer::EAlwaysPass,
+    KSecureServerRangeCount,
+    KSecureServerRanges,
+    KSecureServerElementsIndex,
+    KSecureServerElements
+   };
 // -----------------------------------------------------------------------------
 /**
  * Constructor for performing 1st stage construction
  */
 CAfServer::CAfServer()
 :
-CServer2( EPriorityStandard )
+CPolicyServer( EPriorityStandard, KSecureServerPolicy )
 {
     // No implementation required
 }

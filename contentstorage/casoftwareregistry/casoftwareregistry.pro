@@ -57,3 +57,5 @@ INCLUDEPATH += ./stub/inc
 
 include(casoftwareregistry_stub.pri)
 }
+
+symbian:MMP_RULES += SMPSAFE

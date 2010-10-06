@@ -28,7 +28,8 @@ const TInt KResponseDataOffset(1);
 
 
 enum ActivityCmd {
-    RemoveActivity=0,
+    SaveActivity =0,
+    RemoveActivity,
     RemoveApplicationActivities,
     Activities,
     ApplicationActivities,
@@ -39,8 +40,7 @@ enum ActivityCmd {
     GetData,
     NotifyChange,
     CancelWait,
-    CancelNotify,
-    SaveActivity
+    CancelNotify
 };
 
 #endif  //AFCMD_H

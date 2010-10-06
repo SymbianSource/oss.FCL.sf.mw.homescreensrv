@@ -70,8 +70,9 @@ public:
 private:
     CTsEntry(const TTsEntryKey &aKey, MTsDataObserver &observer);
     void ConstructL(QObject* object);
-public:
-    void thumbnailCreated(const CFbsBitmap& aThumbnail);
+
+public://from MTsThumbnailObserver
+    void ThumbnailCreated(const CFbsBitmap& aThumbnail);
 
 private:
     TUid mAppUid;

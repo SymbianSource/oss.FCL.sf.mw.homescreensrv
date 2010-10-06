@@ -118,3 +118,18 @@ void CTsIdList::InternalizeL(RReadStream &aStream)
         }
     }
 
+//------------------------------------------------------------------------------
+TBool CTsIdList::operator ==( const CTsIdList& aList) const
+    {
+    TBool retVal(aList.iIds.Count() == iIds.Count());
+    for( TInt offset(0); retVal && offset < iIds.Count(); ++offset )
+        {
+        retVal = (KErrNotFound != aList.iIds.Find(iIds[offset]));
+        }
+    return retVal;
+    }
+//------------------------------------------------------------------------------
+TBool CTsIdList::operator !=( const CTsIdList& aList) const
+    {
+    return !(*this ==aList);
+    }

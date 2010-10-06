@@ -58,3 +58,5 @@ symbian: plugin { # copy qtstub and manifest
 symbian:TARGET.UID3=0x2002DCF8
 
 include(camificonengine.pri)
+
+symbian:MMP_RULES += SMPSAFE

@@ -130,10 +130,6 @@ void CAfSession::ServiceL(const RMessage2& message)
     case GetData:
         AfDataProviderTask::ExecuteL(*this,message);
         break;
-    
-    default:
-        message.Complete(CServer2::EBadMessageNumber);
-        break;
     }
 }
 

@@ -34,6 +34,8 @@ public:
     TInt Size() const;
     void ExternalizeL(RWriteStream &aStream) const;
     void InternalizeL(RReadStream &aStream);
+    TBool operator ==( const CTsIdList& aList) const;
+    TBool operator !=( const CTsIdList& aList) const;
 
 private:
     CTsIdList();

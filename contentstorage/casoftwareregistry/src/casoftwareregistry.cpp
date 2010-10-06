@@ -18,8 +18,9 @@
 #include <QString>
 #include <QStringList>
 
-#include "cauninstallnotifier.h"
-#include "casoftwareregistry.h"
+#include <cauninstallnotifier.h>
+#include <casoftwareregistry.h>
+
 #include "casoftwareregistry_p.h"
 
 

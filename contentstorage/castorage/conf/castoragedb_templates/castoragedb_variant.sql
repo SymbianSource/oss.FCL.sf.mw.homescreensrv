@@ -45,24 +45,24 @@ SELECT "castoragedb_variant - BEGIN" AS " ";
         {%- set LocalizeNames = false -%}
         {%- if Collections == "Collections" -%}
             {%- set LocalizeNames = feat_tree.CaStorageDbSetting[Collections].LocalizeNames._value[col] or false -%}
-            {%- set TranslationFile = feat_tree.CaStorageDbSetting[Collections].TranslationFile._value[col]|string|reverse|replace('_','',1)|reverse~'_' or ''-%}
-        {%- endif %}
+            {%- set TranslationFile = feat_tree.CaStorageDbSetting[Collections].TranslationFile._value[col] or '' -%}
+            {%- if TranslationFile != "" -%}
+                {%- set TranslationFile = TranslationFile~'_' -%}
+            {%- endif -%}
+        {%- endif -%}
         {%- set IconFileName = feat_tree.CaStorageDbSetting[Collections].Icon.localPath._value[col] or '' -%}
         {%- set IconSkinId = feat_tree.CaStorageDbSetting[Collections].IconSkinId._value[col] or '' -%}
         {%- if IconFileName != "" -%}
             {%- set IconFileName = stripPath(IconFileName) -%}
-        {%- endif %}
+        {%- endif -%}
         {%- if ShortName == "" -%}
             {%- set ShortName = Name -%}
-        {%- endif %}
-        {%- if TitleName == "" -%}
-            {%- set TitleName = Name -%}
-        {%- endif %}
+        {%- endif -%}
         {%- if GroupName == "" -%}
             {%- set GroupName = Name -%}
-        {%- endif %}        
-    INSERT INTO COLLECTION (COLLECTION_NAME, COL_APP_GROUP_NAME, FLAGS,  COL_TITLE_NAME {% if LocalizeNames -%}, TRANSLATION_FILE{%- endif %}, COL_SHORT_NAME, ICON_FILENAME, ICON_SKIN_ID) 
-    VALUES ( '{{Name}}', '{{GroupName}}', {% if Locked -%} 0 {% else %} 4 {%- endif %}, "{{TitleName}}"{% if LocalizeNames -%}, "{{TranslationFile}}"{%- endif %}, "{{ShortName}}", "{{IconFileName}}", "{{IconSkinId}}");
+        {%- endif -%}        
+    INSERT INTO COLLECTION (COLLECTION_NAME, COL_APP_GROUP_NAME, FLAGS{%- if TitleName -%},  COL_TITLE_NAME{%- endif %} {% if LocalizeNames -%}, TRANSLATION_FILE{%- endif %}, COL_SHORT_NAME, ICON_FILENAME, ICON_SKIN_ID) 
+    VALUES ( '{{Name}}', '{{GroupName}}', {% if Locked -%} 0 {% else %} 4 {%- endif %}{%- if TitleName -%}, "{{TitleName}}"{%- endif %}{% if LocalizeNames -%}, "{{TranslationFile}}"{%- endif %}, "{{ShortName}}", "{{IconFileName}}", "{{IconSkinId}}");
     {% endfor %}
 {%- endmacro %}
 

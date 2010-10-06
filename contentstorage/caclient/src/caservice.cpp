@@ -369,14 +369,7 @@ bool CaService::updateEntry(const CaEntry &entry) const
  */
 bool CaService::touch(const CaEntry &entry) const
 {
-    if (entry.flags() & RemovableEntryFlag &&
-        (entry.flags() & UsedEntryFlag) == 0 &&
-        entry.role() == ItemEntryRole &&
-        entry.entryTypeName() != QString(Hs::packageTypeName)) {
-        return m_d->touch(entry);
-    } else {
-    	return true;
-    }
+    return m_d->touch(entry);
 }
 
 /*!
@@ -1132,15 +1125,22 @@ QSharedPointer<CaEntry> CaServicePrivate::createEntry(const CaEntry &entry)
 bool CaServicePrivate::touch(const CaEntry &entry)
 {
     qDebug() << "CaServicePrivate::touch" << "entryId: " << entry.id();
-
-    mErrorCode = mProxy->touch(entry);
-    if (mErrorCode == ServerTerminated) {
-        if (!mProxy->connect()) {
-            if (mNotifierProxy) {
-                mNotifierProxy->connectSessions();
+    
+    mErrorCode = NoErrorCode;
+    if (entry.flags() & RemovableEntryFlag &&
+        (entry.flags() & UsedEntryFlag) == 0 &&
+        entry.role() == ItemEntryRole &&
+        entry.entryTypeName() != QString(Hs::packageTypeName)) {
+           
+        mErrorCode = mProxy->touch(entry);
+        if (mErrorCode == ServerTerminated) {
+            if (!mProxy->connect()) {
+                if (mNotifierProxy) {
+                    mNotifierProxy->connectSessions();
+                }
+                mErrorCode = mProxy->touch(entry);
             }
-            mErrorCode = mProxy->touch(entry);
-        }
+        }        
     }
 
     qDebug() << "CaServicePrivate::touch mErrorCode:" << mErrorCode;
@@ -1368,14 +1368,13 @@ int CaServicePrivate::executeCommand(const CaEntry &entry,
         return 0;
     }    
     
-    if (command == caCmdOpen) {
-        touch(entry);
-    }
-
     int errorCode = mCommandHandler->execute(entry, 
             command, receiver, member);
     mErrorCode = CaObjectAdapter::convertErrorCode(errorCode);
     
+    if (command == caCmdOpen) {
+        touch(entry);
+    }
 
     qDebug() << "CaServicePrivate::executeCommand mErrorCode on return:"
              << mErrorCode;

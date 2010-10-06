@@ -16,7 +16,7 @@
  */
 
 #include <HbIcon>
-
+#include <HbParameterLengthLimiter>
 #include "caclient_defines.h"
 #include "caitemmodel.h"
 #include "caitemmodel_p.h"
@@ -489,8 +489,9 @@ QVariant CaItemModelPrivate::data(const QModelIndex &modelIndex,
             break;
         case CaItemModel::CollectionTitleRole:
             if (!pEntry->attribute(COLLECTION_TITLE_NAME).isNull()) {
-                variant = QVariant(pEntry->
-                    attribute(COLLECTION_TITLE_NAME).toUtf8());
+                variant = QVariant(
+                        HbParameterLengthLimiter(pEntry->attribute(COLLECTION_TITLE_NAME))
+                        .arg(this->rowCount()).arg(pEntry->text()));
             }
             else {
                 variant = QVariant(pEntry->text());
@@ -893,9 +894,9 @@ void CaItemModelPrivate::removeItem(int id)
 {
     CACLIENTTEST_FUNC_ENTRY("CaItemModelPrivate::removeItem");
     int row = mEntries.indexOf(id);
-    if (row >= 0) {
+    if (row >= 0 && rowCount() > 1) {
         m_q->beginRemoveRows(QModelIndex(), mEntries.indexOf(id),
-                             mEntries.indexOf(id));
+        mEntries.indexOf(id));
         mEntries.remove(id);
         m_q->endRemoveRows();
     } else {
@@ -1032,6 +1033,7 @@ void CaItemModelPrivate::updateModelItem(
             break;
     }
     emitEmpty(previousCount);
+    emitCountChange(previousCount);
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateModelItem");
 }
 

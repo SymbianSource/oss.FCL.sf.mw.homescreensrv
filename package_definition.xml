@@ -76,15 +76,13 @@
      <component id="ts_activitytsplugin" name="Task Switcher Activity Plugin" introduced="^4" filter="s60" class="plugin">
       <unit bldFile="taskswitcher/activitytsplugin" qt:proFile="activitytsplugin.pro"/>
      </component>
+     <component id="ts_devicedialogplugin" name="Task Switcher Device Dialog Plugin" introduced="^4" filter="s60" class="plugin">
+      <unit bldFile="taskswitcher/tsdevicedialogplugin" qt:proFile="tsdevicedialogplugin.pro"/>
+     </component>
      <component id="taskswitcher_rom" name="Task Switcher ROM" introduced="^4" filter="s60" class="config">
       <unit bldFile="taskswitcher/rom"/>
      </component>
-    </collection>
-   <collection id="tsdevicedialog" name="Task Switcher Device Dialog" level="plugin">
-     <component id="tsdevicedialog_build" name="Task Switcher Device Dialog Build" introduced="^4" filter="s60">
-      <unit bldFile="tsdevicedialog" qt:proFile="tsdevicedialog.pro"/>
-     </component>
-  </collection>
+   </collection>
     <collection id="homescreensrv_info" name="Home Screen Services Info" level="specific">
      <component id="homescreensrv_rom" name="Home Screen Services ROM" class="config" introduced="^4" filter="s60">
       <unit bldFile="rom"/>

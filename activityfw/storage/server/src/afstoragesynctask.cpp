@@ -67,36 +67,47 @@ void AfStorageSyncTask::SaveActivityL(CAfStorage& dataStorage, const RMessage2& 
     CAfEntry *entry = CAfEntry::NewLC(msg);
     msg.ReadL(1, bitmapHdl);
 
-    TInt hdl = bitmapHdl();
-    if (0 >= hdl) {
-        User::Leave(KErrCorrupt);
-    }
+    const TBool isValidBitmapHdl( 0 < bitmapHdl() );
     CFbsBitmap *bitmap = new (ELeave) CFbsBitmap;
     CleanupStack::PushL(bitmap);
-    User::LeaveIfError(bitmap->Duplicate(hdl));
+    if( !isValidBitmapHdl )
+        {
+        if( !(entry->Flags() & CAfEntry::Invisible) )
+            {
+            User::Leave(KErrCorrupt);
+            }
+        }
+    else
+        {
+        User::LeaveIfError( bitmap->Duplicate( bitmapHdl() ) );
+        }
     
     //all data is retrieved. compleate message to improve response time
     msg.Complete(KErrNone);
     
     // trap all other leaving methods to prevent completing message in ServiceError
     TRAP_IGNORE(
-        RBuf thumbnailPath;
-        CleanupClosePushL(thumbnailPath);
         DeleteActivityScreenshotL(dataStorage, 
                         entry->ApplicationId(), 
                         entry->ActivityId());
         
-        dataStorage.ThumbnailPathL(thumbnailPath, 
-                       dataStorage.Fs(), 
-                       entry->ApplicationId(), 
-                       entry->ActivityId(),
-                       entry->Flags() & CAfEntry::Persistent);
-                       
-        User::LeaveIfError(bitmap->Save(thumbnailPath));
-
-        entry->SetImageSrcL(thumbnailPath);
+        if( isValidBitmapHdl ) 
+            {
+            RBuf thumbnailPath;
+            CleanupClosePushL(thumbnailPath);
+            
+            dataStorage.ThumbnailPathL(thumbnailPath, 
+                           dataStorage.Fs(), 
+                           entry->ApplicationId(), 
+                           entry->ActivityId(),
+                           entry->Flags() & CAfEntry::Persistent);
+                                   
+            User::LeaveIfError(bitmap->Save(thumbnailPath));
+            entry->SetImageSrcL(thumbnailPath);
+            CleanupStack::PopAndDestroy(&thumbnailPath);
+            }
+        
         dataStorage.SaveActivityL(*entry);
-        CleanupStack::PopAndDestroy(&thumbnailPath);
     )
     CleanupStack::PopAndDestroy(bitmap);
     CleanupStack::PopAndDestroy(entry);

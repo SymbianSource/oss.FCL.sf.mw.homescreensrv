@@ -58,3 +58,6 @@ exportResources(./*.qm, resource/qt/translations)
 
 
 
+
+
+symbian:MMP_RULES += SMPSAFE

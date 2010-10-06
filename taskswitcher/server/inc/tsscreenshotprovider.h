@@ -16,9 +16,14 @@
 */
 #ifndef TSSCREENSHOTPROVIDER_H
 #define TSSCREENSHOTPROVIDER_H
+
+#include <w32std.h>
+
 #include "tsdatastorage.h"
 #include "tswindowgroupsobserver.h"
-#include <w32std.h>
+
+class MTsWindowGroupsMonitor;
+class CTsIdList;
 
 class CTsScreenshotProvider: public CWsGraphic,
                              public MTsWindowGroupsObserver
@@ -36,6 +41,7 @@ public://from CWsGraphic
 
 private:
     CTsScreenshotProvider(MTsDataStorage&, MTsWindowGroupsMonitor&);
+    void ConstructL();
     void HandleMessageL(const TDesC8&);
     void HandleWindowGroupChangedL( MTsResourceManager &aResources, 
                                     const MTsRunningApplicationStorage& aStorage );
@@ -44,6 +50,7 @@ private:
 private:
     MTsDataStorage& iStorage;
     MTsWindowGroupsMonitor& iMonitor;
+    CTsIdList* iCache;
 };
 
 #endif //TSSCREENSHOTTASK_H

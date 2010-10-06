@@ -28,7 +28,9 @@
 #include <afactivitylauncher.h>
 
 #include "tsbacksteppingfilter.h"
-
+#include "tsrunningapp.h"
+#include "tsrunningappstorage.h"
+#include "tsresourcemanager.h"
 /**
  * String to switch hsapplication to IDLE state using activity framework
  */
@@ -69,7 +71,7 @@ CTsBackstepping* CTsBackstepping::NewLC( MTsWindowGroupsMonitor& aMonitor )
  */
 CTsBackstepping::CTsBackstepping( MTsWindowGroupsMonitor &aMonitor )
 :
-CTsWindowGroupsObserver( aMonitor ), iHsWasFirst(ETrue)
+CTsWindowGroupsObserverBase( aMonitor ), iHsWasFirst(ETrue)
     {
     }
 

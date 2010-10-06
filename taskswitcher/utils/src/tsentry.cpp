@@ -265,15 +265,16 @@ CFbsBitmap* CTsEntry::Screenshot() const
 }
 
 // --------------------------------------------------------------------------
-// CTsFswEntry::thumbnailCreated
-// --------------------------------------------------------------------------
-//
-void CTsEntry::thumbnailCreated(const CFbsBitmap& aThumbnail)
-{
+/**
+ * Interface implementation
+ * @see MTsThumbnailObserver::ThumbnailCreated( const CFbsBitmap& )
+ */
+void CTsEntry::ThumbnailCreated(const CFbsBitmap& aThumbnail)
+    {
     mScreenshot->Reset();
     mScreenshot->Duplicate(aThumbnail.Handle());
     RefreshUpdateTimestamp();
     mObserver.DataChanged();
-}
+    }
 
 // end of file

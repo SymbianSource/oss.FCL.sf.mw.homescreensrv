@@ -58,7 +58,7 @@ void CTsScreenshotPlugin::ConstructL( MWsGraphicDrawerEnvironment& aEnv,
                              TWservCrEvent::EWindowGroupChanged |
                              TWservCrEvent::EDeviceOrientationChanged);
     iWindowGroupId = KInvalidGroupId;
-    iBlockedList = CTsIdList::NewL(); 
+    iAllowedList = CTsIdList::NewL(); 
     }
 
 
@@ -68,7 +68,7 @@ void CTsScreenshotPlugin::ConstructL( MWsGraphicDrawerEnvironment& aEnv,
  */
 CTsScreenshotPlugin::~CTsScreenshotPlugin()
     {
-    delete iBlockedList;
+    delete iAllowedList;
     Env().UnregisterEventHandler(this);
     iCache.ResetAndDestroy();
     }
@@ -118,11 +118,11 @@ void CTsScreenshotPlugin::HandleMessageL( const TDesC8& aMsg )
             }
         CleanupStack::PopAndDestroy( screenshotMsg );
         }
-    else if( IgnoreWindowGroups == function )
+    else if( AllowedWindowGroups == function )
         {
         CTsIdList* list = CTsIdList::NewLC( msgStream );
-        delete iBlockedList;
-        iBlockedList = list;
+        delete iAllowedList;
+        iAllowedList = list;
         CleanupStack::Pop( list );
         }
     CleanupStack::PopAndDestroy( &msgStream );
@@ -140,12 +140,15 @@ void CTsScreenshotPlugin::DoHandleEvent(const TWservCrEvent& aEvent)
         if( KInvalidGroupId != iWindowGroupId )
             {
             NotifyWindowGroupToBackground( iWindowGroupId );
-            TakeScreenshot( iWindowGroupId );
+            if(iAllowedList->IsPresent(iWindowGroupId))
+                {
+                TakeScreenshot( iWindowGroupId );
+                }
             }
         iWindowGroupId = aEvent.WindowGroupIdentifier();
         break;
     case TWservCrEvent::EDeviceOrientationChanged:
-        if( !iBlockedList->IsPresent( iWindowGroupId ) )
+        if( iAllowedList->IsPresent( iWindowGroupId ) )
             {
             TakeScreenshot( iWindowGroupId );
             }

@@ -20,29 +20,26 @@
 #include <apgtask.h>
 
 #include "tsrunningappmodel.h"
-
-#include "tsrunningappstorage.h"
-
+#include "tsrunningappstorageimp.h"
 #include "tsdatalist.h"
 #include "tsmodelobserver.h"
 #include "tsscreenshotprovider.h"
+#include "tsresourcemanager.h"
 
 CTsRunningAppModel *CTsRunningAppModel::NewL( MTsResourceManager& aResources, 
-                                              MTsWindowGroupsMonitor& aMonitor,
                                               TsEnv& aEnv )
     {
-    CTsRunningAppModel *self = CTsRunningAppModel::NewLC( aResources, aMonitor, aEnv );
+    CTsRunningAppModel *self = CTsRunningAppModel::NewLC( aResources, aEnv );
     CleanupStack::Pop( self );
     return self;
     }
 
 CTsRunningAppModel *CTsRunningAppModel::NewLC( MTsResourceManager& aResources, 
-                                               MTsWindowGroupsMonitor& aMonitor,
                                                TsEnv& aEnv )
     {
     CTsRunningAppModel *self = new (ELeave) CTsRunningAppModel( aResources );
     CleanupStack::PushL( self );
-    self->ConstructL( aResources, aMonitor, aEnv );
+    self->ConstructL( aResources, aEnv );
     return self;
     }
 
@@ -59,11 +56,11 @@ CTsRunningAppModel::CTsRunningAppModel( MTsResourceManager& aResources )
     }
 
 void CTsRunningAppModel::ConstructL( MTsResourceManager& aResources, 
-                                     MTsWindowGroupsMonitor& aMonitor,
                                      TsEnv& aEnv)
     {
-    iDataList = CTsDataList::NewL( aResources, aMonitor, *this, aEnv );
-    iScreenshotProvider = CTsScreenshotProvider::NewL(*iDataList, aMonitor );
+    iDataList = CTsDataList::NewL( aResources, *this, aEnv );
+    iScreenshotProvider = 
+        CTsScreenshotProvider::NewL(*iDataList, aResources.WsMonitor());
     
     RArray<RWsSession::TWindowGroupChainInfo> wgList;
     CleanupClosePushL( wgList );

@@ -18,6 +18,7 @@
 #include <e32property.h>
 #include <f32file.h>
 #include <badesca.h>
+#include <driveinfo.h>
 
 #include "causifscanner.h"
 #include "cainnerentry.h"
@@ -162,7 +163,48 @@ void CCaUsifScanner::CreateCaEntryFromEntryL(
     if( aEntry->IsRemovable() )
         {
         aCaEntry->SetFlags( aCaEntry->GetFlags() | ERemovable );
+        
+        TChar drive;
+        RBuf drives;        
+        drives.CreateL(KMaxFileName);
+        CleanupClosePushL( drives );
+        const TInt driveListLen(aEntry->InstalledDrives().Length());
+        for (TInt i( 0 ); i < driveListLen; ++i) 
+            {
+            // Skip PhoneMemory and if we have some icon resolved
+            if (aEntry->InstalledDrives()[i] != '\0' && drives.Length() == 0
+                    && (DriveInfo::GetDefaultDrive(
+                            DriveInfo::EDefaultPhoneMemory, drive ) == KErrNone
+                            && TChar('A'+ i) != TChar(drive)))
+                {
+                TUint drvStatus( 0 );
+                int err = DriveInfo::GetDriveStatus( iFs, i, drvStatus );
+                if ( ( drvStatus & DriveInfo::EDriveInternal ) &&
+                     ( drvStatus & DriveInfo::EDriveExternallyMountable ) ){
+                    // Mass Storage
+                    drives.Append(_L("qtg_mono_hard_disk"));
+                    }
+                else if(drvStatus & DriveInfo::EDriveRemote ||
+                        drvStatus & DriveInfo::EDriveUsbMemory)
+                    {
+                    // Usb or remote drive
+                    drives.Append(_L("qtg_mono_usb"));
+                    }
+                else if( ( drvStatus & DriveInfo::EDriveRemovable ) &&
+                     ( drvStatus & DriveInfo::EDriveExternallyMountable ) )
+                    {
+                    // MMC
+                    drives.Append(_L("qtg_mono_memory_in_use"));
+                    }
+                }
+            }
+        if (drives.Length() > 0) {
+            aCaEntry->AddAttributeL( KCaAttrDrivesIconIds, drives );
         }
+        CleanupStack::PopAndDestroy( &drives );
+        }
+
+    
     // entries obtained with usif should have component id.
     //it's needed for uninstalling
     RBuf compIdDesc;
@@ -367,3 +409,4 @@ void CCaUsifScanner::RemoveEntriesFromDbL(
     iStorageProxy.RemoveL( entriesId );
     CleanupStack::PopAndDestroy( &entriesId );
     }
+

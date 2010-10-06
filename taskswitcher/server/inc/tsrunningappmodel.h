@@ -21,8 +21,7 @@
 #include "tsdatastorage.h"
 #include "tsdataobserver.h"
 
-#include "tswindowgroupsobserver.h"
-
+class MTsResourceManager;
 class CTsDataList;
 class CTsScreenshotProvider;
 class TsEnv;
@@ -35,25 +34,20 @@ NONSHARABLE_CLASS(CTsRunningAppModel) : public CBase,
 
 public:
     static CTsRunningAppModel *NewL( MTsResourceManager &aResources, 
-                                     MTsWindowGroupsMonitor &aMonitor,
                                      TsEnv& aEnv );
     static CTsRunningAppModel *NewLC( MTsResourceManager &aResources, 
-                                      MTsWindowGroupsMonitor &aMonitor,
                                       TsEnv& aEnv );
     ~CTsRunningAppModel();
     
 private:
     CTsRunningAppModel( MTsResourceManager &aResources );
     void ConstructL( MTsResourceManager &aResources, 
-                     MTsWindowGroupsMonitor &aMonitor,
                      TsEnv& aEnv);
 
-// MHsDataObserver interface implementation
-public:
+public: // MHsDataObserver interface implementation
     virtual void DataChanged();
-    
-// MTsDataStorage interface implementation    
-public:
+
+public: // MTsDataStorage interface implementation
     TBool IsSupported( TInt aFunction ) const;
     void HandleDataL( TInt aFunction, RReadStream& aDataStream );
     

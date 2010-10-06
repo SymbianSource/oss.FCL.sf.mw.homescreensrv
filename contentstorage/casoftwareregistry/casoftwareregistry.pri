@@ -14,6 +14,6 @@
 # Description:
 #
 
-HEADERS += ../../homescreensrv_plat/contentstorage_api/casoftwareregistry.h
-HEADERS += ../../homescreensrv_plat/contentstorage_api/cauninstallnotifier.h
+HEADERS += ../../homescreensrv_plat/contentstorage_api/inc/casoftwareregistry.h
+HEADERS += ../../homescreensrv_plat/contentstorage_api/inc/cauninstallnotifier.h
 SOURCES += ./src/*.cpp

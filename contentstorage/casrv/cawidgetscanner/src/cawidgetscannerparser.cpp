@@ -109,8 +109,6 @@ RWidgetArray& CCaWidgetScannerParser::WidgetsScanL(
             ScanOnDriveL( currentDriveLetter );
             }
         }
-    
-    
     return iWidgets;
     }
 
@@ -204,8 +202,8 @@ void CCaWidgetScannerParser::ParseDirectoryL( const TDesC& aDirectoryName,
                 }
             else
                 {
-                TRAP_IGNORE( ParseManifestFileL( manifestFilePathName, aDirectoryName,
-                                aDrive ) );
+                TRAP_IGNORE( ParseManifestFileL(
+                    manifestFilePathName, aDirectoryName, aDrive ) );
                 }
             CleanupStack::PopAndDestroy( &manifestFilePathName );
             }
@@ -297,7 +295,7 @@ void CCaWidgetScannerParser::ParseManifestFileL( const TDesC& aFilePath,
             }
         CleanupStack::PopAndDestroy( &childElementList );
 
-        //set path for hs to use, trim last 2 chars (doubleslash)
+        // Set path for hs to use, trim the last character (backslash).
         HBufC *libraryPath = GetManifestDirectoryPathLC( aPackageUid, aDrive );
         widgetDescriptor->SetPathL(libraryPath->Mid(0,libraryPath->Length()-1));
         CleanupStack::PopAndDestroy(libraryPath);
@@ -772,6 +770,5 @@ HBufC* CCaWidgetScannerParser::GetThemableGraphicsNameLC(
     
     return result;
     }
-
 
 //  End of File

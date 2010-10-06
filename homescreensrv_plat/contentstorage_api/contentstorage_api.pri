@@ -15,15 +15,15 @@
 #
 
 PLATFORM_HEADERS += \
-                      contentstorage_api/caclient_global.h \
-                      contentstorage_api/cadefs.h \
-                      contentstorage_api/caentry.h \
-                      contentstorage_api/caicondescription.h \
-                      contentstorage_api/canotifier.h \
-                      contentstorage_api/canotifierfilter.h \
-                      contentstorage_api/caquery.h \
-                      contentstorage_api/caservice.h \
-                      contentstorage_api/caitemmodel.h \
-                      contentstorage_api/camenuiconutility.h \
-                      contentstorage_api/casoftwareregistry.h \
-                      contentstorage_api/cauninstallnotifier.h 
+                      contentstorage_api/inc/caclient_global.h \
+                      contentstorage_api/inc/cadefs.h \
+                      contentstorage_api/inc/caentry.h \
+                      contentstorage_api/inc/caicondescription.h \
+                      contentstorage_api/inc/canotifier.h \
+                      contentstorage_api/inc/canotifierfilter.h \
+                      contentstorage_api/inc/caquery.h \
+                      contentstorage_api/inc/caservice.h \
+                      contentstorage_api/inc/caitemmodel.h \
+                      contentstorage_api/inc/camenuiconutility.h \
+                      contentstorage_api/inc/casoftwareregistry.h \
+                      contentstorage_api/inc/cauninstallnotifier.h 

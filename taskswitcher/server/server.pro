@@ -49,17 +49,17 @@ SOURCES +=  src/tsenv.cpp \
             src/tsservicesproviderconfig.cpp \
             src/tsserviceobserver.cpp \
             src/tsmodelitemkeymsg.cpp \
-            src/tswindowgroupsmonitor.cpp \
-            src/tsrunningapp.cpp \
-            src/tsrunningappstorage.cpp \
+            src/tswindowgroupsmonitorimp.cpp \
+            src/tsrunningappimp.cpp \
+            src/tsrunningappstorageimp.cpp \
+            src/tsresourcemanagerimp.cpp \
             ../utils/src/tsentrykey.cpp \
             ../utils/src/tsentrykeygenerator.cpp \
             ../utils/src/tsentry.cpp \
             ../utils/src/tsscreenshotmsg.cpp \
             ../utils/src/tsunregscreenshotmsg.cpp \
             ../utils/src/tsvisibilitymsg.cpp \
-            ../utils/src/tswindowgroupsobserver.cpp \
-            ../utils/src/tsresourcemanager.cpp \
+            ../utils/src/tswindowgroupsobserverbase.cpp \
             ../utils/src/tsthumbnailprovider.cpp \
             ../utils/src/tsidlist.cpp \
             
@@ -85,9 +85,10 @@ HEADERS +=  inc/tsenv.h \
             inc/tsservicesproviderconfig.h \
             inc/tsserviceobserver.h \
             inc/tsmodelitemkeymsg.h \
-            inc/tswindowgroupsmonitor.h \
-            inc/tsrunningapp.h \
-            inc/tsrunningappstorage.h \
+            inc/tswindowgroupsmonitorimp.h \
+            inc/tsrunningappimp.h \
+            inc/tsrunningappstorageimp.h \
+            inc/tsresourcemanagerimp.h \
             ../utils/inc/tsdataobserver.h \
             ../utils/inc/tsentry.h \
             ../utils/inc/tsentrykey.h \
@@ -96,8 +97,7 @@ HEADERS +=  inc/tsenv.h \
             ../utils/inc/tsscreenshotmsg.h \
             ../utils/inc/tsunregscreenshotmsg.h \
             ../utils/inc/tsvisibilitymsg.h \
-            ../utils/inc/tsresourcemanager.h \
-            ../utils/inc/tswindowgroupsobserver.h \
+            ../utils/inc/tswindowgroupsobserverbase.h \
             ../utils/inc/tsthumbnailprovider.h \
             ../utils/inc/tsthumbnailobserver.h \
             ../utils/inc/tsidlist.h \
@@ -119,3 +119,6 @@ symbian {
     TARGET.CAPABILITY = All -TCB
 }
 
+
+
+symbian:MMP_RULES += SMPSAFE

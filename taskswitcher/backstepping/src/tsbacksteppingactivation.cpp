@@ -22,7 +22,7 @@
 #include "tsbacksteppingactivation.h"
 #include "tsbackstepping.h"
 
- // ============================ MEMBER FUNCTIONS ===============================
+ 
 // -----------------------------------------------------------------------------
 // CBacksteppingActivation::NewL
 // Two-phased constructor.

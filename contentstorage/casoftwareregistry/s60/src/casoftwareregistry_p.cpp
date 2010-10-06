@@ -293,7 +293,6 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
         XQConversions::s60DescToQString(entry.Vendor());
 
     QString drives;
-    QString drv;
     TChar drive;
 
     const TInt driveListLen(entry.InstalledDrives().Length());
@@ -301,9 +300,8 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
         if (entry.InstalledDrives()[i] != '\0') {
 
             if (!drives.isEmpty()) {
-                drives = drives.append(",");
+                drives = drives.append("\n");
             }
-            drv = QString(QChar('A'+ i)).append(":");
             if (DriveInfo::GetDefaultDrive(
                     DriveInfo::EDefaultPhoneMemory, drive ) == KErrNone
                     && QChar('A'+ i) == QChar(drive)) {

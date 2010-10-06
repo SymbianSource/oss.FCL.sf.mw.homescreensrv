@@ -24,13 +24,14 @@
 
 class QObject;
 class TsAbstractModel;
+class MTsResourceManager;
 
 class CTsService: public CBase,
                   public MTsModel,
                   public MTsDataObserver
 {
 public:
-    static CTsService* NewLC( QObject* model );
+    static CTsService* NewLC( MTsResourceManager& aResources, QObject* model );
     ~CTsService();
 
 public: //from MTsDataObserver
@@ -54,7 +55,7 @@ protected: //from MTsModel
     
 private:
     CTsService();
-    void ConstructL( QObject* aModel );
+    void ConstructL( MTsResourceManager& aResources, QObject* aModel );
     TInt IntValueL( TInt aOffset, const char* aKey ) const;
     TTime TimeValueL( TInt aOffset, const char* aKey ) const;
     const TDesC& StringValueL( TInt aOffset, const char* aKey ) const;

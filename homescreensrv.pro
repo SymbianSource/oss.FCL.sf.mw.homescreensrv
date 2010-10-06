@@ -23,7 +23,6 @@ SUBDIRS  += homescreensrv_plat \
 symbian:SUBDIRS += activityfw
 symbian:SUBDIRS += taskswitcher
 symbian:SUBDIRS += hsappkeyhandler
-symbian:SUBDIRS += tsdevicedialog
 
 exists(tsrc/tsrc.pro): SUBDIRS  += tsrc
 

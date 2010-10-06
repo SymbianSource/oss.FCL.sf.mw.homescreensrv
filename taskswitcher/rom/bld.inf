@@ -19,7 +19,9 @@
 
 PRJ_EXPORTS
 
-tstaskmonitor_core.iby  CORE_APP_LAYER_IBY_EXPORT_PATH(tstaskmonitor_core.iby)
+tstaskmonitor_core.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(tstaskmonitor_core.iby)
+tsdevicedialog_core.iby  CORE_MW_LAYER_IBY_EXPORT_PATH(tsdevicedialog_core.iby)
+tsdevicedialog_resources.iby  LANGUAGE_MW_LAYER_IBY_EXPORT_PATH(tsdevicedialog_resources.iby)
 ../sis/stubs/taskmonitor_stub.sis  /epoc32/release/winscw/udeb/z/system/install/taskmonitor_stub.sis
 ../sis/stubs/taskmonitor_stub.sis  /epoc32/data/z/system/install/taskmonitor_stub.sis
 

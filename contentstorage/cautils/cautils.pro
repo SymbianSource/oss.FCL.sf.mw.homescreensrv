@@ -40,3 +40,6 @@ LIBS += -leuser \
 CONFIG -= stl
 include(cautils.pri)
 }
+
+
+symbian:MMP_RULES += SMPSAFE

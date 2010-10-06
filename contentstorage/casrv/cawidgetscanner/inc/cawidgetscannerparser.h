@@ -236,8 +236,6 @@ private:
             const TDesC & aPackageUid,
             TChar& aDrive ) const;
 
-
-
 private:
     // Data  
 
