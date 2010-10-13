@@ -19,7 +19,6 @@
 #include "tsrunningappserver.h"
 #include "tsrunningappsession.h"
 #include "tsresourcemanagerimp.h"
-#include "tsbacksteppingactivation.h"
 #include "tswindowgroupsmonitorimp.h"
 #include "tsmodel.h"
 #include "tsstorage.h"
@@ -44,7 +43,6 @@ CServer2(EPriorityStandard)
  */
 CTsRunningAppServer::~CTsRunningAppServer()
     {
-    delete iBacksteppingEngine;
     delete iStorage;
     delete iAppsModel;
     delete iServiceProvider;
@@ -91,8 +89,6 @@ void CTsRunningAppServer::ConstructL()
 
     // load initial data
     iStorage->DataChanged();
-
-    TRAP_IGNORE(iBacksteppingEngine = CTsBacksteppingActivation::NewL(iResources->WsMonitor());)
     }
 
 // -----------------------------------------------------------------------------

@@ -60,7 +60,6 @@ private:
     CTsStorage* iStorage; 
     CTsServiceProvider* iServiceProvider;
     CTsRunningAppModel* iAppsModel;
-    CBase *iBacksteppingEngine;
 };
 
 #endif // RUNNINGAPPSERVER_H

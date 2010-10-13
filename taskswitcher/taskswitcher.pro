@@ -19,8 +19,7 @@ TEMPLATE = subdirs
 CONFIG += ordered
 SUBDIRS += client
 symbian {
-    SUBDIRS += backstepping \
-               server \
+    SUBDIRS += server \
                screenshotplugin \
                activitytsplugin \
                tsdevicedialogplugin \

@@ -27,7 +27,6 @@ INCLUDEPATH +=  inc \
                 ../inc \
                 ../../inc \
                 ../utils/inc \
-                ../backstepping/inc \
                 
 SOURCES +=  src/tsenv.cpp \
             src/tsdataobservertask.cpp \
@@ -103,7 +102,6 @@ HEADERS +=  inc/tsenv.h \
             ../utils/inc/tsidlist.h \
 
 LIBS += -lxqutils \
-        -ltsbackstepping \
         -laknicon \
         -lfbscli \          #for CFbsBitmap
         -lestor \           #for RDesReadStream

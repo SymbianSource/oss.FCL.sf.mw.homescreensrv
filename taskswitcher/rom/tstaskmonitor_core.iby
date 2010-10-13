@@ -27,9 +27,6 @@ file=ABI_DIR\BUILD_DIR\activitytsplugin.dll					       SHARED_LIB_DIR\activityts
 data=\epoc32\data\z\resource\qt\plugins\activitytsplugin.qtplugin    resource\qt\plugins\activitytsplugin.qtplugin
 data=\epoc32\data\z\resource\taskswitcher\activitytsplugin.xml    resource\taskswitcher\activitytsplugin.xml
 
-file=ABI_DIR\BUILD_DIR\tsbackstepping.dll                   SHARED_LIB_DIR\tsbackstepping.dll
-
-
 ECOM_PLUGIN( tsscreenshotplugin.dll, tsscreenshotplugin.rsc )
 
 // stub sis

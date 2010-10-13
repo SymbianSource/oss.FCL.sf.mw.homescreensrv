@@ -64,9 +64,6 @@
      <component id="ts_client" name="Task Switcher Client" introduced="^4" filter="s60">
       <unit bldFile="taskswitcher/client" qt:proFile="client.pro"/>
      </component>
-     <component id="ts_backstepping" name="Task Switcher Backstepping" introduced="^4" filter="s60">
-      <unit bldFile="taskswitcher/backstepping" qt:proFile="backstepping.pro"/>
-     </component>
      <component id="ts_server" name="Task Switcher Server" introduced="^4" filter="s60">
       <unit bldFile="taskswitcher/server" qt:proFile="server.pro"/>
      </component>
