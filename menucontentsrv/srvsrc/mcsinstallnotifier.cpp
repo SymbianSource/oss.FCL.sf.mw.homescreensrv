@@ -17,67 +17,68 @@
 
 #include <javadomainpskeys.h>
 #include "mcsinstallnotifier.h"
-#include "mcsinstallstrategy.h"
+#include <sacls.h>
 
+CMcsInstallNotifier* CMcsInstallNotifier::NewL(MMcsInstallListener& aListener, TInt aKey)
+	{
+	CMcsInstallNotifier* self = new (ELeave) CMcsInstallNotifier( aListener, aKey );
+	CleanupStack::PushL( self );
+	self->ConstructL( );
+	CleanupStack::Pop( self );
 
-CMcsInstallNotifier* CMcsInstallNotifier::NewL(
-		MMcsInstallListener& aListener, TNotificationType aNotificationType )
-    {
-    CMcsInstallNotifier* self = new ( ELeave ) CMcsInstallNotifier( aListener );
-    CleanupStack::PushL( self );
-    self->ConstructL( aNotificationType );
-    CleanupStack::Pop( self );
-    return self;
-    }
+	return self;
+	}
 
 CMcsInstallNotifier::~CMcsInstallNotifier()
-    {
-    Cancel();
-    iProperty.Close();
-    delete iNotifierStrategy;
-    }
+	{
+    Cancel( );
+    iProperty.Close( );
+	}
 
-CMcsInstallNotifier::CMcsInstallNotifier( MMcsInstallListener& aListener ) :
-    CActive( EPriorityNormal ), iListener( aListener )
-    {
-    CActiveScheduler::Add( this );
-    SetActive();
-    }
+CMcsInstallNotifier::CMcsInstallNotifier( MMcsInstallListener& aListener, TInt aKey ) : 
+    CActive(EPriorityNormal), iListener(aListener)
+	{
+	iKey = aKey;
+	// Prepare automatically
+	iProperty.Attach( KUidSystemCategory, iKey );
+	CActiveScheduler::Add( this );
+	iProperty.Subscribe( iStatus );
+	SetActive( );
+	}
 
-void CMcsInstallNotifier::ConstructL( TNotificationType aNotificationType )
-    {
-    switch( aNotificationType )
-		{
-        case ESisInstallNotification:
-        	iNotifierStrategy = CMcsSwiInstallStrategy::NewL(
-        	        iProperty, iListener );
-            break;
-        case EJavaInstallNotification:
-        	iNotifierStrategy = CMcsJavaInstallStrategy::NewL(
-        	        iProperty, iListener );
-            break;
-        default:
-        	User::Leave( KErrNotSupported );
-            break;
-		}
-    iProperty.Subscribe( iStatus );
-    }
+
+void CMcsInstallNotifier::ConstructL()
+	{
+
+	}
+
 
 void CMcsInstallNotifier::DoCancel()
-    {
-    iProperty.Cancel();
-    }
+	{
+    iProperty.Cancel( );
+	}
+
 
 void CMcsInstallNotifier::RunL()
-    {
-    SetActive();
-    iProperty.Subscribe( iStatus );
-    iNotifierStrategy->NotifyListenerL();
-    }
+	{
+	SetActive( );
+	iProperty.Subscribe( iStatus );
+	TInt status;
+	User::LeaveIfError( iProperty.Get( KUidSystemCategory,
+			iKey, status ) );
 
-TInt CMcsInstallNotifier::RunError( TInt /*aError*/)
-    {
-    // No need to do anything
+	if (( iKey == KPSUidJavaLatestInstallation ) || 
+			((status & EInstOpInstall )||(status & EInstOpUninstall )) && 
+			  (status & EInstOpStatusSuccess) )
+		{
+		iListener.HandleInstallNotifyL(status);
+		}
+
+	}
+
+
+TInt CMcsInstallNotifier::RunError( TInt /*aError*/ )
+	{
+    // No need to do anything      
     return KErrNone;
-    }
-
+	}

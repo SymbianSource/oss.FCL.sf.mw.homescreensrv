@@ -49,13 +49,9 @@ PRJ_EXPORTS
 
 
 // Generic configuration interface for component cenrep settings  
-#if defined(FF_LAYOUT_480_640_TOUCH_VGA4) || defined(FF_LAYOUT_640_480_TOUCH_VGA4)
-../conf/hsps_vga.confml          APP_LAYER_CONFML(hsps.confml)
-#else
-../conf/hsps_qhd.confml          APP_LAYER_CONFML(hsps.confml)
-#endif
-
+../conf/hsps.confml          APP_LAYER_CONFML(hsps.confml)
 ../conf/hsps_200159c9.crml   APP_LAYER_CRML(hsps_200159c9.crml)
+
 
 // Exports for SAPI impl
 ../inc/hspsdomattribute.h           MW_LAYER_PLATFORM_EXPORT_PATH(hspsdomattribute.h)

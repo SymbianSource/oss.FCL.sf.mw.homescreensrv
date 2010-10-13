@@ -186,14 +186,7 @@ void CMCSPluginSettingsContainer::HandleChangeCommandL()
                     {
                         appListIndex = -1;
                     }
-                
-                // if the selected item is hidden, set selected item to -1
-                TBool itemHidden = iModel->BkmList()->ItemHidden( appListIndex );
-                if ( itemHidden )
-                    {
-                    appListIndex = -1;
-                    }
-                
+
                 changed = HandleBookmarkChangeCommandL( appListIndex, current );
 
                 }
@@ -477,18 +470,6 @@ void CMCSPluginSettingsContainer::HandleNotifyL()
         RMenuNotifier::EItemsAddedRemoved,
         iNotifyWatcher->iStatus );
     iNotifyWatcher->WatchNotify( this );
-    }
-
-// ---------------------------------------------------------------------------
-// Sets the currently selected item
-// ---------------------------------------------------------------------------
-//
-void CMCSPluginSettingsContainer::SetCurrentItemIndex( TInt aIdx )
-    {
-    if( iListBox )
-        {
-        iListBox->SetCurrentItemIndex( aIdx );
-        }
     }
 
 // End of File.

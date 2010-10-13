@@ -624,8 +624,7 @@ TBool ChspsThemeServer::HandleDefinitionRespositoryEvent( ThspsRepositoryInfo aR
 
     if( aRepositoryInfo.iEventType & EhspsODTUpdated ||
         aRepositoryInfo.iEventType & EhspsODTModified ||
-        aRepositoryInfo.iEventType & EhspsPluginReplaced ||
-        aRepositoryInfo.iEventType == EhspsODTActivated )
+        aRepositoryInfo.iEventType & EhspsPluginReplaced )
         {
         SetResourceFileCopyRequired( aRepositoryInfo.iAppUid );
         }    
@@ -3643,7 +3642,7 @@ TBool ChspsThemeServer::HandleFamilyChangeL(
                     }                                                     
                 if ( !alreadyIncluded )
                     {                
-                    notificationTargets.AppendL( header );
+                    notificationTargets.Append( header );
 
                     // Check if active configuration supports the current family
                     TBool updateRequired = ETrue;

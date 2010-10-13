@@ -50,7 +50,9 @@ _LIT( KResourceDrive, "Z:" );
 _LIT( KResourceFile, "mcspluginres.rsc" );
 _LIT( KResPath, "\\resource\\" );
 _LIT( KMMApplication, "mm://" );
-_LIT( KSetOpenItemString, "!openitem?id="  );
+_LIT( KHideExit2, "&exit=hide" );
+_LIT( KSetFocusString, "!setfocus?applicationgroup_name=" );
+_LIT( KApplicationGroupName, "applicationgroup_name" );
 _LIT( KIcon, "icon" );
 _LIT( KMenuAttrUndefUid, "0x99999991" );
 _LIT( KMenuIconFile, "aimcsplugin.mif" );
@@ -60,20 +62,12 @@ _LIT( KMenuMailboxIconId, "16388" );
 _LIT( KMenuMailboxMaskId, "16389" );
 _LIT( KMenuTypeMailbox, "menu:mailbox" );
 _LIT( KPrefix, "0x" );
-_LIT( KMenuAttrInvokeSettingsUid, "0x99999990" );
 
 const TUid KHomescreenUid = { AI_UID3_AIFW_COMMON };
 const TUid KMMUid = { 0x101F4CD2 };
 const TUid KMCSCmailUidValue = { 0x2001E277 };
 const TUid KMCSCmailMailboxViewIdValue = { 0x2 };
 const TUid KBrowserUid = { 0x10008D39 };
-
-// maximum custom message length
-const TInt KMaxCustomMsg = 256;
-const TInt KUndefinedIndex = -1;
-
-// maximun integer character length
-const TInt  KMaxLength = 12;
 
 // ======== LOCAL FUNCTIONS ========
 // ----------------------------------------------------------------------------
@@ -361,7 +355,7 @@ CMenuItem* CMCSPluginEngine::CreateBkmItemL( CMCSData& aData )
         {        
         item = CMenuItem::CreateL( iMenu, KMenuTypeUrl, 0, 0 );
         CleanupStack::PushL( item );
-        item->SetAttributeL( KMenuAttrLongName, *aData.Name() );
+        item->SetAttributeL( KMenuAttrLongName, aData.Name() );
         item->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
         item->SetAttributeL( KMenuAttrIconId, KMenuBookmarkIconId );
         item->SetAttributeL( KMenuAttrMaskId, KMenuBookmarkMaskId );
@@ -381,7 +375,7 @@ CMenuItem* CMCSPluginEngine::CreateMailboxItemL( CMCSData& aData )
         {   
         item = CMenuItem::CreateL( iMenu, KMenuTypeMailbox, 0, 0 );
         CleanupStack::PushL( item );
-        item->SetAttributeL( KMenuAttrLongName, *aData.Name() );
+        item->SetAttributeL( KMenuAttrLongName, aData.Name() );
         item->SetAttributeL( KMenuAttrIconFile, KMenuIconFile );
         item->SetAttributeL( KMenuAttrIconId, KMenuMailboxIconId );
         item->SetAttributeL( KMenuAttrMaskId, KMenuMailboxMaskId );
@@ -409,14 +403,7 @@ CGulIcon* CMCSPluginEngine::ItemIconL( CMenuItem* aMenuItem,
         TUint32 isHidden = flags & TMenuItem::EHidden;
         TUint32 isMissing = flags & TMenuItem::EMissing;
 
-        TBool attrExists = ETrue;
-        TPtrC uid = aMenuItem->GetAttributeL(KMenuAttrUid, attrExists);
-                
-        // if item is hidden or missing (mmc card removed)
-        // use "Undefined" icon instead
-        // for empty item it's own icon is shown
-        if ( iUndefinedItem && uid.Compare(KMenuAttrInvokeSettingsUid) != 0 && 
-                ( isHidden || isMissing ) )
+        if ( iUndefinedItem && ( isHidden || isMissing ) )
             {
             menuItem = iUndefinedItem;
             }
@@ -484,14 +471,9 @@ TPtrC CMCSPluginEngine::ItemTextL( CMenuItem* aMenuItem, const TDesC& aAttr )
         TUint32 isHidden = flags & TMenuItem::EHidden;
         TUint32 isMissing = flags & TMenuItem::EMissing;
 
-        TBool attrExists = ETrue;
-        TPtrC uid = aMenuItem->GetAttributeL(KMenuAttrUid, attrExists);
-                
         // if item is hidden or missing (mmc card removed)
         // use "Undefined" text instead
-        // for empty item it's own icon is shown
-        if ( iUndefinedItem && uid.Compare(KMenuAttrInvokeSettingsUid) != 0 && 
-                ( isHidden || isMissing ) )
+        if ( iUndefinedItem && ( isHidden || isMissing ) )
             {
             menuItem = iUndefinedItem;
             }
@@ -550,23 +532,7 @@ void CMCSPluginEngine::LaunchItemL( const TInt& aIndex )
         }
     else
         {
-        CMenuItem* item(CMenuItem::OpenL(iMenu, dataItem.MenuItem().Id()));
-        CleanupStack::PushL(item);
-        
-        TBool attrExists = ETrue;
-        
-        TPtrC uid = item->GetAttributeL(KMenuAttrUid, attrExists);
-        
-        // Show selected shortcut settings
-        if (uid.Compare(KMenuAttrInvokeSettingsUid) == 0)
-            {
-            TRAP_IGNORE( ShowSettingsL(aIndex + 1) );
-            }
-        else
-            {
-            LaunchMCSItemL(dataItem);
-            }
-        CleanupStack::PopAndDestroy(item);
+        LaunchMCSItemL( dataItem );
         }
     }
 
@@ -594,15 +560,25 @@ void CMCSPluginEngine::LaunchFolderItemL( CMCSData& aData )
     HBufC8* message; 
 
     // prepare message for launching folder
-    TBuf<KMaxLength>  itemId;
-    itemId.Num( item->Id() );
+    TBool hasApplicationGroupName( EFalse );
     
-    message = HBufC8::NewLC( KMMApplication().Length()
-                            + KSetOpenItemString().Length()
-                            + itemId.Length() );
+    TPtrC applicationGroupName( item->GetAttributeL(
+        KApplicationGroupName, hasApplicationGroupName ) );
+                                                      
+    if ( !hasApplicationGroupName )
+        {
+        return;
+        }
+    
+    message = HBufC8::NewLC( KMMApplication().Length() + 
+                             KSetFocusString().Length() +
+                             applicationGroupName.Length() + 
+                             KHideExit2().Length() );
+
     message->Des().Copy( KMMApplication );
-    message->Des().Append( KSetOpenItemString );
-    message->Des().Append( itemId );
+    message->Des().Append( KSetFocusString );
+    message->Des().Append( applicationGroupName );
+    message->Des().Append( KHideExit2 );
 
     // find MM application
     TApaTaskList taskList( CCoeEnv::Static()->WsSession() );
@@ -648,7 +624,7 @@ void CMCSPluginEngine::LaunchBookmarkItemL( CMCSData& aData )
     {
     StartEffect( KBrowserUid );
     
-    CSchemeHandler* urlHandler = CSchemeHandler::NewL( *aData.Value());    
+    CSchemeHandler* urlHandler = CSchemeHandler::NewL( aData.Value());    
     CleanupStack::PushL( urlHandler );
     urlHandler->HandleUrlStandaloneL();
     CleanupStack::PopAndDestroy( urlHandler );
@@ -740,6 +716,7 @@ void CMCSPluginEngine::HandleNotifyL()
         CMCSData& data( iPluginData->DataItemL( i ) );
         data.SetDirty( ETrue );
         }
+    iPluginData->UpdateDataL();
     
     iPlugin.PublishL();
     
@@ -792,22 +769,12 @@ void CMCSPluginEngine::SetBackupRestore( TBool aBackupRestore )
 // Launch General Settings plugin
 // ---------------------------------------------------------------------------
 //
-void CMCSPluginEngine::ShowSettingsL( const TInt aEditIdx )
+void CMCSPluginEngine::ShowSettingsL()
     { 
     TUid uid = {AI_UID_ECOM_IMPLEMENTATION_SETTINGS_MCSPLUGIN};
     
-    // format the custom message
-    // iInstanceUid/aEditIdx is the format
-    TBuf8<KMaxCustomMsg> msg;
-    msg.Append(iInstanceUid);
-    if( aEditIdx != KUndefinedIndex )
-        {
-        msg.Append('//');
-        msg.AppendFormat(_L8("%d"), aEditIdx);
-        }
-
     CGSLauncher* launcher = CGSLauncher::NewLC();
-    launcher->LaunchGSViewL ( uid, KHomescreenUid, msg );
+    launcher->LaunchGSViewL ( uid, KHomescreenUid, iInstanceUid );
     CleanupStack::PopAndDestroy( launcher );
     }
 

@@ -117,12 +117,7 @@ public:
      * Hanle notify
      */
     void HandleNotifyL();
-    
-    /**
-     * Sets currently selected index
-     */
-    void SetCurrentItemIndex(TInt aIdx);
-    
+
 private:
 
     /*

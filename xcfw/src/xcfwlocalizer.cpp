@@ -138,10 +138,9 @@ void CXCFWLocalizer::LoadDTDL(
     if( !BaflUtils::FileExists( aFileSystem, locfile->Des() ) )
         {
         RArray<TLanguage> langs;
-        CleanupClosePushL( langs );
         BaflUtils::GetDowngradePathL( aFileSystem, langcode, langs );
         //add current language to array for ROM fetching
-        langs.AppendL( langcode );
+        langs.Append( langcode );
         TInt current = langs.Count() - 1;
         do 
             {
@@ -166,8 +165,8 @@ void CXCFWLocalizer::LoadDTDL(
                 } while ( current >= 0 && 
                     !BaflUtils::FileExists( aFileSystem, locfile->Des() ) );
             }
-        
-        CleanupStack::PopAndDestroy( &langs );
+        langs.Reset();
+        langs.Close();
         }
 
 

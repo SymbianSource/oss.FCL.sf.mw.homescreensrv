@@ -96,17 +96,24 @@ void CActiveIdleState::UpdateStateAsync()
 //
 void CActiveIdleState::UpdateActiveIdleState()
     {
-    const EPSActiveIdleState state =
-        iIsIdleForeground ? EPSAiForeground : EPSAiBackground;
-
-    TInt setResult = 
-        RProperty::Set(
+    TInt state( 0 );
+    TInt err( RProperty::Get( KPSUidAiInformation, KActiveIdleState, state ) );
+    if ( !iIsIdleForeground && KErrNone == err &&
+        EPSAiNumberEntry == (EPSActiveIdleState)state )
+        {
+        __PRINTS( "*** CActiveIdleState::UpdateActiveIdleState - Background & EPSAiNumberEntry, skip state update" );
+        }
+    else
+        {
+        state = iIsIdleForeground ? EPSAiForeground : EPSAiBackground;
+        err = RProperty::Set(
             KPSUidAiInformation, 
             KActiveIdleState, 
-            state );
+            (EPSActiveIdleState)state );
 
-    __PRINT( __DBG_FORMAT( "XAI: Set CActiveIdleState::UpdateActiveIdleState: KTelephonyIdleStatus=%d, P&S result=%d" ),
-        TInt(state), setResult );
+        __PRINT( __DBG_FORMAT( "XAI: Set CActiveIdleState::UpdateActiveIdleState: KTelephonyIdleStatus=%d, P&S result=%d" ),
+        TInt(state), err );
+        }
     }
 
 // -----------------------------------------------------------------------------

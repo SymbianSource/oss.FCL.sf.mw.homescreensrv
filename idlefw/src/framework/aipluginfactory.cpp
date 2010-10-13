@@ -512,7 +512,7 @@ void CAiPluginFactory::DoCreatePluginL(
     ConfigurePluginL( *plugin, info ) );
     
     // Take plugin's ownership
-    iPublishers.AppendL( plugin );
+    iPublishers.Append( plugin );
     CleanupStack::Pop( plugin );
     }
 

@@ -47,13 +47,19 @@ _LIT( KMenuBookmarkMaskId, "16387" );
 _LIT( KMenuMailboxIconId, "16388" );
 _LIT( KMenuMailboxMaskId, "16389" );
 _LIT( KMenuTypeMailbox, "menu:mailbox" );
+_LIT( KIcon, "icon" );
 
 _LIT8( KProperNameType, "type" );
+_LIT8( KProperNameParam, "param" );
 _LIT8( KProperNameUid, "uid" );
+_LIT8( KProperNameView, "view" );
+_LIT8( KProperNameLocked, "locked" );
 _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueFolder, "folder" );
 _LIT8( KProperValueMailbox, "mailbox" );
 _LIT8( KMenuAttrUndefUid, "0x99999991" );
+_LIT8( KMenuAttrViewTest, "view:test" );
+_LIT8( KMenuAttrParamTest, "param:test" );
 
 _LIT( KTestName, "test:name" );
 _LIT( KTestIconAttr, "icon_attributes" );
@@ -197,7 +203,7 @@ void UT_MCSPluginPublisher::SetupL()
 void UT_MCSPluginPublisher::Teardown()
 {
     User::LeaveIfError( iPluginSettings->SetSettingsL( KNameSpace,
-        iSettings, EFalse ));
+        iSettings, ETrue ));
 
     iSettings.ResetAndDestroy();
 
@@ -225,8 +231,8 @@ void UT_MCSPluginPublisher::TestMCSDataL()
     data->SetNameL( KTestName );
     data->SetValueL( KTestValue );
 
-    EUNIT_ASSERT_EQUALS( *data->Name(), KTestName );
-    EUNIT_ASSERT_EQUALS( *data->Value(), KTestValue );
+    EUNIT_ASSERT_EQUALS( data->Name(), KTestName );
+    EUNIT_ASSERT_EQUALS( data->Value(), KTestValue );
 
     CleanupStack::PopAndDestroy( data );
 }
@@ -272,7 +278,7 @@ void UT_MCSPluginPublisher::TestMCSPluginData_GetBkmDataL()
     }
 
     User::LeaveIfError( iPluginSettings->SetSettingsL( KNameSpace, settings,
-        EFalse ));
+        ETrue) );
     iMCSPlugin->iEngine->iPluginData->UpdateDataL();
 
     CMCSData& itemData =  iMCSPlugin->iEngine->iPluginData->DataItemL( 0 );
@@ -303,7 +309,7 @@ void UT_MCSPluginPublisher::TestMCSPluginData_GetFolderDataL()
     }
 
     User::LeaveIfError( iPluginSettings->SetSettingsL( KNameSpace, settings,
-        EFalse ));
+        ETrue ));
     iMCSPlugin->iEngine->iPluginData->UpdateDataL();
 
     CMCSData& itemData =  iMCSPlugin->iEngine->iPluginData->DataItemL( 0 );
@@ -334,7 +340,7 @@ void UT_MCSPluginPublisher::TestMCSPluginData_GetMailboxDataL()
     }
 
     User::LeaveIfError( iPluginSettings->SetSettingsL( KNameSpace, settings,
-        EFalse ));
+        ETrue));
     iMCSPlugin->iEngine->iPluginData->UpdateDataL();
 
     CMCSData& itemData =  iMCSPlugin->iEngine->iPluginData->DataItemL(0);

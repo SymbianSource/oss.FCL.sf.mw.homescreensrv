@@ -11,7 +11,7 @@
 *
 * Contributors:
 *
-* Description:  Used for receive SIM Application name, icon or
+* Description:  Used for receive SIM Application name, icon or 
 *                visibility information.
 *
 */
@@ -33,7 +33,7 @@
 // Two-phased constructor.
 // -----------------------------------------------------------------------------
 //
-EXPORT_C CMcsCacheHandler* CMcsCacheHandler::NewL(
+EXPORT_C CMcsCacheHandler* CMcsCacheHandler::NewL( 
     CMenuEng& aEng,
     CMenuSrvEngUtils& aUtils )
     {
@@ -44,7 +44,7 @@ EXPORT_C CMcsCacheHandler* CMcsCacheHandler::NewL(
     return self;
     }
 
-// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------    
 // Destructor
 // -----------------------------------------------------------------------------
 CMcsCacheHandler::~CMcsCacheHandler()
@@ -58,7 +58,7 @@ CMcsCacheHandler::~CMcsCacheHandler()
 // might leave.
 // -----------------------------------------------------------------------------
 //
-CMcsCacheHandler::CMcsCacheHandler(
+CMcsCacheHandler::CMcsCacheHandler( 
     CMenuEng& aEng,
     CMenuSrvEngUtils& aUtils ): iEng( aEng ), iUtils( aUtils )
     {
@@ -75,7 +75,7 @@ void CMcsCacheHandler::ConstructL()
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
-//
+//     
 void CMcsCacheHandler::HandleRemoveId( TInt aId )
     {
     iAttrCache.RemoveId( aId );
@@ -83,7 +83,7 @@ void CMcsCacheHandler::HandleRemoveId( TInt aId )
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
-//
+// 
 void CMcsCacheHandler::HandleRemoveAttribute( TInt aId, const TDesC& aAttrName )
 	{
 	iAttrCache.RemoveAttribute(aId, aAttrName);
@@ -91,7 +91,7 @@ void CMcsCacheHandler::HandleRemoveAttribute( TInt aId, const TDesC& aAttrName )
 
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
-//
+//        
 void CMcsCacheHandler::EngineEvents( TInt aEvents )
     {
     if( aEvents & RMenuNotifier::EItemsAddedRemoved )
@@ -100,7 +100,7 @@ void CMcsCacheHandler::EngineEvents( TInt aEvents )
         }
     if( aEvents & RMenuNotifier::EItemAttributeChanged )
         {
-        TRAP_IGNORE( RemoveItemsWithChangedAttributesL() );
+        TRAP_IGNORE(RemoveItemsWithChangedAttributesL());
         }
     }
 
@@ -118,9 +118,9 @@ void CMcsCacheHandler::RemoveItemsWithChangedAttributesL()
         TInt id = iAttrCache[i]->Id();
         TPtrC name = iAttrCache[i]->Name();
         TPtrC valueCache = iAttrCache[i]->Value();
-
+        
         TPtrC valueXml(KNullDesC);
-
+    
         exist = iEng.ObjectL(id).FindAttribute( name, valueXml, dummy );
         if( exist && valueXml != valueCache )
             {
@@ -151,4 +151,4 @@ void CMcsCacheHandler::RemoveNotExistItems()
         }
     }
 
-//  End of File
+//  End of File  

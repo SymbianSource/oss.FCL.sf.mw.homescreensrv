@@ -40,7 +40,6 @@ _LIT( KEventNameLaunchByIndex,  "LaunchByIndex" );
 _LIT( KEventNameShowSettings,   "ShowSettings" );
 _LIT( KContentItemTypeText, "text" );
 _LIT( KContentItemTypeImage, "image" );
-const TInt KUndefinedIndex = -1;
 
 const TImplementationProxy KImplementationTable[] =
     {
@@ -376,7 +375,7 @@ void CMCSPlugin::HandleEvent( const TDesC& aEventName, const TDesC& aParam )
         }
     else if( aEventName == KEventNameShowSettings )
         {
-        TRAP_IGNORE( iEngine->ShowSettingsL( KUndefinedIndex ) );
+        TRAP_IGNORE( iEngine->ShowSettingsL() );
         }    
     }
 

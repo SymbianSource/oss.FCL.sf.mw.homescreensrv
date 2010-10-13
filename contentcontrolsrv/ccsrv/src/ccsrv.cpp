@@ -251,7 +251,7 @@ void CCcSrv::RegisterProviderL(
     CCcSrv::TCcProvider provider;
     provider.iId = aProvider;
     provider.iSession = aSession;
-    iProviders.AppendL( provider );
+    iProviders.Append( provider );
     
     // Register possible active observers
     for ( TUint32 i = 0; i < iObservers.Count(); i++ )
@@ -283,7 +283,7 @@ void CCcSrv::RegisterObserverL(
     CCcSrv::TCcObserver observer;
     observer.iProviderId = aProvider;
     observer.iObserver = aSession->Id();
-    iObservers.AppendL( observer );
+    iObservers.Append( observer );
     }
 
 // -----------------------------------------------------------------------------

@@ -256,7 +256,9 @@ void CAiFw::HandleUiReadyEventL( CAiUiController& aUiController )
     __TICK( "CAiFw::HandleUiReadyEventL" );
     
     if ( iUiControllerManager->IsMainUiController( aUiController ) )
-        {    
+        {
+        iUiControllerManager->LoadUIDefinition();
+
         TInt value( EIdlePhase1Ok );
         
         RProperty::Get( KPSUidStartup, KPSIdlePhase1Ok, value ); 
@@ -299,8 +301,6 @@ void CAiFw::HandleActivateUI()
     {
     __PRINTS( "*** CAiFw::HandleActivateUI" );
     __TIME_MARK( time );
-    
-    iUiControllerManager->LoadUIDefinition();
     
     iUiControllerManager->ActivateUI();     
     

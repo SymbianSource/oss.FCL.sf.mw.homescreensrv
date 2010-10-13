@@ -27,6 +27,7 @@ using namespace Hs;
 HsWidgetItem::HsWidgetItem(std::string& aItemName, std::string& aValue):
 	mItemName(aItemName), mItemString(aValue), mItemInt(0), 
 	mIsString(true),mTrigger(false)
+	
 	{
 	}
 
@@ -35,8 +36,7 @@ HsWidgetItem::HsWidgetItem(std::string& aItemName, std::string& aValue):
 // ---------------------------------------------------------------------------
 //
 HsWidgetItem::HsWidgetItem( std::string& aItemName, int aValue ):
-	mItemName(aItemName), mItemString(), mItemInt(aValue), 
-	mIsString(false), mTrigger(false)
+	mItemName(aItemName), mItemString(), mItemInt(aValue), mIsString(false)
 	{
 	}
 

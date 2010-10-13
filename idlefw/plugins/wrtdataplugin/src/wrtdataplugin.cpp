@@ -582,9 +582,7 @@ void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver,
           if ( icon != NULL ) // Syntax correct but icon not found
               {
               aObserver->PublishPtr( *this, aContentId, icon , aContentId );
-              CleanupStack::PushL( icon );
-              iIconArray.AppendL( icon );
-              CleanupStack::Pop( icon );
+              iIconArray.Append(icon);
               } 
           else
               {
@@ -628,7 +626,6 @@ void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver,
                 {
                 // Take the ownership
                 CGulIcon* icon = CGulIcon::NewL(bitmap);
-                CleanupStack::PushL( icon );
                 if( aMaskHandle != KErrBadHandle )
                     {
                     CFbsBitmap* mask = new (ELeave) CFbsBitmap();
@@ -638,8 +635,7 @@ void CWrtDataPlugin::PublishImageL(MAiContentObserver* aObserver,
                         }
                     }
                 aObserver->PublishPtr( *this, aContentId, icon , aContentId );
-                iIconArray.AppendL( icon );
-                CleanupStack::Pop( icon );
+                iIconArray.Append(icon);
                 }
             else
                 {

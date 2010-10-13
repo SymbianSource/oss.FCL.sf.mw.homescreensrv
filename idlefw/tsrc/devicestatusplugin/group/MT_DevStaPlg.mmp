@@ -36,12 +36,15 @@ SOURCE                  runtimetest.cpp
 
 USERINCLUDE             ../mt_devstaplg
 USERINCLUDE             ../stub/src
-USERINCLUDE             ../../../plugins/devicestatus/inc
-USERINCLUDE             ../../../../../homescreen/idlehomescreen/inc
-USERINCLUDE             ../../../../../homescreen/idlehomescreen/nativeuicontroller/inc
-USERINCLUDE             ../../../../idlefw/plugins/profileplugin/inc
-USERINCLUDE             ../../../../../../app/homescreen/idlehomescreen/inc
-USERINCLUDE             ../../../../../../app/homescreen/idlehomescreen/nativeuicontroller/inc
+USERINCLUDE             ../../../../inc/common
+USERINCLUDE             ../../../../inc/framework
+USERINCLUDE             ../../../../group
+USERINCLUDE             ../../../../plugins/devicestatus/inc
+USERINCLUDE             ../../../../../../homescreen/idlehomescreen/inc
+USERINCLUDE             ../../../../../../homescreen/idlehomescreen/nativeuicontroller/inc
+USERINCLUDE             ../../../../../idlefw/plugins/profileplugin/inc
+USERINCLUDE             ../../../../../../../app/homescreen/idlehomescreen/inc
+USERINCLUDE             ../../../../../../../app/homescreen/idlehomescreen/nativeuicontroller/inc
 
 APP_LAYER_SYSTEMINCLUDE
 

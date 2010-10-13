@@ -55,9 +55,9 @@ void CAiUiControllerManager::LoadMainControllerL( CRepository& aRepository )
     User::LeaveIfError( aRepository.Get( KAiMainUIController, value ) );
     
     CAiUiController* controller = CAiUiController::NewL( TUid::Uid( value ) );
+    
+    iCreatedUICList.Append( value );
     CleanupStack::PushL( controller );
-
-    iCreatedUICList.AppendL( value );   
     
     iMainUiController = controller->MainInterface();
     
@@ -98,7 +98,7 @@ void CAiUiControllerManager::LoadSecondaryControllersL(
             continue;
             }
         
-        iCreatedUICList.AppendL( value );
+        iCreatedUICList.Append( value );
         
         CAiUiController* controller = 
             CAiUiController::NewL( TUid::Uid( value ) );

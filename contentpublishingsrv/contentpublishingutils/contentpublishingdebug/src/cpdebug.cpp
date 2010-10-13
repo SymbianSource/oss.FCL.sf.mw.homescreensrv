@@ -167,15 +167,12 @@ EXPORT_C void CCPDebug::ExtendedPrint( const char* aStringParam,
     RDebug::Printf( "CPS Client::Request %s Parameters: \n", aStringParam );
     for ( TInt i = 0; i < aInParamList.Count( ); i++ )
         {
-        TRAP_IGNORE( 
-            {
-            TLiwGenericParam tempParam;
-            tempParam.PushL();
-            aInParamList.AtL(i ,tempParam);
-            Dump( tempParam.Value() );
-            CleanupStack::Pop(&tempParam);
-            tempParam.Reset();
-            } );
+        TLiwGenericParam tempParam;
+        tempParam.PushL();
+        TRAP_IGNORE( aInParamList.AtL(i ,tempParam) );
+        Dump( tempParam.Value() );
+        CleanupStack::Pop(&tempParam);
+        tempParam.Reset();
         }
     }
 

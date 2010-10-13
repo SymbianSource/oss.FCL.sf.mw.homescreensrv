@@ -422,7 +422,7 @@ TInt CHspsConfigurationService::ParseNotificationDataL( ChspsRequestNotification
         
         for(TInt i=0; i < iNotifyParams->iCount; i++ )
             {
-            iPluginIds.AppendL( aParams.iPluginIds[i] );
+            iPluginIds.Append( aParams.iPluginIds[i] );
             }
            
         iNotifyParams->SetNameL(aParams.Name());

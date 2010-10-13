@@ -98,11 +98,6 @@ private: // data
      * Own.
      */
     CAiNetworkInfoListener* iListener;
-    
-    /**
-     * MCN info to show
-     */
-    TNWMCNName iMCNName;
     };
 
 

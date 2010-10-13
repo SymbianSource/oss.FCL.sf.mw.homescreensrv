@@ -96,19 +96,19 @@ CContentObserver::~CContentObserver()
 	}
 
 
-TInt CContentObserver::StartTransaction(TInt /*aTxId*/)
+TInt CContentObserver::StartTransaction(TInt aTxId)
 	{
 	return 0;
 	}
 
 
-TInt CContentObserver::Commit(TInt /*aTxId*/)
+TInt CContentObserver::Commit(TInt aTxId)
 	{
 	return 0;
 	}
 
 
-TInt CContentObserver::CancelTransaction(TInt /*aTxId*/)
+TInt CContentObserver::CancelTransaction(TInt aTxId)
 	{
 	return 0;
 	}
@@ -120,7 +120,7 @@ TBool CContentObserver::CanPublish(CHsContentPublisher& /*aPlugin*/, TInt /*aCon
     }
 
 
-TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, TInt aResource, TInt aIndex )
+TInt CContentObserver::Publish(CHsContentPublisher& aPlugin, TInt aContent, TInt aResource, TInt aIndex )
 	{
 	RDebug::Print( _L("Publish(%d, %d, %d)"), aContent, aResource, aIndex );
 	CContentCache* cache = new( ELeave )CContentCache;
@@ -133,7 +133,7 @@ TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, 
 	return 0;
 	}
 
-TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, const TDesC16& aText, TInt aIndex )
+TInt CContentObserver::Publish(CHsContentPublisher& aPlugin, TInt aContent, const TDesC16& aText, TInt aIndex )
 	{
 	RDebug::Print( _L("Publish(%d, \"%S\", %d)"), aContent, &aText, aIndex );
 	CContentCache* cache = new( ELeave )CContentCache;
@@ -147,7 +147,7 @@ TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, 
 	}
 
 
-TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, const TDesC8& aBuf, TInt aIndex )
+TInt CContentObserver::Publish(CHsContentPublisher& aPlugin, TInt aContent, const TDesC8& aBuf, TInt aIndex )
 	{
 	RDebug::Print( _L("Publish(%d, Buf.Len=%d, %d)"), aContent, aBuf.Length(), aIndex );
 	CContentCache* cache = new( ELeave )CContentCache;
@@ -161,7 +161,7 @@ TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, 
 	}
 
 
-TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, RFile& /*aFile*/, TInt aIndex )
+TInt CContentObserver::Publish(CHsContentPublisher& aPlugin, TInt aContent, RFile& aFile, TInt aIndex )
 	{
 	CContentCache* cache = new( ELeave )CContentCache;
 	CleanupStack::PushL( cache );
@@ -173,7 +173,7 @@ TInt CContentObserver::Publish(CHsContentPublisher& /*aPlugin*/, TInt aContent, 
 	}
 
 
-TInt CContentObserver::Clean(CHsContentPublisher& /*aPlugin*/, TInt aContent, TInt aIndex)
+TInt CContentObserver::Clean(CHsContentPublisher& aPlugin, TInt aContent, TInt aIndex)
 	{
 	RDebug::Print( _L("Clean(%d, %d)"), aContent, aIndex );
 	CContentCache* cache = new( ELeave )CContentCache;
@@ -187,12 +187,12 @@ TInt CContentObserver::Clean(CHsContentPublisher& /*aPlugin*/, TInt aContent, TI
 	}
 
 
-TAny* CContentObserver::Extension(TUid /*aUid*/)
+TAny* CContentObserver::Extension(TUid aUid)
 	{
 	return NULL;
 	}
 
-TBool CContentObserver::RequiresSubscription( const THsPublisherInfo& /*aPublisherInfo*/ ) const
+TBool CContentObserver::RequiresSubscription( const THsPublisherInfo& aPublisherInfo ) const
     {
     return EFalse;
     }

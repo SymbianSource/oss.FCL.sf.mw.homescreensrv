@@ -21,7 +21,6 @@
 #include <e32base.h>
 #include <apgcli.h>
 #include <apgnotif.h>
-#include <driveinfo.h>
 #include <cenrepnotifyhandler.h>
 #include "menuengoperation.h"
 #include "mcssatnotifier.h"
@@ -29,8 +28,7 @@
 #include "mcsfreespaceobserver.h"
 #include "mcsmenuitem.h"
 #include "mcsmenunotifier.h"
-#include "mcsinstallnotifier.h"
-
+#include <driveinfo.h>
 
 // FORWARD DECLARATION
 
@@ -66,7 +64,7 @@ class CMenuSrvEngUtils;
 NONSHARABLE_CLASS( CMenuSrvAppScanner )
 : public CActive, public MMenuEngOperation, public MApaAppListServObserver,
     public MCenRepNotifyHandlerCallback, public MMcsSATNotifierCallback,
-    MMcsFreeSpaceObserver, MMcsInstallListener
+    MMcsFreeSpaceObserver
     {
 
 public:     // Constructor
@@ -83,13 +81,6 @@ public:     // Constructor
     static CMenuSrvAppScanner* NewL(
             CMenuEng& aEng,
             CMenuSrvEngUtils& aSrvEngUtils );
-
-public:
-    /**
-     * Schedule appscanner run.
-     * Self complete active object.
-     */
-    void ScheduleScan();
 
 private:    // Constructors and destructor
 
@@ -144,18 +135,14 @@ private:    // from MMenuEngOperation
 
 private:    // from MApaAppListServObserver
 
-    /**
-    * Application list event.
-    * @param aEvent only one type event exists.
-    */
     void HandleAppListEvent( TInt aEvent );
 
 private:    // from MCenRepNotifyHandlerCallback
 
     /**
     * Called if one of CR keys has changed
-    * @param aKey Id of the key that has changed.
-    * @param aNewValue The new value of the key.
+    * @param aId  Id of the key that has changed.
+    * @param aNewValue  The new value of the key.
     */
     void HandleNotifyString( TUint32 aKey, const TDesC16& aNewValue );
 
@@ -169,15 +156,12 @@ private:    // from MMcsSATNotifierCallback
     */
     void SATChangeL();
 
-private:    // from MMcsInstallListener
-
-    /**
-    * Called application is installed.
-    * @param aUid uid of an application.
-    * @param aOperation operation type.
-    */
-    void HandleInstallNotifyL( TUid aUid,
-        CMcsInstallNotifier::TNotificationType aNotificationType  );
+public:
+	/**
+	 * Schedule appscanner run.
+	 * Self complete active object.
+	 */
+	void ScheduleScan();
 
 private:    // new methods
 
@@ -191,28 +175,7 @@ private:    // new methods
     * Add new menu item referring to this application.
     * @param aItem menu item.
     */
-    void HandleMissingFlagUpdateL(
-            const TMenuItem& aItem, const CMenuSrvAppAttributes& aApaItem );
-
-    /**
-    * Notifies engine abaut application installation.
-    */
-    void InstallationNotifyL();
-
-    /**
-    * Removes uid from installed packages array.
-    * @param aUid application uid.
-    */
-    void RemoveFromInstalledPackages( TUid aUid );
-
-    /**
-    * Removes uid from installed packages array.
-    * @param aUid application uid.
-    * @param aId Item ID.
-    * @param aEvent event for engine to append.
-    */
-    CMenuEngObject& ModifiableObjectL( TUid aUid, TInt aId,
-                TInt aEvent = RMenuNotifier::EItemAttributeChanged );
+    void HandleMissingFlagUpdateL( const TMenuItem& aItem );
 
     /**
     * Updates hidden flag.
@@ -255,7 +218,7 @@ private:    // new methods
 
     /**
     */
-    void SetHiddenL( const TDesC& aHiddenAppUid,
+    void SetHidden( const TDesC& aHiddenAppUid,
                                 RPointerArray<CMenuSrvAppAttributes>& aArray );
 
     /**
@@ -389,7 +352,7 @@ private:    // new methods
     * @return ETrue if drive is in use.
     */
     TBool IsDriveInUse(
-        const DriveInfo::TDefaultDrives& aDefaultDrive );
+    		const DriveInfo::TDefaultDrives& aDefaultDrive );
 
     /**
     TODO
@@ -430,7 +393,7 @@ private:    // new methods
     TODO
     */
     void UpdateApplicationItemL(
-        RArray<TMenuItem>& aMcsItems,
+    		RArray<TMenuItem>& aMcsItems,
             const CMenuSrvAppAttributes& aApaItem,
             TUint aMmcId,
             TBool isLegacy );
@@ -490,12 +453,6 @@ private:    // data
     CMcsFreeSpaceObserver* iFreeSpaceObserver;
 
     TBool iOpStatus;
-
-    RArray<TUid> iInstalledPackages; ///< Own.
-
-    CMcsInstallNotifier* iSisInstallNotifier; ///< Native app notifier. Own.
-    CMcsInstallNotifier* iJavaInstallNotifier; ///< Java app notifier. Own.
-
     };
 
 #endif // __MENUSRVAPPSCANNER_H__

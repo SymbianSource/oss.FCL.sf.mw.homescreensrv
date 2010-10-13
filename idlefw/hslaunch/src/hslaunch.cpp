@@ -21,6 +21,7 @@
 
 // ========================= DECLARATIONS ==================================
 _LIT( KHsExeName, "homescreen.exe" );
+_LIT( KHsProcessName, "Home screen" );
 const TInt KSleepOnRetry = 250000; // 250ms
 const TUid KPSCategoryUid = TUid::Uid( 0x200286E3 );
 const TInt KPSCrashCountKey = 1;
@@ -185,11 +186,17 @@ TInt CHsLaunch::ApplicationReturnValue()
 // -----------------------------------------------------------------------------
 //
 void CHsLaunch::RunL()
-    {        
-    // Create process
+    {    
+    // Create app or connect to existing.
+    TInt processExisted = EFalse;
+    
     RProcess process;
-    TInt processError = KErrNone;    
-    processError = process.Create( KHsExeName, KNullDesC );
+    TInt processError = process.Create( KHsExeName, KNullDesC );
+    if( processError == KErrAlreadyExists )
+        {        
+        processError = process.Open( KHsProcessName, EOwnerProcess );
+        processExisted = ETrue;
+        }
     
     TInt monitorError = KErrNone;
     if( processError == KErrNone )
@@ -197,7 +204,8 @@ void CHsLaunch::RunL()
         TRAP( monitorError, InitProcessMonitorL( process.Id() ) );
         }
     
-    if( processError == KErrNone )
+    if( processError == KErrNone &&
+        !processExisted )
         {
         // Make sure process is started even if monitor startup
         // fails. This will assure that process is not left in

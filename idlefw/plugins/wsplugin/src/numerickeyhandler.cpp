@@ -196,10 +196,11 @@ TBool CNumericKeyHandler::CheckPostToTarget(const TRawEvent& aRawEvent ) const
         }
     
     // Homescreen should open dialer also with alpha characters, if dialer is in 
-    // mode that accepts alpha characters into number entry (ou1cimx1#299396)    
+    // mode that accepts alpha characters into number entry.
+    // ou1cimx1#299396 & ou1cimx1#552069
     
     const TInt  KPhoneKeyStart = 33;
-    const TInt  KPhoneKeyEnd   = 127;
+    const TInt  KPhoneKeyEnd   = 129;
     
     return ( ( AllowAlphaNumericMode() ) && ( ( scanCode >= KPhoneKeyStart &&
              scanCode <= KPhoneKeyEnd ) || modifiers & EModifierSpecial ) );

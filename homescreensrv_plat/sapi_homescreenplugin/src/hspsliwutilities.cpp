@@ -1057,7 +1057,7 @@ TInt CHspsLiwUtilities::BuildPluginMapL(
             }
         if ( aItemMask & CHspsLiwUtilities::EPluginMapLocked )
             {
-            //Add plugin locked status - locked/permanent/none(default)
+            //Add plugin locked status - locked/removable/none(default)
             AppendAttributeToMapL( aMap,
                     attrList,
                     KConfigurationAttrLockingStatus,

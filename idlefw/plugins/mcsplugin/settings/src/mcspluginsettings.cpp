@@ -75,8 +75,6 @@ CMCSPluginSettings::CMCSPluginSettings()
 //
 void CMCSPluginSettings::ConstructL()
 {
-    iTimer = CPeriodic::NewL( CActive::EPriorityUserInput );
-    
     FeatureManager::InitializeLibL();
 
     TParsePtrC driveParse(PathInfo::RomRootPath());
@@ -115,12 +113,6 @@ CMCSPluginSettings::~CMCSPluginSettings()
     FeatureManager::UnInitializeLib();
     iResourceLoader.Close();
     delete iModel;
-    
-    if (iTimer->IsActive())
-        {
-        iTimer->Cancel();
-        }
-    delete iTimer;
 }
 
 // ---------------------------------------------------------------------------
@@ -168,49 +160,11 @@ void CMCSPluginSettings::HandleCommandL(TInt aCommand)
 //
 void CMCSPluginSettings::DoActivateL(const TVwsViewId& aPrevViewId, TUid aCustomMessageId, const TDesC8& aCustomMessage)
     {
-    // Parse the custom message
-    TInt locate = aCustomMessage.Locate('/');
-    TInt editIdx = -1;
-    
+    iModel->SetPluginIdL( aCustomMessage );
     iModel->UpdateAppListL( EFalse );
     iModel->UpdateBkmListL( EFalse );
-    
-    if (locate > 0)
-        {
-        // if / is located in the custom mesage
-        // upto / is the plugin id
-        iModel->SetPluginIdL(aCustomMessage.Left(locate));
-
-        // right most character is the edit index
-        TLex8 lex(aCustomMessage.Right(1));
-        lex.Val(editIdx);
-
-        iModel->UpdateSettingsL();
-        CGSBaseView::DoActivateL(aPrevViewId, aCustomMessageId,
-                aCustomMessage.Left(locate));        
-
-        if (editIdx > 0)
-            {
-            // set the current edit item
-            Container()->SetCurrentItemIndex(editIdx - 1);
-            
-            // Set timer for handle the change of shortcut item
-            // Otherwise status bar is not shown correctly
-            if (iTimer->IsActive())
-                {
-                iTimer->Cancel();
-                }
-            iTimer->Start( 0, 0, TCallBack( TimerCallbackL, this ) );
-            }
-        }
-    else
-        { 
-        // if '/' is not located, custommessage has only the plugin id 
-        iModel->SetPluginIdL(aCustomMessage);
-        iModel->UpdateSettingsL();
-        CGSBaseView::DoActivateL(aPrevViewId, aCustomMessageId,
-                aCustomMessage);
-        }
+    iModel->UpdateSettingsL();
+    CGSBaseView::DoActivateL( aPrevViewId, aCustomMessageId, aCustomMessage );
     }
 
 // ----------------------------------------------------------------------------
@@ -303,19 +257,5 @@ void CMCSPluginSettings::HandleListBoxSelectionL()
 {
     Container()->HandleChangeCommandL();
 }
-
-// ---------------------------------------------------------------------------
-// Callback for direct settings change
-// ---------------------------------------------------------------------------
-//
-TInt CMCSPluginSettings::TimerCallbackL( TAny *aPtr )
-    {
-    CMCSPluginSettings* self = reinterpret_cast< CMCSPluginSettings* >( aPtr );
-    self->iTimer->Cancel();
-    // Handle the change
-    self->HandleListBoxSelectionL();
-    
-    return 0;
-    }
 
 // End of File.

@@ -49,7 +49,6 @@ _LIT8( KProperValueBookmark, "bookmark" );
 _LIT8( KProperValueAppl, "application" );
 _LIT8( KProperValueMailbox, "mailbox" );
 _LIT( KMenuTypeMailbox, "menu:mailbox" );
-_LIT8( KMenuAttrInvokeSettingsUid, "0x99999990" );
 
 using namespace HSPluginSettingsIf;
 
@@ -231,7 +230,7 @@ void CMCSPluginSettingsModel::UpdateSettingsL()
 TSettingItem CMCSPluginSettingsModel::ItemL( 
                  RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
     {
-    TSettingItem setting = { KErrNotFound, EApplication , EFalse, EFalse };
+    TSettingItem setting = { KErrNotFound, EApplication , EFalse };
 
     TSettingType type = SettingTypeL( aProperties );
     if ( type == EApplication || type == EMailbox )
@@ -244,8 +243,7 @@ TSettingItem CMCSPluginSettingsModel::ItemL(
         }
     
     setting.locked = SettingLockedL( aProperties );
-    setting.empty = SettingEmptyL( aProperties );
-    
+
     return setting;
     }
 
@@ -293,30 +291,6 @@ TBool CMCSPluginSettingsModel::SettingLockedL(
             {
             TPtrC8 value = aProperties[i]->Value();
             if( value == KTrue )
-                {
-                return ETrue;
-                }
-            }
-        }   
-    
-    return EFalse;
-    }
-
-// ---------------------------------------------------------------------------
-// Gets empty status of given HSPS entry
-// ---------------------------------------------------------------------------
-//
-TBool CMCSPluginSettingsModel::SettingEmptyL( 
-                RPointerArray<HSPluginSettingsIf::CPropertyMap>& aProperties )
-    {
-        
-    for( TInt i = 0; i <aProperties.Count(); i++ )
-        {
-        TPtrC8 name = aProperties[i]->Name();
-        if( name == KProperNameUid )
-            {
-            TPtrC8 value = aProperties[i]->Value();
-            if( value.Compare(KMenuAttrInvokeSettingsUid) == 0 )
                 {
                 return ETrue;
                 }
@@ -507,8 +481,8 @@ void CMCSPluginSettingsModel::SaveSettingsL( const TInt& aIndex,
             }
         }
 
-    // EFalse tells that modified settings are not stored to plugin reference
-    User::LeaveIfError( iPluginSettings->SetSettingsL( *iPluginId, settingItems, EFalse ) );
+    // ETrue tells that modified settings are stored also to plugin reference
+    User::LeaveIfError( iPluginSettings->SetSettingsL( *iPluginId, settingItems, ETrue ) );
     CleanupStack::PopAndDestroy(); // settingItems
     }
 
@@ -552,19 +526,10 @@ TPtrC CMCSPluginSettingsModel::MdcaPoint( TInt aIndex ) const
         // first, we need to check if the item is missing 
         // (application uninstalled or mmc card removed)
         // If it is, we return "Undefined" application name instead
-        // In case of empty item, it's own name is returned
         if ( iSettings[ aIndex ].id == KErrNotFound )
             {
-            if ( iSettings[ aIndex ].empty )
-                {
-                const TDesC& caption = iAppList->EmptyText();
-                TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
-                }
-            else
-                {
-                const TDesC& caption = iAppList->UndefinedText();
-                TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
-                }
+            const TDesC& caption = iAppList->UndefinedText();
+            TRAP_IGNORE( line.Set( ListBoxLineL( caption, aIndex ) ) )
             }
         else
             {
@@ -601,7 +566,7 @@ TInt CMCSPluginSettingsModel::ItemId( TInt aIndex ) const
 //
 const TSettingItem CMCSPluginSettingsModel::Item( TInt aIndex ) const
     {
-    TSettingItem setting = { KErrNotFound, EApplication, EFalse, EFalse };
+    TSettingItem setting = { KErrNotFound, EApplication, EFalse };
 
     if ( aIndex >= 0 && aIndex < iSettings.Count() )
         {

@@ -177,29 +177,32 @@ void UT_AiPluginFactory::TestCreateDestroyPluginL()
     THsPublisherInfo unknown( 
         TUid::Uid( KUnknownUid ), KUnknown, KNs1 );
 
-    // create 2 same without waiting first to finnish.
-    // Second won't be appended to load queue.
+    // create 2 same without waiting first to finnish. Second should return
+    // KErrAlreadyExists
     TAiFwPublisherInfo info( data, TAiFwCallback( CallBack, this ), EAiFwSystemStartup );
     iFactory->LoadPlugin( info );
     iFactory->LoadPlugin( info );
     iWait->Start();
+    EUNIT_ASSERT_EQUALS( iResult, KErrAlreadyExists );
     EUNIT_ASSERT_EQUALS( iFactory->PluginByInfo( data ) != NULL, ETrue );
-
+    
     // wait for destroy to finnish
     iFactory->DestroyPlugin( info );
     iPeriodic->Start( KDestroyDelay, KDestroyDelay, TCallBack( TimerCallBack, this ) );
     iWait->Start();
     EUNIT_ASSERT_EQUALS( iFactory->PluginByInfo( data ) == NULL, ETrue );
     EUNIT_ASSERT_EQUALS( iFactory->Publishers().Count(), 0 );
-
-    // create 2 same and wait first to finnish. 
-    // Second won't be appended to load queue.
+    
+    // create 2 same and wait first to finnish. Second should return
+    // KErrAlreadyExists
     iFactory->LoadPlugin( info );
     iWait->Start();
     EUNIT_ASSERT_EQUALS( iResult, KErrNone );
     EUNIT_ASSERT_EQUALS( iFactory->PluginByInfo( data ) != NULL, ETrue );
 
     iFactory->LoadPlugin( info );
+    iWait->Start();
+    EUNIT_ASSERT_EQUALS( iResult, KErrAlreadyExists );
     EUNIT_ASSERT_EQUALS( iFactory->PluginByInfo( data ) != NULL, ETrue );
 
     // Test missing namespace

@@ -61,6 +61,5 @@ LIBRARY                 hspsservice.lib
 LIBRARY                 hspsclient.lib
 LIBRARY                 hspsodt.lib
 LIBRARY                 hspsresult.lib
-LIBRARY                 PlatformEnv.lib // for DriveInfo
 
 // End of file

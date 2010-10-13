@@ -347,8 +347,9 @@ void CMenuSrvEng::GetRunningAppsL( RArray<TUid>& aArray )
 // CMenuSrvEng::GetRunningAppsL()
 // ---------------------------------------------------------
 //
-void CMenuSrvEng::GetExtendedAttributesL(TInt aId, const TDesC& aAttrName,
-        TBool& aAttrExists, TDes& aAttrVal )
+void CMenuSrvEng::GetExtendedAttributesL(TInt aId,
+    const TDesC& aAttrName, TBool& aAttrExists,
+    TDes& aAttrVal )
     {
     TBool captionInfo(aAttrName.Compare( KMenuAttrShortName ) == KErrNone ||
     aAttrName.Compare( KMenuAttrLongName ) == KErrNone ||
@@ -375,7 +376,6 @@ void CMenuSrvEng::GetExtendedAttributesL(TInt aId, const TDesC& aAttrName,
     else if( KErrNone == aAttrName.Compare( KMenuAttrNative ) )
         {
         ApplicationNativeAttributeL( aId, aAttrExists, aAttrVal );
-        addToCache = EFalse;
         }
     else // The attribute doesn't present for the item
         {
@@ -384,7 +384,7 @@ void CMenuSrvEng::GetExtendedAttributesL(TInt aId, const TDesC& aAttrName,
         }
     if( aAttrExists && addToCache )
         {
-        AddToCacheL( aId, aAttrName, aAttrVal );
+        AddToCacheL(aId, aAttrName, aAttrVal );
         }
     }
 
@@ -392,8 +392,8 @@ void CMenuSrvEng::GetExtendedAttributesL(TInt aId, const TDesC& aAttrName,
 // CMenuSrvEng::ApplicationNativeAttributeL
 // ---------------------------------------------------------
 //
-void CMenuSrvEng::ApplicationNativeAttributeL( TInt aId,
-        TBool & aAttrExists, TDes & aAttrVal )
+void CMenuSrvEng::ApplicationNativeAttributeL(
+		TInt aId, TBool & aAttrExists, TDes & aAttrVal )
 	{
 	const CMenuEngObject & aEngObj = iEng->ObjectL(aId);
 
@@ -449,7 +449,7 @@ void CMenuSrvEng::AddToCacheL( TInt aId, const TDesC& aAttrName,
 void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
     TBool& aExists, TDes& aAttrVal )
     {
-    const CMenuEngObject& obj = iEng->ObjectL( aId );
+    const CMenuEngObject& obj = iEng->ObjectL(aId);
     if ( obj.Type().Compare( KMenuTypeFolder ) == KErrNone )
         {
         TBool localized;
@@ -459,14 +459,15 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
             {
             aExists = ETrue;
             aAttrVal = attrvalue;
-            AddToCacheL( aId, KMenuAttrLongName, aAttrVal );
-            AddToCacheL( aId, KMenuAttrShortName, aAttrVal );
-            AddToCacheL( aId, KMenuAttrTitleName, aAttrVal );
+            AddToCacheL(aId, KMenuAttrLongName, aAttrVal );
+            AddToCacheL(aId, KMenuAttrShortName, aAttrVal );
+            AddToCacheL(aId, KMenuAttrTitleName, aAttrVal );
             }
         }
     else if ( obj.Type().Compare( KMenuTypeApp ) == KErrNone )
         {
         aAttrVal = AppCaptionInfoL( obj, aAttrName, aExists );
+        AddToCacheL(aId, aAttrName, aAttrVal );
         }
     else
         {
@@ -561,8 +562,7 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
  // CMenuSrvEng::FolderChildrenCountL
  // ---------------------------------------------------------
  //
- void CMenuSrvEng::FolderChildrenCountL(
-         TInt aId, TBool& aExists, TDes& aAttrVal )
+ void CMenuSrvEng::FolderChildrenCountL( TInt aId, TBool& aExists, TDes& aAttrVal )
 	 {
 	 const CMenuEngObject& obj = iEng->ObjectL(aId);
 
@@ -680,54 +680,47 @@ void CMenuSrvEng::CaptionInfoL( TInt aId, const TDesC& aAttrName,
  void CMenuSrvEng::AppendExtendedAttrributesL(
  		const TDesC& aType,
  		RArray<TPtrC>& aList )
-{
+	 {
+
     if ( KErrNone == aType.Compare( KMenuTypeApp ) )
         {
-        if( KErrNotFound == aList.Find( KMenuAttrTitleName(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrTitleName ) );
-            }
-        if( KErrNotFound == aList.Find( KMenuAttrShortName(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrShortName ) );
-            }
-        if( KErrNotFound == aList.Find( KMenuAttrLongName(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrLongName ) );
-            }
-        if( KErrNotFound == aList.Find( KMenuAttrDrmProtection(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrDrmProtection ) );
-            }
+        if( KErrNotFound == aList.Find( KMenuAttrTitleName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrTitleName ) );
+        	}
+        if( KErrNotFound == aList.Find( KMenuAttrShortName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrShortName ) );
+        	}
+        if( KErrNotFound == aList.Find( KMenuAttrLongName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrLongName ) );
+        	}
+        if( KErrNotFound == aList.Find( KMenuAttrDrmProtection(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrDrmProtection ) );
+        	}
         }
     else if ( KErrNone == aType.Compare( KMenuTypeFolder ) )
         {
-        if( KErrNotFound == aList.Find( KMenuAttrTitleName(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrTitleName ) );
-            }
-        if( KErrNotFound == aList.Find( KMenuAttrShortName(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrShortName ) );
-            }
-        if( KErrNotFound == aList.Find( KMenuAttrLongName(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KMenuAttrLongName ) );
-            }
-        if( KErrNotFound == aList.Find( KChildrenCount(),
-                TIdentityRelation<TPtrC>( CmpAttrName )) )
-            {
-            aList.AppendL( TPtrC( KChildrenCount ) );
-            }
+        if( KErrNotFound == aList.Find( KMenuAttrTitleName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrTitleName ) );
+        	}
+        if( KErrNotFound == aList.Find( KMenuAttrShortName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrShortName ) );
+        	}
+        if( KErrNotFound == aList.Find( KMenuAttrLongName(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KMenuAttrLongName ) );
+        	}
+        if( KErrNotFound == aList.Find( KChildrenCount(), TIdentityRelation<TPtrC>( CmpAttrName )) )
+        	{
+        	aList.AppendL( TPtrC( KChildrenCount ) );
+        	}
         }
-    }
+	 }
 
 
 //  End of File

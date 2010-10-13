@@ -951,10 +951,8 @@ ChspsDomNode* hspsServerUtil::FindNodeByAttributeL(
 void hspsServerUtil::FindUniquePluginsL( 
         ChspsODT& aOdt, 
         RArray<TInt>& aPluginArray )
-    {
-    aPluginArray.Reset();
-    CleanupClosePushL( aPluginArray );
-
+    {    
+    aPluginArray.Reset();          
     ChspsDomDocument& dom = aOdt.DomDocument();
     ChspsDomDepthIterator* iter = ChspsDomDepthIterator::NewL( *dom.RootNode() );
     CleanupStack::PushL( iter );
@@ -962,32 +960,32 @@ void hspsServerUtil::FindUniquePluginsL(
     ChspsDomNode* node = iter->First();
     ChspsDomNode* prevNode = NULL;
     while( node && prevNode != node )
-        {
-        const TDesC8& name = node->Name();
+       {                
+       const TDesC8& name = node->Name();
        
-        // Plugin element was found 
-        if ( name == KPluginElement )
-            {           
-            ChspsDomList& attrList = node->AttributeList();                    
-            ChspsDomAttribute* uidAttr = static_cast<ChspsDomAttribute*>( attrList.FindByName(KPluginAttrUid) );            
-            if ( uidAttr )
-                {     
-                // Convert from hex to int
-                const TUid pluginUid = ConvertDescIntoUid( uidAttr->Value() );               
-                if ( pluginUid.iUid > 0 )
-                    {
-                    TBool isUnique = ETrue;
-                    for( TInt i=0; isUnique && i<aPluginArray.Count();i++ )
-                        {
-                        if ( aPluginArray[i] == pluginUid.iUid )
-                            {
-                            isUnique=EFalse;
-                            }
-                        }
-                    if ( isUnique )
-                        {
-                        aPluginArray.AppendL( pluginUid.iUid );
-                        }
+       // Plugin element was found 
+       if ( name == KPluginElement )
+           {           
+           ChspsDomList& attrList = node->AttributeList();                    
+           ChspsDomAttribute* uidAttr = static_cast<ChspsDomAttribute*>( attrList.FindByName(KPluginAttrUid) );            
+           if ( uidAttr )
+               {     
+               // Convert from hex to int
+               const TUid pluginUid = ConvertDescIntoUid( uidAttr->Value() );               
+               if ( pluginUid.iUid > 0 )
+                   {
+                   TBool isUnique = ETrue;
+                   for( TInt i=0; isUnique && i<aPluginArray.Count();i++ )
+                       {
+                       if ( aPluginArray[i] == pluginUid.iUid )
+                           {
+                           isUnique=EFalse;
+                           }
+                       }
+                   if ( isUnique )
+                       {
+                       aPluginArray.Append( pluginUid.iUid );
+                       }
                    }               
                }
            }
@@ -995,10 +993,8 @@ void hspsServerUtil::FindUniquePluginsL(
            prevNode = node;        
            node = iter->NextL();        
            }
-
-    CleanupStack::PopAndDestroy( iter );
-    CleanupStack::Pop( &aPluginArray );
-    }
+   CleanupStack::PopAndDestroy( iter );      
+}
 
 //----------------------------------------------------------------------------
 // CHspsServiceUtilities::HexString2Uint
@@ -1280,9 +1276,10 @@ void hspsServerUtil::FindFilesFromDirL(
         TFileName file;
         file.Append( aDirName );
         file.Append( fileEntry.iName );
-        aFiles.AppendL( file );
+        aFiles.Append( file );
         }
     CleanupStack::PopAndDestroy( fileList );
+
     CleanupStack::PopAndDestroy(); // fs
     }
 
@@ -2048,13 +2045,6 @@ ChspsDomNode* hspsServerUtil::FindNodeByTagL(
                  {
                  aFs.SetSessionToPrivate( drive );
                  }
-// When Emmc drive is not present in emulator it is replaced by D drive
-#ifdef __WINSCW__
-             else 
-                 {
-                 aFs.SetSessionToPrivate( EDriveD );
-                 }
-#endif
              }
          else 
              {
@@ -2216,7 +2206,7 @@ void hspsServerUtil::FindResourcesL(
                   // Find files from the subdirectory and the drive
                   RArray<TInt> driveArray;
                   CleanupClosePushL( driveArray );                  
-                  driveArray.AppendL( aDriveArray[driveIndex] );                                   
+                  driveArray.Append( aDriveArray[driveIndex] );                                   
                   FindResourcesL( aFs, driveArray, file, aFileArray, NULL );   
                   CleanupStack::PopAndDestroy( &driveArray );
                   }

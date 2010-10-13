@@ -395,22 +395,12 @@ ThspsServiceCompletedMessage ChspsInstallationHandler::hspsInstallTheme(
     TRAPD( err, DoInstallThemeL(aManifestFileName) );
     if( !err )
         {
-        // correct headerdata is in iHeaderData set by CheckHeaderL(), check space
-        const TUint bytesRequired = iHeaderData->Des().Length(); 
-        const TUint bytesAllocated = aHeaderData.MaxLength();
-        if( bytesRequired <= bytesAllocated )
-            {            
-            aHeaderData = iHeaderData->Des();
-            
-            // Set next phase
-            iInstallationPhase = EhspsPhaseCleanup;
-            ret = EhspsInstallThemeSuccess;
-            }
-        else
-            {
-            err = KErrOverflow;
-            iInstallationPhase = EhspsPhaseIdle;
-            }        
+        // correct headerdata is in iHeaderData set by CheckHeaderL()
+        aHeaderData = iHeaderData->Des();        
+                   
+        // Set next phase
+        iInstallationPhase = EhspsPhaseCleanup;
+        ret = EhspsInstallThemeSuccess;
         }
     else
         {     
@@ -1598,8 +1588,8 @@ void ChspsInstallationHandler::NotifyOdtUpdatedL()
                 KNullDesC(),
                 (TLanguage)( fullODT->OdtLanguage() ) );
             
-            notifications.AppendL( info );
-            }
+            notifications.Append( info );
+            }        
         
         CleanupStack::PopAndDestroy(); // pluginIds.
         CleanupStack::PopAndDestroy( fullODT );
@@ -2270,11 +2260,11 @@ void ChspsInstallationHandler::AddInterfaceResourcesV2L(
     TInt drive = hspsServerUtil::GetEmmcDrivePath( iFsSession );
     if ( drive != KErrNotFound )
         {
-        driveArray.AppendL( drive );
+        driveArray.Append( drive );
         }
     
-    driveArray.AppendL( EDriveC );
-    driveArray.AppendL( EDriveZ );     
+    driveArray.Append( EDriveC );
+    driveArray.Append( EDriveZ );     
     
     FindResourceFilesL( aPath, ETrue, driveArray, systemEpocLanguageCodes );
    
