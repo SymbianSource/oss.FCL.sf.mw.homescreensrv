@@ -268,16 +268,7 @@ private:
     static void ModifyQueryForSortOrderL( 
             const CCaInnerQuery::TSortAttribute aSortType, 
             RBuf& aQuery, TBool aSortByGroup );
-    
-    /**
-     * Modifies a given query with sort order last or most used.
-     *
-     * @param aSortType The sort order type.
-     * @param aQuery the query where the sort order will be included.
-     */
-    static void ModifyQueryForSortOrderLastMostUsedL(
-            const CCaInnerQuery::TSortAttribute aSortType, RBuf& aQuery );
-    
+   
     /**
      * Check if icon is set proper in CCaInnerEntry.
      *

@@ -48,14 +48,6 @@ CREATE TABLE CA_ICON( ICON_ID INTEGER PRIMARY KEY ,
                                   IC_APP_ID TEXT,
                                   UNIQUE( IC_FILENAME, IC_SKIN_ID, IC_APP_ID ) );
 
-SELECT "CREATE TABLE CA_LAUNCH" AS " ";
-SELECT "------------------------------------" AS " ";
-CREATE TABLE CA_LAUNCH( LAUNCH_ID INTEGER PRIMARY KEY ,
-                                  LA_ENTRY_ID INTEGER NOT NULL,
-                                  LA_LAUNCH_TIME INTEGER NOT NULL,
-                                  FOREIGN KEY(LA_ENTRY_ID) REFERENCES CA_ENTRY(ENTRY_ID) );
-CREATE INDEX LaunchLaunchTime_CAIndex ON CA_LAUNCH(LA_LAUNCH_TIME);
-
 SELECT "CREATE TABLE CA_ATTRIBUTE" AS " ";
 SELECT "------------------------------------" AS " ";
 CREATE TABLE CA_ATTRIBUTE( ATTRIBUTE_ID INTEGER PRIMARY KEY ,

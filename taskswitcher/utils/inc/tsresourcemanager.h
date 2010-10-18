@@ -20,6 +20,8 @@
 class RApaLsSession;
 class RWsSession;
 class MTsWindowGroupsMonitor;
+class MTsIconProvider;
+class CTsIdList;
 
 /**
  * Interface declare methods to access initialized OS resources
@@ -41,5 +43,12 @@ public:
      * Access to window groups monitor
      */
     virtual MTsWindowGroupsMonitor& WsMonitor() =0;
+    
+    /**
+     * Access to icon provider
+     */
+    virtual MTsIconProvider& IconProvider() =0;
+    
+    virtual const CTsIdList& ApplicationsBlackList() const =0;
     };
 #endif // TSRESOURCEMANAGER_H

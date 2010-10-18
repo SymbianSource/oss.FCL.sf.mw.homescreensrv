@@ -14,15 +14,26 @@
  * Description :
  *
  */
+#include "tsutils.h"
+#include "tsentrykey.h"
 #include "tsrunningappstorageimp.h"
+
 //------------------------------------------------------------------------------
 CTsRunningAppStorage* CTsRunningAppStorage::NewLC()
     {
     CTsRunningAppStorage* self = new(ELeave) CTsRunningAppStorage();
     CleanupStack::PushL( self );
+    self->iRunningApps = new (ELeave)CArrayPtrFlat<CTsRunningApp>(1);
     return self;
     }
 
+//------------------------------------------------------------------------------
+CTsRunningAppStorage* CTsRunningAppStorage::NewL()
+    {
+    CTsRunningAppStorage* self( CTsRunningAppStorage::NewLC() );
+    CleanupStack::Pop( self );
+    return self;
+    }
 //------------------------------------------------------------------------------
 CTsRunningAppStorage::CTsRunningAppStorage()
     {
@@ -31,9 +42,14 @@ CTsRunningAppStorage::CTsRunningAppStorage()
 
 //------------------------------------------------------------------------------
 CTsRunningAppStorage::~CTsRunningAppStorage()
-{
-    iRunningApps.ResetAndDestroy();
-}
+    {
+    if( 0 != iRunningApps )
+        {
+        iRunningApps->ResetAndDestroy();
+        }
+    delete iRunningApps;
+    iBlockedWindowGroups.Close();
+    }
 
 //------------------------------------------------------------------------------
 void CTsRunningAppStorage::HandleWindowGroupChanged( 
@@ -41,15 +57,34 @@ void CTsRunningAppStorage::HandleWindowGroupChanged(
                const TArray<RWsSession::TWindowGroupChainInfo> & aWindowGroups )
     {
     CTsRunningApp* app(0);
-    iRunningApps.ResetAndDestroy();
     iBlockedWindowGroups.Reset();
     TRAP_IGNORE(
-    for( TInt iter(0); iter < aWindowGroups.Count(); ++iter )
+    CArrayPtr<CTsRunningApp> *runningApps(new (ELeave)CArrayPtrFlat<CTsRunningApp>(aWindowGroups.Count()));
+    TaskSwitcher::CleanupResetAndDestroyPushL(runningApps);
+    for(TInt current(0); current < aWindowGroups.Count(); ++current)
         {
-        app = CTsRunningApp::NewLC(aResources, aWindowGroups[iter]);
-        iRunningApps.AppendL(app);
+        app = 0;
+        for(TInt old(0); 0 == app && old < iRunningApps->Count(); ++old)
+            {
+            if(iRunningApps->At(old)->WindowGroupId() == aWindowGroups[current].iId)
+                {
+                app = iRunningApps->At(old);
+                iRunningApps->Delete(old);
+                CleanupStack::PushL(app);
+                app->RefreshDataL();
+                }
+            }
+        if(0 == app)
+            {
+            app = CTsRunningApp::NewLC(aResources, aWindowGroups[current]);
+            }
+        runningApps->InsertL(current, app);
         CleanupStack::Pop(app);
         }
+    iRunningApps->ResetAndDestroy();
+    delete iRunningApps;
+    iRunningApps = runningApps;
+    CleanupStack::Pop(runningApps);
     )//TRAP_IGNORE
     }
 
@@ -65,7 +100,7 @@ void CTsRunningAppStorage::HandleWindowGroupChanged(
         {
         for(filtered = 0; filtered < aFiltered.Count(); ++filtered)
             {
-            if(aFull[full].iId == aFiltered[ filtered].iId)
+            if(aFull[full].iId == aFiltered[filtered].iId)
                 {
                 break;
                 }
@@ -77,15 +112,15 @@ void CTsRunningAppStorage::HandleWindowGroupChanged(
         }
     }
 //------------------------------------------------------------------------------
-const MTsRunningApplication& CTsRunningAppStorage::operator[] (TInt aOffset) const
+MTsRunningApplication& CTsRunningAppStorage::operator[] (TInt aOffset) const
     {
-    return *iRunningApps[aOffset];
+    return *(*iRunningApps)[aOffset];
     }
 
 //------------------------------------------------------------------------------
 TInt CTsRunningAppStorage::Count() const
     {
-    return iRunningApps.Count();
+    return iRunningApps->Count();
     }
 
 //------------------------------------------------------------------------------
@@ -103,12 +138,46 @@ TArray<TInt> CTsRunningAppStorage::BlockedWindowGroups() const
     }
 
 //------------------------------------------------------------------------------
+TInt CTsRunningAppStorage::GenerateKey( TTsEntryKey& aReturnKey, 
+                                        TInt aWindowGroupId) const
+    {
+    return GenerateKey(aReturnKey, aWindowGroupId, 0);
+    }
+
+//------------------------------------------------------------------------------
+TInt CTsRunningAppStorage::GenerateKey( TTsEntryKey& aReturnKey, 
+                                        TInt aWindowGroupId, 
+                                        TInt aOffset) const
+    {
+    TInt retVal(Find(aWindowGroupId, aOffset));
+    if( KErrNotFound != retVal )
+        {
+        CTsRunningApp &app(*iRunningApps->At(retVal));
+        if(app.WindowGroupId() == app.ParentWindowGroupId())
+            {
+            retVal = KErrBadHandle;
+            }
+        else if( app.IsEmbeded() )
+            {
+            retVal = GenerateKey(aReturnKey, app.ParentWindowGroupId(), retVal);
+            }
+        else
+            {
+            aReturnKey = app.Key();
+            retVal = KErrNone;
+            }
+        }
+    return retVal;
+    }
+
+//------------------------------------------------------------------------------
 TInt CTsRunningAppStorage::ParentIndex( TInt aOffset ) const
     {
     TInt retval(aOffset);
-    if(iRunningApps[aOffset]->IsEmbeded())
+    
+    if((*iRunningApps)[aOffset]->IsEmbeded())
         {
-        const TInt parentIndex( Find(iRunningApps[aOffset]->ParentWindowGroupId(), 
+        const TInt parentIndex( Find((*iRunningApps)[aOffset]->ParentWindowGroupId(), 
                                 aOffset + 1) );
         if( KErrNotFound != parentIndex )
             {
@@ -123,10 +192,10 @@ TInt CTsRunningAppStorage::Find(TInt aWindowGroupId, TInt aOffset) const
     {
     TInt retVal(KErrNotFound);
     for( TInt iter(aOffset); 
-         KErrNotFound == retVal && iter < iRunningApps.Count(); 
+         KErrNotFound == retVal && iter < iRunningApps->Count(); 
          ++iter )
         {
-        if( iRunningApps[iter]->WindowGroupId() == aWindowGroupId )
+        if( (*iRunningApps)[iter]->WindowGroupId() == aWindowGroupId )
             {
             retVal = iter;
             }

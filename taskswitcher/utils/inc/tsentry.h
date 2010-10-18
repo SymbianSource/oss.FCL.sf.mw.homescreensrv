@@ -19,76 +19,23 @@
 #define TSENTRY_H
 
 #include <e32base.h>
-#include <e32cmn.h>
 
-#include "tsentrykey.h"
-#include "tstaskmonitorglobals.h"
-#include "tsthumbnailobserver.h"
+class TTsEntryKey;
 
-class CTsEntry;
-class CFbsBitmap;
-class QObject;
-class MTsDataObserver;
-class TsThumbnailProvider;
-
-
-
-typedef RPointerArray<CTsEntry> RTsFswArray;
-
-/**
- * An entry in the task list.
- */
-NONSHARABLE_CLASS( CTsEntry ) : public CBase,
-                                private MTsThumbnailObserver
-{
+NONSHARABLE_CLASS( MTsEntry )
+    {
 public:
-    static CTsEntry *NewL(const TTsEntryKey &key, MTsDataObserver &observer, QObject* obj);
-    static CTsEntry *NewLC(const TTsEntryKey &key, MTsDataObserver &observer, QObject* obj);
-    ~CTsEntry();
+    virtual const TDesC& DisplayName() const =0;
+    virtual TInt IconHandle() const =0;
+    virtual TTime Timestamp() const =0;
+    virtual TTime TimestampUpdate() const =0; 
+    virtual TTsEntryKey Key() const =0;
+    virtual TBool IsActive() const =0;
+    virtual TBool IsClosable() const =0;
+    virtual TBool Close() const =0;
+    virtual TBool Launch() const =0;
+    virtual TBool IsMandatory() const =0;
 
-public:
-    TUid AppUid() const;
-    const TDesC &AppName() const;
-    TBool CloseableApp() const;
-    Visibility GetVisibility() const;    
-    CFbsBitmap *AppIconBitmap() const;
-    CFbsBitmap *Screenshot() const;
-    const TTsEntryKey &Key() const;
-    TTime Timestamp() const;    
-    TTime LastUpdateTimestamp() const;
-    
-    void SetAppUid(const TUid &uid);
-    void SetAppNameL(const TDesC &appName);
-    void SetCloseableApp(TBool value);   
-    void SetVisibility(Visibility visibility);
-    void SetAppIcon(CFbsBitmap *aBitmap);
-    void SetScreenshotL(const CFbsBitmap &bitmap, UpdatePriority priority, TInt angle);
-    void RemoveScreenshotL();
-    void SetTimestamp(const TTime &timestamp);
-    void RefreshUpdateTimestamp();
+    };
 
-private:
-    CTsEntry(const TTsEntryKey &aKey, MTsDataObserver &observer);
-    void ConstructL(QObject* object);
-
-public://from MTsThumbnailObserver
-    void ThumbnailCreated(const CFbsBitmap& aThumbnail);
-
-private:
-    TUid mAppUid;
-    HBufC* mAppName;
-    TBool mCloseableApp;
-    Visibility mVisibility;
-    CFbsBitmap* mAppIconBitmap;
-    CFbsBitmap* mScreenshot;
-    TTsEntryKey mKey;
-    UpdatePriority mPriority;
-    TTime mTimestamp;
-    TTime mUpdateTimestamp;
-    TsThumbnailProvider* iProvider;
-private:
-    MTsDataObserver &mObserver;
-
-};
-
-#endif
+#endif //TSENTRY_H

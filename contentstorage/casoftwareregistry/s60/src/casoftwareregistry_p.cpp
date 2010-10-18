@@ -20,8 +20,6 @@
 #include <QScopedPointer>
 #include <QStringList>
 #include <QDateTime>
-#undef SYMBIAN_ENABLE_SPLIT_HEADERS //TODO this is work around
-#include <usif/scr/screntries.h>
 #include <usif/scr/scr.h>
 #include <xqconversions.h>
 #include <driveinfo.h>
@@ -35,13 +33,16 @@
 #include "caarraycleanup.inl"
 #include "cautils.h"
 
+
 using namespace Usif;
 _LIT(KConfirmMessageKey, "MIDlet-Delete-Confirm");
 _LIT(KCaScrPropertyDomainCategory, "Domain-Category");
 _LIT(KCaScrPropertyMidletDescryption, "MIDlet-Description");
 _LIT(KNotNamedMmc, "NO NAME");
-const int maxLogsCount = 20;  // should be 50 - workaround for
-// ou1cimx1#476143 Dialog crash when label contains big amount of lines
+
+const int maxLogsCount = 50;
+const TInt64 KLongKilo = 1024;
+const TInt64 KLongMega = KLongKilo * KLongKilo;
 
 /*!
  Constructor
@@ -58,7 +59,6 @@ CaSoftwareRegistryPrivate::CaSoftwareRegistryPrivate(
  */
 CaSoftwareRegistryPrivate::~CaSoftwareRegistryPrivate()
 {
-
 }
 
 /*!
@@ -73,14 +73,11 @@ CaSoftwareRegistryPrivate::~CaSoftwareRegistryPrivate()
  */
 
 bool CaSoftwareRegistryPrivate::getUninstallDetails(int componentId,
-        QString &componentName,
-        QStringList &applicationsUids,
+        QString &componentName, QStringList &applicationsUids,
         QString &confirmationMessage)
 {
-    TRAPD(error, getUninstallDetailsL(componentId,
-            componentName,
-            applicationsUids,
-            confirmationMessage)
+    TRAPD(error, getUninstallDetailsL(
+            componentId, componentName, applicationsUids, confirmationMessage)
              );
     return error == KErrNone;
 }
@@ -111,15 +108,10 @@ bool CaSoftwareRegistryPrivate::getApplicationsUids(int componentId,
       null string means the lack of the message.
  */
 void CaSoftwareRegistryPrivate::getUninstallDetailsL(int componentId,
-        QString &componentName,
-        QStringList &appUids,
+        QString &componentName, QStringList &appUids,
         QString &confirmationMessage)
 {
-    componentName.clear();
-    appUids.clear();
-    confirmationMessage.clear();
-
-    if (componentId >= 1) {
+    if (componentId > 0) {
         TComponentId componentIdValue(componentId);
         RArray<TUid> appUidsArray;
         CleanupClosePushL(appUidsArray);
@@ -148,6 +140,7 @@ void CaSoftwareRegistryPrivate::getUninstallDetailsL(int componentId,
             confirmationProperty = NULL;
         }
 
+        appUids.clear();
         QT_TRYCATCH_LEAVING(componentName =
             XQConversions::s60DescToQString(entry->Name());
             for (TInt i = 0; i<appUidsArray.Count(); i++) {
@@ -173,8 +166,7 @@ void CaSoftwareRegistryPrivate::getUninstallDetailsL(int componentId,
 void CaSoftwareRegistryPrivate::getApplicationsUidsL(int componentId,
     QStringList &appUids)
 {
-    appUids.clear();
-    if (componentId >= 1) {
+    if (componentId > 0) {
         TComponentId componentIdValue(componentId);
         RArray<TUid> appUidsArray;
         CleanupClosePushL(appUidsArray);
@@ -186,8 +178,9 @@ void CaSoftwareRegistryPrivate::getApplicationsUidsL(int componentId,
         softwareComponentRegistry.GetAppUidsForComponentL(
                 componentIdValue, appUidsArray);
 
+        appUids.clear();
         QT_TRYCATCH_LEAVING(
-            for (TInt i = 0; i<appUidsArray.Count(); i++) {
+            for (TInt i = 0; i < appUidsArray.Count(); i++) {
                 appUids.append(QString::number(appUidsArray[i].iUid));
             }
         );
@@ -204,7 +197,7 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetails(
     int componentId) const
 {
     CaSoftwareRegistry::DetailMap result;
-    TRAP_IGNORE(result=entryDetailsL(componentId));
+    TRAP_IGNORE(result = entryDetailsL(componentId));
     return result;
 }
 
@@ -227,12 +220,12 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
                 result = entryDetailsL(*entry);
                 if (entry->SoftwareType().Compare(KSoftwareTypeJava) == 0) {
                     CPropertyEntry* domainProperty =
-                        scr.GetComponentPropertyL(componentId,
-                            KCaScrPropertyDomainCategory);
+                            scr.GetComponentPropertyL(componentId,
+                                    KCaScrPropertyDomainCategory);
                     CleanupStack::PushL(domainProperty);
-                    if (domainProperty &&
-                        domainProperty->PropertyType() ==
-                            CPropertyEntry::ELocalizedProperty) {
+                    if (domainProperty
+                            && domainProperty->PropertyType()
+                                == CPropertyEntry::ELocalizedProperty) {
                         const TDesC& domainPropertyValue = static_cast<CLocalizablePropertyEntry*>(
                                 domainProperty)->StrValue();
                         TInt splitIndex = domainPropertyValue.Locate(',');
@@ -296,7 +289,7 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
     TChar drive;
 
     const TInt driveListLen(entry.InstalledDrives().Length());
-    for (TInt i( 0 ); i < driveListLen; ++i) {
+    for (TInt i = 0; i < driveListLen; i++) {
         if (entry.InstalledDrives()[i] != '\0') {
 
             if (!drives.isEmpty()) {
@@ -347,16 +340,14 @@ CaSoftwareRegistryPrivate::DetailMap CaSoftwareRegistryPrivate::entryDetailsL(
     }
     detailMap[CaSoftwareRegistry::componentDriveInfoKey()] = drives;
 
-    static const TInt64 KKilo = 1024;
-    static const TInt64 KMega = KKilo * KKilo;
-    if(entry.ComponentSize() >= KMega) {
+    if(entry.ComponentSize() >= KLongMega) {
         detailMap[CaSoftwareRegistry::componentSizeKey()]
                   = HbParameterLengthLimiter("txt_applib_dialog_l1_mb").arg(
-                          static_cast<double>(entry.ComponentSize() / KMega));
+                          static_cast<double>(entry.ComponentSize()/KLongMega));
     } else {
         detailMap[CaSoftwareRegistry::componentSizeKey()]
                   = HbParameterLengthLimiter("txt_applib_dialog_l1_kb").arg(
-                          static_cast<double>(entry.ComponentSize() / KKilo));
+                          static_cast<double>(entry.ComponentSize()/KLongKilo));
     }
     detailMap[CaSoftwareRegistry::componentTypeKey()] =
         XQConversions::s60DescToQString(entry.SoftwareType());
@@ -430,7 +421,8 @@ QList<CaSoftwareRegistryPrivate::DetailMap>
  \param operation type.
  \return string representing operation type.
  */
-QString CaSoftwareRegistryPrivate::operationTypeL(int operationType) const
+QString CaSoftwareRegistryPrivate::operationTypeL(
+        Usif::TScrComponentOperationType operationType) const
 {
     QString opType;
     switch (operationType) {

@@ -93,13 +93,13 @@ void CCaBackupNotifier::RunL()
     {
 	TInt backupStateValue = 0;
 	iProperty.Get(backupStateValue);
-	// Resubscribe before dealing with the current notification 	
+	// Resubscribe before dealing with the current notification
     iProperty.Subscribe(iStatus);
     SetActive();
 
     conn::TBURPartType type = static_cast< conn::TBURPartType >
         ( backupStateValue & conn::KBURPartTypeMask );
-    
+
     if( type == conn::EBURRestoreFull || type == conn::EBURRestorePartial  )
     	{
         // restore starting
@@ -111,11 +111,13 @@ void CCaBackupNotifier::RunL()
         iStorageProxy->SaveDatabaseL();
         iLastState = ECaBackup;
     	}
-    else if( ( type == conn::EBURNormal || type == conn::EBURUnset ) && iLastState == ECaRestore )
+    else if( ( type == conn::EBURNormal || type == conn::EBURUnset )
+            && iLastState == ECaRestore )
     	{ // restore ends
-        iStorageProxy->RestoreDatabaseL();
+        iStorageProxy->SetDBPropertyL( KCaDbPropRestore, KCaDbPropRestoreVal );
     	}
-    else if( ( type == conn::EBURNormal || type == conn::EBURUnset ) && iLastState == ECaBackup )
+    else if( ( type == conn::EBURNormal || type == conn::EBURUnset )
+            && iLastState == ECaBackup )
     	{ // backup ends
          // do nothing
     	}

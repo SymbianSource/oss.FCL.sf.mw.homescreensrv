@@ -41,6 +41,9 @@ CaUninstallNotifier::~CaUninstallNotifier()
     delete m_d;
 }
 
+/*!
+ Returns notifier instance.
+ */
 CaUninstallNotifier* CaUninstallNotifier::notifier()
 {
     if (!mInstance.data()) {
@@ -51,4 +54,10 @@ CaUninstallNotifier* CaUninstallNotifier::notifier()
     return mInstance.data();
 }
 
-
+/*!
+ Returns last progress notification.
+ */
+QVariantMap CaUninstallNotifier::getLastNotification(void)
+{
+    return m_d->getLastNotification();
+}

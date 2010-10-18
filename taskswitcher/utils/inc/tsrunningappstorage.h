@@ -19,6 +19,7 @@
 
 #include <e32base.h>
 class MTsRunningApplication;
+class TTsEntryKey;
 
 /**
  * Abstract interface of container with running applications desctiptors 
@@ -31,7 +32,7 @@ public:
      * @param aOffset - index of running application
      * @return running application entry
      */
-    virtual const MTsRunningApplication& operator[] ( TInt aOffset ) const=0;
+    virtual MTsRunningApplication& operator[] ( TInt aOffset ) const=0;
     
     /**
      * Provide information about number of running applications
@@ -50,6 +51,9 @@ public:
      * @return list of blocked window groups
      */
     virtual TArray<TInt> BlockedWindowGroups() const =0;
+    
+    virtual TInt GenerateKey( TTsEntryKey& aReturnKey, 
+                              TInt aWindowGroupId) const =0;
 
     };
 

@@ -50,8 +50,6 @@ private:
     static void NotifyChangeL(MAfTaskStorage& observers,
                               const RMessage2& msg);
 
-    static void CreateThumbnailL(const TDesC &path, TInt hdl);
-                                
     static void DeleteActivityScreenshotL(CAfStorage& dataStorage,
                                 TInt uid,
                                 const TDesC &activityName);

@@ -21,6 +21,8 @@
 #include "cahandlerproxy.h"
 #include "cahandlerloader.h"
 #include "caobjectadapter.h"
+#include "cahandlerspreloader.h"
+#include "caclient_defines.h"
 
 /*!
     \class CaHandlerProxy
@@ -35,6 +37,7 @@
 */
 CaHandlerProxy::~CaHandlerProxy()
 {
+    delete mHandlersPreloader;
 }
 
 
@@ -43,7 +46,8 @@ CaHandlerProxy::~CaHandlerProxy()
   \param loader Provides handler implementations. It has to be pointer to a valid object.
 */
 CaHandlerProxy::CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader):
-    mLoader(loader)
+    mLoader(loader),
+    mHandlersPreloader(NULL)
 {
     Q_ASSERT(!mLoader.isNull());
 }
@@ -58,40 +62,51 @@ CaHandlerProxy::CaHandlerProxy(const QSharedPointer<CaHandlerLoader> &loader):
   \sa e32err.h for KErrNone definition.
 */
 int CaHandlerProxy::execute(const CaEntry &entry, const QString &commandName,
-        QObject* receiver, const char* member)
+    QObject* receiver, const char* member)
 {
-    CaHandler *const handler = getHandler(entry, commandName);
     int result = -1;
+    CaHandler *const handler = getHandler(entry.entryTypeName());
 
     if (handler) {
-            result = handler->execute(entry, commandName, receiver, member);
+        result = handler->execute(entry, commandName, receiver, member);
     }
     return result;
 }
 
 /*!
-  Looks for handler implementation in local cache or if not found, request it from
-  handler loader.
+  Looks for handler implementation in local cache or if not found,
+  request it from handler loader.
   \param entry The entry being a subject for the requested command.
   \param commandName Name of the command to be executed.
   \return Pointer to a handler instance if available, NULL otherwise.
 */
-CaHandler *CaHandlerProxy::getHandler(const CaEntry &entry,
-                                      const QString &commandName)
+CaHandler *CaHandlerProxy::getHandler(const QString &entryTypeName)
 {
     CaHandler *implementation(0);
-
-    const QString entryTypeName(entry.entryTypeName());
+    QString typeName(entryTypeName);
+    if (entryTypeName == WIDGET_ENTRY_TYPE_NAME
+        || entryTypeName == PACKAGE_ENTRY_TYPE_NAME) {
+        typeName = QString(APPLICATION_ENTRY_TYPE_NAME);
+    }
 
     const ImplementationMapIterator it(
-        mImplementationMap.find(entryTypeName));
+        mImplementationMap.find(typeName));
 
     if (it != mImplementationMap.end()) {
         implementation = it->data();
     } else {
-        implementation = mLoader->loadHandler(entryTypeName, commandName);
-        mImplementationMap[entryTypeName] = QSharedPointer<CaHandler>(implementation);
+        implementation = mLoader->loadHandler(typeName);
+        mImplementationMap[typeName] =
+            QSharedPointer<CaHandler>(implementation);
     }
 
     return implementation;
+}
+
+/*!
+  Preload handlers during the idle time.
+ */
+void CaHandlerProxy::preloadHandlers()
+{
+    mHandlersPreloader = new CaHandlersPreloader(this);
 }

@@ -60,8 +60,7 @@ public:
         EAttributeTable,
         EGroupTable,
         EGroupTableRemove,
-        EGroupTableInsert,
-        ELaunchTable
+        EGroupTableInsert
         };
 
     /**
@@ -211,13 +210,11 @@ public:
             const CCaEntryAttribute* aAttr );
 
     /**
-     * Binds values for a launch operation.
+     * Binds values for a touch operation.
      *
      * @param aEntryId The entry id to bind.
-     * @param aLaunchTime the launch time to bind.
      */
-    void BindValuesForLaunchL( const TInt aEntryId,
-            const TInt64 aLaunchTime );
+    void BindValuesForTouchL( const TInt aEntryId );
 
     /**
      * Binds values for a remove operation.

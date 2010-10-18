@@ -151,7 +151,7 @@ void T_TsTaskSettings::testChangingVisibilityOfApplication()
     }
     
     // hide unit test task
-    mTaskSettings.setVisibility(false);
+    QVERIFY(mTaskSettings.setVisibility(false));
     QVERIFY(TsTestUtils::waitForSignal(&mTaskMonitor, SIGNAL(taskListChanged())));
     {
         QSharedPointer<TsTask> myTask = unitTestTask();

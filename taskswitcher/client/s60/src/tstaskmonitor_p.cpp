@@ -25,7 +25,8 @@
 
 #include "tstaskmonitorclient.h"
 #include "tstask.h"
-#include "tstaskcontent.h"
+#include "tsentrykey.h"
+#include "tscliententry.h"
 #include "tstaskchangeinfo.h"
 #include "tsutils.h"
 #include "tstaskmonitorhistory.h"
@@ -39,6 +40,7 @@ TsTaskMonitorPrivate::TsTaskMonitorPrivate(TsTaskMonitor *q) : q_ptr(q), mClient
 
 TsTaskMonitorPrivate::~TsTaskMonitorPrivate()
 {
+    mUpdateSet.ResetAndDestroy();
     mClient->CancelSubscribe();
     delete mClient;
 }
@@ -47,97 +49,61 @@ TsTaskMonitorPrivate::~TsTaskMonitorPrivate()
 QList<TsTaskChange> TsTaskMonitorPrivate::changeList(bool fullList)
 {
     QList<TsTaskChange> retVal;
-     
-    QT_TRAP_THROWING (
-
-        HBufC8 *data = mClient->TasksContentLC();
-        if (data->Size() == 0) {
-            CleanupStack::PopAndDestroy(data);
-            return retVal;
-        }
-        TPtr8 dataPointer(data->Des());
-        RDesReadStream dataStream(dataPointer);
-        CleanupClosePushL(dataStream);
-
-        int count = dataStream.ReadInt32L();
-
-        QT_TRYCATCH_LEAVING(
-            QList< QSharedPointer<TsTaskContent> > taskList;
-            QList<TsTaskMonitorHistory> newTaskHistory;
-            for (int iter(0); iter < count; iter++) {
-                QSharedPointer<TsTaskContent> content(new TsTaskContent);
-                TsTaskMonitorHistory newHistoryItem = internalizeContentL(dataStream, content);
-                newHistoryItem.setOffset(iter);
-                newTaskHistory.append(newHistoryItem);
-                taskList.append(content);
-            }
-            if (fullList) {
-                mTaskHistory.clear();
-            }
-            QList<int> insertsList = findInserts(newTaskHistory);
-            QList<int> deletesList = findDeletes(newTaskHistory);
-            QList<TsTaskMonitorHistory> newMinusInserts;
-            if (insertsList.count() > 0 ) {
-                newMinusInserts = substractInsertsFromNew(insertsList, newTaskHistory);
-            } else {
-                newMinusInserts = newTaskHistory;
-            }
-            QList<TsTaskMonitorHistory> interimList;
-            if (deletesList.count() > 0 ) {
-                retVal.append(getDeletesChangeset(deletesList));
-                interimList = substractDeletesFromOld(deletesList);
-            } else {
-                interimList = mTaskHistory;
-            }
-            retVal.append(findMovesAndUpdates(newMinusInserts, taskList, interimList));
-            if (mTaskHistory.isEmpty()) {
-                retVal.append(TsTaskChange(TsTaskChangeInfo(), QSharedPointer<TsTask>()));
-            }
-            retVal.append(getInsertsChangeset(insertsList, taskList));
-            mTaskHistory = newTaskHistory;
-        )//QT_TRYCATCH_LEAVING
-        CleanupStack::PopAndDestroy(&dataStream);
-        CleanupStack::PopAndDestroy(data);
-    );//QT_TRAP_THROWING
-       
+    QT_TRAP_THROWING(changeListL());
+    
+    QList< QSharedPointer<CTsClientEntry> > taskList;
+    QList<TsTaskMonitorHistory> newTaskHistory;
+    for (int offset(0); 0 < mUpdateSet.Count(); ++offset) {
+        QSharedPointer<CTsClientEntry> content(mUpdateSet[0]);
+        taskList.append(content);
+        newTaskHistory.append(TsTaskMonitorHistory(content, offset));
+        mUpdateSet.Remove(0);
+    }
+    if (fullList) {
+        mTaskHistory.clear();
+    }
+    QList<int> insertsList = findInserts(newTaskHistory);
+    QList<int> deletesList = findDeletes(newTaskHistory);
+    QList<TsTaskMonitorHistory> newMinusInserts;
+    if (insertsList.count() > 0 ) {
+        newMinusInserts = substractInsertsFromNew(insertsList, newTaskHistory);
+    } else {
+        newMinusInserts = newTaskHistory;
+    }
+    QList<TsTaskMonitorHistory> interimList;
+    if (deletesList.count() > 0 ) {
+        retVal.append(getDeletesChangeset(deletesList));
+        interimList = substractDeletesFromOld(deletesList);
+    } else {
+        interimList = mTaskHistory;
+    }
+    retVal.append(findMovesAndUpdates(newMinusInserts, taskList, interimList));
+    if (mTaskHistory.isEmpty()) {
+        retVal.append(TsTaskChange(TsTaskChangeInfo(), QSharedPointer<TsTask>()));
+    }
+    retVal.append(getInsertsChangeset(insertsList, taskList));
+    mTaskHistory = newTaskHistory;
     return retVal;
 }
 
-TsTaskMonitorHistory TsTaskMonitorPrivate::internalizeContentL(RDesReadStream &  dataStream,
-                                    QSharedPointer<TsTaskContent> &content)
+void TsTaskMonitorPrivate::changeListL()
 {
-    // get name
-    TInt nameLength(dataStream.ReadInt32L());
-    if (0 < nameLength) {
-        HBufC* name = HBufC::NewLC(dataStream, nameLength);
-        content->mName = XQConversions::s60DescToQString(*name);
-        CleanupStack::PopAndDestroy(name);
+    mUpdateSet.ResetAndDestroy();
+    HBufC8 *data = mClient->TasksContentLC();
+    if (data->Size() == 0) {
+        User::Leave(KErrCorrupt);
     }
-    TPckgBuf<TTime> updateTime;
-    dataStream.ReadL(updateTime);
-    QDateTime historyTime =  dateTimeFromS60(updateTime());
-    
-    // get screenshot
-    TInt screenshotHandle = dataStream.ReadInt32L();
-    CFbsBitmap *screenshot = new (ELeave) CFbsBitmap;
-    CleanupStack::PushL(screenshot);
-    if (KErrNone == screenshot->Duplicate(screenshotHandle)) {
-        content->mScreenshot = QPixmap::fromSymbianCFbsBitmap(screenshot);
+    RDesReadStream dataStream;
+    CleanupClosePushL(dataStream);
+    dataStream.Open(*data);
+    const int count(dataStream.ReadInt32L());
+    for (int offset(0); offset < count; ++offset) {
+        CTsClientEntry* entry = CTsClientEntry::NewLC(dataStream);
+        mUpdateSet.AppendL(entry);
+        CleanupStack::Pop(entry);
     }
-    CleanupStack::PopAndDestroy(screenshot);
-    // get key
-    TInt keyLength(dataStream.ReadInt32L());
-    if (0 < keyLength) {
-        HBufC8* key = HBufC8::NewLC(keyLength);
-        TPtr8 des(key->Des());
-        dataStream.ReadL(des, keyLength);
-        content->mKey = XQConversions::s60Desc8ToQByteArray(*key);
-        CleanupStack::PopAndDestroy(key);
-    }
-    // get other values
-    content->mActive = dataStream.ReadInt32L();
-    content->mClosable = dataStream.ReadInt32L();  
-    return TsTaskMonitorHistory(content->mKey, historyTime);
+    CleanupStack::PopAndDestroy(&dataStream);
+    CleanupStack::PopAndDestroy(data);
 }
 
 QDateTime TsTaskMonitorPrivate::dateTimeFromS60(const TTime &s60Time)
@@ -157,7 +123,7 @@ int TsTaskMonitorPrivate::findItemIndex(
                           const TsTaskMonitorHistory &item )
 {
     for (int iter(0); iter < historyList.count(); iter++) {
-        if(historyList[iter].isEqual(item)) {
+        if(historyList[iter] == item) {
             return iter;
         }
     }
@@ -202,7 +168,7 @@ QList<TsTaskChange> TsTaskMonitorPrivate::getDeletesChangeset(
 }
 
 QList<TsTaskChange> TsTaskMonitorPrivate::getInsertsChangeset(const QList<int> &insertList,
-                                        const QList< QSharedPointer<TsTaskContent> > &taskList)
+                                        const QList< QSharedPointer<CTsClientEntry> > &taskList)
 {
     QList<TsTaskChange> retVal;
     foreach (int index, insertList) {
@@ -238,7 +204,7 @@ QList<TsTaskMonitorHistory> TsTaskMonitorPrivate::substractDeletesFromOld(
 
 QList<TsTaskChange> TsTaskMonitorPrivate::findMovesAndUpdates( 
                                      const QList<TsTaskMonitorHistory> &newMinusInserts,
-                                     const QList< QSharedPointer<TsTaskContent> > &taskList,
+                                     const QList< QSharedPointer<CTsClientEntry> > &taskList,
                                      QList<TsTaskMonitorHistory> &workingList)
 {
     QList<TsTaskChange> retVal;
@@ -254,10 +220,9 @@ QList<TsTaskChange> TsTaskMonitorPrivate::findMovesAndUpdates(
         // case 2 item has changed
         if (newMinusInserts[newPos].isUpdated(workingList[newPos])) {
             TsTaskChangeInfo updateChange(newPos, newPos);
-            int taskListOffset = newMinusInserts[newPos].offset();
             retVal.append( TsTaskChange(
                               updateChange,
-                              QSharedPointer<TsTask>(new TsTask(taskList[taskListOffset], *this)))); 
+                              QSharedPointer<TsTask>(new TsTask(taskList[newMinusInserts[newPos].offset()], *this)))); 
         }
     }
     return retVal;
@@ -268,15 +233,36 @@ void TsTaskMonitorPrivate::HandleRunningAppChange()
     emit q_ptr->taskListChanged();
 }
 
-void TsTaskMonitorPrivate::openTask(const QByteArray &key)
+void TsTaskMonitorPrivate::openTask(const MTsEntry &entry)
 {
-    TPtrC8 desC(reinterpret_cast<const TUint8*>(key.constData()), key.length());
-    mClient->OpenTask(desC);
-    
+    QT_TRAP_THROWING(
+    HBufC8 *dataPtr = keyLC(entry);
+    TPtr8 dataBuf(dataPtr->Des());
+    mClient->OpenTask(dataBuf);
+    CleanupStack::PopAndDestroy(dataPtr);
+    )
 }
 
-void TsTaskMonitorPrivate::closeTask(const QByteArray &key)
+void TsTaskMonitorPrivate::closeTask(const MTsEntry &entry)
 {
-    TPtrC8 desC(reinterpret_cast<const TUint8*>(key.constData()), key.length());
-    mClient->CloseTask(desC);
+    QT_TRAP_THROWING(
+    HBufC8 *dataPtr = keyLC(entry);
+    TPtr8 dataBuf(dataPtr->Des());
+    mClient->CloseTask(dataBuf);
+    CleanupStack::PopAndDestroy(dataPtr);
+    )
+}
+
+HBufC8* TsTaskMonitorPrivate::keyLC(const MTsEntry &entry)
+{
+    HBufC8 *dataPtr = HBufC8::NewLC(TTsEntryKey::Size());
+    TPtr8 dataBuf(dataPtr->Des());
+    
+    RDesWriteStream dataStream;
+    CleanupClosePushL(dataStream);
+    dataStream.Open(dataBuf);
+    dataStream << entry.Key();
+    CleanupStack::PopAndDestroy(&dataStream);
+    
+    return dataPtr;
 }

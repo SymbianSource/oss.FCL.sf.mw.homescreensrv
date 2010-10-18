@@ -18,34 +18,34 @@
 #define TSMODELITEM_H
 
 #include <e32base.h>
-#include "tsmodelitemkey.h"
+#include "tsentry.h"
+#include "tsentrykey.h"
 
 class MTsModel;
 
-class TTsModelItem {
+class TTsModelItem : public MTsEntry
+    {
 public:
     TTsModelItem( const MTsModel& aModel, TInt aOffset );
     TTsModelItem( const TTsModelItem& aItem );
-    const TDesC& DisplayNameL() const;
-    TInt IconHandleL() const;
-    TTime TimestampL() const;
-    TTime TimestampUpdateL() const; 
-    TTsModelItemKey KeyL() const;
-    TBool IsActiveL() const;
-    TBool IsClosableL() const;
-    TBool CloseL() const;
-    TBool LaunchL() const;
-    TBool IsMandatoryL() const;
-    
+    TBool IsValid() const;
+    const TDesC& DisplayName() const;
+    TInt IconHandle() const;
+    TTime Timestamp() const;
+    TTime TimestampUpdate() const; 
+    TTsEntryKey Key() const;
+    TBool IsActive() const;
+    TBool IsClosable() const;
+    TBool Close() const;
+    TBool Launch() const;
+    TBool IsMandatory() const;
+
 public:
     void ExternalizeL( RWriteStream& aStream ) const;
-    
-private:
-    void ValidateL() const;
 
 private:
     const MTsModel& iModel;
     const TInt iIndex;
-};
+    };
 
 #endif //TSMODELITEM_H

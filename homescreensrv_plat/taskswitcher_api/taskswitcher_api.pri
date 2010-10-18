@@ -19,7 +19,7 @@ PLATFORM_HEADERS += taskswitcher_api/tstasksettings.h \
                     taskswitcher_api/tspropertydefs.h \
 
 symbian {
-    crml.sources = tsdevicedialog.qcrml
+    crml.sources = $$PWD/tsdevicedialog.qcrml
     crml.path = /resource/qt/crml
     DEPLOYMENT += crml
 }

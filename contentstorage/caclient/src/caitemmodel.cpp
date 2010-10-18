@@ -774,12 +774,14 @@ void CaItemModelPrivate::updateItemData(const QSharedPointer<CaEntry> &entry)
     } else if (mParentEntry && id == mParentEntry->id()) {
         updateParentEntry();
         m_q->reset();
-    } else if (ids.indexOf(id) < 0) {
-        removeItem(id);
-    } else if (mEntries.indexOf(id) < 0) {
-        addItem(id);
-    } else {
-        updateModel();
+    } else  {
+        QList<int> parentIds = entry.data()->parentIds();
+        for (int i(0); i < parentIds.count();  ++i) {
+            if (mEntries.indexOf(parentIds[i]) >= 0) {
+                emit m_q->dataChanged(
+                    index(mEntries.indexOf(parentIds[i])), index(mEntries.indexOf(parentIds[i])));            
+            }
+        } 
     }
     CACLIENTTEST_FUNC_EXIT("CaItemModelPrivate::updateItemData");
 }

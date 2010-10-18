@@ -15,6 +15,7 @@
 *
 */
 #include "tsmodel.h"
+#include "tsentryimp.h"
 // -----------------------------------------------------------------------------
 /**
  * Constructor
@@ -48,10 +49,9 @@ iIndex( aItem.iIndex )
  * Validate item instance and retrieve display name data
  * @return item display name
  */
-const TDesC& TTsModelItem::DisplayNameL() const
+const TDesC& TTsModelItem::DisplayName() const
     {
-    ValidateL();
-    return iModel.DisplayNameL( iIndex );
+    return iModel.DisplayName( iIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -59,10 +59,9 @@ const TDesC& TTsModelItem::DisplayNameL() const
  * Validate item instance and retrieve icon handle ( CFbsBitmap handle )
  * @return item icon handle
  */
-TInt TTsModelItem::IconHandleL() const
+TInt TTsModelItem::IconHandle() const
     {
-    ValidateL();
-    return iModel.IconHandleL( iIndex );
+    return iModel.IconHandle( iIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -70,10 +69,9 @@ TInt TTsModelItem::IconHandleL() const
  * Validate item instance and retrieve entry key
  * @return item key
  */
-TTsModelItemKey TTsModelItem::KeyL() const
+TTsEntryKey TTsModelItem::Key() const
     {
-    ValidateL();
-    return iModel.KeyL( iIndex );
+    return iModel.Key( iIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -81,10 +79,9 @@ TTsModelItemKey TTsModelItem::KeyL() const
  * Validate item instance and retrieve entry timestamp
  * @return item timestamp
  */
-TTime TTsModelItem::TimestampL() const
+TTime TTsModelItem::Timestamp() const
     {
-    ValidateL();
-    return iModel.TimestampL( iIndex );
+    return iModel.Timestamp( iIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -93,21 +90,19 @@ TTime TTsModelItem::TimestampL() const
  * with latest update time
  * @return item timestamp
  */
-TTime TTsModelItem::TimestampUpdateL() const 
-{
-    ValidateL();
-    return iModel.TimestampUpdateL(iIndex);
-}
+TTime TTsModelItem::TimestampUpdate() const 
+    {
+    return iModel.TimestampUpdate(iIndex);
+    }
 
 // -----------------------------------------------------------------------------
 /**
  * Validate item instance and retrieve activity status 
  * @return activity status
  */
-TBool TTsModelItem::IsActiveL() const
+TBool TTsModelItem::IsActive() const
     {
-    ValidateL();
-    return iModel.IsActiveL( iIndex );
+    return iModel.IsActive( iIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -115,10 +110,9 @@ TBool TTsModelItem::IsActiveL() const
  * Validate item instance and retrieve closable status 
  * @return closable status
  */
-TBool TTsModelItem::IsClosableL() const
+TBool TTsModelItem::IsClosable() const
     {
-    ValidateL();
-    return iModel.IsClosableL( iIndex );
+    return iModel.IsClosable( iIndex );
     }
 
 // -----------------------------------------------------------------------------
@@ -126,10 +120,9 @@ TBool TTsModelItem::IsClosableL() const
  * Validate item instance and forward close request to its owner 
  * @return EFalse on failure
  */
-TBool TTsModelItem::CloseL() const
+TBool TTsModelItem::Close() const
     {
-    ValidateL();
-    return iModel.CloseL( KeyL() );
+    return iModel.Close( Key() );
     }
 
 // -----------------------------------------------------------------------------
@@ -137,32 +130,27 @@ TBool TTsModelItem::CloseL() const
  * Validate item instance and forward launch request to its owner 
  * @return EFalse on failure
  */
-TBool TTsModelItem::LaunchL() const
+TBool TTsModelItem::Launch() const
     {
-    ValidateL();
-    return iModel.LaunchL( KeyL() );
+    return iModel.Launch( Key() );
     }
 
 // -----------------------------------------------------------------------------
 /**
  * @return EFalse if entry is not mandatory, other value in other cases  
  */
-TBool TTsModelItem::IsMandatoryL() const
+TBool TTsModelItem::IsMandatory() const
     {
-    ValidateL();
-    return iModel.IsMandatoryL( iIndex );
+    return iModel.IsMandatory( iIndex );
     }
 
 // -----------------------------------------------------------------------------
 /**
  * Validate item instance 
  */
-void TTsModelItem::ValidateL() const
+TBool TTsModelItem::IsValid() const
     {
-    if(iModel.Count() <= iIndex )
-        {
-        User::Leave( KErrOverflow );
-        }
+    return iModel.Count() > iIndex;
     }
 
 // -----------------------------------------------------------------------------
@@ -173,17 +161,6 @@ void TTsModelItem::ValidateL() const
 
 void TTsModelItem::ExternalizeL( RWriteStream& aStream ) const
     {
-    aStream.WriteInt32L( DisplayNameL().Length() );
-    if( 0 < DisplayNameL().Length() )
-        {
-        aStream << DisplayNameL();
-        }
-    TPckgBuf<TTime> timestamp(TimestampUpdateL()); 
-    aStream.WriteL(timestamp);
-    aStream.WriteInt32L( IconHandleL() );
-    aStream.WriteInt32L( TTsModelItemKey::Size() );
-    aStream << KeyL();
-    aStream.WriteInt32L( IsActiveL() );
-    aStream.WriteInt32L( IsClosableL() );
+    CTsEntryImp::ExternalizeL(aStream, *this);
     }
 

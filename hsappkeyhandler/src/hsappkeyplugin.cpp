@@ -29,6 +29,7 @@
 
 _LIT( KHsActivactionUri, "appto://20022F35?activityname=HsIdleView" );
 _LIT( KAppLibActivactionUri, "appto://20022F35?activityname=AppLibMainView" );
+_LIT( KHsHomeKeyPressedOnBackground, "appto://20022F35?activityname=HsHomeKeyPressedOnBackground" );
 _LIT( KTsPluginName, "com.nokia.taskswitcher.tsdevicedialogplugin/1.0" );
 
 
@@ -157,10 +158,14 @@ void CHsAppKeyPlugin::HandleShortPressL()
             {
             activityEnabler->launchActivityL( KAppLibActivactionUri );
             }
-        else
+        else if ( (state & EHomeScreenApplicationBackground) == EHomeScreenApplicationBackground)
+            {
+            activityEnabler->launchActivityL( KHsHomeKeyPressedOnBackground );
+            }
+        else 
             {
             activityEnabler->launchActivityL( KHsActivactionUri );
-            }
+            }    
         CleanupStack::PopAndDestroy( activityEnabler );
         CleanupStack::PopAndDestroy( &apaLsSession );
         }

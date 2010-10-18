@@ -16,22 +16,20 @@
 */
 #ifndef TSTASKMONITORHISTORY_H_
 #define TSTASKMONITORHISTORY_H_
-
-#include <QByteArray>
-#include <QDateTime>
+#include <QSharedPointer>
+#include "tscliententry.h"
 
 class TsTaskMonitorHistory
 {
 public:
-    TsTaskMonitorHistory(const QByteArray &key, const QDateTime &updateTime);
-    bool isEqual(const TsTaskMonitorHistory &item) const;
-    bool isUpdated(const TsTaskMonitorHistory &item) const;
+    TsTaskMonitorHistory(const QSharedPointer< CTsClientEntry > item, int offset);
+    bool operator == (const TsTaskMonitorHistory &item) const;
+    bool isUpdated (const TsTaskMonitorHistory &item) const;
     int offset() const;
-    void setOffset(int offset);
+
 private:
-    QByteArray mKey;
-    QDateTime mUpdateTime;
-    int mOffset;
+    QSharedPointer<CTsClientEntry> mEntry;
+    const int mOffset;
 };
 
 #endif /* TSTASKMONITORHISTORY_H_ */

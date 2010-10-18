@@ -27,18 +27,14 @@
 
 
 // -----------------------------------------------------------------------------
-LOCAL_C QVariantHash valueL( QObject *aModel, TInt aOffset )
+LOCAL_C QVariantHash value( QObject *aModel, TInt aOffset )
     {
     QList<QVariantHash> items;
     QMetaObject::invokeMethod( aModel, 
                                "taskList", 
                                Q_RETURN_ARG(QList<QVariantHash>, 
                                items ) );
-    if( aOffset >= items.count() ) 
-        {
-        User::Leave(KErrCorrupt);
-        }
-    return items.at(aOffset);
+    return (items.count() > aOffset) ? items.at(aOffset) : QVariantHash();
     }
 
 // -----------------------------------------------------------------------------
@@ -107,57 +103,57 @@ void CTsService::SetObserver( MTsModelObserver *aObserver )
     }
 
 // -----------------------------------------------------------------------------
-const TDesC& CTsService::DisplayNameL( TInt aOffset ) const
+const TDesC& CTsService::DisplayName( TInt aOffset ) const
     {
-    return StringValueL( aOffset, "TaskName" );
+    return StringValue( aOffset, "TaskName" );
     }
 
 // -----------------------------------------------------------------------------
-TInt CTsService::IconHandleL( TInt aOffset ) const
+TInt CTsService::IconHandle( TInt aOffset ) const
     {
-    return IntValueL( aOffset, "TaskScreenshot" );
+    return IntValue( aOffset, "TaskScreenshot" );
     }
 
 // -----------------------------------------------------------------------------
-TTime CTsService::TimestampL( TInt aOffset ) const
+TTime CTsService::Timestamp( TInt aOffset ) const
     {
-    return TimeValueL( aOffset, "TaskTimestamp" );
+    return TimeValue( aOffset, "TaskTimestamp" );
     }
 
 // -----------------------------------------------------------------------------
-TTime CTsService::TimestampUpdateL(TInt offset) const
+TTime CTsService::TimestampUpdate(TInt offset) const
 {
-    return TimeValueL(offset, "TaskUpdateTimestamp");
+    return TimeValue(offset, "TaskUpdateTimestamp");
 }
 
-TTsModelItemKey CTsService::KeyL( TInt aOffset ) const
+TTsEntryKey CTsService::Key( TInt aOffset ) const
     {
-    return TTsModelItemKey( IntValueL( aOffset, "TaskId" ), 
-                            reinterpret_cast<TInt>( this ) );
+    return TTsEntryKey( IntValue( aOffset, "TaskId" ), 
+                        reinterpret_cast<TInt>( this ) );
     }
 
 // -----------------------------------------------------------------------------
-TBool CTsService::IsActiveL( TInt aOffset ) const
+TBool CTsService::IsActive( TInt aOffset ) const
     {
-    return IntValueL( aOffset, "TaskIsRunning" );
+    return IntValue( aOffset, "TaskIsRunning" );
     }
 
 // -----------------------------------------------------------------------------
-TBool CTsService::IsClosableL( TInt aOffset ) const
+TBool CTsService::IsClosable( TInt aOffset ) const
     {
-    return IntValueL( aOffset, "TaskCanBeClosed" );
+    return IntValue( aOffset, "TaskCanBeClosed" );
     }
 
 // -----------------------------------------------------------------------------
-TBool CTsService::IsMandatoryL( TInt aOffset ) const
+TBool CTsService::IsMandatory( TInt aOffset ) const
     {
-    const QVariantHash values(valueL(iModel, aOffset));
+    const QVariantHash values(value(iModel, aOffset));
     const QString key("TaskIsMandatory");
     return values.contains(key) ? values.value(key).toInt() : ETrue;
     }
 
 // -----------------------------------------------------------------------------
-TBool CTsService::CloseL( TTsModelItemKey aKey ) const
+TBool CTsService::Close( TTsEntryKey aKey ) const
     {
     bool result(false);
     QMetaObject::invokeMethod( iModel, 
@@ -168,7 +164,7 @@ TBool CTsService::CloseL( TTsModelItemKey aKey ) const
     }
 
 // -----------------------------------------------------------------------------
-TBool CTsService::LaunchL( TTsModelItemKey aKey ) const
+TBool CTsService::Launch( TTsEntryKey aKey ) const
     {
     bool result(false);
     QMetaObject::invokeMethod( iModel, 
@@ -179,30 +175,31 @@ TBool CTsService::LaunchL( TTsModelItemKey aKey ) const
     }
 
 // -----------------------------------------------------------------------------
-TInt CTsService::IntValueL( TInt aOffset, const char* aKey) const
+TInt CTsService::IntValue( TInt aOffset, const char* aKey) const
     {
-    return valueL(iModel, aOffset).value( aKey ).toInt();
+    return value(iModel, aOffset).value( aKey ).toInt();
     }
 
 // -----------------------------------------------------------------------------
-TTime CTsService::TimeValueL(TInt aOffset, const char* aKey) const
+TTime CTsService::TimeValue(TInt aOffset, const char* aKey) const
     {
     // Conversion between TTime which counts from year 0, and QDateTime which uses unix epoch (1st Jan 1970)
-    QDateTime timestamp = valueL( iModel, aOffset ).value( aKey ).toDateTime();
+    QDateTime timestamp = value( iModel, aOffset ).value( aKey ).toDateTime();
     
     return TTime( _L( "19700000:" ) ) + TTimeIntervalSeconds( timestamp.toTime_t() ) +
                          TTimeIntervalMicroSeconds( timestamp.time().msec() * 1000 );
     }
 
 // -----------------------------------------------------------------------------
-const TDesC& CTsService::StringValueL( TInt aOffset, const char* aKey ) const
+const TDesC& CTsService::StringValue( TInt aOffset, const char* aKey ) const
     {
     delete iBuffer;
-    const_cast<CTsService *>(this)->iBuffer = 0;
+    iBuffer = 0;
     
-    const QVariantHash item(valueL(iModel, aOffset));
-    QT_TRYCATCH_LEAVING(
-    const_cast<CTsService *>(this)->iBuffer = 
-    XQConversions::qStringToS60Desc(item.value(aKey).toString()));
-    return *iBuffer;
+    const QVariantHash item(value(iModel, aOffset));
+    try {
+        iBuffer = XQConversions::qStringToS60Desc(item.value(aKey).toString());
+    } catch(...) {
+    }
+    return iBuffer ? *iBuffer : KNullDesC();
     }

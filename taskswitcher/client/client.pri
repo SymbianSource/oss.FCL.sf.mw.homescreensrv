@@ -19,7 +19,6 @@ INCLUDEPATH +=  $$PWD/inc
 HEADERS +=  $$PWD/inc/tstaskmonitor.h \
             $$PWD/inc/tstask.h \
             $$PWD/inc/tstasklauncher.h \
-            $$PWD/inc/tstaskcontent.h \
             $$PWD/inc/tstaskchangeinfo.h 
             
 SOURCES +=  $$PWD/src/tstaskmonitor.cpp \
@@ -37,11 +36,13 @@ symbian {
                 $$PWD/s60/inc/tstaskmonitorclientimpl.h \
                 $$PWD/s60/inc/tssession.h \
                 $$PWD/../utils/inc/tsentrykey.h \
+                $$PWD/../utils/inc/tsentryimp.h \
                 $$PWD/../utils/inc/tsutils.h \
                 $$PWD/../utils/inc/tsscreenshotmsg.h \
                 $$PWD/../utils/inc/tsunregscreenshotmsg.h \
                 $$PWD/../utils/inc/tsvisibilitymsg.h \
                 $$PWD/s60/inc/tstaskmonitor_p.h \
+                $$PWD/s60/inc/tscliententry.h \
                 $$PWD/s60/inc/tstaskmonitorhistory.h \
                 $$PWD/s60/inc/tsscreenshotclient.h \
                 $$PWD/s60/inc/tsscreenshotclientimpl.h \
@@ -52,10 +53,12 @@ symbian {
                 $$PWD/s60/src/tstaskmonitorclientimpl.cpp \
                 $$PWD/s60/src/tssession.cpp \
                 $$PWD/../utils/src/tsentrykey.cpp \
+                $$PWD/../utils/src/tsentryimp.cpp \
                 $$PWD/../utils/src/tsscreenshotmsg.cpp \
                 $$PWD/../utils/src/tsunregscreenshotmsg.cpp \
                 $$PWD/../utils/src/tsvisibilitymsg.cpp \
                 $$PWD/s60/src/tstaskmonitor_p.cpp \
+                $$PWD/s60/src/tscliententry.cpp \
                 $$PWD/s60/src/tstaskmonitorhistory.cpp \
                 $$PWD/s60/src/tsscreenshotclient.cpp \
                 $$PWD/s60/src/tsscreenshotclientimpl.cpp \

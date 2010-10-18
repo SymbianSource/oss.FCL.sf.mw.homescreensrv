@@ -19,7 +19,7 @@
 #define AFACTIVITIES_GLOBAL_H
 
 #include <qglobal.h>
-#include <qmetatype.h>
+#include <QMetaType>
 
 #ifdef AFACTIVITIES_LIB
     #define AFACTIVITIES_EXPORT Q_DECL_EXPORT
@@ -42,6 +42,9 @@ namespace Af {
 
     const char KActivityUriNameKey[] = "activityname";
     const char KActivityUriBackgroundKey[] = "activityinbackground";
+    
+    //to ensure activation reason can be used in queued connections
+    static const int metatypeNumber = qRegisterMetaType<Af::ActivationReason>("Af::ActivationReason");
 }
 
 Q_DECLARE_METATYPE( Af::ActivationReason )

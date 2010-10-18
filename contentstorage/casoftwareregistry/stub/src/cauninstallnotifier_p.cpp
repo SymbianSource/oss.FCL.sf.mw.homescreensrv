@@ -40,7 +40,26 @@ CaUninstallNotifierPrivate::~CaUninstallNotifierPrivate()
     delete mUninstallObserver;
 }
 
+/*!
+ Makes connections witch uninstall observer.
+ */
 void CaUninstallNotifierPrivate::makeConnect()
 {
+}
 
+/*!
+ Slot to cache and forward progress notification.
+ */
+void CaUninstallNotifierPrivate::progressChange(int componentId,int valueOfProgress){
+}
+
+/*!
+ Returns last progress notification.
+ */
+QVariantMap CaUninstallNotifierPrivate::getLastNotification()
+{
+    QVariantMap lastNote;
+    lastNote.insert(uninstallNotifierComponentIdKey, 0);
+    lastNote.insert(uninstallNotifierValueOfProgressKey, 0);
+    return lastNote;
 }

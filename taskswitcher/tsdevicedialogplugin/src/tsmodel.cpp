@@ -69,10 +69,11 @@ int TsModel::rowCount(const QModelIndex &parent) const
     return mEntries.count();
 }
 
-bool TsModel::insertRows(int row, int count, TsModelItem *item, const QModelIndex &parent)
+bool TsModel::insertRows(int row, int count, QScopedPointer<TsModelItem> &item, const QModelIndex &parent)
 {
     beginInsertRows(parent, row, row+count-1);
-    mEntries.insert(row, item);
+    mEntries.insert(row, item.data());
+    item.take();
     endInsertRows();
     return true;
 }
@@ -97,10 +98,11 @@ bool TsModel::moveRows(int oldPosition, int newPosition, const QModelIndex &pare
 }
 
 
-bool TsModel::updateRows(int row, TsModelItem *item)
+bool TsModel::updateRows(int row, QScopedPointer<TsModelItem> &item)
 {
     TsModelItem *oldItem = mEntries.at(row);
-    mEntries[row] = item;
+    mEntries[row] = item.data();
+    item.take();
     delete oldItem;
 
     emit dataChanged(index(row),index(row));
@@ -162,16 +164,20 @@ void TsModel::updateApplications()
                 removeRows(changes[iter].first.oldOffset(), 1);
                 break;
             case TsTaskChangeInfo::EChangeInsert :
-                insertRows(changes[iter].first.newOffset(), 1,
-                           new TsModelItem(changes[iter].second));
+                {
+                QScopedPointer<TsModelItem> item(new TsModelItem(changes[iter].second));
+                insertRows(changes[iter].first.newOffset(), 1, item);
                 break;
+                }
             case TsTaskChangeInfo::EChangeMove :
                 moveRows(changes[iter].first.oldOffset(), changes[iter].first.newOffset());
                 break;
             case TsTaskChangeInfo::EChangeUpdate :
-                updateRows(changes[iter].first.oldOffset(),
-                           new TsModelItem(changes[iter].second));
+                {
+                QScopedPointer<TsModelItem> item(new TsModelItem(changes[iter].second));
+                updateRows(changes[iter].first.oldOffset(), item);
                 break;
+                }
             default:
                 break;
         }

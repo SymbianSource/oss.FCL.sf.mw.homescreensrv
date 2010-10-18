@@ -26,5 +26,4 @@ EXPORTS
 	_ZN16CCaSrvMmcHistory4NewLEv @ 25 NONAME
 	_ZN15CCaStorageProxy16AddLocalizationLERK20CCaLocalizationEntry @ 26 NONAME
 	_ZN15CCaStorageProxy13SaveDatabaseLEv @ 27 NONAME
-	_ZN15CCaStorageProxy16RestoreDatabaseLEv @ 28 NONAME
 

@@ -112,69 +112,58 @@ void CTsRunningAppModel::SetObserver( MTsModelObserver* aObserver )
     iObserver = aObserver;
     }
 
-const TDesC& CTsRunningAppModel::DisplayNameL( TInt aOffset ) const
+const TDesC& CTsRunningAppModel::DisplayName( TInt aOffset ) const
     {
-    return iDataList->Data()[aOffset]->AppName();
+    return iDataList->Data()[aOffset]->DisplayName();
     }
 
-TInt CTsRunningAppModel::IconHandleL( TInt aOffset ) const
+TInt CTsRunningAppModel::IconHandle( TInt aOffset ) const
     {
-    CFbsBitmap *bitmap = iDataList->Data()[aOffset]->Screenshot();
-    if( !bitmap )
-        {
-        bitmap = iDataList->Data()[aOffset]->AppIconBitmap();
-        }
-    return bitmap ? bitmap->Handle() : KErrNotFound;
+    return iDataList->Data()[aOffset]->IconHandle();
+    
     }
 
-TTime CTsRunningAppModel::TimestampL( TInt aOffset ) const
+TTime CTsRunningAppModel::Timestamp( TInt aOffset ) const
     {
     return iDataList->Data()[aOffset]->Timestamp();
     }
 
-TTime CTsRunningAppModel::TimestampUpdateL(TInt offset) const
+TTime CTsRunningAppModel::TimestampUpdate(TInt offset) const
 {
-    return iDataList->Data()[offset]->LastUpdateTimestamp();
+    return iDataList->Data()[offset]->TimestampUpdate();
 }
 
-TTsModelItemKey CTsRunningAppModel::KeyL( TInt aOffset ) const
+TTsEntryKey CTsRunningAppModel::Key( TInt aOffset ) const
     {
-    return TTsModelItemKey(iDataList->Data()[aOffset]->Key().WindowGroupId(), 
-                           reinterpret_cast<TInt>(this));
+    return TTsEntryKey(iDataList->Data()[aOffset]->Key().Key(), 
+                       reinterpret_cast<TInt>(this));
     }
 
-TBool CTsRunningAppModel::IsActiveL( TInt /*aOffset*/ ) const
+TBool CTsRunningAppModel::IsActive( TInt /*aOffset*/ ) const
     {
     return ETrue;
     }
 
-TBool CTsRunningAppModel::IsClosableL( TInt aOffset ) const
+TBool CTsRunningAppModel::IsClosable( TInt aOffset ) const
     {
-    return iDataList->Data()[aOffset]->CloseableApp();
+    return iDataList->Data()[aOffset]->IsClosable();
     }
 
-TBool CTsRunningAppModel::IsMandatoryL( TInt /*aOffset*/ ) const
+TBool CTsRunningAppModel::IsMandatory( TInt /*aOffset*/ ) const
     {
     return ETrue;
     }
 
-TBool CTsRunningAppModel::CloseL( TTsModelItemKey aKey ) const
+TBool CTsRunningAppModel::Close( TTsEntryKey aKey ) const
     {
-    TApaTask task( iResources.WsSession() );
-    task.SetWgId( aKey.Key() );
-    task.EndTask();
-    return ETrue;
+    TBool retVal(EFalse);
+    TRAP_IGNORE(retVal = iDataList->FindL(aKey).Close());
+    return retVal;
     }
 
-TBool CTsRunningAppModel::LaunchL( TTsModelItemKey aKey ) const 
+TBool CTsRunningAppModel::Launch( TTsEntryKey aKey ) const 
     {
-    // find uid by wgid from key
-    CApaWindowGroupName *windowGroupName = 
-        CApaWindowGroupName::NewLC( iResources.WsSession(), aKey.Key() );
-    TUid uid = windowGroupName->AppUid();
-    CleanupStack::PopAndDestroy( windowGroupName );
-
-    TApaTask task = TApaTaskList( iResources.WsSession() ).FindApp( uid );
-    task.BringToForeground();
-    return task.Exists();
+    TBool retVal(EFalse);
+    TRAP_IGNORE(retVal = iDataList->FindL(aKey).Launch());
+    return retVal;
     }

@@ -29,18 +29,18 @@ public:
     virtual void SetObserver( MTsModelObserver *observer ) = 0;
     
 protected: //data access. should be used by TModelItem
-    virtual const TDesC& DisplayNameL( TInt aOffset ) const = 0;
-    virtual TInt IconHandleL( TInt aOffset ) const = 0;
-    virtual TTime TimestampL( TInt aOffset ) const = 0;
-    virtual TTime TimestampUpdateL(TInt offset) const = 0;
-    virtual TTsModelItemKey KeyL( TInt aOffset ) const = 0;
-    virtual TBool IsActiveL( TInt aOffset ) const = 0;
-    virtual TBool IsClosableL( TInt aOffset ) const = 0;
-    virtual TBool IsMandatoryL( TInt aOffset ) const = 0;
+    virtual const TDesC& DisplayName( TInt aOffset ) const = 0;
+    virtual TInt IconHandle( TInt aOffset ) const = 0;
+    virtual TTime Timestamp( TInt aOffset ) const = 0;
+    virtual TTime TimestampUpdate(TInt offset) const = 0;
+    virtual TTsEntryKey Key( TInt aOffset ) const = 0;
+    virtual TBool IsActive( TInt aOffset ) const = 0;
+    virtual TBool IsClosable( TInt aOffset ) const = 0;
+    virtual TBool IsMandatory( TInt aOffset ) const = 0;
 
 protected: //operations execution
-    virtual TBool CloseL( TTsModelItemKey aKey ) const = 0;
-    virtual TBool LaunchL( TTsModelItemKey aKey ) const = 0;
+    virtual TBool Close( TTsEntryKey aKey ) const = 0;
+    virtual TBool Launch( TTsEntryKey aKey ) const = 0;
 
     friend class TTsModelItem;
 };

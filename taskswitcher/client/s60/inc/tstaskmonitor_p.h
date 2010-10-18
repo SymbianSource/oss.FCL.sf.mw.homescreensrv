@@ -31,11 +31,12 @@
 
 class RDesReadStream;
 class TsTask;
-class TsTaskContent;
 class CTsTaskMonitorClient;
 class TsTaskMonitorHistory;
+class CTsClientEntry;
 
-class TsTaskMonitorPrivate : public MTsTaskMonitorObserver, public TsTaskLauncher
+class TsTaskMonitorPrivate : public MTsTaskMonitorObserver, 
+                             public TsTaskLauncher
 {
 public:
     TsTaskMonitorPrivate(TsTaskMonitor *q);
@@ -48,12 +49,10 @@ public: // from MTsTaskMonitorObserver
     virtual void HandleRunningAppChange();
 
 public: // from TsTaskLauncher
-    virtual void openTask(const QByteArray &key);
-    virtual void closeTask(const QByteArray &key);
+    virtual void openTask(const MTsEntry &entry);
+    virtual void closeTask(const MTsEntry &entry);
     
 private: // helper methods
-    TsTaskMonitorHistory internalizeContentL(RDesReadStream &dataStream,
-                             QSharedPointer<TsTaskContent> &content );
     QDateTime dateTimeFromS60(const TTime &s60Time);
     
     //for comparing algorithm
@@ -63,7 +62,7 @@ private: // helper methods
     QList<int>  findDeletes(const QList<TsTaskMonitorHistory> &newHistory);
     QList<TsTaskChange> getDeletesChangeset(const QList<int> &deleteList);
     QList<TsTaskChange> getInsertsChangeset(const QList<int> &insertList,
-                                   const QList< QSharedPointer<TsTaskContent> > &taskList);
+                                   const QList< QSharedPointer<CTsClientEntry> > &taskList);
     QList<TsTaskMonitorHistory> substractInsertsFromNew(
                                           const QList<int> &insertList,
                                           const QList<TsTaskMonitorHistory> &newHistory );
@@ -71,14 +70,18 @@ private: // helper methods
                                           const QList<int> &deleteList);
     QList<TsTaskChange> findMovesAndUpdates(
                                    const QList<TsTaskMonitorHistory> &newMinusInserts,
-                                   const QList< QSharedPointer<TsTaskContent> > &taskList,
+                                   const QList< QSharedPointer<CTsClientEntry> > &taskList,
                                    QList<TsTaskMonitorHistory> &workingList);
+    HBufC8* keyLC(const MTsEntry &entry);
+private:
+    void changeListL();
     
-private:    
+private:
     TsTaskMonitor *q_ptr;
     CTsTaskMonitorClient *mClient;
     RWsSession &mWsSession;
     QList<TsTaskMonitorHistory> mTaskHistory;
+    RPointerArray<CTsClientEntry> mUpdateSet;
 };
 
 #endif //TSTASKMONITOR_P_H

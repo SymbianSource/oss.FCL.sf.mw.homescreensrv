@@ -36,8 +36,7 @@ private slots:
     void cleanup();
 
     //test functions
-    void invokeActivationPublicInterface();
-    void invokeActivationPublicInterfaceCorrupt();
+    void testFailedActivityRequestSubscription();
     void testDefaultValuesAfterCreation();
     void testSignalIsEmittedWhenActivityIsRequested();
     void testValuesChangeWhenActivityIsRequested();

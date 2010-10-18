@@ -61,6 +61,9 @@ public:
     QString entryTypeName() const;
     void setEntryTypeName(const QString &entryTypeName);
 
+    QList<int> parentIds() const;
+    void setParentIds(const QList<int> &parentIds);
+    
     QMap<QString, QString> attributes() const;
     QString attribute(const QString &name) const;
     void setAttribute(const QString &name, const QString &value);

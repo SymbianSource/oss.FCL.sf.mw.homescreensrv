@@ -114,6 +114,12 @@ public:
      */
     IMPORT_C TInt GetIconId() const;
 
+    /**
+     * Get entry array of parent ids. 
+     * @return Array of parent ids.
+     */
+    IMPORT_C  const RArray<TInt>& GetParentIds() const; 
+
     //    SETTERS
     /**
      * Sets entry id.
@@ -201,6 +207,12 @@ public:
      * @param aIconId Icon id.
      */
     IMPORT_C void SetIconId( TInt aIconId );
+    
+    /**
+     * Sets the parent ids to entry.
+     * @param aArray The array of parent ids.
+     */
+    IMPORT_C void SetParentIdsL( const RArray<TInt>& aArray );    
 
     /**
      * Externalizes object to the stream
@@ -288,7 +300,10 @@ private:
     
     TBool iDescriptionLocalized;
     
-
+    /*
+     * Parent ids of entry. Own.
+     */
+    RArray<TInt> iParentIds;
     };
 
 #endif // __CAINNERENTRY_H__

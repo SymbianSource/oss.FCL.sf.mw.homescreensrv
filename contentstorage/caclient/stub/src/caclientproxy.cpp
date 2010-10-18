@@ -853,18 +853,6 @@ void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
     } else if (sortAttribute == CreatedTimestampSortAttribute) {
         queryString.append(oldQueryString).append(
             " ORDER BY EN_CREATION_TIME ");
-    } else if (sortAttribute == MostUsedSortAttribute) {
-        queryString.append("SELECT ENTRY_ID FROM (").append(oldQueryString).append(
-            " \
-                ) LEFT JOIN \
-                (SELECT LA_ENTRY_ID, COUNT(*) AS USAGE_DATA FROM CA_LAUNCH GROUP BY LA_ENTRY_ID) \
-                ON ENTRY_ID = LA_ENTRY_ID ORDER BY USAGE_DATA ");
-    } else if (sortAttribute == LastUsedSortAttribute) {
-        queryString.append("SELECT ENTRY_ID FROM (").append(oldQueryString).append(
-            " \
-                ) LEFT JOIN \
-                (SELECT LA_ENTRY_ID, MAX(LA_LAUNCH_TIME) AS USAGE_DATA FROM CA_LAUNCH GROUP BY LA_ENTRY_ID) \
-                ON ENTRY_ID = LA_ENTRY_ID ORDER BY USAGE_DATA ");
     } else if (parent && sortAttribute == DefaultSortAttribute) {
         queryString.append(oldQueryString).append(
             " ORDER BY GE_GROUP_ID, GE_POSITION ");
@@ -875,9 +863,8 @@ void CaClientProxy::modifyQueryForSortOrder(QString &queryString,
     }
 
     if (sortAttribute == NameSortAttribute || sortAttribute
-            == CreatedTimestampSortAttribute || sortAttribute
-            == MostUsedSortAttribute || sortAttribute == LastUsedSortAttribute
-            || (sortAttribute == DefaultSortAttribute && parent)) {
+            == CreatedTimestampSortAttribute ||
+            (sortAttribute == DefaultSortAttribute && parent)) {
         if (sortOrder == Qt::AscendingOrder)
             queryString.append(" ASC ");
         else

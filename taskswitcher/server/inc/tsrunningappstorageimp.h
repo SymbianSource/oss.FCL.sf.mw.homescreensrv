@@ -25,6 +25,7 @@ class CTsRunningAppStorage: public CBase,
 {
 public:
     static CTsRunningAppStorage* NewLC();
+    static CTsRunningAppStorage* NewL();
     ~CTsRunningAppStorage();
     void HandleWindowGroupChanged( 
            MTsResourceManager &aResources, 
@@ -34,20 +35,24 @@ public:
            const TArray<RWsSession::TWindowGroupChainInfo>& aWindowGroups,
            const TArray<RWsSession::TWindowGroupChainInfo>& aFilteredWindowGroups);
 public:
-    const MTsRunningApplication& operator[] (TInt aOffset) const;
+    MTsRunningApplication& operator[] (TInt aOffset) const;
     TInt Count() const;
     TInt ParentIndex( const MTsRunningApplication& aRunningApp ) const;
     TArray<TInt> BlockedWindowGroups() const;
+    TInt GenerateKey( TTsEntryKey& aReturnKey, TInt aWindowGroupId) const;
     
 private:
     TInt ParentIndex( TInt aOffset ) const;
     TInt Find(TInt aWindowGroupId, TInt aOffset =0) const;
+    TInt GenerateKey( TTsEntryKey& aReturnKey, 
+                      TInt aWindowGroupId, 
+                      TInt aOffset) const;
 
 private:
     CTsRunningAppStorage();
 
 private:
-    RPointerArray<CTsRunningApp> iRunningApps;
+    CArrayPtr<CTsRunningApp> *iRunningApps;
     RArray<TInt> iBlockedWindowGroups;
 
 };

@@ -135,67 +135,70 @@ EXPORTS
 	?setParentId@CaItemModel@@QAEXH@Z @ 134 NONAME ; void CaItemModel::setParentId(int)
 	?countChange@CaItemModel@@IAEXXZ @ 135 NONAME ; void CaItemModel::countChange(void)
 	?metaObject@CaItemModel@@UBEPBUQMetaObject@@XZ @ 136 NONAME ; struct QMetaObject const * CaItemModel::metaObject(void) const
-	?makeIcon@CaEntry@@QBE?AVHbIcon@@ABVQSizeF@@@Z @ 137 NONAME ; class HbIcon CaEntry::makeIcon(class QSizeF const &) const
-	?tr@CaItemModel@@SA?AVQString@@PBD0H@Z @ 138 NONAME ; class QString CaItemModel::tr(char const *, char const *, int)
-	?setFlagsOff@CaQuery@@QAEXABV?$QFlags@W4EntryFlag@@@@@Z @ 139 NONAME ; void CaQuery::setFlagsOff(class QFlags<enum EntryFlag> const &)
-	?getEntry@CaService@@QBE?AV?$QSharedPointer@VCaEntry@@@@H@Z @ 140 NONAME ; class QSharedPointer<class CaEntry> CaService::getEntry(int) const
-	??0CaEntry@@QAE@ABV0@@Z @ 141 NONAME ; CaEntry::CaEntry(class CaEntry const &)
-	?rowCount@CaItemModel@@UBEHABVQModelIndex@@@Z @ 142 NONAME ; int CaItemModel::rowCount(class QModelIndex const &) const
-	?clear@CaQuery@@QAEXXZ @ 143 NONAME ; void CaQuery::clear(void)
-	?prependEntryToGroup@CaService@@QBE_NHH@Z @ 144 NONAME ; bool CaService::prependEntryToGroup(int, int) const
-	?qt_metacast@CaClientNotifierProxy@@UAEPAXPBD@Z @ 145 NONAME ; void * CaClientNotifierProxy::qt_metacast(char const *)
-	?getEntryIcon@CaMenuIconUtility@@SA?AVHbIcon@@ABVCaEntry@@ABVQSizeF@@@Z @ 146 NONAME ; class HbIcon CaMenuIconUtility::getEntryIcon(class CaEntry const &, class QSizeF const &)
-	?tr@CaService@@SA?AVQString@@PBD0H@Z @ 147 NONAME ; class QString CaService::tr(char const *, char const *, int)
-	?entryRoles@CaQuery@@QBE?AV?$QFlags@W4EntryRole@@@@XZ @ 148 NONAME ; class QFlags<enum EntryRole> CaQuery::entryRoles(void) const
-	?qt_metacall@CaService@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 149 NONAME ; int CaService::qt_metacall(enum QMetaObject::Call, int, void * *)
-	??4CaNotifierFilter@@QAEAAV0@ABV0@@Z @ 150 NONAME ; class CaNotifierFilter & CaNotifierFilter::operator=(class CaNotifierFilter const &)
-	??0CaItemModel@@QAE@ABVCaQuery@@PAVQObject@@@Z @ 151 NONAME ; CaItemModel::CaItemModel(class CaQuery const &, class QObject *)
-	?setFlagsOff@CaItemModel@@QAEXABV?$QFlags@W4EntryFlag@@@@@Z @ 152 NONAME ; void CaItemModel::setFlagsOff(class QFlags<enum EntryFlag> const &)
-	?getSort@CaQuery@@QBEXAAW4SortAttribute@@AAW4SortOrder@Qt@@@Z @ 153 NONAME ; void CaQuery::getSort(enum SortAttribute &, enum Qt::SortOrder &) const
-	?parentId@CaQuery@@QBEHXZ @ 154 NONAME ; int CaQuery::parentId(void) const
-	?setEntryRoles@CaQuery@@QAEXV?$QFlags@W4EntryRole@@@@@Z @ 155 NONAME ; void CaQuery::setEntryRoles(class QFlags<enum EntryRole>)
-	??_ECaEntry@@UAE@I@Z @ 156 NONAME ; CaEntry::~CaEntry(unsigned int)
-	??0CaService@@AAE@PAVQObject@@@Z @ 157 NONAME ; CaService::CaService(class QObject *)
-	??1CaService@@EAE@XZ @ 158 NONAME ; CaService::~CaService(void)
-	?flagsOn@CaQuery@@QBE?AV?$QFlags@W4EntryFlag@@@@XZ @ 159 NONAME ; class QFlags<enum EntryFlag> CaQuery::flagsOn(void) const
-	?description@CaEntry@@QBE?AVQString@@XZ @ 160 NONAME ; class QString CaEntry::description(void) const
-	?metaObject@CaNotifier@@UBEPBUQMetaObject@@XZ @ 161 NONAME ; struct QMetaObject const * CaNotifier::metaObject(void) const
-	?data@CaItemModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 162 NONAME ; class QVariant CaItemModel::data(class QModelIndex const &, int) const
-	??0CaIconDescription@@QAE@ABV0@@Z @ 163 NONAME ; CaIconDescription::CaIconDescription(class CaIconDescription const &)
-	?staticMetaObject@CaService@@2UQMetaObject@@B @ 164 NONAME ; struct QMetaObject const CaService::staticMetaObject
-	?removeEntry@CaService@@QBE_NH@Z @ 165 NONAME ; bool CaService::removeEntry(int) const
-	?addEntryTypeName@CaQuery@@QAEXABVQString@@@Z @ 166 NONAME ; void CaQuery::addEntryTypeName(class QString const &)
-	?isAutoUpdate@CaItemModel@@QBE_NXZ @ 167 NONAME ; bool CaItemModel::isAutoUpdate(void) const
-	??1CaEntry@@UAE@XZ @ 168 NONAME ; CaEntry::~CaEntry(void)
-	?prependEntriesToGroup@CaService@@QBE_NABVCaEntry@@ABV?$QList@V?$QSharedPointer@VCaEntry@@@@@@@Z @ 169 NONAME ; bool CaService::prependEntriesToGroup(class CaEntry const &, class QList<class QSharedPointer<class CaEntry> > const &) const
-	?qt_metacall@CaNotifier@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 170 NONAME ; int CaNotifier::qt_metacall(enum QMetaObject::Call, int, void * *)
-	?setSort@CaItemModel@@QAEXW4SortAttribute@@W4SortOrder@Qt@@@Z @ 171 NONAME ; void CaItemModel::setSort(enum SortAttribute, enum Qt::SortOrder)
-	?removeEntry@CaService@@QBE_NABVCaEntry@@@Z @ 172 NONAME ; bool CaService::removeEntry(class CaEntry const &) const
-	?setId@CaEntry@@AAEXH@Z @ 173 NONAME ; void CaEntry::setId(int)
-	?staticMetaObject@CaNotifier@@2UQMetaObject@@B @ 174 NONAME ; struct QMetaObject const CaNotifier::staticMetaObject
-	?applicationId@CaIconDescription@@QBE?AVQString@@XZ @ 175 NONAME ; class QString CaIconDescription::applicationId(void) const
-	?getIds@CaNotifierFilter@@QBE?AV?$QList@H@@XZ @ 176 NONAME ; class QList<int> CaNotifierFilter::getIds(void) const
-	?setIds@CaNotifierFilter@@QAEXABV?$QList@H@@@Z @ 177 NONAME ; void CaNotifierFilter::setIds(class QList<int> const &)
-	??0CaEntry@@QAE@W4EntryRole@@@Z @ 178 NONAME ; CaEntry::CaEntry(enum EntryRole)
-	?qt_metacast@CaItemModel@@UAEPAXPBD@Z @ 179 NONAME ; void * CaItemModel::qt_metacast(char const *)
-	?trUtf8@CaClientNotifierProxy@@SA?AVQString@@PBD0H@Z @ 180 NONAME ; class QString CaClientNotifierProxy::trUtf8(char const *, char const *, int)
-	?lastError@CaService@@QBE?AW4ErrorCode@@XZ @ 181 NONAME ; enum ErrorCode CaService::lastError(void) const
-	?insertEntriesIntoGroup@CaService@@QBE_NHABV?$QList@H@@H@Z @ 182 NONAME ; bool CaService::insertEntriesIntoGroup(int, class QList<int> const &, int) const
-	?getApplicationIcon@CaMenuIconUtility@@SA?AVHbIcon@@HABVQSizeF@@@Z @ 183 NONAME ; class HbIcon CaMenuIconUtility::getApplicationIcon(int, class QSizeF const &)
-	?trUtf8@CaItemModel@@SA?AVQString@@PBD0H@Z @ 184 NONAME ; class QString CaItemModel::trUtf8(char const *, char const *, int)
-	?setFlagsOn@CaQuery@@QAEXABV?$QFlags@W4EntryFlag@@@@@Z @ 185 NONAME ; void CaQuery::setFlagsOn(class QFlags<enum EntryFlag> const &)
-	?parent@CaItemModel@@UBE?AVQModelIndex@@ABV2@@Z @ 186 NONAME ; class QModelIndex CaItemModel::parent(class QModelIndex const &) const
-	?empty@CaItemModel@@IAEX_N@Z @ 187 NONAME ; void CaItemModel::empty(bool)
-	?filename@CaIconDescription@@QBE?AVQString@@XZ @ 188 NONAME ; class QString CaIconDescription::filename(void) const
-	?setIconDescription@CaEntry@@QAEXABVCaIconDescription@@@Z @ 189 NONAME ; void CaEntry::setIconDescription(class CaIconDescription const &)
-	?appendEntryToGroup@CaService@@QBE_NHH@Z @ 190 NONAME ; bool CaService::appendEntryToGroup(int, int) const
-	?setTypeNames@CaNotifierFilter@@QAEXABVQStringList@@@Z @ 191 NONAME ; void CaNotifierFilter::setTypeNames(class QStringList const &)
-	?entryTypeNames@CaQuery@@QBE?AVQStringList@@XZ @ 192 NONAME ; class QStringList CaQuery::entryTypeNames(void) const
-	?findSession@CaClientNotifierProxy@@ABEHABVCaNotifierFilter@@W4TNotifierType@CCaInnerNotifierFilter@@@Z @ 193 NONAME ; int CaClientNotifierProxy::findSession(class CaNotifierFilter const &, enum CCaInnerNotifierFilter::TNotifierType) const
-	?tr@CaClientNotifierProxy@@SA?AVQString@@PBD0H@Z @ 194 NONAME ; class QString CaClientNotifierProxy::tr(char const *, char const *, int)
-	?setAutoUpdate@CaItemModel@@QAEX_N@Z @ 195 NONAME ; void CaItemModel::setAutoUpdate(bool)
-	??_ECaService@@UAE@I@Z @ 196 NONAME ; CaService::~CaService(unsigned int)
-	?removeEntryFromGroup@CaService@@QBE_NHH@Z @ 197 NONAME ; bool CaService::removeEntryFromGroup(int, int) const
-	?index@CaItemModel@@UBE?AVQModelIndex@@HHABV2@@Z @ 198 NONAME ; class QModelIndex CaItemModel::index(int, int, class QModelIndex const &) const
-	?removeAttribute@CaEntry@@QAEXABVQString@@@Z @ 199 NONAME ; void CaEntry::removeAttribute(class QString const &)
+	?parentIds@CaEntry@@QBE?AV?$QList@H@@XZ @ 137 NONAME ; class QList<int> CaEntry::parentIds(void) const
+	?makeIcon@CaEntry@@QBE?AVHbIcon@@ABVQSizeF@@@Z @ 138 NONAME ; class HbIcon CaEntry::makeIcon(class QSizeF const &) const
+	?tr@CaItemModel@@SA?AVQString@@PBD0H@Z @ 139 NONAME ; class QString CaItemModel::tr(char const *, char const *, int)
+	?setFlagsOff@CaQuery@@QAEXABV?$QFlags@W4EntryFlag@@@@@Z @ 140 NONAME ; void CaQuery::setFlagsOff(class QFlags<enum EntryFlag> const &)
+	?getEntry@CaService@@QBE?AV?$QSharedPointer@VCaEntry@@@@H@Z @ 141 NONAME ; class QSharedPointer<class CaEntry> CaService::getEntry(int) const
+	??0CaEntry@@QAE@ABV0@@Z @ 142 NONAME ; CaEntry::CaEntry(class CaEntry const &)
+	?rowCount@CaItemModel@@UBEHABVQModelIndex@@@Z @ 143 NONAME ; int CaItemModel::rowCount(class QModelIndex const &) const
+	?clear@CaQuery@@QAEXXZ @ 144 NONAME ; void CaQuery::clear(void)
+	?prependEntryToGroup@CaService@@QBE_NHH@Z @ 145 NONAME ; bool CaService::prependEntryToGroup(int, int) const
+	?qt_metacast@CaClientNotifierProxy@@UAEPAXPBD@Z @ 146 NONAME ; void * CaClientNotifierProxy::qt_metacast(char const *)
+	?getEntryIcon@CaMenuIconUtility@@SA?AVHbIcon@@ABVCaEntry@@ABVQSizeF@@@Z @ 147 NONAME ; class HbIcon CaMenuIconUtility::getEntryIcon(class CaEntry const &, class QSizeF const &)
+	?tr@CaService@@SA?AVQString@@PBD0H@Z @ 148 NONAME ; class QString CaService::tr(char const *, char const *, int)
+	?setParentIds@CaEntry@@QAEXABV?$QList@H@@@Z @ 149 NONAME ; void CaEntry::setParentIds(class QList<int> const &)
+	?entryRoles@CaQuery@@QBE?AV?$QFlags@W4EntryRole@@@@XZ @ 150 NONAME ; class QFlags<enum EntryRole> CaQuery::entryRoles(void) const
+	?qt_metacall@CaService@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 151 NONAME ; int CaService::qt_metacall(enum QMetaObject::Call, int, void * *)
+	??4CaNotifierFilter@@QAEAAV0@ABV0@@Z @ 152 NONAME ; class CaNotifierFilter & CaNotifierFilter::operator=(class CaNotifierFilter const &)
+	??0CaItemModel@@QAE@ABVCaQuery@@PAVQObject@@@Z @ 153 NONAME ; CaItemModel::CaItemModel(class CaQuery const &, class QObject *)
+	?setFlagsOff@CaItemModel@@QAEXABV?$QFlags@W4EntryFlag@@@@@Z @ 154 NONAME ; void CaItemModel::setFlagsOff(class QFlags<enum EntryFlag> const &)
+	?getSort@CaQuery@@QBEXAAW4SortAttribute@@AAW4SortOrder@Qt@@@Z @ 155 NONAME ; void CaQuery::getSort(enum SortAttribute &, enum Qt::SortOrder &) const
+	?parentId@CaQuery@@QBEHXZ @ 156 NONAME ; int CaQuery::parentId(void) const
+	?setEntryRoles@CaQuery@@QAEXV?$QFlags@W4EntryRole@@@@@Z @ 157 NONAME ; void CaQuery::setEntryRoles(class QFlags<enum EntryRole>)
+	??_ECaEntry@@UAE@I@Z @ 158 NONAME ; CaEntry::~CaEntry(unsigned int)
+	??0CaService@@AAE@PAVQObject@@@Z @ 159 NONAME ; CaService::CaService(class QObject *)
+	??1CaService@@EAE@XZ @ 160 NONAME ; CaService::~CaService(void)
+	?flagsOn@CaQuery@@QBE?AV?$QFlags@W4EntryFlag@@@@XZ @ 161 NONAME ; class QFlags<enum EntryFlag> CaQuery::flagsOn(void) const
+	?description@CaEntry@@QBE?AVQString@@XZ @ 162 NONAME ; class QString CaEntry::description(void) const
+	?metaObject@CaNotifier@@UBEPBUQMetaObject@@XZ @ 163 NONAME ; struct QMetaObject const * CaNotifier::metaObject(void) const
+	?data@CaItemModel@@UBE?AVQVariant@@ABVQModelIndex@@H@Z @ 164 NONAME ; class QVariant CaItemModel::data(class QModelIndex const &, int) const
+	??0CaIconDescription@@QAE@ABV0@@Z @ 165 NONAME ; CaIconDescription::CaIconDescription(class CaIconDescription const &)
+	?staticMetaObject@CaService@@2UQMetaObject@@B @ 166 NONAME ; struct QMetaObject const CaService::staticMetaObject
+	?removeEntry@CaService@@QBE_NH@Z @ 167 NONAME ; bool CaService::removeEntry(int) const
+	?addEntryTypeName@CaQuery@@QAEXABVQString@@@Z @ 168 NONAME ; void CaQuery::addEntryTypeName(class QString const &)
+	?isAutoUpdate@CaItemModel@@QBE_NXZ @ 169 NONAME ; bool CaItemModel::isAutoUpdate(void) const
+	??1CaEntry@@UAE@XZ @ 170 NONAME ; CaEntry::~CaEntry(void)
+	?prependEntriesToGroup@CaService@@QBE_NABVCaEntry@@ABV?$QList@V?$QSharedPointer@VCaEntry@@@@@@@Z @ 171 NONAME ; bool CaService::prependEntriesToGroup(class CaEntry const &, class QList<class QSharedPointer<class CaEntry> > const &) const
+	?qt_metacall@CaNotifier@@UAEHW4Call@QMetaObject@@HPAPAX@Z @ 172 NONAME ; int CaNotifier::qt_metacall(enum QMetaObject::Call, int, void * *)
+	?setSort@CaItemModel@@QAEXW4SortAttribute@@W4SortOrder@Qt@@@Z @ 173 NONAME ; void CaItemModel::setSort(enum SortAttribute, enum Qt::SortOrder)
+	?removeEntry@CaService@@QBE_NABVCaEntry@@@Z @ 174 NONAME ; bool CaService::removeEntry(class CaEntry const &) const
+	?setId@CaEntry@@AAEXH@Z @ 175 NONAME ; void CaEntry::setId(int)
+	?staticMetaObject@CaNotifier@@2UQMetaObject@@B @ 176 NONAME ; struct QMetaObject const CaNotifier::staticMetaObject
+	?applicationId@CaIconDescription@@QBE?AVQString@@XZ @ 177 NONAME ; class QString CaIconDescription::applicationId(void) const
+	?getIds@CaNotifierFilter@@QBE?AV?$QList@H@@XZ @ 178 NONAME ; class QList<int> CaNotifierFilter::getIds(void) const
+	?setIds@CaNotifierFilter@@QAEXABV?$QList@H@@@Z @ 179 NONAME ; void CaNotifierFilter::setIds(class QList<int> const &)
+	??0CaEntry@@QAE@W4EntryRole@@@Z @ 180 NONAME ; CaEntry::CaEntry(enum EntryRole)
+	?preloadHandlers@CaService@@QBEXXZ @ 181 NONAME ; void CaService::preloadHandlers(void) const
+	?qt_metacast@CaItemModel@@UAEPAXPBD@Z @ 182 NONAME ; void * CaItemModel::qt_metacast(char const *)
+	?trUtf8@CaClientNotifierProxy@@SA?AVQString@@PBD0H@Z @ 183 NONAME ; class QString CaClientNotifierProxy::trUtf8(char const *, char const *, int)
+	?lastError@CaService@@QBE?AW4ErrorCode@@XZ @ 184 NONAME ; enum ErrorCode CaService::lastError(void) const
+	?insertEntriesIntoGroup@CaService@@QBE_NHABV?$QList@H@@H@Z @ 185 NONAME ; bool CaService::insertEntriesIntoGroup(int, class QList<int> const &, int) const
+	?getApplicationIcon@CaMenuIconUtility@@SA?AVHbIcon@@HABVQSizeF@@@Z @ 186 NONAME ; class HbIcon CaMenuIconUtility::getApplicationIcon(int, class QSizeF const &)
+	?trUtf8@CaItemModel@@SA?AVQString@@PBD0H@Z @ 187 NONAME ; class QString CaItemModel::trUtf8(char const *, char const *, int)
+	?setFlagsOn@CaQuery@@QAEXABV?$QFlags@W4EntryFlag@@@@@Z @ 188 NONAME ; void CaQuery::setFlagsOn(class QFlags<enum EntryFlag> const &)
+	?parent@CaItemModel@@UBE?AVQModelIndex@@ABV2@@Z @ 189 NONAME ; class QModelIndex CaItemModel::parent(class QModelIndex const &) const
+	?empty@CaItemModel@@IAEX_N@Z @ 190 NONAME ; void CaItemModel::empty(bool)
+	?filename@CaIconDescription@@QBE?AVQString@@XZ @ 191 NONAME ; class QString CaIconDescription::filename(void) const
+	?setIconDescription@CaEntry@@QAEXABVCaIconDescription@@@Z @ 192 NONAME ; void CaEntry::setIconDescription(class CaIconDescription const &)
+	?appendEntryToGroup@CaService@@QBE_NHH@Z @ 193 NONAME ; bool CaService::appendEntryToGroup(int, int) const
+	?setTypeNames@CaNotifierFilter@@QAEXABVQStringList@@@Z @ 194 NONAME ; void CaNotifierFilter::setTypeNames(class QStringList const &)
+	?entryTypeNames@CaQuery@@QBE?AVQStringList@@XZ @ 195 NONAME ; class QStringList CaQuery::entryTypeNames(void) const
+	?findSession@CaClientNotifierProxy@@ABEHABVCaNotifierFilter@@W4TNotifierType@CCaInnerNotifierFilter@@@Z @ 196 NONAME ; int CaClientNotifierProxy::findSession(class CaNotifierFilter const &, enum CCaInnerNotifierFilter::TNotifierType) const
+	?removeAttribute@CaEntry@@QAEXABVQString@@@Z @ 197 NONAME ; void CaEntry::removeAttribute(class QString const &)
+	?tr@CaClientNotifierProxy@@SA?AVQString@@PBD0H@Z @ 198 NONAME ; class QString CaClientNotifierProxy::tr(char const *, char const *, int)
+	?setAutoUpdate@CaItemModel@@QAEX_N@Z @ 199 NONAME ; void CaItemModel::setAutoUpdate(bool)
+	??_ECaService@@UAE@I@Z @ 200 NONAME ; CaService::~CaService(unsigned int)
+	?removeEntryFromGroup@CaService@@QBE_NHH@Z @ 201 NONAME ; bool CaService::removeEntryFromGroup(int, int) const
+	?index@CaItemModel@@UBE?AVQModelIndex@@HHABV2@@Z @ 202 NONAME ; class QModelIndex CaItemModel::index(int, int, class QModelIndex const &) const
 

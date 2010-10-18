@@ -50,17 +50,17 @@ public://from MTsModel
     void SetObserver(MTsModelObserver* aObserver);
     
 private://from MTsModel
-    const TDesC& DisplayNameL( TInt aOffset ) const;
-    TInt IconHandleL( TInt aOffset ) const;
-    TTime TimestampL( TInt aOffset ) const;
-    TTime TimestampUpdateL(TInt offset) const;
-    TTsModelItemKey KeyL( TInt aOffset ) const;
-    TBool IsActiveL( TInt aOffset ) const;
-    TBool IsClosableL( TInt aOffset ) const;
-    TBool IsMandatoryL( TInt aOffset ) const;
-    TBool CloseL( TTsModelItemKey aKey ) const;
-    TBool LaunchL( TTsModelItemKey aKey ) const;
-    TTsModelItem FindL( TTsModelItemKey aKey ) const;
+    const TDesC& DisplayName( TInt aOffset ) const;
+    TInt IconHandle( TInt aOffset ) const;
+    TTime Timestamp( TInt aOffset ) const;
+    TTime TimestampUpdate(TInt offset) const;
+    TTsEntryKey Key( TInt aOffset ) const;
+    TBool IsActive( TInt aOffset ) const;
+    TBool IsClosable( TInt aOffset ) const;
+    TBool IsMandatory( TInt aOffset ) const;
+    TBool Close( TTsEntryKey aKey ) const;
+    TBool Launch( TTsEntryKey aKey ) const;
+    TTsModelItem FindL( TTsEntryKey aKey ) const;
 
 public://from MTsDataObserver
     void DataChanged();

@@ -42,27 +42,27 @@ public: //from MTsModel
     void SetObserver( MTsModelObserver *aObserver );
     
 protected: //from MTsModel
-    const TDesC& DisplayNameL( TInt aOffset ) const;
-    TInt IconHandleL( TInt aOffset ) const;
-    TTime TimestampL( TInt aOffset ) const;
-    TTime TimestampUpdateL(TInt offset) const;
-    TTsModelItemKey KeyL( TInt aOffset ) const;
-    TBool IsActiveL( TInt aOffset ) const;
-    TBool IsClosableL( TInt aOffset ) const;
-    TBool IsMandatoryL( TInt aOffset ) const;
-    TBool CloseL( TTsModelItemKey aKey ) const;
-    TBool LaunchL( TTsModelItemKey aKey ) const;
+    const TDesC& DisplayName( TInt aOffset ) const;
+    TInt IconHandle( TInt aOffset ) const;
+    TTime Timestamp( TInt aOffset ) const;
+    TTime TimestampUpdate(TInt offset) const;
+    TTsEntryKey Key( TInt aOffset ) const;
+    TBool IsActive( TInt aOffset ) const;
+    TBool IsClosable( TInt aOffset ) const;
+    TBool IsMandatory( TInt aOffset ) const;
+    TBool Close( TTsEntryKey aKey ) const;
+    TBool Launch( TTsEntryKey aKey ) const;
     
 private:
     CTsService();
     void ConstructL( MTsResourceManager& aResources, QObject* aModel );
-    TInt IntValueL( TInt aOffset, const char* aKey ) const;
-    TTime TimeValueL( TInt aOffset, const char* aKey ) const;
-    const TDesC& StringValueL( TInt aOffset, const char* aKey ) const;
+    TInt IntValue( TInt aOffset, const char* aKey ) const;
+    TTime TimeValue( TInt aOffset, const char* aKey ) const;
+    const TDesC& StringValue( TInt aOffset, const char* aKey ) const;
 private:
     QObject *iModel;
     QObject *iServiceObserver;
     MTsModelObserver *iModelObserver;
-    HBufC *iBuffer;
+    mutable HBufC *iBuffer;
 };
 #endif //TSSERVICE_H

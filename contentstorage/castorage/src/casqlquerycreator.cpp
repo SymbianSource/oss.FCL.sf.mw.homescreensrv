@@ -519,11 +519,6 @@ void CaSqlQueryCreator::CreateRemoveQueryL(
     DEBUG(("_CA_:CASqlQueryCreator::CreateRemoveQueryL"));
 
     CCaSqlQuery* query = CCaSqlQuery::NewLC( aSqlDb );
-    query->SetQueryL( KSQLDeleteLaunch );
-    aSqlQuery.Append( query );
-    CleanupStack::Pop( query );
-
-    query = CCaSqlQuery::NewLC( aSqlDb );
     query->SetQueryL( KSQLDeleteEntryFromGroup );
     aSqlQuery.Append( query );
     CleanupStack::Pop( query );
@@ -559,14 +554,10 @@ void CaSqlQueryCreator::CreateTouchQueryL(
         TBool aRemovable )
     {
     DEBUG(("_CA_:CASqlQueryCreator::CreateTouchQueryL"));
-
-    CCaSqlQuery* query = CCaSqlQuery::NewLC( aSqlDb );
-    query->SetQueryL( KSQLInsertToLaunch );
-    aSqlQuery.Append( query );
-    CleanupStack::Pop( query );
+    
     if( aRemovable )
         {
-        query = CCaSqlQuery::NewLC( aSqlDb );
+        CCaSqlQuery* query = CCaSqlQuery::NewLC( aSqlDb );
         query->SetQueryL( KSQLUpdateEntryUsedFlag );
         aSqlQuery.Append( query );
         CleanupStack::Pop( query );
@@ -931,14 +922,6 @@ void CaSqlQueryCreator::ModifyQueryForSortOrderL(
             aQuery.Append( KSQLSortOrderCreatedTimestampDesc );
             break;
             }
-        case CCaInnerQuery::MostUsed:
-        case CCaInnerQuery::MostUsedDesc:
-        case CCaInnerQuery::LastUsed:
-        case CCaInnerQuery::LastUsedDesc:
-            {
-            ModifyQueryForSortOrderLastMostUsedL( aSortType, aQuery );
-            break;
-            }
         case CCaInnerQuery::DefaultDesc:
             {
             if( aSortByGroup )
@@ -973,61 +956,6 @@ void CaSqlQueryCreator::ModifyQueryForSortOrderL(
             break;
             }
         }
-    }
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-void CaSqlQueryCreator::ModifyQueryForSortOrderLastMostUsedL(
-        const CCaInnerQuery::TSortAttribute aSortType, RBuf& aQuery )
-    {
-    DEBUG(("_CA_:CASqlQueryCreator::ModifyQueryForSortOrderLastMostUsedL"));
-
-    RBuf descPart;
-    descPart.CleanupClosePushL();
-    if( aSortType == CCaInnerQuery::MostUsedDesc || 
-         aSortType == CCaInnerQuery::LastUsedDesc )
-        {
-        descPart.CreateL( KDesc );
-        }
-    else
-        {
-        descPart.CreateL( KNullDesC );
-        }
-
-    RBuf usageDataQuery;
-    usageDataQuery.CleanupClosePushL();
-    if( aSortType == CCaInnerQuery::MostUsed || 
-         aSortType == CCaInnerQuery::MostUsedDesc )
-        {
-        usageDataQuery.CreateL( KSQLGetMostUsed );
-        }
-    else
-        {
-        usageDataQuery.CreateL( KSQLGetLastUsed );
-        }
-
-    RBuf newQuery;
-    newQuery.CleanupClosePushL();
-    newQuery.CreateL( KSQLGetListByLaunchDataPart1().Length() +
-            KSQLGetListByLaunchDataPart1().Length() +
-            KSQLGetListByLaunchDataPart3().Length() +
-            usageDataQuery.Length() +
-            descPart.Length() +
-            aQuery.Length() );
-    newQuery.Append( KSQLGetListByLaunchDataPart1 );
-    newQuery.Append( aQuery );
-    newQuery.Append( KSQLGetListByLaunchDataPart2 );
-    newQuery.Append( usageDataQuery );
-    newQuery.Append( KSQLGetListByLaunchDataPart3 );
-    newQuery.Append( descPart );
-    aQuery.Close();
-    aQuery.CreateL( newQuery );
-
-    CleanupStack::PopAndDestroy( &newQuery );
-    CleanupStack::PopAndDestroy( &usageDataQuery );
-    CleanupStack::PopAndDestroy( &descPart );
     }
 
 // ---------------------------------------------------------------------------

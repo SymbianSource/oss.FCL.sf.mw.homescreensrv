@@ -11,7 +11,7 @@
 
 TEMPLATE = lib
 TARGET = caapphandlerplugin
-CONFIG += plugin hb mobility
+CONFIG += plugin mobility
 MOBILITY = serviceframework
 
 PLUGIN_SUBDIR = /resource/qt/plugins/commandhandler

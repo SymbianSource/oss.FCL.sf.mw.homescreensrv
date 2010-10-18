@@ -88,7 +88,9 @@ void ActivityTsModel::HandleWindowGroupChanged(
     Q_UNUSED(resources);
     mRunningAppsUid.clear();
     for (int i(0); i < storage.Count(); ++i) {
-        mRunningAppsUid.append(storage[i].UidL().iUid);
+        if(MTsRunningApplication::None == storage[i].HideMode()) {
+            mRunningAppsUid.append(storage[i].Uid().iUid);
+        }
     }
     if(filterActivity()) {
         emit dataChanged();

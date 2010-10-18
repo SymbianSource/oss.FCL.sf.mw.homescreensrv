@@ -45,6 +45,9 @@ private:
     void HandleMessageL(const TDesC8&);
     void HandleWindowGroupChangedL( MTsResourceManager &aResources, 
                                     const MTsRunningApplicationStorage& aStorage );
+    TBool IsBlocked(const MTsResourceManager& aResources, 
+                    const MTsRunningApplication& aApp) const;
+    void SendWhiteListL(const CTsIdList& aList);
     void OnReplace();
 
 private:

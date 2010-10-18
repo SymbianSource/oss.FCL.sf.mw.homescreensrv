@@ -16,16 +16,10 @@
 */
 #include "tstaskmonitorhistory.h"
 
-TsTaskMonitorHistory::TsTaskMonitorHistory(const QByteArray &key, 
-                                           const QDateTime &updateTime) :
-mKey(key), mUpdateTime(updateTime)
+TsTaskMonitorHistory::TsTaskMonitorHistory(const QSharedPointer< CTsClientEntry > item, int offset) :
+mEntry(item),
+mOffset(offset)
 {
-    
-}
-
-void TsTaskMonitorHistory::setOffset(int offset)
-{
-    mOffset = offset;
 }
 
 int TsTaskMonitorHistory::offset() const
@@ -33,19 +27,12 @@ int TsTaskMonitorHistory::offset() const
     return mOffset;
 }
 
-bool TsTaskMonitorHistory::isEqual(const TsTaskMonitorHistory &item) const
+bool TsTaskMonitorHistory::operator == (const TsTaskMonitorHistory &item) const
 {
-    if (mKey == item.mKey) {
-        return true;
-    }
-    return false;
+    return mEntry->Key() == item.mEntry->Key();
 }
 
 bool TsTaskMonitorHistory::isUpdated(const TsTaskMonitorHistory &item) const
 {
-    Q_ASSERT(mKey == item.mKey);
-    if (mUpdateTime != item.mUpdateTime) {
-        return true;
-    }
-    return false;    
+    return mEntry->TimestampUpdate() != item.mEntry->TimestampUpdate();
 }

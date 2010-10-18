@@ -76,6 +76,11 @@ EXPORT_C void CCaInnerEntry::ExternalizeL( RWriteStream& aStream ) const
     aStream.WriteUint32L( iDescriptionLocalized );
     iAttributes.ExternalizeL( aStream );
     iIcon->ExternalizeL( aStream );
+    aStream.WriteUint32L( iParentIds.Count() );
+    for( TInt i = 0; i < iParentIds.Count(); i++ )
+        {
+        aStream.WriteInt32L( iParentIds[i] );
+        }
     aStream.CommitL();
     }
 
@@ -105,6 +110,12 @@ EXPORT_C void CCaInnerEntry::InternalizeL( RReadStream& aStream )
     iDescriptionLocalized = aStream.ReadUint32L();
     iAttributes.InternalizeL( aStream );
     iIcon->InternalizeL( aStream );
+    iParentIds.Close();
+    TInt count = aStream.ReadUint32L();
+    for( TInt i = 0; i < count; i++ )
+        {
+        iParentIds.AppendL( aStream.ReadInt32L() );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -215,6 +226,16 @@ EXPORT_C TInt CCaInnerEntry::GetIconId() const
     {
     return iIcon->Id();
     }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C const RArray<TInt>& CCaInnerEntry::GetParentIds() const
+    {
+    return iParentIds;
+    }
+
 //    SETTERS
 
 // ---------------------------------------------------------------------------
@@ -352,6 +373,18 @@ EXPORT_C void CCaInnerEntry::SetUid( TInt32 aUid )
 EXPORT_C void CCaInnerEntry::SetIconId( TInt aIconId )
     {
     iIcon->SetId( aIconId );
+    }
+
+// ---------------------------------------------------------------------------
+//
+// ---------------------------------------------------------------------------
+//
+EXPORT_C void CCaInnerEntry::SetParentIdsL( const RArray<TInt>& aArray )
+    {
+    for( TInt i( 0 ); i < aArray.Count(); ++i )
+        {
+        iParentIds.AppendL( aArray[i] );
+        }
     }
 
 // ---------------------------------------------------------------------------

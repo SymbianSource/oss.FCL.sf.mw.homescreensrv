@@ -122,7 +122,7 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
     TChangeType changeType = EAddChangeType;
     RArray<TInt> parentArray;
     CleanupClosePushL( parentArray );
-          
+
     if( aEntry->GetId() > 0 )
         {
         changeType = EUpdateChangeType;
@@ -131,7 +131,7 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
         id.AppendL( aEntry->GetId() );
         if (aItemAppearanceChange == EItemUninstallProgressChanged)
             {
-            // no need to search for parent parents for uninstall 
+            // no need to search for parent parents for uninstall
             // progress change
             iStorage->GetParentsIdsL( id, parentArray, EFalse );
             }
@@ -150,14 +150,14 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
         {
         changeType = EAddChangeType;
         }
-    
+
     // do not update entry in db with uninstall progress
     if (aItemAppearanceChange != EItemUninstallProgressChanged)
         {
         RPointerArray<CCaLocalizationEntry> localizations;
 	    CleanupResetAndDestroyPushL( localizations );
         CCaLocalizationEntry* tempLocalization = NULL;
-        if( aEntry->isLocalized( CCaInnerEntry::ENameLocalized ) )		
+        if( aEntry->isLocalized( CCaInnerEntry::ENameLocalized ) )
             {
             tempLocalization = LocalizeTextL( aEntry );
             if( tempLocalization )
@@ -175,9 +175,9 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
                 tempLocalization = NULL;
                 }
             }
-        
+
         iStorage->AddL( aEntry, aUpdate );
-        
+
         for( TInt j =0; j < localizations.Count(); j++ )
             {
             localizations[j]->SetRowId( aEntry->GetId() );
@@ -189,8 +189,7 @@ EXPORT_C void CCaStorageProxy::AddL( CCaInnerEntry* aEntry,
             }
 		 CleanupStack::PopAndDestroy( &localizations );
         }
-    
-        
+    aEntry->SetParentIdsL( parentArray );    
     for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
         {
         iHandlerNotifier[i]->EntryChanged( aEntry, changeType, parentArray );
@@ -218,6 +217,7 @@ EXPORT_C void CCaStorageProxy::RemoveL( const RArray<TInt>& aEntryIds )
     iStorage->RemoveL( aEntryIds );
     for( TInt i( 0 ); i < resultContainer.Count(); i++ )
         {
+        resultContainer[i]->SetParentIdsL( parentArray );
         for( TInt j( 0 ); j < iHandlerNotifier.Count(); j++ )
             {
             iHandlerNotifier[j]->EntryChanged( resultContainer[i],
@@ -254,63 +254,35 @@ EXPORT_C void CCaStorageProxy::OrganizeL( const RArray<TInt>& aEntryIds,
 //
 EXPORT_C void CCaStorageProxy::TouchL( CCaInnerEntry* aEntry )
     {
-    CCaInnerQuery* touchQuery = CCaInnerQuery::NewLC();
-
-    TInt entryId = aEntry->GetId();
-
-    if ( entryId == 0 && aEntry->GetUid() != 0)
+    if( aEntry->GetId() == 0 && aEntry->GetUid() != 0 )
         {
-        CCaInnerQuery* idQuery = CCaInnerQuery::NewLC();
-        idQuery->SetUid( static_cast<TUint>( aEntry->GetUid()) );
+        CCaInnerQuery* query = CCaInnerQuery::NewLC();
+        query->SetUid( static_cast<TUint>( aEntry->GetUid()) );
+        query->SetFlagsOn( ERemovable );
+        query->SetFlagsOff( EUsed );
 
-        RArray<TInt> idArray;
-        CleanupClosePushL( idArray );
-
-        iStorage->GetEntriesIdsL( idQuery, idArray );
-
-        if (idArray.Count() == 1 )
+        RPointerArray<CCaInnerEntry> resultArray;
+        CleanupClosePushL( resultArray );
+        iStorage->GetEntriesL( query, resultArray );
+        if( resultArray.Count() == 1 )
             {
-            entryId = idArray[0];
-            aEntry->SetId( entryId );
+            PrivateTouchL( resultArray[0] );
             }
-
-        CleanupStack::PopAndDestroy( &idArray );
-        CleanupStack::PopAndDestroy( idQuery );
-        }
-
-    RArray<TInt> id;
-    CleanupClosePushL( id );
-    id.AppendL( entryId );
-    touchQuery->SetIdsL( id );
-    RPointerArray<CCaInnerEntry> resultArray;
-    CleanupResetAndDestroyPushL( resultArray );
-    iStorage->GetEntriesL( touchQuery, resultArray );
-    iStorage->TouchL( entryId, aEntry->GetFlags() & ERemovable );
-    for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
-        {
-        iHandlerNotifier[i]->EntryTouched( entryId );
-        }
-    if( resultArray.Count() > 0 )
-        {
-        if( !( resultArray[0]->GetFlags() & EUsed ) )
+        else
             {
-            RArray<TInt> parentArray;
-            CleanupClosePushL( parentArray );
-            iStorage->GetParentsIdsL( id, parentArray );
-            for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
-                {
-                resultArray[0]->SetFlags( 
-                        resultArray[0]->GetFlags() | EUsed );
-                iHandlerNotifier[i]->EntryChanged( resultArray[0],
-                        EUpdateChangeType,
-                        parentArray );
-                }
-            CleanupStack::PopAndDestroy( &parentArray );
+            User::Leave( KErrNotFound );
             }
+        CleanupStack::PopAndDestroy( &resultArray );
+        CleanupStack::PopAndDestroy( query );
         }
-    CleanupStack::PopAndDestroy( &resultArray );
-    CleanupStack::PopAndDestroy( &id );
-    CleanupStack::PopAndDestroy( touchQuery );
+    else if( aEntry->GetId() > 0 )
+        {
+        PrivateTouchL( aEntry );
+        }
+    else
+        {
+        User::Leave( KErrArgument );
+        }
     }
 
 // ---------------------------------------------------------------------------
@@ -408,23 +380,6 @@ EXPORT_C void CCaStorageProxy::SaveDatabaseL()
 #pragma CTC SKIP
 #endif //COVERAGE_MEASUREMENT (calls another method)
 
-EXPORT_C void CCaStorageProxy::RestoreDatabaseL()
-    {
-    iStorage->RestoreDatabaseL();
-    }
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC ENDSKIP
-#endif //COVERAGE_MEASUREMENT
-
-
-// ---------------------------------------------------------------------------
-//
-// ---------------------------------------------------------------------------
-//
-#ifdef COVERAGE_MEASUREMENT
-#pragma CTC SKIP
-#endif //COVERAGE_MEASUREMENT (calls another method)
-
 EXPORT_C void CCaStorageProxy::LoadDataBaseFromRomL()
     {
     iStorage->LoadDataBaseFromRomL();
@@ -475,13 +430,13 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeTextL( CCaInnerEntry* aEntry )
 		TInt pos = title.LocateReverse( delimiter );
 		if ( pos > 0 && pos + 1 < textLength )   // 1 is for delimiters
 			{
-			TPtrC16 logString = title.Mid( pos + 1 ); 
+			TPtrC16 logString = title.Mid( pos + 1 );
 			TInt qmFileNameLength = 
 			        textLength - charsToFilename - 1 - logString.Length();
 			TPtrC16 qmFile = title.Mid( charsToFilename, qmFileNameLength );
 			if ( InitializeTranslatorL( qmFile ) )
 				{
-			    result = CCaLocalizationEntry::NewLC();			
+			    result = CCaLocalizationEntry::NewLC();
 				HBufC* translatedString = 
 				        HbTextResolverSymbian::LoadLC( logString );
 				if ( translatedString->Compare( logString ) )
@@ -498,7 +453,7 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeTextL( CCaInnerEntry* aEntry )
 					result->SetRowId( aEntry->GetId() ? 0 : aEntry->GetId() ); // must be added when present
 					CleanupStack::Pop( result );
 					}
-				else 
+				else
 					{
 					CleanupStack::PopAndDestroy(translatedString);
 					CleanupStack::PopAndDestroy(result);
@@ -546,18 +501,18 @@ CCaLocalizationEntry* CCaStorageProxy::LocalizeDescriptionL( CCaInnerEntry* aEnt
 					result->SetRowId( aEntry->GetId() ? 0 : aEntry->GetId() ); // must be added when present
 					CleanupStack::Pop( result );
 					}
-				else 
+				else
 					{
 				    CleanupStack::PopAndDestroy( translatedString );
 				    CleanupStack::PopAndDestroy( result );
 				    result = NULL;
 					}
-				
+
 				}
 			}
 		CleanupStack::PopAndDestroy( &description );
 		}
-	
+
 	return result;
 	}
 
@@ -595,7 +550,7 @@ TBool CCaStorageProxy::InitializeTranslatorL( const TDesC& aQmFilename )
 	TBool result = HbTextResolverSymbian::Init( aQmFilename, KLocalizationFilepathC );
 	if ( !result )
 		{
-		// this should not be called too often 
+		// this should not be called too often
 		TChar currentDriveLetter;
 		TDriveList driveList;
 		RFs fs;
@@ -624,7 +579,7 @@ TBool CCaStorageProxy::InitializeTranslatorL( const TDesC& aQmFilename )
 			}
 		CleanupStack::PopAndDestroy( &path );
 		CleanupStack::PopAndDestroy( &fs );
-		
+
 		if( !result )
 			{
 		    result = HbTextResolverSymbian::Init( aQmFilename, KLocalizationFilepathZ );
@@ -632,3 +587,37 @@ TBool CCaStorageProxy::InitializeTranslatorL( const TDesC& aQmFilename )
 		}
 	return result;
 	}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CCaStorageProxy::PrivateTouchL( CCaInnerEntry* aEntry )
+    {
+    iStorage->TouchL( aEntry->GetId(), aEntry->GetFlags() & ERemovable );
+    for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
+        {
+        iHandlerNotifier[i]->EntryTouched( aEntry->GetId() );
+        }
+    if( !( aEntry->GetFlags() & EUsed ) &&
+            ( aEntry->GetFlags() & ERemovable ) )
+        {
+        RArray<TInt> id;
+        CleanupClosePushL( id );
+        id.AppendL( aEntry->GetId() );
+        RArray<TInt> parentArray;
+        CleanupClosePushL( parentArray );
+        iStorage->GetParentsIdsL( id, parentArray );
+        aEntry->SetParentIdsL( parentArray );
+        for( TInt i = 0; i < iHandlerNotifier.Count(); i++ )
+            {
+            aEntry->SetFlags( 
+                    aEntry->GetFlags() | EUsed );
+            iHandlerNotifier[i]->EntryChanged( aEntry,
+                    EUpdateChangeType,
+                    parentArray );
+            }
+        CleanupStack::PopAndDestroy( &parentArray );
+        CleanupStack::PopAndDestroy( &id );
+        }
+    }

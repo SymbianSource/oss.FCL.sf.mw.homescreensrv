@@ -27,6 +27,7 @@
 #include "cahandlerloader.h"
 
 class CaEntry;
+class CaHandlersPreloader;
 
 class CaHandlerProxy
 {
@@ -38,16 +39,21 @@ public:
 
     int execute(const CaEntry &entry, const QString &commandName, 
             QObject* receiver = NULL, const char* member = NULL);
+    
+    void preloadHandlers();
 
 private:
-    CaHandler *getHandler(const CaEntry &entry,
-                          const QString &commandName);
+    CaHandler *getHandler(const QString &entryTypeName);
 
-    typedef QMap<QString, QSharedPointer<CaHandler> > ImplementationMap;
+    typedef QMap< QString, QSharedPointer<CaHandler> > ImplementationMap;
     typedef ImplementationMap::iterator ImplementationMapIterator;
 
     QSharedPointer<CaHandlerLoader> mLoader;
     ImplementationMap mImplementationMap;
+    
+    CaHandlersPreloader *mHandlersPreloader; /// Own;
+    
+    friend class CaHandlersPreloader;
 };
 
 #endif // CAHANDLERPROXY_H

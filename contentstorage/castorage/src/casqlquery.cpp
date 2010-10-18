@@ -250,18 +250,11 @@ void CCaSqlQuery::BindValuesForOrganizeL( const RArray<TInt>& aEntryIds,
 //
 // ---------------------------------------------------------------------------
 //
-void CCaSqlQuery::BindValuesForLaunchL( const TInt aEntryId,
-        const TInt64 aLaunchTime )
+void CCaSqlQuery::BindValuesForTouchL( const TInt aEntryId )
     {
-    if( iQuery.Find( KSQLLaLaunchEntryId ) != KErrNotFound )
+    if( iQuery.Find( KSQLEntryId ) != KErrNotFound )
         {
-        BindIntL( iStatement.ParameterIndex( 
-                KSQLLaLaunchEntryId ), aEntryId );
-        }
-    if( iQuery.Find( KSQLLaLaunchTime ) != KErrNotFound )
-        {
-        BindInt64L( iStatement.ParameterIndex( 
-                KSQLLaLaunchTime ), aLaunchTime );
+        BindIntL( iStatement.ParameterIndex( KSQLEntryId ), aEntryId );
         }
     if( iQuery.Find( KSQLEnFlags ) != KErrNotFound )
         {

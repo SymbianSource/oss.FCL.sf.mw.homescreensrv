@@ -45,7 +45,7 @@ public:
      * @param aLocalization localization information about entry.
      */
     virtual void AddLocalizationL( const CCaLocalizationEntry& aLocalization ) = 0;
-    
+
     /**
      * Fetches data from database
      *
@@ -79,11 +79,11 @@ public:
      * @param aEntryIdArray list of enties ids.
      * @param aParentIdArray The result list of parents' ids
      * for a specific select.
-     * @param aCheckParentsParent flag if set to true then 
-     * search also for parent of the parent 
+     * @param aCheckParentsParent flag if set to true then
+     * search also for parent of the parent
      */
     virtual void GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
-            RArray<TInt>& aParentIdArray, 
+            RArray<TInt>& aParentIdArray,
             TBool aCheckParentsParent = ETrue ) = 0;
 
     /**
@@ -149,17 +149,11 @@ public:
     virtual void CustomSortL( const RArray<TInt>& aEntryIds,
             const TInt aGroupId ) = 0;
 
-    
-    /**
-    * Saves a copy of database to private.
-    */
-    virtual void RestoreDatabaseL() = 0;
-        
     /**
      * Saves a copy of database to private.
      */
     virtual void SaveDatabaseL() = 0;
-    
+
     /**
      * Loads data base from rom.
      */

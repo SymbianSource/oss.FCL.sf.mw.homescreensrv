@@ -19,18 +19,25 @@
 #define CAUINSTALLNOTIFIER_H
 
 #include <QObject>
+#include <QVariantMap>
 #include <QSharedPointer>
 
 #include "caclient_global.h"
+
 class CaUninstallNotifierPrivate;
 
-class CaUninstallNotifier: public QObject
+const char uninstallNotifierComponentIdKey[] = "component_id";
+const char uninstallNotifierValueOfProgressKey[] = "val_of_progress";
+
+class CACLIENT_EXPORT CaUninstallNotifier: public QObject
 {
 Q_OBJECT
 
 public:
 
     static CaUninstallNotifier* notifier();
+    
+    QVariantMap getLastNotification();
 
 private: 
     
@@ -62,3 +69,4 @@ private:
 
 
 #endif // CAUINSTALLNOTIFIER_H
+

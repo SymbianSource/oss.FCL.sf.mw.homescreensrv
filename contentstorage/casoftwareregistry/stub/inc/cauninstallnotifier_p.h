@@ -19,6 +19,7 @@
 #define CAUNINSTALLNOTIFIER_P_H
 
 #include <QObject>
+#include <QVariantMap>
 #include <QSharedPointer>
 class CaUninstallObserver;
 class CaUninstallNotifier;
@@ -35,6 +36,12 @@ public:
     virtual ~CaUninstallNotifierPrivate();
     
     void makeConnect();
+    
+    QVariantMap getLastNotification();
+    
+private slots:
+
+    void progressChange(int componentId, int valueOfProgress);
 
 private:
     CaUninstallObserver* mUninstallObserver;

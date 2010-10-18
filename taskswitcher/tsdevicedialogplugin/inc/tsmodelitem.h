@@ -20,8 +20,6 @@
 #include <QVariant>
 #include <QSharedPointer>
 
-#include "tsmodelitem.h"
-
 class TsTask;
 
 /*!

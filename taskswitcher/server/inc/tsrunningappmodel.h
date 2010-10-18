@@ -56,19 +56,19 @@ public:
     virtual void SetObserver( MTsModelObserver *aObserver );
 
 public:
-    virtual const TDesC& DisplayNameL( TInt aOffset ) const;
-    virtual TInt IconHandleL( TInt aOffset ) const;
-    virtual TTime TimestampL( TInt aOffset ) const;
-    virtual TTime TimestampUpdateL(TInt offset) const; 
-    virtual TTsModelItemKey KeyL( TInt aOffset ) const;
-    virtual TBool IsActiveL( TInt aOffset ) const;
-    virtual TBool IsClosableL( TInt aOffset ) const;
-    virtual TBool IsMandatoryL( TInt aOffset ) const;
+    virtual const TDesC& DisplayName( TInt aOffset ) const;
+    virtual TInt IconHandle( TInt aOffset ) const;
+    virtual TTime Timestamp( TInt aOffset ) const;
+    virtual TTime TimestampUpdate(TInt offset) const; 
+    virtual TTsEntryKey Key( TInt aOffset ) const;
+    virtual TBool IsActive( TInt aOffset ) const;
+    virtual TBool IsClosable( TInt aOffset ) const;
+    virtual TBool IsMandatory( TInt aOffset ) const;
 
 public:
-    virtual TBool CloseL( TTsModelItemKey aKey ) const;
-    virtual TBool LaunchL( TTsModelItemKey aKey ) const;
-    
+    virtual TBool Close( TTsEntryKey aKey ) const;
+    virtual TBool Launch( TTsEntryKey aKey ) const;
+
 private: // owned
     CTsDataList *iDataList;
     

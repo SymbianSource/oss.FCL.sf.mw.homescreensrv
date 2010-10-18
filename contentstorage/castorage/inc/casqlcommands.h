@@ -52,10 +52,6 @@ _LIT( KSQLInsertToIcon, "INSERT INTO CA_ICON \
 (IC_FILENAME,IC_SKIN_ID,IC_APP_ID) \
 VALUES ( :IC_FILENAME, :IC_SKIN_ID, :IC_APP_ID )" );
 
-_LIT( KSQLInsertToLaunch, "INSERT INTO CA_LAUNCH \
-(LA_ENTRY_ID, LA_LAUNCH_TIME) \
-VALUES ( :LA_ENTRY_ID, :LA_LAUNCH_TIME )" );
-
 _LIT( KSQLInsertToAttribute, "REPLACE INTO CA_ATTRIBUTE \
 (AT_ENTRY_ID, AT_NAME,AT_VALUE) \
 VALUES ( :AT_ENTRY_ID, :AT_NAME, :AT_VALUE )" );
@@ -69,15 +65,15 @@ _LIT( KSQLUpdateEntry, "UPDATE CA_ENTRY SET " );
 _LIT( KSQLUpdateGroup, "UPDATE CA_GROUP_ENTRY SET " );
 _LIT( KSQLUpdateIcon, "UPDATE CA_ICON SET " );
 _LIT( KSQLUpdateEntryUsedFlag, "UPDATE CA_ENTRY SET \
-EN_FLAGS = EN_FLAGS | :EN_FLAGS WHERE ENTRY_ID = :LA_ENTRY_ID");
+EN_FLAGS = EN_FLAGS | :EN_FLAGS WHERE ENTRY_ID = :ENTRY_ID");
 _LIT( KSQLLocalizeTextEntry, "UPDATE CA_ENTRY SET \
 EN_TEXT = :LT_STRING WHERE ENTRY_ID = :LT_ROW_ID"); // WHERE ENTRY_ID must be changed if an attribute
 _LIT( KSQLLocalizeDescriptionEntry, "UPDATE CA_ENTRY SET \
 EN_DESCRIPTION = :LT_STRING WHERE ENTRY_ID = :LT_ROW_ID"); // WHERE ENTRY_ID must be changed if an attribute
 _LIT( KSQLLocalizeShortNameAttribute, "UPDATE CA_ATTRIBUTE SET \
-AT_VALUE = :LT_STRING WHERE AT_ENTRY_ID = :LT_ROW_ID AND AT_NAME = \"short_name\""); 
+AT_VALUE = :LT_STRING WHERE AT_ENTRY_ID = :LT_ROW_ID AND AT_NAME = \"short_name\"");
 _LIT( KSQLLocalizeTitleNameAttribute, "UPDATE CA_ATTRIBUTE SET \
-AT_VALUE = :LT_STRING WHERE AT_ENTRY_ID = :LT_ROW_ID AND AT_NAME = \"title_name\""); 
+AT_VALUE = :LT_STRING WHERE AT_ENTRY_ID = :LT_ROW_ID AND AT_NAME = \"title_name\"");
 
 _LIT( KSQLUpdatePositionInGroup, "UPDATE CA_GROUP_ENTRY SET \
 GE_POSITION = :GE_POSITION WHERE \
@@ -100,7 +96,7 @@ _LIT( KSQLUpdateEntryUidNULL, "EN_UID = NULL " );
 _LIT( KSQLUpdateEntryFlags, "EN_FLAGS = :EN_FLAGS " );
 _LIT( KSQLUpdateWhere, "WHERE ENTRY_ID = :ENTRY_ID " );
 
-// Null Icon params 
+// Null Icon params
 _LIT( KSQLEmptyIconFileName, "(IC_FILENAME IS NULL OR IC_FILENAME = '')" );
 _LIT( KSQLEmptyIconSkinId, "(IC_SKIN_ID IS NULL OR IC_SKIN_ID = '')" );
 _LIT( KSQLEmptyIconAppId, "(IC_APP_ID IS NULL OR IC_APP_ID = '')" );
@@ -113,8 +109,8 @@ _LIT( KSQLUpdateIconAppId, "IC_APP_ID = :IC_APP_ID " );
 _LIT( KSQLUpdateIconWhere, "WHERE ICON_ID = :ICON_ID" );
 
 // Update property
-_LIT( KSQLUpdateProperty, "UPDATE CA_DB_PROPERTIES \
-SET DB_VALUE = :DB_VALUE WHERE DB_PROPERTY = :DB_PROPERTY ");
+_LIT( KSQLUpdateProperty, "REPLACE INTO CA_DB_PROPERTIES \
+   ( DB_PROPERTY, DB_VALUE ) VALUES ( :DB_PROPERTY, :DB_VALUE )");
 
 // Update localization table entry
 
@@ -124,10 +120,6 @@ _LIT( KSQLUpdateLocalization, "UPDATE CA_LOCALIZATION_TEXT SET \
  AND LT_ROW_ID = :LT_ROW_ID" );
 
 //Delete Data
-_LIT( KSQLDeleteLaunch, "DELETE FROM CA_LAUNCH \
-WHERE LA_ENTRY_ID = :ENTRY_ID" );
-_LIT( KSQLDeleteOldFromLaunch, "DELETE FROM CA_LAUNCH \
-WHERE LA_LAUNCH_TIME < :LA_LAUNCH_TIME" );
 _LIT( KSQLDeleteEntryFromGroup, "DELETE FROM CA_GROUP_ENTRY \
 WHERE GE_ENTRY_ID = :ENTRY_ID" );
 _LIT( KSQLDeleteGroupFromGroup, "DELETE FROM CA_GROUP_ENTRY \
@@ -184,17 +176,6 @@ _LIT( KSQLGetAttributesByEntryId, "SELECT \
 ATTRIBUTE_ID, AT_ENTRY_ID, AT_NAME, AT_VALUE FROM CA_ATTRIBUTE \
 WHERE AT_ENTRY_ID IN ( %S )" );
 
-//Select most used
-// %S - the input table to work on.
-_LIT( KSQLGetListByLaunchDataPart1,"SELECT ENTRY_ID, EN_TEXT, \
-EN_DESCRIPTION, EN_ROLE, EN_TYPE_NAME, EN_ICON_ID, EN_CREATION_TIME, \
-EN_UID, EN_FLAGS, IC_FILENAME, IC_SKIN_ID, IC_APP_ID FROM (");
-
-// %S - the table to match e.g KSQLGetMostUsed or KSQLGetLastUsed
-// The column USAGE_DATA is used to order the items
-_LIT( KSQLGetListByLaunchDataPart2,") LEFT JOIN(");
-_LIT( KSQLGetListByLaunchDataPart3,") ON ENTRY_ID = LA_ENTRY_ID \
-ORDER BY USAGE_DATA");
 
 _LIT( KSQLGetParentIds,"SELECT DISTINCT GE_GROUP_ID FROM CA_GROUP_ENTRY \
 WHERE GE_ENTRY_ID IN ( %S )" );
@@ -218,11 +199,6 @@ IC_SKIN_ID, IC_APP_ID FROM \
 CA_ENTRY LEFT JOIN CA_ICON ON EN_ICON_ID = ICON_ID \
 WHERE EN_ICON_ID = :EN_ICON_ID");
 
-_LIT( KSQLGetMostUsed,"SELECT LA_ENTRY_ID, COUNT(*) AS USAGE_DATA FROM \
-CA_LAUNCH GROUP BY LA_ENTRY_ID" );
-
-_LIT( KSQLGetLastUsed,"SELECT LA_ENTRY_ID, MAX(LA_LAUNCH_TIME) \
-AS USAGE_DATA FROM CA_LAUNCH GROUP BY LA_ENTRY_ID" );
 
 _LIT( KSQLGetProperty, "SELECT DB_VALUE FROM CA_DB_PROPERTIES WHERE DB_PROPERTY = :DB_PROPERTY ");
 
@@ -242,7 +218,7 @@ WHERE GE_ENTRY_ID = :Entry_Id_Before ) ) ");
 
 _LIT( KSQLOrganizeInsertToGroupPrepend,"INSERT INTO CA_GROUP_ENTRY \
 (GE_GROUP_ID,GE_ENTRY_ID,GE_POSITION) \
-VALUES ( :GE_GROUP_ID, :GE_ENTRY_ID, 1 ) "); 
+VALUES ( :GE_GROUP_ID, :GE_ENTRY_ID, 1 ) ");
 
 //Statement to append the entry at end of table
 _LIT( KSQLOrganizeAppendToGroup,"INSERT INTO CA_GROUP_ENTRY \
@@ -313,10 +289,6 @@ _LIT( KSQLIcFileName, ":IC_FILENAME" );
 _LIT( KSQLIcSkinId, ":IC_SKIN_ID" );
 _LIT( KSQLIcAppId, ":IC_APP_ID" );
 
-_LIT( KSQLLaunchId, ":LAUNCH_ID" );
-_LIT( KSQLLaLaunchTime, ":LA_LAUNCH_TIME" );
-_LIT( KSQLLaLaunchEntryId, ":LA_ENTRY_ID" );
-
 _LIT( KSQLAttributeId, ":ATTRIBUTE_ID" );
 _LIT( KSQLAttrEntryID, ":AT_ENTRY_ID" );
 _LIT( KSQLAttrName, ":AT_NAME" );
@@ -361,9 +333,6 @@ _LIT( KColumnIconId, "ICON_ID" );
 _LIT( KColumnIcFileName, "IC_FILENAME" );
 _LIT( KColumnIcSkinId, "IC_SKIN_ID" );
 _LIT( KColumnIcAppId, "IC_APP_ID" );
-
-_LIT( KColumnLaunchId, "LAUNCH_ID" );
-_LIT( KColumnLaLaunchTime, "LA_LAUNCH_TIME" );
 
 _LIT( KColumnAttributeId, "ATTRIBUTE_ID" );
 _LIT( KColumnAttrEntryID, "AT_ENTRY_ID" );

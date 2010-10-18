@@ -103,7 +103,8 @@ symbian: plugin { # copy qtstub and manifest
     qtplugins.path = $$PLUGIN_SUBDIR
     qtplugins.sources += qmakepluginstubs/$${TARGET}.qtplugin
 
-    contains(MOBILITY, serviceframework):BLD_INF_RULES.prj_exports += "resource/$${TARGET}.xml z:$$qtplugins.path/$${TARGET}.xml"
+    CONFIG += qtservice
+    QTSERVICE.DESCRIPTOR = ./resource/$${TARGET}.xml
     
     for(qtplugin, qtplugins.sources):BLD_INF_RULES.prj_exports += "./$$qtplugin z:$$qtplugins.path/$$basename(qtplugin)"
 }

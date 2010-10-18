@@ -64,6 +64,8 @@ public:
     CaNotifier *createNotifier(const CaNotifierFilter &filter);
 
     bool customSort(int groupId, QList<int> &entryIdList);
+    
+    void preloadHandlers() const;
 
     ErrorCode lastError() const;
 

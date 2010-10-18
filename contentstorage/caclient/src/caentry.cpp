@@ -331,6 +331,24 @@ void CaEntry::setEntryTypeName(const QString &entryTypeName)
 }
 
 /*!
+ Gets parent ids.
+ \retval parent ids of entry.
+ */
+QList<int> CaEntry::parentIds() const
+{
+    return m_d->parentIds();
+}
+
+/*!
+ Sets parent ids.
+ \param parentIds parent ids of entry (const reference)
+ */
+void CaEntry::setParentIds(const QList<int> &parentIds)
+{
+    m_d->setParentIds(parentIds);
+}
+
+/*!
  Returns item attributes.
  \retval map of attributes indexed by their names.
 
@@ -527,6 +545,7 @@ CaEntryPrivate &CaEntryPrivate::operator=(const CaEntryPrivate &entry)
     mEntryRole = entry.mEntryRole;
     mTextLocalized = entry.mTextLocalized;
     mDescriptionLocalized = entry.mDescriptionLocalized;
+    mParentIds = entry.mParentIds;
     return *this;
 }
 
@@ -632,6 +651,28 @@ QString CaEntryPrivate::entryTypeName() const
 void CaEntryPrivate::setEntryTypeName(const QString &entryTypeName)
 {
     mEntryTypeName = entryTypeName;
+}
+
+/*!
+ Gets parent ids.
+ \retval parent ids of entry.
+ */
+QList<int> CaEntryPrivate::parentIds() const
+{
+    return mParentIds;
+}
+
+/*!
+ Sets parent ids.
+ \param parentIds parent ids of entry (const reference).
+ */
+void CaEntryPrivate::setParentIds(const QList<int> &parentIds)
+{
+    mParentIds.clear();
+    for (int i(0); i < parentIds.count(); ++i) {
+        mParentIds.append(parentIds[i]);
+    }
+    
 }
 
 /*!

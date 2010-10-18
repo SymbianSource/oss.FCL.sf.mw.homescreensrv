@@ -17,13 +17,13 @@
 #ifndef TSTASKLAUNCHER_H
 #define TSTASKLAUNCHER_H
 
-class QByteArray;
+class MTsEntry;
 
 class TsTaskLauncher {
 
 public:
-    virtual void openTask(const QByteArray &key) = 0;
-    virtual void closeTask(const QByteArray &key) = 0;
+    virtual void openTask(const MTsEntry &entry) = 0;
+    virtual void closeTask(const MTsEntry &key) = 0;
 };
 
 #endif //TSTASKLAUNCHER_H

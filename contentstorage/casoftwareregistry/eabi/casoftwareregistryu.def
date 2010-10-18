@@ -27,10 +27,26 @@ EXPORTS
 	_ZN18CaSoftwareRegistryD0Ev @ 26 NONAME
 	_ZN18CaSoftwareRegistryD1Ev @ 27 NONAME
 	_ZN18CaSoftwareRegistryD2Ev @ 28 NONAME
-	_ZNK18CaSoftwareRegistry10metaObjectEv @ 29 NONAME
-	_ZNK18CaSoftwareRegistry12entryDetailsEi @ 30 NONAME
-	_ZNK18CaSoftwareRegistry18retrieveLogEntriesEv @ 31 NONAME
-	_ZNK18CaSoftwareRegistry23createUninstallNotifierEv @ 32 NONAME
-	_ZTI18CaSoftwareRegistry @ 33 NONAME
-	_ZTV18CaSoftwareRegistry @ 34 NONAME
+	_ZN19CaUninstallNotifier11qt_metacallEN11QMetaObject4CallEiPPv @ 29 NONAME
+	_ZN19CaUninstallNotifier11qt_metacastEPKc @ 30 NONAME
+	_ZN19CaUninstallNotifier14progressChangeEii @ 31 NONAME
+	_ZN19CaUninstallNotifier16staticMetaObjectE @ 32 NONAME DATA 16
+	_ZN19CaUninstallNotifier19getLastNotificationEv @ 33 NONAME
+	_ZN19CaUninstallNotifier19getStaticMetaObjectEv @ 34 NONAME
+	_ZN19CaUninstallNotifier8notifierEv @ 35 NONAME
+	_ZN19CaUninstallNotifier9mInstanceE @ 36 NONAME DATA 8
+	_ZN19CaUninstallNotifierC1EP26CaUninstallNotifierPrivate @ 37 NONAME
+	_ZN19CaUninstallNotifierC2EP26CaUninstallNotifierPrivate @ 38 NONAME
+	_ZN19CaUninstallNotifierD0Ev @ 39 NONAME
+	_ZN19CaUninstallNotifierD1Ev @ 40 NONAME
+	_ZN19CaUninstallNotifierD2Ev @ 41 NONAME
+	_ZNK18CaSoftwareRegistry10metaObjectEv @ 42 NONAME
+	_ZNK18CaSoftwareRegistry12entryDetailsEi @ 43 NONAME
+	_ZNK18CaSoftwareRegistry18retrieveLogEntriesEv @ 44 NONAME
+	_ZNK18CaSoftwareRegistry23createUninstallNotifierEv @ 45 NONAME
+	_ZNK19CaUninstallNotifier10metaObjectEv @ 46 NONAME
+	_ZTI18CaSoftwareRegistry @ 47 NONAME
+	_ZTI19CaUninstallNotifier @ 48 NONAME
+	_ZTV18CaSoftwareRegistry @ 49 NONAME
+	_ZTV19CaUninstallNotifier @ 50 NONAME
 

@@ -139,10 +139,14 @@ void CTsScreenshotPlugin::DoHandleEvent(const TWservCrEvent& aEvent)
     case TWservCrEvent::EWindowGroupChanged:
         if( KInvalidGroupId != iWindowGroupId )
             {
-            NotifyWindowGroupToBackground( iWindowGroupId );
+            
             if(iAllowedList->IsPresent(iWindowGroupId))
                 {
                 TakeScreenshot( iWindowGroupId );
+                }
+            else
+                {
+                NotifyWindowGroupToBackground( iWindowGroupId );
                 }
             }
         iWindowGroupId = aEvent.WindowGroupIdentifier();

@@ -24,5 +24,4 @@ EXPORTS
 	?NewL@CCaSrvMmcHistory@@SAPAV1@XZ @ 23 NONAME ; class CCaSrvMmcHistory * CCaSrvMmcHistory::NewL(void)
 	?AddLocalizationL@CCaStorageProxy@@QAEXABVCCaLocalizationEntry@@@Z @ 24 NONAME ; void CCaStorageProxy::AddLocalizationL(class CCaLocalizationEntry const &)
 	?SaveDatabaseL@CCaStorageProxy@@QAEXXZ @ 25 NONAME ; void CCaStorageProxy::SaveDatabaseL(void)
-	?RestoreDatabaseL@CCaStorageProxy@@QAEXXZ @ 26 NONAME ; void CCaStorageProxy::RestoreDatabaseL(void)
 

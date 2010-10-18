@@ -20,16 +20,26 @@
 #define TSENTRYKEY_H
 
 #include <e32base.h>
+#include <s32strm.h>
+
+typedef TInt TTsKey;
 
 class TTsEntryKey
 {
 public:
-    TTsEntryKey(TInt parentId =0);
-    TBool operator ==(const TTsEntryKey& key) const;
-    TInt WindowGroupId() const;
+    static TInt Size();
+    TTsEntryKey();
+    TTsEntryKey( TTsKey aKey, TInt aRoot );
+    TTsEntryKey( const TTsEntryKey &aKey );
+    TTsEntryKey& operator =( const TTsEntryKey& aKey );
+    TBool operator == ( const TTsEntryKey aKey ) const;
+    TInt Key() const;
+    void ExternalizeL( RWriteStream& aStream ) const;
+    void InternalizeL( RReadStream& aStream );
 
 private:
-    TInt mParentId;
+    TTsKey iKey;
+    TInt iRoot;
 };
 
 #endif //TSENTRYKEY_H

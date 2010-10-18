@@ -29,8 +29,7 @@ class CaQtSfHandlerLoader:
 {
 public:
     CaQtSfHandlerLoader();
-    CaHandler *loadHandler(const QString &entryTypeName,
-                           const QString &commandName);
+    CaHandler *loadHandler(const QString &entryTypeName);
 protected:
     void registerPlugins() const;
 };

@@ -46,7 +46,8 @@ void CCaInstallNotifier::ConstructL( TNotificationType aNotificationType )
     iNotificationType = aNotificationType;
 }
 
-void CCaInstallNotifier::EndOperationHandler(const CSifOperationEndData& aEndData)
+void CCaInstallNotifier::EndOperationHandler(
+        const CSifOperationEndData& aEndData )
 {
     TRAP_IGNORE
         (
@@ -59,12 +60,12 @@ void CCaInstallNotifier::EndOperationHandler(const CSifOperationEndData& aEndDat
 }
 
 void CCaInstallNotifier::ProgressOperationHandler(
-        const CSifOperationProgressData& /*aProgressData*/)
+        const CSifOperationProgressData& /*aProgressData*/ )
 {
 }
 
 void CCaInstallNotifier::StartOperationHandler(
-        TUint aKey, const CSifOperationStartData& aStartData)
+        TUint aKey, const CSifOperationStartData& aStartData )
 {
     TRAP_IGNORE
         (

@@ -185,19 +185,3 @@ void AfStorageSyncTask::NotifyChangeL(MAfTaskStorage& observers,
         table[iter]->BroadcastReceivedL(msg);
     }
 }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
-void AfStorageSyncTask::CreateThumbnailL(const TDesC &path, TInt hdl)
-{
-    if (0 >= hdl) {
-        User::Leave(KErrCorrupt);
-    }
-    CFbsBitmap *bitmap = new (ELeave) CFbsBitmap;
-    CleanupStack::PushL(bitmap);
-    User::LeaveIfError(bitmap->Duplicate(hdl));
-    User::LeaveIfError(bitmap->Save(path));
-    CleanupStack::PopAndDestroy(bitmap);
-}

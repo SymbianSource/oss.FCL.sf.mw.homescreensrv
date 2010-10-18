@@ -22,6 +22,7 @@
 #include <QString>
 
 #include <usif/usifcommon.h>
+#include <usif/scr/screntries.h>
 
 class QStringList;
 class CaSoftwareRegistry;
@@ -54,7 +55,7 @@ public:
 
     QList<DetailMap> retrieveLogEntries() const;
     CaUninstallNotifier *createUninstallNotifier() const;
-    
+
 private:
     QList<DetailMap> retrieveLogEntriesL() const;
     DetailMap entryDetailsL(
@@ -66,12 +67,12 @@ private:
     void getApplicationsUidsL(int componentId,
         QStringList &appUids);
     DetailMap entryDetailsL(int componentId) const;
-    //TODO int should be changed to const Usif::TScrComponentOperationType&
-    //when the problem with usif headers is solved
-    QString operationTypeL(int operationType) const;
+    QString operationTypeL(
+            Usif::TScrComponentOperationType operationType) const;
     QString operationTime(TTime time) const;
 private:
     CaSoftwareRegistry *const m_q;
+
     friend class T_CaSoftwareRegistry;
 };
 

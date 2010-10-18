@@ -18,37 +18,36 @@
 #define TSRUNNINGAPPLICATION_H
 
 #include <e32base.h>
+#include "tsentry.h"
 
 /**
  * Abstract interface of container with data to describe running application 
  */
-class MTsRunningApplication
+class MTsRunningApplication: public MTsEntry
     {
 public:
+    enum ApplicationHideMode 
+        {
+        None = 0x0,
+        Software = 0x1,
+        System =0x2
+        };
+    
     /**
      * Provide access to application unique identifier
      * @return running application identyfier
      */
-    virtual TUid UidL()const =0;
-    
-    /**
-     * Provide access to application caption
-     * @return running application caption 
-     */
-    virtual const TDesC& CaptionL() const =0;
+    virtual TUid Uid()const =0;
     
     /**
      * Provide information if application is hidden from application library
      * @return EFalse if it's not hidden, other values it is.  
      */
-    virtual TBool IsHiddenL() const =0;
+    virtual ApplicationHideMode HideMode() const =0;
     
-    /**
-     * Provide information if application is required by the system and should be closed
-     * @return EFalse if it's not system, other values it is.  
-     */
-    virtual TBool IsSystemL() const =0;
+    virtual void SetHidden( TBool aHidden ) =0;
     
+    virtual TBool IsSystem() const =0;
     /**
      * Provide access to process window group identifier
      * @return process window group identyfier

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2009 Nokia Corporation and/or its subsidiary(-ies).
+* Copyright (c) 2008 Nokia Corporation and/or its subsidiary(-ies).
 * All rights reserved.
 * This component and the accompanying materials are made available
 * under the terms of "Eclipse Public License v1.0"
@@ -11,22 +11,19 @@
 *
 * Contributors:
 *
-* Description: 
+* Description:  Task list entry
 *
 */
-#ifndef TSTASKCONTENT_H
-#define TSTASKCONTENT_H
 
-class TsTaskContent
-{
-    
+#ifndef TSICONPROVIDER_H
+#define TSICONPROVIDER_H
+
+class CFbsBitmap;
+class MTsIconProvider
+    {
 public:
-    bool mClosable;
-    bool mActive;
-    QPixmap mScreenshot;
-    QString mName;
-    QByteArray mKey;
-    
-};
+    virtual void LoadIconL(CFbsBitmap& aDst, TUid aUid) =0;
 
-#endif //TSTASKCONTENT_H
+    };
+
+#endif //TSICONPROVIDER_H

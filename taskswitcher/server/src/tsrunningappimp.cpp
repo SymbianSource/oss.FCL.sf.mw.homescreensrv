@@ -16,7 +16,7 @@
  */
 
 #include <apgwgnam.h>
-
+#include "tsentrykey.h"
 #include "tsrunningappimp.h"
 #include "tsresourcemanager.h"
 
@@ -27,6 +27,7 @@ CTsRunningApp* CTsRunningApp::NewLC(
     {
     CTsRunningApp* self = new(ELeave) CTsRunningApp(aResources, aInfo);
     CleanupStack::PushL( self );
+    self->ConstructL();
     return self;
     }
 
@@ -46,27 +47,31 @@ iWindowGroupInfo(aInfo)
     //No implementation required
     }
 
-//------------------------------------------------------------------------------
-const CApaWindowGroupName& CTsRunningApp::WindowGroupNameL() const
+void CTsRunningApp::ConstructL()
     {
-    if( 0 == iWindowGroupName )
-        {
-        iWindowGroupName = CApaWindowGroupName::NewL( iResources.WsSession(), 
-                                                      WindowGroupId() );
-        }
-    return *iWindowGroupName;
+    iWindowGroupName = CApaWindowGroupName::NewL( iResources.WsSession(), 
+                                                  WindowGroupId() );
+    iCaption.Set(iWindowGroupName->Caption());
+    
     }
 
 //------------------------------------------------------------------------------
-TUid CTsRunningApp::UidL()const
+void CTsRunningApp::RefreshDataL()
     {
-    return WindowGroupNameL().AppUid();
+    delete iWindowGroupName;
+    iWindowGroupName =0;
+    ConstructL();
     }
 
 //------------------------------------------------------------------------------
-const TDesC& CTsRunningApp::CaptionL() const
+TUid CTsRunningApp::Uid()const
     {
-    iCaption.Set(WindowGroupNameL().Caption());
+    return iWindowGroupName->AppUid();
+    }
+
+//------------------------------------------------------------------------------
+const TDesC& CTsRunningApp::DisplayName() const
+    {
     return iCaption;
     
     }
@@ -90,13 +95,76 @@ TBool CTsRunningApp::IsEmbeded() const
     }
 
 //------------------------------------------------------------------------------
-TBool CTsRunningApp::IsHiddenL() const
+MTsRunningApplication::ApplicationHideMode CTsRunningApp::HideMode() const
     {
-    return WindowGroupNameL().Hidden();
+    return iWindowGroupName->Hidden() ? 
+           MTsRunningApplication::System :
+           iHideMode;
     }
 
 //------------------------------------------------------------------------------
-TBool CTsRunningApp::IsSystemL() const
+TBool CTsRunningApp::IsSystem() const
     {
-    return  WindowGroupNameL().IsSystem();
+    return  iWindowGroupName->IsSystem();
+    }
+
+//------------------------------------------------------------------------------
+void CTsRunningApp::SetHidden( TBool aHidden )
+    {
+    iHideMode = aHidden ? MTsRunningApplication::Software :
+                          MTsRunningApplication::None;
+    }
+
+//------------------------------------------------------------------------------
+TInt CTsRunningApp::IconHandle() const
+    {
+    return KErrNotFound;
+    }
+
+//------------------------------------------------------------------------------
+TTime CTsRunningApp::Timestamp() const
+    {
+    return iTimestap;
+    }
+
+//------------------------------------------------------------------------------
+TTime CTsRunningApp::TimestampUpdate() const
+    {
+    return iUpdateTimestap;
+    }
+
+//------------------------------------------------------------------------------
+TTsEntryKey CTsRunningApp::Key() const
+    {
+    return TTsEntryKey(WindowGroupId(), ParentWindowGroupId());
+    }
+
+//------------------------------------------------------------------------------
+TBool CTsRunningApp::IsActive() const
+    {
+    return ETrue;
+    }
+
+//------------------------------------------------------------------------------
+TBool CTsRunningApp::IsClosable() const
+    {
+    return !iWindowGroupName->IsSystem();
+    }
+
+//------------------------------------------------------------------------------
+TBool CTsRunningApp::Close() const
+    {
+    return EFalse;
+    }
+
+//------------------------------------------------------------------------------
+TBool CTsRunningApp::Launch() const
+    {
+    return EFalse;
+    }
+
+//------------------------------------------------------------------------------
+TBool CTsRunningApp::IsMandatory() const
+    {
+    return ETrue;
     }

@@ -40,8 +40,6 @@ enum SortAttribute
 {
     NameSortAttribute,
     CreatedTimestampSortAttribute,
-    MostUsedSortAttribute,
-    LastUsedSortAttribute,
     DefaultSortAttribute
 // default - return items in custom order
 };

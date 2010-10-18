@@ -86,6 +86,12 @@ void CaObjectAdapter::convertL(const CaEntry &fromEntry,
                     attributesMap.value(key))->Des());
         }
     }
+    QList<int> parentIds = fromEntry.parentIds();
+    RArray<TInt> s60ParentIds;
+    for (int i(0); i < parentIds.count(); ++i ) {
+        s60ParentIds.AppendL(parentIds[i]);
+    }
+    toEntry.SetParentIdsL(s60ParentIds);
 }
 
 //----------------------------------------------------------------------------
@@ -191,6 +197,12 @@ void CaObjectAdapter::convert(
             XQConversions::s60DescToQString(attribute->Name()),
             XQConversions::s60DescToQString(attribute->Value()));
     }
+    QList<int> parentIds;
+    RArray<TInt> s60ParentIds = fromEntry.GetParentIds();
+    for (int i(0); i < s60ParentIds.Count(); ++i ) {
+        parentIds.append((int)s60ParentIds[i]);
+    }
+    toEntry.setParentIds(parentIds);
 }
 
 //----------------------------------------------------------------------------
@@ -358,16 +370,6 @@ CCaInnerQuery::TSortAttribute CaObjectAdapter::getSortCode(
         sortCode = (sortOrder == Qt::AscendingOrder)
                    ? CCaInnerQuery::CreatedTimestamp
                    : CCaInnerQuery::CreatedTimestampDesc;
-        break;
-    }
-    case MostUsedSortAttribute: {
-        sortCode = (sortOrder == Qt::AscendingOrder)
-                   ? CCaInnerQuery::MostUsed : CCaInnerQuery::MostUsedDesc;
-        break;
-    }
-    case LastUsedSortAttribute: {
-        sortCode = (sortOrder == Qt::AscendingOrder)
-                   ? CCaInnerQuery::LastUsed : CCaInnerQuery::LastUsedDesc;
         break;
     }
     case DefaultSortAttribute: {

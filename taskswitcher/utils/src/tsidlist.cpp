@@ -68,15 +68,6 @@ void CTsIdList::AppendL(const TInt aArray[], TInt aSize )
     }
 
 //------------------------------------------------------------------------------
-void CTsIdList::AppendL(const TArray<TInt>& aArray)
-    {
-    for( TInt iter(0); iter < aArray.Count(); ++iter )
-        {
-        AppendL( aArray[iter] );
-        }
-    }
-
-//------------------------------------------------------------------------------
 void CTsIdList::AppendL(TInt aId)
     {
     if( !IsPresent( aId ) )
@@ -124,7 +115,7 @@ TBool CTsIdList::operator ==( const CTsIdList& aList) const
     TBool retVal(aList.iIds.Count() == iIds.Count());
     for( TInt offset(0); retVal && offset < iIds.Count(); ++offset )
         {
-        retVal = (KErrNotFound != aList.iIds.Find(iIds[offset]));
+        retVal = aList.IsPresent(iIds[offset]);
         }
     return retVal;
     }

@@ -16,6 +16,7 @@
 */
 #include <s32mem.h>
 
+#include "tsresourcemanager.h"
 #include "tswindowgroupsmonitor.h"
 #include "tsrunningapp.h"
 #include "tsrunningappstorage.h"
@@ -26,12 +27,7 @@
 
 
 const TUid KPluginUID = {0x200267AE};
-const TInt KSkippedApp [] = {0x20022F35 /* <-- hsapplication */,
-                             0x100058F3 /* <-- sysapp*/};
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
 CTsScreenshotProvider* CTsScreenshotProvider::NewL( MTsDataStorage& aStorage,
                                                     MTsWindowGroupsMonitor& aMonitor)
     {
@@ -83,45 +79,51 @@ void CTsScreenshotProvider::HandleWindowGroupChanged(
  * @see MTsWindowGroupsObserver::HandleWindowGroupChangedL
  */
 void CTsScreenshotProvider::HandleWindowGroupChangedL(
-                                   MTsResourceManager& /*aResources*/, 
+                                   MTsResourceManager& aResources, 
                                    const MTsRunningApplicationStorage& aStorage)
     {
-    const TInt count(sizeof( KSkippedApp ) / sizeof(TInt));
+    
     CTsIdList* list = CTsIdList::NewLC();
     for( TInt allowed(0); allowed < aStorage.Count(); ++allowed )
         {
-        if(!aStorage[allowed].IsHiddenL())
+        if(!IsBlocked(aResources, aStorage[allowed]))
             {
-            TBool isBlocked(EFalse);
-            for( TInt blocked(0); !isBlocked && blocked < count; ++blocked )
-                {
-                isBlocked = (KSkippedApp[blocked] == aStorage[allowed].UidL().iUid);
-                }
-            if(!isBlocked)
-                {
-                list->AppendL(aStorage[allowed].WindowGroupId());
-                }
+            list->AppendL(aStorage[allowed].WindowGroupId());
             }
         }
     if( *iCache != *list )
         {
-        RBuf8 message;
-        CleanupClosePushL(message);
-        message.CreateL(list->Size() + sizeof(TInt));
-            
-        RDesWriteStream stream;
-        CleanupClosePushL(stream);
-        stream.Open(message);
-        stream.WriteInt32L(AllowedWindowGroups);
-        stream << (*list);
-        CleanupStack::PopAndDestroy(&stream);
-        
-        SendMessage(message);
-        CleanupStack::PopAndDestroy(&message);
+        SendWhiteListL(*list);
         }
     delete iCache;
     iCache = list;
     CleanupStack::Pop(list);
+    }
+
+// -----------------------------------------------------------------------------
+TBool CTsScreenshotProvider::IsBlocked(const MTsResourceManager& aResources, 
+                                       const MTsRunningApplication& aApp) const
+    {
+    return MTsRunningApplication::System == aApp.HideMode() ||
+           aResources.ApplicationsBlackList().IsPresent(aApp.Uid().iUid);
+    }
+
+// -----------------------------------------------------------------------------
+void CTsScreenshotProvider::SendWhiteListL(const CTsIdList& aList)
+    {
+    RBuf8 message;
+    CleanupClosePushL(message);
+    message.CreateL(aList.Size() + sizeof(TInt));
+        
+    RDesWriteStream stream;
+    CleanupClosePushL(stream);
+    stream.Open(message);
+    stream.WriteInt32L(AllowedWindowGroups);
+    stream << aList;
+    CleanupStack::PopAndDestroy(&stream);
+    
+    SendMessage(message);
+    CleanupStack::PopAndDestroy(&message);
     }
 
 // -----------------------------------------------------------------------------

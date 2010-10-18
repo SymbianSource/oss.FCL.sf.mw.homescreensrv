@@ -86,7 +86,7 @@ void CTsRunningAppServer::ConstructL()
     iStorage = CTsStorage::NewL(providers.Array());
     iStorage->SetObserver(iSerializer);
     CleanupStack::PopAndDestroy(&providers);
-
+    
     // load initial data
     iStorage->DataChanged();
     }
@@ -103,6 +103,7 @@ CSession2* CTsRunningAppServer::NewSessionL( const TVersion & /*aVersion*/,
     CleanupClosePushL(dataStorages);
     dataStorages.AppendL(const_cast<CTsRunningAppServer *>(this)->iAppsModel);
     dataStorages.AppendL(const_cast<CTsRunningAppServer *>(this)->iStorage);
+    dataStorages.AppendL(const_cast<CTsRunningAppServer *>(this)->iResources);
     CSession2* retVal = 
         CTsRunningAppSession::NewL( *const_cast<CTsRunningAppServer *>(this)->iSerializer,
                                     dataStorages.Array());

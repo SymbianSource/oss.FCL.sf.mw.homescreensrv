@@ -40,10 +40,6 @@ public:
         NameDesc,
         CreatedTimestamp,
         CreatedTimestampDesc,
-        MostUsed,
-        MostUsedDesc,
-        LastUsed,
-        LastUsedDesc,
         Default, // default - return items in custom order
         DefaultDesc
         };

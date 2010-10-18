@@ -21,10 +21,8 @@
 
 #include <e32base.h>
 
-#include <HbIcon>
-
 #include "tswindowgroupsobserverbase.h"
-#include "tsentry.h"
+#include "tsrunningappentry.h"
 #include "tsdatastorage.h"
 #include "tsdataobserver.h"
 #include "tsenv.h"
@@ -54,41 +52,35 @@ public:
     const RTsFswArray& Data() const;
     void HandleWindowGroupChanged( MTsResourceManager &aResources, 
                                    const MTsRunningApplicationStorage& aStorage );
-    TBool IsHiddenUid( TUid aUid );
     TBool IsSupported(TInt aFunction) const;
     void HandleDataL(TInt aFunction,RReadStream& aDataStream);
+    MTsEntry& FindL(TTsEntryKey& aKey);
 
 private:
     void CollectAppsL( RTsFswArray& aAppsList,
                        const MTsRunningApplicationStorage& aStorage );
-    void AddEntryL( const TTsEntryKey& aKey, 
+    void AddEntryL( const TTsEntryKey aKey, 
                     const MTsRunningApplication& aRunningApp,
                     RTsFswArray& aNewList );
-    HBufC* FindAppNameLC( const MTsRunningApplication& aRunningApp );
-    TBool CheckIfExists( const CTsEntry& aEntry,
+    TBool CheckIfExistsL( const MTsEntry& aEntry,
                          const RTsFswArray& aNewList ) const;
     void RegisterScreenshotL( RReadStream& aDataStream );
     void UnregisterScreenshotL( RReadStream& aDataStream );
-    void ChangeVisibilityL( RReadStream& aDataStream );
     void UpdateTaskTimestampL( RReadStream& aDataStream );
     void FitDataToListL( RTsFswArray& aListToFit );
-    TBool ConsiderOldDataL( const TTsEntryKey& aKey );
-    CFbsBitmap* GetAppIconL( const TUid& aAppUid );
+    TBool ConsiderOldData( const TTsEntryKey& aKey );
     TInt FindEntry( const RTsFswArray& aList, const TTsEntryKey& aKey ) const;
-    TBool EstablishOrder( const RArray<TTsEntryKey>& aKeyList );
+    TBool EstablishOrderL( const RArray<TTsEntryKey>& aKeyList );
     TTsEntryKey GenerateKeyL( TInt );
-    void HideEntryIfNotAllowed( CTsEntry* aEntry );
+    void HideEntryIfNotAllowed( CTsRunningAppEntry* aEntry );
     TBool UpdateEntryData(const RTsFswArray& aList);
     void RebuildVisibleDataListL();
-    CFbsBitmap* HbIcon2CFbsBitmap( const HbIcon& aIcon );
 
 private:
     MTsResourceManager& iResources;
     MTsDataObserver &iObserver;
     RTsFswArray iData; // current fsw content, i.e. the task list
     RTsFswArray iVisibleData;
-    RArray<TUid> iHiddenUids/** list of hidden uids */;
-    CFbsBitmap* iDefaultIcon /** default icon*/;
     TsEnv& iEnv;
     };
 

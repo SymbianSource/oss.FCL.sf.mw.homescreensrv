@@ -25,8 +25,7 @@ class CaHandlerLoader
 {
 public:
     virtual ~CaHandlerLoader();
-    virtual CaHandler *loadHandler(const QString &entryTypeName,
-                                   const QString &commandName) = 0;
+    virtual CaHandler *loadHandler(const QString &entryTypeName) = 0;
 };
 
 #endif // CAHANDLERLOADER_H

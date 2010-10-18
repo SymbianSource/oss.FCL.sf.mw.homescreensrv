@@ -137,8 +137,7 @@ private:
      * @param aEntry application entry.
      * @param aUpdate is entry updated by a client.
      */
-    void AddEntryToPredefinedCollectionL( CCaInnerEntry* aEntry,
-            TBool aUpdate = EFalse );
+    void AddEntryToPredefinedCollectionL( CCaInnerEntry* aEntry);
 
     /**
      * Create predefined collection.

@@ -28,7 +28,6 @@ public:
     ~CTsIdList();
     TBool IsPresent( TInt aId ) const;
     void AppendL(const TInt aArray[], TInt aSize );
-    void AppendL(const TArray<TInt>& aArray);
     void AppendL(TInt aId);
     void Reset();
     TInt Size() const;

@@ -66,18 +66,12 @@ public:
      * Loads data base from rom.
      */
     void LoadDataBaseFromRomL();
-    
+
     //from CCpStorage
     /**
      * Saves a copy of database to private.
      */
     void SaveDatabaseL();
-
-    //from CCpStorage
-    /**
-     * Restores a copy of database from backup to private.
-     */
-    void RestoreDatabaseL();
 
     /**
      * Localizes one entry attribute.
@@ -92,7 +86,7 @@ public:
      * @param aLocalization localization information about entry.
      */
     void AddLocalizationL( const CCaLocalizationEntry& aLocalization );
-    
+
     /**
      * Checks if entry already exists in localization table
      *
@@ -106,9 +100,9 @@ public:
      * @param aLocalization localization information about entry.
      * @param aStatement SQL statement
      */
-    void ExecuteLocalizationStatementL(const CCaLocalizationEntry& aLocalization, 
+    void ExecuteLocalizationStatementL(const CCaLocalizationEntry& aLocalization,
             const TDesC& aStatement);
-   
+
     /**
      * Fetches data from database.
      *
@@ -141,11 +135,11 @@ public:
      * @param aEntryIdArray List of enties ids.
      * @param aParentIdArray The result list of parents
      * ids for a specific select.
-     * @param aCheckParentsParent falg if set to true then 
-     * search also for parent of the parent 
+     * @param aCheckParentsParent falg if set to true then
+     * search also for parent of the parent
      */
     void GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
-            RArray<TInt>& aParentIdArray, 
+            RArray<TInt>& aParentIdArray,
             TBool aCheckParentsParent = ETrue );
 
     /**
@@ -171,7 +165,7 @@ public:
             TCaOperationParams aParams );
 
     /**
-     * Add ifno launch to db.
+     * Change flag used for removable entries
      * @param aEntryId.
      * @param aRemovable.
      */
@@ -222,6 +216,23 @@ private:
      */
     CCaSqLiteStorage();
 
+    void GetDownloadedApplicationsArrayL(
+            RArray<TInt>& aResultArray );
+
+    void GetDownloadedApplicationsArrayL(
+            RPointerArray<CCaInnerEntry>& aResultArray );
+
+    void SetDownloadedApplicationsArrayL(
+            RPointerArray<CCaInnerEntry>& aResultArray );
+
+    /**
+     * Restores a copy of database from backup to private.
+     */
+    void RestoreDatabaseL();
+
+
+    TInt GetCollectionDownloadIdL();
+
     TInt CreatePrivateDirPath( TFileName& aPrivatePath,
             const TDesC& aDrive, const TDesC& aDbName );
 
@@ -237,6 +248,9 @@ private:
     void ExecuteOrganizeL( const RArray<TInt>& aEntryIds,
             TCaOperationParams aParams );
 
+    void ExecuteOrganizeL( const RPointerArray<CCaInnerEntry> & aResultArray,
+            TCaOperationParams aParams );
+
     void ExecuteTouchL( const TInt aEntryId, TBool aRemovable );
 
     void ExecuteDbPropertyL( const TDesC& aProperty, TDes& aPropertyValue );
@@ -247,8 +261,6 @@ private:
     void ExecuteCustomSortL( const RArray<TInt>& aEntryIds,
             const TInt aGroupId,
             RPointerArray<CCaSqlQuery>& aSqlQuery );
-
-    void RemoveOldEntriesFromLaunchTableL( TInt aDays );
 
     void VerifyOrganizeParamsL( const RArray<TInt>& aEntryIds,
             TCaOperationParams aParams );
@@ -283,7 +295,7 @@ private:
      * Private path on C-drive.
      */
     TFileName iPrivatePathCDrive;
-    
+
     /**
      * Private path on C-drive for backup db.
      */
@@ -293,6 +305,11 @@ private:
      * RFs session.
      */
     RFs iRfs;
+
+    /**
+     * Id of downloaded collection.
+     */
+    TInt iCollectionDownloadId;
 
     };
 

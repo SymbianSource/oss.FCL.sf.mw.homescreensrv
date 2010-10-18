@@ -26,7 +26,6 @@
 
 #include "cahandler.h"
 #include "caqtsfhandlerloader.h"
-#include "caclient_defines.h"
 
 QTM_USE_NAMESPACE
 
@@ -76,28 +75,21 @@ void CaQtSfHandlerLoader::registerPlugins() const
 }
 
 /*!
-    Loads handler implementations appropriate for the requested entry type name and command.
+    Loads handler implementations appropriate for the requested
+    entry type name and command.
 
     The caller takes ownership of the returned pointer.
 
     \param entryTypeName Entry type name.
-    \param commandName Name of the command to be handled.
-    \return A pointer to handler serving the entry type and command if found, NULL otherwise.
+    \param commandName Name of the command to be handled (unused).
+    \return A pointer to handler serving the entry type and command
+    if found, NULL otherwise.
 */
-CaHandler *CaQtSfHandlerLoader::loadHandler(const QString &entryTypeName,
-        const QString &commandName)
+CaHandler *CaQtSfHandlerLoader::loadHandler(const QString &entryTypeName)
 {
-    Q_UNUSED(commandName);
-
-    QString typeName(entryTypeName);
-    if (entryTypeName == WIDGET_ENTRY_TYPE_NAME
-        || entryTypeName == PACKAGE_ENTRY_TYPE_NAME) {
-        typeName = QString(APPLICATION_ENTRY_TYPE_NAME);
-    }
-
     QServiceManager serviceManager;
     QServiceFilter serviceFilter("com.nokia.homescreen.ICommandHandler");
-    serviceFilter.setCustomAttribute("entryTypeName", typeName);
+    serviceFilter.setCustomAttribute("entryTypeName", entryTypeName);
     QList<QServiceInterfaceDescriptor> serviceInterfaceDescriptorList =
         serviceManager.findInterfaces(serviceFilter);
     CaHandler *interfaceHandler = NULL;
@@ -110,5 +102,3 @@ CaHandler *CaQtSfHandlerLoader::loadHandler(const QString &entryTypeName,
     }
     return interfaceHandler;
 }
-
-

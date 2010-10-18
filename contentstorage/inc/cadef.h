@@ -12,7 +12,7 @@
  * Contributors:
  *
  * Description:  Definition of different constants
- *  Version     : %version: 10.1.30 % << Don't touch! Updated by Synergy at check-out.
+ *  Version     : %version: 10.1.31 % << Don't touch! Updated by Synergy at check-out.
  *
  */
 
@@ -151,7 +151,7 @@ const TUid KMidletApplicationTypeUid =
 
 const TUid KCWRTApplicationTypeUid =
     {
-    0x10282821 
+    0x10282821
     };
 
 const TInt KCenRepBufferSize = 255;
@@ -184,7 +184,9 @@ _LIT( KCaDbPropVersion, "Version" ); /// db version
 _LIT( KCaDbPropLanguage, "Language" ); // language of ca strings in db
 _LIT( KCaDbPropQMfile, "QMfile" ); // prefix of qm file used in translation
 
-
+_LIT( KCaDbPropRestore, "Restore" ); // restore db property
+_LIT( KCaDbPropRestoreVal, "RestoreVal" ); // restore db property val
+_LIT( KCaDbPropNoRestoreVal, "NoRestoreVal" ); // no restore db property val
 
 _LIT(KComma, ",");
 // Prefix hex format

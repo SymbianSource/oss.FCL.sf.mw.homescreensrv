@@ -22,15 +22,18 @@
 #include <apgcli.h>
 
 #include "tsresourcemanager.h"
+#include "tsdatastorage.h"
 
 class CTsWindowGroupsMonitor;
-
+class CTsIconProvider;
+class CTsIdList;
 /**
  * Resource manager implemetatioin
  */
 class CTsResourceManager: public CBase,
-                          public MTsResourceManager
-                              {
+                          public MTsResourceManager,
+                          public MTsDataStorage
+    {
 public:
     /**
      * Two phase constructor
@@ -47,12 +50,17 @@ public:
      */
     RWsSession& WsSession();
     
-    /**
-     * @see MTsResourceManager::ApaSession
-     */
+    
     RApaLsSession& ApaSession();
     
     MTsWindowGroupsMonitor& WsMonitor();
+    
+    MTsIconProvider& IconProvider();
+    
+    const CTsIdList& ApplicationsBlackList() const;
+    
+    TBool IsSupported(TInt aFunction) const;
+    void HandleDataL(TInt aFunction, RReadStream& aDataStream);
 
 private:
     /**
@@ -61,10 +69,11 @@ private:
     void ConstructL();
 
 private:
-   RWsSession mWsSession;
-   RApaLsSession mApaSeesion;
-   CTsWindowGroupsMonitor* iMonitor;
-
+    RWsSession mWsSession;
+    RApaLsSession mApaSeesion;
+    CTsWindowGroupsMonitor* iMonitor;
+    CTsIconProvider* iIconProvider;
+    CTsIdList* iBlackList;
     };
 
 #endif // TSRESOURCEMANAGER_H

@@ -94,7 +94,7 @@ void CTsStorage::HandleDataL( TInt aFunction, RReadStream& aDataStream )
         User::Leave( KErrCorrupt );
         }
     CTsModelItemKeyMsg* msg = CTsModelItemKeyMsg::NewLC( aDataStream );
-    OpenTaskMessage == aFunction ? LaunchL( msg->Key() ) : CloseL( msg->Key() );
+    OpenTaskMessage == aFunction ? Launch( msg->Key() ) : Close( msg->Key() );
     CleanupStack::PopAndDestroy( msg );
     }
 
@@ -133,9 +133,9 @@ void CTsStorage::SetObserver( MTsModelObserver* aObserver )
  * Interface implementation
  * @see MTsModel::DisplayNameL(TInt)
  */
-const TDesC& CTsStorage::DisplayNameL( TInt aOffset ) const 
+const TDesC& CTsStorage::DisplayName( TInt aOffset ) const 
     {
-    return iData[aOffset].DisplayNameL();
+    return iData[aOffset].DisplayName();
     }
 
 // -----------------------------------------------------------------------------
@@ -143,9 +143,9 @@ const TDesC& CTsStorage::DisplayNameL( TInt aOffset ) const
  * Interface implementation
  * @see MTsModel::IconHandleL(TInt)
  */
-TInt CTsStorage::IconHandleL( TInt aOffset ) const 
+TInt CTsStorage::IconHandle( TInt aOffset ) const 
     {
-    return iData[aOffset].IconHandleL();
+    return iData[aOffset].IconHandle();
     }
 
 // -----------------------------------------------------------------------------
@@ -153,9 +153,9 @@ TInt CTsStorage::IconHandleL( TInt aOffset ) const
  * Interface implementation
  * @see MTsModel::TimestampL(TInt)
  */
-TTime CTsStorage::TimestampL( TInt aOffset ) const 
+TTime CTsStorage::Timestamp( TInt aOffset ) const 
     {
-    return iData[aOffset].TimestampL();
+    return iData[aOffset].Timestamp();
     }
 
 // -----------------------------------------------------------------------------
@@ -163,29 +163,29 @@ TTime CTsStorage::TimestampL( TInt aOffset ) const
  * Interface implementation
  * @see MTsModel::TimestampUpdateL(TInt)
  */
-TTime CTsStorage::TimestampUpdateL( TInt offset ) const 
+TTime CTsStorage::TimestampUpdate( TInt offset ) const 
 {
-    return iData[offset].TimestampUpdateL();
+    return iData[offset].TimestampUpdate();
 }
 
 // -----------------------------------------------------------------------------
 /**
  * Interface implementation
- * @see MTsModel::KeyL(TInt)
+ * @see MTsModel::Key(TInt)
  */
-TTsModelItemKey CTsStorage::KeyL( TInt aoffset ) const 
+TTsEntryKey CTsStorage::Key( TInt aoffset ) const 
     {
-    return iData[aoffset].KeyL();
+    return iData[aoffset].Key();
     }
 
 // -----------------------------------------------------------------------------
 /**
  * Interface implementation
- * @see MTsModel::IsActiveL(TInt)
+ * @see MTsModel::IsActive(TInt)
  */
-TBool CTsStorage::IsActiveL( TInt aOffset ) const 
+TBool CTsStorage::IsActive( TInt aOffset ) const 
     {
-    return iData[aOffset].IsActiveL();
+    return iData[aOffset].IsActive();
     }
 
 // -----------------------------------------------------------------------------
@@ -193,9 +193,9 @@ TBool CTsStorage::IsActiveL( TInt aOffset ) const
  * Interface implementation
  * @see MTsModel::IsClosableL(TInt)
  */
-TBool CTsStorage::IsClosableL( TInt aOffset ) const 
+TBool CTsStorage::IsClosable( TInt aOffset ) const 
     {
-    return iData[aOffset].IsClosableL();
+    return iData[aOffset].IsClosable();
     }
 
 // -----------------------------------------------------------------------------
@@ -203,37 +203,41 @@ TBool CTsStorage::IsClosableL( TInt aOffset ) const
  * Interface implementation
  * @see MTsModel::IsMandatoryL(TInt) const
  */
-TBool CTsStorage::IsMandatoryL( TInt aOffset ) const
+TBool CTsStorage::IsMandatory( TInt aOffset ) const
     {
-    return iData[aOffset].IsMandatoryL();
+    return iData[aOffset].IsMandatory();
     }
 
 // -----------------------------------------------------------------------------
 /**
  * Interface implementation
- * @see MTsModel::CloseL(TTsModelItemKey)
+ * @see MTsModel::Close(TTsModelItemKey)
  */
-TBool CTsStorage::CloseL( TTsModelItemKey aKey ) const 
+TBool CTsStorage::Close( TTsEntryKey aKey ) const 
     {
-    return FindL(aKey).CloseL();
+    TBool retVal(EFalse);
+    TRAP_IGNORE(retVal = FindL(aKey).Close())
+    return retVal;
     }
 
 // -----------------------------------------------------------------------------
 /**
  * Interface implementation
- * @see MTsModel::launchL(TTsModelItemKey)
+ * @see MTsModel::Launch(TTsModelItemKey)
  */
-TBool CTsStorage::LaunchL(TTsModelItemKey aKey) const 
+TBool CTsStorage::Launch(TTsEntryKey aKey) const 
     {
-    return FindL(aKey).LaunchL(); 
+    TBool retVal(EFalse);
+    TRAP_IGNORE(retVal = FindL(aKey).Launch())
+    return retVal;
     }
 
 // -----------------------------------------------------------------------------
-TTsModelItem CTsStorage::FindL( TTsModelItemKey aKey ) const
+TTsModelItem CTsStorage::FindL( TTsEntryKey aKey ) const
     {
     for( TInt offset(0); offset < iData.Count(); ++offset ) 
         {
-        if( iData[offset].KeyL() == aKey )
+        if( iData[offset].Key() == aKey )
             {
             return iData[offset];
             }
@@ -294,8 +298,8 @@ void CTsStorage::ReorderDataL()
         for( TInt next(prev + 1); next < iData.Count(); ++next )
             {
             const TTsModelItem prevItem(iData[prev]), nextItem(iData[next]);
-            if( ( !prevItem.IsMandatoryL() && nextItem.IsMandatoryL() ) ||
-                ( prevItem.TimestampL() < nextItem.TimestampL() && prevItem.IsMandatoryL() == nextItem.IsMandatoryL() ) )
+            if( ( !prevItem.IsMandatory() && nextItem.IsMandatory() ) ||
+                ( prevItem.Timestamp() < nextItem.Timestamp() && prevItem.IsMandatory() == nextItem.IsMandatory() ) )
                 {
                 iData.Remove(prev);
                 iData.InsertL(nextItem, prev);
@@ -312,7 +316,7 @@ void CTsStorage::ReorderDataL()
 void CTsStorage::TrimDataL()
     {
     const TInt lastItemOffset(iData.Count() -1);
-    if(KTsDataLimit <= lastItemOffset && !iData[lastItemOffset].IsMandatoryL())
+    if(KTsDataLimit <= lastItemOffset && !iData[lastItemOffset].IsMandatory())
         {
         iData.Remove(lastItemOffset);
         TrimDataL();

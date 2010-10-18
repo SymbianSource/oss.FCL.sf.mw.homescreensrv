@@ -215,22 +215,6 @@ LOCAL_C HbIcon getDefaultIcon(const CaEntry& entry)
     return icon;
 }
 
-/*!
- Get entry by uid.
- \param uid application uid.
- \retval entry.
- */
-LOCAL_C CaEntry getEntryByUid(int uid)
-{
-    CaEntry entry;
-    CaQuery query;
-    query.setAttribute(QString("application:uid"), QString::number(uid));
-    QList< QSharedPointer<CaEntry> > entries = CaService::instance()->getEntries(query);
-    if (!entries.isEmpty()) {
-        entry = *(entries.first());
-    }
-    return entry;
-}
 
 /*!
  Get icon when uid is defined.
@@ -243,7 +227,8 @@ HbIcon CaMenuIconUtility::getApplicationIcon(int uid,
 {
     HbIcon icon;
     CaEntry entry;
-    entry = getEntryByUid(uid);
+    entry.setEntryTypeName(XQConversions::s60DescToQString(KCaTypeApp));
+    entry.setAttribute(QString("application:uid"), QString::number(uid));
     icon = getEntryIcon(entry, size);
     return icon;
 }

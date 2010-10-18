@@ -14,8 +14,23 @@
 * Description: 
 *
 */
-
+#ifndef TSUTILS_H
+#define TSUTILS_H
+#include <e32base.h>
 namespace TaskSwitcher {
+    template <class T>
+    void CArrayPtrCleanupMethod(TAny *aPtr)
+    {
+        CArrayPtr<T> *ptr(static_cast< CArrayPtr<T>* >(aPtr));
+        ptr->ResetAndDestroy();
+        delete ptr;
+    }
+    
+    template <class T>
+    void CleanupResetAndDestroyPushL(CArrayPtr<T> *array) {
+        CleanupStack::PushL(TCleanupItem(&CArrayPtrCleanupMethod<T>, array));
+    }
+
     template <class T>
     void RPointerArrayCleanupMethod(TAny *aPtr)
     {
@@ -27,3 +42,4 @@ namespace TaskSwitcher {
         CleanupStack::PushL(TCleanupItem(&RPointerArrayCleanupMethod<T>, &array));            
     }
 }
+#endif//TSUTILS_H

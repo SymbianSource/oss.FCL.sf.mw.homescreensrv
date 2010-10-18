@@ -18,7 +18,6 @@
 #define DATASTORAGE_H
 
 #include <e32base.h>
-#include "tstaskmonitorglobals.h"
 
 class MTsDataStorage {
 public:

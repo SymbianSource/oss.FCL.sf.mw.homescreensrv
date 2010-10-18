@@ -32,27 +32,43 @@ public:
     static CTsRunningApp* NewLC( MTsResourceManager& aResources,
                                  const RWsSession::TWindowGroupChainInfo& aInfo );
     ~CTsRunningApp();
+    
+    void RefreshDataL();
 
-private:
+protected:
     CTsRunningApp( MTsResourceManager& aResources,
                    const RWsSession::TWindowGroupChainInfo& aInfo );
-    const CApaWindowGroupName& WindowGroupNameL() const;
+    void ConstructL();
 
 public://from MTsRunningApplication
-    TUid UidL()const;
-    const TDesC& CaptionL() const;
-    TBool IsHiddenL() const;
-    TBool IsSystemL() const;
+    TUid Uid()const;
+    MTsRunningApplication::ApplicationHideMode HideMode() const;
+    void SetHidden( TBool aHidden );
+    TBool IsSystem() const;
     TInt WindowGroupId() const;
     TInt ParentWindowGroupId() const;
     TBool IsEmbeded() const;
     
+    const TDesC& DisplayName() const;
+    TInt IconHandle() const;
+    TTime Timestamp() const;
+    TTime TimestampUpdate() const; 
+    TTsEntryKey Key() const;
+    TBool IsActive() const;
+    TBool IsClosable() const;
+    TBool Close() const;
+    TBool Launch() const;
+    TBool IsMandatory() const;
 
-private:
+protected:
     MTsResourceManager& iResources;
     const RWsSession::TWindowGroupChainInfo iWindowGroupInfo;
+    MTsRunningApplication::ApplicationHideMode iHideMode;
     mutable CApaWindowGroupName* iWindowGroupName;
     mutable TPtrC iCaption;
+    TTime iTimestap;
+    TTime iUpdateTimestap;
+
 };
 
 #endif//TSRUNNINGAPP_H

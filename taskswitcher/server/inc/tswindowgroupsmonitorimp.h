@@ -18,13 +18,16 @@
 #define TSWINDOWGROUPMONITORIMP_H
 
 #include "tswindowgroupsmonitor.h"
+#include "tsdatastorage.h"
+
+class CTsRunningAppStorage;
 
 /**
  * Window server monitor implementation.
  */
 class CTsWindowGroupsMonitor: public CActive, 
-                              public MTsWindowGroupsMonitor
-                              
+                              public MTsWindowGroupsMonitor,
+                              public MTsDataStorage
 {
 public:
     /**
@@ -46,6 +49,11 @@ public:
      * @see MTsWindowGroupsMonitor::Cancel
      */
     void Cancel(MTsWindowGroupsObserver &);
+    const MTsRunningApplicationStorage& Storage() const;
+
+public://from MTsDataStorage
+    TBool IsSupported(TInt aFunction) const;
+    void HandleDataL(TInt aFunction, RReadStream& aDataStream);
 
 protected:
     /**
@@ -84,6 +92,8 @@ private:
      */
     void ProvideEventL();
     
+    void RefreshCacheL();
+
 private:
     /**
      * Registry of subscribed observers
@@ -99,5 +109,10 @@ private:
      * Monitor window group
      */
     RWindowGroup iWg;
+    
+    /**
+     * 
+     */
+    CTsRunningAppStorage* iCache;
 };
 #endif//TSWINDOWGROUPMONITORIMP_H

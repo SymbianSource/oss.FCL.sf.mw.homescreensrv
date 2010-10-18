@@ -19,7 +19,7 @@
 #define TSMODELITEMKEYMSG_H
 #include <e32base.h>
 #include <s32strm.h>
-#include "tsmodelitemkey.h"
+#include "tsentrykey.h"
 
 class CTsModelItemKeyMsg: public CBase
 {
@@ -27,7 +27,7 @@ public:
     static CTsModelItemKeyMsg* NewLC( RReadStream& aStream );
     static TInt Size();
     ~CTsModelItemKeyMsg();
-    TTsModelItemKey Key() const;
+    TTsEntryKey Key() const;
     void InternalizeL( RReadStream &aStream );
 
 private:
@@ -35,7 +35,7 @@ private:
     void ConstructL( RReadStream &aStream );
 
 private:
-    TTsModelItemKey iKey;
+    TTsEntryKey iKey;
 };
 
 #endif

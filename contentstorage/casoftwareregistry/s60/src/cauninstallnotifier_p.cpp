@@ -28,7 +28,9 @@
 CaUninstallNotifierPrivate::CaUninstallNotifierPrivate() :
     mUninstallObserver(NULL), mProgressScanner(NULL),
     mCaSoftwareRegistry(CaSoftwareRegistry::create()),
-    m_q(NULL)
+    m_q(NULL),
+    mLastComponentId(0),
+    mLastValueOfProgress(0)
 {
     mUninstallObserver = new CaUninstallObserver();
     TRAP_IGNORE(mProgressScanner = CCaProgresScanner::NewL(mUninstallObserver));
@@ -43,8 +45,34 @@ CaUninstallNotifierPrivate::~CaUninstallNotifierPrivate()
     delete mUninstallObserver;
 }
 
+/*!
+ Makes connections witch uninstall observer.
+ */
 void CaUninstallNotifierPrivate::makeConnect()
 {
     connect(mUninstallObserver, SIGNAL(signalprogressChange(int, int)), 
-            m_q, SIGNAL(progressChange(int, int)));
+            this, SLOT(progressChange(int, int)));
+}
+
+/*!
+ Slot to cache and forward progress notification.
+ */
+void CaUninstallNotifierPrivate::progressChange(int componentId,int valueOfProgress){
+    mLastComponentId = componentId;
+    mLastValueOfProgress = valueOfProgress;
+    emit m_q->progressChange(componentId, valueOfProgress);
+}
+
+/*!
+ Returns last progress notification.
+ */
+QVariantMap CaUninstallNotifierPrivate::getLastNotification()
+{
+    QVariantMap lastNote;
+    if(mLastValueOfProgress < 0){
+    	mLastComponentId = 0;
+    }
+    lastNote.insert(uninstallNotifierComponentIdKey, mLastComponentId);
+    lastNote.insert(uninstallNotifierValueOfProgressKey, mLastValueOfProgress);
+    return lastNote;
 }

@@ -44,18 +44,15 @@ void CCaSqLiteStorage::ConstructL()
     {
     User::LeaveIfError( iRfs.Connect() );
 
-    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDriveDb, KCDrive,
-            KDbName ) );
-
-    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathZDriveDb, KZDrive,
-            KDbName ) );
-
-    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDrive, KCDrive,
-            KNullDesC ) );
-    
-    User::LeaveIfError( CreatePrivateDirPath( iPrivatePathCDriveDbBackup, KCDrive,
-    		KDbNameBackup ) );
-    
+    User::LeaveIfError(
+            CreatePrivateDirPath( iPrivatePathCDriveDb, KCDrive, KDbName ) );
+    User::LeaveIfError(
+            CreatePrivateDirPath( iPrivatePathZDriveDb, KZDrive, KDbName ) );
+    User::LeaveIfError(
+            CreatePrivateDirPath( iPrivatePathCDrive, KCDrive, KNullDesC ) );
+    User::LeaveIfError(
+            CreatePrivateDirPath(
+                    iPrivatePathCDriveDbBackup, KCDrive, KDbNameBackup ) );
 
     if( iSqlDb.Open( iPrivatePathCDriveDb, &KSqlDbConfig ) )
         {
@@ -65,8 +62,8 @@ void CCaSqLiteStorage::ConstructL()
     else
         {
         TBuf<KCaMaxAttrNameLen> versionValue;
-        DbPropertyL(KCaDbPropVersion, versionValue);
-        ASSERT(versionValue.Length()>0);
+        DbPropertyL( KCaDbPropVersion, versionValue );
+        ASSERT( versionValue.Length() > 0 );
         if( versionValue.CompareC( KCaDbVersion ) )
             {
             // database loaded from C: is obsolete, load from Z:
@@ -74,6 +71,141 @@ void CCaSqLiteStorage::ConstructL()
             LoadDataBaseFromRomL();
             }
         }
+    TBuf<KCaMaxAttrNameLen> restoreValue;
+    DbPropertyL( KCaDbPropRestore, restoreValue );
+    if( restoreValue.CompareC( KCaDbPropRestoreVal ) == KErrNone )
+        {
+        RestoreDatabaseL();
+        }
+    }
+
+// ---------------------------------------------------------------------------
+// CCASqLiteStorage::GetDownloadedApplicationsArrayL()
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::GetDownloadedApplicationsArrayL(
+        RPointerArray<CCaInnerEntry>& aResultArray )
+{
+    iCollectionDownloadId = GetCollectionDownloadIdL();
+    CCaInnerQuery* downloadedQuery = CCaInnerQuery::NewLC();
+    downloadedQuery->SetParentId( iCollectionDownloadId );
+    GetEntriesL( downloadedQuery, aResultArray );
+    CleanupStack::PopAndDestroy( downloadedQuery );
+}
+
+// ---------------------------------------------------------------------------
+// CCASqLiteStorage::GetDownloadedApplicationsArrayL()
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::GetDownloadedApplicationsArrayL(
+        RArray<TInt>& aResultArray )
+{
+    iCollectionDownloadId = GetCollectionDownloadIdL();
+    CCaInnerQuery* downloadedQuery = CCaInnerQuery::NewLC();
+    downloadedQuery->SetParentId( iCollectionDownloadId );
+    GetEntriesIdsL( downloadedQuery, aResultArray );
+    CleanupStack::PopAndDestroy( downloadedQuery );
+}
+
+// ---------------------------------------------------------------------------
+// CCASqLiteStorage::RestoreDownloadedApplications()
+//
+// ---------------------------------------------------------------------------
+//
+void CCaSqLiteStorage::SetDownloadedApplicationsArrayL(
+        RPointerArray<CCaInnerEntry>& aResultArray )
+{
+    //remove all entries from downloaded collection
+    RArray<TInt> entryIds;
+    CleanupClosePushL( entryIds );
+    GetDownloadedApplicationsArrayL( entryIds );
+
+    TCaOperationParams params;
+    params.iOperationType = TCaOperationParams::ERemove;
+    params.iGroupId = iCollectionDownloadId;
+    params.iBeforeEntryId = 0; // Not Used
+    ExecuteOrganizeL( entryIds, params );
+    CleanupStack::PopAndDestroy( &entryIds );
+
+    //get current downloaded applications list
+    for( TInt i = aResultArray.Count() - 1; i >= 0; i-- )
+        {
+        CCaInnerQuery* downloadedQuery = CCaInnerQuery::NewLC();
+        RArray<TInt> entryIds;
+        CleanupClosePushL( entryIds );
+        entryIds.AppendL( aResultArray[i]->GetId() );
+        downloadedQuery->SetIdsL( entryIds );
+
+        RArray<TInt> resultEntryIds;
+        CleanupClosePushL( resultEntryIds );
+        GetEntriesIdsL( downloadedQuery, resultEntryIds );
+        if( !resultEntryIds.Count() )
+            {
+            //its in case of application that was installed after backup
+            aResultArray[i]->SetId(0);
+            }
+        //there could be some icon added to db aster backup
+        //( after update or installation of applicatiotion )
+        aResultArray[i]->SetIconId(0);
+
+        CleanupStack::PopAndDestroy( &resultEntryIds );
+        CleanupStack::PopAndDestroy( &entryIds );
+        CleanupStack::PopAndDestroy( downloadedQuery );
+        }
+
+    //add applications to downloaded collection
+    for( TInt i = 0; i < aResultArray.Count(); i++ )
+        {
+        AddL( aResultArray[i] );
+        }
+    params.iOperationType = TCaOperationParams::EAppend;
+    ExecuteOrganizeL( aResultArray, params );
+}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+void CCaSqLiteStorage::ExecuteOrganizeL(
+        const RPointerArray<CCaInnerEntry> & aResultArray,
+        TCaOperationParams params)
+{
+    RArray<TInt> restoredEntryIds;
+    CleanupClosePushL(restoredEntryIds);
+    for( TInt i = 0; i < aResultArray.Count(); i++ )
+        {
+        restoredEntryIds.AppendL( aResultArray[i]->GetId() );
+        }
+    ExecuteOrganizeL( restoredEntryIds, params );
+    CleanupStack::PopAndDestroy( &restoredEntryIds );
+}
+
+// ---------------------------------------------------------
+//
+// ---------------------------------------------------------
+//
+TInt CCaSqLiteStorage::GetCollectionDownloadIdL()
+    {
+    TInt downloadId( KErrNotFound );
+    RPointerArray<CCaInnerEntry> resultArray;
+    CleanupResetAndDestroyPushL( resultArray );
+    CCaInnerQuery* allAppQuery = CCaInnerQuery::NewLC();
+    CDesC16ArrayFlat* appType =
+            new ( ELeave ) CDesC16ArrayFlat( KGranularityOne );
+    CleanupStack::PushL( appType );
+    appType->AppendL( KCaTypeCollectionDownload );
+    allAppQuery->SetEntryTypeNames( appType );
+    CleanupStack::Pop( appType );
+    GetEntriesL( allAppQuery, resultArray );
+    CleanupStack::PopAndDestroy( allAppQuery );
+    if( resultArray.Count() )
+        {
+        downloadId = resultArray[0]->GetId();
+        }
+    CleanupStack::PopAndDestroy( &resultArray );
+    return downloadId;
     }
 
 // ---------------------------------------------------------------------------
@@ -111,7 +243,7 @@ void CCaSqLiteStorage::LoadDataBaseFromRomL()
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 //
 // ---------------------------------------------------------------------------
 //
@@ -120,28 +252,39 @@ void CCaSqLiteStorage::SaveDatabaseL()
     if( ( BaflUtils::FileExists( iRfs, iPrivatePathCDriveDb ) ) )
         {
         iSqlDb.Close();
-        User::LeaveIfError( BaflUtils::CopyFile( iRfs,
-                iPrivatePathCDriveDb, iPrivatePathCDriveDbBackup ) );
-        User::LeaveIfError( iSqlDb.Open( iPrivatePathCDriveDb,
-                &KSqlDbConfig ) );
+        User::LeaveIfError( BaflUtils::CopyFile(
+                iRfs, iPrivatePathCDriveDb, iPrivatePathCDriveDbBackup ) );
+        User::LeaveIfError( iSqlDb.Open(
+                iPrivatePathCDriveDb, &KSqlDbConfig ) );
         }
     }
 
 // ---------------------------------------------------------------------------
-// 
+//
 //
 // ---------------------------------------------------------------------------
 //
 void CCaSqLiteStorage::RestoreDatabaseL()
     {
-    if( ( BaflUtils::FileExists( iRfs, iPrivatePathCDriveDbBackup ) ) )
+    if( BaflUtils::FileExists( iRfs, iPrivatePathCDriveDbBackup ) )
         {
+        RPointerArray<CCaInnerEntry> resultArray;
+        CleanupResetAndDestroyPushL( resultArray );
+        //get current downloaded applications list
+        GetDownloadedApplicationsArrayL( resultArray );
+
         iSqlDb.Close();
-        User::LeaveIfError( BaflUtils::CopyFile( iRfs,
-        		iPrivatePathCDriveDbBackup, iPrivatePathCDriveDb ) );
-        User::LeaveIfError( iSqlDb.Open( iPrivatePathCDriveDb,
-                &KSqlDbConfig ) );
+        User::LeaveIfError( BaflUtils::CopyFile(
+                iRfs, iPrivatePathCDriveDbBackup, iPrivatePathCDriveDb ) );
+        User::LeaveIfError( iSqlDb.Open(
+                iPrivatePathCDriveDb, &KSqlDbConfig ) );
+
+        //set current downloaded applications list to backuped
+        //downloaded collection
+        SetDownloadedApplicationsArrayL( resultArray );
+        CleanupStack::PopAndDestroy( &resultArray );
         }
+    SetDBPropertyL( KCaDbPropRestore, KCaDbPropNoRestoreVal );
     }
 
 // ---------------------------------------------------------------------------
@@ -236,7 +379,7 @@ void CCaSqLiteStorage::GetEntriesL( const CCaInnerQuery* aQuery,
                 CCaSqlQuery::EAttribute );
         CleanupStack::PopAndDestroy( sqlGetAttributesQuery );
         }
-    
+
     //  set entries if proper order if they were fetched by ids
     if( aQuery->GetIds().Count() > 0 )
         {
@@ -392,7 +535,7 @@ void CCaSqLiteStorage::GetParentsIdsL( const RArray<TInt>& aEntryIdArray,
 //
 // ---------------------------------------------------------------------------
 //
-void CCaSqLiteStorage::AddL( CCaInnerEntry* aEntry, TBool aUpdate)
+void CCaSqLiteStorage::AddL( CCaInnerEntry* aEntry, TBool aUpdate )
     {
     RPointerArray<CCaSqlQuery> sqlQueries;
     CleanupResetAndDestroyPushL( sqlQueries );
@@ -536,14 +679,14 @@ void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
         {
         entryIds.AppendL(aEntryIds[j]);
         }
-    
+
     RArray<TInt> oldIds;
     CleanupClosePushL( oldIds );
     CCaInnerQuery* innerQuery = CCaInnerQuery::NewLC();
     innerQuery->SetParentId( aGroupId );
-    
+
     GetEntriesIdsL( innerQuery, oldIds );
-    
+
     if( oldIds.Count() != entryIds.Count() )
         {
         for( TInt i=0; i<oldIds.Count(); i++ )
@@ -556,11 +699,11 @@ void CCaSqLiteStorage::CustomSortL( const RArray<TInt>& aEntryIds,
                 }
             }
         }
-    
+
     const RArray<TInt> constEntryIds( entryIds );
-    
+
     RPointerArray<CCaSqlQuery> sqlQueries;
-    CleanupResetAndDestroyPushL( sqlQueries ); 
+    CleanupResetAndDestroyPushL( sqlQueries );
 
     CaSqlQueryCreator::CreateCustomSortQueryL(
             constEntryIds, sqlQueries, iSqlDb );
@@ -695,7 +838,7 @@ void CCaSqLiteStorage::ExecuteAddL( CCaInnerEntry* aEntry,
             aSqlQuery[i]->CloseStatement();
             isAttributeDeleted = ETrue;
             }
-        else if( aSqlQuery[i]->Type()==CCaSqlQuery::EAttributeTable )
+        else if( aSqlQuery[i]->Type() == CCaSqlQuery::EAttributeTable )
             {
             // add new attribute(s) if it's neccesery
             aSqlQuery[i]->PrepareL();
@@ -834,13 +977,10 @@ void CCaSqLiteStorage::ExecuteTouchL( const TInt aEntryId, TBool aRemovable )
 
     CaSqlQueryCreator::CreateTouchQueryL( sqlQuery, iSqlDb, aRemovable );
 
-    TTime time;
-    time.UniversalTime();
-
     for( TInt i = 0; i < sqlQuery.Count(); i++ )
         {
         sqlQuery[i]->PrepareL();
-        sqlQuery[i]->BindValuesForLaunchL( aEntryId, time.Int64() );
+        sqlQuery[i]->BindValuesForTouchL( aEntryId );
         sqlQuery[i]->ExecuteL();
         sqlQuery[i]->CloseStatement();
         }
@@ -882,27 +1022,6 @@ void CCaSqLiteStorage::ExecuteSetDbPropertyL( const TDesC& aProperty,
     CleanupStack::PopAndDestroy( sqlQuery );
     }
 
-
-// ---------------------------------------------------------------------------
-// CCASqLiteStorage::RemoveOldEntriesFromLaunchTableL( TInt aDays )
-//
-// ---------------------------------------------------------------------------
-//
-void CCaSqLiteStorage::RemoveOldEntriesFromLaunchTableL( TInt aDays )
-    {
-    TTime presentTime;
-    presentTime.UniversalTime();
-    TTime borderTime = presentTime - ( TTimeIntervalDays( aDays ) );
-
-    CCaSqlQuery* sqlQuery = CCaSqlQuery::NewLC( iSqlDb );
-    sqlQuery->SetQueryL( KSQLDeleteOldFromLaunch );
-    sqlQuery->PrepareL();
-    sqlQuery->BindValuesForLaunchL( 0, borderTime.Int64() );
-    sqlQuery->ExecuteL();
-
-    CleanupStack::PopAndDestroy( sqlQuery );
-    }
-
 // ---------------------------------------------------------------------------
 // CCASqLiteStorage::VerifyOrganizeParamsL( const RArray<TInt>& aEntryIds,
 //      TCaOperationParams aParams);
@@ -925,6 +1044,7 @@ void CCaSqLiteStorage::VerifyOrganizeParamsL( const RArray<TInt>& aEntryIds,
             TInt dbEntryCount;
             query->ExecuteL( dbEntryCount );
             query->CloseStatement();
+
             if( dbEntryCount < aEntryIds.Count() )
                 {
                 User::Leave( KErrArgument );

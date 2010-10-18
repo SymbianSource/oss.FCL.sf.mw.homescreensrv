@@ -36,6 +36,8 @@ public:
      * @param aObserver - events observer
      */
     virtual void Cancel(MTsWindowGroupsObserver & aObserver) =0;
+    
+    virtual const MTsRunningApplicationStorage& Storage() const =0;
 };
 
 #endif //TSWINDOWGROUPSMONITOR_H

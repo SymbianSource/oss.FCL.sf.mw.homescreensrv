@@ -19,7 +19,7 @@
 #include "tswindowgroupsmonitorimp.h"
 #include "tsrunningappstorageimp.h"
 #include "tsresourcemanager.h"
-
+#include "tsvisibilitymsg.h"
 
 const int KOrdinalPositionNoZOrder(-1);
 // -----------------------------------------------------------------------------
@@ -68,6 +68,9 @@ void CTsWindowGroupsMonitor::ConstructL()
     
     // Window group change event
     User::LeaveIfError (iWg.EnableGroupListChangeEvents());
+    
+    iCache = CTsRunningAppStorage::NewL();
+    RefreshCacheL();
     Subscribe();
 }
 
@@ -76,32 +79,78 @@ void CTsWindowGroupsMonitor::ConstructL()
 // -----------------------------------------------------------------------------
 //
 CTsWindowGroupsMonitor::~CTsWindowGroupsMonitor()
-{
+    {
     CActive::Cancel();
     iWg.Close();
-}
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CTsWindowGroupsMonitor::SubscribeL(MTsWindowGroupsObserver &observer)
-{
-    const TInt offset(iObservers.Find(&observer));
-    KErrNotFound == offset ? iObservers.InsertL(&observer, 0) : 
-                             User::Leave(KErrAlreadyExists);
-}
+    {
+    if(KErrNotFound != iObservers.Find(&observer))
+        {
+        User::Leave(KErrAlreadyExists);
+        }
+    iObservers.InsertL(&observer, 0);
+    observer.HandleWindowGroupChanged(iResources, *iCache);
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 void CTsWindowGroupsMonitor::Cancel(MTsWindowGroupsObserver & observer)
-{
+    {
     const TInt offset(iObservers.Find(&observer));
-    if (KErrNotFound != offset) {
+    if(KErrNotFound != offset)
+        {
         iObservers.Remove(offset);
+        }
     }
+
+// -----------------------------------------------------------------------------
+/**
+ * @see MTsWindowGroupsMonitor::Storage
+ */
+const MTsRunningApplicationStorage& CTsWindowGroupsMonitor::Storage() const
+    {
+    return *iCache;
+    }
+// -----------------------------------------------------------------------------
+TBool CTsWindowGroupsMonitor::IsSupported(TInt aFunction) const
+    {
+    return ( VisibilityChange == aFunction );
+    }
+
+// -----------------------------------------------------------------------------
+void CTsWindowGroupsMonitor::HandleDataL(TInt aFunction, RReadStream& aDataStream)
+{
+    if(VisibilityChange == aFunction)
+        {
+        CTsVisibilitMsg* msg = CTsVisibilitMsg::NewLC(aDataStream);
+        const TBool hide (Invisible == msg->visibility());
+        bool changed = false;
+        for(TInt offset(0); offset < iCache->Count(); ++offset)
+            {
+            if( msg->windowGroupId() == (*iCache)[offset].WindowGroupId() )
+                {
+                (*iCache)[offset].SetHidden(hide);
+                offset = iCache->Count();
+                changed = true;
+                }
+            }
+        if(changed)
+            {
+            for( TInt iter(0); iter < iObservers.Count(); ++iter ) 
+                {
+                iObservers[iter]->HandleWindowGroupChanged( iResources, *iCache );
+                }
+            }
+        CleanupStack::PopAndDestroy(msg);
+        }
 }
 
 // -----------------------------------------------------------------------------
@@ -149,34 +198,32 @@ void CTsWindowGroupsMonitor::Subscribe()
 }
 
 // -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//
 void CTsWindowGroupsMonitor::ProvideEventL()
-{
+    {
     TWsEvent wsEvent;
     iResources.WsSession().GetEvent(wsEvent);
     if( EEventWindowGroupListChanged == wsEvent.Type() )
         {
-        
-        CTsRunningAppStorage *storage = CTsRunningAppStorage::NewLC();
-        
-        RArray<RWsSession::TWindowGroupChainInfo> filteredWgInfo, fullWgInfo;
-        CleanupClosePushL(filteredWgInfo);
-        CleanupClosePushL(fullWgInfo);
-        User::LeaveIfError(iResources.WsSession().WindowGroupList(0, &filteredWgInfo));
-        User::LeaveIfError(iResources.WsSession().WindowGroupList(&fullWgInfo));
-        storage->HandleWindowGroupChanged(iResources, 
-                                          fullWgInfo.Array(), 
-                                          filteredWgInfo.Array());
-        CleanupStack::PopAndDestroy( &fullWgInfo );
-        CleanupStack::PopAndDestroy( &filteredWgInfo );
-                
-        for( TInt iter(0); iter < iObservers.Count(); ++iter ) 
-            {
-            iObservers[iter]->HandleWindowGroupChanged( iResources, *storage );
-            }
-        CleanupStack::PopAndDestroy( storage );
-        
+        RefreshCacheL();
         }
-}
+    }
+
+// -----------------------------------------------------------------------------
+void CTsWindowGroupsMonitor::RefreshCacheL()
+    {
+    RArray<RWsSession::TWindowGroupChainInfo> filteredWgInfo, fullWgInfo;
+    CleanupClosePushL(filteredWgInfo);
+    CleanupClosePushL(fullWgInfo);
+    User::LeaveIfError(iResources.WsSession().WindowGroupList(0, &filteredWgInfo));
+    User::LeaveIfError(iResources.WsSession().WindowGroupList(&fullWgInfo));
+    iCache->HandleWindowGroupChanged(iResources, 
+                                     fullWgInfo.Array(), 
+                                     filteredWgInfo.Array());
+    CleanupStack::PopAndDestroy( &fullWgInfo );
+    CleanupStack::PopAndDestroy( &filteredWgInfo );
+            
+    for( TInt iter(0); iter < iObservers.Count(); ++iter ) 
+        {
+        iObservers[iter]->HandleWindowGroupChanged( iResources, *iCache );
+        }
+    }

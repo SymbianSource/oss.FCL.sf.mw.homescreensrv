@@ -83,9 +83,7 @@
  Proxy to client notifier.
  */
 
-namespace Hs {
-    const char packageTypeName[] = "package";
-}
+const char packageTypeName[] = "package";
 
 // Initialization of a static member variable.
 QWeakPointer<CaService> CaService::m_instance = QWeakPointer<CaService>();
@@ -911,16 +909,34 @@ CaNotifier *CaService::createNotifier(const CaNotifierFilter &filter) const
 }
 
 /*!
-    Set new order of collection's items set by user.
-    \groupId Group id.
-    \param entryIdList consists of new order of items.
-    \retval true if new order of collection's items is set correctly,
-     otherwise return false.
+ Set new order of collection's items set by user.
+ \groupId Group id.
+ \param entryIdList consists of new order of items.
+ \retval true if new order of collection's items is set correctly,
+ otherwise return false.
  */
 
 bool CaService::customSort(int groupId, QList<int> &entryIdList) const
 {
     return m_d->customSort(groupId, entryIdList);
+}
+
+/*!
+ Initiate preloading of handlers during the idle time
+ (when there is no events to handle).
+ The following handlers would be loaded:
+ CaAppHandler, CaTappHandler, CaUrlHandler.
+
+ \example
+ \code
+ ...
+ CaService::instance()->preloadHandlers();
+ ...
+ \endcode
+ */
+void CaService::preloadHandlers() const
+{
+    m_d->preloadHandlers();
 }
 
 /*!
@@ -1130,7 +1146,7 @@ bool CaServicePrivate::touch(const CaEntry &entry)
     if (entry.flags() & RemovableEntryFlag &&
         (entry.flags() & UsedEntryFlag) == 0 &&
         entry.role() == ItemEntryRole &&
-        entry.entryTypeName() != QString(Hs::packageTypeName)) {
+        entry.entryTypeName() != QString(packageTypeName)) {
            
         mErrorCode = mProxy->touch(entry);
         if (mErrorCode == ServerTerminated) {
@@ -1347,12 +1363,12 @@ bool CaServicePrivate::prependEntriesToGroup(int groupId,
 }
 
 /*!
- Executes command on entry (fe. "open", "remove")
- \param const reference to an entry on which command will be issued
- \param string containing a command
- \param receiver QObject with slot
- \param member slot from QObject
- \retval int which is used as an error code return value, 0 means no errors
+ Executes command on entry (eg. "open", "remove").
+ \param const reference to an entry on which command will be issued.
+ \param string containing a command.
+ \param receiver QObject with slot.
+ \param member slot from QObject.
+ \retval int which is used as an error code return value, 0 means no errors.
  */
 int CaServicePrivate::executeCommand(const CaEntry &entry,
                                       const QString &command,
@@ -1370,18 +1386,19 @@ int CaServicePrivate::executeCommand(const CaEntry &entry,
     
     int errorCode = mCommandHandler->execute(entry, 
             command, receiver, member);
-    mErrorCode = CaObjectAdapter::convertErrorCode(errorCode);
     
     if (command == caCmdOpen) {
         touch(entry);
     }
 
+    mErrorCode = CaObjectAdapter::convertErrorCode(errorCode);
+    
     qDebug() << "CaServicePrivate::executeCommand mErrorCode on return:"
              << mErrorCode;
 
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::executeCommand");
 
-    return errorCode;
+    return mErrorCode;
 }
 
 /*!
@@ -1420,6 +1437,14 @@ bool CaServicePrivate::customSort(int groupId, QList<int> &entryIdList)
     CACLIENTTEST_FUNC_EXIT("CaServicePrivate::customSort");
 
     return (mErrorCode == NoErrorCode);
+}
+
+/*!
+     Preload handlers during the idle time.
+ */
+void CaServicePrivate::preloadHandlers() const
+{
+    mCommandHandler->preloadHandlers();
 }
 
 /*!

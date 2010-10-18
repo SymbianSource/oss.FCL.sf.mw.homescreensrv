@@ -37,7 +37,6 @@ SOURCES +=  src/tsenv.cpp \
             src/tsdatalist.cpp \
             src/tsdatatask.cpp \
             src/tsscreenshotprovider.cpp \
-            src/tsmodelitemkey.cpp \
             src/tsmodelitem.cpp \
             src/tsmodel.cpp \
             src/tsrunningappmodel.cpp \
@@ -52,9 +51,10 @@ SOURCES +=  src/tsenv.cpp \
             src/tsrunningappimp.cpp \
             src/tsrunningappstorageimp.cpp \
             src/tsresourcemanagerimp.cpp \
+            src/tsiconproviderimp.cpp \
+            src/tsrunningappentry.cpp \
             ../utils/src/tsentrykey.cpp \
-            ../utils/src/tsentrykeygenerator.cpp \
-            ../utils/src/tsentry.cpp \
+            ../utils/src/tsentryimp.cpp \
             ../utils/src/tsscreenshotmsg.cpp \
             ../utils/src/tsunregscreenshotmsg.cpp \
             ../utils/src/tsvisibilitymsg.cpp \
@@ -73,7 +73,6 @@ HEADERS +=  inc/tsenv.h \
             inc/tsdatatask.h \
             inc/tsscreenshotprovider.h \            
             inc/tsmodelobserver.h \
-            inc/tsmodelitemkey.h \
             inc/tsmodelitem.h \
             inc/tsmodel.h \
             inc/tsrunningappmodel.h \
@@ -88,10 +87,12 @@ HEADERS +=  inc/tsenv.h \
             inc/tsrunningappimp.h \
             inc/tsrunningappstorageimp.h \
             inc/tsresourcemanagerimp.h \
+            inc/tsiconproviderimp.h \
+            inc/tsrunningappentry.h \
             ../utils/inc/tsdataobserver.h \
             ../utils/inc/tsentry.h \
+            ../utils/inc/tsentryimp.h \
             ../utils/inc/tsentrykey.h \
-            ../utils/inc/tsentrykeygenerator.h \
             ../utils/inc/tsutils.h \
             ../utils/inc/tsscreenshotmsg.h \
             ../utils/inc/tsunregscreenshotmsg.h \
@@ -102,14 +103,12 @@ HEADERS +=  inc/tsenv.h \
             ../utils/inc/tsidlist.h \
 
 LIBS += -lxqutils \
-        -laknicon \
         -lfbscli \          #for CFbsBitmap
         -lestor \           #for RDesReadStream
         -lxqutils \
         -lapgrfx \          #for CApaWindowGroupName
         -lws32 \            #for CWsGraphic
         -lapparc \          #for TApaAppInfo
-        -lcaclient \        #for getApplicationIcon
         -lcone
 
 symbian {

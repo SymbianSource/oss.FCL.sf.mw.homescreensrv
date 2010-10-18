@@ -33,7 +33,7 @@ CTsModelItemKeyMsg::~CTsModelItemKeyMsg()
     }
 
 // -----------------------------------------------------------------------------
-TTsModelItemKey CTsModelItemKeyMsg::Key() const
+TTsEntryKey CTsModelItemKeyMsg::Key() const
 {
     return iKey;
 }

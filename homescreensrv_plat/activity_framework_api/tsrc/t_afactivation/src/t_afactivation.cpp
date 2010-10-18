@@ -24,9 +24,7 @@
 
 TestAfActivation::TestAfActivation()
 {
-    mDefaultActivityName = QString("appto://EBADC0DE?%1=TestActivity&TestParam=TestValue").arg(
-        Af::KActivityUriNameKey);
-    qRegisterMetaType<Af::ActivationReason> ("Af::ActivationReason");
+    mDefaultActivityName = QString("appto://EBADC0DE?%1=TestActivity&TestParam=TestValue").arg(Af::KActivityUriNameKey);
 }
 
 void TestAfActivation::init()
@@ -41,101 +39,87 @@ void TestAfActivation::cleanup()
     mActivation = NULL;
 }
 
-void TestAfActivation::invokeActivationPublicInterface()
-{
-    // AfActivation is only responsible of correct creation of AfActivationPrivate and
-    // forwarding requests. Since it's impossible to verify the effects of the member
-    // calls, just invoke the methods.
-    AfActivation activation;
-
-    activation.parameters();
-    activation.reason();
-    activation.name();
-}
-
-void TestAfActivation::invokeActivationPublicInterfaceCorrupt()
+void TestAfActivation::testFailedActivityRequestSubscription()
 {
     bool errorReceived = false;
     //af storage proxy is mocked so I can set static variable making it leave
     AfStorageProxy::waitFailed = true;
-    try
-    {
-        AfActivation *activation = new AfActivation();
-    }
-    catch(...)
-    {
+    try {
+        AfActivation activation;
+    } catch (...) {
         errorReceived = true;
     }
     QVERIFY(errorReceived);
-    }
+}
 
-    void TestAfActivation::testDefaultValuesAfterCreation()
-    {
-        QCOMPARE(mActivation->parameters(), QVariantHash());
-        QCOMPARE(mActivation->reason(), Af::ActivationReasonNormal);
-        QCOMPARE(mActivation->name(), QString());
-    }
+void TestAfActivation::testDefaultValuesAfterCreation()
+{
+    QCOMPARE(mActivation->parameters(), QVariantHash());
+    QCOMPARE(mActivation->reason(), Af::ActivationReasonNormal);
+    QCOMPARE(mActivation->name(), QString());
+}
 
-    void TestAfActivation::testSignalIsEmittedWhenActivityIsRequested()
-    {
-        QSignalSpy activatedSpy(mActivation,
-            SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)));
-        QVERIFY(activatedSpy.isValid());
+void TestAfActivation::testSignalIsEmittedWhenActivityIsRequested()
+{
+    QSignalSpy activatedSpy(mActivation, 
+        SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)));
+    QVERIFY(activatedSpy.isValid());
 
-        mServiceProvider->emitActivityRequested(mDefaultActivityName);
+    mServiceProvider->emitActivityRequested(mDefaultActivityName);
 
-        QCOMPARE(activatedSpy.count(), 1);
-    }
+    QCOMPARE(activatedSpy.count(), 1);
+}
 
-    void TestAfActivation::testValuesChangeWhenActivityIsRequested()
-    {
-        QSignalSpy activatedSpy(mActivation,
-            SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)));
-        QVERIFY(activatedSpy.isValid());
+void TestAfActivation::testValuesChangeWhenActivityIsRequested()
+{
+    QSignalSpy activatedSpy(mActivation, 
+        SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)));
+    QVERIFY(activatedSpy.isValid());
 
-        mServiceProvider->emitActivityRequested(mDefaultActivityName);
+    mServiceProvider->emitActivityRequested(mDefaultActivityName);
 
-        QCOMPARE(activatedSpy.count(), 1);
-        QCOMPARE(mActivation->reason(), Af::ActivationReasonActivity);
-        QCOMPARE(mActivation->name(), QString("TestActivity"));
-        QVERIFY(mActivation->parameters().contains("TestParam"));
-        QCOMPARE(mActivation->parameters().value("TestParam").toString(), QString("TestValue"));
-    }
+    QCOMPARE(activatedSpy.count(), 1);
+    QCOMPARE(mActivation->reason(), Af::ActivationReasonActivity);
+    QCOMPARE(mActivation->name(), QString("TestActivity"));
+    QVERIFY(mActivation->parameters().contains("TestParam"));
+    QCOMPARE(mActivation->parameters().value("TestParam").toString(), QString("TestValue"));
+}
 
-    void TestAfActivation::testValuesChangeWhenActivityIsRequestedNoName()
-    {
-        QString activityname("appto://EBADC0DE?TestParam=TestValue");
-        QSignalSpy activatedSpy(mActivation,
-            SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)));
-        QVERIFY(activatedSpy.isValid());
+void TestAfActivation::testValuesChangeWhenActivityIsRequestedNoName()
+{
+    QString activityname("appto://EBADC0DE?TestParam=TestValue");
+    QSignalSpy activatedSpy(mActivation,
+        SIGNAL(activated(Af::ActivationReason,QString,QVariantHash)));
+    QVERIFY(activatedSpy.isValid());
 
-        mServiceProvider->emitActivityRequested(activityname);
-        QCOMPARE(activatedSpy.count(), 1);
+    mServiceProvider->emitActivityRequested(activityname);
+    QCOMPARE(activatedSpy.count(), 1);
 
-        QCOMPARE(mActivation->reason(), Af::ActivationReasonActivity);
-        QCOMPARE(mActivation->name(), QString());
-        QVERIFY(mActivation->parameters().contains("TestParam"));
-        QCOMPARE(mActivation->parameters().value("TestParam").toString(), QString("TestValue"));
-    }
+    QCOMPARE(mActivation->reason(), Af::ActivationReasonActivity);
+    QCOMPARE(mActivation->name(), QString());
+    QVERIFY(mActivation->parameters().contains("TestParam"));
+    QCOMPARE(mActivation->parameters().value("TestParam").toString(), QString("TestValue"));
+}
 
-    void TestAfActivation::testChangingActivityInBackground()
-    {
-        // bring to foreground is called by default
-        mServiceProvider->emitActivityRequested(mDefaultActivityName);
+void TestAfActivation::testChangingActivityInBackground()
+{
+    // bring to foreground is called by default
+    mServiceProvider->emitActivityRequested(mDefaultActivityName);
 
-        ApplicationLauncherPrivate *launcher = ApplicationLauncherPrivate::instance;
-        QVERIFY(launcher);
-        QCOMPARE(launcher->bringToForegroundCalls.count(), 1);
-        launcher->bringToForegroundCalls.clear();
+    ApplicationLauncherPrivate *launcher = ApplicationLauncherPrivate::instance;
+    QVERIFY(launcher);
+    QCOMPARE(launcher->bringToForegroundCalls.count(), 1);
+    launcher->bringToForegroundCalls.clear();
 
-        // bring to foreground is not called if background parameter is present
-        mServiceProvider->emitActivityRequested(
-            QString("appto://EBADC0DE?%1=TestActivity&%2=").arg(Af::KActivityUriNameKey).arg(
-                Af::KActivityUriBackgroundKey));
+    // bring to foreground is not called if background parameter is present
+    mServiceProvider->emitActivityRequested(
+        QString("appto://EBADC0DE?%1=TestActivity&%2=").
+            arg(Af::KActivityUriNameKey).
+            arg(Af::KActivityUriBackgroundKey));
 
-        launcher = ApplicationLauncherPrivate::instance;
-        QVERIFY(launcher);
-        QCOMPARE(launcher->bringToForegroundCalls.count(), 0);
-    }
+    launcher = ApplicationLauncherPrivate::instance;
+    QVERIFY(launcher);
+    QCOMPARE(launcher->bringToForegroundCalls.count(), 0);
+}
 
-    QTEST_MAIN(TestAfActivation)
+QTEST_MAIN(TestAfActivation)

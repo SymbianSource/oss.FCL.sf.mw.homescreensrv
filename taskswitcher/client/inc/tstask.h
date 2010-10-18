@@ -23,14 +23,14 @@
 
 #include "tstaskmonitor_global.h"
 
-class TsTaskContent;
+class CTsClientEntry;
 class TsTaskLauncher;
 
 class TsTask
 {
     
 public:
-    TsTask(const QSharedPointer<TsTaskContent> &content, TsTaskLauncher &launcher);
+    TsTask(const QSharedPointer<CTsClientEntry> &content, TsTaskLauncher &launcher);
     TSTASKMONITOR_EXPORT ~TsTask();
     
     TSTASKMONITOR_EXPORT void open();
@@ -44,7 +44,7 @@ public:
 private:
     Q_DISABLE_COPY(TsTask)
     
-    QSharedPointer<TsTaskContent> mContent;
+    QSharedPointer<CTsClientEntry> mContent;
     TsTaskLauncher &mLauncher;
 
 };

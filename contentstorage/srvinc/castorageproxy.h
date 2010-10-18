@@ -69,7 +69,7 @@ public:
      * @param aLocalization entry containing localization row to be added
      */
     IMPORT_C void AddLocalizationL(const CCaLocalizationEntry& aLocalization);
-    
+
     /**
      * Fetches localization data from database
      *
@@ -154,18 +154,12 @@ public:
     IMPORT_C void CustomSortL( const RArray<TInt>& aEntryIds,
             const TInt aGroupId );
 
-    
+
     /**
      * Saves a copy of database to private.
      */
 	IMPORT_C void SaveDatabaseL();
-	
-    /**
-     * Marks db to be restored from backup by next restart
-     */
-	IMPORT_C void RestoreDatabaseL();
-    
-    
+
     /**
      * Loads data base from rom.
      */
@@ -196,14 +190,21 @@ private:
      * C++ default constructor.
      */
     CCaStorageProxy();
-    
+
     CCaLocalizationEntry* LocalizeTextL( CCaInnerEntry* aEntry );
-    
+
     CCaLocalizationEntry* LocalizeDescriptionL( CCaInnerEntry* aEntry );
-    
+
     void AddTitleNameL( CCaInnerEntry* aEntry );
     
     TBool InitializeTranslatorL( const TDesC& aQmFilename );
+    
+    /**
+     * Executes touch specific actions on storage.
+     * Should be called when e.g. entry is clicked.
+     * @param aEntry entry to be touched
+     */
+    void PrivateTouchL( CCaInnerEntry* aEntry );
 
 private:
     //Data
@@ -224,7 +225,7 @@ private:
     RBuf iTitleUserColName;
     
     CA_STORAGE_TEST_FRIEND_CLASS( TestCaClient )
-    
+
     };
 
 #endif //CASTORAGEPROXY_H

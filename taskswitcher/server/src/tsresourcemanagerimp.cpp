@@ -16,6 +16,12 @@
  */
 #include "tsresourcemanagerimp.h"
 #include "tswindowgroupsmonitorimp.h"
+#include "tsiconproviderimp.h"
+#include "tsidlist.h"
+
+const TInt KSkippedApp [] = {0x00000000 /* <-- null/splashscreen*/,
+                             0x20022F35 /* <-- hsapplication */,
+                             0x100058F3 /* <-- sysapp*/};
 
 // -----------------------------------------------------------------------------
 //
@@ -39,6 +45,11 @@ void CTsResourceManager::ConstructL()
     User::LeaveIfError(mWsSession.Connect());
     User::LeaveIfError(mApaSeesion.Connect());
     iMonitor = CTsWindowGroupsMonitor::NewL(*this);
+    iIconProvider = CTsIconProvider::NewL(*this);
+    
+    const TInt count(sizeof( KSkippedApp ) / sizeof(TInt));
+    iBlackList = CTsIdList::NewL();
+    iBlackList->AppendL(KSkippedApp, count);
 }
 
 // -----------------------------------------------------------------------------
@@ -47,6 +58,8 @@ void CTsResourceManager::ConstructL()
 //
 CTsResourceManager::~CTsResourceManager()
 {
+    delete iBlackList;
+    delete iIconProvider;
     delete iMonitor;
     mApaSeesion.Close();
     mWsSession.Close();
@@ -57,21 +70,51 @@ CTsResourceManager::~CTsResourceManager()
 // -----------------------------------------------------------------------------
 //
 RWsSession& CTsResourceManager::WsSession()
-{
+    {
     return mWsSession;
-}
+    }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 //
 RApaLsSession& CTsResourceManager::ApaSession()
-{
+    {
     return mApaSeesion;
-}
+    }
 
 // -----------------------------------------------------------------------------
 MTsWindowGroupsMonitor& CTsResourceManager::WsMonitor()
     {
     return *iMonitor;
+    }
+
+// -----------------------------------------------------------------------------
+/**
+ * @see MTsResourceManager::IconProvider
+ */
+MTsIconProvider& CTsResourceManager::IconProvider()
+    {
+    return *iIconProvider;
+    }
+
+// -----------------------------------------------------------------------------
+/**
+ * @see MTsResourceManager::ApplicationsBlackList
+ */
+const CTsIdList& CTsResourceManager::ApplicationsBlackList() const
+    {
+    return *iBlackList;
+    }
+
+// -----------------------------------------------------------------------------
+TBool CTsResourceManager::IsSupported(TInt aFunction) const
+    {
+    return iMonitor->IsSupported(aFunction);
+    }
+
+// -----------------------------------------------------------------------------
+void CTsResourceManager::HandleDataL(TInt aFunction, RReadStream& aDataStream)
+    {
+    iMonitor->HandleDataL(aFunction, aDataStream);
     }

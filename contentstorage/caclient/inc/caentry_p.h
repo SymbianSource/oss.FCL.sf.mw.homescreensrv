@@ -56,6 +56,9 @@ public:
 
     QString entryTypeName() const;
     void setEntryTypeName(const QString &entryTypeName);
+    
+    QList<int> parentIds() const;
+    void setParentIds(const QList<int> &parentIds);
 
     QMap<QString, QString> attributes() const;
     QString attribute(const QString &name) const;
@@ -84,6 +87,8 @@ private:
     EntryFlags mFlags;
 
     QString mEntryTypeName;
+    
+    QList<int> mParentIds;
 
     QMap<QString, QString> mAttributes;
 

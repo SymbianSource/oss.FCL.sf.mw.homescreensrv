@@ -41,7 +41,8 @@ public:
     QVariant data(const QModelIndex &index,
                   int role = Qt::DisplayRole) const;
     // from QAbstractModel
-    virtual bool insertRows(int row, int count, TsModelItem *item,
+    virtual bool insertRows(int row, int count,
+                            QScopedPointer<TsModelItem> &item,
                             const QModelIndex &parent = QModelIndex());
     virtual bool removeRows(int row, int count,
                             const QModelIndex &parent = QModelIndex());
@@ -49,7 +50,7 @@ public:
 
     bool moveRows(int oldPosition, int newPosition,
                   const QModelIndex &parent = QModelIndex());
-    bool updateRows(int row, TsModelItem *item);
+    bool updateRows(int row, QScopedPointer<TsModelItem> &item);
     void fullUpdate();
 
 public slots:

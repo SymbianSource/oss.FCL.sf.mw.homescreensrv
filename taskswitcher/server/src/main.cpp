@@ -22,16 +22,12 @@
 #include <apgwgnam.h>
 #include <eikenv.h>
 
-#include <caservice.h>
-
 int main(int argc, char *argv[]) 
 {
     RSemaphore semaphore;
     int errNo( semaphore.CreateGlobal(KTsServerReadySemaphore, 0) );
     if (KErrNone == errNo) {
         QApplication app(argc, argv);
-        // maintain instance of caservice (needed for getting application icons)
-        QSharedPointer<CaService> service = CaService::instance();
         TRAP(errNo,
         // hide server from TaskSwitcher
         CEikonEnv * env = CEikonEnv::Static();

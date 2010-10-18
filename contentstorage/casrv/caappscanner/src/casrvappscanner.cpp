@@ -262,7 +262,6 @@ void CCaSrvAppScanner::UpdateAppEntryL(
     TBool missingFlagChanged = HandleMissingFlagsUpdate( aEntry );
     TBool visibleFlagChanged = HandleVisibleFlagUpdate( aEntry );
 
-
     // To handle case with mmc card. When mmc attritube is updated then
     // used flag should be change. When aplication is update but
     // it is not appear then this flag should be change too.
@@ -272,7 +271,8 @@ void CCaSrvAppScanner::UpdateAppEntryL(
         }
     TBool toUpdate = missingFlagChanged || visibleFlagChanged;
     toUpdate = SetApaAppInfoL( aEntry ) || toUpdate;
-    toUpdate = HandleRemovableFlagAndMmcAttrUpdateL( aEntry, aMmcId ) || toUpdate;
+    toUpdate = HandleRemovableFlagAndMmcAttrUpdateL(
+            aEntry, aMmcId ) || toUpdate;
     toUpdate = RemoveUninstallFlagL( aEntry ) || toUpdate;
 
     if( toUpdate || aAlwaysUpdate )
@@ -285,8 +285,8 @@ void CCaSrvAppScanner::UpdateAppEntryL(
             }
         if( !missingFlagChanged )
             {
-            AddEntryToPredefinedCollectionL( aEntry, ETrue );
-            if ( aEntry->GetFlags() & ERemovable )
+            AddEntryToPredefinedCollectionL( aEntry );
+            if( aEntry->GetFlags() & ERemovable )
                 {
                 AddEntryToDownloadedCollectionL( aEntry->GetId() );
                 }
@@ -307,12 +307,12 @@ TBool CCaSrvAppScanner::HandleMmcAttrUpdateL(
     if( aEntry && aEntry->IsRemovable() )
         {
         TChar currentDriveLetter;
-        if ( aEntry->SoftwareType().Compare(KCaAttrAppTypeValueNative()) != 0 )
+        if( aEntry->SoftwareType().Compare( KCaAttrAppTypeValueNative() ) != 0 )
             {
             TDriveList driveList = aEntry->InstalledDrives();
-            for ( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
+            for( TInt driveNr=EDriveY; driveNr >= EDriveA; driveNr-- )
                 {
-                if ( driveList[driveNr] )
+                if( driveList[driveNr] )
                     {
                     User::LeaveIfError( iFs.DriveToChar( driveNr,
                             currentDriveLetter ) );
@@ -340,7 +340,8 @@ TBool CCaSrvAppScanner::HandleMmcAttrUpdateL(
             toChange = AddAttributeL( aItem, KCaAttrMmcId, uidString );
             CleanupStack::PopAndDestroy( &uidString );
             }
-        else if ( IsCharInDrive( currentDriveLetter, DriveInfo::EDefaultMassStorage ) )
+        else if ( IsCharInDrive(
+                currentDriveLetter, DriveInfo::EDefaultMassStorage ) )
             {
             //its app installed on mass storage, we need to leave it
             //in case of connecting usb in mass storage mode
@@ -701,7 +702,7 @@ void CCaSrvAppScanner::AddEntryToDownloadedCollectionL( TInt aEntryId )
 // ---------------------------------------------------------
 //
 void CCaSrvAppScanner::AddEntryToPredefinedCollectionL(
-        CCaInnerEntry* aEntry, TBool aUpdate )
+        CCaInnerEntry* aEntry )
     {
     TApaAppCapabilityBuf capability;
     User::LeaveIfError( iApaLsSession.GetAppCapability( capability,
@@ -743,17 +744,9 @@ void CCaSrvAppScanner::AddEntryToPredefinedCollectionL(
 
             // add new collection to all collection
             AddCollectionToAllCollectionL( predefinedCollectionId );
-
-            if( aUpdate )
-                {
-                iCaStorageProxy.OrganizeL( entryIds, organizeParams );
-                }
             }
 
-        if( !aUpdate )
-            {
-            iCaStorageProxy.OrganizeL( entryIds, organizeParams );
-            }
+        iCaStorageProxy.OrganizeL( entryIds, organizeParams );
 
         CleanupStack::PopAndDestroy( &entryIds );
         CleanupStack::PopAndDestroy( &resultArrayItems );
@@ -876,26 +869,26 @@ TBool CCaSrvAppScanner::SetApaAppInfoL( CCaInnerEntry* aEntry )
                 changed = SetCWRTAppL( aEntry ) || changed;
                 }
             }
-        
+
         TApaAppCapabilityBuf appCap;
         TInt screenNumber = 0;
-        
+
         User::LeaveIfError( iApaLsSession.GetAppCapability
             ( appCap, info->iUid ) );
         User::LeaveIfError( iApaLsSession.GetDefaultScreenNumber
             ( screenNumber, info->iUid ) );
-        
+
         const TBool hidden = appCap().iAppIsHidden || screenNumber != 0;
-        
+
         const TBool visible = aEntry->GetFlags() & EVisible;
-        
-        if ( hidden && visible ) 
+
+        if ( hidden && visible )
             {
             changed = ETrue;
             aEntry->SetFlags(aEntry->GetFlags() & ~EVisible);
             }
         }
-    
+
     CleanupStack::PopAndDestroy( info );
     return changed;
     }

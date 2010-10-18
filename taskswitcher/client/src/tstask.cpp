@@ -14,9 +14,9 @@
 * Description: 
 *
 */
+#include <xqconversions.h>
 #include "tstask.h"
-
-#include "tstaskcontent.h"
+#include "tscliententry.h"
 #include "tstasklauncher.h"
 
 /*!
@@ -32,7 +32,7 @@
     @internal
     Constructor. 
 */
-TsTask::TsTask(const QSharedPointer<TsTaskContent> &content, TsTaskLauncher &launcher) : mContent(content), mLauncher(launcher)
+TsTask::TsTask(const QSharedPointer<CTsClientEntry> &content, TsTaskLauncher &launcher) : mContent(content), mLauncher(launcher)
 {
 }
 
@@ -48,7 +48,7 @@ TsTask::~TsTask()
 */
 bool TsTask::isClosable() const
 {
-    return mContent->mClosable;
+    return EFalse != mContent->IsClosable();
 }
 
 /*!
@@ -56,7 +56,7 @@ bool TsTask::isClosable() const
 */
 bool TsTask::isActive() const
 {
-    return mContent->mActive;
+    return EFalse != mContent->IsActive();
 }
 
 /*!
@@ -64,7 +64,9 @@ bool TsTask::isActive() const
 */
 QPixmap TsTask::screenshot() const
 {
-    return mContent->mScreenshot;
+    
+    return mContent->Icon() ? QPixmap::fromSymbianCFbsBitmap(mContent->Icon()) :
+                              QPixmap();
 }
 
 /*!
@@ -72,7 +74,7 @@ QPixmap TsTask::screenshot() const
 */
 QString TsTask::name() const
 {
-    return mContent->mName;
+    return XQConversions::s60DescToQString(mContent->DisplayName());
 }
 
 /*!
@@ -80,7 +82,8 @@ QString TsTask::name() const
 */
 void TsTask::open()
 {
-    mLauncher.openTask(mContent->mKey);
+    
+    mLauncher.openTask(*mContent);
 }
 
 /*!
@@ -88,5 +91,5 @@ void TsTask::open()
 */
 void TsTask::close()
 {
-    mLauncher.closeTask(mContent->mKey);
+    mLauncher.closeTask(*mContent);
 }
