@@ -40,7 +40,7 @@ void CAiNetworkInfoListener::ConstructL()
     User::LeaveIfError( Dll::SetTls( this ) );
 
     //Create network handling engine session.
-    iSession = CreateL( *this, iInfo );
+    iSession = CreateL( *this, iInfo, ETrue );
     iShowOpInd = EFalse;
     //Create message cache
     iMessageCache = new( ELeave )CArrayFixFlat

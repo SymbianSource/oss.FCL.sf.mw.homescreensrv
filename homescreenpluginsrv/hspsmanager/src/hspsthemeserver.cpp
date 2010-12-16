@@ -3021,6 +3021,9 @@ void ChspsThemeServer::HandleBRBackupStateL(
         {
         DeleteBRHandler();
         iBRState = EhspsBRNormal;
+        // Clear backup data
+        iDefinitionRepository->ClearBackupsL();
+        
 #ifdef HSPS_LOG_ACTIVE            
         iLogBus->LogText( _L( "ChspsThemeServer::HandleBRBackupStateL(): - Backup completed" ) );
 #endif                  
@@ -3048,6 +3051,10 @@ void ChspsThemeServer::HandleBRRestoreStateL(
         DeleteBRHandler();
         iBRState = EhspsBRNormal;
         EnableAutoInstallationL();
+        
+        // Clear backup data
+        iDefinitionRepository->ClearBackupsL();
+        
 #ifdef HSPS_LOG_ACTIVE            
         iLogBus->LogText( _L( "ChspsThemeServer::HandleBRRestoreStateL(): - Restore completed" ) );
 #endif                  

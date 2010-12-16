@@ -245,7 +245,7 @@ void ChspsMaintenanceHandler::ServiceGetNextHeaderL(const RMessage2& aMessage)
             {                                    
             // at least one header on the list
             TPtr8 bufPtr( iHeaderDataList->At(iDeliveryCount)->Des() );
-            iMessagePtr.WriteL(2, bufPtr, 0);
+            TRAP_IGNORE( iMessagePtr.WriteL(2, bufPtr, 0) );
             // add list count
             iDeliveryCount++;
             // deliver a list item
@@ -4263,6 +4263,17 @@ void ChspsMaintenanceHandler::GetHeaderListL(
             HBufC8* data = clone->MarshalHeaderL();            
             if ( data )
                 {
+                const TInt requiredLength = data->Length(); 
+                if( requiredLength >= KMaxHeaderDataLength8 )
+                    {
+                    // Data should be passed in chunks, 
+                    // for now we'll just cut the description
+                    delete data;
+                    data = NULL;
+                    clone->SetDescriptionL( KNullDesC );
+                    data = clone->MarshalHeaderL();
+                    }
+                
                 // Append to the search results
                 CleanupStack::PushL( data );
                 aHeaderDataList.AppendL( data );

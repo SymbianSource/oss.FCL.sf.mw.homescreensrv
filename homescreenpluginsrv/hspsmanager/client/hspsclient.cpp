@@ -568,7 +568,8 @@ EXPORT_C TInt ChspsClient::hspsGetHeaders(
             // Header count > 0
             UpdatehspsResult( iResultData );
             TInt headerCount = iResult->iIntValue1;
-            // Get headers
+            
+            // Get headers from the server
             for ( TInt i = 0; 
                   i < headerCount && err == KErrNone; 
                   i++ )
@@ -578,14 +579,14 @@ EXPORT_C TInt ChspsClient::hspsGetHeaders(
                     iHeaderData );
                 if ( ret == EhspsGetListHeadersUpdate )
                     {
-                    TRAP( err, AppendHeaderListL( iHeaderData) );
-                    }
-                else
-                    {
-                    // Request failed
-                    err = KErrGeneral;
-                    }
+                    // Convert the descriptor to an ODT instance and
+                    // append it to the search results array
+                    TRAP_IGNORE( AppendHeaderListL( iHeaderData) );
+                    }                
                 }
+            
+            // Return all found plugins and ignore any errors
+            err = KErrNone;
             }
         else if ( ret == EhspsGetListHeadersEmpty )
             {
